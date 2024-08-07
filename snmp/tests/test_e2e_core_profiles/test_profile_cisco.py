@@ -35,8 +35,11 @@ def test_e2e_profile_cisco(dd_agent_check):
     common_tags = [
         "snmp_profile:cisco",
         "snmp_host:cisco3620",
+        "device_hostname:cisco3620",
         "device_namespace:default",
         "snmp_device:" + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST METRICS ---
@@ -62,13 +65,17 @@ def test_e2e_profile_cisco(dd_agent_check):
         "status": 1,
         "sys_object_id": "1.3.6.1.4.1.9.1.122",
         "tags": [
+            "device_ip:" + ip_address,
+            "device_id:default:" + ip_address,
             "device_namespace:default",
             "snmp_device:" + ip_address,
             "snmp_host:cisco3620",
+            "device_hostname:cisco3620",
             "snmp_profile:cisco",
         ],
         "vendor": "cisco",
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 

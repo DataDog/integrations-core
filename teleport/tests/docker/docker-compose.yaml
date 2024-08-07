@@ -1,0 +1,11 @@
+services:
+  teleport:
+    image: public.ecr.aws/gravitational/teleport:14.3
+    ports:
+      - 3000:3000
+      - 3080:3080
+      - 3025:3025
+      - 443:443
+    volumes:
+      - ./etc/teleport:/etc/teleport
+    command: --diag-addr=0.0.0.0:3000

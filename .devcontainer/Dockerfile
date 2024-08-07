@@ -12,3 +12,4 @@ RUN echo \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+RUN sed -i 's\ulimit -Hn 524288\ulimit -n 524288\g' /etc/init.d/docker

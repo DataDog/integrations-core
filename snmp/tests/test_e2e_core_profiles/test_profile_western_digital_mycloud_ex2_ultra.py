@@ -29,8 +29,11 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
     common_tags = [
         'snmp_profile:western-digital-mycloud-ex2-ultra',
         'snmp_host:western-digital-mycloud-ex2-ultra.device.name',
+        'device_hostname:western-digital-mycloud-ex2-ultra.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'wdmycloudex2_agent_ver:oxen quaintly zombies driving oxen their oxen',
         'wdmycloudex2_host_name:but oxen quaintly but Jaded',
@@ -157,6 +160,7 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.5127.1.1.1.8',
         'vendor': 'western-digital',
         'device_type': 'storage',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

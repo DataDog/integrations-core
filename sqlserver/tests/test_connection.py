@@ -17,7 +17,11 @@ from datadog_checks.sqlserver.connection import (
     SQLConnectionError,
     parse_connection_string_properties,
 )
-from datadog_checks.sqlserver.connection_errors import ConnectionErrorCode, format_connection_exception
+from datadog_checks.sqlserver.connection_errors import (
+    ConnectionErrorCode,
+    format_connection_exception,
+    obfuscate_error_msg,
+)
 
 from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
 
@@ -552,3 +556,92 @@ def test_format_connection_error(
     _, conn_err = format_connection_exception(error_message, driver)
     assert conn_err
     assert conn_err.value == expected_error.value
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_restore_current_database_context(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
+    with check.connection.open_managed_default_connection():
+        current_db = check.connection._get_current_database_context()
+        with check.connection.restore_current_database_context():
+            with check.connection.get_managed_cursor() as cursor:
+                cursor.execute("USE tempdb")
+                assert check.connection._get_current_database_context() == "tempdb"
+        assert check.connection._get_current_database_context() == current_db
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "error_message,password,expected_error_message",
+    [
+        pytest.param(
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=PWD123!;\"')",
+            "PWD123!",
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=******;\"')",
+            id="regular_password",
+        ),
+        pytest.param(
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=Pass\\\\Wrd;\"')",
+            "Pass\\Wrd",
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=******;\"')",
+            id="password_with_backslash",
+        ),
+        pytest.param(
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=;\"')",
+            "",
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=;\"')",
+            id="empty_password",
+        ),
+        pytest.param(
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=;\"')",
+            None,
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=;\"')",
+            id="no_password",
+        ),
+        pytest.param(
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=\"12345\";\"')",
+            "\"12345!D!T\"",
+            "TCP-connection(ERROR: The requested address is not valid in its context), Exception: "
+            "OperationalError(com_error(-2147352567, 'Exception occurred.', (0, 'Microsoft OLE DB Driver for SQL "
+            "Server', \"Login failed for user 'datadog'.\", None, 0, 2147217843), None), 'Error opening connection to "
+            "\"ConnectRetryCount=2;Provider=MSOLEDBSQL;Data Source=localhost;User ID=datadog;Password=******;\"')",
+            id="password_with_quotes",
+        ),
+    ],
+)
+def test_obfuscate_error_msg(
+    error_message,
+    password,
+    expected_error_message,
+):
+    obfuscated_error_message = obfuscate_error_msg(error_message, password)
+    assert obfuscated_error_message == expected_error_message

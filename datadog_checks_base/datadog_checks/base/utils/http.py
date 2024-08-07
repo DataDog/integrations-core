@@ -23,6 +23,8 @@ from six import PY2, iteritems, string_types
 from six.moves.urllib.parse import quote, urlparse, urlunparse
 from wrapt import ObjectProxy
 
+from datadog_checks.base.agent import datadog_agent
+
 from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
@@ -34,11 +36,6 @@ try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
-
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
 
 # Import lazily to reduce memory footprint and ease installation for development
 requests_aws = None
@@ -594,11 +591,16 @@ def handle_kerberos_cache(cache_file_path):
 def should_bypass_proxy(url, no_proxy_uris):
     # Accepts a URL and a list of no_proxy URIs
     # Returns True if URL should bypass the proxy.
-    parsed_uri = urlparse(url).hostname
+    parsed_uri_parts = urlparse(url)
+    parsed_uri = parsed_uri_parts.hostname
 
     if '*' in no_proxy_uris:
         # A single * character is supported, which matches all hosts, and effectively disables the proxy.
         # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
+        return True
+
+    if parsed_uri_parts.scheme == "unix":
+        # Unix domain sockets semantically do not make sense to proxy
         return True
 
     for no_proxy_uri in no_proxy_uris:

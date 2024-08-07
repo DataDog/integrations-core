@@ -5,10 +5,7 @@ from collections import OrderedDict
 
 from six import iteritems
 
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
+from datadog_checks.base.agent import datadog_agent
 
 
 def _get_common_headers():

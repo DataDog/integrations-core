@@ -16,7 +16,8 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -58,9 +59,6 @@
     },
     "saved_views": {
       "marklogic_processes": "assets/saved_views/marklogic_processes.json"
-    },
-    "logs": {
-      "source": "marklogic"
     }
   }
 }

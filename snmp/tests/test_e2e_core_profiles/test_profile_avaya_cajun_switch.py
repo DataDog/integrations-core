@@ -27,8 +27,11 @@ def test_e2e_profile_avaya_cajun_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:avaya-cajun-switch',
         'snmp_host:avaya-cajun-switch.device.name',
+        'device_hostname:avaya-cajun-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + ['avaya_gen_cpu_utilization_enable_monitoring:enabled']
 
     # --- TEST EXTENDED METRICS ---
@@ -79,6 +82,7 @@ def test_e2e_profile_avaya_cajun_switch(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.81.17.1.19',
         'vendor': 'avaya',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

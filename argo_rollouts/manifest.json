@@ -2,13 +2,13 @@
   "manifest_version": "2.0.0",
   "app_uuid": "28d531ac-954c-4c5a-8769-589589f793e0",
   "app_id": "argo-rollouts",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Argo Rollouts Integration",
+    "description": "Monitor the health and performance of Argo Rollouts",
     "title": "Argo Rollouts",
     "media": [],
     "classifier_tags": [
@@ -20,7 +20,8 @@
       "Category::Developer Tools",
       "Category::Log Collection",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -47,10 +48,7 @@
       }
     },
     "dashboards": {
-      "Argo Rollouts Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "argo_rollouts"
+      "Argo Rollouts Overview": "assets/dashboards/argo_rollouts_overview.json"
     },
     "monitors": {
       "Rollout Phase": "assets/monitors/rollout_phase.json"

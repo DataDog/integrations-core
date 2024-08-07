@@ -7,14 +7,16 @@ Cisco is the worldwide leader in IT, networking, and cybersecurity solutions. In
 Collect SNMP metrics from Cisco appliances, including:
 
 - Cisco Catalyst
-- Cisco Adaptive Security Appliance (ASA)
-- Cisco Meraki (note: additional events can be collected from Meraki through the [Meraki integration tile][1])
+- [Cisco Adaptive Security Appliance][7] (ASA)
+- [Cisco Meraki][8] 
+    **Note**: Additional events can be collected from Meraki through the [Meraki integration tile][1]
 - Cisco Nexus
 - Cisco ICM
 - Cisco ISR
+- [Cisco SD-WAN][9]
 - Cisco UC Virtual Machines
 
-For details of monitored metrics see the [SNMP integration tile][2]
+**Note**: Additional supported vendor profiles for this integration can be found on the [network vendors][6] page.
 
 ## Setup
 
@@ -24,7 +26,7 @@ To install and configure the SNMP integration, see the [Network Device Monitorin
 
 ### Metrics
 
-For details of monitored metrics see the [SNMP integration tile][2]
+For details of monitored metrics see the [SNMP integration tile][2].
 
 ### Service Checks
 
@@ -49,3 +51,7 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
 [4]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [5]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/network_monitoring/devices/#vendor-profiles
+[7]: https://docs.datadoghq.com/integrations/crest_data_systems_cisco_asa/
+[8]: https://docs.datadoghq.com/integrations/meraki/
+[9]: https://docs.datadoghq.com/integrations/cisco_sdwan/

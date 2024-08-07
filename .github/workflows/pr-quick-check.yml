@@ -22,13 +22,13 @@ jobs:
 
     steps:
     # Uncomment for testing purposes
-    # - uses: actions/checkout@v3
+    # - uses: actions/checkout@v4
     #   if: inputs.repo == 'core'
     #   with:
     #     ref: "${{ github.event.pull_request.head.sha }}"
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
@@ -70,9 +70,9 @@ jobs:
 
     - name: Comment
       if: ${{ steps.changes.outputs.major_bump_fragments == 'true' }}
-      uses: actions/github-script@0.3.0
+      uses: actions/github-script@v7
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
-          github.issues.createComment({ issue_number, owner, repo, body: "The changelog type `changed` or `removed` was used in this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `fixed` or `added` type instead." });
+          github.rest.issues.createComment({ issue_number, owner, repo, body: "The changelog type `changed` or `removed` was used in this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `fixed` or `added` type instead." });

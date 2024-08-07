@@ -2,23 +2,24 @@
   "manifest_version": "2.0.0",
   "app_uuid": "{app_uuid}",
   "app_id": "{integration_id}",
-  "display_on_public_website": false,
+  "display_on_public_website": {display_on_public_website},
   "tile": {{
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "{description}",
     "title": "{integration_name}",
-    "media": [],
+    "media": {media},
     "classifier_tags": [
+      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Category::<FILL IN>",
+      "Offering::<FILL IN>",
+      "Queried Data Type::<FILL IN>",
+      "Submitted Data Type::<FILL IN>"
     ]
   }},
   "assets": {{
@@ -41,9 +42,10 @@
         "metadata_path": "assets/service_checks.json"
       }}
     }},
-    "dashboards": {{}},
+    "dashboards": {{
+        "{example_dashboard_short_name}": "assets/dashboards/<FILL IN>.json"
+    }},
     "monitors": {{}},
-    "logs": {{}},
     "saved_views": {{}}
   }},{pricing_plan}{terms}{author_info}
 }}

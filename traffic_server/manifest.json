@@ -16,7 +16,8 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -62,9 +63,6 @@
       "traffic_server_error_logs": "assets/saved_views/traffic_server_error_logs.json",
       "traffic_server_overview": "assets/saved_views/traffic_server_overview.json",
       "traffic_server_patterns": "assets/saved_views/traffic_server_error_patterns.json"
-    },
-    "logs": {
-      "source": "traffic_server"
     }
   }
 }

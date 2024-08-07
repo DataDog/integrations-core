@@ -18,7 +18,30 @@
       "Category::Tracing",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/postgresql-monitoring"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/postgresql-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog"
+      }
     ]
   },
   "author": {
@@ -69,9 +92,6 @@
       "postgres_pattern": "assets/saved_views/postgres_pattern.json",
       "sessions_by_host": "assets/saved_views/sessions_by_host.json",
       "postgres_processes": "assets/saved_views/postgres_processes.json"
-    },
-    "logs": {
-      "source": "postgresql"
     }
   }
 }

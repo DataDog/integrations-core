@@ -39,6 +39,13 @@ files:
     options: []
   - template: instances
     options:
+    - template: instances/openmetrics_legacy
+      overrides:
+        prometheus_url.value.example: http://localhost:2379/metrics
+        prometheus_url.display_priority: 1
+        prometheus_url.description: |
+          Prometheus endpoint of your etcd instance.
+          One of possible_prometheus_urls or prometheus_url parameter is required.
     - name: possible_prometheus_urls
       required: true
       description: |
@@ -52,14 +59,6 @@ files:
         example:
           - https://%%host%%:2379/metrics
           - http://%%host%%:2379/metrics
-    - name: prometheus_url
-      description: |
-        Prometheus endpoint of your etcd instance.
-        One of possible_prometheus_urls or prometheus_url parameter is required.
-      required: false
-      value:
-        example: http://%%host%%:2379/metrics
-        type: string
     - name: ssl_verify
       required: true
       description: Used to verify self signed certificates.

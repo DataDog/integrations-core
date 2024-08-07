@@ -3,6 +3,7 @@ JPype1,PyPI,Apache-2.0,Copyright (c) 2004-2008 Steve Menard
 JayDeBeApi,PyPI,LGPL-3.0-only,Copyright (C) 2014 Bastian Bowe
 PyJWT,PyPI,MIT,Copyright (c) 2015 José Padilla
 PyJWT,PyPI,MIT,Copyright (c) 2015-2022 José Padilla
+PyMySQL,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 PySocks,PyPI,BSD-3-Clause,Copyright 2006 Dan-Haim. All rights reserved.
 PyYAML,PyPI,MIT,Copyright (c) 2017-2021 Ingy döt Net
 aerospike,PyPI,Apache-2.0,"Copyright Aerospike, Inc."
@@ -64,15 +65,17 @@ protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
 psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola'"
 psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
 psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
+pyOpenSSL,PyPI,Apache-2.0,Copyright The pyOpenSSL developers
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pycryptodomex,PyPI,BSD-2-Clause,Copyright 2014 Helder Eijs
 pycryptodomex,PyPI,Unlicense,Helder Eijs. pycryptodomex is dedicated to the public domain under Unlicense.
 pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and individual contributors.
 pymongo,PyPI,Apache-2.0,Copyright The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
-pymysql,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
 pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
+pysmi,PyPI,BSD-2-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2019 Ilya Etingof <etingof@gmail.com>
+pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pysnmp-mibs,PyPI,BSD-3-Clause,"Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>"
 python-binary-memcached,PyPI,MIT,Copyright (c) 2011 Jayson Reis
@@ -81,6 +84,7 @@ python-dateutil,PyPI,Apache-2.0,Copyright 2017- Paul Ganssle <paul@ganssle.io>
 python-dateutil,PyPI,BSD-3-Clause,Copyright 2017- Paul Ganssle <paul@ganssle.io>
 python3-gearman,PyPI,Apache-2.0,
 pyvmomi,PyPI,Apache-2.0,"Copyright (c) 2005-2021 VMware, Inc. All Rights Reserved."
+pyvmomi,PyPI,Apache-2.0,Copyright (c) 2005-2024 Broadcom. All Rights Reserved.
 pywin32,PyPI,PSF,Copyright 2002-2003 by Blackdog Software Pty Ltd.
 redis,PyPI,MIT,"Copyright (c) 2022-2023, Redis, inc."
 redis,PyPI,MIT,Copyright (c) 2012 Andy McCurdy
@@ -91,6 +95,7 @@ requests-oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2014 Kenneth Reitz.
 requests-oauthlib,PyPI,ISC,Copyright (c) 2014 Kenneth Reitz.
 requests-toolbelt,PyPI,Apache-2.0,"Copyright 2014 Ian Cordasco, Cory Benfield"
 requests-unixsocket,PyPI,Apache-2.0,Copyright 2014 Marc Abramowitz
+requests-unixsocket2,PyPI,ISC,Copyright (c) 2024 - 2024 thelab
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 scandir,PyPI,BSD-3-Clause,"Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres

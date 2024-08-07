@@ -28,7 +28,7 @@ class MySQLConfig(object):
         self.additional_status = instance.get('additional_status', [])
         self.additional_variable = instance.get('additional_variable', [])
         self.connect_timeout = instance.get('connect_timeout', 10)
-        self.read_timeout = instance.get('read_timeout', 10)
+        self.read_timeout = instance.get('read_timeout', None)
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
@@ -42,6 +42,8 @@ class MySQLConfig(object):
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.settings_config = instance.get('collect_settings', {}) or {}
         self.activity_config = instance.get('query_activity', {}) or {}
+        self.schemas_config: dict = instance.get('schemas_collection', {}) or {}
+
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})
@@ -89,7 +91,7 @@ class MySQLConfig(object):
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
-        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

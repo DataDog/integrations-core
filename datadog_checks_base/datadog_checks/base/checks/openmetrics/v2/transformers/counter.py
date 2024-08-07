@@ -15,14 +15,13 @@ def get_counter(check, metric_name, modifiers, global_options):
         flush_first_value = runtime_data['flush_first_value']
 
         for sample, tags, hostname in sample_data:
-            if sample.name.endswith('_total'):
-                monotonic_count_method(
-                    metric_name,
-                    sample.value,
-                    tags=tags,
-                    hostname=hostname,
-                    flush_first_value=flush_first_value,
-                )
+            monotonic_count_method(
+                metric_name,
+                sample.value,
+                tags=tags,
+                hostname=hostname,
+                flush_first_value=flush_first_value,
+            )
 
     del check
     del modifiers

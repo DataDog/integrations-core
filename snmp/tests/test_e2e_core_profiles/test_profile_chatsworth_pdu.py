@@ -27,8 +27,11 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
     common_tags = [
         'snmp_profile:chatsworth_pdu',
         'snmp_host:chatsworth_pdu.device.name',
+        'device_hostname:chatsworth_pdu.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
         'device_vendor:chatsworth',
     ] + [
         'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
@@ -233,6 +236,7 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.30932.1.1',
         'vendor': 'chatsworth',
         'device_type': 'pdu',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

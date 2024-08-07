@@ -28,8 +28,11 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     common_tags = [
         'snmp_profile:a10-thunder',
         'snmp_host:a10-thunder.device.name',
+        'device_hostname:a10-thunder.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'ax_sys_a_fle_x_engine_version:their quaintly acted Jaded driving their ' 'forward',
         'ax_sys_firmware_version:oxen their quaintly kept quaintly zombies',
@@ -264,6 +267,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.22610.1.3.28',
         'vendor': 'a10',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

@@ -143,6 +143,12 @@ EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = (
     + EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON
 )
 
+EXPECTED_AGENT_JOBS_METRICS_COMMON = [
+    'sqlserver.agent.active_jobs.duration',
+    'sqlserver.agent.active_jobs.step_info',
+    'sqlserver.agent.active_session.duration',
+]
+
 # Our test environment does not have failover clustering enabled, so these metrics are not expected.
 # To test them follow this guide:
 # https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
@@ -242,7 +248,6 @@ OPERATION_TIME_METRICS = [
     'database_stats_metrics',
     'fraction_metrics',
     'db_file_space_usage_metrics',
-    'database_backup_metrics',
     'database_file_stats_metrics',
     'incr_fraction_metrics',
 ]
@@ -284,7 +289,7 @@ def assert_metrics(
             tags = check_tags + ['database:{}'.format(dbname)]
             for mname in DB_PERF_COUNT_METRICS_NAMES_SINGLE:
                 aggregator.assert_metric(mname, hostname=hostname, tags=tags)
-            if dbname == 'datadog_test' and is_always_on():
+            if dbname == 'datadog_test-1' and is_always_on():
                 for mname in DB_PERF_COUNT_METRICS_NAMES_AO:
                     aggregator.assert_metric(mname, hostname=hostname, tags=tags)
     else:
@@ -316,8 +321,6 @@ def get_operation_time_metrics(instance):
     if instance.get('include_task_scheduler_metrics', False):
         operation_time_metrics.append('os_schedulers_metrics')
         operation_time_metrics.append('os_tasks_metrics')
-    if instance.get('include_db_fragmentation_metrics', False):
-        operation_time_metrics.append('db_fragmentation_metrics')
     if instance.get('include_ao_metrics', False):
         operation_time_metrics.append('availability_groups_metrics')
     if instance.get('include_master_files_metrics', False):

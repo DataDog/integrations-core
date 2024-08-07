@@ -5,7 +5,7 @@ import time
 from typing import Any, AnyStr, Sequence, Set, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.teradata.config_models.instance import Table
+from datadog_checks.teradata.config_models.instance import Tables
 
 
 def filter_tables(tables_filter, row):
@@ -38,7 +38,7 @@ def create_tables_filter(tables):
         tables_to_collect = set(tables)
         return tables_to_collect, tables_to_exclude
 
-    if isinstance(tables, Table):
+    if isinstance(tables, Tables):
         if tables.include and tables.exclude:
             for table in tables.include:
                 if table not in tables.exclude:

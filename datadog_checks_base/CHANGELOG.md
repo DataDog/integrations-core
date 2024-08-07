@@ -2,7 +2,83 @@
 
 <!-- towncrier release notes start -->
 
-## 36.5.1 / 2024-03-22
+## 36.12.0 / 2024-08-06
+
+***Added***:
+
+* Enforce format of timestamp logs attribute ([#18218](https://github.com/DataDog/integrations-core/pull/18218))
+
+***Fixed***:
+
+* Ensures that 'should_bypass_proxy' correctly considers unix:/// URLs ([#18119](https://github.com/DataDog/integrations-core/pull/18119))
+
+## 36.11.0 / 2024-08-06
+
+***Added***:
+
+* Log invalid line when failing to parse OpenMetrics response ([#17514](https://github.com/DataDog/integrations-core/pull/17514))
+* Support log submission from checks ([#18019](https://github.com/DataDog/integrations-core/pull/18019))
+* Allow untyped metrics that we coerce to `counter` to be collected regardless if they have `_total` or not. ([#18054](https://github.com/DataDog/integrations-core/pull/18054))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 36.10.0 / 2024-07-11
+
+***Added***:
+
+* [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
+
+## 36.9.0 / 2024-07-05
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+
+***Fixed***:
+
+* Fix rate limiter in sync mode of DBMAsync job. Prior to this change, the DBMAsync job would not take into account the time of the job execution when throttling by the collection interval. ([#17893](https://github.com/DataDog/integrations-core/pull/17893))
+
+## 36.8.0 / 2024-06-13 / Agent 7.55.0
+
+***Added***:
+
+* Improve throttling in sync jobs of `DBMAsyncJob` class. Instead of putting a thread to sleep check if the job is too early to run. ([#17716](https://github.com/DataDog/integrations-core/pull/17716))
+
+## 36.7.1 / 2024-06-11
+
+***Fixed***:
+
+* Bump the `requests` version to 2.32.3 on Python 3 ([#17702](https://github.com/DataDog/integrations-core/pull/17702))
+
+## 36.7.0 / 2024-05-31
+
+***Added***:
+
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424)), ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+* Add TimedCache for controlled cache expiration. The TimedCache sets TTL on initialization and expires when TTL is reached. ([#17557](https://github.com/DataDog/integrations-core/pull/17557))
+* Add `obfuscate_mongodb_string` to datadog_agent stub ([#17597](https://github.com/DataDog/integrations-core/pull/17597))
+* Add dedicated module for the Agent interface ([#17667](https://github.com/DataDog/integrations-core/pull/17667))
+* Add option to use BoringSSL for all network requests ([#17669](https://github.com/DataDog/integrations-core/pull/17669))
+
+***Fixed***:
+
+* Revert pydantic bump to keep compatibility ([#17660](https://github.com/DataDog/integrations-core/pull/17660))
+
+## 36.6.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+* Upgrade boto dependencies ([#17332](https://github.com/DataDog/integrations-core/pull/17332))
+
+***Fixed***:
+
+* Undo pydantic upgrade to stay compatible with ddev. ([#17339](https://github.com/DataDog/integrations-core/pull/17339))
+
+## 36.5.1 / 2024-03-22 / Agent 7.53.0
 
 ***Fixed***:
 

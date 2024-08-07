@@ -5,7 +5,6 @@ import copy
 import functools
 import importlib
 import inspect
-import json
 import logging
 import re
 import traceback
@@ -30,6 +29,8 @@ from typing import (  # noqa: F401
 import yaml
 from six import PY2, binary_type, iteritems, raise_from, text_type
 
+from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
+
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..errors import ConfigurationError
@@ -49,36 +50,39 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
+from ..utils.serialization import from_json, to_json
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
 
-try:
-    import datadog_agent
-
+if AGENT_RUNNING:
     from ..log import CheckLoggingAdapter, init_logging
 
-    init_logging()
-except ImportError:
-    from ..stubs import datadog_agent
+else:
     from ..stubs.log import CheckLoggingAdapter, init_logging
 
-    init_logging()
-
-try:
-    import aggregator
-
-    using_stub_aggregator = False
-except ImportError:
-    from ..stubs import aggregator
-
-    using_stub_aggregator = True
-
+init_logging()
 
 if datadog_agent.get_config('disable_unsafe_yaml'):
     from ..ddyaml import monkey_patch_pyyaml
 
     monkey_patch_pyyaml()
+
+if datadog_agent.get_config('integration_tracing'):
+    from ddtrace import patch
+
+    # handle thread monitoring as an additional option
+    # See: http://pypi.datadoghq.com/trace/docs/other_integrations.html#futures
+    if datadog_agent.get_config('integration_tracing_futures'):
+        patch(logging=True, requests=True, futures=True)
+    else:
+        patch(logging=True, requests=True)
+
+if is_affirmative(datadog_agent.get_config('integration_profiling')):
+    from ddtrace.profiling import Profiler
+
+    prof = Profiler(service='datadog-agent-integrations')
+    prof.start()
 
 if not PY2:
     from pydantic import BaseModel, ValidationError
@@ -305,6 +309,9 @@ class AgentCheck(object):
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
 
+        self.__formatted_tags = None
+        self.__logs_enabled = None
+
     def _create_metrics_pattern(self, metric_patterns, option_name):
         all_patterns = metric_patterns.get(option_name, [])
 
@@ -395,6 +402,36 @@ class AgentCheck(object):
         return self._http
 
     @property
+    def logs_enabled(self):
+        # type: () -> bool
+        """
+        Returns True if logs are enabled, False otherwise.
+        """
+        if self.__logs_enabled is None:
+            self.__logs_enabled = bool(datadog_agent.get_config('logs_enabled'))
+
+        return self.__logs_enabled
+
+    @property
+    def formatted_tags(self):
+        # type: () -> str
+        if self.__formatted_tags is None:
+            normalized_tags = set()
+            for tag in self.instance.get('tags', []):
+                key, _, value = tag.partition(':')
+                if not value:
+                    continue
+
+                if self.disable_generic_tags and key in GENERIC_TAGS:
+                    key = '{}_{}'.format(self.name, key)
+
+                normalized_tags.add('{}:{}'.format(key, value))
+
+            self.__formatted_tags = ','.join(sorted(normalized_tags))
+
+        return self.__formatted_tags
+
+    @property
     def diagnosis(self):
         # type: () -> Diagnosis
         """
@@ -430,7 +467,7 @@ class AgentCheck(object):
         Used for sending metadata via Go bindings.
         """
         if not hasattr(self, '_metadata_manager'):
-            if not self.check_id and not using_stub_aggregator:
+            if not self.check_id and AGENT_RUNNING:
                 raise RuntimeError('Attribute `check_id` must be set')
 
             self._metadata_manager = MetadataManager(self.name, self.check_id, self.log, self.METADATA_TRANSFORMERS)
@@ -608,7 +645,7 @@ class AgentCheck(object):
             err_msg = 'Histogram: {} has non integer value: {}. Only integer are valid bucket values (count).'.format(
                 repr(name), repr(value)
             )
-            if using_stub_aggregator:
+            if not AGENT_RUNNING:
                 raise ValueError(err_msg)
             self.warning(err_msg)
             return
@@ -658,6 +695,21 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
+    def event_platform_event(self, raw_event, event_track_type):
+        # type: (str, str) -> None
+        """Send an event platform event.
+
+        Parameters:
+
+            raw_event (str):
+                JSON formatted string representing the event to send
+            event_track_type (str):
+                type of event ingested and processed by the event platform
+        """
+        if raw_event is None:
+            return
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
 
@@ -706,7 +758,7 @@ class AgentCheck(object):
             err_msg = 'Metric: {} has non float value: {}. Only float values can be submitted as metrics.'.format(
                 repr(name), repr(value)
             )
-            if using_stub_aggregator:
+            if not AGENT_RUNNING:
                 raise ValueError(err_msg)
             self.warning(err_msg)
             return
@@ -941,6 +993,43 @@ class AgentCheck(object):
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
+    def send_log(self, data, cursor=None, stream='default'):
+        # type: (dict[str, str], dict[str, Any] | None, str) -> None
+        """Send a log for submission.
+
+        Parameters:
+
+            data (dict[str, str]):
+                The log data to send. The following keys are treated specially, if present:
+
+                - timestamp: should be an integer or float representing the number of seconds since the Unix epoch
+                - ddtags: if not defined, it will automatically be set based on the instance's `tags` option
+            cursor (dict[str, Any] or None):
+                Metadata associated with the log which will be saved to disk. The most recent value may be
+                retrieved with the `get_log_cursor` method.
+            stream (str):
+                The stream associated with this log, used for accurate cursor persistence.
+                Has no effect if `cursor` argument is `None`.
+        """
+        attributes = data.copy()
+        if 'ddtags' not in attributes and self.formatted_tags:
+            attributes['ddtags'] = self.formatted_tags
+
+        timestamp = attributes.get('timestamp')
+        if timestamp is not None:
+            # convert seconds to milliseconds
+            attributes['timestamp'] = int(timestamp * 1000)
+
+        datadog_agent.send_log(to_json(attributes), self.check_id)
+        if cursor is not None:
+            self.write_persistent_cache('log_cursor_{}'.format(stream), to_json(cursor))
+
+    def get_log_cursor(self, stream='default'):
+        # type: (str) -> dict[str, Any] | None
+        """Returns the most recent log cursor from disk."""
+        data = self.read_persistent_cache('log_cursor_{}'.format(stream))
+        return from_json(data) if data else None
+
     def _log_deprecation(self, deprecation_key, *args):
         # type: (str, *str) -> None
         """
@@ -1114,7 +1203,7 @@ class AgentCheck(object):
         The agent calls this method to retrieve diagnostics from integrations. This method
         runs explicit diagnostics if available.
         """
-        return json.dumps([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
+        return to_json([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
 
     def _get_requests_proxy(self):
         # type: () -> ProxySettings
@@ -1227,7 +1316,7 @@ class AgentCheck(object):
         except Exception as e:
             message = self.sanitize(str(e))
             tb = self.sanitize(traceback.format_exc())
-            error_report = json.dumps([{'message': message, 'traceback': tb}])
+            error_report = to_json([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):

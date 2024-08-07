@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 7.13.0 / 2024-03-22
+## 7.13.2 / 2024-05-31 / Agent 7.55.0
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 7.13.1 / 2024-04-26 / Agent 7.54.0
+
+***Fixed***:
+
+* Fixes pod resources requests/limits with exponent notation correctly, e.g. `129e6` for memory is `129M` / `123Mi` ([#17280](https://github.com/DataDog/integrations-core/pull/17280))
+
+## 7.13.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

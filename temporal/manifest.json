@@ -15,7 +15,17 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Developer Tools",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/temporal-server-integration/"
+      }
     ]
   },
   "assets": {
@@ -40,9 +50,6 @@
       ],
       "source_type_id": 10337,
       "auto_install": true
-    },
-    "logs": {
-      "source": "temporal"
     },
     "dashboards": {
       "Temporal Server Overview": "assets/dashboards/server_overview.json"

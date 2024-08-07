@@ -103,6 +103,9 @@ BASE_METRICS = {
     "opLatencies.reads.latency": GAUGE,
     "opLatencies.writes.latency": GAUGE,
     "opLatencies.commands.latency": GAUGE,
+    "opLatencies.reads.latency_avg": (GAUGE, "opLatencies.reads.latency.avg"),
+    "opLatencies.writes.latency_avg": (GAUGE, "opLatencies.writes.latency.avg"),
+    "opLatencies.commands.latency_avg": (GAUGE, "opLatencies.commands.latency.avg"),
     "opcounters.command": RATE,
     "opcounters.delete": RATE,
     "opcounters.getmore": RATE,
@@ -133,8 +136,17 @@ BASE_METRICS = {
     "stats.numExtents": GAUGE,
     "stats.objects": GAUGE,
     "stats.storageSize": GAUGE,
+    "stats.totalSize": GAUGE,
+    "stats.freeStorageSize": GAUGE,
+    "stats.indexFreeStorageSize": GAUGE,
+    "stats.totalFreeStorageSize": GAUGE,
+    "stats.fsUsedSize": GAUGE,
+    "stats.fsTotalSize": GAUGE,
     "sessions.count": GAUGE,
     "uptime": GAUGE,
+    "system.memSizeMB": (GAUGE, "system.mem.total"),  # total amount of system memory
+    "system.memLimitMB": (GAUGE, "system.mem.limit"),  # memory usage limit
+    "system.numCores": (GAUGE, "system.cpu.cores"),  # number of CPU cores
 }
 
 """
@@ -260,6 +272,8 @@ WiredTiger storage engine.
 """
 WIREDTIGER_METRICS = {
     "wiredTiger.cache.bytes currently in the cache": (GAUGE, "wiredTiger.cache.bytes_currently_in_cache"),
+    "wiredTiger.cache.bytes read into cache": GAUGE,
+    "wiredTiger.cache.bytes written from cache": GAUGE,
     "wiredTiger.cache.failed eviction of pages that exceeded the in-memory maximum": (
         RATE,
         "wiredTiger.cache.failed_eviction_of_pages_exceeding_the_in-memory_maximum",
@@ -270,6 +284,7 @@ WIREDTIGER_METRICS = {
     "wiredTiger.cache.modified pages evicted": GAUGE,
     "wiredTiger.cache.pages read into cache": GAUGE,
     "wiredTiger.cache.pages written from cache": GAUGE,
+    "wiredTiger.cache.pages requested from the cache": (GAUGE, "wiredTiger.cache.pages_requested_from_cache"),
     "wiredTiger.cache.pages currently held in the cache": (GAUGE, "wiredTiger.cache.pages_currently_held_in_cache"),
     "wiredTiger.cache.pages evicted because they exceeded the in-memory maximum": (
         RATE,
@@ -313,6 +328,7 @@ TOP_METRICS = {
 }
 
 COLLECTION_METRICS = {
+    # collection storage stats
     'collection.size': GAUGE,
     'collection.avgObjSize': GAUGE,
     'collection.count': GAUGE,
@@ -321,6 +337,23 @@ COLLECTION_METRICS = {
     'collection.maxSize': GAUGE,
     'collection.storageSize': GAUGE,
     'collection.nindexes': GAUGE,
+    'collection.totalIndexSize': GAUGE,
+    # collection latency stats
+    'collection.reads.latency': GAUGE,
+    'collection.reads.latency_avg': (GAUGE, 'collection.reads.latency.avg'),
+    'collection.reads.ops': RATE,
+    'collection.writes.ops': RATE,
+    'collection.writes.latency': GAUGE,
+    'collection.writes.latency_avg': (GAUGE, 'collection.writes.latency.avg'),
+    'collection.commands.latency': GAUGE,
+    'collection.commands.ops': RATE,
+    'collection.commands.latency_avg': (GAUGE, 'collection.commands.latency.avg'),
+    'collection.transactions.latency': GAUGE,
+    'collection.transactions.ops': RATE,
+    'collection.transactions.latency_avg': (GAUGE, 'collection.transactions.latency.avg'),
+    # collection query exec stats
+    'collection.collectionScans.total': GAUGE,
+    'collection.collectionScans.nonTailable': GAUGE,
 }
 
 """

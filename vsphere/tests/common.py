@@ -890,6 +890,19 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     ),
                 ],
             ),
+            vim.ObjectContent(
+                obj=vim.Datacenter(moId="dc2"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='dc2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.Folder(moId="folder_1"),
+                    ),
+                ],
+            ),
         ],
     )
 )

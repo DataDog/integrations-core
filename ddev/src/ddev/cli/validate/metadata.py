@@ -130,12 +130,17 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
 
                     error_message += f"{current_check.name}:{line} Invalid column {invalid_headers}.\n"
 
-                missing_headers = metadata_utils.ALL_HEADERS.difference(all_keys)
+                missing_headers = metadata_utils.HEADERS_TO_CHECK.difference(all_keys)
                 if missing_headers:
                     errors = True
 
                     error_message += f"{current_check.name}:{line} Missing columns {missing_headers}.\n"
-                continue
+
+                if errors:
+                    # There's now an optional sample_tag column that isn't added yet to the existing metadata.csv
+                    # all_keys will not be same as ALL_HEADERS. But since that sample_tag column is optional and not
+                    # inside HEADERS_TO_CHECK, we should only continue if there's an invalid header or missing_header.
+                    continue
 
             # check duplicate metric name
             duplicate_metric_name = check_duplicate_values(

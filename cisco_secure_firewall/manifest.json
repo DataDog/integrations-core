@@ -59,7 +59,8 @@
       "Category::Network",
       "Category::Security",
       "Category::Log Collection",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -85,16 +86,13 @@
       "Cisco Secure Firewall - Application and Identity-based Firewall": "assets/dashboards/cisco_secure_firewall_application_and_identity_firewall.json",
       "Cisco Secure Firewall - IP Stack": "assets/dashboards/cisco_secure_firewall_ip_stack.json",
       "Cisco Secure Firewall - Failover": "assets/dashboards/cisco_secure_firewall_failover.json",
-      "Cisco Secure Firewall - Threat Detection": "assets/dashboards/cisco_secure_firewall_threat detection.json",
+      "Cisco Secure Firewall - Threat Detection": "assets/dashboards/cisco_secure_firewall_threat_detection.json",
       "Cisco Secure Firewall - Command Interface": "assets/dashboards/cisco_secure_firewall_command_interface.json",
       "Cisco Secure Firewall - OSPF and RIP Routing": "assets/dashboards/cisco_secure_firewall_ospf_and_rip_routing.json",
       "Cisco Secure Firewall - Security Events": "assets/dashboards/cisco_secure_firewall_security_events.json",
       "Cisco Secure Firewall - Resource Manager": "assets/dashboards/cisco_secure_firewall_resource_manager.json",
       "Cisco Secure Firewall - VPN Failover": "assets/dashboards/cisco_secure_firewall_vpn_failover.json",
       "Cisco Secure Firewall - Intrusion Protection System": "assets/dashboards/cisco_secure_firewall_intrusion_protection_system.json"
-    },
-    "logs": {
-      "source": "cisco-secure-firewall"
     }
   },
   "author": {

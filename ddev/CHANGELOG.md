@@ -2,6 +2,76 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.0 / 2024-08-06
+
+***Removed***:
+
+* Remove `ddev release trello ...` commands. We no longer interact with trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
+
+***Added***:
+
+* Add cli option to override org config value at runtime ([#17932](https://github.com/DataDog/integrations-core/pull/17932))
+* Support reading site and api key from org config setting in addition to cli flags. ([#17934](https://github.com/DataDog/integrations-core/pull/17934))
+* Add validation for versions in __about__.py and CHANGELOG: `ddev validate version`. ([#18063](https://github.com/DataDog/integrations-core/pull/18063))
+* Add joule as valid metric units ([#18147](https://github.com/DataDog/integrations-core/pull/18147))
+* Bump datadog_checks_dev dependency to 33.0+ to get new features and bugfixes. ([#18206](https://github.com/DataDog/integrations-core/pull/18206))
+
+***Fixed***:
+
+* Improve messages around dependency spec management ([#17969](https://github.com/DataDog/integrations-core/pull/17969))
+
+## 9.1.0 / 2024-06-25
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+***Added***:
+
+* Bump datadog_checks_dev requirement ([#17926](https://github.com/DataDog/integrations-core/pull/17926))
+
+***Fixed***:
+
+* Help docs for --compat flag mention it implies --recreate ([#17810](https://github.com/DataDog/integrations-core/pull/17810))
+* Replace DD_LOGS_CONFIG_DD_URL with DD_LOGS_CONFIG_LOGS_DD_URL ([#17890](https://github.com/DataDog/integrations-core/pull/17890))
+
+## 9.0.0 / 2024-05-13
+
+***Changed***:
+
+* Bump datadog_checks_dev dependency requirement ([#17551](https://github.com/DataDog/integrations-core/pull/17551))
+
+***Added***:
+
+* Add the ability to expose multiple payloads consecutively with the `serve-openmetrics-payload` command ([#16826](https://github.com/DataDog/integrations-core/pull/16826))
+* Add a `config` option to the `serve-openmetrics-payload` script. ([#16836](https://github.com/DataDog/integrations-core/pull/16836))
+* Add a constant class with the Agent env variables ([#16844](https://github.com/DataDog/integrations-core/pull/16844))
+* Bump black version to 24.2.0 ([#16857](https://github.com/DataDog/integrations-core/pull/16857))
+* Add the `all` argument to `ddev test` ([#16859](https://github.com/DataDog/integrations-core/pull/16859))
+* Bump ruff to 0.2.1 ([#16866](https://github.com/DataDog/integrations-core/pull/16866))
+* Add a command to create the release branch ([#16905](https://github.com/DataDog/integrations-core/pull/16905))
+* Do not return an error when running test with `changed` if no integrations were modified ([#17030](https://github.com/DataDog/integrations-core/pull/17030))
+* Enforce `metadata.csv` to be sorted by metric names in integrations-core ([#17176](https://github.com/DataDog/integrations-core/pull/17176))
+* Allow stopping all running environments at once ([#17215](https://github.com/DataDog/integrations-core/pull/17215))
+* Bump ruff to 0.3.3 ([#17244](https://github.com/DataDog/integrations-core/pull/17244))
+* Collect all metrics by default for the OpenMetrics integration in the serve payload script ([#17316](https://github.com/DataDog/integrations-core/pull/17316))
+* Add sample_tags to metadata validation ([#17521](https://github.com/DataDog/integrations-core/pull/17521))
+
+***Fixed***:
+
+* Github client gracefully handles empty PR descriptions ([#16807](https://github.com/DataDog/integrations-core/pull/16807))
+* Extract hardcoded additional integrations from the `validate labeler` command to the config file ([#16845](https://github.com/DataDog/integrations-core/pull/16845))
+* Extract hardcoded dependencies from the `dep updates` command to the config file ([#16846](https://github.com/DataDog/integrations-core/pull/16846))
+* Remove references to the old validate manifest command ([#17019](https://github.com/DataDog/integrations-core/pull/17019))
+* Fix a deprecation warning ([#17021](https://github.com/DataDog/integrations-core/pull/17021))
+* Remove tox references ([#17068](https://github.com/DataDog/integrations-core/pull/17068))
+* Fix the validation of metadata files ([#17136](https://github.com/DataDog/integrations-core/pull/17136))
+* `ddev changelog new` docs say changelog entries are in Markdown format. ([#17222](https://github.com/DataDog/integrations-core/pull/17222))
+* Bump datadog_checks_dev required version ([#17255](https://github.com/DataDog/integrations-core/pull/17255))
+* Update the ruff command for ruff 0.3.3 ([#17257](https://github.com/DataDog/integrations-core/pull/17257))
+* Fix sentence in test command docstring ([#17270](https://github.com/DataDog/integrations-core/pull/17270))
+* Do not open the editor if no changelog should be generated in the changelog new command ([#17348](https://github.com/DataDog/integrations-core/pull/17348))
+
 ## 8.0.0 / 2024-02-06
 
 ***Changed***:

@@ -33,13 +33,6 @@ init_config:
 #
 instances:
 
-  -
-    ## @param use_legacy_check_version - boolean - optional - default: false
-    ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
-    ## integration by setting this field to "true".
-    #
-    # use_legacy_check_version: false
-
     ## @param username - string - optional
     ## The User name used to connect to Openstack.
     #
@@ -55,6 +48,12 @@ instances:
     ## use the "default" Domain ID
     #
     # domain_id: default
+
+    ## @param use_legacy_check_version - boolean - optional - default: false
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+    ## integration by setting this field to "true".
+    #
+    use_legacy_check_version: false
 
     ## @param use_agent_proxy - boolean - optional - default: true
     ## Whether the dd-agent proxy should also be used for openstack API requests (if set).
@@ -104,6 +103,15 @@ instances:
     #
     nova_microversion: '2.93'
 
+    ## @param cinder_microversion - string - optional
+    ## The microversion of the Rest API to call.
+    ## It is recommended to set this parameter to the latest microversion supported by your Openstack version.
+    ##
+    ## View this page for more about microvoersion compatibility:
+    ##    https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html
+    #
+    cinder_microversion: volume 3.70
+
     ## @param use_shortname - boolean - optional - default: false
     ## In some OpenStack environments, the hostname registered to Nova is the shortname.
     ## Enabling this enforces the check to split the hostname up to the first period when
@@ -128,6 +136,11 @@ instances:
     ## The region_id that will be used to filter the endpoints to use for each component.
     #
     # endpoint_region_id: <ENDPOINT_REGION_ID>
+
+    ## @param all_projects - boolean - optional - default: false
+    ## List compute servers across all projects (admin only).
+    #
+    # all_projects: false
 
     ## @param components - mapping - optional
     ## General configuration that we want to apply to each of the components and their different metric blocks.
@@ -324,8 +337,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 

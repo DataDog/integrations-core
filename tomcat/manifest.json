@@ -16,7 +16,22 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-tomcat-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/tomcat-architecture-and-performance"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog"
+      }
     ]
   },
   "author": {
@@ -66,9 +81,6 @@
       "tomcat_4xx": "assets/saved_views/tomcat_4xx.json",
       "tomcat_5xx": "assets/saved_views/tomcat_5xx.json",
       "tomcat_status_code_overview": "assets/saved_views/tomcat_status_code_overview.json"
-    },
-    "logs": {
-      "source": "tomcat"
     }
   }
 }

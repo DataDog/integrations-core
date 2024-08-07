@@ -10,6 +10,7 @@ from six import raise_from
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
+from datadog_checks.sqlserver.utils import construct_use_statement
 
 try:
     import adodbapi
@@ -22,7 +23,13 @@ except ImportError:
     pyodbc = None
 
 from .azure import generate_managed_identity_token
-from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception
+from .connection_errors import (
+    ConnectionErrorCode,
+    SQLConnectionError,
+    error_with_tags,
+    format_connection_exception,
+    obfuscate_error_msg,
+)
 
 logger = logging.getLogger(__file__)
 
@@ -287,9 +294,7 @@ class Connection(object):
             if tcp_connection_status != "OK" and conn_warn_msg is ConnectionErrorCode.unknown:
                 conn_warn_msg = ConnectionErrorCode.tcp_connection_failed
 
-            password = self.instance.get('password')
-            if password is not None:
-                exception_msg = exception_msg.replace(password, "*" * 6)
+            exception_msg = obfuscate_error_msg(exception_msg, self.instance.get('password'))
 
             check_err_message = error_with_tags(
                 "Unable to connect to SQL Server, see %s#%s for more details on how to debug this issue. "
@@ -689,3 +694,29 @@ class Connection(object):
                 return "ERROR: {}".format(e.strerror if hasattr(e, 'strerror') else repr(e))
 
         return None
+
+    def _get_current_database_context(self):
+        """
+        Get the current database name.
+        """
+        with self.get_managed_cursor() as cursor:
+            cursor.execute('select DB_NAME()')
+            data = cursor.fetchall()
+            return data[0][0]
+
+    @contextmanager
+    def restore_current_database_context(self):
+        """
+        Restores the default database after executing use statements.
+        """
+        current_db = self._get_current_database_context()
+        try:
+            yield
+        finally:
+            if current_db:
+                try:
+                    self.log.debug("Restoring the original database context %s", current_db)
+                    with self.get_managed_cursor() as cursor:
+                        cursor.execute(construct_use_statement(current_db))
+                except Exception as e:
+                    self.log.error("Failed to switch back to the original database context %s: %s", current_db, e)

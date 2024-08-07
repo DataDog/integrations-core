@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   # Runs at startup to build certs and exit
   cert-builder:
@@ -61,7 +59,7 @@ services:
   # mysql serving valid.mysql.mock
   starttls-mysql:
     container_name: mysql-valid
-    image: mysql
+    image: mysql:8.0.37
     volumes:
       - certs:/var/lib/certs/:ro
     ports:

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import functools
 import os
 import time
 from contextlib import contextmanager
@@ -122,6 +123,31 @@ def instance_integration(instance_custom_queries):
     instance["collections"] = ["foo", "bar"]
     instance["collections_indexes_stats"] = True
     instance["add_node_tag_to_events"] = False
+    return instance
+
+
+@pytest.fixture
+def instance_integration_autodiscovery(instance_integration):
+    instance = copy.deepcopy(instance_integration)
+    instance["database_autodiscovery"] = {
+        "enabled": True,
+    }
+    return instance
+
+
+@pytest.fixture
+def instance_integration_cluster(instance_integration):
+    instance = copy.deepcopy(instance_integration)
+    instance["cluster_name"] = "my_cluster"
+    return instance
+
+
+@pytest.fixture
+def instance_integration_cluster_autodiscovery(instance_integration_cluster):
+    instance = copy.deepcopy(instance_integration_cluster)
+    instance["database_autodiscovery"] = {
+        "enabled": True,
+    }
     return instance
 
 
@@ -285,3 +311,20 @@ class InitializeAuthDB(LazyFunction):
             ],
         )
         auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
+
+
+def mock_now(static_time):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            monkeypatch = pytest.MonkeyPatch()
+            monkeypatch.setattr(time, 'time', lambda: static_time)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                monkeypatch.undo()
+            return result
+
+        return wrapper
+
+    return decorator

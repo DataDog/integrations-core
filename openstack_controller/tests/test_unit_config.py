@@ -126,6 +126,16 @@ pytestmark = [
             {
                 'keystone_server_url': 'http://localhost',
                 'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
+                'cinder_microversion': 'tests',
+                'use_legacy_check_version': False,
+            },
+            'Invalid `cinder_microversion`: tests; please specify a valid version',
+            id='invalid cinder_microversion',
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://localhost',
+                'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
                 'ironic_microversion': 'tests',
                 'nova_microversion': 'tests',
                 'use_legacy_check_version': False,
@@ -185,6 +195,7 @@ def test_config_exceptions(check, dd_run_check, exception_msg):
         ),
     ],
 )
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_config_warnings(check, dd_run_check, caplog, warning_msg):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)

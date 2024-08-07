@@ -30,8 +30,11 @@ def test_e2e_profile_nvidia_mellanox_switchx(dd_agent_check):
     common_tags = [
         'snmp_profile:nvidia-mellanox-switchx',
         'snmp_host:nvidia-mellanox-switchx.device.name',
+        'device_hostname:nvidia-mellanox-switchx.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST METRICS ---
@@ -52,6 +55,7 @@ def test_e2e_profile_nvidia_mellanox_switchx(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.33049.1.1.1.27002',
         'vendor': 'nvidia',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

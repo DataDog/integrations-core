@@ -30,8 +30,11 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
     common_tags = [
         'snmp_profile:juniper-pulse-secure',
         'snmp_host:juniper-pulse-secure.device.name',
+        'device_hostname:juniper-pulse-secure.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'juniper_ive_esap_version:but Jaded acted quaintly forward oxen acted kept',
         'juniper_ive_product_name:kept their Jaded oxen but acted quaintly',
@@ -80,6 +83,7 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.12532.256.999',
         'vendor': 'juniper-networks',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

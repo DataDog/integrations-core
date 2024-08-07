@@ -23,7 +23,7 @@ yum install -y kernel-headers-$(uname -r)
 yum install -y kernel-devel-$(uname -r)
 ```
 
-**Note**: Kernel version 4.11 or later is required for the OOM Kill check to work.
+**Note**: Kernel version 4.9 or later is required for the OOM Kill check to work.
 In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
@@ -46,8 +46,8 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
 1. Mount the following volumes to the Agent container:
 
     ```
-    -v /sys/kernel/debug:/sys/kernel/debug 
-    -v /lib/modules:/lib/modules 
+    -v /sys/kernel/debug:/sys/kernel/debug
+    -v /lib/modules:/lib/modules
     -v /usr/src:/usr/src
     ```
 
@@ -56,8 +56,8 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
     ```
     --privileged
     ```
-    
-    From kernel version 5.8, the `--privileged` parameter can be replaces by `--cap-add CAP_BPF`. 
+
+    From kernel version 5.8, the `--privileged` parameter can be replaces by `--cap-add CAP_BPF`.
 
 **Note**: `--privileged` mode is not supported in Docker swarm.
 
@@ -92,7 +92,7 @@ spec:
       enabled: true
   override:
     nodeAgent:
-      volumes: 
+      volumes:
       - emptyDir: {}
         name: src
 ```

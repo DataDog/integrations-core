@@ -27,8 +27,11 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
     common_tags = [
         'snmp_profile:generic-ospf',
         'snmp_host:_generic-ospf.device.name',
+        'device_hostname:_generic-ospf.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST METRICS ---
@@ -101,6 +104,7 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.2.3.3294.1281',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "openstacksdk==3.0.0; python_version > '3.0'",
+    "openstacksdk==3.3.0; python_version > '3.0'",
 ]
 
 [project.urls]

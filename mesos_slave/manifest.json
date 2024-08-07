@@ -18,7 +18,14 @@
       "Category::Network",
       "Category::Orchestration",
       "Supported OS::Linux",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/deploy-datadog-dcos"
+      }
     ]
   },
   "author": {
@@ -49,9 +56,6 @@
     },
     "dashboards": {
       "mesos": "assets/dashboards/mesos_overview.json"
-    },
-    "logs": {
-      "source": "mesos"
     }
   }
 }

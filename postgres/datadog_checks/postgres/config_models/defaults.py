@@ -28,6 +28,10 @@ def instance_collect_bloat_metrics():
     return False
 
 
+def instance_collect_buffercache_metrics():
+    return False
+
+
 def instance_collect_checksum_metrics():
     return False
 
@@ -108,8 +112,12 @@ def instance_min_collection_interval():
     return 15
 
 
+def instance_only_custom_queries():
+    return False
+
+
 def instance_pg_stat_statements_view():
-    return 'show_pg_stat_statements()'
+    return 'pg_stat_statements'
 
 
 def instance_port():
@@ -134,3 +142,7 @@ def instance_table_count_limit():
 
 def instance_tag_replication_role():
     return False
+
+
+def instance_use_global_custom_queries():
+    return 'true'

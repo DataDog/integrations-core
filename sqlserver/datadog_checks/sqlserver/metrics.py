@@ -13,7 +13,7 @@ from datadog_checks.base import ensure_unicode
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.time import get_precise_time
 
-from .utils import construct_use_statement
+from .utils import construct_use_statement, is_azure_sql_database
 
 # Queries
 ALL_INSTANCES = 'ALL'
@@ -51,7 +51,7 @@ class BaseSqlServerMetric(object):
         self.instance = cfg_instance.get('instance_name', '')
         self.physical_db_name = cfg_instance.get('physical_db_name', '')
         self.object_name = cfg_instance.get('object_name', '')
-        self.tags = cfg_instance.get('tags', [])
+        self.tags = cfg_instance.get('tags', []) or []
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
@@ -80,7 +80,7 @@ class BaseSqlServerMetric(object):
         return rows, columns
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         raise NotImplementedError
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -98,7 +98,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
     OPERATION_NAME = 'simple_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -136,7 +136,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
     OPERATION_NAME = 'fraction_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         placeholders = ', '.join('?' for _ in counters_list)
         query = cls.QUERY_BASE.format(placeholders=placeholders)
 
@@ -257,7 +257,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
     OPERATION_NAME = 'os_wait_stat_metric'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -289,7 +289,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
     OPERATION_NAME = 'io_virtual_file_stats_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         # since we want the database name we need to update the SQL query at runtime with our custom columns
         # multiple formats on a string are harmless
         extra_cols = ', '.join(col for col in counters_list)
@@ -349,7 +349,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     OPERATION_NAME = 'os_memory_clerks_stat_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -381,7 +381,7 @@ class SqlOsSchedulers(BaseSqlServerMetric):
     OPERATION_NAME = 'os_schedulers_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -418,7 +418,7 @@ class SqlOsTasks(BaseSqlServerMetric):
     OPERATION_NAME = 'os_tasks_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -451,7 +451,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
     OPERATION_NAME = 'master_database_file_stats_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -502,7 +502,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
         super(SqlDatabaseFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         # special case since this table is specific to databases, need to run query for each database instance
         rows = []
         columns = []
@@ -519,8 +519,10 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             # use statements need to be executed separate from select queries
             ctx = construct_use_statement(db)
             try:
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
+                # Azure SQL DB does not allow running the USE command
+                if not is_azure_sql_database(engine_edition):
+                    logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                    cursor.execute(ctx)
                 logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
                 cursor.execute(cls.QUERY_BASE)
                 data = cursor.fetchall()
@@ -546,9 +548,11 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
             logger.debug("%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db)
 
-        # reset back to previous db
-        logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-        cursor.execute(construct_use_statement(current_db))
+        # Azure SQL DB does not allow running the USE command
+        if not is_azure_sql_database(engine_edition):
+            # reset back to previous db
+            logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
+            cursor.execute(construct_use_statement(current_db))
 
         return rows, columns
 
@@ -602,7 +606,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     OPERATION_NAME = 'database_stats_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -648,7 +652,7 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
     OPERATION_NAME = 'database_backup_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -702,7 +706,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         # special case to limit this query to specific databases and monitor performance
         rows = []
         columns = []
@@ -712,17 +716,16 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, databases)
 
         for db in databases:
-            print(db)
             ctx = construct_use_statement(db)
             query = cls.QUERY_BASE.format(db=db)
             start = get_precise_time()
             try:
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
+                if not is_azure_sql_database(engine_edition):
+                    logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                    cursor.execute(ctx)
                 logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
                 cursor.execute(query)
                 data = cursor.fetchall()
-                print(query, data)
             except Exception as e:
                 logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
                 continue
@@ -787,7 +790,7 @@ class SqlDbReplicaStates(BaseSqlServerMetric):
     OPERATION_NAME = 'db_replica_states_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -842,7 +845,7 @@ class SqlAvailabilityGroups(BaseSqlServerMetric):
     OPERATION_NAME = 'availability_groups_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -888,7 +891,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                     inner join sys.dm_hadr_database_replica_cluster_states as dhdrcs
                     on ar.replica_id = dhdrcs.replica_id
                     inner join sys.dm_hadr_database_replica_states as dhdrs
-                    on ar.replica_id = dhdrs.replica_id
+                    on ar.replica_id = dhdrs.replica_id and dhdrcs.group_database_id = dhdrs.group_database_id
                     inner join sys.availability_groups as ag
                     on ag.group_id = ar.group_id""".format(
         table=TABLE
@@ -896,7 +899,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
     OPERATION_NAME = 'availability_replicas_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -973,7 +976,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
     OPERATION_NAME = 'db_file_space_usage_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         rows = []
         columns = []
 
@@ -987,8 +990,9 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
         ctx = construct_use_statement(db)
         start = get_precise_time()
         try:
-            logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-            cursor.execute(ctx)
+            if not is_azure_sql_database(engine_edition):
+                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
+                cursor.execute(ctx)
             logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
             cursor.execute(cls.QUERY_BASE)
             data = cursor.fetchall()
@@ -1007,7 +1011,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
         logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
 
         # reset back to previous db
-        if current_db:
+        if current_db and not is_azure_sql_database(engine_edition):
             logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
             cursor.execute(construct_use_statement(current_db))
 

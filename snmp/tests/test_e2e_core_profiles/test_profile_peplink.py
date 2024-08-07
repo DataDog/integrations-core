@@ -29,8 +29,11 @@ def test_e2e_profile_peplink(dd_agent_check):
     common_tags = [
         'snmp_profile:peplink',
         'snmp_host:peplink.device.name',
+        'device_hostname:peplink.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'peplink_bal_firmware:driving their acted',
         'peplink_bal_serial_number:zombies their',
@@ -138,6 +141,7 @@ def test_e2e_profile_peplink(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.23695',
         'vendor': 'peplink',
         'device_type': 'router',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

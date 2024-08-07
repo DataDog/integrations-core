@@ -27,8 +27,11 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
     common_tags = [
         'snmp_profile:hp-compaq-health',
         'snmp_host:_hp-compaq-health.device.name',
+        'device_hostname:_hp-compaq-health.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
@@ -119,6 +122,7 @@ def test_e2e_profile__hp_compaq_health(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.2.3.1004',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

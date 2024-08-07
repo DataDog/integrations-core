@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Dict, Iterable
 from ddev.integration.core import Integration
 from ddev.repo.constants import CONFIG_DIRECTORY, FULL_NAMES
 from ddev.utils.fs import Path
-from ddev.utils.git import GitManager
+from ddev.utils.git import GitRepository
 
 if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
@@ -20,7 +20,7 @@ class Repository:
         self.__name = name
         self.__full_name = FULL_NAMES.get(name, name)
         self.__path = Path(path).expand()
-        self.__git = GitManager(self.__path)
+        self.__git = GitRepository(self.__path)
         self.__integrations = IntegrationRegistry(self)
 
     @property
@@ -36,7 +36,7 @@ class Repository:
         return self.__path
 
     @property
-    def git(self) -> GitManager:
+    def git(self) -> GitRepository:
         return self.__git
 
     @property
@@ -51,7 +51,7 @@ class Repository:
 
     @cached_property
     def agent_requirements(self) -> Path:
-        return self.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+        return self.path / 'agent_requirements.in'
 
     @cached_property
     def agent_release_requirements(self) -> Path:
@@ -165,7 +165,7 @@ class IntegrationRegistry:
         Iterate over all integrations that have changes that could affect built distributions.
         """
         for integration in self.__iter_filtered(selection):
-            for relative_path in self.repo.git.changed_files:
+            for relative_path in self.repo.git.changed_files():
                 if integration.requires_changelog_entry(self.repo.path / relative_path):
                     yield integration
                     break
@@ -201,4 +201,4 @@ class IntegrationRegistry:
         return set(selection)
 
     def __get_changed_root_entries(self) -> set[str]:
-        return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files}
+        return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files()}

@@ -20,6 +20,7 @@ from datadog_checks.postgres.util import (
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
+    STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
@@ -70,6 +71,8 @@ COMMON_METRICS = [
     'postgresql.deadlocks.count',
     'postgresql.temp_bytes',
     'postgresql.temp_files',
+    'postgresql.blk_read_time',
+    'postgresql.blk_write_time',
 ]
 
 DBM_MIGRATED_METRICS = [
@@ -117,14 +120,18 @@ requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `late
 
 
 def _iterate_metric_name(query):
+    metric_prefix = 'postgresql'
     if 'columns' in query:
+        if 'metric_prefix' in query:
+            metric_prefix = f'{query["metric_prefix"]}'
         for column in query['columns']:
             if column['type'].startswith('tag'):
                 continue
-            yield column['name']
+            yield f'{metric_prefix}.{column["name"]}'
     else:
-        for metric in query['metrics'].values():
-            yield metric[0]
+        metrics = query['metrics'].values() if 'metrics' in query else query.values()
+        for metric in metrics:
+            yield f'{metric_prefix}.{metric[0]}'
 
 
 def _get_expected_replication_tags(check, pg_instance, with_host=True, with_db=False, with_version=True, **kwargs):
@@ -201,15 +208,16 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         for name in COMMON_METRICS:
             aggregator.assert_metric(name, count=count, tags=db_tags)
         if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
-            for metric_name, _ in NEWER_14_METRICS.values():
+            for metric_name in _iterate_metric_name(NEWER_14_METRICS):
                 aggregator.assert_metric(metric_name, count=count, tags=db_tags)
+    aggregator.assert_metric('postgresql.running', count=count, value=1, tags=expected_tags)
 
 
 def check_db_count(aggregator, expected_tags, count=1):
-    table_count = 7
+    table_count = 18
     # We create 2 additional partition tables when partition is available + 2 parent tables
     if float(POSTGRES_VERSION) >= 11.0:
-        table_count = 14
+        table_count = 25
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,
@@ -253,7 +261,7 @@ def check_stat_replication(aggregator, expected_tags, count=1):
         'wal_state:streaming',
         'wal_sync_state:async',
     ]
-    for metric_name, _ in REPLICATION_STATS_METRICS['metrics'].values():
+    for metric_name in _iterate_metric_name(REPLICATION_STATS_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
 
 
@@ -315,7 +323,7 @@ def check_replication_slots_stats(aggregator, expected_tags, count=1):
 
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
-    for metric_name, _ in replication_metrics.values():
+    for metric_name in _iterate_metric_name(replication_metrics):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
@@ -352,9 +360,13 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
         return
 
     slru_caches = ['Subtrans', 'Serial', 'MultiXactMember', 'Xact', 'other', 'Notify', 'CommitTs', 'MultiXactOffset']
-    for metric_name, _ in SLRU_METRICS['metrics'].values():
+    for metric_name in _iterate_metric_name(SLRU_METRICS):
         for slru_cache in slru_caches:
-            aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['slru_name:{}'.format(slru_cache)])
+            aggregator.assert_metric(
+                metric_name,
+                count=count,
+                tags=expected_tags + ['slru_name:{}'.format(slru_cache)],
+            )
 
 
 def check_snapshot_txid_metrics(aggregator, expected_tags, count=1):
@@ -418,3 +430,15 @@ def check_checksum_metrics(aggregator, expected_tags, count=1):
         return
     for metric_name in _iterate_metric_name(CHECKSUM_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME)])
+
+
+def check_stat_io_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 16:
+        return
+    expected_stat_io_tags = expected_tags + [
+        'backend_type:walsender',
+        'context:normal',
+        'object:relation',
+    ]
+    for metric_name in _iterate_metric_name(STAT_IO_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)

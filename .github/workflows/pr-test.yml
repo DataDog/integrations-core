@@ -15,6 +15,11 @@ on:
         required: false
         default: ""
         type: string
+      pytest-args:
+        description: "Arguments to pass to pytest"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   compute-matrix:
@@ -47,6 +52,7 @@ jobs:
       # For other repositories
       setup-env-vars: "${{ inputs.setup-env-vars }}"
       python-version: "${{ inputs.python-version }}"
+      pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
 
   save-event:

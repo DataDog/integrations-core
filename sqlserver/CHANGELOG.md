@@ -2,7 +2,55 @@
 
 <!-- towncrier release notes start -->
 
-## 17.1.0 / 2024-03-22
+## 17.4.0 / 2024-07-05
+
+***Added***:
+
+* Adding schema collection to sqlserver
+  Schema data includes information about the tables, their columns, indexes, foreign keys, and partitions. ([#17258](https://github.com/DataDog/integrations-core/pull/17258))
+* Set sqlserver integration default odbc driver to agent embedded msodbcsql18 on Linux platform ([#17729](https://github.com/DataDog/integrations-core/pull/17729))
+* Update embedded odbc driver config odbcinist.ini to use msodbcsql 18.3.3.1 ([#17765](https://github.com/DataDog/integrations-core/pull/17765))
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+***Fixed***:
+
+* Filter query metrics by database_name if check is configured to a single non-master db ([#17717](https://github.com/DataDog/integrations-core/pull/17717))
+* [sqlserver] fix missing sqlserver_version ([#17750](https://github.com/DataDog/integrations-core/pull/17750))
+* Hyphen in database name support ([#17775](https://github.com/DataDog/integrations-core/pull/17775))
+* Upgrade `azure-identity` dependency ([#17862](https://github.com/DataDog/integrations-core/pull/17862))
+* Move sqlserver schema foreign key information to the dependent table. ([#17933](https://github.com/DataDog/integrations-core/pull/17933))
+
+## 17.3.0 / 2024-05-31 / Agent 7.55.0
+
+***Added***:
+
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424))
+
+***Fixed***:
+
+* Fix Always-On metrics query for replica_failover_mode and replica_failover_readiness. Previously the query returned a cartesian product of rows which could result in incorrect metrics in some cases. ([#17503](https://github.com/DataDog/integrations-core/pull/17503))
+* Emit database_instance metadata before collecting metrics
+  Decreased database instance collection interval from 1800 seconds to 300 seconds to improve reliability ([#17675](https://github.com/DataDog/integrations-core/pull/17675))
+
+## 17.2.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Add `sqlserver.database.replica.transaction_delay` metric to report database level replica transaction delays ([#17345](https://github.com/DataDog/integrations-core/pull/17345))
+* Add a new config option include_db_fragmentation_metrics_tempdb to skip index fragmentation metrics for tempdb. By default, index fragmentation metrics are NOT be collected for tempdb. ([#17361](https://github.com/DataDog/integrations-core/pull/17361))
+* Migrate `SQLServer index usage metrics`,  `SQLServer database index fragmentation metrics` and `SQLServer database backup metrics` to `database_metrics`.
+  Increase `SQLServer database index fragmentation metrics` and `SQLServer database backup metrics` default collection interval to 5 mins. ([#17374](https://github.com/DataDog/integrations-core/pull/17374))
+
+***Fixed***:
+
+* Break circular dependency between sqlserver check and connection ([#17275](https://github.com/DataDog/integrations-core/pull/17275))
+* Fix missing file stats metrics `sqlserver.files.write_io_stall_queued` and `sqlserver.files.read_io_stall_queued` for sqlserver newer than 2012 and not Azure SQL Database/Azure SQL Managed Instance ([#17299](https://github.com/DataDog/integrations-core/pull/17299))
+* Remove db exist check if ignore_missing_database is set to false. In this case throw SQLConnectionError instead of ConfigurationError when database does not exist. ([#17300](https://github.com/DataDog/integrations-core/pull/17300))
+* Fix zero value bug for `sqlserver.replica.transaction_delay` metric due to integration wrongly pulling transaction delay performance counter from `SQLServer:Database Mirroring` instead of the the correct object_name `SQLServer:Database Replica` ([#17345](https://github.com/DataDog/integrations-core/pull/17345))
+* Fixed a bug where specifying `null` for `custom_metrics` would cause the SQL Server integration to crash ([#17430](https://github.com/DataDog/integrations-core/pull/17430))
+* Prevent agent from unsupported USE commands on Azure SQL DBs ([#17448](https://github.com/DataDog/integrations-core/pull/17448))
+
+## 17.1.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

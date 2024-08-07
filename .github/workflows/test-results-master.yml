@@ -17,14 +17,15 @@ jobs:
       BADGE_PATH: test-results.svg
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: "${{ env.BADGES_BRANCH }}"
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: test-results
+        pattern: test-results-*
         path: test-results
+        merge-multiple: true
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
@@ -47,7 +48,7 @@ jobs:
         esac
 
     - name: Create badge
-      uses: emibcn/badge-action@v2.0.2
+      uses: emibcn/badge-action@v2.0.3
       with:
         label: Tests
         status: "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed"

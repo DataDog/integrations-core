@@ -187,6 +187,37 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 The Kubernetes State Metrics Core check does not include any events.
 
+### Default labels as tags
+
+#### Default recommended Kubernetes and Helm labels 
+
+|  Recommended Label        | Tag                |
+|-----------------------|-----------------------------|
+| `app.kubernetes.io/name`         | `kube_app_name`           |
+| `app.kubernetes.io/instance`          | `kube_app_instance`           |
+| `app.kubernetes.io/version`          | `kube_app_version`           |
+| `app.kubernetes.io/component`          | `kube_app_component`           |
+| `app.kubernetes.io/part-of`          | `kube_app_part_of`           |
+| `app.kubernetes.io/managed-by`          | `kube_app_managed_by`           |
+| `helm.sh/chart`          | `helm_chart`           |
+
+#### Default recommended Kubernetes node labels
+
+|  Recommended Label        | Tag                |
+|-----------------------|-----------------------------|
+| `topology.kubernetes.io/region`  | `kube_region`     |
+| `topology.kubernetes.io/zone`    | `kube_zone`       |
+| `failure-domain.beta.kubernetes.io/region`   | `kube_region`   |
+| `failure-domain.beta.kubernetes.io/zone`     | `kube_zone`     |
+
+#### Datadog labels (Unified Service Tagging)
+
+|  Datadog Label        | Tag                |
+|-----------------------|-----------------------------|
+| `tags.datadoghq.com/env`          | `env`           |
+| `tags.datadoghq.com/service`          | `service`           |
+| `tags.datadoghq.com/version`          | `version`           |
+
 ### Service Checks
 
 `kubernetes_state.cronjob.complete`

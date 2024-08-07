@@ -27,8 +27,11 @@ def test_e2e_profile__generic_entity_sensor(dd_agent_check):
     common_tags = [
         'snmp_profile:generic-entity-sensor',
         'snmp_host:_generic-entity-sensor.device.name',
+        'device_hostname:_generic-entity-sensor.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST METRICS ---
@@ -62,6 +65,7 @@ def test_e2e_profile__generic_entity_sensor(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.2.3.1002',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

@@ -61,6 +61,17 @@ instances:
     #
     # windows_service_startup_type_tag: false
 
+    ## @param collect_display_name_as_tag - boolean - optional - default: false
+    ## Whether or not to submit the Windows Service Display Name as the `display_name` tag.
+    ## `display_name` will be formatted according to Datadog's tagging requirements:
+    ## https://docs.datadoghq.com/getting_started/tagging/#define-tags
+    ##
+    ## Example of the default `windows_service` tag and `display_name` tag:
+    ## windows_service:wuauserv
+    ## display_name:windows_update
+    #
+    # collect_display_name_as_tag: false
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

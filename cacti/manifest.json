@@ -14,7 +14,8 @@
     "classifier_tags": [
       "Category::Developer Tools",
       "Category::Log Collection",
-      "Supported OS::Linux"
+      "Supported OS::Linux",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -42,9 +43,6 @@
       },
       "source_type_id": 25,
       "auto_install": true
-    },
-    "logs": {
-      "source": "cacti"
     }
   }
 }

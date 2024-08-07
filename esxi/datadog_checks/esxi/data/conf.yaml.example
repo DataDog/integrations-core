@@ -1,0 +1,188 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+    ## @param proxy - string - optional - default: 
+    ## SOCKS Proxy to use for all instances.
+    #
+    # proxy: socks5://<PROXY_SERVER>:<PORT>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param host - string - required
+    ## The host used to resolve the ESXi IP. It is either a FQDN or an IP.
+    #
+  - host: <HOSTNAME>
+
+    ## @param username - string - required
+    ## The ESXi host username
+    #
+    username: <USERNAME>
+
+    ## @param password - string - required
+    ## The ESXi host password
+    #
+    password: <PASSWORD>
+
+    ## @param empty_default_hostname - boolean - required
+    ## The ESXi integration is a check where metrics are usually unrelated to the host
+    ## on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
+    ## (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
+    ## running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
+    #
+    empty_default_hostname: true
+
+    ## @param use_guest_hostname - boolean - optional - default: false
+    ## If true, the check will use the guest hostname for VMs instead of the VM name.
+    ## This requires the VM to have VMware tools installed. If the guest hostname is
+    ## not available, it will fallback to the VM name.
+    ## Use this if you install the agent on VMs to avoid duplicate entries for hosts
+    ## in the web application UI.
+    ## Note: If VMs are duplicated in the Infrastructure List, follow these troubleshooting steps
+    ##       https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
+    #
+    # use_guest_hostname: false
+
+    ## @param use_configured_hostname - boolean - optional - default: true
+    ## If true, the check will use the configured `host` parameter for ESXi hostnames instead of the Host name.
+    ## You may need to use this if you install both the vSphere check and ESXi check to avoid duplicate entries
+    ## for hosts in the web application UI.
+    #
+    # use_configured_hostname: true
+
+    ## @param collect_per_instance_filters - mapping - optional
+    ## Use this option to collect metrics tagged with instance values.
+    ## Some ESXi metrics can be tagged with instance values.
+    ## For each resource type (vm, host) to collect,
+    ## you can choose which metrics you want to collect the instance value as tags using a list of regex.
+    ## See https://github.com/DataDog/integrations-core/blob/master/esxi/datadog_checks/esxi/metrics.py
+    ## for the list of collected metrics (do not prefix them with `esxi`)
+    ## /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
+    #
+    # collect_per_instance_filters:
+    #   vm:
+    #   - <VM_REGEX>
+    #   host:
+    #   - <HOST_REGEX>
+
+    ## @param resource_filters - list of mappings - optional
+    ## Each filter in the list is composed of three parameters.
+    ## 'resource' is one of vm/host on which to apply the filter
+    ## 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
+    ## 'type' is either include list (default) or exclude list. If a resource is both included and excluded it will be
+    ##       considered excluded.
+    ## 'property' is the kind of property on which to apply the filter and must be one of those values:
+    ##   - name (default) to filter on the resource name (defined by vCenter)
+    ##   - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
+    ##   - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
+    ##     if VMware tools are installed)
+    #
+    # resource_filters:
+    #   - resource: vm
+    #     property: name
+    #     type: include
+    #     patterns:
+    #     - <VM_REGEX_1>
+    #     - <VM_REGEX_2>
+    #   - resource: vm
+    #     type: exclude
+    #     property: hostname
+    #     patterns:
+    #     - <HOSTNAME_REGEX>
+    #   - resource: vm
+    #     type: exclude
+    #     property: guest_hostname
+    #     patterns:
+    #     - <GUEST_HOSTNAME_REGEX>
+
+    ## @param metric_filters - mapping - optional
+    ## Use this option to control what metrics to submit for each resource type
+    ## For each resource type (vm, host) collected,
+    ## you can choose which metric you want to collect using a list of regex.
+    ## If you do not specify a regex for the resource, all metrics will be collected.
+    ## See https://github.com/DataDog/integrations-core/blob/master/esxi/datadog_checks/esxi/metrics.py
+    ## for the list of collected metrics (do not prefix them with `esxi`)
+    #
+    # metric_filters:
+    #   vm:
+    #   - <VM_REGEX>
+    #   host:
+    #   - <HOST_REGEX>
+
+    ## @param excluded_host_tags - list of strings - optional - default: []
+    ## Use this option to send a subset of host tags as metric tags.
+    ## The ESXi integration collects tags for every ESXi host or VM in your environment.
+    ## Those tags can be `esxi_url`, esxi_type`, `esxi_host`, and `esxi_datastore`
+    ## and are attached to the ESXi metrics by default.
+    ## By default these tags are submitted as host tags, but you can submit them as metric tags instead by using
+    ## this configuration option, see: https://docs.datadoghq.com/tagging/using_tags/
+    ## You will lose the ability to filter your hosts on the tags you specify but they will appear faster
+    ## and will remove spikes from some `count by {TAG}` queries.
+    ## A good use case is to set this parameter to `[esxi_host]`, indeed with VM migrations this tag is expected to
+    ## change often and it is usually helpful to be informed quickly of this change.
+    #
+    # excluded_host_tags:
+    #   - <HOST_TAG>
+
+    ## @param proxy - string - optional - default: 
+    ## SOCKS Proxy to use for this instance. Overrides the `proxy` setting in `init_config`.
+    #
+    # proxy: socks5://<PROXY_SERVER>:<PORT>
+
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Set to false to disable SSL verification when connecting to the ESXi host
+    #
+    # ssl_verify: true
+
+    ## @param ssl_cafile - string - optional
+    ## Set to the absolute file path of CA certificates in PEM format
+    #
+    # ssl_cafile: <FILE_PATH>
+
+    ## @param ssl_capath - string - optional
+    ## Set to the absolute file path of a directory containing CA certificates
+    ## in PEM format
+    #
+    # ssl_capath: <DIRECTORY_PATH>
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

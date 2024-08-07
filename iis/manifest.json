@@ -13,7 +13,8 @@
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
-      "Supported OS::Windows"
+      "Supported OS::Windows",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -57,9 +58,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "response_time_overview": "assets/saved_views/response_time.json"
-    },
-    "logs": {
-      "source": "iis"
     }
   }
 }

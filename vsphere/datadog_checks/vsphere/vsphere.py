@@ -26,6 +26,7 @@ from datadog_checks.vsphere.constants import (
     HOST_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
+    PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
     UNLIMITED_HIST_METRICS_PER_QUERY,
 )
@@ -639,7 +640,11 @@ class VSphereCheck(AgentCheck):
                     "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
                 )
                 normalized_event = VSphereEvent(
-                    event, event_config, self._config.base_tags, self._config.event_resource_filters
+                    event,
+                    event_config,
+                    self._config.base_tags,
+                    self._config.event_resource_filters,
+                    self._config.exclude_filters,
                 )
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
@@ -889,7 +894,12 @@ class VSphereCheck(AgentCheck):
 
         all_properties = mor_props.get('properties', None)
         if not all_properties:
-            self.log.warning('Could not retrieve properties for resource %s hostname=%s', mor_name, hostname)
+            self.log.debug(
+                'Could not retrieve properties for %s resource %s hostname=%s',
+                resource_metric_suffix,
+                mor_name,
+                hostname,
+            )
             return
 
         base_tags = self._config.base_tags + resource_tags
@@ -985,7 +995,14 @@ class VSphereCheck(AgentCheck):
 
             # Submit property metrics after the cache is refreshed
             if self._config.collect_property_metrics:
-                for resource_type in self._config.collected_resource_types:
+
+                resources_with_property_metrics = [
+                    resource
+                    for resource in self._config.collected_resource_types
+                    if MOR_TYPE_AS_STRING[resource] in PROPERTY_METRICS_BY_RESOURCE_TYPE.keys()
+                ]
+
+                for resource_type in resources_with_property_metrics:
                     for mor in self.infrastructure_cache.get_mors(resource_type):
                         mor_props = self.infrastructure_cache.get_mor_props(mor)
                         resource_tags = mor_props.get('tags', [])

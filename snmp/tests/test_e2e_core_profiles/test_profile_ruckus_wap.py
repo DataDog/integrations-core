@@ -29,8 +29,11 @@ def test_e2e_profile_ruckus_wap(dd_agent_check):
     common_tags = [
         'snmp_profile:ruckus-wap',
         'snmp_host:ruckus-wap.device.name',
+        'device_hostname:ruckus-wap.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
@@ -55,6 +58,7 @@ def test_e2e_profile_ruckus_wap(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.25053.3.1.4.91',
         'vendor': 'ruckus',
         'device_type': 'access_point',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

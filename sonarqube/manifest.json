@@ -17,7 +17,8 @@
       "Category::Security",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -58,9 +59,6 @@
     },
     "saved_views": {
       "status_overview": "assets/saved_views/status_overview.json"
-    },
-    "logs": {
-      "source": "sonarqube"
     }
   }
 }
