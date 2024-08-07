@@ -60,7 +60,7 @@ METRICS = [
     'hazelcast.member.client_count',
     'hazelcast.member.closed_count',
     'hazelcast.member.cluster_start_time',
-    'hazelcast.member.cluster_time',
+    'hazelcast.instance.cluster_time',
     'hazelcast.member.cluster_time_diff',
     'hazelcast.member.cluster_up_time',
     'hazelcast.member.commit_count',

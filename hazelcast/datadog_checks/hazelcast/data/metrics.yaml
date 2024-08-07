@@ -31,7 +31,7 @@ jmx_metrics:
           alias: hazelcast.instance.member_count
           metric_type: gauge
         clusterTime:
-          alias: hazelcast.member.cluster_time
+          alias: hazelcast.instance.cluster_time
           metric_type: gauge
   - include:
       domain: com.hazelcast
