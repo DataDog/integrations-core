@@ -26,7 +26,7 @@ from .mocked_api import MockedAPI
 @pytest.fixture(autouse=True)
 def mock_vsan_stub():
     if sys.version_info[0] < 3:
-        return
+        pytest.skip("This test requires Python 3 or higher.")
     with patch('vsanapiutils.GetVsanVcStub') as GetStub:
         GetStub._stub.host = '0.0.0.0'
         yield GetStub
