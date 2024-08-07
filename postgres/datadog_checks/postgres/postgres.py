@@ -465,7 +465,6 @@ class PostgreSql(AgentCheck):
     @property
     def agent_hostname(self):
         # type: () -> str
-        self.log.info("natasha testing tags from agent %s", datadog_agent.get_host_tags())
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
@@ -921,6 +920,7 @@ class PostgreSql(AgentCheck):
         }
 
     def check(self, _):
+        self.log.info("natasha testing tags from agent %s", datadog_agent.get_host_tags())
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
