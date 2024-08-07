@@ -74,7 +74,7 @@ Follow these steps to collect traces for an application in your Fly.io environme
     Set the following as an environment variable to submit metrics to the Datadog Agent application:
     ```
     [env]
-        DD_AGENT_HOST=<YOUR_AGENT_APP_NAME>.internal
+        DD_AGENT_HOST="<YOUR_AGENT_APP_NAME>.internal"
 
     ```
 
@@ -99,10 +99,10 @@ Follow these steps to collect traces for an application in your Fly.io environme
 
     ```
     [env]
-        DD_APM_ENABLED = 'true'
-        DD_APM_NON_LOCAL_TRAFFIC = 'true'
-        DD_DOGSTATSD_NON_LOCAL_TRAFFIC = 'true'
-        DD_BIND_HOST = 'fly-global-services'
+        DD_APM_ENABLED = "true"
+        DD_APM_NON_LOCAL_TRAFFIC = "true"
+        DD_DOGSTATSD_NON_LOCAL_TRAFFIC = "true"
+        DD_BIND_HOST = "fly-global-services"
     ```
 
 **Note**: Ensure that the settings on your Fly.io instances do not publicly expose the ports for APM and DogStatsD, if enabled.
