@@ -7,7 +7,6 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from .instance import InstanceConfig
 from .shared import SharedConfig
 
