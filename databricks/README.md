@@ -469,8 +469,6 @@ Additional helpful documentation, links, and articles:
 
 - [Uploading a Script to Unity Catalog Volume][24]
 
-{{< partial name="whats-next/whats-next.html" >}}
-
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
 [3]: https://app.datadoghq.com/integrations/spark
