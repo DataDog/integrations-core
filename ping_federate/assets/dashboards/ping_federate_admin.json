@@ -1,475 +1,11 @@
 {
-  "title": "PingFederate - Admin",
-  "description": "[[suggested_dashboards]]",
-  "widgets": [
-    {
-      "id": 5390725829680626,
-      "definition": {
-        "type": "image",
-        "url": "https://support.pingidentity.com/s/sfsites/c/sfc/servlet.shepherd/version/download/0688Z00000QW07FQAT",
-        "sizing": "contain",
-        "margin": "md",
-        "has_background": false,
-        "has_border": true,
-        "vertical_align": "center",
-        "horizontal_align": "center"
-      },
-      "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
-    },
-    {
-      "id": 4301672761035144,
-      "definition": {
-        "type": "note",
-        "content": "## Overview\n-  This Dashboard provides a comprehensive analysis of Admin Events.\n",
-        "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "vertical_align": "top",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left",
-        "has_padding": true
-      },
-      "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
-    },
-    {
-      "id": 7057520287547330,
-      "definition": {
-        "type": "note",
-        "content": "## Widgets\n1. Total Logs \n 2. Traffic Over Time \n 3. Total Users \n 4. Top Users with Roles \n 5. Top IPs With Failed Login Attempts by User\n 6. Distribution of Events by Name \n 7. Distribution of Events by Component \n 8. Distribution of Events by Login Status \n 9. Distribution of Events by Location \n 10. Event Details",
-        "background_color": "white",
-        "font_size": "14",
-        "text_align": "left",
-        "vertical_align": "top",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left",
-        "has_padding": true
-      },
-      "layout": { "x": 8, "y": 0, "width": 4, "height": 2 }
-    },
-    {
-      "id": 5654245605908244,
-      "definition": {
-        "title": "Total Logs",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_value",
-        "requests": [
-          {
-            "response_format": "scalar",
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [],
-                "search": {
-                  "query": "source:ping-federate service:admin $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "formulas": [{ "formula": "query1" }],
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "value": 0,
-                "palette": "black_on_light_green",
-                "custom_bg_color": "#bad3fd"
-              }
-            ]
-          }
-        ],
-        "autoscale": true,
-        "precision": 2,
-        "timeseries_background": {
-          "yaxis": { "include_zero": true },
-          "type": "area"
-        }
-      },
-      "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
-    },
-    {
-      "id": 1509312559927310,
-      "definition": {
-        "title": "Traffic Over Time",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_layout": "auto",
-        "legend_columns": ["avg", "min", "max", "value", "sum"],
-        "type": "timeseries",
-        "requests": [
-          {
-            "formulas": [{ "formula": "query1" }],
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [],
-                "search": {
-                  "query": "source:ping-federate service:admin $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "response_format": "timeseries",
-            "style": {
-              "palette": "dog_classic",
-              "order_by": "values",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ]
-      },
-      "layout": { "x": 3, "y": 2, "width": 9, "height": 4 }
-    },
-    {
-      "id": 3496329720792188,
-      "definition": {
-        "title": "Total Users",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_value",
-        "requests": [
-          {
-            "response_format": "scalar",
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": {
-                  "aggregation": "cardinality",
-                  "metric": "@usr.name"
-                },
-                "group_by": [],
-                "search": {
-                  "query": "source:ping-federate service:admin $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "formulas": [{ "formula": "query1" }],
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "value": 0,
-                "palette": "custom_bg",
-                "custom_bg_color": "#dbdef5"
-              }
-            ]
-          }
-        ],
-        "autoscale": true,
-        "precision": 2,
-        "timeseries_background": { "type": "area" }
-      },
-      "layout": { "x": 0, "y": 4, "width": 3, "height": 2 }
-    },
-    {
-      "id": 6109424404701742,
-      "definition": {
-        "title": "Top Users with Roles",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "toplist",
-        "requests": [
-          {
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [
-                  {
-                    "facet": "@usr.name",
-                    "limit": 10,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  },
-                  {
-                    "facet": "@roles",
-                    "limit": 10,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  }
-                ],
-                "search": {
-                  "query": "source:ping-federate service:admin $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "response_format": "scalar",
-            "formulas": [{ "formula": "query1" }],
-            "sort": {
-              "count": 100,
-              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
-            }
-          }
-        ],
-        "style": {
-          "display": { "type": "stacked", "legend": "automatic" },
-          "palette": "datadog16"
-        }
-      },
-      "layout": { "x": 0, "y": 6, "width": 6, "height": 5 }
-    },
-    {
-      "id": 8144103561585696,
-      "definition": {
-        "title": "Top IP's With Failed Login Attempts by User",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "toplist",
-        "requests": [
-          {
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [
-                  {
-                    "facet": "@network.client.ip",
-                    "limit": 10,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  },
-                  {
-                    "facet": "@usr.name",
-                    "limit": 10,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  }
-                ],
-                "search": {
-                  "query": "source:ping-federate service:admin @evt.name:LOGIN_ATTEMPT -@description:\"Login was successful\" $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "response_format": "scalar",
-            "formulas": [{ "formula": "query1" }],
-            "sort": {
-              "count": 100,
-              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
-            }
-          }
-        ],
-        "style": {
-          "display": { "type": "stacked", "legend": "automatic" },
-          "palette": "datadog16"
-        }
-      },
-      "layout": { "x": 6, "y": 6, "width": 6, "height": 5 }
-    },
-    {
-      "id": 8020248442147672,
-      "definition": {
-        "title": "Distribution of Events by Name",
-        "title_size": "16",
-        "title_align": "left",
-        "requests": [
-          {
-            "formulas": [{ "formula": "query1" }],
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [
-                  {
-                    "facet": "@evt.name",
-                    "limit": 10,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  }
-                ],
-                "search": {
-                  "query": "source:ping-federate service:admin $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "response_format": "scalar",
-            "sort": {
-              "count": 500,
-              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
-            },
-            "style": { "palette": "datadog16" }
-          }
-        ],
-        "type": "sunburst",
-        "legend": { "type": "table" }
-      },
-      "layout": { "x": 0, "y": 11, "width": 4, "height": 7 }
-    },
-    {
-      "id": 2184750172017470,
-      "definition": {
-        "title": "Distribution of Events by Component",
-        "title_size": "16",
-        "title_align": "left",
-        "requests": [
-          {
-            "formulas": [{ "formula": "query1" }],
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [
-                  {
-                    "facet": "@component",
-                    "limit": 10,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  }
-                ],
-                "search": {
-                  "query": "source:ping-federate service:admin $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "response_format": "scalar",
-            "sort": {
-              "count": 500,
-              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
-            },
-            "style": { "palette": "datadog16" }
-          }
-        ],
-        "type": "sunburst",
-        "legend": { "type": "table" }
-      },
-      "layout": { "x": 4, "y": 11, "width": 4, "height": 7 }
-    },
-    {
-      "id": 8750859546755360,
-      "definition": {
-        "title": "Distribution of Events by Login Status",
-        "title_size": "16",
-        "title_align": "left",
-        "requests": [
-          {
-            "formulas": [{ "formula": "query1" }],
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [
-                  {
-                    "facet": "@description",
-                    "limit": 10,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  }
-                ],
-                "search": {
-                  "query": "source:ping-federate service:admin @evt.name:LOGIN_ATTEMPT $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "response_format": "scalar",
-            "sort": {
-              "count": 500,
-              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
-            },
-            "style": { "palette": "datadog16" }
-          }
-        ],
-        "type": "sunburst",
-        "legend": { "type": "table" }
-      },
-      "layout": { "x": 8, "y": 11, "width": 4, "height": 7 }
-    },
-    {
-      "id": 1950416711843284,
-      "definition": {
-        "title": "Distribution of Events by Location",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "geomap",
-        "requests": [
-          {
-            "response_format": "scalar",
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [
-                  {
-                    "facet": "@network.client.geoip.country.iso_code",
-                    "limit": 250,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  }
-                ],
-                "search": {
-                  "query": "source:ping-federate service:admin $event_name $component"
-                },
-                "storage": "hot"
-              }
-            ],
-            "formulas": [{ "formula": "query1" }],
-            "sort": {
-              "count": 10,
-              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
-            }
-          }
-        ],
-        "style": { "palette": "hostmap_blues", "palette_flip": false },
-        "view": { "focus": "WORLD" }
-      },
-      "layout": { "x": 0, "y": 18, "width": 12, "height": 5 }
-    },
-    {
-      "id": 4026262965481334,
-      "definition": {
-        "title": "Event Details",
-        "title_size": "16",
-        "title_align": "left",
-        "requests": [
-          {
-            "response_format": "event_list",
-            "query": {
-              "data_source": "logs_stream",
-              "query_string": "source:ping-federate service:admin $event_name $component ",
-              "indexes": [],
-              "storage": "hot",
-              "sort": { "order": "asc", "column": "@usr.name" }
-            },
-            "columns": [
-              { "field": "status_line", "width": "auto" },
-              { "field": "timestamp", "width": "auto" },
-              { "field": "host", "width": "auto" },
-              { "field": "@usr.name", "width": "auto" },
-              { "field": "@network.client.ip", "width": "auto" },
-              { "field": "@component", "width": "auto" },
-              { "field": "@evt.name", "width": "auto" },
-              { "field": "@description", "width": "auto" }
-            ]
-          }
-        ],
-        "type": "list_stream"
-      },
-      "layout": { "x": 0, "y": 23, "width": 12, "height": 5 }
-    }
+  "description": "This dashboard provides information about the Admin Activity in your PingFederate server.",
+  "layout_type": "ordered",
+  "notify_list": [
   ],
+  "reflow_type": "fixed",
   "template_variables": [
     {
-      "name": "event_name",
-      "prefix": "@evt.name",
       "available_values": [
         "LOGIN_ATTEMPT",
         "ACTIVATE",
@@ -480,26 +16,1314 @@
         "EXPORT",
         "ROLE_CHANGE"
       ],
-      "default": "*"
+      "default": "*",
+      "name": "Event_Name",
+      "prefix": "@evt.name"
     },
     {
-      "name": "component",
-      "prefix": "@component",
       "available_values": [
         "USER",
         "GENERAL_SETTINGS",
         "IDP_ADAPTER",
         "IDP_CONNECTION",
         "CERTIFICATE",
-        "CONFIG_ARCHIVE",
+        "CONFIG_ARCHIE",
         "OAUTH_VIRTUAL_ISSUERS",
         "METADATA",
-        "aDMIN_XML_SIGNATURES"
+        "ADMIN_XML_SIGNATURE"
       ],
-      "default": "*"
+      "default": "*",
+      "name": "Component",
+      "prefix": "@component"
     }
   ],
-  "layout_type": "ordered",
-  "notify_list": [],
-  "reflow_type": "fixed"
+  "title": "PingFederate - Admin Overview (New)",
+  "widgets": [
+    {
+      "definition": {
+        "has_background": true,
+        "has_border": false,
+        "horizontal_align": "center",
+        "margin": "md",
+        "sizing": "contain",
+        "type": "image",
+        "url": "https://support.pingidentity.com/s/sfsites/c/sfc/servlet.shepherd/version/download/0688Z00000QVi33QAD",
+        "url_dark_theme": "",
+        "vertical_align": "center"
+      },
+      "id": 4312993155515866,
+      "layout": {
+        "height": 3,
+        "width": 6,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Admin Logs Overview",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "order_by": "values",
+                    "palette": "dog_classic"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "title": "Traffic Over Time",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "timeseries"
+            },
+            "id": 1113414894854716,
+            "layout": {
+              "height": 4,
+              "width": 6,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bad3fd",
+                      "palette": "black_on_light_green",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              },
+              "title": "Total Logs",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 4498771821649466,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 0,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#dbdef5",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@usr.name"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "Total Users",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 3696420401013086,
+            "layout": {
+              "height": 2,
+              "width": 3,
+              "x": 3,
+              "y": 4
+            }
+          }
+        ]
+      },
+      "id": 1981088653631708,
+      "layout": {
+        "height": 7,
+        "width": 6,
+        "x": 6,
+        "y": 0
+      }
+    },
+    {
+      "definition": {
+        "background_color": "white",
+        "content": "The PingFederate - Admin Overview dashboard offers a high-level summary of administrative activities and providing critical insights into overall admin activity. \n\nThis dashboard gains better visibility into your organization's administrative activities by monitoring PingFederate Admin Logs.\n\nFor more information, see the [PingFederate Integration Documentation](https://docs.datadoghq.com/integrations/ping_federate).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "font_size": "14",
+        "has_padding": true,
+        "show_tick": false,
+        "text_align": "left",
+        "tick_edge": "left",
+        "tick_pos": "50%",
+        "type": "note",
+        "vertical_align": "top"
+      },
+      "id": 1272312239487240,
+      "layout": {
+        "height": 4,
+        "width": 6,
+        "x": 0,
+        "y": 3
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Datadog Cloud SIEM",
+        "title_align": "center",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "vivid_blue",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates PingFederate Admin logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Aping-federate%20service%3Aadmin%20). ",
+              "font_size": "14",
+              "has_padding": true,
+              "show_tick": false,
+              "text_align": "left",
+              "tick_edge": "left",
+              "tick_pos": "50%",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 4984060352758136,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "custom_links": [
+              ],
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "security_signals",
+                      "group_by": [
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin status:critical $Event_Name $Component"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              },
+              "title": "CRITICALs",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 8495499766095366,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "custom_links": [
+              ],
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#e5a21c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "security_signals",
+                      "group_by": [
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin status:medium $Event_Name $Component"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              },
+              "title": "MEDIUMs",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 4277863684613816,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 2,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "custom_links": [
+              ],
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "security_signals",
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin status:critical $Event_Name $Component"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+              },
+              "title": "Critical Security Signals",
+              "type": "toplist"
+            },
+            "id": 5672345229698134,
+            "layout": {
+              "height": 4,
+              "width": 8,
+              "x": 4,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "custom_links": [
+              ],
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#d33043",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "security_signals",
+                      "group_by": [
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin status:high $Event_Name $Component"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "HIGHs",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 8829924623588632,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 0,
+              "y": 3
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "custom_links": [
+              ],
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#ffb52b",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "security_signals",
+                      "group_by": [
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin status:low $Event_Name $Component"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              },
+              "title": "LOWs",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 4817635636892826,
+            "layout": {
+              "height": 1,
+              "width": 2,
+              "x": 2,
+              "y": 3
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "custom_links": [
+              ],
+              "precision": 2,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#84c1e0",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "security_signals",
+                      "group_by": [
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin status:info $Event_Name $Component"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              },
+              "title": "INFOs",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 5929290347448436,
+            "layout": {
+              "height": 1,
+              "width": 2,
+              "x": 2,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "custom_links": [
+              ],
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#d33043",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "security_signals",
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin status:high $Event_Name $Component"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+              },
+              "title": "High Security Signals",
+              "type": "toplist"
+            },
+            "id": 8817235788307850,
+            "layout": {
+              "height": 4,
+              "width": 6,
+              "x": 0,
+              "y": 5
+            }
+          },
+          {
+            "definition": {
+              "custom_links": [
+              ],
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#e5a21c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "security_signals",
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin status:medium $Event_Name $Component"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+              },
+              "title": "Medium Security Signals",
+              "type": "toplist"
+            },
+            "id": 7218874324623780,
+            "layout": {
+              "height": 4,
+              "width": 6,
+              "x": 6,
+              "y": 5
+            }
+          }
+        ]
+      },
+      "id": 7113626160301624,
+      "layout": {
+        "height": 10,
+        "width": 12,
+        "x": 0,
+        "y": 7
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Admin Logs Detail",
+        "title_align": "center",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        },
+                        {
+                          "facet": "@roles",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "legend": "automatic",
+                  "type": "stacked"
+                },
+                "palette": "datadog16"
+              },
+              "title": "Top Users with Roles",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "toplist"
+            },
+            "id": 5376689197206732,
+            "layout": {
+              "height": 5,
+              "width": 6,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@network.client.ip",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        },
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin @evt.name:LOGIN_ATTEMPT -@description:\"Login was successful\" $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "legend": "automatic",
+                  "type": "stacked"
+                },
+                "palette": "datadog16"
+              },
+              "title": "Top IP's With Failed Login Attempts by User",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "toplist"
+            },
+            "id": 8961641079655010,
+            "layout": {
+              "height": 5,
+              "width": 6,
+              "x": 6,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "legend": {
+                "type": "table"
+              },
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "title": "Distribution of Events by Name",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "sunburst"
+            },
+            "id": 6053024720043268,
+            "layout": {
+              "height": 7,
+              "width": 4,
+              "x": 0,
+              "y": 5
+            }
+          },
+          {
+            "definition": {
+              "legend": {
+                "type": "table"
+              },
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@component",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "title": "Distribution of Events by Component",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "sunburst"
+            },
+            "id": 5874920576479864,
+            "layout": {
+              "height": 7,
+              "width": 4,
+              "x": 4,
+              "y": 5
+            }
+          },
+          {
+            "definition": {
+              "legend": {
+                "type": "table"
+              },
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@description",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin @evt.name:LOGIN_ATTEMPT $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "title": "Distribution of Events by Login Status",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "sunburst"
+            },
+            "id": 2333110513837698,
+            "layout": {
+              "height": 7,
+              "width": 4,
+              "x": 8,
+              "y": 5
+            }
+          },
+          {
+            "definition": {
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 250,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-federate service:admin $Event_Name $Component"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "title": "Distribution of Events by Location",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "geomap",
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "id": 3452669898388398,
+            "layout": {
+              "height": 5,
+              "width": 12,
+              "x": 0,
+              "y": 12
+            }
+          },
+          {
+            "definition": {
+              "requests": [
+                {
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@usr.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@network.client.ip",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@component",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@evt.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@description",
+                      "width": "auto"
+                    }
+                  ],
+                  "query": {
+                    "data_source": "logs_stream",
+                    "indexes": [
+                    ],
+                    "query_string": "source:ping-federate service:admin $Event_Name $Component",
+                    "sort": {
+                      "column": "@usr.name",
+                      "order": "asc"
+                    },
+                    "storage": "hot"
+                  },
+                  "response_format": "event_list"
+                }
+              ],
+              "title": "Event Details",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "list_stream"
+            },
+            "id": 3468658538635742,
+            "layout": {
+              "height": 5,
+              "width": 12,
+              "x": 0,
+              "y": 17
+            }
+          }
+        ]
+      },
+      "id": 710967814952512,
+      "layout": {
+        "height": 23,
+        "width": 12,
+        "x": 0,
+        "y": 17
+      }
+    }
+  ]
 }
