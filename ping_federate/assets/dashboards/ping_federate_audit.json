@@ -35,7 +35,7 @@
       "prefix": "@ping_federate.transaction.role"
     }
   ],
-  "title": "PingFederate - Audit Overview (New)",
+  "title": "PingFederate - Audit Overview",
   "widgets": [
     {
       "definition": {
