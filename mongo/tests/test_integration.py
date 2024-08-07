@@ -1087,7 +1087,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
 
     # Override the deployment type replset_state to secondary
     # next check run should detect the change and re-emit the mongodb instance event
-    mongo_check.api_client.deployment_type.replset_state = SECONDARY_STATE_ID
+    mongo_check.deployment_type.replset_state = SECONDARY_STATE_ID
     dd_run_check(mongo_check)
     assert _get_mongodb_instance_event(aggregator) is not None
 
