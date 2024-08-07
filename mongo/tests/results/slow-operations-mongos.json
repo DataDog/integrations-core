@@ -8,6 +8,7 @@
         "ddtags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
+            "hosting_type:self-hosted",
             "sharding_cluster_role:mongos"
         ],
         "timestamp": 1715911398111.2722,
