@@ -517,11 +517,11 @@ def test_include_events_empty_event_resource_filters(aggregator, realtime_instan
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
 def test_vsan_event(aggregator, realtime_instance, dd_run_check, mock_api):
     realtime_instance['get_vsan'] = True
-    realtime_instance['include_events'] = [{"event": "EventEx", "excluded_messages": []}]
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     event1 = vim.event.EventEx()
     event1.createdTime = dt.datetime.now()
     event1.userName = "vSAN Health"
+    event1.eventTypeId = "vsan.health.test.overallsummary.event"
     event1.datacenter = vim.event.DatacenterEventArgument()
     event1.datacenter.name = "dc1"
     event1.fullFormattedMessage = "A vsan event was registered"

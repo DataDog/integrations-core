@@ -217,3 +217,16 @@ PER_RESOURCE_EVENTS = [
     'PermissionEvent',
     'ScheduledTaskEvent',
 ]
+
+VSAN_EVENT_IDS = [
+    'vsan.health.test.cloudhealth.advisor.event',
+    'vsan.health.test.cloudhealth.diskusage.event',
+    'vsan.health.test.cluster.consistentconfig.event',
+    'vsan.health.test.network.hostdisconnected.event',
+    'vsan.health.test.network.hostdisconnected.event',
+    'vsan.health.test.overallsummary.event',
+    'vsan.health.test.perfsvc.perfsvcstatus.event',
+    'vsan.health.test.physicaldisks.diskusage.event',
+    'vsan.health.test.vsanhardwarecert.event',
+    'vsan.health.test.hciskip.event',
+]

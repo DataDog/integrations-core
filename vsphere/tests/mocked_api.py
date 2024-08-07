@@ -126,7 +126,7 @@ class MockedAPI(object):
     def get_vsan_events(self, start_time):
         return self.mock_vsan_events
 
-    def get_vsan_metrics(self):
+    def get_vsan_metrics(self, cluster_nested_elts, entity_ref_ids, id_to_tags, start_time):
         mock_health_data = [
             {
                 'vsphere.vsan.cluster.health.count': MagicMock(id='group_id', status='group_health'),

@@ -481,7 +481,9 @@ class VSphereCheck(AgentCheck):
         collect_start_time = get_current_datetime()
         try:
             t0 = Timer()
-            new_health_metrics, new_performance_metrics = self.api.get_vsan_metrics()
+            new_health_metrics, new_performance_metrics = self.query_vsan_metrics(
+                collect_start_time - dt.timedelta(hours=2)
+            )
             self.gauge(
                 'vsphere.vsan.cluster.time',
                 t0.total(),
@@ -557,6 +559,43 @@ class VSphereCheck(AgentCheck):
             # Let's set `self.latest_metric_query` to `collect_start_time` as safeguard in case no metrics are reported
             # OR something bad happened (which might happen again indefinitely).
             self.latest_metric_query = collect_start_time
+
+    def query_vsan_metrics(self, starting_time):
+        # we seek to make 1 call per cluster since the cluster id needs to be passed in the perf manager
+        # {cluster_reference: set([cluster_id, host1_id, host2_id, host1disk1_id, host1disk2_id, ...])}
+        cluster_nested_elts = {}
+        entity_ref_ids = {}
+        entity_ref_ids['cluster'] = ['cluster-domclient:', 'vsan-cluster-capacity:']
+        entity_ref_ids['host'] = ['host-domclient:', 'host-cpu:']
+        entity_ref_ids['disk'] = ['capacity-disk:', 'cache-disk:']
+        # {id: {0: type, 1: cluster_name, (optional)2: host_name, (optional)3: disk_id}}
+        id_to_tags = {}
+        for cluster in self.infrastructure_cache.get_mors(vim.ClusterComputeResource):
+            cluster_vsan_config = cluster.configurationEx.vsanConfigInfo
+            # only collect vsan metrics if the cluster has vsan enabled
+            if cluster_vsan_config and cluster_vsan_config.enabled:
+                cluster_uuid = cluster_vsan_config.defaultConfig.uuid
+                cluster_nested_elts[cluster] = [cluster_uuid]
+                id_to_tags[cluster_uuid] = {1: cluster.name, 0: 'cluster'}
+                for host in cluster.host:
+                    host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
+                    cluster_uuid = cluster.configurationEx.vsanConfigInfo.defaultConfig.uuid
+                    if cluster_uuid not in cluster_nested_elts.keys():
+                        cluster_nested_elts[cluster] = [cluster_uuid]
+                    cluster_nested_elts[cluster].append(host_uuid)
+                    id_to_tags[host_uuid] = {1: cluster.name, 2: host.name, 0: 'host'}
+                    host_disks = host.configManager.vsanSystem.QueryDisksForVsan()
+                    for disk in host_disks:
+                        disk_uuid = disk.vsanUuid
+                        if disk_uuid:
+                            cluster_nested_elts[cluster].append(disk_uuid)
+                            id_to_tags[disk_uuid] = {
+                                1: cluster.name,
+                                2: host.name,
+                                3: disk_uuid,
+                                0: 'disk',
+                            }
+        return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
 
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]

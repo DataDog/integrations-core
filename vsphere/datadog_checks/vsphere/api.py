@@ -22,6 +22,7 @@ from datadog_checks.vsphere.constants import (
     MAX_QUERY_METRICS_OPTION,
     MOR_TYPE_AS_STRING,
     UNLIMITED_HIST_METRICS_PER_QUERY,
+    VSAN_EVENT_IDS,
 )
 from datadog_checks.vsphere.types import InfrastructureData
 from datadog_checks.vsphere.utils import properties_to_collect
@@ -395,93 +396,53 @@ class VSphereAPI(object):
     @smart_retry
     def get_vsan_events(self, timestamp):
         event_manager = self._conn.content.eventManager
-        entity_user = vim.event.EventFilterSpec.ByUsername(systemUser=False, userList=['vSAN Health'])
         entity_time = vim.event.EventFilterSpec.ByTime(beginTime=timestamp)
-        query_filter = vim.event.EventFilterSpec(userName=entity_user, time=entity_time)
+        query_filter = vim.event.EventFilterSpec(eventTypeId=VSAN_EVENT_IDS, time=entity_time)
         events = event_manager.QueryEvents(query_filter)
         return events
 
     @smart_retry
-    def get_vsan_metrics(self):
+    def get_vsan_metrics(self, cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time):
         self.log.debug("Querying vSAN metrics: %s", self._vsan_stub)
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         health_metrics = []
         performance_metrics = []
-        infra_data = self.get_infrastructure()
-        # we seek to make 1 call per cluster since the cluster id needs to be passed in the perf manager
-        # {cluster_reference: set([cluster_id, host1_id, host2_id, host1disk1_id, host1disk2_id, ...])}
-        cluster_nested_elts = {}
-        entity_ref_ids = {}
-        entity_ref_ids['cluster'] = ['cluster-domclient:', 'vsan-cluster-capacity:']
-        entity_ref_ids['host'] = ['host-domclient:', 'host-cpu:']
-        entity_ref_ids['disk'] = ['capacity-disk:', 'cache-disk:']
-        # {id: {0: type, 1: cluster_name, (optional)2: host_name, (optional)3: disk_id}}
-        id_to_tags = {}
-        for resource, additional_info in infra_data.items():
-            if str(resource).replace("'", "").split(':')[0] == 'vim.ClusterComputeResource':
-                cluster_vsan_config = resource.configurationEx.vsanConfigInfo
-                # only collect vsan metrics if the cluster has vsan enabled
-                if cluster_vsan_config and cluster_vsan_config.enabled:
-                    unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(resource)
-                    processed_health_metrics = {}
-                    group_id = unprocessed_health_metrics[0].groupId
-                    group_health = unprocessed_health_metrics[0].groupHealth
-                    processed_health_metrics.update(
-                        {
-                            'vsphere.vsan.cluster.health.count': {
-                                'id': group_id,
-                                'status': group_health,
-                                'vsphere_cluster': resource.name,
-                            }
-                        }
-                    )
-                    for health_test in unprocessed_health_metrics[0].groupTests:
-                        test_name = health_test.testId.split('.')[-1]
-                        processed_health_metrics.update(
-                            {
-                                'vsphere.vsan.cluster.health.{}.count'.format(test_name): {
-                                    'id': group_id,
-                                    'status': group_health,
-                                    'test_id': health_test.testId,
-                                    'test_status': health_test.testHealth,
-                                    'vsphere_cluster': resource.name,
-                                }
-                            }
-                        )
-                    health_metrics.append(processed_health_metrics)
-
-                    cluster_uuid = cluster_vsan_config.defaultConfig.uuid
-                    cluster_nested_elts[resource] = [cluster_uuid]
-                    id_to_tags[cluster_uuid] = {1: resource.name, 0: 'cluster'}
-            elif str(resource).replace("'", "").split(':')[0] == 'vim.HostSystem':
-                if str(additional_info['parent']).replace("'", "").split(':')[0] == 'vim.ClusterComputeResource':
-                    cluster_vsan_config = additional_info['parent'].configurationEx.vsanConfigInfo
-                    # only check hosts within a vsan cluster
-                    if cluster_vsan_config and cluster_vsan_config.enabled:
-                        host_uuid = resource.configManager.vsanSystem.config.clusterInfo.nodeUuid
-                        cluster_uuid = additional_info['parent'].configurationEx.vsanConfigInfo.defaultConfig.uuid
-                        if cluster_uuid not in cluster_nested_elts.keys():
-                            cluster_nested_elts[additional_info['parent']] = [cluster_uuid]
-                        cluster_nested_elts[additional_info['parent']].append(host_uuid)
-                        id_to_tags[host_uuid] = {1: additional_info['parent'].name, 2: resource.name, 0: 'host'}
-                        host_disks = resource.configManager.vsanSystem.QueryDisksForVsan()
-                        for disk in host_disks:
-                            disk_uuid = disk.vsanUuid
-                            if disk_uuid:
-                                cluster_nested_elts[additional_info['parent']].append(disk_uuid)
-                                id_to_tags[disk_uuid] = {
-                                    1: additional_info['parent'].name,
-                                    2: resource.name,
-                                    3: disk_uuid,
-                                    0: 'disk',
-                                }
-
         for cluster_reference, nested_ids in cluster_nested_elts.items():
+            unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
+            processed_health_metrics = {}
+            group_id = unprocessed_health_metrics[0].groupId
+            group_health = unprocessed_health_metrics[0].groupHealth
+            processed_health_metrics.update(
+                {
+                    'vsphere.vsan.cluster.health.count': {
+                        'id': group_id,
+                        'status': group_health,
+                        'vsphere_cluster': cluster_reference.name,
+                    }
+                }
+            )
+            for health_test in unprocessed_health_metrics[0].groupTests:
+                test_name = health_test.testId.split('.')[-1]
+                processed_health_metrics.update(
+                    {
+                        'vsphere.vsan.cluster.health.{}.count'.format(test_name): {
+                            'id': group_id,
+                            'status': group_health,
+                            'test_id': health_test.testId,
+                            'test_status': health_test.testHealth,
+                            'vsphere_cluster': cluster_reference.name,
+                        }
+                    }
+                )
+            health_metrics.append(processed_health_metrics)
+
             vsan_perf_query_spec = []
             for nested_id in nested_ids:
                 for entity_type in entity_ref_ids[id_to_tags[nested_id][0]]:
                     vsan_perf_query_spec.append(
-                        vim.cluster.VsanPerfQuerySpec(entityRefId=(entity_type + str(nested_id)))
+                        vim.cluster.VsanPerfQuerySpec(
+                            entityRefId=(entity_type + str(nested_id)), startTime=starting_time
+                        )
                     )
             discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
             for entity_type in discovered_metrics:
