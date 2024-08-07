@@ -127,7 +127,7 @@ Use the [fly_logs_shipper][10] to collect logs from your Fly.io applications.
     '''
     ```
 
-This configuration will parse basic fly-specific log attributes. To fully parse all log attributes, set `ddsource` to a [known logs integration][21] on a per-app basic using [vector transforms][22].
+This configuration will parse basic fly-specific log attributes. To fully parse all log attributes, set `ddsource` to a [known logs integration][21] on a per-app basis using [vector transforms][22].
 
 3. Set [secrets][17] for [NATS][18]:
 `ORG` and `ACCESS_TOKEN`
