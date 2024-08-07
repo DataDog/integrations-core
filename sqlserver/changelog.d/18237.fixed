@@ -1,0 +1,1 @@
+Prevent hostname evaluating to None in sqlserver check
