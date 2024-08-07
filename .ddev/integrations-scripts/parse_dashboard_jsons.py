@@ -1,6 +1,7 @@
 import json
+import csv
 import os
-from utilities import PATH, INTEGRATIONS, PATHS_TXT_FILE, HEURISTICS_JSON_FILE
+from utilities import PATH, INTEGRATIONS, PATHS_TXT_FILE, HEURISTICS_JSON_FILE, HEURISTICS_CSV_FILE
 
 # store all last modified date, name, and pathname in a file
 def store_paths_in_text_file(top_path, dirs, file_name):
@@ -15,7 +16,12 @@ def store_paths_in_text_file(top_path, dirs, file_name):
 	file.close()
 
 def evaluate_widgets(widgets):
-	dict = {'query_values': {
+	dict = {
+		'legend': {
+			'total': 0,
+			'show_legend': 0
+		},
+		'query_values': {
 			'total': 0,
 			'have_timeseries_background': 0,
 			'have_conditional_formats': 0,
@@ -24,6 +30,12 @@ def evaluate_widgets(widgets):
 		return
 	for w in widgets:
 		definition = w['definition']
+
+		# show legends is true
+		if('show_legend' in definition):
+			dict['legend']['total'] += 1
+			if(definition['show_legend'] == True):
+				dict['legend']['show_legend'] += 1
 
 		# checking on query values
 		if(definition['type'] == 'query_value'):
@@ -43,8 +55,7 @@ def main():
 	store_paths_in_text_file(PATH, INTEGRATIONS, PATHS_TXT_FILE)
 	array = []
 	f = open(PATHS_TXT_FILE, 'r')
-	x = 1
-	while x < 20:
+	while True:
 		# Get next line from file
 		line = f.readline()
 
@@ -69,6 +80,10 @@ def main():
 						'total': 0,
 						'have_timeseries_background': 0,
 						'have_conditional_formats': 0
+					},
+					'legends': {
+						'total': 0,
+						'show_legend': 0
 					}
 				}}
 
@@ -117,15 +132,35 @@ def main():
 									dict['widgets']['query_values']['total'] += evaluated['query_values']['total']
 									dict['widgets']['query_values']['have_timeseries_background'] += evaluated['query_values']['have_timeseries_background']
 									dict['widgets']['query_values']['have_conditional_formats'] += evaluated['query_values']['have_conditional_formats']
+									dict['widgets']['legends']['total'] += evaluated['legend']['total']
+									dict['widgets']['legends']['show_legend'] += evaluated['legend']['show_legend']
 									
 
-		x += 1
 		array.append(dict)
 	f.close()
 
-	heuristics = open(HEURISTICS_JSON_FILE, 'w')
-	heuristics.write(str(array).replace('\'', '\"'))
-	heuristics.close()
+	# write to json file
+	heuristics_json = open(HEURISTICS_JSON_FILE, 'w')
+	heuristics_json.write(str(array).replace('\'', '\"'))
+	heuristics_json.close()
+
+	# write to csv file
+	csv_data = json.loads(str(array).replace('\'', '\"'))
+	heuristics_csv = open(HEURISTICS_CSV_FILE, 'w')
+	csv_writer = csv.writer(heuristics_csv)
+	
+	# counter used for writing headers to the CSV file
+	count = 0
+	for dashboard in csv_data:
+		if count == 0:
+			# headers
+			header = dashboard.keys()
+			csv_writer.writerow(header)
+			count += 1
+	
+		# data
+		csv_writer.writerow(dashboard.values())
+	heuristics_csv.close()
   
 if __name__=="__main__": 
     main() 

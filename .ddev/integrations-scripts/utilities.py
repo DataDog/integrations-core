@@ -8,6 +8,7 @@ RESULTS_JSON_FILE = "results.json"
 STATS_TXT_FILE = "stats.txt"
 PATHS_TXT_FILE = "paths.txt"
 HEURISTICS_JSON_FILE = "heuristics.json"
+HEURISTICS_CSV_FILE = "heuristics.csv"
 
 # all directories that include an 'assets/dashboards' directory
 def get_dashboard_directories(top_path):
