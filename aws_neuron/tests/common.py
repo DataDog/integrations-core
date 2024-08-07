@@ -59,5 +59,5 @@ TEST_METRICS = {
 
 
 RENAMED_LABELS = {
-    'python_version:3.9.16',
+    "aws_neuron.python_info": 'python_version:3.9.16',
 }

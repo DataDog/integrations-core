@@ -20,6 +20,9 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
         aggregator.assert_metric(metric, metric_type=aggregator.METRIC_ENUM_MAP[metric_type])
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
+    for metric, tag in RENAMED_LABELS.items():
+        aggregator.assert_metric_has_tag(metric, tag)
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
@@ -41,11 +44,3 @@ def test_custom_validation(dd_run_check):
     ):
         check = AwsNeuronCheck('aws_neuron', {}, [{'openmetrics_endpoint': endpoint}])
         dd_run_check(check)
-
-
-def test_rename_labels(dd_run_check, instance, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('rename_labels.txt'))
-    check = AwsNeuronCheck('aws_neuron', {}, [instance])
-    dd_run_check(check)
-    for tag in RENAMED_LABELS:
-        aggregator.assert_metric_has_tag("aws_neuron.python_info", tag)
