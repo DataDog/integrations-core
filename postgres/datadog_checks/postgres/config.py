@@ -292,7 +292,7 @@ class PostgresConfig:
         '''
         Get the tags from the agent host and return them as a list of strings.
         '''
-        host_tags = datadog_agent.get_tags()
+        host_tags = datadog_agent.get_host_tags()
         result = []
         if not host_tags:
             return result
