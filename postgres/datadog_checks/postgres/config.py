@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-from typing import Optional
+from typing import Optional, List
 
 from six import PY2, PY3, iteritems
 
@@ -13,6 +13,7 @@ except ImportError:
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
+import json
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -68,7 +69,7 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
-            agent_tags=datadog_agent.get_config('tags') or [],
+            agent_tags=self._get_agent_tags(),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
 
@@ -285,6 +286,20 @@ class PostgresConfig:
             return is_affirmative(collect_wal_metrics)
 
         return None
+
+    @staticmethod
+    def _get_agent_tags() -> List[str]:
+        '''
+        Get the tags from the agent host and return them as a list of strings.
+        '''
+        tags = json.loads(datadog_agent.get_host_tags()) or {}
+        result = []
+        for key, value in tags.items():
+            if isinstance(value, list):
+                result.extend(value)
+            else:
+                pass
+        return result
 
     @staticmethod
     def _should_propagate_agent_tags(instance, init_config) -> bool:
