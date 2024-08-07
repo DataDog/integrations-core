@@ -103,14 +103,14 @@ def main():
 
 								# overview group
 								has_overview_section = group_title.lower().find('overview')
-								if(has_overview_section > 0):
+								if(has_overview_section != -1):
 									dict['has_overview_section'] = str(True)
 
 
 								# first group
 								if(is_first):
 									contains_about_text = group_title.lower().find('about')
-									if(contains_about_text > 0):
+									if(contains_about_text != -1):
 										dict['about_section_contains_text'] = str(True)
 									contains_banner_img = 'banner_img' in definition and definition['banner_img'] != None
 									if(contains_banner_img):
