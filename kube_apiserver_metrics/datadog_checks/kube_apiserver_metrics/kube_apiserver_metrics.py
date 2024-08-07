@@ -74,6 +74,8 @@ METRICS = {
     'apiserver_storage_list_returned_objects_total': 'storage_list_returned_objects_total',
     'apiserver_flowcontrol_current_inqueue_requests': 'flowcontrol_current_inqueue_requests',
     'apiserver_flowcontrol_dispatched_requests_total': 'flowcontrol_dispatched_requests_total',
+    # https://github.com/kubernetes/kubernetes/pull/103162
+    'apiserver_admission_webhook_request_total': 'admission_webhook_request_total',
     # For Kubernetes >= 1.26
     # https://github.com/kubernetes/kubernetes/pull/112690
     'kubernetes_feature_enabled': 'kubernetes_feature_enabled',
@@ -119,6 +121,8 @@ class KubeAPIServerMetricsCheck(SliMetricsScraperMixin, OpenMetricsBaseCheck):
             # For Kubernetes >= 1.24
             # https://github.com/kubernetes/kubernetes/pull/107171
             'apiserver_admission_webhook_fail_open_count': self.apiserver_admission_webhook_fail_open_count,
+            # https://github.com/kubernetes/kubernetes/pull/103162
+            'apiserver_admission_webhook_request_total': self.apiserver_admission_webhook_request_total,
         }
         self.kube_apiserver_config = None
 
@@ -244,3 +248,6 @@ class KubeAPIServerMetricsCheck(SliMetricsScraperMixin, OpenMetricsBaseCheck):
 
     def apiserver_admission_webhook_fail_open_count(self, metric, scraper_config):
         self.submit_metric('.apiserver_admission_webhook_fail_open_count', metric, scraper_config)
+
+    def apiserver_admission_webhook_request_total(self, metric, scraper_config):
+        self.submit_metric('.apiserver_admission_webhook_request_total', metric, scraper_config)
