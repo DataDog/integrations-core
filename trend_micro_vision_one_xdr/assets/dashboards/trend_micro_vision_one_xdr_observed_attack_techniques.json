@@ -5298,7 +5298,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:critical"
+                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:critical $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5306,12 +5306,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Acritical&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -5322,9 +5317,9 @@
                         }
                     },
                     {
-                        "id": 6209523051868818,
+                        "id": 1786303523722774,
                         "definition": {
-                            "title": "MEDIUMs",
+                            "title": "HIGHs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -5333,7 +5328,7 @@
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
-                                            "custom_bg_color": "#e5a21c",
+                                            "custom_bg_color": "#d33043",
                                             "palette": "custom_bg",
                                             "value": 0
                                         }
@@ -5355,7 +5350,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:medium"
+                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:high $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5363,13 +5358,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Amedium&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
-                            "precision": 2
+                            "custom_links": [],
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
                         },
                         "layout": {
                             "x": 2,
@@ -5414,7 +5407,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:critical"
+                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:critical $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5436,12 +5429,7 @@
                                     }
                                 }
                             ],
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "style": {}
                         },
                         "layout": {
@@ -5452,9 +5440,9 @@
                         }
                     },
                     {
-                        "id": 1786303523722774,
+                        "id": 6209523051868818,
                         "definition": {
-                            "title": "HIGHs",
+                            "title": "MEDIUMs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -5463,7 +5451,7 @@
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
-                                            "custom_bg_color": "#d33043",
+                                            "custom_bg_color": "#e5a21c",
                                             "palette": "custom_bg",
                                             "value": 0
                                         }
@@ -5485,7 +5473,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:high"
+                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:medium $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5493,16 +5481,8 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Ahigh&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
+                            "custom_links": [],
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -5523,7 +5503,7 @@
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
-                                            "custom_bg_color": "#bc303c",
+                                            "custom_bg_color": "#ffb52b",
                                             "palette": "custom_bg",
                                             "value": 0
                                         }
@@ -5545,7 +5525,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:low"
+                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:low $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5553,12 +5533,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Acritical&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -5580,7 +5555,7 @@
                                     "conditional_formats": [
                                         {
                                             "comparator": ">",
-                                            "custom_bg_color": "#bc303c",
+                                            "custom_bg_color": "#84c1e0",
                                             "palette": "custom_bg",
                                             "value": 0
                                         }
@@ -5602,7 +5577,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:info"
+                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:info $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5610,12 +5585,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Acritical&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -5661,7 +5631,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:high"
+                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:high $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5734,7 +5704,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:medium"
+                                                "query": "source:trend-micro-vision-one-xdr service:observed-attack-techniques status:medium $Source $Risk-Level"
                                             }
                                         }
                                     ],
@@ -5756,12 +5726,7 @@
                                     }
                                 }
                             ],
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "style": {}
                         },
                         "layout": {
