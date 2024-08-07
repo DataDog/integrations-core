@@ -275,6 +275,10 @@ class SQLServer(AgentCheck):
 
     @property
     def resolved_hostname(self):
+        # ensure _resolved_hostname is never None when referenced by other parts
+        # of this check. If it falls back to None, this will result in gaps in data
+        if self._resolved_hostname is None:
+            return self.set_resolved_hostname()
         return self._resolved_hostname
 
     def load_static_information(self):
