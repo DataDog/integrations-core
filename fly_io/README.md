@@ -68,24 +68,31 @@ The Fly.io integration does not include any service checks.
 Follow these steps to collect traces for an application in your Fly.io environment.
 
 1. [Instrument][12] your application.
-2. Set the required environment variables in the `Dockerfile` of your application and deploy the app.
+2. [Deploy](#deploying-the-agent-as-a-flyio-application) the Datadog Agent as a Fly.io application.
+3. Set the required environment variables in the `fly.toml` or `Dockerfile` of your application and deploy the app.
 
-
-    Set the following environment variable to ensure you report same host for logs and metrics:
+    Set the following as an environment variable to submit metrics to the Datadog Agent application:
     ```
-    ENV DD_TRACE_REPORT_HOSTNAME="true"
+    [env]
+        DD_AGENT_HOST=<YOUR_AGENT_APP_NAME>.internal
+
+    ```
+
+    Set the following environment variable to ensure you report the same host for logs and metrics:
+    ```
+    DD_TRACE_REPORT_HOSTNAME="true"
     ```
 
     To utilize [unified service tagging][13], set these environment variables:
     ```
-    ENV DD_SERVICE="APP_NAME"
-    ENV DD_ENV="ENV_NAME"
-    ENV DD_VERSION="VERSION"
+    DD_SERVICE="APP_NAME"
+    DD_ENV="ENV_NAME"
+    DD_VERSION="VERSION"
     ```
 
     To correlate logs and traces, follow these [steps][11] and set this environment variable:
     ```
-    ENV DD_LOGS_INJECTION="true"
+    DD_LOGS_INJECTION="true"
     ```
 
 3. Set the following environment variables in your [Datadog Agent application's](#Deploying-the-agent-as-a-Fly.io-application) `fly.toml` and deploy the app:
