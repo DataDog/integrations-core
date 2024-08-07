@@ -116,7 +116,6 @@ class PostgreSql(AgentCheck):
                 " Please use the new azure.managed_authentication option instead."
             )
         self._config = PostgresConfig(self.instance, self.init_config, self)
-        self.log.info("natasha testing tags %s", self._config.tags)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
@@ -921,7 +920,6 @@ class PostgreSql(AgentCheck):
         }
 
     def check(self, _):
-        self.log.info("natasha testing tags 2 %s", datadog_agent.get_host_tags())
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
