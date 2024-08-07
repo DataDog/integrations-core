@@ -531,7 +531,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -599,7 +599,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:suricata status:critical"
+                                                "query": "source:suricata status:critical $Host $Event-Type $Source-IP $Destination-IP $Flow-ID $Protocol"
                                             }
                                         }
                                     ],
@@ -656,7 +656,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:suricata status:high"
+                                                "query": "source:suricata status:high $Host $Event-Type $Source-IP $Destination-IP $Flow-ID $Protocol"
                                             }
                                         }
                                     ],
@@ -718,7 +718,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:suricata status:critical"
+                                                "query": "source:suricata status:critical $Host $Event-Type $Source-IP $Destination-IP $Flow-ID $Protocol"
                                             }
                                         }
                                     ],
@@ -789,7 +789,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:suricata status:medium"
+                                                "query": "source:suricata status:medium $Host $Event-Type $Source-IP $Destination-IP $Flow-ID $Protocol"
                                             }
                                         }
                                     ],
@@ -846,7 +846,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:suricata status:low"
+                                                "query": "source:suricata status:low $Host $Event-Type $Source-IP $Destination-IP $Flow-ID $Protocol"
                                             }
                                         }
                                     ],
@@ -903,7 +903,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:suricata status:info"
+                                                "query": "source:suricata status:info $Host $Event-Type $Source-IP $Destination-IP $Flow-ID $Protocol"
                                             }
                                         }
                                     ],
@@ -962,7 +962,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:suricata status:high"
+                                                "query": "source:suricata status:high $Host $Event-Type $Source-IP $Destination-IP $Flow-ID $Protocol"
                                             }
                                         }
                                     ],
@@ -1035,7 +1035,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:suricata status:medium"
+                                                "query": "source:suricata status:medium $Host $Event-Type $Source-IP $Destination-IP $Flow-ID $Protocol"
                                             }
                                         }
                                     ],
@@ -1076,7 +1076,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 4,
+                "y": 19,
                 "width": 12,
                 "height": 10
             }
