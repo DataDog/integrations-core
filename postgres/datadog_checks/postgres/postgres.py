@@ -116,6 +116,7 @@ class PostgreSql(AgentCheck):
                 " Please use the new azure.managed_authentication option instead."
             )
         self._config = PostgresConfig(self.instance, self.init_config, self)
+        self.log.info("natasha testing tags %s", self._config.tags)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
