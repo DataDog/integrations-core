@@ -3,8 +3,8 @@
         "host": "d4c6071697ea:27017",
         "dbm_type": "plan",
         "ddagentversion": "0.0.0",
-        "ddsource": "mongodb",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,sharding_cluster_role:mongos",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
         "timestamp": 1715911398111.2722,
         "network": {
             "client": {
@@ -750,7 +750,7 @@
             },
             "waiting_for_flow_control": false,
             "flow_control_stats": {},
-            "waiting_for_latch": false,
+            "waiting_for_latch": {},
             "type": "op",
             "op": "query",
             "shard": "shard04",

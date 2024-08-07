@@ -77,6 +77,7 @@ class ProcessCheck(AgentCheck):
         self.collect_children = is_affirmative(self.instance.get('collect_children', False))
         self.user = self.instance.get('user', False)
         self.try_sudo = self.instance.get('try_sudo', False)
+        self.use_oneshot = is_affirmative(self.instance.get('use_oneshot', True))
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
@@ -293,65 +294,75 @@ class ProcessCheck(AgentCheck):
 
             p = self.process_cache[name][pid]
 
-            meminfo = self.psutil_wrapper(p, 'memory_info', ['rss', 'vms'])
-            st['rss'].append(meminfo.get('rss'))
-            st['vms'].append(meminfo.get('vms'))
-
-            mem_percent = self.psutil_wrapper(p, 'memory_percent')
-            st['mem_pct'].append(mem_percent)
-
-            # will fail on win32 and solaris
-            shared_mem = self.psutil_wrapper(p, 'memory_info', ['shared']).get('shared')
-            if shared_mem is not None and meminfo.get('rss') is not None:
-                st['real'].append(meminfo['rss'] - shared_mem)
+            if self.use_oneshot:
+                self.log.debug("Using psutil Process.oneshot()")
+                with p.oneshot():
+                    st = self.run_psutil_methods(pid, p, st, new_process)
             else:
-                st['real'].append(None)
+                st = self.run_psutil_methods(pid, p, st, new_process)
 
-            ctxinfo = self.psutil_wrapper(p, 'num_ctx_switches', ['voluntary', 'involuntary'])
-            st['ctx_swtch_vol'].append(ctxinfo.get('voluntary'))
-            st['ctx_swtch_invol'].append(ctxinfo.get('involuntary'))
+        return st
 
-            st['thr'].append(self.psutil_wrapper(p, 'num_threads'))
+    def run_psutil_methods(self, pid, p, st, new_process):
+        meminfo = self.psutil_wrapper(p, 'memory_info', ['rss', 'vms'])
+        st['rss'].append(meminfo.get('rss'))
+        st['vms'].append(meminfo.get('vms'))
 
-            cpu_percent = self.psutil_wrapper(p, 'cpu_percent')
-            cpu_count = psutil.cpu_count()
-            if not new_process:
-                # psutil returns `0.` for `cpu_percent` the
-                # first time it's sampled on a process,
-                # so save the value only on non-new processes
-                st['cpu'].append(cpu_percent)
-                if cpu_count > 0 and cpu_percent is not None:
-                    st['cpu_norm'].append(cpu_percent / cpu_count)
-                else:
-                    self.log.debug('could not calculate the normalized cpu pct, cpu_count: %s', cpu_count)
-            st['open_fd'].append(self.psutil_wrapper(p, 'num_fds'))
-            st['open_handle'].append(self.psutil_wrapper(p, 'num_handles'))
+        mem_percent = self.psutil_wrapper(p, 'memory_percent')
+        st['mem_pct'].append(mem_percent)
 
-            ioinfo = self.psutil_wrapper(p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'])
-            st['r_count'].append(ioinfo.get('read_count'))
-            st['w_count'].append(ioinfo.get('write_count'))
-            st['r_bytes'].append(ioinfo.get('read_bytes'))
-            st['w_bytes'].append(ioinfo.get('write_bytes'))
+        # will fail on win32 and solaris
+        shared_mem = self.psutil_wrapper(p, 'memory_info', ['shared']).get('shared')
+        if shared_mem is not None and meminfo.get('rss') is not None:
+            st['real'].append(meminfo['rss'] - shared_mem)
+        else:
+            st['real'].append(None)
 
-            pagefault_stats = self.get_pagefault_stats(pid)
-            if pagefault_stats is not None:
-                (minflt, cminflt, majflt, cmajflt) = pagefault_stats
-                st['minflt'].append(minflt)
-                st['cminflt'].append(cminflt)
-                st['majflt'].append(majflt)
-                st['cmajflt'].append(cmajflt)
+        ctxinfo = self.psutil_wrapper(p, 'num_ctx_switches', ['voluntary', 'involuntary'])
+        st['ctx_swtch_vol'].append(ctxinfo.get('voluntary'))
+        st['ctx_swtch_invol'].append(ctxinfo.get('involuntary'))
+
+        st['thr'].append(self.psutil_wrapper(p, 'num_threads'))
+
+        cpu_percent = self.psutil_wrapper(p, 'cpu_percent')
+        cpu_count = psutil.cpu_count()
+        if not new_process:
+            # psutil returns `0.` for `cpu_percent` the
+            # first time it's sampled on a process,
+            # so save the value only on non-new processes
+            st['cpu'].append(cpu_percent)
+            if cpu_count > 0 and cpu_percent is not None:
+                st['cpu_norm'].append(cpu_percent / cpu_count)
             else:
-                st['minflt'].append(None)
-                st['cminflt'].append(None)
-                st['majflt'].append(None)
-                st['cmajflt'].append(None)
+                self.log.debug('could not calculate the normalized cpu pct, cpu_count: %s', cpu_count)
+        st['open_fd'].append(self.psutil_wrapper(p, 'num_fds'))
+        st['open_handle'].append(self.psutil_wrapper(p, 'num_handles'))
 
-            # calculate process run time
-            create_time = self.psutil_wrapper(p, 'create_time')
-            if create_time is not None:
-                now = time.time()
-                run_time = now - create_time
-                st['run_time'].append(run_time)
+        ioinfo = self.psutil_wrapper(p, 'io_counters', ['read_count', 'write_count', 'read_bytes', 'write_bytes'])
+        st['r_count'].append(ioinfo.get('read_count'))
+        st['w_count'].append(ioinfo.get('write_count'))
+        st['r_bytes'].append(ioinfo.get('read_bytes'))
+        st['w_bytes'].append(ioinfo.get('write_bytes'))
+
+        pagefault_stats = self.get_pagefault_stats(pid)
+        if pagefault_stats is not None:
+            (minflt, cminflt, majflt, cmajflt) = pagefault_stats
+            st['minflt'].append(minflt)
+            st['cminflt'].append(cminflt)
+            st['majflt'].append(majflt)
+            st['cmajflt'].append(cmajflt)
+        else:
+            st['minflt'].append(None)
+            st['cminflt'].append(None)
+            st['majflt'].append(None)
+            st['cmajflt'].append(None)
+
+        # calculate process run time
+        create_time = self.psutil_wrapper(p, 'create_time')
+        if create_time is not None:
+            now = time.time()
+            run_time = now - create_time
+            st['run_time'].append(run_time)
 
         return st
 

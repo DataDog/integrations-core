@@ -18,7 +18,8 @@
       "Category::AI/ML",
       "Category::Log Collection",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -39,7 +40,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "python -m ray.util.client.server",
+        "ray.util.client.server",
         "gcs_server",
         "raylet"
       ],

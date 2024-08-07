@@ -126,6 +126,26 @@ instances:
     #
     # include_ao_metrics: false
 
+    ## Configure collection of agent jobs events and metrics
+    #
+    # agent_jobs:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of agent jobs events and metrics. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 15
+        ## Configure the interval (in seconds) for the collection of agent jobs events and metrics.
+        ## Set the query metric collection interval (in seconds).
+        #
+        # collection_interval: 15
+
+        ## @param history_row_limit - integer - optional - default: 10000
+        ## Set the maximum number of job step rows that can be retrieved in a single check run.
+        #
+        # history_row_limit: 10000
+
     ## @param availability_group - string - optional
     ## You can specify an availability group when `include_ao_metrics`
     ## is enabled to monitor a specific availability group.
@@ -217,10 +237,10 @@ instances:
     # include_index_usage_metrics_tempdb: false
 
     ## @param index_usage_metrics_interval - integer - optional - default: 300
-    ## Configure the interval (in seconds) for the collection of index usage statistics from the 
-    ## `sys.dm_db_index_usage_stats` DMV. 
+    ## Configure the interval (in seconds) for the collection of index usage statistics from the
+    ## `sys.dm_db_index_usage_stats` DMV.
     ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
-    ## to use a consistent value throughout all SQL Server agent deployments. 
+    ## to use a consistent value throughout all SQL Server agent deployments.
     #
     # index_usage_metrics_interval: 300
 
@@ -280,7 +300,7 @@ instances:
     #
     # dbm: false
 
-    ## Configure collection of sys.configurations. This is an alpha feature.
+    ## Configure collection of sys.configurations.
     #
     # collect_settings:
 

@@ -7,10 +7,11 @@ files:
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` to the check.
-        When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.        
+        When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
       value:
         example: false
         type: boolean
+    - template: init_config/db
     - template: init_config/default
   - template: instances
     options:
@@ -256,6 +257,13 @@ files:
         example:
           - application_name
         default: []
+    - name: collect_buffercache_metrics
+      description: |
+        If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
+        pg_buffercache extension must be installed.
+      value:
+        type: boolean
+        example: false
     - name: collect_database_size_metrics
       description: Collect database size metrics.
       value:
@@ -275,7 +283,7 @@ files:
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
-        NOTE: 
+        NOTE:
         For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
         Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
       value:
@@ -299,26 +307,18 @@ files:
         type: integer
         display_default: 200
         example: 200
-    - name: custom_queries
-      description: |
-        Define custom queries to collect custom metrics from your PostgreSQL
-        See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
-        https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
-      value:
-        type: array
-        items:
-          type: object
-          properties: []
-        example:
-            - metric_prefix: postgresql
-              query: <QUERY>
-              columns:
-                - name: <COLUNMS_1_NAME>
-                  type: <COLUMNS_1_TYPE>
-                - name: <COLUNMS_2_NAME>
-                  type: <COLUMNS_2_TYPE>
-              tags:
-                - <TAG_KEY>:<TAG_VALUE>
+    - template: instances/db
+      overrides:
+        custom_queries.value.example:
+          - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+            columns:
+              - name: foo
+                type: tag
+              - name: event.total
+                type: gauge
+            tags:
+              - test:postgresql
+            metric_prefix: postgresql
     - name: database_autodiscovery
       description: |
         Define the configuration for database autodiscovery.
@@ -527,7 +527,7 @@ files:
             type: number
             example: 3500
     - name: collect_settings
-      description: Configure collection of pg_settings. This is an alpha feature.
+      description: Configure collection of pg_settings.
       options:
         - name: enabled
           description: |
@@ -544,7 +544,7 @@ files:
             example: 600
         - name: ignored_settings_patterns
           description: |
-            A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+            A list of setting patterns to ignore. Any setting key matching one of the value in this list will
             not be collected. This uses the traditional LIKE pattern-matching approach.
           value:
               type: array
@@ -562,7 +562,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+            Enable collection of database schemas. Requires `dbm: true`.
           value:
             type: boolean
             example: false
@@ -586,6 +586,72 @@ files:
           value:
             type: number
             example: 600
+        - name: include_databases
+          description: |
+            A list of regex patterns to include databases. 
+            Any database whose name matches any one of these patterns will be included. 
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydb"
+        - name: exclude_databases
+          description: |
+            A list of regex patterns to exclude databases. 
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+        - name: include_schemas
+          description: |
+            A list of regex patterns to include schemas. 
+            Any schema whose name matches any one of these patterns will be included.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "myschema"
+        - name: exclude_schemas
+          description: |
+            A list of regex patterns to exclude schemas. 
+            Any schema whose name matches any one of these patterns will be excluded.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privateschema.*"
+        - name: include_tables
+          description: |
+            A list of regex patterns to include tables. 
+            Any table whose name matches any one of these patterns will be included.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "users.*"
+        - name: exclude_tables
+          description: |
+            A list of regex patterns to exclude tables. 
+            Any table whose name matches any one of these patterns will be excluded.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "customer.*"
 
     - name: aws
       description: |

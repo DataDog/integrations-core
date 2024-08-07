@@ -70,6 +70,12 @@ METRICS = [
     'language_detection_dca_handler.processed_requests',
     'language_detection_patcher.patches',
     'secret_backend.elapsed',
+    'tagger.stored_entities',
+    'tagger.updated_entities',
+    'workloadmeta.events_received',
+    'workloadmeta.notifications_sent',
+    'workloadmeta.stored_entities',
+    'workloadmeta.subscribers',
 ]
 
 

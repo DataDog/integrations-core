@@ -2,6 +2,39 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.0 / 2024-08-06
+
+***Removed***:
+
+* Remove `ddev release trello ...` commands. We no longer interact with trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
+
+***Added***:
+
+* Add cli option to override org config value at runtime ([#17932](https://github.com/DataDog/integrations-core/pull/17932))
+* Support reading site and api key from org config setting in addition to cli flags. ([#17934](https://github.com/DataDog/integrations-core/pull/17934))
+* Add validation for versions in __about__.py and CHANGELOG: `ddev validate version`. ([#18063](https://github.com/DataDog/integrations-core/pull/18063))
+* Add joule as valid metric units ([#18147](https://github.com/DataDog/integrations-core/pull/18147))
+* Bump datadog_checks_dev dependency to 33.0+ to get new features and bugfixes. ([#18206](https://github.com/DataDog/integrations-core/pull/18206))
+
+***Fixed***:
+
+* Improve messages around dependency spec management ([#17969](https://github.com/DataDog/integrations-core/pull/17969))
+
+## 9.1.0 / 2024-06-25
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+***Added***:
+
+* Bump datadog_checks_dev requirement ([#17926](https://github.com/DataDog/integrations-core/pull/17926))
+
+***Fixed***:
+
+* Help docs for --compat flag mention it implies --recreate ([#17810](https://github.com/DataDog/integrations-core/pull/17810))
+* Replace DD_LOGS_CONFIG_DD_URL with DD_LOGS_CONFIG_LOGS_DD_URL ([#17890](https://github.com/DataDog/integrations-core/pull/17890))
+
 ## 9.0.0 / 2024-05-13
 
 ***Changed***:

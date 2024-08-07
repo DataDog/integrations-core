@@ -1,0 +1,26 @@
+{
+	"version": 2,
+	"created_at": "2024-06-20",
+	"last_updated_at": "2024-06-20",
+	"title": "CPU usage is high for Cisco ACI device",
+	"description": "CPU usage measures the percentage of processing capacity that is in use and provides insights into the overall health and efficiency of the device. This monitor alerts if the average CPU usage goes above 90%, suggesting potential performance issues",
+	"definition": {
+		"name": "[Cisco ACI] Avg CPU usage is high for {{device_ip.name}} in namespace {{device_namespace.name}}",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:cisco_aci.fabric.node.cpu.avg{*} by {device_ip,device_namespace} > 90",
+		"message": "{{#is_alert}} \n{{device_ip.name}} in namespace {{device_namespace.name}} is reporting high CPU usage (at or above 90%).\n{{/is_alert}}\n\n{{#is_warning}}\n{{device_ip.name}} in namespace {{device_namespace.name}} is reporting higher CPU usage (at or above 80%).\n{{/is_warning}} \n\n{{#is_recovery}}\nCPU usage for {{device_ip.name}} in namespace {{device_namespace.name}} is back to normal.\n{{/is_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 90,
+				"warning": 80
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60
+		}
+	},
+	"tags": [
+		"integration:cisco-aci"
+	]
+}

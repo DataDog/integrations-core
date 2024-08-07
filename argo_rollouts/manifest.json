@@ -20,7 +20,8 @@
       "Category::Developer Tools",
       "Category::Log Collection",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {

@@ -8,15 +8,31 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor Apache Spark in Databricks clusters.",
+    "description": "Monitor the performance, reliability, and cost of your Apache Spark and Databricks jobs.",
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
       "Category::Cloud",
+      "Category::Cost Management",
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/data-jobs-monitoring/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/data-observability-monitoring/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/databricks-monitoring-datadog/"
+      }
     ]
   },
   "author": {

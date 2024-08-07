@@ -7,7 +7,9 @@
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "member:replset-data-0.mongo.default.svc.cluster.local:27017",
             "replset_name:replset",
-            "replset_state:primary"
+            "replset_state:primary",
+            "replset_me:replset-data-0.mongo.default.svc.cluster.local:27017",
+            "hosting_type:self-hosted"
         ]
     },
     {
@@ -18,7 +20,9 @@
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "member:replset-data-1.mongo.default.svc.cluster.local:27017",
             "replset_name:replset",
-            "replset_state:secondary"
+            "replset_state:secondary",
+            "replset_me:replset-data-0.mongo.default.svc.cluster.local:27017",
+            "hosting_type:self-hosted"
         ]
     },
     {
@@ -29,7 +33,9 @@
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "member:replset-data-2.mongo.default.svc.cluster.local:27017",
             "replset_name:replset",
-            "replset_state:secondary"
+            "replset_state:secondary",
+            "replset_me:replset-data-0.mongo.default.svc.cluster.local:27017",
+            "hosting_type:self-hosted"
         ]
     }
 ]

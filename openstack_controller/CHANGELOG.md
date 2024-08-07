@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 6.8.1 / 2024-07-24
+
+***Fixed***:
+
+* Fixed the heat endpoint for the Openstack Controller ([#17996](https://github.com/DataDog/integrations-core/pull/17996))
+
+## 6.8.0 / 2024-06-21
+
+***Added***:
+
+* Added handling for new exception: 'CatalogEndPointFailure' and clearer log messages for exception handling ([#17904](https://github.com/DataDog/integrations-core/pull/17904))
+
+## 6.7.0 / 2024-06-20
+
+***Added***:
+
+* Handle more exceptions by lowering severity of logs ([#17773](https://github.com/DataDog/integrations-core/pull/17773))
+* Add 'all_projects' option for compute servers ([#17871](https://github.com/DataDog/integrations-core/pull/17871))
+
+***Fixed***:
+
+* Fix uninitialized variables ([#17771](https://github.com/DataDog/integrations-core/pull/17771))
+* Remove baremetal allocations microversion check ([#17791](https://github.com/DataDog/integrations-core/pull/17791))
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
 ## 6.6.0 / 2024-05-31
 
 ***Added***:

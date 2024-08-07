@@ -2,10 +2,10 @@
     {
         "host": "d4c6071697ea:27017",
         "ddagentversion": "0.0.0",
-        "ddsource": "mongodb",
+        "ddsource": "mongo",
         "dbm_type": "activity",
         "collection_interval": 10,
-        "ddtags": ["server:mongodb://testUser2:*****@localhost:27017/test"],
+        "ddtags": ["server:mongodb://testUser2:*****@localhost:27017/test", "clustername:my_cluster", "hosting_type:self-hosted"],
         "timestamp": 1715911398111.2722,
         "mongodb_activity": [
             {
@@ -47,7 +47,12 @@
                 },
                 "waiting_for_flow_control": false,
                 "flow_control_stats": {},
-                "waiting_for_latch": false,
+                "waiting_for_latch": {
+                    "timestamp": {
+                        "$date": "2024-05-16T18:06:38.419Z"
+                    },
+                    "capture_name": "FutureResolution"
+                },
                 "type": "op",
                 "op": "query",
                 "shard": null,
