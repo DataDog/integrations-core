@@ -1,70 +1,95 @@
 id: lastpass
 tests:
-  - sample: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com',
-      'IP_Address': '10.10.10.10', 'Action': 'Adding user to group', 'Data':
-      'test@abc.com - Group1', 'timestamp': 1722839024000.0}"
-    result:
-      custom: { }
-      message: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com', 'IP_Address': '10.10.10.10', 'Action': 'Adding user to group', 'Data': 'test@abc.com - Group1', 'timestamp': 1722839024000.0}"
-      tags:
-        - "source:LOGS_SOURCE"
-  - sample: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com',
-      'IP_Address': '10.10.10.10', 'Action': 'Rename group', 'Data': \"'Group2'
-      to 'Group21'\", 'timestamp': 1722839024000.0}"
-    result:
-      custom: { }
-      message: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com', 'IP_Address': '10.10.10.10', 'Action': 'Rename group', 'Data': \"'Group2' to 'Group21'\", 'timestamp': 1722839024000.0}"
-      tags:
-        - "source:LOGS_SOURCE"
-  - sample: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com',
-      'IP_Address': '10.10.10.10', 'Action': 'Update folder permissions',
-      'Data': \"'SharedFD33' 'test@abc.com' 'Read only:yes Admin:yes Hide
-      PW:yes'\", 'timestamp': 1722839024000.0}"
-    result:
-      custom: { }
-      message: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com', 'IP_Address': '10.10.10.10', 'Action': 'Update folder permissions', 'Data': \"'SharedFD33' 'test@abc.com' 'Read only:yes Admin:yes Hide PW:yes'\", 'timestamp': 1722839024000.0}"
-      tags:
-        - "source:LOGS_SOURCE"
-  - sample: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com',
-      'IP_Address': '10.10.10.10', 'Action': 'Permanently deleted shared
-      folder', 'Data': 'SharedFD2', 'timestamp': 1722839024000.0}"
-    result:
-      custom: { }
-      message: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com', 'IP_Address': '10.10.10.10', 'Action': 'Permanently deleted shared folder', 'Data': 'SharedFD2', 'timestamp': 1722839024000.0}"
-      tags:
-        - "source:LOGS_SOURCE"
-  - sample: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com',
-      'IP_Address': '10.10.10.10', 'Action': 'Renamed shared folder', 'Data':
-      \"'SharedFD3' 'SharedFD33'\", 'timestamp': 1722839024000.0}"
-    result:
-      custom: { }
-      message: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com', 'IP_Address': '10.10.10.10', 'Action': 'Renamed shared folder', 'Data': \"'SharedFD3' 'SharedFD33'\", 'timestamp': 1722839024000.0}"
-      tags:
-        - "source:LOGS_SOURCE"
-  - sample: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com',
-      'IP_Address': '10.10.10.10', 'Action': 'Edit policy', 'Data': 'Minimum
-      digits in master password New value: 1', 'timestamp': 1722839024000.0}"
-    result:
-      custom: { }
-      message: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com', 'IP_Address': '10.10.10.10', 'Action': 'Edit policy', 'Data': 'Minimum digits in master password New value: 1', 'timestamp': 1722839024000.0}"
-      tags:
-        - "source:LOGS_SOURCE"
-  - sample: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com',
-      'IP_Address': '10.10.10.10', 'Action': 'Site added', 'Data': 'VID:
-      7893106581169881263 from SFolder1', 'timestamp': 1722839024000.0}"
-    result:
-      custom: { }
-      message: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com', 'IP_Address': '10.10.10.10', 'Action': 'Site added', 'Data': 'VID: 7893106581169881263 from SFolder1', 'timestamp': 1722839024000.0}"
-      tags:
-        - "source:LOGS_SOURCE"
-  - sample: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com',
-      'IP_Address': '10.10.10.10', 'Action': 'Move to shared folder', 'Data':
-      'VID: 7893106581169881263 to SFolder1', 'timestamp': 1722839024000.0}"
-    result:
-      custom: { }
-      message: "{'Time': '2024-08-05 11:53:44', 'Username': 'test@abc.com', 'IP_Address': '10.10.10.10', 'Action': 'Move to shared folder', 'Data': 'VID: 7893106581169881263 to SFolder1', 'timestamp': 1722839024000.0}"
-      tags:
-        - "source:LOGS_SOURCE"
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Remove from group",
+          "Data": "'Group3' 'cdd@test.com'",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Adding user to group",
+          "Data": "cdd@test.com - Group3",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Add to shared folder",
+          "Data": "'shared by name1' 'cdd@test.com'",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Move to shared folder",
+          "Data": "VID: 4901555952779484761 to Common_DataDog_Creds",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Removed from shared folder",
+          "Data": "'Testing_data' 'cdd@test.com'",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Renamed shared folder",
+          "Data": "'shared by name1' 'shared by name2'",
+          "timestamp": 1722921377000.0   
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Add policy",
+          "Data": "Length of site passwords",
+          "timestamp": 1722921377000.0   
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Edit policy",
+          "Data": "Length of site passwords New value: test.com=8",
+          "timestamp": 1722921377000.0  
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Site added",
+          "Data": "VID: 5516541713708306640 from SFolder33",
+          "timestamp": 1722921377000.0
+      }
+    result: null
 
 # The `result` field should be left blank to start. Once you submit your log asset files with
 # your integration pull-request in a Datadog GitHub repository, Datadog's validations will
