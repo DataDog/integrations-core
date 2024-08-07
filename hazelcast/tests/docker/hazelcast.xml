@@ -14,10 +14,4 @@
             <endpoint-group name="DATA" enabled="true"/>
         </rest-api>
     </network>
-    <queue name="defaultqueue">
-    </queue>
-    <topic name="deafulttopic">
-    </topic>
-    <reliable-topic name="deafultreltopic">
-    </reliable-topic>
 </hazelcast>

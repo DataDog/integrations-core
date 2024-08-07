@@ -30,6 +30,9 @@ jmx_metrics:
         memberCount:
           alias: hazelcast.instance.member_count
           metric_type: gauge
+        clusterTime:
+          alias: hazelcast.member.cluster_time
+          metric_type: gauge
   - include:
       domain: com.hazelcast
       type: HazelcastInstance.PartitionServiceMBean
@@ -429,9 +432,6 @@ jmx_metrics:
         connectionListenerCount:
           alias: hazelcast.member.connection_listener_count
           metric_type: gauge
-        connectionType:
-          alias: hazelcast.member.connection_type
-          metric_type: gauge
         count:
           alias: hazelcast.member.count
           metric_type: gauge
@@ -540,13 +540,13 @@ jmx_metrics:
         invocationTimeoutMillis:
           alias: hazelcast.member.invocation_timeout_millis
           metric_type: gauge
-        invocations.lastCallId:
+        lastCallId:
           alias: hazelcast.member.invocations.last_call_id
           metric_type: gauge
-        invocations.pending:
+        pending:
           alias: hazelcast.member.invocations.pending
           metric_type: gauge
-        invocations.usedPercentage:
+        usedPercentage:
           alias: hazelcast.member.invocations.used_percentage
           metric_type: gauge
         ioThreadId:
@@ -621,9 +621,6 @@ jmx_metrics:
         missingMembers:
           alias: hazelcast.member.missing_members
           metric_type: gauge
-        monitorCount:
-          alias: hazelcast.member.monitor_count
-          metric_type: gauge
         nodes:
           alias: hazelcast.member.nodes
           metric_type: gauge
@@ -650,12 +647,6 @@ jmx_metrics:
           metric_type: gauge
         ownerId:
           alias: hazelcast.member.owner_id
-          metric_type: gauge
-        packetsReceived:
-          alias: hazelcast.member.packets_received
-          metric_type: gauge
-        packetsSend:
-          alias: hazelcast.member.packets_send
           metric_type: gauge
         parkQueueCount:
           alias: hazelcast.member.park_queue_count
@@ -777,9 +768,6 @@ jmx_metrics:
         startedMigrations:
           alias: hazelcast.member.started_migrations
           metric_type: gauge
-        stateVersion:
-          alias: hazelcast.member.state_version
-          metric_type: gauge
         syncDeliveryFailureCount:
           alias: hazelcast.member.sync_delivery_failure_count
           metric_type: gauge
@@ -873,50 +861,6 @@ jmx_metrics:
         writeQueueSize:
           alias: hazelcast.member.write_queue_size
           metric_type: gauge
-  # Queue
-  - include:
-      domain: com.hazelcast
-      type: IQueue
-      exclude_tags:
-        - instance
-        - type
-      tags:
-        hazelcast_instance: $instance
-      attribute:
-        localMinAge:
-          alias: hazelcast.iqueue.minimum_age
-          metric_type: gauge
-        localMaxAge:
-          alias: hazelcast.iqueue.maximum_age
-          metric_type: gauge
-        localAverageAge:
-          alias: hazelcast.iqueue.average_age
-          metric_type: gauge
-        localOwnedItemCount:
-          alias: hazelcast.iqueue.owned_item_count
-          metric_type: gauge
-        localBackupItemCount:
-          alias: hazelcast.iqueue.backup_item_count
-          metric_type: gauge
-        localOfferOperationCount:
-          alias: hazelcast.iqueue.offer_operation_count
-          metric_type: gauge
-        localRejectedOfferOperationCount:
-          alias: hazelcast.iqueue.rejected_offer_operation_count
-          metric_type: gauge
-        localPollOperationCount:
-          alias: hazelcast.iqueue.poll_operation_count
-          metric_type: gauge
-        localEmptyPollOperationCount:
-          alias: hazelcast.iqueue.empty_poll_operation_count
-          metric_type: gauge
-        localOtherOperationsCount:
-          alias: hazelcast.iqueue.other_operation_count 
-          metric_type: gauge
-        localEventOperationCount:
-          alias: hazelcast.iqueue.event_operation_count
-          metric_type: gauge
-
   # Queue
   - include:
       domain: com.hazelcast
