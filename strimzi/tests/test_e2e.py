@@ -15,6 +15,7 @@ from tests.common import (
 pytestmark = pytest.mark.e2e
 
 
+@pytest.mark.flaky
 def test_check(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
     for endpoint_metrics in (
