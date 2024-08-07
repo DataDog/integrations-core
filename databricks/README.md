@@ -244,7 +244,7 @@ chmod a+x /tmp/start_datadog.sh
 
 #### With a cluster-scoped init script 
 
-Cluster-scoped init scripts are init scripts defined in a cluster configuration. Cluster-scoped init scripts apply to both clusters you create and those created to run jobs. Databricks currently supports configuration and storage of init scripts via:
+Cluster-scoped init scripts are init scripts defined in a cluster configuration. Cluster-scoped init scripts apply to both clusters you create and those created to run jobs. Databricks supports configuration and storage of init scripts through:
 - Workspace Files
 - Unity Catalog Volumes
 - Cloud Object Storage
