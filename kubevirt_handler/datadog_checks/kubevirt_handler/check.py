@@ -11,88 +11,48 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 
 
 class KubevirtHandlerCheck(AgentCheck):
-
     # This will be the prefix of every metric and service check the integration sends
-    __NAMESPACE__ = 'kubevirt_handler'
+    __NAMESPACE__ = "kubevirt_handler"
 
     def __init__(self, name, init_config, instances):
         super(KubevirtHandlerCheck, self).__init__(name, init_config, instances)
-
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
-
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+        self.check_initializations.appendleft(self._parse_config)
 
     def check(self, _):
         # type: (Any) -> None
-        # The following are useful bits of code to help new users get started.
 
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
+        if self.kubevirt_handler_healthz_endpoint:
+            self._report_health_check(self.kubevirt_handler_healthz_endpoint)
+        else:
+            self.log.warning(
+                "Skipping health check. Please provide a `kubevirt_handler_healthz_endpoint` to ensure the health of the KubeVirt Handler."  # noqa: E501
+            )
 
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {}, {}".format(self.url, e),
-        #     )
-        #     raise
+    def _report_health_check(self, health_endpoint):
+        try:
+            self.log.debug("Checking health status at %s", health_endpoint)
+            response = self.http.get(health_endpoint)
+            response.raise_for_status()
+            self.gauge("can_connect", 1, tags=[f"endpoint:{health_endpoint}", *self.base_tags])
+        except Exception as e:
+            self.log.error(
+                "Cannot connect to KubeVirt Handler HTTP endpoint '%s': %s.\n",
+                health_endpoint,
+                str(e),
+            )
+            self.gauge("can_connect", 0, tags=[f"endpoint:{health_endpoint}", *self.base_tags])
+            raise
 
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
+    def _parse_config(self):
+        self.kubevirt_handler_healthz_endpoint = self.instance.get("kubevirt_handler_healthz_endpoint")
+        self.kube_cluster_name = self.instance.get("kube_cluster_name")
+        self.kube_namespace = self.instance.get("kube_namespace")
+        self.pod_name = self.instance.get("kube_pod_name")
 
-        # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
+        self.base_tags = [
+            "pod_name:{}".format(self.pod_name),
+            "kube_namespace:{}".format(self.kube_namespace),
+        ]
 
-        # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
-
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
-
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
-
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
-
-        # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        if self.kube_cluster_name:
+            self.base_tags.append("kube_cluster_name:{}".format(self.kube_cluster_name))
