@@ -1,5 +1,5 @@
-id: aws-neuron
-metric_id: aws_neuron
+id: aws_neuron
+metric_id: aws-neuron
 backend_only: false
 facets: null
 pipeline:
@@ -7,7 +7,7 @@ pipeline:
   name: AWS Neuron
   enabled: true
   filter:
-    query: 'source:aws_neuron '
+    query: 'source:aws_neuron'
   processors:
     - type: grok-parser
       name: Operator compilation

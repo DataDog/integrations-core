@@ -1,4 +1,4 @@
-id: aws-neuron
+id: "aws_neuron"
 tests:
   - sample: INFO:Neuron:Number of arithmetic operators (pre-compilation) before =
       565, fused = 548, percent fused = 96.99%
