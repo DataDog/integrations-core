@@ -1,1 +1,344 @@
-[{"path": "twistlock/assets/dashboards/overview.json", "has_ordered_layout": "False", "has_ungrouped_widgets": "True", "has_all_title_case_groups": "True"}, {"path": "dcgm/assets/dashboards/dcgm_overview.json", "has_ordered_layout": "True", "has_ungrouped_widgets": "False", "has_all_title_case_groups": "False"}, {"path": "cloudera/assets/dashboards/cloudera_overview.json", "has_ordered_layout": "True", "has_ungrouped_widgets": "True", "has_all_title_case_groups": "True"}, {"path": "btrfs/assets/dashboards/btrfs_dashboard.json", "has_ordered_layout": "True", "has_ungrouped_widgets": "True", "has_all_title_case_groups": "True"}, {"path": "activemq/assets/dashboards/activemq_dashboard.json", "has_ordered_layout": "False", "has_ungrouped_widgets": "True", "has_all_title_case_groups": "True"}, {"path": "activemq/assets/dashboards/artemis_dashboard.json", "has_ordered_layout": "False", "has_ungrouped_widgets": "True", "has_all_title_case_groups": "True"}, {"path": "nvidia_jetson/assets/dashboards/nvidia_jetson.json", "has_ordered_layout": "True", "has_ungrouped_widgets": "True", "has_all_title_case_groups": "True"}, {"path": "temporal/assets/dashboards/server_overview.json", "has_ordered_layout": "True", "has_ungrouped_widgets": "False", "has_all_title_case_groups": "False"}, {"path": "traefik_mesh/assets/dashboards/traefik_mesh_overview.json", "has_ordered_layout": "True", "has_ungrouped_widgets": "False", "has_all_title_case_groups": "True"}]
+[
+    {
+        "path": "twistlock/assets/dashboards/overview.json",
+        "has_ordered_layout": "False",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "dcgm/assets/dashboards/dcgm_overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "False",
+        "has_all_title_case_groups": "False",
+        "has_overview_section": "True",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "True"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 1,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 1
+            }
+        }
+    },
+    {
+        "path": "cloudera/assets/dashboards/cloudera_overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "True"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 2,
+                "have_timeseries_background": 2,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "btrfs/assets/dashboards/btrfs_dashboard.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "activemq/assets/dashboards/activemq_dashboard.json",
+        "has_ordered_layout": "False",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "activemq/assets/dashboards/artemis_dashboard.json",
+        "has_ordered_layout": "False",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "nvidia_jetson/assets/dashboards/nvidia_jetson.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "temporal/assets/dashboards/server_overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "False",
+        "has_all_title_case_groups": "False",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "True"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 6,
+                "have_timeseries_background": 5,
+                "have_conditional_formats": 6
+            }
+        }
+    },
+    {
+        "path": "traefik_mesh/assets/dashboards/traefik_mesh_overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "False",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "True"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "openstack/assets/dashboards/openstack_dashboard.json",
+        "has_ordered_layout": "False",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "nvidia_triton/assets/dashboards/nvidia_triton_overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "False",
+        "has_all_title_case_groups": "False",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 2,
+                "have_timeseries_background": 2,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "clickhouse/assets/dashboards/overview.json",
+        "has_ordered_layout": "False",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "kubernetes_cluster_autoscaler/assets/dashboards/kubernetes_cluster_autoscaler_overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "False",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 3,
+                "have_timeseries_background": 3,
+                "have_conditional_formats": 2
+            }
+        }
+    },
+    {
+        "path": "mapr/assets/dashboards/mapr_overview.json",
+        "has_ordered_layout": "False",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "presto/assets/dashboards/overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 3,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "weblogic/assets/dashboards/metrics.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    },
+    {
+        "path": "weblogic/assets/dashboards/overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "False",
+        "has_all_title_case_groups": "False",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "True"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 15,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 5
+            }
+        }
+    },
+    {
+        "path": "avi_vantage/assets/dashboards/overview.json",
+        "has_ordered_layout": "True",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "False",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "True"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 6,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 2
+            }
+        }
+    },
+    {
+        "path": "ibm_db2/assets/dashboards/overview.json",
+        "has_ordered_layout": "False",
+        "has_ungrouped_widgets": "True",
+        "has_all_title_case_groups": "True",
+        "has_overview_section": "False",
+        "about_section": {
+            "contains_about_text": "False",
+            "contains_banner_img": "False"
+        },
+        "widgets": {
+            "query_values": {
+                "total": 0,
+                "have_timeseries_background": 0,
+                "have_conditional_formats": 0
+            }
+        }
+    }
+]
