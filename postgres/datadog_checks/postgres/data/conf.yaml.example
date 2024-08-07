@@ -620,6 +620,9 @@ instances:
         ## To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
         ## If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
         ## `aws.region` is required to enable IAM Authentication.
+        ##
+        ## Optionally, you can set `aws.managed_authentication.role_arn` to specify the IAM role ARN.
+        ## This can be used to perform cross-account authentication.
         #
         # managed_authentication: {}
 

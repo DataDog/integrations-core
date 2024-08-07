@@ -73,7 +73,9 @@ pydantic,PyPI,MIT,Copyright (c) 2017 to present Pydantic Services Inc. and indiv
 pymongo,PyPI,Apache-2.0,Copyright The MongoDB Python Team
 pymqi,PyPI,PSF,Copyright (c) Zato Source s.r.o.
 pyodbc,PyPI,MIT,Copyright (c) 2008 Michael Kleehammer
+pysmi,PyPI,BSD-2-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2019 Ilya Etingof <etingof@gmail.com>
+pysmi,PyPI,BSD-3-Clause,Copyright (c) 2015-2020 Ilya Etingof <etingof@gmail.com>
 pysnmp,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
 pysnmp-mibs,PyPI,BSD-3-Clause,"Copyright (c) 2005-2016, Ilya Etingof <ilya@glas.net>"
 python-binary-memcached,PyPI,MIT,Copyright (c) 2011 Jayson Reis

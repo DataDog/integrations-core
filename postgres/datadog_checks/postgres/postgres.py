@@ -794,6 +794,7 @@ class PostgreSql(AgentCheck):
                         username=self._config.user,
                         port=self._config.port,
                         region=region,
+                        role_arn=aws_managed_authentication.get('role_arn'),
                     )
             elif 'azure' in self.cloud_metadata:
                 azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']

@@ -136,8 +136,17 @@ BASE_METRICS = {
     "stats.numExtents": GAUGE,
     "stats.objects": GAUGE,
     "stats.storageSize": GAUGE,
+    "stats.totalSize": GAUGE,
+    "stats.freeStorageSize": GAUGE,
+    "stats.indexFreeStorageSize": GAUGE,
+    "stats.totalFreeStorageSize": GAUGE,
+    "stats.fsUsedSize": GAUGE,
+    "stats.fsTotalSize": GAUGE,
     "sessions.count": GAUGE,
     "uptime": GAUGE,
+    "system.memSizeMB": (GAUGE, "system.mem.total"),  # total amount of system memory
+    "system.memLimitMB": (GAUGE, "system.mem.limit"),  # memory usage limit
+    "system.numCores": (GAUGE, "system.cpu.cores"),  # number of CPU cores
 }
 
 """
