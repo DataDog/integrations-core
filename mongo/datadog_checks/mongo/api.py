@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 from pymongo import MongoClient, ReadPreference
 from pymongo.errors import (
     ConfigurationError,
@@ -9,12 +10,6 @@ from pymongo.errors import (
     OperationFailure,
     ProtocolError,
     ServerSelectionTimeoutError,
-)
-
-from datadog_checks.mongo.common import (
-    MongosDeployment,
-    ReplicaSetDeployment,
-    StandaloneDeployment,
 )
 
 # The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in
@@ -59,7 +54,7 @@ class MongoApi(object):
             options['replicaSet'] = replicaset
         options.update(self._config.additional_options)
         options.update(self._config.tls_params)
-        if self._config.do_auth and not self._is_arbiter(options):
+        if self._config.do_auth and self._is_auth_required(options):
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
             if self._config.username:
                 options['username'] = self._config.username
@@ -69,7 +64,7 @@ class MongoApi(object):
                 options['authSource'] = self._config.auth_source
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
-        self.deployment_type = None
+        self.__hostname = None
 
     def __getitem__(self, item):
         return self._cli[item]
@@ -77,10 +72,13 @@ class MongoApi(object):
     def connect(self):
         try:
             # The ping command is cheap and does not require auth.
-            self['admin'].command('ping')
+            self.ping()
         except ConnectionFailure as e:
             self._log.debug('ConnectionFailure: %s', e)
             raise
+
+    def ping(self):
+        return self['admin'].command('ping')
 
     def server_info(self, session=None):
         return self._cli.server_info(session)
@@ -113,93 +111,44 @@ class MongoApi(object):
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
-    def _is_arbiter(self, options):
-        cli = MongoClient(**options)
-        is_master_payload = cli['admin'].command('isMaster')
-        return is_master_payload.get('arbiterOnly', False)
-
-    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
-        replset_name = repl_set_payload["set"]
-        replset_state = repl_set_payload["myState"]
-        hosts = [m['name'] for m in repl_set_payload.get("members", [])]
-        replset_me = is_master_payload.get('me')
-        return ReplicaSetDeployment(replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role)
-
-    def refresh_deployment_type(self):
-        # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
-        # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
+    def _is_auth_required(self, options):
+        # Check if the node is an arbiter. If it is, usually it does not require authentication.
+        # However this is a best-effort check as the replica set might focce authentication.
         try:
-            self.deployment_type = self._get_default_deployment_type()
-        except Exception as e:
-            self._log.debug(
-                "Unable to run `getCmdLineOpts`, got: %s. Treating this as an Alibaba ApsaraDB instance.", str(e)
-            )
-            try:
-                self.deployment_type = self._get_alibaba_deployment_type()
-            except Exception as e:
-                self._log.debug("Unable to run `shardingState`, so switching to AWS DocumentDB, got error %s", str(e))
-                self.deployment_type = self._get_documentdb_deployment_type()
+            # Try connect to the admin database to run the isMaster command without authentication.
+            cli = MongoClient(**options)
+            is_master_payload = cli['admin'].command('isMaster')
+            is_arbiter = is_master_payload.get('arbiterOnly', False)
+            # If the node is an arbiter and we are able to connect without authentication
+            # we can assume that the node does not require authentication.
+            return not is_arbiter
+        except:
+            return True
 
-    def _get_default_deployment_type(self):
-        options = self['admin'].command("getCmdLineOpts")['parsed']
-        cluster_role = None
-        if 'sharding' in options:
-            if 'configDB' in options['sharding']:
-                self._log.debug("Detected MongosDeployment. Node is principal.")
-                return MongosDeployment(shard_map=self.refresh_shards())
-            elif 'clusterRole' in options['sharding']:
-                cluster_role = options['sharding']['clusterRole']
+    def get_profiling_level(self, db_name, session=None):
+        return self[db_name].command('profile', -1, session=session)
 
-        replication_options = options.get('replication', {})
-        if 'replSetName' in replication_options or 'replSet' in replication_options:
-            repl_set_payload = self['admin'].command("replSetGetStatus")
-            is_master_payload = self['admin'].command('isMaster')
-            replica_set_deployment = self._get_rs_deployment_from_status_payload(
-                repl_set_payload, is_master_payload, cluster_role
-            )
-            is_principal = replica_set_deployment.is_principal()
-            is_principal_log = "" if is_principal else "not "
-            self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
-            return replica_set_deployment
+    def get_profiling_data(self, db_name, ts, session=None):
+        filter = {'ts': {'$gt': ts}}
+        return self[db_name]['system.profile'].find(filter, session=session).sort('ts', 1)
 
-        self._log.debug("Detected StandaloneDeployment. Node is principal.")
-        return StandaloneDeployment()
+    def get_log_data(self, session=None):
+        return self['admin'].command("getLog", "global", session=session)
 
-    def _get_alibaba_deployment_type(self):
-        is_master_payload = self['admin'].command('isMaster')
-        if is_master_payload.get('msg') == 'isdbgrid':
-            return MongosDeployment(shard_map=self.refresh_shards())
+    def get_cmdline_opts(self):
+        return self["admin"].command("getCmdLineOpts")["parsed"]
 
-        # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
-        repl_set_payload = self['admin'].command("replSetGetStatus")
-        if repl_set_payload.get('configsvr') is True:
-            cluster_role = 'configsvr'
-        elif self['admin'].command('shardingState').get('enabled') is True:
-            # Use `shardingState` command to know whether or not the replicaset
-            # is a shard or not.
-            cluster_role = 'shardsvr'
-        else:
-            cluster_role = None
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
+    def replset_get_status(self):
+        return self["admin"].command("replSetGetStatus")
 
-    def _get_documentdb_deployment_type(self):
-        """
-        Deployment type for AWS DocumentDB.
+    def is_master(self):
+        return self["admin"].command("isMaster")
 
-        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
-        """
-        repl_set_payload = self['admin'].command("replSetGetStatus")
-        is_master_payload = self['admin'].command('isMaster')
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role=None)
+    def sharding_state_is_enabled(self):
+        return self["admin"].command("shardingState").get("enabled", False)
 
-    def refresh_shards(self):
-        try:
-            shard_map = self['admin'].command('getShardMap')
-            self._log.debug('Get shard map: %s', shard_map)
-            return shard_map
-        except Exception as e:
-            self._log.error('Unable to get shard map for mongos: %s', e)
-            return {}
+    def get_shard_map(self):
+        return self['admin'].command('getShardMap')
 
     def server_status(self):
         return self['admin'].command('serverStatus')
@@ -223,13 +172,14 @@ class MongoApi(object):
 
     @property
     def hostname(self):
+        if self.__hostname:
+            return self.__hostname
         try:
-            hostname = self.server_status()['host'].split(':')
-            if len(hostname) == 1:
+            self.__hostname = self.server_status()['host']
+            if ':' not in self.__hostname:
                 # If there is no port, we assume the default port
-                return "{}:27017".format(hostname[0])
-            else:
-                return "{}:{}".format(hostname[0], hostname[1])
+                self.__hostname += ':27017'
+            return self.__hostname
         except Exception as e:
             self._log.error('Unable to get hostname: %s', e)
             return None
