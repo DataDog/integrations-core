@@ -1,0 +1,1 @@
+Add new config option `role_arn` to aws managed authentication to support cross account iam auth.
