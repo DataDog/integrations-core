@@ -20,6 +20,7 @@ def dd_environment():
 def instance():
     return {
         "kubevirt_handler_healthz_endpoint": "https://127.0.0.1:8443/healthz",
+        "kubevirt_handler_metrics_endpoint": "https://127.0.0.1:8443/metrics",
         "kube_cluster_name": "test-cluster",
         "kube_namespace": "kubevirt",
         "kube_pod_name": "virt-handler-some-id",
@@ -29,6 +30,7 @@ def instance():
 def mock_http_responses(url, **_params):
     mapping = {
         "https://127.0.0.1:8443/healthz": "healthz.txt",
+        "https://127.0.0.1:8443/metrics": "metrics.txt",
     }
 
     fixtures_file = mapping.get(url)
