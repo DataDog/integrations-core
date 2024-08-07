@@ -1,6 +1,6 @@
 Component,Origin,License,Copyright
 JPype1,PyPI,Apache-2.0,Copyright (c) 2004-2008 Steve Menard
-JayDeBeApi,PyPI,LGPL-3.0-only,Copyright (C) Bastian Bowe
+JayDeBeApi,PyPI,LGPL-3.0-only,Copyright (C) 2014 Bastian Bowe
 PyJWT,PyPI,MIT,Copyright (c) 2015 José Padilla
 PyJWT,PyPI,MIT,Copyright (c) 2015-2022 José Padilla
 PyMySQL,PyPI,MIT,"Copyright (c) 2010, 2013 PyMySQL contributors"
@@ -13,11 +13,11 @@ beautifulsoup4,PyPI,MIT,Copyright (c) 2004-2017 Leonard Richardson
 beautifulsoup4,PyPI,MIT,Copyright (c) Leonard Richardson
 binary,PyPI,Apache-2.0,Copyright 2018 Ofek Lev
 binary,PyPI,MIT,Copyright 2018 Ofek Lev
-boto,PyPI,MIT,Copyright (c) Mitch Garnaat
+boto,PyPI,MIT,Copyright (c) 2010 Mitch Garnaat
 boto3,PyPI,Apache-2.0,"Copyright 2013-2017 Amazon.com, Inc. or its affiliates. All Rights Reserved."
-boto3,PyPI,Apache-2.0,Copyright Amazon Web Services
+boto3,PyPI,Apache-2.0,Copyright 2014 Amazon Web Services
 botocore,PyPI,Apache-2.0,"Copyright 2012-2022 Amazon.com, Inc. or its affiliates. All Rights Reserved."
-botocore,PyPI,Apache-2.0,Copyright Amazon Web Services
+botocore,PyPI,Apache-2.0,Copyright 2012 Amazon Web Services
 cachetools,PyPI,MIT,Copyright (c) 2014-2019 Thomas Kemmer
 cachetools,PyPI,MIT,Copyright (c) 2014-2024 Thomas Kemmer
 check-postgres,"https://github.com/bucardo/",BSD-2-Clause,Copyright 2007 - 2023 Greg Sabino Mullane
@@ -25,7 +25,7 @@ clickhouse-cityhash,PyPI,MIT,"Copyright (c) 2011, Alexander Marshalov <alone.amp
 clickhouse-driver,PyPI,MIT,Copyright (c) 2017 by Konstantin Lebedev.
 cm-client,PyPI,Apache-2.0,
 confluent-kafka,PyPI,Apache-2.0,Copyright (C) 1995-1998 Jean-loup Gailly and Mark Adler
-contextlib2,PyPI,PSF,Copyright (c) Nick Coghlan
+contextlib2,PyPI,PSF,Copyright (c) 2016 Nick Coghlan
 cryptography,PyPI,Apache-2.0,Copyright (c) Individual contributors.
 cryptography,PyPI,BSD-3-Clause,Copyright (c) Individual contributors.
 cryptography,PyPI,PSF,Copyright (c) Individual contributors.
@@ -35,13 +35,13 @@ dnspython,PyPI,ISC,Copyright (C) Dnspython Contributors
 enum34,PyPI,BSD-3-Clause,Copyright Ethan Furman
 flup,Vendor,BSD-3-Clause,Copyright (c) 2005 Allan Saddi. All Rights Reserved.
 flup-py3,Vendor,BSD-3-Clause,"Copyright (c) 2005, 2006 Allan Saddi <allan@saddi.com> All rights reserved."
-foundationdb,PyPI,Apache-2.0,Copyright FoundationDB
-futures,PyPI,PSF,Copyright (c) Brian Quinlan
+foundationdb,PyPI,Apache-2.0,Copyright 2017 FoundationDB
+futures,PyPI,PSF,Copyright (c) 2015 Brian Quinlan
 gearman,PyPI,Apache-2.0,Copyright 2010 Yelp
 hazelcast-python-client,PyPI,Apache-2.0,"Copyright (c) 2008-2023, Hazelcast, Inc. All Rights Reserved."
 importlib-metadata,PyPI,Apache-2.0,"Copyright 2017-2019 Jason R. Coombs, Barry Warsaw"
 in-toto,PyPI,Apache-2.0,Copyright 2018 New York University
-ipaddress,PyPI,PSF,Copyright (c) Philipp Hagemeister
+ipaddress,PyPI,PSF,Copyright (c) 2013 Philipp Hagemeister
 jellyfish,PyPI,MIT,Copyright (c) 2015 James Turk
 kentik-snmp-profiles,"https://github.com/kentik/snmp-profiles",Apache-2.0,
 kubernetes,PyPI,Apache-2.0,Copyright 2014 The Kubernetes Authors.
@@ -53,18 +53,18 @@ mmh3,PyPI,CC0-1.0,Hajime Senuma. mmh3 is dedicated to the public domain under CC
 oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2019 The OAuthlib Community
 openstacksdk,PyPI,Apache-2.0,Copyright OpenStack
 oracledb,PyPI,Apache-2.0,"Copyright (c) 2016, 2023 Oracle and/or its affiliates."
-orjson,PyPI,Apache-2.0,Copyright ijl <ijl@mailbox.org>
-orjson,PyPI,MIT,Copyright (c) ijl <ijl@mailbox.org>
+orjson,PyPI,Apache-2.0,Copyright 2018 ijl <ijl@mailbox.org>
+orjson,PyPI,MIT,Copyright (c) 2018 ijl <ijl@mailbox.org>
 packaging,PyPI,Apache-2.0,Copyright (c) Donald Stufft and individual contributors.
 packaging,PyPI,BSD-3-Clause,Copyright (c) Donald Stufft and individual contributors.
-paramiko,PyPI,LGPL-2.1-only,Copyright (C) Jeff Forcier
+paramiko,PyPI,LGPL-2.1-only,Copyright (C) 2009 Jeff Forcier
 ply,PyPI,BSD-3-Clause,Copyright (C) 2001-2018
+prometheus-client,PyPI,Apache-2.0,Copyright 2015 Brian Brazil
 prometheus-client,PyPI,Apache-2.0,Copyright 2015 The Prometheus Authors
-prometheus-client,PyPI,Apache-2.0,Copyright Brian Brazil
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
 psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola'"
-psycopg2-binary,PyPI,BSD-3-Clause,Copyright Federico Di Gregorio
+psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
 psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) Federico Di Gregorio
 pyOpenSSL,PyPI,Apache-2.0,Copyright The pyOpenSSL developers
 pyasn1,PyPI,BSD-3-Clause,"Copyright (c) 2005-2019, Ilya Etingof <etingof@gmail.com>"
