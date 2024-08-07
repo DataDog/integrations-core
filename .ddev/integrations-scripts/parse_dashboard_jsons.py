@@ -71,21 +71,14 @@ def main():
 				'has_ungrouped_widgets': 'False', 
 				'has_all_title_case_groups': "True",
 				'has_overview_section': 'False',
-				'about_section': {
-					'contains_about_text': 'False',
-					'contains_banner_img': 'False'
-				},
-				'widgets': {
-					'query_values': {
-						'total': 0,
-						'have_timeseries_background': 0,
-						'have_conditional_formats': 0
-					},
-					'legends': {
-						'total': 0,
-						'show_legend': 0
-					}
-				}}
+				'about_section_contains_text': 'False',
+				'about_section_contains_banner_img': 'False',
+				'total_query_values': 0,
+				'query_values_have_timeseries_background': 0,
+				'query_values_have_conditional_formats': 0,
+				'total_widgets_legends': 0,
+				'widgets_legends_shown': 0,
+				}
 
 		is_first = True
 		for key in json_object:
@@ -118,10 +111,10 @@ def main():
 								if(is_first):
 									contains_about_text = group_title.lower().find('about')
 									if(contains_about_text > 0):
-										dict['about_section']['contains_about_text'] = str(True)
+										dict['about_section_contains_text'] = str(True)
 									contains_banner_img = 'banner_img' in definition and definition['banner_img'] != None
 									if(contains_banner_img):
-										dict['about_section']['contains_banner_img'] = str(True)
+										dict['about_section_contains_banner_img'] = str(True)
 
 									is_first = False
 
@@ -129,11 +122,11 @@ def main():
 								# iterate through widgets
 								if('widgets' in definition):
 									evaluated = evaluate_widgets(definition['widgets'])
-									dict['widgets']['query_values']['total'] += evaluated['query_values']['total']
-									dict['widgets']['query_values']['have_timeseries_background'] += evaluated['query_values']['have_timeseries_background']
-									dict['widgets']['query_values']['have_conditional_formats'] += evaluated['query_values']['have_conditional_formats']
-									dict['widgets']['legends']['total'] += evaluated['legend']['total']
-									dict['widgets']['legends']['show_legend'] += evaluated['legend']['show_legend']
+									dict['total_query_values'] += evaluated['query_values']['total']
+									dict['query_values_have_timeseries_background'] += evaluated['query_values']['have_timeseries_background']
+									dict['query_values_have_conditional_formats'] += evaluated['query_values']['have_conditional_formats']
+									dict['total_widgets_legends'] += evaluated['legend']['total']
+									dict['widgets_legends_shown'] += evaluated['legend']['show_legend']
 									
 
 		array.append(dict)
