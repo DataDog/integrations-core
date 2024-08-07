@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 36.12.0 / 2024-08-06
+
+***Added***:
+
+* Enforce format of timestamp logs attribute ([#18218](https://github.com/DataDog/integrations-core/pull/18218))
+
+***Fixed***:
+
+* Ensures that 'should_bypass_proxy' correctly considers unix:/// URLs ([#18119](https://github.com/DataDog/integrations-core/pull/18119))
+
+## 36.11.0 / 2024-08-06
+
+***Added***:
+
+* Log invalid line when failing to parse OpenMetrics response ([#17514](https://github.com/DataDog/integrations-core/pull/17514))
+* Support log submission from checks ([#18019](https://github.com/DataDog/integrations-core/pull/18019))
+* Allow untyped metrics that we coerce to `counter` to be collected regardless if they have `_total` or not. ([#18054](https://github.com/DataDog/integrations-core/pull/18054))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
 ## 36.10.0 / 2024-07-11
 
 ***Added***:
