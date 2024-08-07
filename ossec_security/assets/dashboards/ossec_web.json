@@ -3,7 +3,7 @@
     "description": "-   This dashboard offers comprehensive insights into Web access events and activities like SQL injection, web attacks, recon, and invalid access.\n",
     "widgets": [
         {
-            "id": 2594168224429834,
+            "id": 3955236979726288,
             "definition": {
                 "type": "image",
                 "url": "https://www.ossec.net/wp-content/uploads/2019/01/ossec-300x113.png",
@@ -17,160 +17,157 @@
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 3,
-                "height": 2
-            }
-        },
-        {
-            "id": 2452730491029996,
-            "definition": {
-                "type": "note",
-                "content": "## Overview\n- This dashboard offers comprehensive insights into Web access events and activities like SQL injection, web attacks, recon, and invalid access.\n",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 3,
-                "y": 0,
                 "width": 5,
-                "height": 2
+                "height": 3
             }
         },
         {
-            "id": 4885491610110020,
+            "id": 48109937099856,
             "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Total Web Events Count\n2. Web Events Over Time\n3. Top 10 Web Events by Source IP\n4. Events Distribution by Groups\n4. SQL-Injection Attempt Event List\n5. Attack Event List\n6. Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 18684607492604,
-            "definition": {
-                "title": "Total Web Events Count",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
+                "title": "Web Events Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "response_format": "scalar",
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [],
-                                "search": {
-                                    "query": "source:ossec-security service:web_access $Level $Source_IP $Group_List $Host_Name"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "black_on_light_green"
-                            }
-                        ]
-                    }
-                ],
-                "autoscale": true,
-                "precision": 2
-            },
-            "layout": {
-                "x": 0,
-                "y": 2,
-                "width": 3,
-                "height": 4
-            }
-        },
-        {
-            "id": 2579927200091574,
-            "definition": {
-                "title": "Web Events Over Time",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "alias": "Count",
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [],
-                                "search": {
-                                    "query": "source:ossec-security service:web_access $Level $Source_IP $Group_List $Host_Name"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "dog_classic",
-                            "order_by": "values",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 2753682626808508,
+                        "definition": {
+                            "title": "Total Web Events Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:ossec-security service:web_access $Level $Source_IP $Group_List $Host_Name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
                         },
-                        "display_type": "line"
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2317273430784234,
+                        "definition": {
+                            "title": "Web Events Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:ossec-security service:web_access $Level $Source_IP $Group_List $Host_Name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 7,
+                            "height": 3
+                        }
                     }
                 ]
             },
             "layout": {
-                "x": 3,
-                "y": 2,
-                "width": 9,
-                "height": 4
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 6
+            }
+        },
+        {
+            "id": 788191528838758,
+            "definition": {
+                "type": "note",
+                "content": "### Dashboard Overview\nWeb Event dashboard offers comprehensive insights into Web access events and activities like SQL injection, web attacks, recon, and invalid access.\n\nFor more information, see the [OSSEC Integration Documentation](https://docs.datadoghq.com/integrations/ossec_security/)\n\nTips:\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 5,
+                "height": 3
             }
         },
         {
@@ -235,7 +232,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 6,
+                "y": 0,
                 "width": 12,
                 "height": 4
             }
@@ -302,7 +299,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 4,
                 "width": 12,
                 "height": 5
             }
@@ -350,7 +347,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 15,
+                "y": 9,
                 "width": 12,
                 "height": 4
             }
@@ -406,7 +403,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 13,
                 "width": 12,
                 "height": 4
             }
@@ -454,7 +451,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 23,
+                "y": 17,
                 "width": 12,
                 "height": 4
             }

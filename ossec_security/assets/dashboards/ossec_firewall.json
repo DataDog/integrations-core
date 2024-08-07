@@ -3,7 +3,7 @@
     "description": "-   This dashboard offers comprehensive insights into firewall events and activities conducted through the firewall.",
     "widgets": [
         {
-            "id": 8838163283747962,
+            "id": 7474006281634812,
             "definition": {
                 "type": "image",
                 "url": "https://www.ossec.net/wp-content/uploads/2019/01/ossec-300x113.png",
@@ -17,160 +17,157 @@
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 1062084907733958,
-            "definition": {
-                "type": "note",
-                "content": "## Overview\n- This dashboard offers comprehensive insights into firewall events and activities conducted through the firewall.",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 4,
-                "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 4796134867692870,
-            "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Firewall Total Event Count\n2. Firewall Event Over Time\n3. Firewall Drop Packet Count\n4. Firewall Drop by Source IP\n5. Firewall Drop by Destination IP\n6. Geo-Distributed Source IP Address\n7. Geo-Distributed Destination IP Address\n8. Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 4011844177683238,
-            "definition": {
-                "title": "Firewall Total Event Count",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
-                    {
-                        "response_format": "scalar",
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [],
-                                "search": {
-                                    "query": "source:ossec-security service:firewall $Action $Source_IP $Group_List $Level $Host_Name $Destination_IP"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "black_on_light_green"
-                            }
-                        ]
-                    }
-                ],
-                "autoscale": true,
-                "precision": 2
-            },
-            "layout": {
-                "x": 0,
-                "y": 2,
-                "width": 3,
+                "width": 5,
                 "height": 3
             }
         },
         {
-            "id": 4633585751596184,
+            "id": 7804085756425800,
             "definition": {
-                "title": "Firewall Event Over Time",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "type": "timeseries",
-                "requests": [
+                "title": "Firewall Event Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "formulas": [
-                            {
-                                "alias": "Count",
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [],
-                                "search": {
-                                    "query": "source:ossec-security service:firewall $Action $Source_IP $Group_List $Level $Host_Name $Destination_IP"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "dog_classic",
-                            "order_by": "values",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 8766715333990730,
+                        "definition": {
+                            "title": "Firewall Total Event Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:ossec-security service:firewall $Action $Source_IP $Group_List $Level $Host_Name $Destination_IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
                         },
-                        "display_type": "line"
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6230225427738932,
+                        "definition": {
+                            "title": "Firewall Event Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:ossec-security service:firewall $Action $Source_IP $Group_List $Level $Host_Name $Destination_IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 7,
+                            "height": 3
+                        }
                     }
                 ]
             },
             "layout": {
-                "x": 3,
-                "y": 2,
-                "width": 6,
-                "height": 3
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 7
+            }
+        },
+        {
+            "id": 842738480314278,
+            "definition": {
+                "type": "note",
+                "content": "### Dashboard Overivew\nFirewall dashboard offers comprehensive insights into firewall events and activities conducted through the firewall.\n\nFor more information, see the [OSSEC Integration Documentation](https://docs.datadoghq.com/integrations/ossec_security/)\n\nTips:\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 5,
+                "height": 4
             }
         },
         {
@@ -218,8 +215,8 @@
                 "precision": 2
             },
             "layout": {
-                "x": 9,
-                "y": 2,
+                "x": 0,
+                "y": 0,
                 "width": 3,
                 "height": 3
             }
@@ -285,10 +282,10 @@
                 }
             },
             "layout": {
-                "x": 0,
-                "y": 5,
-                "width": 6,
-                "height": 4
+                "x": 3,
+                "y": 0,
+                "width": 4,
+                "height": 3
             }
         },
         {
@@ -352,10 +349,10 @@
                 }
             },
             "layout": {
-                "x": 6,
-                "y": 5,
-                "width": 6,
-                "height": 4
+                "x": 7,
+                "y": 0,
+                "width": 5,
+                "height": 3
             }
         },
         {
@@ -421,7 +418,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 3,
                 "width": 12,
                 "height": 5
             }
@@ -489,7 +486,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 8,
                 "width": 12,
                 "height": 4
             }
@@ -537,7 +534,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 18,
+                "y": 12,
                 "width": 12,
                 "height": 5
             }

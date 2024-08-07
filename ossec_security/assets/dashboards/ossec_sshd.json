@@ -3,7 +3,7 @@
     "description": "-   This dashboard offers comprehensive insights into SSHD events and activities conducted through SSH-like connection attempts or authentication failure.",
     "widgets": [
         {
-            "id": 6582953341186730,
+            "id": 8194773538304776,
             "definition": {
                 "type": "image",
                 "url": "https://www.ossec.net/wp-content/uploads/2019/01/ossec-300x113.png",
@@ -17,159 +17,156 @@
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 3,
-                "height": 2
-            }
-        },
-        {
-            "id": 3742523071554850,
-            "definition": {
-                "type": "note",
-                "content": "## Overview\n- This dashboard offers comprehensive insights into SSHD events and activities conducted through SSH-like connection attempts or authentication failure.\n",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 3,
-                "y": 0,
                 "width": 5,
-                "height": 2
-            }
-        },
-        {
-            "id": 5955822312598738,
-            "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Total Number of SSHD Events\n2. SSHD Events Over Time\n3. SSHD Events by Level\n4. Count of Authentication Failed Events\n5. Count of Multiple Authentication Failure Events\n6. Authentication Failed Events Over Time\n7. Count of Invalid Login Events\n8. Count of Multiple Invalid Login Events\n9. Top 10 Maximum Failed Authentication Source IPs\n10. Geo-Distributed Failed Authentication Source IPs\n11. Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 3997797262917416,
-            "definition": {
-                "title": "Total Number of SSHD Events",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [],
-                                "search": {
-                                    "query": "source:ossec-security service:sshd $Level $Source_IP $Group_List $Host_Name"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "value": 0,
-                                "palette": "black_on_light_green"
-                            }
-                        ]
-                    }
-                ],
-                "autoscale": true,
-                "precision": 2
-            },
-            "layout": {
-                "x": 0,
-                "y": 2,
-                "width": 4,
                 "height": 3
             }
         },
         {
-            "id": 1230512853359994,
+            "id": 7954477885571586,
             "definition": {
-                "title": "SSHD Events Over Time",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "type": "timeseries",
-                "requests": [
+                "title": "SSHD Event Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "formulas": [
-                            {
-                                "alias": "Count",
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [],
-                                "search": {
-                                    "query": "source:ossec-security service:sshd $Level $Source_IP $Group_List $Host_Name"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "dog_classic",
-                            "order_by": "values",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 4396857562721056,
+                        "definition": {
+                            "title": "Total Number of SSHD Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:ossec-security service:sshd $Level $Source_IP $Group_List $Host_Name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
                         },
-                        "display_type": "line"
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7589104440334796,
+                        "definition": {
+                            "title": "SSHD Events Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:ossec-security service:sshd $Level $Source_IP $Group_List $Host_Name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 7,
+                            "height": 3
+                        }
                     }
                 ]
             },
             "layout": {
-                "x": 4,
-                "y": 2,
-                "width": 8,
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 6
+            }
+        },
+        {
+            "id": 6532177892671160,
+            "definition": {
+                "type": "note",
+                "content": "### Dashboard Overview\nSSHD dashboard offers comprehensive insights into SSHD events and activities conducted through SSH-like connection attempts or authentication failure.\n\nFor more information, see the [OSSEC Integration Documentation](https://docs.datadoghq.com/integrations/ossec_security/)\n\nTips:\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 5,
                 "height": 3
             }
         },
@@ -235,7 +232,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 5,
+                "y": 0,
                 "width": 4,
                 "height": 4
             }
@@ -286,7 +283,7 @@
             },
             "layout": {
                 "x": 4,
-                "y": 5,
+                "y": 0,
                 "width": 4,
                 "height": 4
             }
@@ -337,7 +334,7 @@
             },
             "layout": {
                 "x": 8,
-                "y": 5,
+                "y": 0,
                 "width": 4,
                 "height": 4
             }
@@ -396,7 +393,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 4,
                 "width": 12,
                 "height": 4
             }
@@ -447,7 +444,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 8,
                 "width": 3,
                 "height": 4
             }
@@ -501,7 +498,7 @@
             },
             "layout": {
                 "x": 3,
-                "y": 13,
+                "y": 8,
                 "width": 4,
                 "height": 4
             }
@@ -568,7 +565,7 @@
             },
             "layout": {
                 "x": 7,
-                "y": 13,
+                "y": 8,
                 "width": 5,
                 "height": 4
             }
@@ -636,7 +633,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 17,
+                "y": 12,
                 "width": 12,
                 "height": 5
             }
@@ -684,7 +681,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 22,
+                "y": 17,
                 "width": 12,
                 "height": 4
             }
