@@ -49,12 +49,12 @@ instances:
     ## @param kubevirt_api_metrics_endpoint - string - optional
     ## URL to the KubeVirt API Service /metrics endpoint.
     #
-    # kubevirt_api_metrics_endpoint: https://virt-api.kubevirt.svc/metrics
+    # kubevirt_api_metrics_endpoint: https://10.244.0.38:443/metrics
 
     ## @param kubevirt_api_healthz_endpoint - string - optional
     ## URL to check the KubeVirt API /healthz endpoint.
     #
-    # kubevirt_api_healthz_endpoint: https://virt-api.kubevirt.svc/healthz
+    # kubevirt_api_healthz_endpoint: https://10.244.0.38:443/healthz
 
     ## @param kube_cluster_name - string - optional
     ## The name of the Kubernetes cluster.
@@ -62,14 +62,14 @@ instances:
     # kube_cluster_name: dev-cluster
 
     ## @param kube_namespace - string - optional
-    ## The namespace where the KubeVirt Controller is running.  (Provided via autodiscovery template variables)
+    ## The namespace where the KubeVirt API is running.  (Provided via autodiscovery template variables)
     #
     # kube_namespace: kubevirt
 
     ## @param kube_pod_name - string - optional
-    ## The name of the KubeVirt Controller pod. (Provided via autodiscovery template variables)
+    ## The name of the KubeVirt API pod. (Provided via autodiscovery template variables)
     #
-    # kube_pod_name: virt-controller-id-1234
+    # kube_pod_name: virt-api-id-1234
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
