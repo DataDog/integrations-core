@@ -607,12 +607,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Acritical&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -664,12 +659,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Ahigh&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
@@ -740,12 +730,7 @@
                                     }
                                 }
                             ],
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "style": {}
                         },
                         "layout": {
@@ -797,12 +782,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Amedium&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -911,12 +891,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Acritical&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "precision": 2
                         },
                         "layout": {
@@ -984,12 +959,7 @@
                                     }
                                 }
                             ],
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "style": {}
                         },
                         "layout": {
@@ -1057,12 +1027,7 @@
                                     }
                                 }
                             ],
-                            "custom_links": [
-                                {
-                                    "label": "View related Security Signals",
-                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                                }
-                            ],
+                            "custom_links": [],
                             "style": {}
                         },
                         "layout": {
