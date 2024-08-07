@@ -18,6 +18,35 @@ class KubevirtControllerCheck(OpenMetricsBaseCheckV2):
         self.check_initializations.append(self._configure_additional_transformers)
 
     def check(self, _):
+        self._init_base_tags()
+
+        self.kubevirt_controller_healthz_endpoint = self.instance.get("kubevirt_controller_healthz_endpoint")
+
+        if self.kubevirt_controller_healthz_endpoint:
+            self._report_health_check(self.kubevirt_controller_healthz_endpoint)
+        else:
+            self.log.warning(
+                "Skipping health check. Please provide a `kubevirt_controller_healthz_endpoint` to ensure the health of the KubeVirt Controller."  # noqa: E501
+            )
+
+        super().check(_)
+
+    def _report_health_check(self, health_endpoint):
+        try:
+            self.log.debug("Checking health status at %s", health_endpoint)
+            response = self.http.get(health_endpoint)
+            response.raise_for_status()
+            self.gauge("can_connect", 1, tags=[f"endpoint:{health_endpoint}", *self.base_tags])
+        except Exception as e:
+            self.log.error(
+                "Cannot connect to KubeVirt Controller HTTP endpoint '%s': %s.\n",
+                health_endpoint,
+                str(e),
+            )
+            self.gauge("can_connect", 0, tags=[f"endpoint:{health_endpoint}", *self.base_tags])
+            raise
+
+    def _init_base_tags(self):
         self.base_tags = [
             "pod_name:{}".format(self.pod_name),
             "kube_namespace:{}".format(self.kube_namespace),
@@ -25,28 +54,6 @@ class KubevirtControllerCheck(OpenMetricsBaseCheckV2):
 
         if self.kube_cluster_name:
             self.base_tags.append("kube_cluster_name:{}".format(self.kube_cluster_name))
-
-        self.kubevirt_controller_healthz_endpoint = self.instance.get("kubevirt_controller_healthz_endpoint")
-
-        try:
-            self.log.debug("Checking health status at %s", self.kubevirt_controller_healthz_endpoint)
-            response = self.http.get(self.kubevirt_controller_healthz_endpoint)
-            response.raise_for_status()
-            self.gauge(
-                "can_connect", 1, tags=[f"endpoint:{self.kubevirt_controller_healthz_endpoint}", *self.base_tags]
-            )
-        except Exception as e:
-            self.log.error(
-                "Cannot connect to KubeVirt Controller HTTP endpoint '%s': %s.\n",
-                self.kubevirt_controller_healthz_endpoint,
-                str(e),
-            )
-            self.gauge(
-                "can_connect", 0, tags=[f"endpoint:{self.kubevirt_controller_healthz_endpoint}", *self.base_tags]
-            )
-            raise
-
-        super().check(_)
 
     def _parse_config(self):
         self.kubevirt_controller_metrics_endpoint = self.instance.get("kubevirt_controller_metrics_endpoint")

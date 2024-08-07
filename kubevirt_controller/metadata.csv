@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-kubevirt_controller.can_connect,gauge,,,,Whether the check can connect to the Kubevirt API or not.,0,kubevirt_controller,api connect,,
+kubevirt_controller.can_connect,gauge,,,,Whether the check can connect to the Kubevirt Controller or not.,0,kubevirt_controller,api connect,,
 kubevirt_controller.virt_controller.leading_status,gauge,,,,Indication for an operating virt-controller.,0,kubevirt_controller,leading_status,,
 kubevirt_controller.virt_controller.ready_status,gauge,,,,Indication for a virt-controller that is ready to take the lead.,0,kubevirt_controller,ready_status,,
 kubevirt_controller.vm.error_status_last_transition_timestamp_seconds.count,count,,,,Virtual Machine last transition timestamp to error status.,0,kubevirt_controller,,,

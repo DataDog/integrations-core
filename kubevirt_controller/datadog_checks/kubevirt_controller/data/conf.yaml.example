@@ -49,12 +49,12 @@ instances:
     ## @param kubevirt_controller_metrics_endpoint - string - optional
     ## URL to the KubeVirt Controller Service /metrics endpoint.
     #
-    # kubevirt_controller_metrics_endpoint: https://virt-api.kubevirt.svc/metrics
+    # kubevirt_controller_metrics_endpoint: https://10.244.0.38:443/metrics
 
     ## @param kubevirt_controller_healthz_endpoint - string - optional
     ## URL to check the KubeVirt Controller /healthz endpoint.
     #
-    # kubevirt_controller_healthz_endpoint: https://virt-api.kubevirt.svc/healthz
+    # kubevirt_controller_healthz_endpoint: https://10.244.0.38:443/healthz
 
     ## @param kube_cluster_name - string - optional
     ## The name of the Kubernetes cluster.

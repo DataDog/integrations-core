@@ -12,14 +12,14 @@ files:
               URL to the KubeVirt Controller Service /metrics endpoint.
             value:
               display_default: null
-              example: https://virt-api.kubevirt.svc/metrics
+              example: https://10.244.0.38:443/metrics
               type: string
           - name: kubevirt_controller_healthz_endpoint
             description: |
               URL to check the KubeVirt Controller /healthz endpoint.
             value:
               display_default: null
-              example: https://virt-api.kubevirt.svc/healthz
+              example: https://10.244.0.38:443/healthz
               type: string
           - name: kube_cluster_name
             description: |
