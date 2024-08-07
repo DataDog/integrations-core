@@ -168,6 +168,9 @@ class MongoOperationSamples(DBMAsyncJob):
         if db not in databases_monitored:
             self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
             return False
+        if db == "admin":
+            self._check.log.debug("Skipping operation for admin database: %s", operation)
+            return False
 
         # Skip operations without a command
         command = operation.get("command")
