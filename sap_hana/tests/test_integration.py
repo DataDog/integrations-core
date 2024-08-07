@@ -25,6 +25,10 @@ def test_check(aggregator, datadog_agent, instance, dd_run_check):
     _assert_logs(check, datadog_agent)
     aggregator.assert_all_metrics_covered()
 
+    datadog_agent._sent_logs.clear()
+    dd_run_check(check)
+    datadog_agent.assert_logs(check.check_id, [])
+
 
 def test_check_invalid_schema(aggregator, instance, dd_run_check):
     instance["schema"] = "UNKNOWN_SCHEMA"

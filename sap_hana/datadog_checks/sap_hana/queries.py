@@ -80,9 +80,9 @@ class AuditLog(Query):
     https://help.sap.com/docs/SAP_HANA_PLATFORM/4fe29514fd584807ac9f2a04f6754767/d1fe1244d29510148f69be8b0e060dcc.html
     """
 
-    def __init__(self):
+    def __init__(self, previous_timestamp=None):
         super(AuditLog, self).__init__(
-            schema="SYS",
+            schema='SYS',
             fields=(
                 'application_name',
                 'application_user_name',
@@ -114,7 +114,7 @@ class AuditLog(Query):
                 'user_name',
                 'value',
             ),
-            view="AUDIT_LOG",
+            view='AUDIT_LOG',
             query="""
                 SELECT
                   APPLICATION_NAME,
@@ -149,6 +149,11 @@ class AuditLog(Query):
                 FROM {}
             """,
         )
+
+        if previous_timestamp:
+            self.query += " WHERE TIMESTAMP > '{}'".format(previous_timestamp)
+
+        self.query += ' ORDER BY TIMESTAMP ASC'
 
 
 class GlobalSystemBackupProgress(Query):
