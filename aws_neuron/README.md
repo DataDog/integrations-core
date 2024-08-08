@@ -11,7 +11,9 @@ Follow the instructions below to install and configure this check for an Agent r
 ### Installation
 
 The AWS Neuron check is included in the [Datadog Agent][2] package.
-This check also uses Neuron Monitor which is provided by the [AWS Neuron Tools package][11] and must be installed.
+
+You also need to install the [AWS Neuron Tools][11] package.
+
 No additional installation is needed on your server.
 
 ### Configuration
