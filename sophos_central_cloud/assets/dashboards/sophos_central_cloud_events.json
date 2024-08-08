@@ -307,7 +307,15 @@
                                             }
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#bc303c"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -324,9 +332,9 @@
                         }
                     },
                     {
-                        "id": 4595806099225642,
+                        "id": 8458894014357488,
                         "definition": {
-                            "title": "MEDIUMs",
+                            "title": "HIGHs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -345,13 +353,21 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:event status:medium"
+                                                "query": "status:high service:event source:sophos-central-cloud"
                                             }
                                         }
                                     ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#d33043"
                                         }
                                     ]
                                 }
@@ -401,6 +417,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#bc303c"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -433,9 +457,9 @@
                         }
                     },
                     {
-                        "id": 8458894014357488,
+                        "id": 4595806099225642,
                         "definition": {
-                            "title": "HIGHs",
+                            "title": "MEDIUMs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -454,13 +478,21 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "status:high service:event source:sophos-central-cloud"
+                                                "query": "source:sophos-central-cloud service:event status:medium"
                                             }
                                         }
                                     ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
                                         }
                                     ]
                                 }
@@ -473,49 +505,6 @@
                             "y": 3,
                             "width": 2,
                             "height": 2
-                        }
-                    },
-                    {
-                        "id": 4166166626344918,
-                        "definition": {
-                            "title": "INFOs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "security_signals",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:sophos-central-cloud service:event status:info"
-                                            }
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 3,
-                            "width": 2,
-                            "height": 1
                         }
                     },
                     {
@@ -541,6 +530,57 @@
                                             "group_by": [],
                                             "search": {
                                                 "query": "source:sophos-central-cloud service:event status:low"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#ffb52b"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 4166166626344918,
+                        "definition": {
+                            "title": "INFOs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:sophos-central-cloud service:event status:info"
                                             }
                                         }
                                     ],
@@ -596,6 +636,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#d33043"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -662,6 +710,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
