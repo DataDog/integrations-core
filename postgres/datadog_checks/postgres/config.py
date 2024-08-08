@@ -67,6 +67,8 @@ class PostgresConfig:
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )
         self.max_connections = instance.get('max_connections', 30)
+        check.warning("natasha hereee 1")
+        check.warning("natasha hereee 2 %s", get_agent_host_tags())
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
             agent_tags=get_agent_host_tags(),
