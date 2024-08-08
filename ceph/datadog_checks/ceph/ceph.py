@@ -5,6 +5,7 @@ from __future__ import division
 
 import os
 import re
+import subprocess
 
 import simplejson as json
 from six import iteritems
@@ -12,7 +13,6 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class Ceph(AgentCheck):
@@ -62,7 +62,7 @@ class Ceph(AgentCheck):
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
-                output, _, _ = get_subprocess_output(args.split(), self.log)
+                output = subprocess.run(args.split(), capture_output=True).stdout
                 res = json.loads(output)
             except Exception as e:
                 self.log.warning('Unable to parse data from cmd=%s: %s', cmd, e)
