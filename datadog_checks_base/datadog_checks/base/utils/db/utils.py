@@ -183,6 +183,26 @@ def resolve_db_host(db_host):
     return db_host
 
 
+def get_agent_host_tags() -> List[str]:
+    '''
+    Get the tags from the agent host and return them as a list of strings.
+    '''
+    result = []
+    host_tags = datadog_agent.get_host_tags()
+    if not host_tags:
+        return result
+    try:
+        tags_dict = json.loads(host_tags) or {}
+    except:
+        logger.warning("Failed to parse agent host tags: %s", host_tags)
+        return result
+    for key, value in tags_dict.items():
+        if isinstance(value, list):
+            result.extend(value)
+        else:
+            logger.warning("Unable to use tags for key %s since %s is not a list", key, value)
+    return result
+
 def default_json_event_encoding(o):
     if isinstance(o, decimal.Decimal):
         return float(o)
