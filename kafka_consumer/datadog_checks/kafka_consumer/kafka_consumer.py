@@ -97,12 +97,15 @@ class KafkaCheck(AgentCheck):
     def _load_broker_timestamps(self):
         """Loads broker timestamps from persistent cache."""
         broker_timestamps = defaultdict(dict)
-        try:
-            for topic_partition, content in json.loads(self.read_persistent_cache("broker_timestamps_")).items():
-                for offset, timestamp in content.items():
-                    broker_timestamps[topic_partition][int(offset)] = timestamp
-        except Exception as e:
-            self.log.warning('Could not read broker timestamps from cache: %s', str(e))
+        cached_value = json.loads(self.read_persistent_cache("broker_timestamps_")).strip()
+        self.log.info("cached_value: %s ", cached_value)
+        if cached_value:
+          try:
+              for topic_partition, content in json.loads(self.read_persistent_cache("broker_timestamps_")).items():
+                  for offset, timestamp in content.items():
+                      broker_timestamps[topic_partition][int(offset)] = timestamp
+          except Exception as e:
+              self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
 
     def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
