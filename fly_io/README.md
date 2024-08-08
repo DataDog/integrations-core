@@ -95,7 +95,7 @@ Follow these steps to collect traces for an application in your Fly.io environme
     DD_LOGS_INJECTION="true"
     ```
 
-3. Set the following environment variables in your [Datadog Agent application's](#Deploying-the-agent-as-a-Fly.io-application) `fly.toml` and deploy the app:
+4. Set the following environment variables in your [Datadog Agent application's](#Deploying-the-agent-as-a-Fly.io-application) `fly.toml` and deploy the app:
 
     ```
     [env]
