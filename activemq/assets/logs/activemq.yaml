@@ -45,7 +45,7 @@ pipeline:
     query: source:activemq
   processors:
     - type: grok-parser
-      name: Parsing ActiveMQ logs
+      name: Parsing ActiveMQ logs test
       enabled: true
       source: message
       samples:
