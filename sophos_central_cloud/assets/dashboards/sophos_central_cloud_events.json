@@ -588,6 +588,14 @@
                                         {
                                             "formula": "query1"
                                         }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#84c1e0"
+                                        }
                                     ]
                                 }
                             ],
