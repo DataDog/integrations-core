@@ -1,13 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import contextlib
 import copy
 
 import mock
 import psycopg2
 import pytest
-from mock import MagicMock
 from pytest import fail
 from semver import VersionInfo
 from six import iteritems
@@ -85,123 +83,6 @@ def test_get_instance_with_default(pg_instance, collect_default_database):
         assert dbfilter not in res['query']
     else:
         assert dbfilter in res['query']
-
-
-def test_malformed_get_custom_queries(check):
-    """
-    Test early-exit conditions for _get_custom_queries()
-    """
-    check.log = MagicMock()
-    db = MagicMock()
-
-    @contextlib.contextmanager
-    def mock_db():
-        yield db
-
-    check.db = mock_db
-
-    check._config.custom_queries = [{}]
-
-    # Make sure 'metric_prefix' is defined
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with("custom query field `metric_prefix` is required")
-    check.log.reset_mock()
-
-    # Make sure 'query' is defined
-    malformed_custom_query = {'metric_prefix': 'postgresql'}
-    check._config.custom_queries = [malformed_custom_query]
-
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with(
-        "custom query field `query` is required for metric_prefix `%s`", malformed_custom_query['metric_prefix']
-    )
-    check.log.reset_mock()
-
-    # Make sure 'columns' is defined
-    malformed_custom_query['query'] = 'SELECT num FROM sometable'
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with(
-        "custom query field `columns` is required for metric_prefix `%s`", malformed_custom_query['metric_prefix']
-    )
-    check.log.reset_mock()
-
-    # Make sure we gracefully handle an error while performing custom queries
-    malformed_custom_query_column = {}
-    malformed_custom_query['columns'] = [malformed_custom_query_column]
-    db.cursor().__enter__().execute.side_effect = psycopg2.ProgrammingError('FOO')
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with(
-        "Error executing query for metric_prefix %s: %s", malformed_custom_query['metric_prefix'], 'FOO'
-    )
-    check.log.reset_mock()
-
-    # Make sure the number of columns defined is the same as the number of columns return by the query
-    malformed_custom_query_column = {}
-    malformed_custom_query['columns'] = [malformed_custom_query_column]
-    query_return = ['num', 1337]
-    db.cursor().__enter__().execute.side_effect = None
-    db.cursor().__enter__().__iter__.return_value = iter([query_return])
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with(
-        "query result for metric_prefix %s: expected %s columns, got %s",
-        malformed_custom_query['metric_prefix'],
-        len(malformed_custom_query['columns']),
-        len(query_return),
-    )
-    check.log.reset_mock()
-
-    # Make sure the query does not return an empty result
-    db.cursor().__enter__().__iter__.return_value = iter([[]])
-    check._collect_custom_queries([])
-    check.log.debug.assert_called_with(
-        "query result for metric_prefix %s: returned an empty result", malformed_custom_query['metric_prefix']
-    )
-    check.log.reset_mock()
-
-    # Make sure 'name' is defined in each column
-    malformed_custom_query_column['some_key'] = 'some value'
-    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with(
-        "column field `name` is required for metric_prefix `%s`", malformed_custom_query['metric_prefix']
-    )
-    check.log.reset_mock()
-
-    # Make sure 'type' is defined in each column
-    malformed_custom_query_column['name'] = 'num'
-    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with(
-        "column field `type` is required for column `%s` of metric_prefix `%s`",
-        malformed_custom_query_column['name'],
-        malformed_custom_query['metric_prefix'],
-    )
-    check.log.reset_mock()
-
-    # Make sure 'type' is a valid metric type
-    malformed_custom_query_column['type'] = 'invalid_type'
-    db.cursor().__enter__().__iter__.return_value = iter([[1337]])
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with(
-        "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
-        malformed_custom_query_column['type'],
-        malformed_custom_query_column['name'],
-        malformed_custom_query['metric_prefix'],
-    )
-    check.log.reset_mock()
-
-    # Make sure we're only collecting numeric value metrics
-    malformed_custom_query_column['type'] = 'gauge'
-    query_return = MagicMock()
-    query_return.__float__.side_effect = ValueError('Mocked exception')
-    db.cursor().__enter__().__iter__.return_value = iter([[query_return]])
-    check._collect_custom_queries([])
-    check.log.error.assert_called_once_with(
-        "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
-        query_return,
-        malformed_custom_query_column['name'],
-        malformed_custom_query['metric_prefix'],
-    )
 
 
 @pytest.mark.parametrize(

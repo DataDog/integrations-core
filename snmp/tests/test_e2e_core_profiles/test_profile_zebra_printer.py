@@ -65,6 +65,7 @@ def test_e2e_profile_zebra_printer(dd_agent_check):
         'vendor': 'zebra',
         'version': 'P430i V2.00.00',
         'device_type': 'printer',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
