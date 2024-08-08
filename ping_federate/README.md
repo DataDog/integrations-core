@@ -71,16 +71,22 @@ The Ping Federate integration collects the following log types.
 #### Admin
 Default log format: 
 
-```<pattern>%d | %X{user} | %X{roles} | %X{ip} | %X{component} | %X{event} | %X{eventdetailid} | %m%n</pattern>```
+```
+<pattern>%d | %X{user} | %X{roles} | %X{ip} | %X{component} | %X{event} | %X{eventdetailid} | %m%n</pattern>
+```
 
 #### Audit
 Default log format: 
 
-```<pattern>%d| %X{trackingid}| %X{event}| %X{subject}| %X{ip} | %X{app}| %X{connectionid}| %X{protocol}| %X{host}| %X{role}| %X{status}| %X{adapterid}| %X{description}| %X{responsetime} %n</pattern>```
+```
+<pattern>%d| %X{trackingid}| %X{event}| %X{subject}| %X{ip} | %X{app}| %X{connectionid}| %X{protocol}| %X{host}| %X{role}| %X{status}| %X{adapterid}| %X{description}| %X{responsetime} %n</pattern>
+```
 
 Additional field log format: 
 
-```<pattern>%d| %X{trackingid}| %X{event}| %X{subject}| %X{ip} | %X{app}| %X{connectionid}| %X{protocol}| %X{host}| %X{role}| %X{status}| %X{adapterid}| %X{description}| %X{responsetime}| %X{attrackingid}| %X{attributes}| %X{granttype}| %X{initiator}| %X{inmessagetype}| %X{inresponseto}| %X{localuserid}| %X{requestid}| %X{requeststarttime}| %X{responseid}| %X{stspluginid}| %X{targetsessionid}| %X{authenticationsourceid}| %X{validatorid}| %X{virtualserverid}| %X{connectionname}| %X{httprequestid}%n</pattern>```
+```
+<pattern>%d| %X{trackingid}| %X{event}| %X{subject}| %X{ip} | %X{app}| %X{connectionid}| %X{protocol}| %X{host}| %X{role}| %X{status}| %X{adapterid}| %X{description}| %X{responsetime}| %X{attrackingid}| %X{attributes}| %X{granttype}| %X{initiator}| %X{inmessagetype}| %X{inresponseto}| %X{localuserid}| %X{requestid}| %X{requeststarttime}| %X{responseid}| %X{stspluginid}| %X{targetsessionid}| %X{authenticationsourceid}| %X{validatorid}| %X{virtualserverid}| %X{connectionname}| %X{httprequestid}%n</pattern>
+```
 
 
 **Note**: Additional fields are supported only if they are configured in above sequence. Also, if any field is not configured, then integration will not support the additional fields.
@@ -105,6 +111,7 @@ If you see a **Permission denied** error while monitoring the log files, give th
   sudo chown -R dd-agent:dd-agent <pf_install>/pingfederate/log/admin.log
   sudo chown -R dd-agent:dd-agent <pf_install>/pingfederate/log/audit.log
   ```
+## Support
 
 For any further assistance, contact [Datadog support][1].
 
