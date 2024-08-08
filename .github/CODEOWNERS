@@ -293,4 +293,4 @@ docs/developer/process/integration-release.md                         @DataDog/a
 
 # LEAVE THE FOLLOWING LOG OWNERSHIP LAST IN THE FILE
 # Make sure logs team is the full owner for all logs related files
-**/assets/logs/                          @DataDog/logs-backend
+**/assets/logs/                          @DataDog/logs-backend @DataDog/siem-logs-reviewers
