@@ -1,3 +1,7 @@
 # CHANGELOG - trend_micro_email_security
 
-<!-- towncrier release notes start -->
+## 1.0.0 / 2024-07-17
+
+***Added***:
+
+* Initial Release
