@@ -20,7 +20,7 @@ No additional installation is needed on your server.
 
 1. Ensure that [Neuron Monitor][10] is being used to expose the Prometheus endpoint.
 
-2. Edit the `aws_neuron.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your AWS Neuron performance data. See the [sample aws_neuron.d/conf.yaml][4] for all available configuration options.
+2. Edit the `aws_neuron.d/conf.yaml` file, which is located in the `conf.d/` folder at the root of your [Agent's configuration directory][12], to start collecting your AWS Neuron performance data. See the [sample aws_neuron.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
 
