@@ -1,2 +1,3 @@
-Enable local check only after installing it in agent container.
-This avoids crashing the agent container before we load the local version of the check.
+Enable local check only after installing it in agent docker container.
+This avoids crashing the container with a version of the check that comes bundled with the agent before we load the local version of the check.
+For now limited to docker since that addresses an immediate CI issue. We'll extend it to native agent once we observe it and iron out any kinks.
