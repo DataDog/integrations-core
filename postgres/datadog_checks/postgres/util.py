@@ -132,42 +132,42 @@ AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
 }
 
 DBM_MIGRATED_METRICS = {
-    'numbackends': ('postgresql.connections', AgentCheck.gauge),
+    'numbackends': ('connections', AgentCheck.gauge),
 }
 
 COMMON_METRICS = {
-    'xact_commit': ('postgresql.commits', AgentCheck.rate),
-    'xact_rollback': ('postgresql.rollbacks', AgentCheck.rate),
-    'blks_read': ('postgresql.disk_read', AgentCheck.rate),
-    'blks_hit': ('postgresql.buffer_hit', AgentCheck.rate),
-    'tup_returned': ('postgresql.rows_returned', AgentCheck.rate),
-    'tup_fetched': ('postgresql.rows_fetched', AgentCheck.rate),
-    'tup_inserted': ('postgresql.rows_inserted', AgentCheck.rate),
-    'tup_updated': ('postgresql.rows_updated', AgentCheck.rate),
-    'tup_deleted': ('postgresql.rows_deleted', AgentCheck.rate),
-    '2^31 - age(datfrozenxid) as wraparound': ('postgresql.before_xid_wraparound', AgentCheck.gauge),
+    'xact_commit': ('commits', AgentCheck.rate),
+    'xact_rollback': ('rollbacks', AgentCheck.rate),
+    'blks_read': ('disk_read', AgentCheck.rate),
+    'blks_hit': ('buffer_hit', AgentCheck.rate),
+    'tup_returned': ('rows_returned', AgentCheck.rate),
+    'tup_fetched': ('rows_fetched', AgentCheck.rate),
+    'tup_inserted': ('rows_inserted', AgentCheck.rate),
+    'tup_updated': ('rows_updated', AgentCheck.rate),
+    'tup_deleted': ('rows_deleted', AgentCheck.rate),
+    '2^31 - age(datfrozenxid) as wraparound': ('before_xid_wraparound', AgentCheck.gauge),
 }
 
-DATABASE_SIZE_METRICS = {
-    'pg_database_size(psd.datname) as pg_database_size': ('postgresql.database_size', AgentCheck.gauge)
-}
+DATABASE_SIZE_METRICS = {'pg_database_size(psd.datname) as pg_database_size': ('database_size', AgentCheck.gauge)}
 
 NEWER_92_METRICS = {
-    'deadlocks': ('postgresql.deadlocks', AgentCheck.rate),
-    'temp_bytes': ('postgresql.temp_bytes', AgentCheck.rate),
-    'temp_files': ('postgresql.temp_files', AgentCheck.rate),
+    'deadlocks': ('deadlocks', AgentCheck.rate),
+    'temp_bytes': ('temp_bytes', AgentCheck.rate),
+    'temp_files': ('temp_files', AgentCheck.rate),
+    'blk_read_time': ('blk_read_time', AgentCheck.monotonic_count),
+    'blk_write_time': ('blk_write_time', AgentCheck.monotonic_count),
 }
 
-CHECKSUM_METRICS = {'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.monotonic_count)}
+CHECKSUM_METRICS = {'checksum_failures': ('checksums.checksum_failures', AgentCheck.monotonic_count)}
 
 NEWER_14_METRICS = {
-    'session_time': ('postgresql.sessions.session_time', AgentCheck.monotonic_count),
-    'active_time': ('postgresql.sessions.active_time', AgentCheck.monotonic_count),
-    'idle_in_transaction_time': ('postgresql.sessions.idle_in_transaction_time', AgentCheck.monotonic_count),
-    'sessions': ('postgresql.sessions.count', AgentCheck.monotonic_count),
-    'sessions_abandoned': ('postgresql.sessions.abandoned', AgentCheck.monotonic_count),
-    'sessions_fatal': ('postgresql.sessions.fatal', AgentCheck.monotonic_count),
-    'sessions_killed': ('postgresql.sessions.killed', AgentCheck.monotonic_count),
+    'session_time': ('sessions.session_time', AgentCheck.monotonic_count),
+    'active_time': ('sessions.active_time', AgentCheck.monotonic_count),
+    'idle_in_transaction_time': ('sessions.idle_in_transaction_time', AgentCheck.monotonic_count),
+    'sessions': ('sessions.count', AgentCheck.monotonic_count),
+    'sessions_abandoned': ('sessions.abandoned', AgentCheck.monotonic_count),
+    'sessions_fatal': ('sessions.fatal', AgentCheck.monotonic_count),
+    'sessions_killed': ('sessions.killed', AgentCheck.monotonic_count),
 }
 
 QUERY_PG_STAT_DATABASE = {
@@ -180,7 +180,7 @@ QUERY_PG_STAT_DATABASE = {
     """.strip(),
     'columns': [
         {'name': 'db', 'type': 'tag'},
-        {'name': 'postgresql.deadlocks.count', 'type': 'monotonic_count'},
+        {'name': 'deadlocks.count', 'type': 'monotonic_count'},
     ],
 }
 
@@ -198,11 +198,11 @@ QUERY_PG_STAT_DATABASE_CONFLICTS = {
     """.strip(),
     'columns': [
         {'name': 'db', 'type': 'tag'},
-        {'name': 'postgresql.conflicts.tablespace', 'type': 'monotonic_count'},
-        {'name': 'postgresql.conflicts.lock', 'type': 'monotonic_count'},
-        {'name': 'postgresql.conflicts.snapshot', 'type': 'monotonic_count'},
-        {'name': 'postgresql.conflicts.bufferpin', 'type': 'monotonic_count'},
-        {'name': 'postgresql.conflicts.deadlock', 'type': 'monotonic_count'},
+        {'name': 'conflicts.tablespace', 'type': 'monotonic_count'},
+        {'name': 'conflicts.lock', 'type': 'monotonic_count'},
+        {'name': 'conflicts.snapshot', 'type': 'monotonic_count'},
+        {'name': 'conflicts.bufferpin', 'type': 'monotonic_count'},
+        {'name': 'conflicts.deadlock', 'type': 'monotonic_count'},
     ],
 }
 
@@ -210,7 +210,7 @@ QUERY_PG_UPTIME = {
     'name': 'pg_uptime',
     'query': "SELECT FLOOR(EXTRACT(EPOCH FROM current_timestamp - pg_postmaster_start_time()))",
     'columns': [
-        {'name': 'postgresql.uptime', 'type': 'gauge'},
+        {'name': 'uptime', 'type': 'gauge'},
     ],
 }
 
@@ -222,33 +222,31 @@ QUERY_PG_CONTROL_CHECKPOINT = {
         FROM pg_control_checkpoint();
 """,
     'columns': [
-        {'name': 'postgresql.control.timeline_id', 'type': 'gauge'},
-        {'name': 'postgresql.control.checkpoint_delay', 'type': 'gauge'},
+        {'name': 'control.timeline_id', 'type': 'gauge'},
+        {'name': 'control.checkpoint_delay', 'type': 'gauge'},
     ],
 }
 
 COMMON_BGW_METRICS = {
-    'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
-    'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
-    'buffers_checkpoint': ('postgresql.bgwriter.buffers_checkpoint', AgentCheck.monotonic_count),
-    'buffers_clean': ('postgresql.bgwriter.buffers_clean', AgentCheck.monotonic_count),
-    'maxwritten_clean': ('postgresql.bgwriter.maxwritten_clean', AgentCheck.monotonic_count),
-    'buffers_backend': ('postgresql.bgwriter.buffers_backend', AgentCheck.monotonic_count),
-    'buffers_alloc': ('postgresql.bgwriter.buffers_alloc', AgentCheck.monotonic_count),
+    'checkpoints_timed': ('bgwriter.checkpoints_timed', AgentCheck.monotonic_count),
+    'checkpoints_req': ('bgwriter.checkpoints_requested', AgentCheck.monotonic_count),
+    'buffers_checkpoint': ('bgwriter.buffers_checkpoint', AgentCheck.monotonic_count),
+    'buffers_clean': ('bgwriter.buffers_clean', AgentCheck.monotonic_count),
+    'maxwritten_clean': ('bgwriter.maxwritten_clean', AgentCheck.monotonic_count),
+    'buffers_backend': ('bgwriter.buffers_backend', AgentCheck.monotonic_count),
+    'buffers_alloc': ('bgwriter.buffers_alloc', AgentCheck.monotonic_count),
 }
 
-NEWER_91_BGW_METRICS = {
-    'buffers_backend_fsync': ('postgresql.bgwriter.buffers_backend_fsync', AgentCheck.monotonic_count)
-}
+NEWER_91_BGW_METRICS = {'buffers_backend_fsync': ('bgwriter.buffers_backend_fsync', AgentCheck.monotonic_count)}
 
 NEWER_92_BGW_METRICS = {
-    'checkpoint_write_time': ('postgresql.bgwriter.write_time', AgentCheck.monotonic_count),
-    'checkpoint_sync_time': ('postgresql.bgwriter.sync_time', AgentCheck.monotonic_count),
+    'checkpoint_write_time': ('bgwriter.write_time', AgentCheck.monotonic_count),
+    'checkpoint_sync_time': ('bgwriter.sync_time', AgentCheck.monotonic_count),
 }
 
 COMMON_ARCHIVER_METRICS = {
-    'archived_count': ('postgresql.archiver.archived_count', AgentCheck.monotonic_count),
-    'failed_count': ('postgresql.archiver.failed_count', AgentCheck.monotonic_count),
+    'archived_count': ('archiver.archived_count', AgentCheck.monotonic_count),
+    'failed_count': ('archiver.failed_count', AgentCheck.monotonic_count),
 }
 
 
@@ -265,7 +263,7 @@ COMMON_ARCHIVER_METRICS = {
 # pg_namespace at the end, removing an expensive nested loop.
 COUNT_METRICS = {
     'descriptors': [('schemaname', 'schema')],
-    'metrics': {'count (*)': ('postgresql.table.count', AgentCheck.gauge)},
+    'metrics': {'count (*)': ('table.count', AgentCheck.gauge)},
     'relation': False,
     'use_global_db_tag': True,
     'query': """
@@ -288,8 +286,8 @@ q1 = (
 )
 q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
 REPLICATION_METRICS_10 = {
-    q1: ('postgresql.replication_delay', AgentCheck.gauge),
-    q2: ('postgresql.replication_delay_bytes', AgentCheck.gauge),
+    q1: ('replication_delay', AgentCheck.gauge),
+    q2: ('replication_delay_bytes', AgentCheck.gauge),
 }
 
 q = (
@@ -297,21 +295,14 @@ q = (
     'pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
     '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
 )
-REPLICATION_METRICS_9_1 = {q: ('postgresql.replication_delay', AgentCheck.gauge)}
+REPLICATION_METRICS_9_1 = {q: ('replication_delay', AgentCheck.gauge)}
 
-q1 = (
-    'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) '
-    'AS replication_delay_bytes_dup'
-)
 q2 = (
     'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) '
     'AS replication_delay_bytes'
 )
 REPLICATION_METRICS_9_2 = {
-    # postgres.replication_delay_bytes is deprecated and will be removed in a future version.
-    # Please use postgresql.replication_delay_bytes instead.
-    q1: ('postgres.replication_delay_bytes', AgentCheck.gauge),
-    q2: ('postgresql.replication_delay_bytes', AgentCheck.gauge),
+    q2: ('replication_delay_bytes', AgentCheck.gauge),
 }
 
 REPLICATION_METRICS = {
@@ -334,19 +325,19 @@ REPLICATION_STATS_METRICS = {
     ],
     'metrics': {
         'GREATEST (0, EXTRACT(epoch from write_lag)) as write_lag': (
-            'postgresql.replication.wal_write_lag',
+            'replication.wal_write_lag',
             AgentCheck.gauge,
         ),
         'GREATEST (0, EXTRACT(epoch from flush_lag)) AS flush_lag': (
-            'postgresql.replication.wal_flush_lag',
+            'replication.wal_flush_lag',
             AgentCheck.gauge,
         ),
         'GREATEST (0, EXTRACT(epoch from replay_lag)) AS replay_lag': (
-            'postgresql.replication.wal_replay_lag',
+            'replication.wal_replay_lag',
             AgentCheck.gauge,
         ),
         'GREATEST (0, age(backend_xmin)) as backend_xmin_age': (
-            'postgresql.replication.backend_xmin_age',
+            'replication.backend_xmin_age',
             AgentCheck.gauge,
         ),
     },
@@ -374,11 +365,11 @@ QUERY_PG_STAT_WAL_RECEIVER = {
     """.strip(),
     'columns': [
         {'name': 'status', 'type': 'tag'},
-        {'name': 'postgresql.wal_receiver.connected', 'type': 'gauge'},
-        {'name': 'postgresql.wal_receiver.received_timeline', 'type': 'gauge'},
-        {'name': 'postgresql.wal_receiver.last_msg_send_age', 'type': 'gauge'},
-        {'name': 'postgresql.wal_receiver.last_msg_receipt_age', 'type': 'gauge'},
-        {'name': 'postgresql.wal_receiver.latest_end_age', 'type': 'gauge'},
+        {'name': 'wal_receiver.connected', 'type': 'gauge'},
+        {'name': 'wal_receiver.received_timeline', 'type': 'gauge'},
+        {'name': 'wal_receiver.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'wal_receiver.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'wal_receiver.latest_end_age', 'type': 'gauge'},
     ],
 }
 
@@ -402,9 +393,9 @@ QUERY_PG_REPLICATION_SLOTS = {
         {'name': 'slot_type', 'type': 'tag'},
         {'name': 'slot_persistence', 'type': 'tag'},
         {'name': 'slot_state', 'type': 'tag'},
-        {'name': 'postgresql.replication_slot.xmin_age', 'type': 'gauge'},
-        {'name': 'postgresql.replication_slot.restart_delay_bytes', 'type': 'gauge'},
-        {'name': 'postgresql.replication_slot.confirmed_flush_delay_bytes', 'type': 'gauge'},
+        {'name': 'replication_slot.xmin_age', 'type': 'gauge'},
+        {'name': 'replication_slot.restart_delay_bytes', 'type': 'gauge'},
+        {'name': 'replication_slot.confirmed_flush_delay_bytes', 'type': 'gauge'},
     ],
 }
 
@@ -415,14 +406,14 @@ QUERY_PG_REPLICATION_SLOTS_STATS = {
         {'name': 'slot_name', 'type': 'tag'},
         {'name': 'slot_type', 'type': 'tag'},
         {'name': 'slot_state', 'type': 'tag'},
-        {'name': 'postgresql.replication_slot.spill_txns', 'type': 'monotonic_count'},
-        {'name': 'postgresql.replication_slot.spill_count', 'type': 'monotonic_count'},
-        {'name': 'postgresql.replication_slot.spill_bytes', 'type': 'monotonic_count'},
-        {'name': 'postgresql.replication_slot.stream_txns', 'type': 'monotonic_count'},
-        {'name': 'postgresql.replication_slot.stream_count', 'type': 'monotonic_count'},
-        {'name': 'postgresql.replication_slot.stream_bytes', 'type': 'monotonic_count'},
-        {'name': 'postgresql.replication_slot.total_txns', 'type': 'monotonic_count'},
-        {'name': 'postgresql.replication_slot.total_bytes', 'type': 'monotonic_count'},
+        {'name': 'replication_slot.spill_txns', 'type': 'monotonic_count'},
+        {'name': 'replication_slot.spill_count', 'type': 'monotonic_count'},
+        {'name': 'replication_slot.spill_bytes', 'type': 'monotonic_count'},
+        {'name': 'replication_slot.stream_txns', 'type': 'monotonic_count'},
+        {'name': 'replication_slot.stream_count', 'type': 'monotonic_count'},
+        {'name': 'replication_slot.stream_bytes', 'type': 'monotonic_count'},
+        {'name': 'replication_slot.total_txns', 'type': 'monotonic_count'},
+        {'name': 'replication_slot.total_bytes', 'type': 'monotonic_count'},
     ],
     'query': """
 SELECT
@@ -440,8 +431,8 @@ JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
 CONNECTION_METRICS = {
     'descriptors': [],
     'metrics': {
-        'MAX(setting) AS max_connections': ('postgresql.max_connections', AgentCheck.gauge),
-        'SUM(numbackends)/MAX(setting) AS pct_connections': ('postgresql.percent_usage_connections', AgentCheck.gauge),
+        'MAX(setting) AS max_connections': ('max_connections', AgentCheck.gauge),
+        'SUM(numbackends)/MAX(setting) AS pct_connections': ('percent_usage_connections', AgentCheck.gauge),
     },
     'relation': False,
     'query': """
@@ -455,13 +446,13 @@ SELECT {metrics_columns}
 SLRU_METRICS = {
     'descriptors': [('name', 'slru_name')],
     'metrics': {
-        'blks_zeroed': ('postgresql.slru.blks_zeroed', AgentCheck.monotonic_count),
-        'blks_hit': ('postgresql.slru.blks_hit', AgentCheck.monotonic_count),
-        'blks_read': ('postgresql.slru.blks_read', AgentCheck.monotonic_count),
-        'blks_written ': ('postgresql.slru.blks_written', AgentCheck.monotonic_count),
-        'blks_exists': ('postgresql.slru.blks_exists', AgentCheck.monotonic_count),
-        'flushes': ('postgresql.slru.flushes', AgentCheck.monotonic_count),
-        'truncates': ('postgresql.slru.truncates', AgentCheck.monotonic_count),
+        'blks_zeroed': ('slru.blks_zeroed', AgentCheck.monotonic_count),
+        'blks_hit': ('slru.blks_hit', AgentCheck.monotonic_count),
+        'blks_read': ('slru.blks_read', AgentCheck.monotonic_count),
+        'blks_written ': ('slru.blks_written', AgentCheck.monotonic_count),
+        'blks_exists': ('slru.blks_exists', AgentCheck.monotonic_count),
+        'flushes': ('slru.flushes', AgentCheck.monotonic_count),
+        'truncates': ('slru.truncates', AgentCheck.monotonic_count),
     },
     'relation': False,
     'query': """
@@ -484,9 +475,9 @@ WITH snap AS (
 select pg_snapshot_xmin(pg_current_snapshot), pg_snapshot_xmax(pg_current_snapshot), count from snap, xip_count;
 """,
     'columns': [
-        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
-        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
-        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+        {'name': 'snapshot.xmin', 'type': 'gauge'},
+        {'name': 'snapshot.xmax', 'type': 'gauge'},
+        {'name': 'snapshot.xip_count', 'type': 'gauge'},
     ],
 }
 
@@ -502,9 +493,9 @@ WITH snap AS (
 select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_current_snapshot), count from snap, xip_count;
 """,
     'columns': [
-        {'name': 'postgresql.snapshot.xmin', 'type': 'gauge'},
-        {'name': 'postgresql.snapshot.xmax', 'type': 'gauge'},
-        {'name': 'postgresql.snapshot.xip_count', 'type': 'gauge'},
+        {'name': 'snapshot.xmin', 'type': 'gauge'},
+        {'name': 'snapshot.xmax', 'type': 'gauge'},
+        {'name': 'snapshot.xip_count', 'type': 'gauge'},
     ],
 }
 
@@ -522,12 +513,12 @@ SELECT v.datname, c.relname, v.phase,
         {'name': 'db', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
         {'name': 'phase', 'type': 'tag'},
-        {'name': 'postgresql.vacuum.heap_blks_total', 'type': 'gauge'},
-        {'name': 'postgresql.vacuum.heap_blks_scanned', 'type': 'gauge'},
-        {'name': 'postgresql.vacuum.heap_blks_vacuumed', 'type': 'gauge'},
-        {'name': 'postgresql.vacuum.index_vacuum_count', 'type': 'gauge'},
-        {'name': 'postgresql.vacuum.max_dead_tuples', 'type': 'gauge'},
-        {'name': 'postgresql.vacuum.num_dead_tuples', 'type': 'gauge'},
+        {'name': 'vacuum.heap_blks_total', 'type': 'gauge'},
+        {'name': 'vacuum.heap_blks_scanned', 'type': 'gauge'},
+        {'name': 'vacuum.heap_blks_vacuumed', 'type': 'gauge'},
+        {'name': 'vacuum.index_vacuum_count', 'type': 'gauge'},
+        {'name': 'vacuum.max_dead_tuples', 'type': 'gauge'},
+        {'name': 'vacuum.num_dead_tuples', 'type': 'gauge'},
     ],
 }
 
@@ -548,12 +539,12 @@ SELECT r.datname, c.relname, child.relname, r.phase,
         {'name': 'table', 'type': 'tag'},
         {'name': 'child_relation', 'type': 'tag_not_null'},
         {'name': 'phase', 'type': 'tag'},
-        {'name': 'postgresql.analyze.sample_blks_total', 'type': 'gauge'},
-        {'name': 'postgresql.analyze.sample_blks_scanned', 'type': 'gauge'},
-        {'name': 'postgresql.analyze.ext_stats_total', 'type': 'gauge'},
-        {'name': 'postgresql.analyze.ext_stats_computed', 'type': 'gauge'},
-        {'name': 'postgresql.analyze.child_tables_total', 'type': 'gauge'},
-        {'name': 'postgresql.analyze.child_tables_done', 'type': 'gauge'},
+        {'name': 'analyze.sample_blks_total', 'type': 'gauge'},
+        {'name': 'analyze.sample_blks_scanned', 'type': 'gauge'},
+        {'name': 'analyze.ext_stats_total', 'type': 'gauge'},
+        {'name': 'analyze.ext_stats_computed', 'type': 'gauge'},
+        {'name': 'analyze.child_tables_total', 'type': 'gauge'},
+        {'name': 'analyze.child_tables_done', 'type': 'gauge'},
     ],
 }
 
@@ -575,11 +566,11 @@ SELECT
         {'name': 'command', 'type': 'tag'},
         {'name': 'phase', 'type': 'tag'},
         {'name': 'index', 'type': 'tag_not_null'},
-        {'name': 'postgresql.cluster_vacuum.heap_tuples_scanned', 'type': 'gauge'},
-        {'name': 'postgresql.cluster_vacuum.heap_tuples_written', 'type': 'gauge'},
-        {'name': 'postgresql.cluster_vacuum.heap_blks_total', 'type': 'gauge'},
-        {'name': 'postgresql.cluster_vacuum.heap_blks_scanned', 'type': 'gauge'},
-        {'name': 'postgresql.cluster_vacuum.index_rebuild_count', 'type': 'gauge'},
+        {'name': 'cluster_vacuum.heap_tuples_scanned', 'type': 'gauge'},
+        {'name': 'cluster_vacuum.heap_tuples_written', 'type': 'gauge'},
+        {'name': 'cluster_vacuum.heap_blks_total', 'type': 'gauge'},
+        {'name': 'cluster_vacuum.heap_blks_scanned', 'type': 'gauge'},
+        {'name': 'cluster_vacuum.index_rebuild_count', 'type': 'gauge'},
     ],
 }
 
@@ -603,14 +594,14 @@ SELECT
         {'name': 'index', 'type': 'tag_not_null'},
         {'name': 'command', 'type': 'tag'},
         {'name': 'phase', 'type': 'tag'},
-        {'name': 'postgresql.create_index.lockers_total', 'type': 'gauge'},
-        {'name': 'postgresql.create_index.lockers_done', 'type': 'gauge'},
-        {'name': 'postgresql.create_index.blocks_total', 'type': 'gauge'},
-        {'name': 'postgresql.create_index.blocks_done', 'type': 'gauge'},
-        {'name': 'postgresql.create_index.tuples_total', 'type': 'gauge'},
-        {'name': 'postgresql.create_index.tuples_done', 'type': 'gauge'},
-        {'name': 'postgresql.create_index.partitions_total', 'type': 'gauge'},
-        {'name': 'postgresql.create_index.partitions_done', 'type': 'gauge'},
+        {'name': 'create_index.lockers_total', 'type': 'gauge'},
+        {'name': 'create_index.lockers_done', 'type': 'gauge'},
+        {'name': 'create_index.blocks_total', 'type': 'gauge'},
+        {'name': 'create_index.blocks_done', 'type': 'gauge'},
+        {'name': 'create_index.tuples_total', 'type': 'gauge'},
+        {'name': 'create_index.tuples_done', 'type': 'gauge'},
+        {'name': 'create_index.partitions_total', 'type': 'gauge'},
+        {'name': 'create_index.partitions_done', 'type': 'gauge'},
     ],
 }
 
@@ -624,9 +615,9 @@ EXTRACT (EPOCH FROM now() - min(modification))
   FROM pg_ls_waldir();
 """,
     'columns': [
-        {'name': 'postgresql.wal_count', 'type': 'gauge'},
-        {'name': 'postgresql.wal_size', 'type': 'gauge'},
-        {'name': 'postgresql.wal_age', 'type': 'gauge'},
+        {'name': 'wal_count', 'type': 'gauge'},
+        {'name': 'wal_size', 'type': 'gauge'},
+        {'name': 'wal_age', 'type': 'gauge'},
     ],
 }
 
@@ -640,23 +631,23 @@ SELECT wal_records, wal_fpi,
   FROM pg_stat_wal
 """,
     'columns': [
-        {'name': 'postgresql.wal.records', 'type': 'monotonic_count'},
-        {'name': 'postgresql.wal.full_page_images', 'type': 'monotonic_count'},
-        {'name': 'postgresql.wal.bytes', 'type': 'monotonic_count'},
-        {'name': 'postgresql.wal.buffers_full', 'type': 'monotonic_count'},
-        {'name': 'postgresql.wal.write', 'type': 'monotonic_count'},
-        {'name': 'postgresql.wal.sync', 'type': 'monotonic_count'},
-        {'name': 'postgresql.wal.write_time', 'type': 'monotonic_count'},
-        {'name': 'postgresql.wal.sync_time', 'type': 'monotonic_count'},
+        {'name': 'wal.records', 'type': 'monotonic_count'},
+        {'name': 'wal.full_page_images', 'type': 'monotonic_count'},
+        {'name': 'wal.bytes', 'type': 'monotonic_count'},
+        {'name': 'wal.buffers_full', 'type': 'monotonic_count'},
+        {'name': 'wal.write', 'type': 'monotonic_count'},
+        {'name': 'wal.sync', 'type': 'monotonic_count'},
+        {'name': 'wal.write_time', 'type': 'monotonic_count'},
+        {'name': 'wal.sync_time', 'type': 'monotonic_count'},
     ],
 }
 
 FUNCTION_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('funcname', 'function')],
     'metrics': {
-        'calls': ('postgresql.function.calls', AgentCheck.rate),
-        'total_time': ('postgresql.function.total_time', AgentCheck.rate),
-        'self_time': ('postgresql.function.self_time', AgentCheck.rate),
+        'calls': ('function.calls', AgentCheck.rate),
+        'total_time': ('function.total_time', AgentCheck.rate),
+        'self_time': ('function.self_time', AgentCheck.rate),
     },
     'query': """
 WITH overloaded_funcs AS (
@@ -732,13 +723,12 @@ SELECT COALESCE(d.datname, 'shared'), n.nspname, c.relname,
         {'name': 'db', 'type': 'tag'},
         {'name': 'schema', 'type': 'tag_not_null'},
         {'name': 'relation', 'type': 'tag_not_null'},
-        {'name': 'used_buffers', 'type': 'gauge'},
-        {'name': 'unused_buffers', 'type': 'gauge'},
-        {'name': 'usage_count', 'type': 'gauge'},
-        {'name': 'dirty_buffers', 'type': 'gauge'},
-        {'name': 'pinning_backends', 'type': 'gauge'},
+        {'name': 'buffercache.used_buffers', 'type': 'gauge'},
+        {'name': 'buffercache.unused_buffers', 'type': 'gauge'},
+        {'name': 'buffercache.usage_count', 'type': 'gauge'},
+        {'name': 'buffercache.dirty_buffers', 'type': 'gauge'},
+        {'name': 'buffercache.pinning_backends', 'type': 'gauge'},
     ],
-    'metric_prefix': 'postgresql.buffercache',
 }
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
@@ -800,14 +790,14 @@ ACTIVITY_METRICS_LT_8_3 = [
 
 # The metrics we collect from pg_stat_activity that we zip with one of the lists above
 ACTIVITY_DD_METRICS = [
-    ('postgresql.transactions.open', AgentCheck.gauge),
-    ('postgresql.transactions.idle_in_transaction', AgentCheck.gauge),
-    ('postgresql.active_queries', AgentCheck.gauge),
-    ('postgresql.waiting_queries', AgentCheck.gauge),
-    ('postgresql.active_waiting_queries', AgentCheck.gauge),
-    ('postgresql.activity.xact_start_age', AgentCheck.gauge),
-    ('postgresql.activity.backend_xid_age', AgentCheck.gauge),
-    ('postgresql.activity.backend_xmin_age', AgentCheck.gauge),
+    ('transactions.open', AgentCheck.gauge),
+    ('transactions.idle_in_transaction', AgentCheck.gauge),
+    ('active_queries', AgentCheck.gauge),
+    ('waiting_queries', AgentCheck.gauge),
+    ('active_waiting_queries', AgentCheck.gauge),
+    ('activity.xact_start_age', AgentCheck.gauge),
+    ('activity.backend_xid_age', AgentCheck.gauge),
+    ('activity.backend_xmin_age', AgentCheck.gauge),
 ]
 
 # The base query for postgres version >= 10
@@ -839,9 +829,9 @@ FROM pg_stat_subscription
 """,
     'columns': [
         {'name': 'subscription_name', 'type': 'tag'},
-        {'name': 'postgresql.subscription.last_msg_send_age', 'type': 'gauge'},
-        {'name': 'postgresql.subscription.last_msg_receipt_age', 'type': 'gauge'},
-        {'name': 'postgresql.subscription.latest_end_age', 'type': 'gauge'},
+        {'name': 'subscription.last_msg_send_age', 'type': 'gauge'},
+        {'name': 'subscription.last_msg_receipt_age', 'type': 'gauge'},
+        {'name': 'subscription.latest_end_age', 'type': 'gauge'},
     ],
 }
 
@@ -868,7 +858,7 @@ join pg_subscription ON pg_subscription.oid = pg_subscription_rel.srsubid""".str
         {'name': 'subscription_name', 'type': 'tag'},
         {'name': 'relation', 'type': 'tag'},
         {'name': 'state', 'type': 'tag'},
-        {'name': 'postgresql.subscription.state', 'type': 'gauge'},
+        {'name': 'subscription.state', 'type': 'gauge'},
     ],
 }
 
@@ -883,8 +873,8 @@ FROM pg_stat_subscription_stats
 """,
     'columns': [
         {'name': 'subscription_name', 'type': 'tag'},
-        {'name': 'postgresql.subscription.apply_error', 'type': 'monotonic_count'},
-        {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
+        {'name': 'subscription.apply_error', 'type': 'monotonic_count'},
+        {'name': 'subscription.sync_error', 'type': 'monotonic_count'},
     ],
 }
 
@@ -913,15 +903,15 @@ LIMIT 200
         {'name': 'backend_type', 'type': 'tag'},
         {'name': 'object', 'type': 'tag'},
         {'name': 'context', 'type': 'tag'},
-        {'name': 'postgresql.io.evictions', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.extend_time', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.extends', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.fsync_time', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.fsyncs', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.hits', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.read_time', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.reads', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.write_time', 'type': 'monotonic_count'},
-        {'name': 'postgresql.io.writes', 'type': 'monotonic_count'},
+        {'name': 'io.evictions', 'type': 'monotonic_count'},
+        {'name': 'io.extend_time', 'type': 'monotonic_count'},
+        {'name': 'io.extends', 'type': 'monotonic_count'},
+        {'name': 'io.fsync_time', 'type': 'monotonic_count'},
+        {'name': 'io.fsyncs', 'type': 'monotonic_count'},
+        {'name': 'io.hits', 'type': 'monotonic_count'},
+        {'name': 'io.read_time', 'type': 'monotonic_count'},
+        {'name': 'io.reads', 'type': 'monotonic_count'},
+        {'name': 'io.write_time', 'type': 'monotonic_count'},
+        {'name': 'io.writes', 'type': 'monotonic_count'},
     ],
 }

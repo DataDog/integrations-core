@@ -678,6 +678,10 @@ coverage:
         target: 75
         flags:
         - fluxcd
+      kyverno:
+        target: 75
+        flags:
+        - kyverno
       tibco_ems:
         target: 75
         flags:
@@ -686,10 +690,6 @@ coverage:
         target: 75
         flags:
         - vllm
-      kyverno:
-        target: 75
-        flags:
-        - kyverno
       vSphere:
         target: 75
         flags:

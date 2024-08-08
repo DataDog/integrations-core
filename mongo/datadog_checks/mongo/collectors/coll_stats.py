@@ -29,6 +29,13 @@ class CollStatsCollector(MongoCollector):
             return self.coll_names
         return api.list_authorized_collections(self.db_name)
 
+    def __calculate_oplatency_avg(self, latency_stats):
+        """Calculate the average operation latency."""
+        for latency in latency_stats.values():
+            if latency['ops'] > 0:
+                latency['latency_avg'] = round(latency.get('latency', 0) / latency['ops'], 1)
+        return latency_stats
+
     def collect(self, api):
         coll_names = self._get_collections(api)
         for coll_name in coll_names:
@@ -45,6 +52,7 @@ class CollStatsCollector(MongoCollector):
                 storage_stats = coll_stats.get('storageStats', {})
                 latency_stats = coll_stats.get('latencyStats', {})
                 query_stats = coll_stats.get('queryExecStats', {})
+                latency_stats = self.__calculate_oplatency_avg(latency_stats)
                 payload = {'collection': {**storage_stats, **latency_stats, **query_stats}}
                 additional_tags = ["db:%s" % self.db_name, "collection:%s" % coll_name]
                 if coll_stats.get('shard'):

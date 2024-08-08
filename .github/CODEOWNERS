@@ -253,6 +253,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mimecast/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /mimecast/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/palo_alto_cortex_xdr/                                               @DataDog/saas-integrations
+/palo_alto_cortex_xdr/*.md                                           @DataDog/saas-integrations @DataDog/documentation
+/palo_alto_cortex_xdr/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
+/palo_alto_cortex_xdr/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /sophos_central_cloud/                                               @DataDog/saas-integrations
 /sophos_central_cloud/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /sophos_central_cloud/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
@@ -263,6 +268,15 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_one/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /ping_one/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/ping_federate/                                                      @DataDog/saas-integrations
+/ping_federate/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
+/ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
+/ping_federate/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/trend_micro_email_security/                                        @DataDog/saas-integrations
+/trend_micro_email_security/*.md                                    @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_email_security/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_email_security/assets/logs/                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
@@ -279,4 +293,4 @@ docs/developer/process/integration-release.md                         @DataDog/a
 
 # LEAVE THE FOLLOWING LOG OWNERSHIP LAST IN THE FILE
 # Make sure logs team is the full owner for all logs related files
-**/assets/logs/                          @DataDog/logs-backend
+**/assets/logs/                          @DataDog/logs-backend @DataDog/siem-logs-reviewers

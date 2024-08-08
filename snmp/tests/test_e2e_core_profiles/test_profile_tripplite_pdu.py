@@ -167,6 +167,7 @@ def test_e2e_profile_tripplite_pdu(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.850.1.1.1',
         'vendor': 'tripplite',
         'device_type': 'pdu',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

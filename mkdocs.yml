@@ -88,7 +88,6 @@ nav:
       - tutorials/snmp/profile-format.md
       - tutorials/snmp/sim-format.md
       - tutorials/snmp/tools.md
-    - Memory profiling: tutorials/memory-profiling.md
   - Architecture:
     - IBM i: architecture/ibm_i.md
     - SNMP: architecture/snmp.md

@@ -85,9 +85,9 @@ See [Configure integrations with Autodiscovery on Kubernetes][4] or [Configure i
 To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio v1.5 or later, apply the following pod annotations for the deployment `istiod` in the `istio-system` namespace:
 
 ```yaml
-ad.datadoghq.com/discovery.check_names: '["istio"]'
-ad.datadoghq.com/discovery.init_configs: '[{}]'
-ad.datadoghq.com/discovery.instances: |
+ad.datadoghq.com/<CONTAINER_IDENTIFIER>.check_names: '["istio"]'
+ad.datadoghq.com/<CONTAINER_IDENTIFIER>.init_configs: '[{}]'
+ad.datadoghq.com/<CONTAINER_IDENTIFIER>.instances: |
      [
        {
          "istiod_endpoint": "http://%%host%%:15014/metrics",
@@ -96,9 +96,9 @@ ad.datadoghq.com/discovery.instances: |
      ]
 ```
 
-The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the [Istio documentation][23] for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
+Replace `<CONTAINER_IDENTIFIER>` with the name (`.spec.containers[i].name`) of your container. For example, `discovery`.
 
-These annotations reference `discovery` to match the default container name of the pods for the `istiod` deployment. If your container name is different, adjust accordingly.
+The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the [Istio documentation][23] for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 #### Disable sidecar injection for Datadog Agent pods
 
@@ -146,11 +146,43 @@ kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"anno
 
 #### Log collection
 
-Istio contains two types of logs: Envoy access logs that are collected with the [Envoy integration][11] and [Istio logs][12].
-
 _Available for Agent versions >6.0_
 
-To enable log collection in Kubernetes, see [Kubernetes Log Collection][13].
+First, enable the Datadog Agent to perform log collection in Kubernetes. See [Kubernetes Log Collection][13].
+
+#### Istio logs
+
+To collect [Istio logs][12], apply the following annotation to the pod where Istio containers are running:
+
+```yaml
+ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs: |
+     [
+       {
+         "source": "istio",
+         "service": "<SERVICE_NAME>"
+       }
+     ]
+```
+
+Replace `<CONTAINER_IDENTIFIER>` with the name (`.spec.containers[i].name`) of your container. Replace `<SERVICE_NAME>` with the name of your Istio service.
+
+#### Envoy access logs
+
+To collect Envoy access logs:
+1. Ensure the [Envoy integration][11] is installed.
+2. Apply the following annotation to the pod where Envoy is running:
+
+```yaml
+ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs: |
+     [
+       {
+         "type": "file",
+         "path": "/var/log/envoy.log",
+         "source": "envoy"
+       }
+     ]
+```
+Replace `<CONTAINER_IDENTIFIER>` with the name (`.spec.containers[i].name`) of your container.
 
 ### Validation
 

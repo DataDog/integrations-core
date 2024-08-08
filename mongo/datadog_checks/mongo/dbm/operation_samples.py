@@ -5,16 +5,17 @@
 
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from bson import json_util
+
+from datadog_checks.mongo.dbm.utils import format_key_name
 
 try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.tracking import tracked_method
@@ -75,7 +76,7 @@ class MongoOperationSamples(DBMAsyncJob):
         super(MongoOperationSamples, self).__init__(
             check,
             rate_limit=1 / self._collection_interval,
-            run_sync=self._operation_samples_config.get("run_sync", False),  # Default to running sync
+            run_sync=self._operation_samples_config.get("run_sync", False),
             enabled=self._operation_samples_config["enabled"],
             dbms="mongo",
             min_collection_interval=check._config.min_collection_interval,
@@ -91,7 +92,6 @@ class MongoOperationSamples(DBMAsyncJob):
     def collect_operation_samples(self):
         if not self._should_collect_operation_samples():
             return
-
         now = time.time()
 
         activities = []
@@ -103,7 +103,6 @@ class MongoOperationSamples(DBMAsyncJob):
                 self._check.log.debug("Sending operation sample: %s", sample)
                 self._check.database_monitoring_query_sample(json_util.dumps(sample))
             activities.append(activity)
-
         activities_payload = self._create_activities_payload(now, activities)
         self._check.log.debug("Sending activities payload: %s", activities_payload)
         self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
@@ -111,7 +110,7 @@ class MongoOperationSamples(DBMAsyncJob):
         self._last_sampled_timestamp = now
 
     def _should_collect_operation_samples(self) -> bool:
-        deployment = self._check.api_client.deployment_type
+        deployment = self._check.deployment_type
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping operation samples collection on arbiter node")
             return False
@@ -133,6 +132,7 @@ class MongoOperationSamples(DBMAsyncJob):
                 )
 
                 if not self._should_explain(
+                    namespace=operation.get("ns"),
                     op=operation.get("op"),
                     command=command,
                     explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
@@ -168,9 +168,8 @@ class MongoOperationSamples(DBMAsyncJob):
         if db not in databases_monitored:
             self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
             return False
-
-        if db in SYSTEM_DATABASES:
-            self._check.log.debug("Skipping operation for system database %s", db)
+        if db == "admin":
+            self._check.log.debug("Skipping operation for admin database: %s", operation)
             return False
 
         # Skip operations without a command
@@ -201,7 +200,9 @@ class MongoOperationSamples(DBMAsyncJob):
 
         return True
 
-    def _should_explain(self, op: Optional[str], command: dict, explain_plan_cache_key: Tuple[str, str]) -> bool:
+    def _should_explain(
+        self, namespace: str, op: Optional[str], command: dict, explain_plan_cache_key: Tuple[str, str]
+    ) -> bool:
         if not op or op == "none":
             # Skip operations that are not queries
             self._check.log.debug("Skipping explain operation without operation type: %s", command)
@@ -215,6 +216,11 @@ class MongoOperationSamples(DBMAsyncJob):
         if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
             # Skip operations as they are not queries
             self._check.log.debug("Skipping operations that are not queries: %s", op, command)
+            return False
+
+        db, _ = namespace.split(".", 1)
+        if db in SYSTEM_DATABASES:
+            self._check.log.debug("Skipping operation for system database %s", db)
             return False
 
         if not self._explained_operations_ratelimiter.acquire(explain_plan_cache_key):
@@ -362,13 +368,19 @@ class MongoOperationSamples(DBMAsyncJob):
             "num_yields": operation.get("numYields", 0),  # int
             # Locks
             "waiting_for_lock": operation.get("waitingForLock", False),  # bool
-            "locks": self._format_key_name(operation.get("locks", {})),  # dict
-            "lock_stats": self._format_key_name(operation.get("lockStats", {})),  # dict
+            "locks": format_key_name(self._check.convert_to_underscore_separated, operation.get("locks", {})),  # dict
+            "lock_stats": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("lockStats", {})
+            ),  # dict
             # Flow control
             "waiting_for_flow_control": operation.get("waitingForFlowControl", False),  # bool
-            "flow_control_stats": self._format_key_name(operation.get("flowControlStats", {})),  # dict
+            "flow_control_stats": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("flowControlStats", {})
+            ),  # dict
             # Latches
-            "waiting_for_latch": self._format_key_name(operation.get("waitingForLatch", {})),  # dict
+            "waiting_for_latch": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("waitingForLatch", {})
+            ),  # dict
             # cursor
             "cursor": self._get_operation_cursor(operation),  # dict
         }
@@ -448,17 +460,3 @@ class MongoOperationSamples(DBMAsyncJob):
             "timestamp": now * 1000,
             "mongodb_activity": activities,
         }
-
-    def _format_key_name(self, metric_dict: Dict) -> dict:
-        # convert camelCase to snake_case
-        formatted = {}
-        for key, value in metric_dict.items():
-            formatted_key = to_native_string(self._check.convert_to_underscore_separated(key))
-            if formatted_key in metric_dict:
-                # If the formatted_key already exists (conflict), use the original key
-                formatted_key = key
-            if isinstance(value, dict):
-                formatted[formatted_key] = self._format_key_name(value)
-            else:
-                formatted[formatted_key] = value
-        return formatted
