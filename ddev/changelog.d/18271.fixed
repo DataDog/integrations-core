@@ -1,0 +1,2 @@
+Enable local check only after installing it in agent container.
+This avoids crashing the agent container before we load the local version of the check.
