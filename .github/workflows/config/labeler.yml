@@ -451,6 +451,8 @@ integration/strimzi:
 - strimzi/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/suricata:
+- suricata/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
