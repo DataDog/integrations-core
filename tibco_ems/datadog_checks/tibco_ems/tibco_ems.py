@@ -7,7 +7,7 @@ from typing import Any  # noqa: F401
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
-from .constants import SHOW_METRIC_DATA, unit_pattern
+from .constants import SHOW_METRIC_DATA, UNIT_PATTERN
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 7222
@@ -23,7 +23,7 @@ class TibcoEMSCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(TibcoEMSCheck, self).__init__(name, init_config, instances)
         # Allow to specify a complete command for tibemsadmin such as `docker exec <container> tibemsadmin`
-        default_tibemsadmin_cmd = init_config.get('tibemsadmin', 'tibemsadmin')
+        default_tibemsadmin_cmd = init_config.get('tibemsadmin', '/usr/bin/tibemsadmin')
         tibemsadmin_cmd = self.instance.get('tibemsadmin', default_tibemsadmin_cmd).split()
         host = self.instance.get('host', DEFAULT_HOST)
         port = self.instance.get('port', DEFAULT_PORT)
@@ -85,7 +85,7 @@ class TibcoEMSCheck(AgentCheck):
         return get_subprocess_output(self.cmd, self.log)
 
     def _parse_unit(self, value):
-        match = unit_pattern.match(value)
+        match = UNIT_PATTERN.match(value)
         if match:
             return {'value': float(match.group('value')), 'unit': match.group('unit')}
         return value
@@ -122,7 +122,7 @@ class TibcoEMSCheck(AgentCheck):
         def parse_rate(server_data, metric_key, value):
             rates = value.split(',')
             count_match = rate_pattern.match(rates[0].strip())
-            unit_match = unit_pattern.match(rates[1].strip())
+            unit_match = UNIT_PATTERN.match(rates[1].strip())
             if count_match and unit_match:
                 server_data[f"{key}"] = float(count_match.group('value'))
                 server_data[f"{key}_size"] = {}

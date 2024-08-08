@@ -28,7 +28,7 @@ SERVER_METRIC_KEYS = [
     'uptime',
 ]
 
-unit_pattern = re.compile(r'(?P<value>\d+\.?\d*)\s*(?P<unit>\S+)')
+UNIT_PATTERN = re.compile(r'(?P<value>\d+\.?\d*)\s*(?P<unit>\S+)')
 
 SHOW_METRIC_DATA = {
     'show server': {

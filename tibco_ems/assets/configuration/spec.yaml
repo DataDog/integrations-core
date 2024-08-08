@@ -48,7 +48,7 @@ files:
         The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
         , which can be overwritten on an instance.
 
-        This overrides `ibemsadmin` defined in `init_config`.
+        This overrides `tibemsadmin` defined in `init_config`.
       value:
         type: string
     - template: instances/default

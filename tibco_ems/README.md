@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [[TIBCO Enterprise Message Service][1] through the Datadog Agent. This integration allows you to do ...
+This check monitors [TIBCO Enterprise Message Service][1] through the Datadog Agent.
 
 ## Setup
 
