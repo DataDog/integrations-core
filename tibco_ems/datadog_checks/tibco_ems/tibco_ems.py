@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import subprocess
 from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 from .constants import SHOW_METRIC_DATA, UNIT_PATTERN
 
@@ -47,13 +47,11 @@ class TibcoEMSCheck(AgentCheck):
 
     def check(self, _):
 
-        output, err, code = self.run_tibco_command()
-        if err or 'Error:' in output or code != 0:
-            self.log.error('Error running command: %s', err)
-            return
+        output = self.run_tibco_command()
+        decoded_output = output.decode('utf-8')
 
         # Sanitize the output
-        cleaned_data = output.replace('\r', '').strip()
+        cleaned_data = decoded_output.replace('\r', '').strip()
 
         # Split the output into command sections
         sections = self._section_output(cleaned_data)
@@ -82,7 +80,13 @@ class TibcoEMSCheck(AgentCheck):
                     self._submit_metrics_factory(metric_prefix, metric_entry, metric_keys, tag_keys)
 
     def run_tibco_command(self):
-        return get_subprocess_output(self.cmd, self.log)
+        try:
+            output = subprocess.run(self.cmd, capture_output=True).stdout
+        except subprocess.CalledProcessError as e:
+            self.log.error('Error running command: %s', e)
+            return
+
+        return output
 
     def _parse_unit(self, value):
         match = UNIT_PATTERN.match(value)

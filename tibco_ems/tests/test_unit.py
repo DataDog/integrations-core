@@ -49,7 +49,7 @@ def test_parse_show_server():
     """
     Test the parse_show_server method
     """
-    section = SHOW_MAP['show server']['section']
+    section = SHOW_MAP['show server']['section'].decode('utf-8')
     regex = SHOW_MAP['show server']['regex']
 
     check = TibcoEMSCheck('tibco_ems', {}, [{}])
@@ -149,6 +149,6 @@ def test_show_metrics(dd_run_check, aggregator, instance, output, expected_metri
 )
 def test_parse_factory(data, regex, expected_result):
     check = TibcoEMSCheck('tibco_ems', {}, [{}])
-    result = check._parse_factory(data, regex)
+    result = check._parse_factory(data.decode('utf-8'), regex)
 
     assert result == expected_result

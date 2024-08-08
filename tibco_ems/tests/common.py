@@ -74,7 +74,7 @@ METRIC_DATA = [
 def _read_fixture(filename):
     with open(os.path.join(HERE, 'fixtures', filename)) as f:
         contents = f.read()
-        return contents, "", 0
+        return contents.encode('utf-8')
 
 
 def mock_output(filename):
@@ -83,7 +83,7 @@ def mock_output(filename):
 
 SHOW_MAP = {
     'show server': {
-        'section': mock_output('show_server')[0],
+        'section': mock_output('show_server'),
         'regex': SHOW_METRIC_DATA['show server']['regex'],
         'expected_result': {
             'version': '10.1.0',
@@ -144,7 +144,7 @@ SHOW_MAP = {
         ],
     },
     'show queues': {
-        'section': mock_output('show_queues')[0],
+        'section': mock_output('show_queues'),
         'regex': SHOW_METRIC_DATA['show queues']['regex'],
         'expected_result': [
             {
@@ -285,7 +285,7 @@ SHOW_MAP = {
         ],
     },
     'show topics': {
-        'section': mock_output('show_topics')[0],
+        'section': mock_output('show_topics'),
         'regex': SHOW_METRIC_DATA['show topics']['regex'],
         'expected_result': [
             {
@@ -331,7 +331,7 @@ SHOW_MAP = {
         ],
     },
     'show stat consumers': {
-        'section': mock_output('show_stat_consumers')[0],
+        'section': mock_output('show_stat_consumers'),
         'regex': SHOW_METRIC_DATA['show stat consumers']['regex'],
         'expected_result': [
             {
@@ -353,7 +353,7 @@ SHOW_MAP = {
         ],
     },
     'show stat producers': {
-        'section': mock_output('show_stat_producers')[0],
+        'section': mock_output('show_stat_producers'),
         'regex': SHOW_METRIC_DATA['show stat producers']['regex'],
         'expected_result': [
             {
@@ -375,7 +375,7 @@ SHOW_MAP = {
         ],
     },
     'show connections full': {
-        'section': mock_output('show_connections')[0],
+        'section': mock_output('show_connections'),
         'regex': SHOW_METRIC_DATA['show connections full']['regex'],
         'expected_result': [
             {
@@ -413,7 +413,7 @@ SHOW_MAP = {
         ],
     },
     'show durables': {
-        'section': mock_output('show_durables')[0],
+        'section': mock_output('show_durables'),
         'regex': SHOW_METRIC_DATA['show durables']['regex'],
         'expected_result': [
             {
