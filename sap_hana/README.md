@@ -91,6 +91,27 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 2. [Restart the Agent][5].
 
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `sap_hana.d/conf.yaml` file to start collecting your SAP HANA logs, adjusting the `service` value to configure them for your environment:
+
+   ```yaml
+   logs:
+     - type: integration
+       source: sap_hana
+       service: sap_hana
+   ```
+
+    See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
 ### Validation
 
 Run the [Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
