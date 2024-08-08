@@ -47,6 +47,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 ## Troubleshooting
 
 In containerized environments, ensure that the Agent has network access to the endpoints specified in the `aws_neuron.d/conf.yaml` file.
+
 Need help? Contact [Datadog support][9].
 
 
