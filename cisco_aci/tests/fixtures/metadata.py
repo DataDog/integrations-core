@@ -36,6 +36,7 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.0',
         'model': 'N9K-C93180YC-FX',
+        'fabric_st': 'active',
         'name': 'pod-1-node-101',
         'serial_number': 'FDO20440TS1',
         'status': 1,
@@ -67,6 +68,7 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.1',
         'model': 'N9K-C93180YC-FX',
+        'fabric_st': 'active',
         'name': 'pod-1-node-102',
         'serial_number': 'FDO20510HCA',
         'status': 1,
@@ -98,6 +100,7 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.2',
         'model': 'N9K-C9336PQ',
+        'fabric_st': 'active',
         'name': 'pod-1-node-202',
         'serial_number': 'SAL2014N5T7',
         'status': 1,
@@ -128,9 +131,10 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.3',
         'model': 'APIC-SERVER-M1',
+        'fabric_st': 'unknown',
         'name': 'pod-1-node-3',
         'serial_number': 'FCH1927V11T',
-        'status': 4,
+        'status': 2,
         'vendor': 'cisco',
         'version': 'A',
     },
@@ -158,9 +162,10 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.4',
         'model': 'APIC-SERVER-M1',
+        'fabric_st': 'unknown',
         'name': 'pod-1-node-1',
         'serial_number': 'FCH1928V0SL',
-        'status': 4,
+        'status': 2,
         'vendor': 'cisco',
         'version': 'A',
     },
@@ -189,6 +194,7 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.5',
         'model': 'N9K-C9336PQ',
+        'fabric_st': 'active',
         'name': 'pod-1-node-201',
         'serial_number': 'SAL2014N5U4',
         'status': 1,
@@ -219,9 +225,10 @@ DEVICE_METADATA = [
         ],
         'ip_address': '10.0.200.6',
         'model': 'APIC-SERVER-M1',
+        'fabric_st': 'unknown',
         'name': 'pod-1-node-2',
         'serial_number': 'FCH1928V06Q',
-        'status': 4,
+        'status': 2,
         'vendor': 'cisco',
         'version': 'A',
     },
@@ -2734,6 +2741,16 @@ INTERFACE_METADATA = [
     },
 ]
 
+IP_ADDRESS_METADATA = [
+    {'device_id': 'default:10.0.200.0', 'ip_address': '1.1.0.101', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.1', 'ip_address': '1.1.0.102', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.2', 'ip_address': '1.1.0.202', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.3', 'ip_address': '1.1.0.3', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.4', 'ip_address': '1.1.0.1', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.5', 'ip_address': '1.1.0.201', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.6', 'ip_address': '1.1.0.2', 'prefix_len': '32'},
+]
+
 EXPECTED_DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
 
 # "2012-01-14 03:21:34" in seconds
@@ -2741,18 +2758,20 @@ MOCK_TIME_EPOCH = 1326511294
 
 EXPECTED_INTERFACE_METADATA = [InterfaceMetadata(**im) for im in INTERFACE_METADATA]
 
-EXPECTED_DEVICE_METADATA_EVENTS = [
-    NetworkDevicesMetadata(namespace='default', devices=[ndm_meta], collect_timestamp=MOCK_TIME_EPOCH)
-    for ndm_meta in DEVICE_METADATA
-]
-EXPECTED_INTERFACE_METADATA_EVENTS = [
+EXPECTED_METADATA_EVENTS = [
     NetworkDevicesMetadata(
-        namespace='default', interfaces=INTERFACE_METADATA[0:100], collect_timestamp=MOCK_TIME_EPOCH
+        namespace='default',
+        devices=DEVICE_METADATA,
+        interfaces=INTERFACE_METADATA[0:93],
+        collect_timestamp=MOCK_TIME_EPOCH,
     ),
     NetworkDevicesMetadata(
-        namespace='default', interfaces=INTERFACE_METADATA[100:200], collect_timestamp=MOCK_TIME_EPOCH
+        namespace='default', interfaces=INTERFACE_METADATA[93:193], collect_timestamp=MOCK_TIME_EPOCH
     ),
     NetworkDevicesMetadata(
-        namespace='default', interfaces=INTERFACE_METADATA[200::], collect_timestamp=MOCK_TIME_EPOCH
+        namespace='default',
+        interfaces=INTERFACE_METADATA[193::],
+        ip_addresses=IP_ADDRESS_METADATA,
+        collect_timestamp=MOCK_TIME_EPOCH,
     ),
 ]

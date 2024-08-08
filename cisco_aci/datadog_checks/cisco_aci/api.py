@@ -297,6 +297,13 @@ class Api:
         response = self.make_request(path)
         return self._parse_response(response)
 
+    def get_netflow_exporter_policies(self):
+        # only get netflow exporter policies that have a custom source IP
+        query = 'query-target-filter=and(eq(netflowExporterPol.sourceIpType,"custom-src-ip"))'
+        path = '/api/node/class/netflowExporterPol.json?{}'.format(query)
+        response = self.make_request(path)
+        return self._parse_response(response)
+
     def get_eqpt_capacity(self, eqpt):
         base_path = '/api/class/eqptcapacityEntity.json'
         base_query = 'query-target=self&rsp-subtree-include=stats&rsp-subtree-class='
