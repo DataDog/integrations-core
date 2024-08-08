@@ -251,7 +251,11 @@ class SqlserverActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_deadlocks(self):
         deadlock_xmls = self._deadlocks.collect_deadlocks()
+        if len(deadlock_xmls) == 0:
+            self._log.error("Collected 0 DEADLOCKS")
+            return 
         deadlocks_event = self._create_deadlock_event(deadlock_xmls)
+        self._log.error("DEADLOCK EVENTS TO BE SENT: {}".format(deadlocks_event))
         payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
         self._check.database_monitoring_query_activity(payload)
         
