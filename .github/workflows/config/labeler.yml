@@ -99,6 +99,8 @@ integration/cisco_duo:
 - cisco_duo/**/*
 integration/cisco_sdwan:
 - cisco_sdwan/**/*
+integration/cisco_secure_endpoint:
+- cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
 - cisco_secure_firewall/**/*
 integration/cisco_umbrella_dns:
@@ -301,6 +303,8 @@ integration/mesos_master:
 - mesos_master/**/*
 integration/mesos_slave:
 - mesos_slave/**/*
+integration/mimecast:
+- mimecast/**/*
 integration/mongo:
 - mongo/**/*
 integration/mysql:
@@ -343,6 +347,8 @@ integration/oracle:
 - oracle/**/*
 integration/otel:
 - otel/**/*
+integration/palo_alto_cortex_xdr:
+- palo_alto_cortex_xdr/**/*
 integration/palo_alto_panorama:
 - palo_alto_panorama/**/*
 integration/pan_firewall:
@@ -353,6 +359,8 @@ integration/pgbouncer:
 - pgbouncer/**/*
 integration/php_fpm:
 - php_fpm/**/*
+integration/ping_federate:
+- ping_federate/**/*
 integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
@@ -429,6 +437,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sophos_central_cloud:
+- sophos_central_cloud/**/*
 integration/spark:
 - spark/**/*
 integration/sqlserver:
@@ -443,6 +453,8 @@ integration/strimzi:
 - strimzi/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/suricata:
+- suricata/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
@@ -479,6 +491,8 @@ integration/traefik_mesh:
 - traefik_mesh/**/*
 integration/traffic_server:
 - traffic_server/**/*
+integration/trend_micro_email_security:
+- trend_micro_email_security/**/*
 integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:

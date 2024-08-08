@@ -98,7 +98,6 @@ class PostgresConfig:
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', True)):
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
-        self.custom_queries = instance.get('custom_queries', [])
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))

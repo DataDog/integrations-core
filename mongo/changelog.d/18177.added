@@ -1,0 +1,8 @@
+Add database and collection level average latency metrics by operation type
+- mongodb.oplatencies.commands.latency.avg
+- mongodb.oplatencies.reads.latency.avg
+- mongodb.oplatencies.writes.latency.avg
+- mongodb.collection.commands.latency.avg
+- mongodb.collection.reads.latency.avg
+- mongodb.collection.transactions.latency.avg
+- mongodb.collection.writes.latency.avg

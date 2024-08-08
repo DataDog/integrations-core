@@ -11,6 +11,7 @@ files:
       value:
         example: false
         type: boolean
+    - template: init_config/db
     - template: init_config/default
   - template: instances
     options:
@@ -306,26 +307,18 @@ files:
         type: integer
         display_default: 200
         example: 200
-    - name: custom_queries
-      description: |
-        Define custom queries to collect custom metrics from your PostgreSQL
-        See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
-        https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
-      value:
-        type: array
-        items:
-          type: object
-          properties: []
-        example:
-            - metric_prefix: postgresql
-              query: <QUERY>
-              columns:
-                - name: <COLUNMS_1_NAME>
-                  type: <COLUMNS_1_TYPE>
-                - name: <COLUNMS_2_NAME>
-                  type: <COLUMNS_2_TYPE>
-              tags:
-                - <TAG_KEY>:<TAG_VALUE>
+    - template: instances/db
+      overrides:
+        custom_queries.value.example:
+          - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+            columns:
+              - name: foo
+                type: tag
+              - name: event.total
+                type: gauge
+            tags:
+              - test:postgresql
+            metric_prefix: postgresql
     - name: database_autodiscovery
       description: |
         Define the configuration for database autodiscovery.
@@ -569,7 +562,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+            Enable collection of database schemas. Requires `dbm: true`.
           value:
             type: boolean
             example: false
@@ -593,6 +586,72 @@ files:
           value:
             type: number
             example: 600
+        - name: include_databases
+          description: |
+            A list of regex patterns to include databases. 
+            Any database whose name matches any one of these patterns will be included. 
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydb"
+        - name: exclude_databases
+          description: |
+            A list of regex patterns to exclude databases. 
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+        - name: include_schemas
+          description: |
+            A list of regex patterns to include schemas. 
+            Any schema whose name matches any one of these patterns will be included.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "myschema"
+        - name: exclude_schemas
+          description: |
+            A list of regex patterns to exclude schemas. 
+            Any schema whose name matches any one of these patterns will be excluded.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privateschema.*"
+        - name: include_tables
+          description: |
+            A list of regex patterns to include tables. 
+            Any table whose name matches any one of these patterns will be included.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "users.*"
+        - name: exclude_tables
+          description: |
+            A list of regex patterns to exclude tables. 
+            Any table whose name matches any one of these patterns will be excluded.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "customer.*"
 
     - name: aws
       description: |
@@ -636,12 +695,18 @@ files:
             To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
             If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
             `aws.region` is required to enable IAM Authentication.
+
+            Optionally, you can set `aws.managed_authentication.role_arn` to specify the IAM role ARN.
+            This can be used to perform cross-account authentication.
           value:
             type: object
             properties:
             - name: enabled
               type: boolean
               example: false
+            - name: role_arn
+              type: string
+              example: arn:aws:iam::123456789012:role/MyRole
 
     - name: gcp
       description: |

@@ -109,6 +109,7 @@ def test_e2e_profile_alcatel_lucent_ind(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.6486.800.1.1.2.1.9.1.1',
         'vendor': 'alcatel-lucent',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

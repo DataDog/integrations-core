@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import threading
 from collections import namedtuple
+from copy import deepcopy
 
+import paramiko
 import pytest
-from mock import MagicMock
+from mock import MagicMock, call, create_autospec
 
 from datadog_checks.ssh_check import CheckSSH
 
@@ -107,3 +109,58 @@ def test_collect_bad_metadata(datadog_agent):
     ssh._collect_metadata(client)
     datadog_agent.assert_metadata_count(1)
     datadog_agent.assert_metadata('test:123', {'flavor': 'unknown'})
+
+
+def _setup_check_with_mock_client(settings, connect_mock_result):
+    client = create_autospec(paramiko.SSHClient)
+    client.connect.side_effect = [connect_mock_result]
+    client.get_transport.return_value = namedtuple('Transport', ['remote_version'])('SSH-2.0-OpenSSH_8.1')
+
+    inst = deepcopy(common.INSTANCES['main'])
+    inst.update(settings)
+
+    ssh = CheckSSH('ssh_check', {}, [inst])
+    ssh.initialize_client = MagicMock(return_value=client)
+
+    return client, ssh
+
+
+@pytest.mark.parametrize(
+    'settings',
+    [
+        pytest.param({}, id='implicitly'),
+        pytest.param({'force_sha1': False}, id='explicitly'),
+    ],
+)
+def test_force_sha1_disabled(aggregator, dd_run_check, settings):
+    client, ssh = _setup_check_with_mock_client(settings, paramiko.ssh_exception.AuthenticationException)
+
+    with pytest.raises(Exception, match='AuthenticationException'):
+        dd_run_check(ssh)
+
+    aggregator.assert_service_check(CheckSSH.SSH_SERVICE_CHECK_NAME, CheckSSH.CRITICAL)
+    assert client.connect.mock_calls == [
+        call(
+            ssh.instance['host'],
+            port=ssh.instance['port'],
+            username=ssh.instance['username'],
+            password=ssh.instance['password'],
+        )
+    ]
+
+
+def test_force_sha1_enabled(aggregator, dd_run_check):
+    client, ssh = _setup_check_with_mock_client({'force_sha1': True}, None)
+
+    dd_run_check(ssh)
+
+    aggregator.assert_service_check(CheckSSH.SSH_SERVICE_CHECK_NAME, CheckSSH.OK)
+    assert client.connect.mock_calls == [
+        call(
+            ssh.instance['host'],
+            port=ssh.instance['port'],
+            username=ssh.instance['username'],
+            password=ssh.instance['password'],
+            disabled_algorithms={'pubkeys': ['rsa-sha2-512', 'rsa-sha2-256']},
+        ),
+    ]

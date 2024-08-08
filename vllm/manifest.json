@@ -45,11 +45,14 @@
       ]
     },
     "monitors": {
-        "token_throughput": "assets/monitors/token_throughput.json",
-        "latency": "assets/monitors/latency.json"
+      "token_throughput": "assets/monitors/token_throughput.json",
+      "latency": "assets/monitors/latency.json"
     },
     "dashboards": {
       "vLLM Overview": "assets/dashboards/overview.json"
+    },
+    "saved_views": {
+      "errors": "assets/saved_views/errors.json"
     }
   },
   "author": {

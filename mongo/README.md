@@ -11,7 +11,7 @@ Connect MongoDB to Datadog in order to:
 
 You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
 
-**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba AsparaDB and AWS DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
+**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and AWS DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
 
 ## Setup
 
@@ -542,18 +542,20 @@ The following metrics are **not** collected by default. Use the `additional_metr
 | metric prefix            | what to add to `additional_metrics` to collect it |
 | ------------------------ | ------------------------------------------------- |
 | mongodb.collection       | collection                                        |
-| mongodb.commands         | top                                               |
-| mongodb.getmore          | top                                               |
-| mongodb.insert           | top                                               |
-| mongodb.queries          | top                                               |
-| mongodb.readLock         | top                                               |
-| mongodb.writeLock        | top                                               |
-| mongodb.remove           | top                                               |
-| mongodb.total            | top                                               |
-| mongodb.update           | top                                               |
-| mongodb.writeLock        | top                                               |
+| mongodb.usage.commands   | top                                               |
+| mongodb.usage.getmore    | top                                               |
+| mongodb.usage.insert     | top                                               |
+| mongodb.usage.queries    | top                                               |
+| mongodb.usage.readLock   | top                                               |
+| mongodb.usage.writeLock  | top                                               |
+| mongodb.usage.remove     | top                                               |
+| mongodb.usage.total      | top                                               |
+| mongodb.usage.update     | top                                               |
+| mongodb.usage.writeLock  | top                                               |
 | mongodb.tcmalloc         | tcmalloc                                          |
 | mongodb.metrics.commands | metrics.commands                                  |
+| mongodb.chunks.jumbo     | jumbo_chunks                                      |
+| mongodb.chunks.total     | jumbo_chunks                                      |
 
 ### Events
 

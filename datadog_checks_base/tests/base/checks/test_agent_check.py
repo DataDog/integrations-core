@@ -541,6 +541,111 @@ class TestServiceChecks:
         aggregator.assert_service_check('service_check', status=AgentCheck.OK)
 
 
+class TestLogSubmission:
+    def test_cursor(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+        check.send_log({'message': 'bar'}, cursor={'data': '2'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor() == {'data': '2'}
+
+    def test_no_cursor(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'})
+        check.send_log({'message': 'bar'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor() is None
+
+    def test_tags(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{'tags': ['foo:bar', 'baz:qux']}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'})
+        check.send_log({'message': 'bar', 'ddtags': 'bar:baz'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo', 'ddtags': 'baz:qux,foo:bar'},
+                {'message': 'bar', 'ddtags': 'bar:baz'},
+                {'message': 'baz', 'ddtags': 'baz:qux,foo:bar'},
+            ],
+        )
+
+    def test_stream(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'}, cursor={'data': '1'}, stream='stream1')
+        check.send_log({'message': 'bar'}, cursor={'data': '2'}, stream='stream2')
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor(stream='stream1') == {'data': '1'}
+        assert check.get_log_cursor(stream='stream2') == {'data': '2'}
+
+    def test_timestamp(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo', 'timestamp': 1722958617.2842212})
+        check.send_log({'message': 'bar', 'timestamp': 1722958619.2358432})
+        check.send_log({'message': 'baz', 'timestamp': 1722958620.5963688})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo', 'timestamp': 1722958617284},
+                {'message': 'bar', 'timestamp': 1722958619235},
+                {'message': 'baz', 'timestamp': 1722958620596},
+            ],
+        )
+        assert check.get_log_cursor() is None
+
+
+class TestLogsEnabledDetection:
+    def test_default(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+
+        assert check.logs_enabled is False
+
+    def test_enabled(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        datadog_agent._config['logs_enabled'] = True
+
+        assert check.logs_enabled is True
+
+
 class TestTags:
     def test_default_string(self):
         check = AgentCheck()

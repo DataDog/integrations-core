@@ -1,0 +1,1 @@
+Allow filtering of schema collection in Postgres using regexes to include or exclude objects
