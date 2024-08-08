@@ -238,6 +238,7 @@ class SQLServer(AgentCheck):
         )
 
     def set_resolved_hostname(self):
+        # load static information cache
         self.load_static_information()
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
@@ -748,7 +749,6 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
-            self.load_static_information()
             # configure custom queries for the check
             if self._query_manager is None:
                 # use QueryManager to process custom queries
