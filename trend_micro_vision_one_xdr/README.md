@@ -18,7 +18,7 @@ This integration seamlessly collects all the above listed logs, channeling them 
 1. On the Trend Vision One console, go to **Administration > API Keys** .
 2. Generate a new authentication token. Click **Add API key**. Specify the settings of the new API key.
     - Name: A meaningful name that can help you identify the API key
-    - Role: The user role assigned to the key. Select SIEM from dropdown.
+    - Role: The user role assigned to the key. Select **SIEM** from dropdown.
     - Expiration time: The time the API key remains valid.
     - Status: Whether the API key is enabled.
     - Details: Extra information about the API key.
