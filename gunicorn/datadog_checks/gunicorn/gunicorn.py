@@ -16,6 +16,14 @@ import psutil
 from datadog_checks.base import AgentCheck
 
 
+def get_subprocess_output(cmd):
+    """
+    Temporary wrapper
+    """
+    res = subprocess.run(cmd, capture_output=True)
+    return res.stdout, res.stderr, res.returncode
+
+
 class GUnicornCheck(AgentCheck):
 
     # Config
@@ -166,7 +174,7 @@ class GUnicornCheck(AgentCheck):
         """Get version from `gunicorn --version`"""
         cmd = '{} --version'.format(self.gunicorn_cmd)
         try:
-            pc_out, pc_err, _ = subprocess.run(cmd).stdout
+            pc_out, pc_err, _ = get_subprocess_output(cmd)
         except OSError:
             self.log.debug("Error collecting gunicorn version.")
             return None
