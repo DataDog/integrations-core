@@ -16,7 +16,7 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 from datadog_checks.sqlserver.deadlocks import Deadlocks
-import pdb
+
 try:
     import datadog_agent
 except ImportError:
@@ -179,7 +179,8 @@ class SqlserverActivity(DBMAsyncJob):
         self._last_deadlocks_collection_time = 0
         self._last_activity_collection_time = 0
 
-        self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", False))
+        #TODO put back false
+        self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", True))
         self._deadlocks_collection_interval = config.deadlocks_config.get(
             "collection_interval", DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
         )
@@ -253,11 +254,6 @@ class SqlserverActivity(DBMAsyncJob):
         deadlocks_event = self._create_deadlock_event(deadlock_xmls)
         payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
         self._check.database_monitoring_query_activity(payload)
-
-
-        #deadlocks_event_activity = self._create_activity_event([], [], deadlock_xmls)
-        #payload = json.dumps(deadlocks_event_activity, default=default_json_event_encoding)
-        #self._check.database_monitoring_query_activity(payload)
         
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
@@ -420,6 +416,9 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_estimated_row_size_bytes(row):
         return len(str(row))
 
+
+
+
     def _create_activity_event(self, active_sessions, active_connections):
         event = {
             "host": self._check.resolved_hostname,
@@ -429,7 +428,7 @@ class SqlserverActivity(DBMAsyncJob):
             "collection_interval": self._activity_collection_interval, #TODO is it important for whatever reason to have very precise int ?
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
-            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""), 
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_activity": active_sessions,
@@ -451,8 +450,8 @@ class SqlserverActivity(DBMAsyncJob):
             "collection_interval": self._deadlocks_collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
-            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+            #TODO ? 'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            #TODO ? 'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_deadlocks": deadlock_xmls,
         }

@@ -11,7 +11,7 @@ from datadog_checks.sqlserver.queries import (
     DETECT_DEADLOCK_QUERY,
 )
 #TODO temp imports:
-import pdb
+#import pdb
 
 MAX_DEADLOCKS = 100
 
@@ -71,5 +71,5 @@ class Deadlocks:
                     self.obfuscate_xml(root)
                     converted_xmls.append(ET.tostring(root, encoding='unicode'))
                 self._last_deadlock_timestamp = last_deadlock_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
-                pdb.set_trace()
+                #pdb.set_trace()
                 return converted_xmls
