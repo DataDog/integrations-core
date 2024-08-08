@@ -1,19 +1,8 @@
 import json
 import csv
 import os
-from utilities import PATH, INTEGRATIONS, PATHS_TXT_FILE, HEURISTICS_JSON_FILE, HEURISTICS_CSV_FILE
-
-# store all last modified date, name, and pathname in a file
-def store_paths_in_text_file(top_path, dirs, file_name):
-	file = open(file_name, 'w')
-
-	for f in dirs:
-		dashboards_path = f + "/assets/dashboards"
-		full_dashboards_path = os.path.join(top_path, dashboards_path)
-		for d in os.listdir(full_dashboards_path):
-			full_path = os.path.join(full_dashboards_path, d)
-			file.write(full_path + '\n')
-	file.close()
+from utilities import PATH, HEURISTICS_JSON_FILE, HEURISTICS_CSV_FILE, RESULTS_TXT_FILE
+from integration_dashboards import get_sorted_dict_by_modified_date
 
 def evaluate_widgets(widgets):
 	dict = {
@@ -52,21 +41,15 @@ def evaluate_widgets(widgets):
 
 
 def main(): 
-	store_paths_in_text_file(PATH, INTEGRATIONS, PATHS_TXT_FILE)
 	array = []
-	f = open(PATHS_TXT_FILE, 'r')
-	while True:
-		# Get next line from file
-		line = f.readline()
-
-		# if line is empty end of file is reached
-		if not line:
-			break
-			
-		integration = open(line.strip(), 'r')
+	stats_dict = get_sorted_dict_by_modified_date(RESULTS_TXT_FILE)
+	for obj in stats_dict:
+		integration = open(os.path.join(PATH, obj['path']), 'r')
 		json_string = integration.read()
 		json_object = json.loads(json_string)
-		dict = {'path': line.split('integrations-core/')[1].strip(), 
+		dict = {'path': obj['path'], 
+				'last_modified': obj['last_modified'],
+				'email': obj['email'],
 		  		'has_ordered_layout': 'True', 
 				'has_ungrouped_widgets': 'False', 
 				'has_all_title_case_groups': "True",
@@ -130,7 +113,6 @@ def main():
 									
 
 		array.append(dict)
-	f.close()
 
 	# write to json file
 	heuristics_json = open(HEURISTICS_JSON_FILE, 'w')
