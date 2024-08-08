@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor the health and performance of Kyverno",
-    "title": "kyverno",
+    "title": "Kyverno",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -35,7 +35,10 @@
       },
       "metrics": {
         "prefix": "kyverno.",
-        "check": "",
+        "check": [
+          "kyverno.policy.results.count",
+          "kyverno.policy.rule.info"
+        ],
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
@@ -45,12 +48,15 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-   "monitors": {
+    "monitors": {
       "metadata_path": "assets/monitors/controller_drops.json"
     },
     "saved_views": {
       "Kyverno Logs Overview": "assets/saved_views/logs_overview.json",
       "Kyverno Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    },
+    "dashboards": {
+      "Kyverno Overview": "assets/dashboards/overview.json"
     }
   },
   "author": {

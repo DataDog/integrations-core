@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
+from requests.exceptions import HTTPError
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -244,13 +245,20 @@ class TeamCityRest(AgentCheck):
             self.log.debug(
                 'No builds for project %d and build config %d, checking again', project_id, self.current_build_config
             )
-            ressource = "last_build"
+            resource = "last_build"
             options = {"project_id": project_id}
         else:
             self.log.debug('Checking for new builds...')
-            ressource = "new_builds"
+            resource = "new_builds"
             options = {"since_build": last_build_id}
-        return get_response(self, ressource, build_conf=self.current_build_config, **options)
+        try:
+            new_builds = get_response(self, resource, build_conf=self.current_build_config, **options)
+        except HTTPError:
+            # In the case where a build config has been deleted, no new builds should be returned and it will be removed
+            # from the list of all build configs in the next re-initialization
+            self.log.debug('Failed to retrieve new builds for build config %s', self.current_build_config)
+            new_builds = {}
+        return new_builds
 
     def _get_build_config_type(self, build_config):
         if self.is_deployment:

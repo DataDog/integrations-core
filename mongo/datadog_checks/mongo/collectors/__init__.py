@@ -7,6 +7,7 @@ from .coll_stats import CollStatsCollector
 from .custom_queries import CustomQueriesCollector
 from .db_stat import DbStatCollector
 from .fsynclock import FsyncLockCollector
+from .host_info import HostInfoCollector
 from .index_stats import IndexStatsCollector
 from .replica import ReplicaCollector
 from .replication_info import ReplicationOpLogCollector
