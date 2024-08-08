@@ -42,7 +42,7 @@ def test_mongo_operation_samples_standalone(aggregator, instance_integration_clu
             assert sample == expected_samples[i]
 
     # assert activities
-    with open(os.path.join(HERE, "results", "opeartion-activities-standalone.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "operation-activities-standalone.json"), 'r') as f:
         expected_activities = json.load(f)
         assert len(activity_samples) == len(expected_activities)
         for i, activity in enumerate(activity_samples):
@@ -74,7 +74,7 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
             assert sample == expected_samples[i]
 
     # assert activities
-    with open(os.path.join(HERE, "results", "opeartion-activities-mongos.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "operation-activities-mongos.json"), 'r') as f:
         expected_activities = json.load(f)
         assert len(activity_samples) == len(expected_activities)
         for i, activity in enumerate(activity_samples):
