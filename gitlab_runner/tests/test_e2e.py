@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
 
 from flaky import flaky
 
@@ -16,7 +17,10 @@ def _rerun_on_502_response(err, name, test, plugin):
     In this case we just want to retry the request without waiting.
     """
 
-    return 'Http status code 502 on url' in str(err)
+    we_retry = 'Http status code 502 on url' in str(err)
+    if we_retry:
+        time.sleep(5)
+    return we_retry
 
 
 @flaky(max_runs=5, rerun_filter=_rerun_on_502_response)
