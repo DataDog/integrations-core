@@ -75,6 +75,87 @@ class SystemDatabases(Query):
         )
 
 
+class AuditLog(Query):
+    """
+    https://help.sap.com/docs/SAP_HANA_PLATFORM/4fe29514fd584807ac9f2a04f6754767/d1fe1244d29510148f69be8b0e060dcc.html
+    """
+
+    def __init__(self, previous_timestamp=None):
+        super(AuditLog, self).__init__(
+            schema='SYS',
+            fields=(
+                'application_name',
+                'application_user_name',
+                'audit_policy_name',
+                'comment',
+                'event_action',
+                'event_level',
+                'event_status',
+                'file_name',
+                'grantable',
+                'grantee',
+                'grantee_schema_name',
+                'host',
+                'key',
+                'object_name',
+                'origin_database_name',
+                'origin_user_name',
+                'port',
+                'prev_value',
+                'privilege_name',
+                'role_name',
+                'role_schema_name',
+                'schema_name',
+                'section',
+                'service_name',
+                'statement_string',
+                'statement_user_name',
+                'timestamp',
+                'user_name',
+                'value',
+            ),
+            view='AUDIT_LOG',
+            query="""
+                SELECT
+                  APPLICATION_NAME,
+                  APPLICATION_USER_NAME,
+                  AUDIT_POLICY_NAME,
+                  COMMENT,
+                  EVENT_ACTION,
+                  EVENT_LEVEL,
+                  EVENT_STATUS,
+                  FILE_NAME,
+                  GRANTABLE,
+                  GRANTEE,
+                  GRANTEE_SCHEMA_NAME,
+                  HOST,
+                  KEY,
+                  OBJECT_NAME,
+                  ORIGIN_DATABASE_NAME,
+                  ORIGIN_USER_NAME,
+                  PORT,
+                  PREV_VALUE,
+                  PRIVILEGE_NAME,
+                  ROLE_NAME,
+                  ROLE_SCHEMA_NAME,
+                  SCHEMA_NAME,
+                  SECTION,
+                  SERVICE_NAME,
+                  STATEMENT_STRING,
+                  STATEMENT_USER_NAME,
+                  TIMESTAMP,
+                  USER_NAME,
+                  VALUE
+                FROM {}
+            """,
+        )
+
+        if previous_timestamp:
+            self.query += " WHERE TIMESTAMP > '{}'".format(previous_timestamp)
+
+        self.query += ' ORDER BY TIMESTAMP ASC'
+
+
 class GlobalSystemBackupProgress(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/783108ba8b8b4c709959220b4535a010.html
