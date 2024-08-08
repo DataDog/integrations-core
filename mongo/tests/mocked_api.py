@@ -35,6 +35,14 @@ class MockedCollection(object):
             with open(os.path.join(HERE, "fixtures", "system.replset"), 'r') as f:
                 content = json.load(f, object_hook=json_util.object_hook)
                 self.find_one = MagicMock(return_value=content)
+        elif coll_name == 'system.profile':
+            with open(os.path.join(HERE, "fixtures", "system.profile"), 'r') as f:
+                content = json.load(f, object_hook=json_util.object_hook)
+
+                def mocked_sort(*args, **kwargs):
+                    return content
+
+                self.find = MagicMock(return_value=MagicMock(sort=mocked_sort))
 
     def aggregate(self, pipeline, session=None, **kwargs):
         if '$indexStats' in pipeline[0]:
@@ -55,8 +63,8 @@ class MockedDB(object):
 
     def command(self, command, *args, **_):
         filename = command
-        if command == "dbstats":
-            filename += f"-{self._db_name}"
+        if "dbStats" in command:
+            filename = f"dbstats-{self._db_name}"
         elif command == "collstats":
             coll_name = args[0]
             filename += f"-{coll_name}"
@@ -65,8 +73,12 @@ class MockedDB(object):
         elif command in ("find", "count", "aggregate"):
             # At time of writing, those commands only are for custom queries.
             filename = f"custom-query-{command}"
-        elif command in ("explain"):
+        elif command == "explain":
             filename = f"explain-{self.deployment}"
+        elif command == "profile":
+            filename = f"profile-{self._db_name}"
+        elif command == "getLog":
+            filename = f"getLog-{self.deployment}"
         with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
 

@@ -143,3 +143,17 @@ def _lookup_conn_error_and_msg(hresult, msg):
         if res and len(res) == 2:
             return res[0], res[1]
     return None, ConnectionErrorCode.unknown
+
+
+def obfuscate_error_msg(msg, password):
+    """
+    Obfuscates the password in the error message.
+    """
+    # obfuscate the password in the error message
+    # regex to match the `Password=<password>;` in the connection string
+    # and replace it with `Password=***;` (case insensitive)
+    obfuscated_error_msg = re.sub(r"(?i)(Password=)([^;]+)", r"\1******", msg)
+    if password:
+        # this is a fallback in case the password is not in the connection string
+        obfuscated_error_msg = obfuscated_error_msg.replace(password, "*" * 6)
+    return obfuscated_error_msg

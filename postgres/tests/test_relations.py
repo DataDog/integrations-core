@@ -4,7 +4,6 @@
 
 import psycopg2
 import pytest
-from flaky import flaky
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import (
@@ -250,7 +249,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@flaky(max_runs=5)
+@pytest.mark.flaky(max_runs=5)
 def test_vacuum_age(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
     pg_instance['dbname'] = 'datadog_test'

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 19.0.1 / 2024-07-31
+
+***Fixed***:
+
+* Emit dead/live toast rows as gauge ([#18009](https://github.com/DataDog/integrations-core/pull/18009))
+
 ## 19.0.0 / 2024-07-05
 
 ***Changed***:

@@ -26,7 +26,7 @@ files:
           - name: password
             description: |
               Password to use for the SSH connection.
-              If an encrypted SSH private key is specified in `private_key_file`, 
+              If an encrypted SSH private key is specified in `private_key_file`,
                 the given password will be used to decrypt the key.
             value:
               type: string
@@ -59,6 +59,17 @@ files:
 
           - name: add_missing_keys
             description: Automatically add host key to known hosts when it is missing.
+            value:
+              example: false
+              type: boolean
+
+          - name: force_sha1
+            description: |
+              Some older SSH servers only support SHA1 encryption. Moreover, some don't have the `server-sig-algs`
+              extension installed, which means they don't tell their clients that they only support SHA1.
+              The SSH client assumes SHA2 encryption, so it crashes when connecting to such a server.
+              While it's strongly recommended to upgrade the SSH server to support the more secure SHA2, you can force
+              the client to use SHA1 encryption by setting this option to 'true'.
             value:
               example: false
               type: boolean

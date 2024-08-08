@@ -1014,7 +1014,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:kubernetes_state.container.waiting{$namespace,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name}"
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$namespace,$scope,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1123,7 +1123,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.containers.state.waiting{$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name} by {pod_name}"
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job,$vsphere_cluster,$vsphere_host,$vsphere_vcenter,$pod_name,$kube_container_name} by {pod_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",

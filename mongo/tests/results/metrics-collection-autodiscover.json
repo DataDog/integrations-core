@@ -212,9 +212,29 @@
         ]
     },
     {
+        "name": "mongodb.collection.reads.latency.avg",
+        "type": 0,
+        "value": 1316.5,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
         "name": "mongodb.collection.reads.latency",
         "type": 0,
         "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency.avg",
+        "type": 0,
+        "value": 1316.5,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:test",
@@ -252,7 +272,27 @@
         ]
     },
     {
+        "name": "mongodb.collection.writes.latency.avg",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
         "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency.avg",
         "type": 0,
         "value": 8542.0,
         "tags": [

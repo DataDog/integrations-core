@@ -26,6 +26,7 @@ class ManagedAuthentication(BaseModel):
         frozen=True,
     )
     enabled: Optional[bool] = Field(None, examples=[False])
+    role_arn: Optional[str] = Field(None, examples=['arn:aws:iam::123456789012:role/MyRole'])
 
 
 class Aws(BaseModel):
@@ -65,6 +66,12 @@ class CollectSchemas(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    exclude_schemas: Optional[tuple[str, ...]] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    include_schemas: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
     max_columns: Optional[float] = None
     max_tables: Optional[float] = None
 
@@ -77,6 +84,18 @@ class CollectSettings(BaseModel):
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     ignored_settings_patterns: Optional[tuple[str, ...]] = None
+
+
+class CustomQuery(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = None
+    columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    metric_prefix: Optional[str] = None
+    query: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
 
 
 class DatabaseAutodiscovery(BaseModel):
@@ -209,7 +228,7 @@ class InstanceConfig(BaseModel):
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
-    custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
     database_instance_collection_interval: Optional[float] = None
@@ -230,6 +249,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     obfuscator_options: Optional[ObfuscatorOptions] = None
+    only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
     pg_stat_statements_view: Optional[str] = None
     port: Optional[int] = None
