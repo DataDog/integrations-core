@@ -1,16 +1,45 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import socket
+import sys
 from collections import defaultdict
+from ctypes import Structure, windll, byref
+from ctypes.wintypes import DWORD
 
 import psutil
 from six import PY3, iteritems
 
 from . import Network
 
+Iphlpapi = windll.Iphlpapi
 if PY3:
     long = int
 
+class TCPSTATS(Structure):
+    """
+    Modelled after the MIB_TCPSTATS structure.
+    For more information:
+    http://msdn.microsoft.com/en-us/library/aa366915(VS.85).aspx
+    (Visited 2009-07-23)
+    """
+    _fields_ = [
+        ("dwRtoAlgorithm", DWORD),
+        ("dwRtoMin", DWORD),
+        ("dwRtoMax", DWORD),
+        ("dwMaxConn", DWORD),
+        ("dwActiveOpens", DWORD),
+        ("dwPassiveOpens", DWORD),
+        ("dwAttemptFails", DWORD),
+        ("dwEstabResets", DWORD),
+        ("dwCurrEstab", DWORD),
+        ("dwInSegs", DWORD),
+        ("dwOutSegs", DWORD),
+        ("dwRetransSegs", DWORD),
+        ("dwInErrs", DWORD),
+        ("dwOutRsts", DWORD),
+        ("dwNumConns", DWORD)
+    ]
 
 class WindowsNetwork(Network):
     """
@@ -25,6 +54,7 @@ class WindowsNetwork(Network):
         custom_tags = self.instance.get('tags', [])
         if self._collect_cx_state:
             self._cx_state_psutil(tags=custom_tags)
+        self._tcp_stats(tags=custom_tags)
 
         self._cx_counters_psutil(tags=custom_tags)
 
@@ -73,6 +103,58 @@ class WindowsNetwork(Network):
                 'packets_out.error': counters.errout,
             }
             self.submit_devicemetrics(iface, metrics, tags)
+
+    def _get_tcp_stats(self, inet):
+        stats=TCPSTATS()
+        try:
+            Iphlpapi.GetTcpStatisticsEx(byref(stats), inet)
+        except OSError as e:
+            self.log.error("OSError: %s",e)
+            return None
+        return stats
+
+    def _tcp_stats(self, tags):
+        """
+        Collect metrics from Microsoft's TCPSTATS
+        """
+        tags = [] if tags is None else tags
+
+        tcpstats_dict = {
+            'dwActiveOpens': '.active_opens',
+            'dwPassiveOpens': '.passive_opens',
+            'dwAttemptFails': '.attempt_fails',
+            'dwEstabResets': '.established_resets',
+            'dwInSegs': '.in_segs',
+            'dwOutSegs': '.out_segs',
+            'dwRetransSegs': '.retrans_segs',
+            'dwInErrs': '.in_errors',
+            'dwOutRsts': '.out_resets',
+            'dwNumConns': '.connections',
+        }
+
+        proto_dict = {}
+        tcp4stats = self._get_tcp_stats(socket.AF_INET)
+        if tcp4stats:
+            proto_dict["tcp4"] = tcp4stats
+
+        tcp6stats = self._get_tcp_stats(socket.AF_INET6)
+        if tcp6stats:
+            proto_dict["tcp6"] = tcp6stats
+
+        tcpAllstats = TCPSTATS()
+        if 'tcp4' in proto_dict and 'tcp6' in proto_dict:
+            for fieldname, _ in tcpAllstats._fields_:
+                tcp_sum = getattr(proto_dict['tcp4'], fieldname) + getattr(proto_dict['tcp6'], fieldname)
+                setattr(tcpAllstats, fieldname, tcp_sum)
+            proto_dict["tcp"] = tcpAllstats
+
+        for proto, stats in proto_dict.items():
+            for fieldname, _ in stats._fields_:
+                fieldvalue = getattr(stats, fieldname)
+                if fieldname in tcpstats_dict:
+                    final_name = "system.net."+str(proto)+tcpstats_dict[fieldname]
+                    self.submit_netmetric(final_name, fieldvalue, tags)
+
 
     def _parse_protocol_psutil(self, conn):
         """

@@ -2,13 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import ctypes
 import socket
 from collections import namedtuple
+from ctypes import WinError as winerror
 
 import mock
-from six import PY3, iteritems
-
 from datadog_checks.network.check_windows import WindowsNetwork
+from six import PY3, iteritems
 
 from . import common
 
@@ -23,6 +24,16 @@ if PY3:
 def test_creates_windows_instance(is_linux, is_bsd, is_solaris, is_windows, check):
     check_instance = check({})
     assert isinstance(check_instance, WindowsNetwork)
+
+def test_get_tcp_stats(aggregator):
+    instance = copy.deepcopy(common.INSTANCE)
+    check_instance = WindowsNetwork('network', {}, [instance])
+
+    with mock.patch(
+    'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx',
+    side_effect=winerror()), mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric:
+        check_instance.check({})
+        submit_netmetric.assert_not_called()
 
 
 def test_check_psutil_no_collect_connection_state(aggregator):

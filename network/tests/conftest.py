@@ -6,13 +6,18 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.network import Network
+from datadog_checks.base.utils.platform import Platform
+
 
 from . import common
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield common.INSTANCE, common.E2E_METADATA
+    if Platform.is_windows():
+        yield common.INSTANCE, {'docker_platform': 'windows',}
+    else:
+        yield common.INSTANCE, common.E2E_METADATA
 
 
 @pytest.fixture
