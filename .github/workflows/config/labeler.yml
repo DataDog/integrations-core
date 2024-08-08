@@ -345,6 +345,8 @@ integration/openstack_controller:
 - openstack_controller/**/*
 integration/oracle:
 - oracle/**/*
+integration/ossec_security:
+- ossec_security/**/*
 integration/otel:
 - otel/**/*
 integration/palo_alto_cortex_xdr:
