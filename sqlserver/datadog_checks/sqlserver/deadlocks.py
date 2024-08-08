@@ -39,7 +39,6 @@ class Deadlocks:
 
     def obfuscate_xml(self, root):
         # TODO put exception here if not found as this would signal in a format change
-        pdb.set_trace()
         process_list = root.find(".//process-list")
         for process in process_list.findall('process'):
             inputbuf = process.find('inputbuf')
@@ -49,7 +48,6 @@ class Deadlocks:
                 frame.text = self.obfuscate_no_except_wrapper(frame.text)
 
     def collect_deadlocks(self):
-        pdb.set_trace()
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, self._last_deadlock_timestamp))

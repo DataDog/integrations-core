@@ -16,7 +16,7 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 from datadog_checks.sqlserver.deadlocks import Deadlocks
-
+import pdb
 try:
     import datadog_agent
 except ImportError:
@@ -250,9 +250,14 @@ class SqlserverActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_deadlocks(self):
         deadlock_xmls = self._deadlocks.collect_deadlocks()
-        deadlocks_event = self._create_deadlock_event(deadlock_xmls)
-        payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
-        self._check.database_monitoring_deadlocks(payload)
+        #deadlocks_event = self._create_deadlock_event(deadlock_xmls)
+        #payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
+        #self._check.database_monitoring_deadlocks(payload)
+
+
+        deadlocks_event_activity = self._create_activity_event([], [], deadlock_xmls)
+        payload = json.dumps(deadlocks_event_activity, default=default_json_event_encoding)
+        self._check.database_monitoring_query_activity(payload)
         
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
@@ -415,7 +420,7 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_estimated_row_size_bytes(row):
         return len(str(row))
 
-    def _create_activity_event(self, active_sessions, active_connections):
+    def _create_activity_event(self, active_sessions, active_connections, deadlocks = []):
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -429,6 +434,7 @@ class SqlserverActivity(DBMAsyncJob):
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
+            "sqlserver_deadlocks": deadlocks,
         }
         return event
 
