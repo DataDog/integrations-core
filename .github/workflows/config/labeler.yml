@@ -481,6 +481,8 @@ integration/teradata:
 - teradata/**/*
 integration/terraform:
 - terraform/**/*
+integration/tibco_ems:
+- tibco_ems/**/*
 integration/tls:
 - tls/**/*
 integration/tokumx:
