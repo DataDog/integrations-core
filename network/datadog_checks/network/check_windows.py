@@ -134,7 +134,6 @@ class WindowsNetwork(Network):
         tcp4stats = self._get_tcp_stats(socket.AF_INET)
         if tcp4stats:
             proto_dict["tcp4"] = tcp4stats
-
         tcp6stats = self._get_tcp_stats(socket.AF_INET6)
         if tcp6stats:
             proto_dict["tcp6"] = tcp6stats

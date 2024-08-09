@@ -8,7 +8,7 @@ from collections import namedtuple
 from ctypes import WinError as winerror
 
 import mock
-from datadog_checks.network.check_windows import WindowsNetwork
+from datadog_checks.network.check_windows import WindowsNetwork, TCPSTATS
 from six import PY3, iteritems
 
 from . import common
@@ -25,7 +25,7 @@ def test_creates_windows_instance(is_linux, is_bsd, is_solaris, is_windows, chec
     check_instance = check({})
     assert isinstance(check_instance, WindowsNetwork)
 
-def test_get_tcp_stats(aggregator):
+def test_get_tcp_stats_failure():
     instance = copy.deepcopy(common.INSTANCE)
     check_instance = WindowsNetwork('network', {}, [instance])
 
@@ -34,6 +34,70 @@ def test_get_tcp_stats(aggregator):
     side_effect=winerror()), mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric:
         check_instance.check({})
         submit_netmetric.assert_not_called()
+
+def test_get_tcp_stats(aggregator):
+    instance = copy.deepcopy(common.INSTANCE)
+    check_instance = WindowsNetwork('network', {}, [instance])
+
+    mock_stats = TCPSTATS(
+        dwRtoAlgorithm=1,
+        dwRtoMin=2,
+        dwRtoMax=3,
+        dwMaxConn=4,
+        dwActiveOpens=5,
+        dwPassiveOpens=6,
+        dwAttemptFails=7,
+        dwEstabResets=8,
+        dwCurrEstab=9,
+        dwInSegs=10,
+        dwOutSegs=11,
+        dwRetransSegs=12,
+        dwInErrs=13,
+        dwOutRsts=14,
+        dwNumConns=15
+    )
+    expected_mets = {
+        'system.net.tcp4.active_opens': 5,
+        'system.net.tcp4.passive_opens': 6,
+        'system.net.tcp4.attempt_fails': 7,
+        'system.net.tcp4.established_resets': 8,
+        'system.net.tcp4.current_established': 9,
+        'system.net.tcp4.in_segs': 10,
+        'system.net.tcp4.out_segs': 11,
+        'system.net.tcp4.retrans_segs': 12,
+        'system.net.tcp4.in_errors': 13,
+        'system.net.tcp4.out_resets': 14,
+        'system.net.tcp4.connections': 15,
+        'system.net.tcp6.active_opens': 5,
+        'system.net.tcp6.passive_opens': 6,
+        'system.net.tcp6.attempt_fails': 7,
+        'system.net.tcp6.established_resets': 8,
+        'system.net.tcp6.current_established': 9,
+        'system.net.tcp6.in_segs': 10,
+        'system.net.tcp6.out_segs': 11,
+        'system.net.tcp6.retrans_segs': 12,
+        'system.net.tcp6.in_errors': 13,
+        'system.net.tcp6.out_resets': 14,
+        'system.net.tcp6.connections': 15,
+        'system.net.tcp.active_opens': 10,
+        'system.net.tcp.passive_opens': 12,
+        'system.net.tcp.attempt_fails': 14,
+        'system.net.tcp.established_resets': 16,
+        'system.net.tcp.current_established': 18,
+        'system.net.tcp.in_segs': 20,
+        'system.net.tcp.out_segs': 22,
+        'system.net.tcp.retrans_segs': 24,
+        'system.net.tcp.in_errors': 26,
+        'system.net.tcp.out_resets': 28,
+        'system.net.tcp.connections': 30,
+    }
+
+    with mock.patch(
+    'datadog_checks.network.check_windows.WindowsNetwork._get_tcp_stats') as mock_get_tcp_stats:
+        mock_get_tcp_stats.return_value = mock_stats # Make _get_tcp_stats return my mock object
+        check_instance.check({})
+        for name, value in iteritems(expected_mets):
+            aggregator.assert_metric(name, value=value)
 
 
 def test_check_psutil_no_collect_connection_state(aggregator):
