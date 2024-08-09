@@ -46,8 +46,7 @@
     },
     "dashboards": {
       "KubeVirt Overview": "assets/dashboards/kubevirt_overview.json"
-    },
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
