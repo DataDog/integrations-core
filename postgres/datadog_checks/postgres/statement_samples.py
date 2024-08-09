@@ -286,7 +286,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                try:                    
+                try:
                     cursor.execute(
                         "select * from {pg_stat_activity_view} LIMIT 0".format(
                             pg_stat_activity_view=self._config.pg_stat_activity_view
@@ -296,10 +296,14 @@ class PostgresStatementSamples(DBMAsyncJob):
                     available_columns = [c for c in all_expected_columns if c in all_columns]
                     missing_columns = set(all_expected_columns) - set(available_columns)
                     if missing_columns:
-                        self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
+                        self._log.debug(
+                            "missing the following expected columns from pg_stat_activity: %s", missing_columns
+                        )
                     self._log.debug("found available pg_stat_activity columns: %s", available_columns)
                 except psycopg2.errors.InvalidSchemaName as e:
-                    self._log.warning("cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e))
+                    self._log.warning(
+                        "cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e)
+                    )
                     return None
                 except psycopg2.DatabaseError as e:
                     # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
@@ -440,11 +444,12 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self.tags + ["error:missing-activity-columns"] + self._check._get_debug_tags(),
+                tags=self.tags + ["error:explain-no_plans_possible"] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
                 raw=True,
             )
             return
+        print(pg_activity_cols)
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0

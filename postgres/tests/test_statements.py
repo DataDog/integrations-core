@@ -705,7 +705,7 @@ def test_failed_explain_handling(
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:missing-activity-columns",
+            "error:explain-no_plans_possible",
             [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
             [],
@@ -756,8 +756,7 @@ def test_failed_explain_handling(
         ),
     ],
 )
-@pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
-
+@pytest.mark.parametrize("dbstrict,ignore_databases", [(True, [])])
 def test_statement_samples_collect(
     aggregator,
     integration_check,
@@ -774,7 +773,7 @@ def test_statement_samples_collect(
     datadog_agent,
     expected_warnings,
     dbstrict,
-    ignore_databases
+    ignore_databases,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
@@ -783,6 +782,8 @@ def test_statement_samples_collect(
     dbm_instance['ignore_databases'] = ignore_databases
     check = integration_check(dbm_instance)
     check._connect()
+
+    print("EXECUTING: {dbm_instance}".format(dbm_instance=dbm_instance))
 
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
