@@ -69,6 +69,8 @@ integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
+integration/aws_neuron:
+- aws_neuron/**/*
 integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
