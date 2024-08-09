@@ -9,16 +9,16 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "",
-    "title": "Kubevirt Controller",
+    "title": "Collect key metrics to monitor the health of your KubeVirt Controller service.",
     "media": [],
     "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
@@ -34,17 +34,16 @@
       },
       "metrics": {
         "prefix": "kubevirt_controller.",
-        "check": "",
+        "check": [
+          "kubevirt_controller.virt_controller.leading_status",
+          "kubevirt_controller.virt_controller.ready_status"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {},
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
