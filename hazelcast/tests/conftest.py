@@ -4,7 +4,7 @@
 import os
 
 import pytest
-import requests
+from hazelcast import HazelcastClient
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
@@ -37,12 +37,24 @@ def dd_environment():
 
 
 def trigger_some_tcp_data():
-    base_url = 'http://{}:{}'.format(common.HOST, common.MEMBER_REST_PORT)
+    # put a bunch data into the cluster so various metrics are initialized
+    client = HazelcastClient(
+        cluster_name="dev",
+        cluster_members=[
+            "{}:{}".format(common.HOST, common.MEMBER_REST_PORT),
+        ],
+    )
+
+    default_map = client.get_map("default_map")
+    default_reliable_topic = client.get_reliable_topic("default_reliable_topic")
+    default_topic = client.get_topic("default_topic")
+    default_queue = client.get_queue("default_queue")
+
     for i in range(100):
-        url = "{}/hazelcast/rest/maps/mapName/foo{}".format(base_url, i)
-        requests.post(url, data='bar')
-        resp = requests.get(url)
-        assert resp.content.decode('utf-8') == 'bar'
+        default_map.put(f"foo{i}", f"bar{i}")
+        default_reliable_topic.publish(f"bar{i}")
+        default_topic.publish(f"bar{i}")
+        default_queue.offer(f"bar{i}")
 
 
 @pytest.fixture(scope='session')

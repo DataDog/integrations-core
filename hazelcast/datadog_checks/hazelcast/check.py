@@ -46,5 +46,5 @@ class HazelcastCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=tags)
 
         self.service_check(
-            self.SERVICE_CHECK_MC_CLUSTER_STATE, self._mc_cluster_states.get(status['managementCenterState']), tags=tags
+            self.SERVICE_CHECK_MC_CLUSTER_STATE, self._mc_cluster_states.get(status['status']), tags=tags
         )
