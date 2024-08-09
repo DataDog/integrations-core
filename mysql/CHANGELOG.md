@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 12.7.0 / 2024-08-09
+
+***Added***:
+
+* Adding databases (schemas) data collection to MySQL
+  These data include information about the tables, their columns, indexes, foreign keys, and partitions. ([#17916](https://github.com/DataDog/integrations-core/pull/17916))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+***Fixed***:
+
+* Fixed group replication metrics for MySQL version < 8.0.2 ([#18024](https://github.com/DataDog/integrations-core/pull/18024))
+
 ## 12.6.1 / 2024-07-24
 
 ***Fixed***:

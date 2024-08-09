@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.0 / 2024-08-09
+
+***Added***:
+
+* Add tagger and workloadmeta metrics ([#18030](https://github.com/DataDog/integrations-core/pull/18030))
+* Add telemetry scraping for Autoscaling ([#18265](https://github.com/DataDog/integrations-core/pull/18265))
+
 ## 3.1.1 / 2024-05-31 / Agent 7.55.0
 
 ***Fixed***:

@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 36.13.0 / 2024-08-09
+
+***Added***:
+
+* Combine streams to single pipe ([#18273](https://github.com/DataDog/integrations-core/pull/18273))
+* Bump the ddtrace version to 2.9.3 ([#18275](https://github.com/DataDog/integrations-core/pull/18275))
+* Add `log` transformer to the QueryManager ([#18278](https://github.com/DataDog/integrations-core/pull/18278))
+
 ## 36.12.0 / 2024-08-06
 
 ***Added***:
