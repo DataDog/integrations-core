@@ -1,0 +1,70 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "7aa10661-8d2e-49ab-8b37-a8aa8eccc5d1",
+  "app_id": "contentful",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Contentful activities related to content and other actions.",
+    "title": "Contentful",
+    "media": [
+      {
+        "caption": "Contentful - Activity Overview 1",
+        "image_url": "images/contentful_activity_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Contentful - Activity Overview 2",
+        "image_url": "images/contentful_activity_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Contentful - Activity Overview 3",
+        "image_url": "images/contentful_activity_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Contentful - Activity Overview 4",
+        "image_url": "images/contentful_activity_overview_4.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Developer Tools",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 21609350,
+      "source_type_name": "Contentful",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+        "Contentful - Activity Overview": "assets/dashboards/contentful_activity_overview.json"
+    },
+    "logs": {
+      "source": "contentful"
+    },
+    "monitors": {
+      "Contentful: Scheduled Action has failed": "assets/monitors/scheduled_action_failed.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
