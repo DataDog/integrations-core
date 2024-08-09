@@ -161,7 +161,7 @@ datadog-sonarqube==3.2.2
 datadog-spark==4.3.1
 datadog-sqlserver==17.5.0
 datadog-squid==2.5.1
-datadog-ssh-check==2.8.0
+datadog-ssh-check==2.9.0
 datadog-statsd==1.12.0
 datadog-strimzi==2.2.2
 datadog-supervisord==2.6.0
