@@ -97,6 +97,8 @@ integration/cisco_aci:
 - cisco_aci/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
+integration/cisco_identity_intelligence:
+- cisco_identity_intelligence/**/*
 integration/cisco_sdwan:
 - cisco_sdwan/**/*
 integration/cisco_secure_endpoint:
