@@ -46,8 +46,8 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## Endpoint exposing Neuron's Prometheus metrics. For more information refer to:
-    ## https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-monitor-user-guide.html
+    ## Endpoint exposing Neuron's Prometheus metrics. For more information, refer to
+    ## https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-monitor-user-guide.html.
     #
   - openmetrics_endpoint: http://localhost:8000/metrics
 
