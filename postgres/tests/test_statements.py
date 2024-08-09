@@ -24,7 +24,7 @@ from datadog_checks.postgres.statement_samples import (
     StatementTruncationState,
 )
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
-from datadog_checks.postgres.util import payload_pg_version
+from datadog_checks.postgres.util import DatabaseConfigurationError, payload_pg_version
 from datadog_checks.postgres.version_utils import V12
 
 from .common import (
@@ -1758,26 +1758,15 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True}
     check = integration_check(dbm_instance)
     check._connect()
-    with pytest.raises(psycopg2.errors.UndefinedTable):
-        check.check(dbm_instance)
-
-    # run asynchronously, loop will crash the first time it tries to run as the table doesn't exist
-    dbm_instance['query_samples']['run_sync'] = False
-    check = integration_check(dbm_instance)
-    check._connect()
     check.check(dbm_instance)
-    # make sure there were no unhandled exceptions
-    check.statement_samples._job_loop_future.result()
-    aggregator.assert_metric(
-        "dd.postgres.async_job.error",
-        tags=_get_expected_tags(
-            check,
-            dbm_instance,
-            with_db=True,
-            job='query-samples',
-            error="database-<class 'psycopg2.errors.UndefinedTable'>",
-        ),
+
+    print(check.warnings)
+    assert check.warnings[0].startswith(
+        "Unable to collect activity columns in dbname=datadog_test. Check that the function "
+        "wrong_view exists in the database. See "
+        "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting"
     )
+    assert "code=undefined-pg-stat-activity-view dbname=datadog_test host=stubbed.hostname" in check.warnings[0]
 
 
 @pytest.mark.parametrize(

@@ -313,11 +313,10 @@ class PostgresStatementSamples(DBMAsyncJob):
                         warning_with_tags(
                             "Unable to collect activity columns in dbname=%s. Check that the function "
                             "%s exists in the database. See "
-                            "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#%s "
+                            "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting "
                             "for more details: %s",
                             self._config.dbname,
                             self._config.pg_stat_activity_view,
-                            DatabaseConfigurationError.undefined_activity_view.value,
                             str(e),
                             host=self._check.resolved_hostname,
                             dbname=self._config.dbname,
