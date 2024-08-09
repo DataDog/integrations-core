@@ -154,7 +154,7 @@ datadog-scylla==2.7.2
 datadog-sidekiq==1.4.0
 datadog-silk==2.2.1
 datadog-singlestore==2.2.1
-datadog-snmp==7.3.1
+datadog-snmp==7.4.0
 datadog-snowflake==5.7.0
 datadog-solr==1.13.0
 datadog-sonarqube==3.2.2
