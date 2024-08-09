@@ -38,7 +38,7 @@
       },
       "metrics": {
         "prefix": "mailchimp.",
-        "check": [],
+        "check": "mailchimp.campaigns.count",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
