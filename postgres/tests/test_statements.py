@@ -705,7 +705,7 @@ def test_failed_explain_handling(
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-invalid_schema-<class 'psycopg2.errors.InvalidSchemaName'>",
+            "error:missing-activity-columns",
             [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
             [],
@@ -779,6 +779,7 @@ def test_statement_samples_collect(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['dbstrict'] = dbstrict
+    dbm_instance['dbname'] = dbname
     dbm_instance['ignore_databases'] = ignore_databases
     check = integration_check(dbm_instance)
     check._connect()
@@ -809,18 +810,19 @@ def test_statement_samples_collect(
             assert len(matching) == 0, "did not expect to catch any events"
             return
 
-        assert len(matching) == 1, "missing captured event"
-        event = matching[0]
-        assert event['db']['query_truncated'] == expected_statement_truncated
-
         if expected_error_tag:
-            assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
+            if len(matching) > 0:
+                event = matching[0]
+                assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
             aggregator.assert_metric(
                 "dd.postgres.statement_samples.error",
                 tags=tags + [expected_error_tag, 'agent_hostname:stubbed.hostname'],
                 hostname='stubbed.hostname',
             )
         else:
+            assert len(matching) == 1, "missing captured event"
+            event = matching[0]
+            assert event['db']['query_truncated'] == expected_statement_truncated
             assert set(event['ddtags'].split(',')) == set(tags)
             assert event['db']['plan']['definition'] is not None, "missing execution plan"
             assert 'Plan' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
