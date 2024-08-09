@@ -15,6 +15,7 @@ datadog-argo-workflows==1.0.2
 datadog-argocd==2.4.2
 datadog-aspdotnet==2.1.1; sys_platform == 'win32'
 datadog-avi-vantage==4.2.2
+datadog-aws-neuron==1.0.0
 datadog-azure-iot-edge==4.2.1
 datadog-boundary==2.2.3
 datadog-btrfs==2.3.0; sys_platform != 'win32'
@@ -60,6 +61,7 @@ datadog-external-dns==3.2.1
 datadog-flink==1.5.0
 datadog-fluentd==3.2.1
 datadog-fluxcd==1.2.2
+datadog-fly-io==1.0.0
 datadog-foundationdb==1.4.0
 datadog-gearmand==3.1.0; sys_platform != 'win32'
 datadog-gitlab-runner==4.2.1
@@ -126,11 +128,13 @@ datadog-openmetrics==4.2.2
 datadog-openstack-controller==6.8.1
 datadog-openstack==2.0.0
 datadog-oracle==5.2.0
+datadog-ossec-security==1.0.0
 datadog-palo-alto-panorama==1.0.0
 datadog-pan-firewall==1.2.0
 datadog-pdh-check==2.1.0; sys_platform == 'win32'
 datadog-pgbouncer==6.2.0; sys_platform != 'win32'
 datadog-php-fpm==3.3.1
+datadog-ping-federate==1.0.0
 datadog-postfix==1.14.0; sys_platform != 'win32'
 datadog-postgres==19.0.1
 datadog-powerdns-recursor==2.5.1
@@ -161,6 +165,7 @@ datadog-ssh-check==2.8.0
 datadog-statsd==1.12.0
 datadog-strimzi==2.2.2
 datadog-supervisord==2.6.0
+datadog-suricata==1.0.0
 datadog-system-core==2.4.0
 datadog-system-swap==1.18.0
 datadog-tcp-check==4.9.0
@@ -170,6 +175,7 @@ datadog-teleport==1.0.0
 datadog-temporal==2.2.2
 datadog-tenable==1.5.0
 datadog-teradata==2.2.1; sys_platform != 'darwin'
+datadog-tibco-ems==1.0.0
 datadog-tls==2.18.0
 datadog-tokumx==3.2.0
 datadog-tomcat==2.0.0
