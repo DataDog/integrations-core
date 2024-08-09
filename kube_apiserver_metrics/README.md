@@ -31,6 +31,29 @@ Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Dat
 You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5].
 You must add `cluster_check: true` to your [configuration file][6] when using a static configuration file or ConfigMap to configure cluster checks. See the [sample kube_apiserver_metrics.d/conf.yaml][7] for all available configuration options.
 
+If you want to run the check with configmap and Datadog Operator, you can use the following example.
+With this example, there must be a Service named "kubernetes" in "default" namespace.
+
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+# ...skip...
+spec:
+  features:
+    clusterChecks:
+      enabled: true
+  override:
+    clusterAgent:
+      extraConfd:
+        configDataMap:
+          kube_apiserver_metrics.yaml: |-
+            cluster_check: true
+            init_config:
+            instances:
+            - prometheus_url: https://kubernetes.default:443/metrics
+              bearer_token_auth: true
+```
+
 By default the Agent running the check tries to get the service account bearer token to authenticate against the APIServer. If you are not using RBACs, set `bearer_token_auth` to `false`.
 
 Finally, if you run the Datadog Agent on the master nodes, you can rely on [Autodiscovery][8] to schedule the check. It is automatic if you are running the official image `registry.k8s.io/kube-apiserver`.
