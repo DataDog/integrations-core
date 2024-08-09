@@ -181,6 +181,8 @@ integration/fluentd:
 - fluentd/**/*
 integration/fluxcd:
 - fluxcd/**/*
+integration/fly_io:
+- fly_io/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/gearmand:
