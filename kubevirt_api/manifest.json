@@ -17,7 +17,6 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
       "Offering::Integration",
       "Submitted Data Type::Metrics"
     ]
