@@ -97,17 +97,18 @@ class PostgresMetricsCache:
             'metrics': metrics,
             'query': "SELECT psd.datname, {metrics_columns} "
             "FROM pg_stat_database psd "
-            "JOIN pg_database pd ON psd.datname = pd.datname",
+            "JOIN pg_database pd ON psd.datname = pd.datname "
+            "WHERE 1=1",
             'relation': False,
             'name': 'instance_metrics',
         }
 
-        res["query"] += " WHERE " + " AND ".join(
-            "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
-        )
-
         if self.config.dbstrict:
             res["query"] += " AND psd.datname in('{}')".format(self.config.dbname)
+        elif len(self.config.ignore_databases) > 0:
+            res["query"] += " AND " + " AND ".join(
+                "psd.datname not ilike '{}'".format(db) for db in self.config.ignore_databases
+            )
 
         return res
 
