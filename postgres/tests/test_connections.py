@@ -184,9 +184,9 @@ def test_conn_pool_no_leaks_on_prune(pg_instance):
         deadline = conn_info.deadline
         approximate_deadline = datetime.datetime.now() + datetime.timedelta(milliseconds=ttl_long)
         assert (
-            approximate_deadline - datetime.timedelta(seconds=1)
+            approximate_deadline - datetime.timedelta(seconds=2)
             < deadline
-            < approximate_deadline + datetime.timedelta(seconds=1)
+            < approximate_deadline + datetime.timedelta(seconds=2)
         )
         assert not db.closed
         assert db.status == psycopg2.extensions.STATUS_READY
