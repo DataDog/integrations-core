@@ -10,13 +10,13 @@ except ImportError:
 
 import os
 import shlex
+import subprocess
 from typing import Dict, List  # noqa: F401
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
 
@@ -24,6 +24,17 @@ GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
 
 GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
+
+
+def get_subprocess_output(cmd, log, raise_on_empty_output=True):
+    log.debug('Running get_subprocess_output with cmd: %s', cmd)
+    res = subprocess.run(cmd, capture_output=True)
+    if not res.stdout and raise_on_empty_output:
+        msg = "expected subprocess output but had none."
+        if res.stderr:
+            msg += " Error: {}".format(str(res.stderr))
+        raise Exception(msg)
+    return res.stdout, res.stderr, res.returncode
 
 
 class GlusterfsCheck(AgentCheck):
