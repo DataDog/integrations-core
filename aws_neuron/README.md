@@ -18,23 +18,15 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+#### Metrics
+
 1. Ensure that [Neuron Monitor][10] is being used to expose the Prometheus endpoint.
 
 2. Edit the `aws_neuron.d/conf.yaml` file, which is located in the `conf.d/` folder at the root of your [Agent's configuration directory][12], to start collecting your AWS Neuron performance data. See the [sample aws_neuron.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
 
-### Validation
-
-[Run the Agent's status subcommand][6] and look for `aws_neuron` under the Checks section.
-
-## Data Collected
-
-### Metrics
-
-See [metadata.csv][7] for a list of metrics provided by this integration.
-
-### Logs
+#### Logs
 
 The AWS Neuron integration can collect logs from the Neuron containers and forward them to Datadog.
 
@@ -62,6 +54,16 @@ The AWS Neuron integration can collect logs from the Neuron containers and forwa
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
 Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
+
+### Validation
+
+[Run the Agent's status subcommand][6] and look for `aws_neuron` under the Checks section.
+
+## Data Collected
+
+### Metrics
+
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
