@@ -332,6 +332,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 insufficient_privilege_count,
                 tags=self.tags + ["error:insufficient-privilege"] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
+                raw=True,
             )
         return normalized_rows
 
@@ -361,6 +362,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 1,
                 tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
+                raw=True,
             )
         normalized_row['statement'] = obfuscated_query
         return normalized_row
@@ -386,12 +388,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             (time.time() - start_time) * 1000,
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
         self._check.histogram(
             "dd.postgres.{}.rows".format(method_name),
             row_len,
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
 
     def run_job(self):
@@ -421,7 +425,10 @@ class PostgresStatementSamples(DBMAsyncJob):
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
             self._check.histogram(
-                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self.tags
+                "dd.postgres.collect_activity_snapshot.time",
+                (time.time() - start_time) * 1000,
+                tags=self.tags,
+                raw=True,
             )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
@@ -429,30 +436,35 @@ class PostgresStatementSamples(DBMAsyncJob):
             elapsed_ms,
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
         self._check.count(
             "dd.postgres.collect_statement_samples.events_submitted.count",
             submitted_count,
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explained_statements_cache.len",
             len(self._explained_statements_ratelimiter),
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
         self._check.gauge(
             "dd.postgres.collect_statement_samples.explain_errors_cache.len",
             len(self._explain_errors_cache),
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
 
     @staticmethod
@@ -565,6 +577,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     (time.time() - start_time) * 1000,
                     tags=self._dbtags(dbname) + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
+                    raw=True,
                 )
                 if not result or len(result) < 1 or len(result[0]) < 1:
                     return None
@@ -584,6 +597,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 1,
                 tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
+                raw=True,
             )
         return plan_dict, explain_err_code, err_msg
 
@@ -658,6 +672,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             tags=self._dbtags(dbname, "error:explain-{}-{}".format(err_code.value, type(err)))
             + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -766,6 +781,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     1,
                     tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
+                    raw=True,
                 )
         return events
 

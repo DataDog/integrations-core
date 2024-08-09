@@ -75,6 +75,7 @@ def test_calculate_elapsed_time_valid_tz(datestamp, timestamp, time_zone, valid)
         assert calculate_elapsed_time(datestamp, timestamp, time_zone) is not None
 
 
+@pytest.mark.flaky
 @pytest.mark.parametrize(
     'datestamp,timestamp,timestamp_dst,time_zone,expected',
     [

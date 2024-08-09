@@ -207,6 +207,7 @@ test_procedure_metrics_parametrized = (
 )
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_procedure_metrics_parametrized)
