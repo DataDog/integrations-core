@@ -60,6 +60,7 @@ datadog-external-dns==3.2.1
 datadog-flink==1.5.0
 datadog-fluentd==3.2.1
 datadog-fluxcd==1.2.2
+datadog-fly-io==1.0.0
 datadog-foundationdb==1.4.0
 datadog-gearmand==3.1.0; sys_platform != 'win32'
 datadog-gitlab-runner==4.2.1
