@@ -176,7 +176,7 @@ datadog-temporal==2.3.0
 datadog-tenable==1.5.0
 datadog-teradata==2.2.1; sys_platform != 'darwin'
 datadog-tibco-ems==1.0.0
-datadog-tls==2.18.0
+datadog-tls==2.19.0
 datadog-tokumx==3.2.0
 datadog-tomcat==2.0.0
 datadog-torchserve==2.2.2
