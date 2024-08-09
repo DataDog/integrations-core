@@ -24,7 +24,7 @@ from datadog_checks.postgres.statement_samples import (
     StatementTruncationState,
 )
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
-from datadog_checks.postgres.util import DatabaseConfigurationError, payload_pg_version
+from datadog_checks.postgres.util import payload_pg_version
 from datadog_checks.postgres.version_utils import V12
 
 from .common import (
