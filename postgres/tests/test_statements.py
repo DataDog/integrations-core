@@ -756,6 +756,8 @@ def test_failed_explain_handling(
         ),
     ],
 )
+@pytest.mark.parametrize("dbstrict,ignore_databases", [(True, []), (False, ['dogs']), (False, [])])
+
 def test_statement_samples_collect(
     aggregator,
     integration_check,
@@ -771,9 +773,13 @@ def test_statement_samples_collect(
     expected_statement_truncated,
     datadog_agent,
     expected_warnings,
+    dbstrict,
+    ignore_databases
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['dbstrict'] = dbstrict
+    dbm_instance['ignore_databases'] = ignore_databases
     check = integration_check(dbm_instance)
     check._connect()
 

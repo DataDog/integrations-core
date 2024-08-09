@@ -267,7 +267,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                self._log.debug("Running query [%s] %s", query, params)
+                self._log.warning("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
 
@@ -373,7 +373,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._config.dbstrict:
             extra_filters = " AND datname = %s"
             params = params + (self._config.dbname,)
-        else:
+        elif len(self._config.ignore_databases) > 0:
             extra_filters = " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
             params = params + tuple(self._config.ignore_databases)
         if filter_stale_idle_conn and self._activity_last_query_start:
