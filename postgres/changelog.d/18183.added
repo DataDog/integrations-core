@@ -1,0 +1,1 @@
+Use QueryManager to collect `custom_queries` and `global_custom_queries`. `custom_queries` now supports configurable `collection_interval`.

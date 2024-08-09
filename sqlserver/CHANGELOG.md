@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 17.4.1 / 2024-08-08
+
+***Fixed***:
+
+* Revert "[dbm] fix flapping sqlserver_version" ([#18249](https://github.com/DataDog/integrations-core/pull/18249))
+
 ## 17.4.0 / 2024-07-05
 
 ***Added***:

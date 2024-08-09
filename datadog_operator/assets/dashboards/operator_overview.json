@@ -708,7 +708,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes.containers.state.waiting{$scope,$cluster,kube_app_name:datadog-operator,reason:crashloopbackoff} by {kube_cluster_name,image_tag}",
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$scope,$cluster,kube_app_name:datadog-operator,reason:crashloopbackoff} by {kube_cluster_name,image_tag}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"

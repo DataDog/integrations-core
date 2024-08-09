@@ -1,0 +1,64 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "1deb5e7c-e9a9-4566-8d78-12c92d1baff9",
+  "app_id": "ping-federate",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into PingFederate logs",
+    "title": "PingFederate",
+    "media": [
+      {
+        "caption": "PingFederate - Audit",
+        "image_url": "images/ping_federate_audit.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "PingFederate - Admin",
+        "image_url": "images/ping_federate_admin.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 20005886,
+      "source_type_name": "PingFederate",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "PingFederate - Admin": "assets/dashboards/ping_federate_admin.json",
+      "PingFederate - Audit": "assets/dashboards/ping_federate_audit.json"
+    },
+    "logs": {
+      "source": "ping-federate"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

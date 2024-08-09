@@ -487,6 +487,58 @@ def get_percent(transformers, name, **modifiers):
     return percent
 
 
+def get_log(transformers, name, **modifiers):
+    # type: (Dict[str, Callable], str, Any) -> Transformer
+    """
+    Send a log.
+
+    The required modifiers are `attributes` and `cursor`.
+
+    For example, if you have this configuration:
+
+    ```yaml
+    columns:
+      - name: msg
+        type: source
+      - name: level
+        type: source
+      - name: time
+        type: source
+      - name: bar
+        type: source
+    extras:
+      - type: log
+        attributes:
+          message: msg
+          status: level
+          date: time
+          foo: bar
+    ```
+
+    then a log will be sent with the following attributes:
+
+    - `message`: value of the `msg` column
+    - `status`: value of the `level` column
+    - `date`: value of the `time` column
+    - `foo`: value of the `bar` column
+    """
+    available_sources = modifiers.pop('sources')
+    attributes = _compile_log_attributes(modifiers, available_sources)
+
+    del available_sources
+    send_log = transformers['__send_log'](transformers, **modifiers)
+    send_log = create_extra_transformer(send_log)
+
+    def log(sources, **kwargs):
+        data = {attribute: sources[source] for attribute, source in attributes.items()}
+        if kwargs['tags']:
+            data['ddtags'] = ','.join(kwargs['tags'])
+
+        send_log(sources, data)
+
+    return log
+
+
 COLUMN_TRANSFORMERS = {
     'temporal_percent': get_temporal_percent,
     'monotonic_gauge': get_monotonic_gauge,
@@ -498,7 +550,36 @@ COLUMN_TRANSFORMERS = {
     'time_elapsed': get_time_elapsed,
 }  # type: Dict[str, Transformer]
 
-EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}  # type: Dict[str, TransformerFactory]
+EXTRA_TRANSFORMERS = {
+    'expression': get_expression,
+    'percent': get_percent,
+    'log': get_log,
+}  # type: Dict[str, TransformerFactory]
+
+
+def _compile_log_attributes(modifiers, available_sources):
+    attributes = modifiers.pop('attributes', None)
+    if attributes is None:
+        raise ValueError('the `attributes` parameter is required')
+    elif not isinstance(attributes, dict):
+        raise ValueError('the `attributes` parameter must be a mapping')
+    elif not attributes:
+        raise ValueError('the `attributes` parameter must not be empty')
+
+    for attribute, source in attributes.items():
+        if not isinstance(source, str):
+            raise ValueError(
+                'source `{}` for attribute `{}` of parameter `attributes` is not a string'.format(source, attribute)
+            )
+
+        if source not in available_sources:
+            raise ValueError(
+                'source `{}` for attribute `{}` of parameter `attributes` is not an available source'.format(
+                    source, attribute
+                )
+            )
+
+    return attributes
 
 
 def _compile_service_check_statuses(modifiers):

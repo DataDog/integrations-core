@@ -17,6 +17,7 @@ KNOWN_LICENSES = {
     'bsd license': 'BSD-3-Clause',
     '3-clause bsd license': 'BSD-3-Clause',
     'new bsd license': 'BSD-3-Clause',
+    'license.bsd3': 'BSD-3-Clause',
     'mit license': 'MIT',
     'psf': 'PSF',
     'psf license': 'PSF',

@@ -1,1 +1,0 @@
-Add validation for versions in __about__.py and CHANGELOG: `ddev validate version`.
