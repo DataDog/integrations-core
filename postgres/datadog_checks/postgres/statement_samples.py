@@ -267,7 +267,7 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                self._log.warning("Running query [%s] %s", query, params)
+                self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
 
@@ -449,7 +449,6 @@ class PostgresStatementSamples(DBMAsyncJob):
                 raw=True,
             )
             return
-        print(pg_activity_cols)
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0

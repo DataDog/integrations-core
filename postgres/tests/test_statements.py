@@ -785,8 +785,6 @@ def test_statement_samples_collect(
     check = integration_check(dbm_instance)
     check._connect()
 
-    print("EXECUTING: {dbm_instance}".format(dbm_instance=dbm_instance))
-
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
