@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
 import ssl
+import sys
 
 import pytest
 from mock import ANY, MagicMock, patch
@@ -10,6 +11,15 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.config import VSphereConfig
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    if sys.version_info[0] < 3:
+        pytest.skip("This test requires Python 3 or higher.")
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 def test_ssl_verify_false(realtime_instance):

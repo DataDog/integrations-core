@@ -29,6 +29,8 @@ class MockedAPI(object):
         self.infrastructure_data = {}
         self.metrics_data = []
         self.mock_events = []
+        self.mock_vsan_events = []
+        self.vsan_metrics_data = [[], []]
         self.server_time = dt.datetime.now()
 
     def get_current_time(self):
@@ -120,6 +122,50 @@ class MockedAPI(object):
 
     def get_new_events(self, start_time):
         return self.mock_events
+
+    def get_vsan_events(self, start_time):
+        return self.mock_vsan_events
+
+    def get_vsan_metrics(self, cluster_nested_elts, entity_ref_ids, id_to_tags, start_time):
+        mock_health_data = [
+            {
+                'vsphere.vsan.cluster.health.count': MagicMock(id='group_id', status='group_health'),
+            }
+        ]
+        mock_performance_data = [
+            [
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(
+                                label='example_cluster_metric', dynamicProperty=[{0: 'cluster', 1: 'hello'}]
+                            )
+                        )
+                    ]
+                ),
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(
+                                label='example_host_metric', dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}]
+                            )
+                        )
+                    ]
+                ),
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(
+                                label='example_disk_metric',
+                                dynamicProperty=[{0: 'disk', 1: 'hello', 2: 'new', 3: 'world'}],
+                            )
+                        )
+                    ]
+                ),
+            ]
+        ]
+        self.vsan_metrics_data = [mock_health_data, mock_performance_data]
+        return self.vsan_metrics_data
 
 
 class MockResponse(Response):

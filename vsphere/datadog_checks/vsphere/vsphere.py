@@ -474,6 +474,129 @@ class VSphereCheck(AgentCheck):
         )
         return metrics_values
 
+    def collect_vsan_metrics(self):
+        # type: () -> None
+        self.log.debug("Starting vsan metrics collection (query start time: %s).", self.latest_event_query)
+        latest_metric_time = None
+        collect_start_time = get_current_datetime()
+        try:
+            t0 = Timer()
+            new_health_metrics, new_performance_metrics = self.query_vsan_metrics(
+                collect_start_time - dt.timedelta(hours=2)
+            )
+            self.gauge(
+                'vsphere.vsan.cluster.time',
+                t0.total(),
+                tags=self._config.base_tags,
+                raw=True,
+                hostname=self._hostname,
+            )
+
+            for cluster in new_health_metrics:
+                for metric_name, metric_value in cluster.items():
+                    list_of_tags = ["{}:{}".format(key, value) for key, value in metric_value.items()]
+                    self.gauge(
+                        metric_name,
+                        1,
+                        tags=list_of_tags + self._config.base_tags,
+                        raw=True,
+                        hostname=self._hostname,
+                    )
+
+            for cluster in new_performance_metrics:
+                for entity_type in cluster:
+                    if len(entity_type.value) > 0:
+                        resource_type = entity_type.value[0].metricId.dynamicProperty[0][0]
+                        for given_metric in entity_type.value:
+                            self.log.debug(
+                                "Processing metric with type:%s",
+                                type(given_metric),
+                            )
+                            if given_metric.values.split(',')[-1] != 'None':
+                                if resource_type == 'cluster':
+                                    self.gauge(
+                                        'vsphere.vsan.cluster.{}'.format(given_metric.metricId.label),
+                                        # for now we only collect the latest value
+                                        int(given_metric.values.split(',')[-1]),
+                                        tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
+                                        + self._config.base_tags,
+                                        raw=True,
+                                        hostname=self._hostname,
+                                    )
+                                elif resource_type == 'host':
+                                    self.gauge(
+                                        'vsphere.vsan.host.{}'.format(given_metric.metricId.label),
+                                        # for now we only collect the latest value
+                                        int(given_metric.values.split(',')[-1]),
+                                        tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
+                                        + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
+                                        + self._config.base_tags,
+                                        raw=True,
+                                        hostname=self._hostname,
+                                    )
+                                elif resource_type == 'disk':
+                                    self.gauge(
+                                        'vsphere.vsan.disk.{}'.format(given_metric.metricId.label),
+                                        # for now we only collect the latest value
+                                        int(given_metric.values.split(',')[-1]),
+                                        tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
+                                        + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
+                                        + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
+                                        + self._config.base_tags,
+                                        raw=True,
+                                        hostname=self._hostname,
+                                    )
+                        if latest_metric_time is None:
+                            latest_metric_time = collect_start_time
+        except Exception as e:
+            # Don't get stuck on a failure to fetch a vsan metric
+            # Ignore them for next pass
+            self.log.warning("Unable to fetch Vsan metrics %s", e)
+
+        if latest_metric_time is not None:
+            self.latest_metric_query = latest_metric_time + dt.timedelta(seconds=1)
+        else:
+            # Let's set `self.latest_metric_query` to `collect_start_time` as safeguard in case no metrics are reported
+            # OR something bad happened (which might happen again indefinitely).
+            self.latest_metric_query = collect_start_time
+
+    def query_vsan_metrics(self, starting_time):
+        # we seek to make 1 call per cluster since the cluster id needs to be passed in the perf manager
+        # {cluster_reference: set([cluster_id, host1_id, host2_id, host1disk1_id, host1disk2_id, ...])}
+        cluster_nested_elts = {}
+        entity_ref_ids = {}
+        entity_ref_ids['cluster'] = ['cluster-domclient:', 'vsan-cluster-capacity:']
+        entity_ref_ids['host'] = ['host-domclient:', 'host-cpu:']
+        entity_ref_ids['disk'] = ['capacity-disk:', 'cache-disk:']
+        # {id: {0: type, 1: cluster_name, (optional)2: host_name, (optional)3: disk_id}}
+        id_to_tags = {}
+        for cluster in self.infrastructure_cache.get_mors(vim.ClusterComputeResource):
+            cluster_vsan_config = cluster.configurationEx.vsanConfigInfo
+            # only collect vsan metrics if the cluster has vsan enabled
+            if cluster_vsan_config and cluster_vsan_config.enabled:
+                cluster_uuid = cluster_vsan_config.defaultConfig.uuid
+                cluster_nested_elts[cluster] = [cluster_uuid]
+                id_to_tags[cluster_uuid] = {1: cluster.name, 0: 'cluster'}
+                for host in cluster.host:
+                    host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
+                    cluster_uuid = cluster.configurationEx.vsanConfigInfo.defaultConfig.uuid
+                    if cluster_uuid not in cluster_nested_elts.keys():
+                        cluster_nested_elts[cluster] = [cluster_uuid]
+                    cluster_nested_elts[cluster].append(host_uuid)
+                    id_to_tags[host_uuid] = {1: cluster.name, 2: host.name, 0: 'host'}
+                    host_disks = host.configManager.vsanSystem.QueryDisksForVsan()
+                    for disk in host_disks:
+                        disk_uuid = disk.vsanUuid
+                        if disk_uuid:
+                            cluster_nested_elts[cluster].append(disk_uuid)
+                            id_to_tags[disk_uuid] = {
+                                1: cluster.name,
+                                2: host.name,
+                                3: disk_uuid,
+                                0: 'disk',
+                            }
+        return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
+
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]
         """
@@ -626,6 +749,8 @@ class VSphereCheck(AgentCheck):
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
+            if self._config.collect_vsan:
+                new_events.extend(self.api.get_vsan_events(self.latest_event_query))
             self.gauge(
                 'datadog.vsphere.collect_events.time',
                 t0.total(),
@@ -1027,3 +1152,6 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Starting metric collection in %d threads.", self._config.threads_count)
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")
+
+        if self._config.collect_vsan:
+            self.collect_vsan_metrics()

@@ -55,6 +55,8 @@ class VSphereEvent(object):
                 return True
 
         if self.event_type not in self.exclude_filters:
+            if self.raw_event.eventTypeId and 'vsan' in self.raw_event.eventTypeId:
+                return False
             return True
 
         filters = self.exclude_filters[self.event_type]

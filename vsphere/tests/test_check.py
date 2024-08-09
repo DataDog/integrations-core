@@ -5,11 +5,11 @@ import datetime as dt
 import json
 import logging
 import os
+import sys
 import time
 
-import mock
 import pytest
-from mock import MagicMock
+from mock import MagicMock, mock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base import to_string
@@ -21,6 +21,15 @@ from tests.legacy.utils import mock_alarm_event
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    if sys.version_info[0] < 3:
+        pytest.skip("This test requires Python 3 or higher.")
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
@@ -737,3 +746,27 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
         )
 
         aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="vSAN API is only available in Python 3")
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_check):
+    realtime_instance['get_vsan'] = True
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.vsan.cluster.time', metric_type=aggregator.GAUGE, count=1)
+    aggregator.assert_metric('vsphere.vsan.cluster.health.count', count=1)
+    aggregator.assert_metric(
+        'vsphere.vsan.cluster.example_cluster_metric', count=1, tags=['vcenter_server:FAKE', 'vsphere_cluster:hello']
+    )
+    aggregator.assert_metric(
+        'vsphere.vsan.host.example_host_metric',
+        count=1,
+        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world'],
+    )
+    aggregator.assert_metric(
+        'vsphere.vsan.disk.example_disk_metric',
+        count=1,
+        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:new', 'vsphere_disk:world'],
+    )

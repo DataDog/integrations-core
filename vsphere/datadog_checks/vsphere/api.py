@@ -4,8 +4,12 @@
 import datetime as dt  # noqa: F401
 import functools
 import ssl
+import sys
 from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
 
+if sys.version_info[0] >= 3:
+    import vsanapiutils
+    from pyVmomi import SoapStubAdapter
 from pyVim import connect
 from pyVmomi import vim, vmodl
 from six import itervalues
@@ -18,6 +22,7 @@ from datadog_checks.vsphere.constants import (
     MAX_QUERY_METRICS_OPTION,
     MOR_TYPE_AS_STRING,
     UNLIMITED_HIST_METRICS_PER_QUERY,
+    VSAN_EVENT_IDS,
 )
 from datadog_checks.vsphere.types import InfrastructureData
 from datadog_checks.vsphere.utils import properties_to_collect
@@ -99,6 +104,8 @@ class VSphereAPI(object):
         self.log = log
 
         self._conn = cast(vim.ServiceInstance, None)
+        if sys.version_info[0] >= 3:
+            self._vsan_stub = cast(SoapStubAdapter, None)
         self.smart_connect()
 
     def smart_connect(self):
@@ -151,6 +158,8 @@ class VSphereAPI(object):
             connect.Disconnect(self._conn)
 
         self._conn = conn
+        if sys.version_info[0] >= 3:
+            self._vsan_stub = vsanapiutils.GetVsanVcStub(conn._stub, context=context)
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
@@ -383,3 +392,63 @@ class VSphereAPI(object):
             return max_historical_metrics
         else:
             return UNLIMITED_HIST_METRICS_PER_QUERY
+
+    @smart_retry
+    def get_vsan_events(self, timestamp):
+        event_manager = self._conn.content.eventManager
+        entity_time = vim.event.EventFilterSpec.ByTime(beginTime=timestamp)
+        query_filter = vim.event.EventFilterSpec(eventTypeId=VSAN_EVENT_IDS, time=entity_time)
+        events = event_manager.QueryEvents(query_filter)
+        return events
+
+    @smart_retry
+    def get_vsan_metrics(self, cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time):
+        self.log.debug("Querying vSAN metrics: %s", self._vsan_stub)
+        vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
+        health_metrics = []
+        performance_metrics = []
+        for cluster_reference, nested_ids in cluster_nested_elts.items():
+            unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
+            processed_health_metrics = {}
+            group_id = unprocessed_health_metrics[0].groupId
+            group_health = unprocessed_health_metrics[0].groupHealth
+            processed_health_metrics.update(
+                {
+                    'vsphere.vsan.cluster.health.count': {
+                        'id': group_id,
+                        'status': group_health,
+                        'vsphere_cluster': cluster_reference.name,
+                    }
+                }
+            )
+            for health_test in unprocessed_health_metrics[0].groupTests:
+                test_name = health_test.testId.split('.')[-1]
+                processed_health_metrics.update(
+                    {
+                        'vsphere.vsan.cluster.health.{}.count'.format(test_name): {
+                            'id': group_id,
+                            'status': group_health,
+                            'test_id': health_test.testId,
+                            'test_status': health_test.testHealth,
+                            'vsphere_cluster': cluster_reference.name,
+                        }
+                    }
+                )
+            health_metrics.append(processed_health_metrics)
+
+            vsan_perf_query_spec = []
+            for nested_id in nested_ids:
+                for entity_type in entity_ref_ids[id_to_tags[nested_id][0]]:
+                    vsan_perf_query_spec.append(
+                        vim.cluster.VsanPerfQuerySpec(
+                            entityRefId=(entity_type + str(nested_id)), startTime=starting_time
+                        )
+                    )
+            discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
+            for entity_type in discovered_metrics:
+                for metric in entity_type.value:
+                    metric.metricId.dynamicProperty.append(
+                        id_to_tags[entity_type.entityRefId.replace("'", "").split(':')[-1]]
+                    )
+            performance_metrics.append(discovered_metrics)
+        return [health_metrics, performance_metrics]
