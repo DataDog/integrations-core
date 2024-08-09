@@ -147,11 +147,10 @@ class WindowsNetwork(Network):
             proto_dict["tcp"] = tcpAllstats
 
         for proto, stats in proto_dict.items():
-            for fieldname, _ in stats._fields_:
+            for fieldname in tcpstats_dict:
                 fieldvalue = getattr(stats, fieldname)
-                if fieldname in tcpstats_dict:
-                    final_name = "system.net."+str(proto)+tcpstats_dict[fieldname]
-                    self.submit_netmetric(final_name, fieldvalue, tags)
+                metric_name = "system.net."+str(proto)+tcpstats_dict[fieldname]
+                self.submit_netmetric(metric_name, fieldvalue, tags)
 
 
     def _parse_protocol_psutil(self, conn):
