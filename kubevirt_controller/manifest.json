@@ -8,8 +8,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
-    "title": "Collect key metrics to monitor the health of your KubeVirt Controller service.",
+    "description": "Collect key metrics to monitor the health of your KubeVirt Controller service.",
+    "title": "Kubevirt Controller",
     "media": [],
     "classifier_tags": [
       "Category::Containers",
