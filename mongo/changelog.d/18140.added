@@ -1,3 +1,0 @@
-Collect MongoDB slow operations for auto-discovered databases when DBM is enabled. The slow operations are collected from
-- `system.profile` collection when database profiler is enabled
-- MongoDB slow query logs when database profiler is not enabled
