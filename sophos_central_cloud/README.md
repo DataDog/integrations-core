@@ -20,7 +20,7 @@ The Sophos Central Cloud integration seamlessly collects all the above listed lo
 1. Login to [**Sophos Central Platform**][2] with your credentials.
 2. From Sophos Central Admin, go to **My Products** > **General Settings** > **API Credentials Management**.
 3. Click **Add Credential**.
-4. Provide credential name, select the appropriate role, add an optional description and click on **Add** button. The **API credential Summary** for this credential is displayed.
+4. Provide a credential name, select the appropriate role, add an optional description, and click the **Add** button. The **API credential Summary** for this credential is displayed.
 5. Click on **Show Client Secret** to show the **Client Secret**.
 6. Copy the **Client ID** and **Client Secret**
 
