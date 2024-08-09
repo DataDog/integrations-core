@@ -203,6 +203,7 @@ def get_agent_host_tags():
             logger.warning("Unable to use tags for key %s since %s is not a list", key, value)
     return result
 
+
 def default_json_event_encoding(o):
     if isinstance(o, decimal.Decimal):
         return float(o)
