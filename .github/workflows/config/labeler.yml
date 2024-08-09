@@ -347,6 +347,8 @@ integration/openstack_controller:
 - openstack_controller/**/*
 integration/oracle:
 - oracle/**/*
+integration/ossec_security:
+- ossec_security/**/*
 integration/otel:
 - otel/**/*
 integration/palo_alto_cortex_xdr:
@@ -481,6 +483,8 @@ integration/teradata:
 - teradata/**/*
 integration/terraform:
 - terraform/**/*
+integration/tibco_ems:
+- tibco_ems/**/*
 integration/tls:
 - tls/**/*
 integration/tokumx:
