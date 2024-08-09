@@ -12,7 +12,7 @@ datadog-apache==4.5.1
 datadog-arangodb==2.2.2
 datadog-argo-rollouts==1.0.2
 datadog-argo-workflows==1.0.2
-datadog-argocd==2.4.2
+datadog-argocd==2.4.3
 datadog-aspdotnet==2.1.1; sys_platform == 'win32'
 datadog-avi-vantage==4.2.2
 datadog-aws-neuron==1.0.0
