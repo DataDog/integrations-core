@@ -18,6 +18,7 @@
       "Category::AI/ML",
       "Category::AWS",
       "Category::Cloud",
+      "Category::Log Collection",
       "Offering::Integration",
       "Queried Data Type::Metrics",
       "Submitted Data Type::Metrics"
