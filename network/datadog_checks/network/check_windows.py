@@ -121,6 +121,7 @@ class WindowsNetwork(Network):
             'dwPassiveOpens': '.passive_opens',
             'dwAttemptFails': '.attempt_fails',
             'dwEstabResets': '.established_resets',
+            'dwCurrEstab': '.current_established',
             'dwInSegs': '.in_segs',
             'dwOutSegs': '.out_segs',
             'dwRetransSegs': '.retrans_segs',
