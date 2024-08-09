@@ -18,10 +18,7 @@ if PY3:
 
 class TCPSTATS(Structure):
     """
-    Modelled after the MIB_TCPSTATS structure.
-    For more information:
-    http://msdn.microsoft.com/en-us/library/aa366915(VS.85).aspx
-    (Visited 2009-07-23)
+    https://learn.microsoft.com/en-us/windows/win32/api/tcpmib/ns-tcpmib-mib_tcpstats_lh
     """
     _fields_ = [
         ("dwRtoAlgorithm", DWORD),
@@ -142,6 +139,7 @@ class WindowsNetwork(Network):
             proto_dict["tcp6"] = tcp6stats
 
         tcpAllstats = TCPSTATS()
+        # Create tcp metrics that are a sum of tcp4 and tcp6 metrics
         if 'tcp4' in proto_dict and 'tcp6' in proto_dict:
             for fieldname, _ in tcpAllstats._fields_:
                 tcp_sum = getattr(proto_dict['tcp4'], fieldname) + getattr(proto_dict['tcp6'], fieldname)
