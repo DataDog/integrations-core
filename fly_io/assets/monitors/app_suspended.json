@@ -4,7 +4,7 @@
     "last_updated_at": "2024-07-31",
     "title": "Fly.io App Suspended",
     "tags": [
-        "integration:fly_io"
+        "integration:fly-io"
     ],
     "description": "A Fly.io app can be suspended if the app exits or if the app does not have any traffic. This monitor tracks whether an app status is suspeneded for the last 10 minutes.",
     "definition": {
