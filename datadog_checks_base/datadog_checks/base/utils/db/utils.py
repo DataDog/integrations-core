@@ -183,7 +183,7 @@ def resolve_db_host(db_host):
     return db_host
 
 
-def get_agent_host_tags() -> List[str]:
+def get_agent_host_tags():
     '''
     Get the tags from the agent host and return them as a list of strings.
     '''
