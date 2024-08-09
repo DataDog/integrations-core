@@ -1,0 +1,4 @@
+Introduced a new `HostInfo` metrics collector to gather system-level metrics for the host running the `mongod` or `mongos` process. The following metrics are now collected by default across all deployment types:
+- `mongodb.system.cpu.cores`
+- `mongodb.system.mem.limit`
+- `mongodb.system.mem.total`

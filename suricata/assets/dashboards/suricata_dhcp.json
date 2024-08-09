@@ -1,0 +1,760 @@
+{
+    "title": "Suricata - DHCP",
+    "description": "- This dashboard provides information about DHCP logs generated in Suricata.",
+    "widgets": [
+        {
+            "id": 4000160402704450,
+            "definition": {
+                "type": "image",
+                "url": "https://suricata.io/wp-content/uploads/2023/09/Logo-Suricata-vert-R.png",
+                "url_dark_theme": "https://suricata.io/wp-content/uploads/2023/09/Logo-Suricata-vert-whitetype-R.png",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7296852491781326,
+            "definition": {
+                "type": "note",
+                "content": "The Suricata DHCP dashboard is designed to provide visibility into DHCP-related network activities and events. \n\nThe dashboard helps users monitor for unusual patterns, such as unexpected spikes in DHCP requests or errors, which could indicate misconfigurations or potential security issues. By offering detailed insights into DHCP operations, the dashboard assists network administrators and security teams in troubleshooting issues, ensuring proper network configuration, and detecting unauthorized or suspicious devices.\n\nFor more information, see the [Suricata Integration Documentation](https://docs.datadoghq.com/integrations/suricata).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 8577634300383546,
+            "definition": {
+                "title": "DHCP",
+                "background_color": "purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3358142566706586,
+                        "definition": {
+                            "title": "Total DHCP Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp @dhcp.type:request $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4509056570438722,
+                        "definition": {
+                            "title": "Timeline by DHCP Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "DHCP Requests",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp @dhcp.type:request $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6210823826765374,
+                        "definition": {
+                            "title": "Total DHCP Responses",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp @dhcp.type:reply $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7183331714326592,
+                        "definition": {
+                            "title": "Timeline by DHCP Responses",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "DHCP Responses",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp @dhcp.type:reply $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4790044906884778,
+                        "definition": {
+                            "title": "Distribution by DHCP Message Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dhcp.dhcp_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp @dhcp.dhcp_type:* $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4936861736205544,
+                        "definition": {
+                            "title": "Client Host Names",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dhcp.hostname",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp @dhcp.hostname:* $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8771089858533222,
+                        "definition": {
+                            "title": "Top 10 Requested IP Address",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dhcp.requested_ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp @dhcp.requested_ip:* $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16",
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 540903325398666,
+                        "definition": {
+                            "title": "Top 10 Leased IP Address",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dhcp.assigned_ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16",
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 10,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6566495289941286,
+                        "definition": {
+                            "title": "Leased IP Duration by Client IP and Client MAC",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.dhcp.lease_time"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dhcp.client_mac",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "sum",
+                                                        "metric": "@suricata.dhcp.lease_time"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@dhcp.assigned_ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "sum",
+                                                        "metric": "@suricata.dhcp.lease_time"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:suricata service:dhcp @dhcp.client_mac:* @dhcp.assigned_ip:* $Leased-IP $Protocol $Flow-ID $Destination-IP $Source-IP $Host $Client-MAC"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5298472594590782,
+                        "definition": {
+                            "title": "DHCP Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:suricata service:dhcp $Flow-ID $Source-IP $Destination-IP $Leased-IP $Protocol $Host $Client-MAC",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "flow_id",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "in_iface",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@suricata.proto",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dhcp.type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dhcp.dhcp_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dhcp.hostname",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dhcp.requested_ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dhcp.assigned_ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dhcp.client_mac",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@suricata.dhcp.lease_time",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 18,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 23
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Source-IP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Destination-IP",
+            "prefix": "@network.destination.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Flow-ID",
+            "prefix": "@flow_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Leased-IP",
+            "prefix": "@dhcp.assigned_ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Client-MAC",
+            "prefix": "@dhcp.client_mac",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Protocol",
+            "prefix": "@suricata.proto",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

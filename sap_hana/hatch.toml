@@ -2,7 +2,7 @@
 
 [envs.default]
 dependencies = [
-  "hdbcli==2.10.15",
+  "hdbcli==2.21.28",
 ]
 
 [[envs.default.matrix]]
