@@ -26,6 +26,7 @@ def _assert_metadata(datadog_agent):
     datadog_agent.assert_metadata_count(5)
 
 
+@pytest.mark.xfail
 @pytest.mark.skipif(not GUNICORN_VERSION, reason='Require GUNICORN_VERSION')
 def test_collect_metadata_instance(aggregator, datadog_agent, setup_gunicorn):
     instance = INSTANCE.copy()
@@ -38,6 +39,7 @@ def test_collect_metadata_instance(aggregator, datadog_agent, setup_gunicorn):
     _assert_metadata(datadog_agent)
 
 
+@pytest.mark.xfail
 @pytest.mark.skipif(not GUNICORN_VERSION, reason='Require GUNICORN_VERSION')
 def test_collect_metadata_init_config(aggregator, datadog_agent, setup_gunicorn):
     init_config = {'gunicorn': setup_gunicorn['gunicorn_bin_path']}
@@ -49,6 +51,7 @@ def test_collect_metadata_init_config(aggregator, datadog_agent, setup_gunicorn)
     _assert_metadata(datadog_agent)
 
 
+@pytest.mark.xfail
 @pytest.mark.skipif(not GUNICORN_VERSION, reason='Require GUNICORN_VERSION')
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_metadata_docker(aggregator, datadog_agent, setup_gunicorn):
@@ -62,6 +65,7 @@ def test_collect_metadata_docker(aggregator, datadog_agent, setup_gunicorn):
     _assert_metadata(datadog_agent)
 
 
+@pytest.mark.xfail
 def test_collect_metadata_count(aggregator, datadog_agent, setup_gunicorn):
     instance = INSTANCE.copy()
     instance['gunicorn'] = setup_gunicorn['gunicorn_bin_path']

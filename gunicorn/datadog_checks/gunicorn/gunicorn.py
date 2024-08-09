@@ -8,12 +8,20 @@ Collects metrics from the gunicorn web server.
 http://gunicorn.org/
 """
 import re
+import subprocess
 import time
 
 import psutil
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+
+
+def get_subprocess_output(cmd):
+    """
+    Temporary wrapper
+    """
+    res = subprocess.run(cmd, capture_output=True)
+    return res.stdout, res.stderr, res.returncode
 
 
 class GUnicornCheck(AgentCheck):
@@ -166,7 +174,7 @@ class GUnicornCheck(AgentCheck):
         """Get version from `gunicorn --version`"""
         cmd = '{} --version'.format(self.gunicorn_cmd)
         try:
-            pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
+            pc_out, pc_err, _ = get_subprocess_output(cmd)
         except OSError:
             self.log.debug("Error collecting gunicorn version.")
             return None
