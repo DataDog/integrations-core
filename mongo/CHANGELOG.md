@@ -13,7 +13,7 @@
 * Collect MongoDB slow operations for auto-discovered databases when DBM is enabled. The slow operations are collected from
   - `system.profile` collection when database profiler is enabled
   - MongoDB slow query logs when database profiler is not enabled ([#18140](https://github.com/DataDog/integrations-core/pull/18140))
-* Add `hosting_type` tag to the mongo metrics. This tag indicates where the mongodb instance is hosted. ([#18167](https://github.com/DataDog/integrations-core/pull/18167))
+* Add `hosting_type` tag to the Mongo metrics. This tag indicates where the MongoDB instance is hosted. ([#18167](https://github.com/DataDog/integrations-core/pull/18167))
 * Add database and collection level average latency metrics by operation type
   - mongodb.oplatencies.commands.latency.avg
   - mongodb.oplatencies.reads.latency.avg
@@ -38,7 +38,7 @@
 ***Fixed***:
 
 * Fix the default null value for waiting_for_latch in operation sampling. When an operation is not waiting for latch, waiting_for_latch should be an empty dict instead of boolean False. ([#17997](https://github.com/DataDog/integrations-core/pull/17997))
-* Fix connection error `SCRAM-SHA-256 requires a username`  when connection option  authMechanism is provided ([#18156](https://github.com/DataDog/integrations-core/pull/18156))
+* Fix connection error `SCRAM-SHA-256 requires a username` when connection option authMechanism is provided ([#18156](https://github.com/DataDog/integrations-core/pull/18156))
 
 ## 6.7.2 / 2024-07-19
 

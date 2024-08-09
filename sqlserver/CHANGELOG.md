@@ -6,11 +6,11 @@
 
 ***Added***:
 
-* Added collection of sqlserver agent jobs history and activity ([#17787](https://github.com/DataDog/integrations-core/pull/17787))
+* Added collection of SQL Server Agent jobs history and activity ([#17787](https://github.com/DataDog/integrations-core/pull/17787))
 
 ***Fixed***:
 
-* Fix password obfuscation in OLE DB driver error message when one or more backslash exist in the password. ([#18203](https://github.com/DataDog/integrations-core/pull/18203))
+* Fix password obfuscation in OLE DB driver error message when one or more backslashes exist in the password. ([#18203](https://github.com/DataDog/integrations-core/pull/18203))
 
 ## 17.4.1 / 2024-08-08
 
