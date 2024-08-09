@@ -34,6 +34,35 @@ No additional installation is needed on your server.
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
+### Logs
+
+The AWS Neuron integration can collect logs from the Neuron containers and forward them to Datadog.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `aws_neuron.d/conf.yaml` file. Here's an example:
+
+   ```yaml
+   logs:
+     - type: docker
+       source: aws_neuron
+       service: aws_neuron
+   ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
+
+Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
+
 ### Events
 
 The AWS Neuron integration does not include any events.
@@ -61,3 +90,5 @@ Need help? Contact [Datadog support][9].
 [10]: https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-monitor-user-guide.html#using-neuron-monitor-prometheus-py
 [11]: https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/index.html
 [12]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/#agent-configuration-directory
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
