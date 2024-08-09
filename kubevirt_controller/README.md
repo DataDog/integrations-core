@@ -1,8 +1,8 @@
-# Agent Check: Kubevirt Controller
+# Agent Check: KubeVirt Controller
 
 ## Overview
 
-This check monitors [Kubevirt Controller][1] through the Datadog Agent.
+This check monitors [KubeVirt Controller][1] through the Datadog Agent.
 
 ## Setup
 
@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Kubevirt Controller check is included in the [Datadog Agent][2] package.
+The KubeVirt Controller check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -70,11 +70,11 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
-The Kubevirt Controller integration does not include any events.
+The KubeVirt Controller integration does not include any events.
 
 ### Service Checks
 
-The Kubevirt Controller integration does not include any service checks.
+The KubeVirt Controller integration does not include any service checks.
 
 ## Troubleshooting
 
