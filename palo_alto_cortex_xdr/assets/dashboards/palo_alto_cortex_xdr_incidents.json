@@ -15,7 +15,7 @@
                         "id": 911775482073612,
                         "definition": {
                             "type": "note",
-                            "content": "Gain better visibility into your organization's security events by monitoring Palo Alto Cortex XDR Incident logs with this dashboard. \n\nAn attack can affect multiple hosts or users and trigger various alert types from a single event. All artifacts, assets, and alerts from a threat event are gathered into an Incident.\nIncident logs aggregate multiple alerts and events from different sources, providing a comprehensive view of a security incident, offers detailed information about the incident, including the nature of the threat, affected systems, and potential impact. They include artifacts such as malware,  IP addresses, and user activities associated with the incident. Security teams can use incident logs to manage and track the progress of an incident from detection to resolution. Logs include fields for incident descriptions, resolution statuses, and actions taken.\n\nWith the help of  incident logs, organizations can improve their overall security posture, ensuring that all security events are thoroughly investigated, managed, and documented.\n\nFor Further reading, see:\n\n- [Palo Alto Cortex XDR - Incidents Documentation](https://docs-cortex.paloaltonetworks.com/r/Cortex-XDR/Cortex-XDR-Pro-Administrator-Guide/Investigate-Incidents)",
+                            "content": "Gain better visibility into your organization's security events by monitoring Palo Alto Cortex XDR Incident logs with this dashboard. \n\nAn attack can affect multiple hosts or users and trigger various alert types from a single event. All artifacts, assets, and alerts from a threat event are gathered into an Incident.\nIncident logs aggregate multiple alerts and events from different sources, providing a comprehensive view of a security incident, offers detailed information about the incident, including the nature of the threat, affected systems, and potential impact. They include artifacts such as malware,  IP addresses, and user activities associated with the incident. Security teams can use incident logs to manage and track the progress of an incident from detection to resolution. Logs include fields for incident descriptions, resolution statuses, and actions taken.\n\nWith the help of  incident logs, organizations can improve their overall security posture, ensuring that all security events are thoroughly investigated, managed, and documented.\n\nFor more information, see the [Palo Alto Cortex XDR Integration Documentation](https://docs.datadoghq.com/integrations/palo_alto_cortex_xdr).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -29,7 +29,7 @@
                             "x": 0,
                             "y": 0,
                             "width": 6,
-                            "height": 5
+                            "height": 6
                         }
                     }
                 ]
@@ -38,7 +38,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 6,
-                "height": 8
+                "height": 9
             }
         },
         {
@@ -114,7 +114,7 @@
                             "x": 0,
                             "y": 0,
                             "width": 6,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
@@ -163,7 +163,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 3,
+                            "y": 4,
                             "width": 3,
                             "height": 4
                         }
@@ -214,7 +214,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 3,
+                            "y": 4,
                             "width": 3,
                             "height": 4
                         }
@@ -225,7 +225,7 @@
                 "x": 6,
                 "y": 0,
                 "width": 6,
-                "height": 8
+                "height": 9
             }
         },
         {
@@ -242,7 +242,7 @@
                         "id": 5996232744860254,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates Incident logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](https://app.datadoghq.com/security). ",
+                            "content": "Datadog Cloud SIEM analyzes and correlates Incident logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Apalo-alto-cortex-xdr%20service%3Aincident%20). ",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "left",
@@ -289,20 +289,25 @@
                                             }
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#bc303c"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
                             "y": 1,
                             "width": 2,
-                            "height": 4
+                            "height": 2
                         }
                     },
                     {
@@ -335,6 +340,14 @@
                                         {
                                             "formula": "query1"
                                         }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#d33043"
+                                        }
                                     ]
                                 }
                             ],
@@ -345,7 +358,234 @@
                             "x": 2,
                             "y": 1,
                             "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3497013462131200,
+                        "definition": {
+                            "title": "Critical Security Signals",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:palo-alto-cortex-xdr service:incident status:critical $Severity-Status $Starred $Incident-Id $User"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#bc303c"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
                             "height": 4
+                        }
+                    },
+                    {
+                        "id": 1994785643647592,
+                        "definition": {
+                            "title": "MEDIUMs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "status:medium service:incident source:palo-alto-cortex-xdr $Starred $Severity-Status $Incident-Id $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5221231304656460,
+                        "definition": {
+                            "title": "LOWs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "status:low service:incident source:palo-alto-cortex-xdr $Starred $Severity-Status $Incident-Id $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#ffb52b"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8115309526387882,
+                        "definition": {
+                            "title": "INFOs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "status:info service:incident source:palo-alto-cortex-xdr $Starred $Severity-Status $Incident-Id $User"
+                                            }
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#84c1e0"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 4,
+                            "width": 2,
+                            "height": 1
                         }
                     },
                     {
@@ -383,6 +623,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#d33043"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -408,10 +656,10 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 1,
-                            "width": 8,
-                            "height": 3
+                            "x": 0,
+                            "y": 5,
+                            "width": 7,
+                            "height": 4
                         }
                     },
                     {
@@ -449,6 +697,14 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#e5a21c"
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -474,212 +730,17 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 4,
-                            "width": 8,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 1994785643647592,
-                        "definition": {
-                            "title": "MEDIUMs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "security_signals",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "status:medium service:incident source:palo-alto-cortex-xdr $Starred $Severity-Status $Incident-Id $User"
-                                            }
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
+                            "x": 7,
                             "y": 5,
-                            "width": 2,
+                            "width": 5,
                             "height": 4
-                        }
-                    },
-                    {
-                        "id": 5221231304656460,
-                        "definition": {
-                            "title": "LOWs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "security_signals",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "status:low service:incident source:palo-alto-cortex-xdr $Starred $Severity-Status $Incident-Id $User"
-                                            }
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 5,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8115309526387882,
-                        "definition": {
-                            "title": "INFOs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "security_signals",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "status:info service:incident source:palo-alto-cortex-xdr $Starred $Severity-Status $Incident-Id $User"
-                                            }
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 7,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3497013462131200,
-                        "definition": {
-                            "title": "Low Security Signals",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "security_signals",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@workflow.rule.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:palo-alto-cortex-xdr service:incident status:low $Severity-Status $Starred $Incident-Id $User"
-                                            }
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 7,
-                            "width": 8,
-                            "height": 2
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 8,
+                "y": 9,
                 "width": 12,
                 "height": 10
             }
@@ -1480,7 +1541,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 18,
+                "y": 19,
                 "width": 12,
                 "height": 25,
                 "is_column_break": true
@@ -1690,7 +1751,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 43,
+                "y": 44,
                 "width": 12,
                 "height": 9
             }
