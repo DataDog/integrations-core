@@ -34,7 +34,10 @@
       },
       "metrics": {
         "prefix": "kubevirt_api.",
-        "check": "",
+        "check": [
+          "kubevirt_api.process.cpu_seconds.count",
+          "kubevirt_api.process.open_fds"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -44,8 +47,6 @@
     "dashboards": {
       "KubeVirt Overview": "assets/dashboards/kubevirt_overview.json"
     },
-    "monitors": {},
-    "logs": {},
     "saved_views": {}
   },
   "author": {
