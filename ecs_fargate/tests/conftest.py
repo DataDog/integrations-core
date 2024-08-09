@@ -214,7 +214,7 @@ def mocked_get_tags_v4(entity, _):
     return tag_store.get(entity, [])
 
 
-def mocked_is_excluded(name, image):
+def mocked_is_excluded(annotation, name, image):
     if image.startswith("amazon/amazon-ecs-pause"):
         return True
     return False

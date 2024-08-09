@@ -33,7 +33,7 @@ except ImportError:
     log = logging.getLogger(__name__)
     log.info('Agent does not provide filtering logic, disabling container filtering')
 
-    def c_is_excluded(name, image, namespace=""):
+    def c_is_excluded(annotation, name, image, namespace=""):
         return False
 
 
@@ -156,7 +156,7 @@ class FargateCheck(AgentCheck):
         for container in metadata['Containers']:
             c_id = container['DockerId']
             # Check if container is excluded
-            if c_is_excluded(container.get("Name", ""), container.get("Image", "")):
+            if c_is_excluded("", container.get("Name", ""), container.get("Image", "")):
                 exlcuded_cid.add(c_id)
                 continue
 
