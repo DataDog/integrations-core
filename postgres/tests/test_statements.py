@@ -756,7 +756,9 @@ def test_failed_explain_handling(
         ),
     ],
 )
-@pytest.mark.parametrize("dbstrict,ignore_databases", [(True, [])])
+@pytest.mark.parametrize(
+    "dbstrict,ignore_databases", [(True, []), (False, []), (False, ['foo']), (False, ['postgres'])]
+)
 def test_statement_samples_collect(
     aggregator,
     integration_check,
