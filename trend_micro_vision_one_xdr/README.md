@@ -1,13 +1,13 @@
 ## Overview
 
-[Trend Micro Vision One XDR][1] collects and automatically correlates data across multiple security layers - email, endpoint, server, cloud workload, and network. This allows for faster detection of threats and improved investigation and response times through security analysis.
+[Trend Micro Vision One XDR][1] collects and automatically correlates data across multiple security layers: email, endpoint, server, cloud workload, and network. This allows for faster detection of threats and improved investigation and response times through security analysis.
 
 This integration ingests the following logs:
 
 - Workbench Alerts
 - Observed Attack Techniques
 
-This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into workbench alerts and observed attack techniques through the out-of-the-box dashboards.
+This integration collects all the above listed logs and sends them to Datadog for analysis. Datadog uses the built-in logs pipeline to parse and enrich these logs, enabling effortless search and analysis. The integration provides insight into workbench alerts and observed attack techniques through the out-of-the-box dashboards.
 
 ## Setup
 

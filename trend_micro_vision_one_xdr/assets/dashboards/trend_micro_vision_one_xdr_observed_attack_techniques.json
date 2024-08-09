@@ -15,7 +15,7 @@
                         "id": 5872268233797356,
                         "definition": {
                             "type": "note",
-                            "content": "This dashboard offers a comprehensive view of detected attack patterns across various data sources, including network traffic, application logs, and endpoint activities. \n\nThis allows you to visualize and analyze attack techniques in real time, enhancing their ability to identify and respond to threats quickly. \n\nFor more information, see the [Trend Micro Vision One XDR Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_xdr).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
+                            "content": "This dashboard offers a comprehensive view of detected attack patterns across various data sources, including network traffic, application logs, and endpoint activities. \n\nThis allows you to visualize and analyze attack techniques in real time, enhancing your ability to identify and respond to threats quickly. \n\nFor more information, see the [Trend Micro Vision One XDR Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_xdr).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
