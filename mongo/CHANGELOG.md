@@ -2,6 +2,44 @@
 
 <!-- towncrier release notes start -->
 
+## 6.8.0 / 2024-08-09
+
+***Added***:
+
+* Collects 3 additional WiredTiger cache metrics from serverStatus
+  - wiredtiger.cache.bytes_read_into_cache
+  - wiredtiger.cache.bytes_written_from_cache
+  - wiredtiger.cache.pages_requested_from_cache ([#18052](https://github.com/DataDog/integrations-core/pull/18052))
+* Collect MongoDB slow operations for auto-discovered databases when DBM is enabled. The slow operations are collected from
+  - `system.profile` collection when database profiler is enabled
+  - MongoDB slow query logs when database profiler is not enabled ([#18140](https://github.com/DataDog/integrations-core/pull/18140))
+* Add `hosting_type` tag to the mongo metrics. This tag indicates where the mongodb instance is hosted. ([#18167](https://github.com/DataDog/integrations-core/pull/18167))
+* Add database and collection level average latency metrics by operation type
+  - mongodb.oplatencies.commands.latency.avg
+  - mongodb.oplatencies.reads.latency.avg
+  - mongodb.oplatencies.writes.latency.avg
+  - mongodb.collection.commands.latency.avg
+  - mongodb.collection.reads.latency.avg
+  - mongodb.collection.transactions.latency.avg
+  - mongodb.collection.writes.latency.avg ([#18177](https://github.com/DataDog/integrations-core/pull/18177))
+* Introduced a new `HostInfo` metrics collector to gather system-level metrics for the host running the `mongod` or `mongos` process. The following metrics are now collected by default across all deployment types:
+  - `mongodb.system.cpu.cores`
+  - `mongodb.system.mem.limit`
+  - `mongodb.system.mem.total` ([#18196](https://github.com/DataDog/integrations-core/pull/18196))
+* Add new database storage metrics collected from `dbStats`. The new metrics include
+  - mongodb.stats.freestoragesize
+  - mongodb.stats.fstotalsize
+  - mongodb.stats.fsusedsize
+  - mongodb.stats.indexfreestoragesize
+  - mongodb.stats.totalfreestoragesize
+  - mongodb.stats.totalsize ([#18200](https://github.com/DataDog/integrations-core/pull/18200))
+* Collect operation samples (DBM only) for operations that run on system databases (e.g. admin, local, config). ([#18224](https://github.com/DataDog/integrations-core/pull/18224))
+
+***Fixed***:
+
+* Fix the default null value for waiting_for_latch in operation sampling. When an operation is not waiting for latch, waiting_for_latch should be an empty dict instead of boolean False. ([#17997](https://github.com/DataDog/integrations-core/pull/17997))
+* Fix connection error `SCRAM-SHA-256 requires a username`  when connection option  authMechanism is provided ([#18156](https://github.com/DataDog/integrations-core/pull/18156))
+
 ## 6.7.2 / 2024-07-19
 
 ***Fixed***:
