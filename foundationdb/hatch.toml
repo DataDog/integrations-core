@@ -7,10 +7,10 @@ dependencies = [
 e2e-env = false
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 protocol = ["tls"]
 
 [envs.default.overrides]
