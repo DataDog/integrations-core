@@ -63,13 +63,13 @@ Replace `<DD_CLUSTER_NAME>` with the name you want for your cluster.
 
 ### Validation
 
-[Run the Cluster Agent's `clusterchecks` subcommand][7] inside your Cluster Agent container and look for the `kubevirt_api` check under the Checks section.
+[Run the Cluster Agent's `clusterchecks` subcommand][5] inside your Cluster Agent container and look for the `kubevirt_api` check under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -81,12 +81,12 @@ The Kubevirt API integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][7].
 
 [1]: https://docs.datadoghq.com/integrations/kubevirt_api
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=datadogoperator
-[7]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent
-[8]: https://github.com/DataDog/integrations-core/blob/master/kubevirt_api/metadata.csv
-[9]: https://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent
+[6]: https://github.com/DataDog/integrations-core/blob/master/kubevirt_api/metadata.csv
+[7]: https://docs.datadoghq.com/help/
