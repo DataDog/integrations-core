@@ -8,17 +8,18 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Collect key metrics to monitor the health of your KubeVirt API service.",
     "title": "Kubevirt API",
     "media": [],
     "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
