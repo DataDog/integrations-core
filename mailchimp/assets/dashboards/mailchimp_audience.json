@@ -1,0 +1,656 @@
+{
+    "title": "Mailchimp -  Audiences",
+    "description": "",
+    "widgets": [
+        {
+            "id": 8941493771920024,
+            "definition": {
+                "type": "image",
+                "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2XxdAHl6OwmybeKmWlbGY1mz01aNF-KadbQ&s",
+                "url_dark_theme": "https://www.signpost.com/wp-content/uploads/2021/03/Mailchimp_Logo-Horizontal_White.png",
+                "sizing": "contain",
+                "margin": "sm",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 3867952414448808,
+            "definition": {
+                "title": "Total Audiences (Latest)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.count{*}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_yellow"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 2577370023576594,
+            "definition": {
+                "title": "Avg Open Rate (Latest)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:mailchimp.lists.open_rate{$audience,$audience_id}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 9,
+                "y": 0,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 8591325840832338,
+            "definition": {
+                "type": "note",
+                "content": "Mailchimp is an all-in-one marketing platform that helps businesses create, send, and analyze email campaigns. It provides tools for audience management, marketing automation, and insights to drive engagement and grow your business.\n\nThis Mailchimp **Audience** Dashboard provides comprehensive insights, including total contacts, active contacts, total campaigns completed, unsubscribing information.\n\nFor more information, see the [Mailchimp Integration Documentation](https://docs.datadoghq.com/integrations/mailchimp/).\n",
+                "background_color": "gray",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "right",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 5031174173951340,
+            "definition": {
+                "type": "note",
+                "content": "**Note**:\n- The dashboard widgets show the latest metric values captured for each Audience.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "right",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 3,
+                "y": 2,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 7246398951405206,
+            "definition": {
+                "title": "Total Campaigns (Latest)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.campaign_count{$audience,$audience_id}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 6,
+                "y": 2,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 2022827613769468,
+            "definition": {
+                "title": "Avg Click Rate  (Latest)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:mailchimp.lists.click_rate{$audience,$audience_id}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 9,
+                "y": 3,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1083428137619484,
+            "definition": {
+                "title": "Total Unsubscriptions (Latest)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.unsubscribe_count{$audience,$audience_id}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "red_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 6,
+                "y": 4,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 1901908941423366,
+            "definition": {
+                "title": "Total Active Contacts (Latest)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.member_count{$audience,$audience_id}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 4255179764756608,
+            "definition": {
+                "title": "Audiences Overview",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "week",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Total Audience Members",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Active Audience Members",
+                                "formula": "query2"
+                            },
+                            {
+                                "alias": "Unsubscribe Members",
+                                "formula": "query3"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.total_contacts{$audience,$audience_id}"
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.member_count{$audience,$audience_id}"
+                            },
+                            {
+                                "name": "query3",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.unsubscribe_count{$audience,$audience_id}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "color_order": "shuffled",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 6,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 5889273041389844,
+            "definition": {
+                "title": "Total Contacts (Latest)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.total_contacts{$audience,$audience_id}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 5349789520571192,
+            "definition": {
+                "title": "Audience Summary (Latest)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.total_contacts{$audience,$audience_id} by {list_name,list_id}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.list_rating{$audience,$audience_id} by {list_name,list_id}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "name": "query4",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.member_count{$audience,$audience_id} by {list_name,list_id}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "name": "query5",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.campaign_count{$audience,$audience_id} by {list_name,list_id}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "name": "query6",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.unsubscribe_count{$audience,$audience_id} by {list_name,list_id}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "name": "query9",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.open_rate{$audience,$audience_id} by {list_name,list_id}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "name": "query10",
+                                "data_source": "metrics",
+                                "query": "sum:mailchimp.lists.click_rate{$audience,$audience_id} by {list_name,list_id}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Total Contacts",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">",
+                                        "value": 0,
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "formula": "query1"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Ratings",
+                                "formula": "query2"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Active Contacts",
+                                "formula": "query4"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Campaigns",
+                                "formula": "query5"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Unsubscriptions",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">",
+                                        "value": 0,
+                                        "palette": "red_on_white"
+                                    }
+                                ],
+                                "formula": "query6"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Open Rate %",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">",
+                                        "value": 0,
+                                        "palette": "green_on_white"
+                                    }
+                                ],
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "formula": "query9"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Click Rate %",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">",
+                                        "value": 0,
+                                        "palette": "green_on_white"
+                                    }
+                                ],
+                                "formula": "query10"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "always"
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "audience",
+            "prefix": "list_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "audience_id",
+            "prefix": "list_id",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
