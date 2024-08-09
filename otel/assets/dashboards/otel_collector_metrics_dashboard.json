@@ -1,5 +1,4 @@
 {
-    "author_name": "Datadog",
     "title": "OpenTelemetry Collector Metrics Dashboard",
     "description": "Default dashboard to visualize metrics for the OpenTelemetry Collector.\n\nNote: To view these metrics, enable the Prometheus receiver in the collector configuration, as shown in [this example](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/6946b963820d391325254cb9cc6bb34ae12907a0/exporter/datadogexporter/examples/collector.yaml#L37).",
     "widgets": [
@@ -7,9 +6,9 @@
             "id": 7581494098406438,
             "definition": {
                 "title": "About",
-                "type": "group",
                 "banner_img": "/static/images/integration_dashboard/otel_hero_1.png",
                 "show_title": false,
+                "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
@@ -66,9 +65,9 @@
             "id": 6537209141697758,
             "definition": {
                 "title": "Overall Health",
-                "type": "group",
                 "background_color": "vivid_blue",
                 "show_title": true,
+                "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
@@ -97,7 +96,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_uptime{$host} by {service_version}.as_count()",
+                                            "query": "sum:otelcol_process_uptime{$host,$service} by {service_version}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -144,7 +143,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_cpu_seconds{$host} by {service_version}.as_rate()",
+                                            "query": "sum:otelcol_process_cpu_seconds{$host,$service} by {service_version}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -191,7 +190,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_process_runtime_total_sys_memory_bytes{$host} by {host}",
+                                            "query": "avg:otelcol_process_runtime_total_sys_memory_bytes{$host,$service} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -238,7 +237,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_spans{$host} by {service_version}.as_rate()",
+                                            "query": "sum:otelcol_exporter_sent_spans{$host,$service} by {service_version}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -285,7 +284,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_metric_points{$host} by {service_version}.as_rate()",
+                                            "query": "sum:otelcol_exporter_sent_metric_points{$host,$service} by {service_version}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -319,9 +318,9 @@
             "id": 8041422185924356,
             "definition": {
                 "title": "Component: Receivers",
-                "type": "group",
                 "background_color": "white",
                 "show_title": true,
+                "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
@@ -333,24 +332,29 @@
                             "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Accepted metric points",
-                                            "conditional_formats": [],
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "asc"
-                                            },
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_metric_points{*} by {service,receiver}.as_count()",
+                                            "query": "sum:otelcol_receiver_accepted_metric_points{$service} by {service,receiver}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "asc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Accepted metric points",
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -372,23 +376,29 @@
                             "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Accepted spans",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            },
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_spans{$host} by {receiver}.as_count()",
+                                            "query": "sum:otelcol_receiver_accepted_spans{$host,$service} by {receiver}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Accepted spans",
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -427,7 +437,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_metric_points{$host} by {receiver}.as_rate()",
+                                            "query": "sum:otelcol_receiver_accepted_metric_points{$host,$service} by {receiver}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -474,7 +484,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_spans{$host} by {receiver}.as_rate()",
+                                            "query": "sum:otelcol_receiver_accepted_spans{$host,$service} by {receiver}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -521,7 +531,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_metric_points{$host} by {receiver}.as_count()",
+                                            "query": "sum:otelcol_receiver_accepted_metric_points{$host,$service} by {receiver}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -568,7 +578,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_accepted_spans{$host} by {receiver}.as_count()",
+                                            "query": "sum:otelcol_receiver_accepted_spans{$host,$service} by {receiver}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -615,7 +625,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_refused_metric_points{$host}.as_count()",
+                                            "query": "sum:otelcol_receiver_refused_metric_points{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -662,7 +672,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_receiver_refused_spans{$host}.as_count()",
+                                            "query": "sum:otelcol_receiver_refused_spans{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -709,7 +719,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_scraper_scraped_metric_points{$host}.as_count()",
+                                            "query": "sum:otelcol_scraper_scraped_metric_points{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -756,7 +766,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_scraper_scraped_metric_points{$host}.as_rate()",
+                                            "query": "sum:otelcol_scraper_scraped_metric_points{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -803,7 +813,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_scraper_errored_metric_points{$host}.as_count()",
+                                            "query": "sum:otelcol_scraper_errored_metric_points{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -837,9 +847,9 @@
             "id": 4869373166772386,
             "definition": {
                 "title": "Component: Processors",
-                "type": "group",
                 "background_color": "white",
                 "show_title": true,
+                "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
@@ -851,23 +861,29 @@
                             "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Average batch send size",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            },
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host} by {service,processor}",
+                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host,$service} by {service,processor}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Average batch send size",
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -889,23 +905,29 @@
                             "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Batch size trigger send",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            },
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_processor_batch_batch_size_trigger_send{$host} by {service,processor}.as_count()",
+                                            "query": "sum:otelcol_processor_batch_batch_size_trigger_send{$host,$service} by {service,processor}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Batch size trigger send",
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -944,7 +966,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host} by {host}",
+                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host,$service} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -991,7 +1013,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_processor_batch_batch_size_trigger_send{$host} by {host}.as_count()",
+                                            "query": "sum:otelcol_processor_batch_batch_size_trigger_send{$host,$service} by {host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1038,7 +1060,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host} by {host}",
+                                            "query": "avg:otelcol_processor_batch_batch_send_size{$host,$service} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1085,7 +1107,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_processor_batch_timeout_trigger_send{$host}.as_count()",
+                                            "query": "sum:otelcol_processor_batch_timeout_trigger_send{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1119,9 +1141,9 @@
             "id": 7510133872566486,
             "definition": {
                 "title": "Component: Exporters",
-                "type": "group",
                 "background_color": "white",
                 "show_title": true,
+                "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
@@ -1133,23 +1155,29 @@
                             "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Sent metric points",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            },
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_metric_points{$host} by {service,exporter}.as_count()",
+                                            "query": "sum:otelcol_exporter_sent_metric_points{$host,$service} by {service,exporter}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Sent metric points",
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -1171,23 +1199,29 @@
                             "type": "query_table",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "alias": "Sent spans",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            },
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_spans{$host} by {service,exporter}.as_count()",
+                                            "query": "sum:otelcol_exporter_sent_spans{$host,$service} by {service,exporter}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Sent spans",
+                                            "formula": "query1"
                                         }
                                     ]
                                 }
@@ -1226,7 +1260,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_metric_points{$host}.as_rate()",
+                                            "query": "sum:otelcol_exporter_sent_metric_points{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1273,7 +1307,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_spans{$host}.as_rate()",
+                                            "query": "sum:otelcol_exporter_sent_spans{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1320,7 +1354,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_metric_points{$host} by {exporter}.as_count()",
+                                            "query": "sum:otelcol_exporter_sent_metric_points{$host,$service} by {exporter}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1367,7 +1401,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_sent_spans{$host} by {exporter}.as_count()",
+                                            "query": "sum:otelcol_exporter_sent_spans{$host,$service} by {exporter}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1414,7 +1448,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_exporter_queue_size{$host}",
+                                            "query": "avg:otelcol_exporter_queue_size{$host,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1461,7 +1495,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_send_failed_spans{$host}.as_count()",
+                                            "query": "sum:otelcol_exporter_send_failed_spans{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1508,7 +1542,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_enqueue_failed_log_records{$host}.as_count()",
+                                            "query": "sum:otelcol_exporter_enqueue_failed_log_records{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1555,7 +1589,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_enqueue_failed_metric_points{$host}.as_count()",
+                                            "query": "sum:otelcol_exporter_enqueue_failed_metric_points{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1602,7 +1636,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_exporter_enqueue_failed_spans{$host}.as_count()",
+                                            "query": "sum:otelcol_exporter_enqueue_failed_spans{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1637,9 +1671,9 @@
             "id": 1976337206684930,
             "definition": {
                 "title": "Process",
-                "type": "group",
                 "background_color": "white",
                 "show_title": true,
+                "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
@@ -1668,7 +1702,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_uptime{$host}.as_count()",
+                                            "query": "sum:otelcol_process_uptime{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1715,7 +1749,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_cpu_seconds{$host}.as_rate()",
+                                            "query": "sum:otelcol_process_cpu_seconds{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1762,7 +1796,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_process_memory_rss{$host} by {host}",
+                                            "query": "avg:otelcol_process_memory_rss{$host,$service} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1809,7 +1843,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_process_runtime_heap_alloc_bytes{$host} by {host}",
+                                            "query": "avg:otelcol_process_runtime_heap_alloc_bytes{$host,$service} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1856,7 +1890,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_process_runtime_total_alloc_bytes{$host} by {host}.as_count()",
+                                            "query": "sum:otelcol_process_runtime_total_alloc_bytes{$host,$service} by {host}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1903,7 +1937,7 @@
                                     "response_format": "timeseries",
                                     "queries": [
                                         {
-                                            "query": "avg:otelcol_process_runtime_total_sys_memory_bytes{$host} by {host}",
+                                            "query": "avg:otelcol_process_runtime_total_sys_memory_bytes{$host,$service} by {host}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1965,7 +1999,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_traces{$host}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_traces{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2010,7 +2044,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_spans{$host}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_spans{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2081,12 +2115,12 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "max:otelcol_datadog_trace_agent_trace_writer_flush_duration_max{$host}",
+                                            "query": "max:otelcol_datadog_trace_agent_trace_writer_flush_duration_max{$host,$service}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         },
                                         {
-                                            "query": "avg:otelcol_datadog_trace_agent_trace_writer_flush_duration_avg{$host}",
+                                            "query": "avg:otelcol_datadog_trace_agent_trace_writer_flush_duration_avg{$host,$service}",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         }
@@ -2138,7 +2172,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_bytes{$host}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_bytes{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2190,7 +2224,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_payloads{$host}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_payloads{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2263,7 +2297,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_errors{$host}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_errors{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2319,7 +2353,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2330,7 +2363,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_otlp_traces{$host, source:datadogexporter}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_otlp_traces{$host,source:datadogexporter,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2372,7 +2405,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2383,7 +2415,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_otlp_spans{$host, source:datadogexporter}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_otlp_spans{$host,source:datadogexporter,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2456,7 +2488,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_retries{$host}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_trace_writer_retries{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2506,7 +2538,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_entries{$host}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_entries{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "avg"
@@ -2590,7 +2622,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2601,7 +2632,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_otlp_traces{$host,source:datadogconnector}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_otlp_traces{$host,source:datadogconnector,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2643,7 +2674,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2654,7 +2684,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_otlp_spans{$host,source:datadogconnector}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_otlp_spans{$host,source:datadogconnector,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2706,7 +2736,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_payloads{$host}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_payloads{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2751,7 +2781,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_bytes{$host}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_bytes{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2817,7 +2847,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_retries{$host}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_retries{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2862,7 +2892,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_entries{$host}.as_rate()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_entries{$host,$service}.as_rate()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2907,7 +2937,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_buckets{$host}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_stats_buckets{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -2973,7 +3003,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_errors{$host}.as_count()",
+                                            "query": "sum:otelcol_datadog_trace_agent_stats_writer_errors{$host,$service}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -3011,10 +3041,15 @@
             "prefix": "host",
             "available_values": [],
             "default": "*"
+        },
+        {
+            "name": "service",
+            "prefix": "service",
+            "available_values": [],
+            "default": "*"
         }
     ],
     "layout_type": "ordered",
-    "is_read_only": false,
     "notify_list": [],
     "reflow_type": "fixed"
 }
