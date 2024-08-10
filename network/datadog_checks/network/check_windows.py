@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
-import sys
 from collections import defaultdict
-from ctypes import Structure, windll, byref
+from ctypes import Structure, byref, windll
 from ctypes.wintypes import DWORD
 
 import psutil

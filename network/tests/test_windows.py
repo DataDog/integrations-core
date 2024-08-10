@@ -2,14 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import ctypes
 import socket
 from collections import namedtuple
 from ctypes import WinError as winerror
 
 import mock
-from datadog_checks.network.check_windows import WindowsNetwork, TCPSTATS
 from six import PY3, iteritems
+
+from datadog_checks.network.check_windows import TCPSTATS, WindowsNetwork
 
 from . import common
 
