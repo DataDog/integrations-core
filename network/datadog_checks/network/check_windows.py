@@ -16,10 +16,12 @@ Iphlpapi = windll.Iphlpapi
 if PY3:
     long = int
 
+
 class TCPSTATS(Structure):
     """
     https://learn.microsoft.com/en-us/windows/win32/api/tcpmib/ns-tcpmib-mib_tcpstats_lh
     """
+
     _fields_ = [
         ("dwRtoAlgorithm", DWORD),
         ("dwRtoMin", DWORD),
@@ -35,8 +37,9 @@ class TCPSTATS(Structure):
         ("dwRetransSegs", DWORD),
         ("dwInErrs", DWORD),
         ("dwOutRsts", DWORD),
-        ("dwNumConns", DWORD)
+        ("dwNumConns", DWORD),
     ]
+
 
 class WindowsNetwork(Network):
     """
@@ -102,11 +105,11 @@ class WindowsNetwork(Network):
             self.submit_devicemetrics(iface, metrics, tags)
 
     def _get_tcp_stats(self, inet):
-        stats=TCPSTATS()
+        stats = TCPSTATS()
         try:
             Iphlpapi.GetTcpStatisticsEx(byref(stats), inet)
         except OSError as e:
-            self.log.error("OSError: %s",e)
+            self.log.error("OSError: %s", e)
             return None
         return stats
 
@@ -149,9 +152,8 @@ class WindowsNetwork(Network):
         for proto, stats in proto_dict.items():
             for fieldname in tcpstats_dict:
                 fieldvalue = getattr(stats, fieldname)
-                metric_name = "system.net."+str(proto)+tcpstats_dict[fieldname]
+                metric_name = "system.net." + str(proto) + tcpstats_dict[fieldname]
                 self.submit_netmetric(metric_name, fieldvalue, tags)
-
 
     def _parse_protocol_psutil(self, conn):
         """

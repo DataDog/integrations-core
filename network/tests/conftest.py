@@ -15,7 +15,9 @@ from . import common
 @pytest.fixture(scope='session')
 def dd_environment():
     if Platform.is_windows():
-        yield common.INSTANCE, {'docker_platform': 'windows',}
+        yield common.INSTANCE, {
+            'docker_platform': 'windows',
+        }
     else:
         yield common.INSTANCE, common.E2E_METADATA
 

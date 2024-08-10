@@ -25,15 +25,17 @@ def test_creates_windows_instance(is_linux, is_bsd, is_solaris, is_windows, chec
     check_instance = check({})
     assert isinstance(check_instance, WindowsNetwork)
 
+
 def test_get_tcp_stats_failure():
     instance = copy.deepcopy(common.INSTANCE)
     check_instance = WindowsNetwork('network', {}, [instance])
 
     with mock.patch(
-    'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx',
-    side_effect=winerror()), mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric:
+        'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx', side_effect=winerror()
+    ), mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric:
         check_instance.check({})
         submit_netmetric.assert_not_called()
+
 
 def test_get_tcp_stats(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
@@ -54,7 +56,7 @@ def test_get_tcp_stats(aggregator):
         dwRetransSegs=12,
         dwInErrs=13,
         dwOutRsts=14,
-        dwNumConns=15
+        dwNumConns=15,
     )
     expected_mets = {
         'system.net.tcp4.active_opens': 5,
@@ -92,9 +94,8 @@ def test_get_tcp_stats(aggregator):
         'system.net.tcp.connections': 30,
     }
 
-    with mock.patch(
-    'datadog_checks.network.check_windows.WindowsNetwork._get_tcp_stats') as mock_get_tcp_stats:
-        mock_get_tcp_stats.return_value = mock_stats # Make _get_tcp_stats return my mock object
+    with mock.patch('datadog_checks.network.check_windows.WindowsNetwork._get_tcp_stats') as mock_get_tcp_stats:
+        mock_get_tcp_stats.return_value = mock_stats  # Make _get_tcp_stats return my mock object
         check_instance.check({})
         for name, value in iteritems(expected_mets):
             aggregator.assert_metric(name, value=value)
