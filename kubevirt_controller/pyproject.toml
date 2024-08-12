@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-kubevirt-controller"
-description = "The Kubevirt Controller check"
+description = "The KubeVirt Controller check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.11"
