@@ -111,11 +111,14 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         return ChainMap(config, self.get_default_config())
 
     def get_default_config(self):
-        return {
-            metrics = construct_metrics_config(metrics)
+            metrics = []
             metrics.append(DEFAULT_GO_METRICS)
-            'metrics':metrics 
+        config = {
+            'metrics':metrics, 
+            'namespace': namespace,
         }
+        config.update(self.instance)
+        return config
 
     def refresh_scrapers(self):
         pass
