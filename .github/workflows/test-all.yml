@@ -2154,10 +2154,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  j1a04452:
+  jc4c1032:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubevirt Controller
+      job-name: KubeVirt Controller
       target: kubevirt_controller
       platform: linux
       runner: '["ubuntu-22.04"]'
