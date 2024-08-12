@@ -179,6 +179,7 @@ class MongoSlowOperations(DBMAsyncJob):
                 explain_plan_rate_limiter=self._explained_operations_ratelimiter,
                 explain_plan_cache_key=(dbname, query_signature),
             ):
+                self._check.log.debug("Collecting explain plan for slow operation: %s", slow_operation['command'])
                 if slow_operation.get("execStats"):
                     # execStats is available with profiling, so we just need to format it
                     explain_plan = format_explain_plan({"executionStats": slow_operation.get("execStats")})
