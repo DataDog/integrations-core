@@ -1,4 +1,4 @@
-name: Kubevirt Handler
+name: KubeVirt Handler
 files:
   - name: kubevirt_handler.yaml
     options:

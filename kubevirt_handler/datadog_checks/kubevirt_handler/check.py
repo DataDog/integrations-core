@@ -9,12 +9,12 @@ from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynam
 from .metrics import METRICS_MAP
 
 
-class KubevirtHandlerCheck(OpenMetricsBaseCheckV2):
+class KubeVirtHandlerCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "kubevirt_handler"
 
     def __init__(self, name, init_config, instances):
-        super(KubevirtHandlerCheck, self).__init__(name, init_config, instances)
+        super(KubeVirtHandlerCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self._parse_config)
         self.check_initializations.append(self._configure_additional_transformers)
 

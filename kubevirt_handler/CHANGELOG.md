@@ -1,4 +1,3 @@
-# CHANGELOG - Kubevirt Handler
+# CHANGELOG - KubeVirt Handler
 
 <!-- towncrier release notes start -->
-

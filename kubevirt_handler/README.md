@@ -1,8 +1,8 @@
-# Agent Check: Kubevirt Handler
+# Agent Check: KubeVirt Handler
 
 ## Overview
 
-This check monitors [Kubevirt Handler][1] through the Datadog Agent.
+This check monitors [KubeVirt Handler][1] through the Datadog Agent.
 
 ## Setup
 
@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Kubevirt Handler check is included in the [Datadog Agent][2] package.
+The KubeVirt Handler check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -31,18 +31,17 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Kubevirt Handler integration does not include any events.
+The KubeVirt Handler integration does not include any events.
 
 ### Service Checks
 
-The Kubevirt Handler integration does not include any service checks.
+The KubeVirt Handler integration does not include any service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
-
 
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings/agent/latest

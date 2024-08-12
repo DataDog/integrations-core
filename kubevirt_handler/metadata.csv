@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-kubevirt_handler.can_connect,gauge,,,,Whether the check can connect to the Kubevirt Handler or not.,0,kubevirt_handler,handler connect,,
+kubevirt_handler.can_connect,gauge,,,,Whether the check can connect to the KubeVirt Handler or not.,0,kubevirt_handler,handler connect,,
 kubevirt_handler.info,gauge,,,,"KubeVirt Version information",0,kubevirt_handler,short_name,,
 kubevirt_handler.vmi.cpu_system_usage_seconds.count,count,,,,"Total CPU time spent in system mode.",0,kubevirt_handler,short_name,,
 kubevirt_handler.vmi.cpu_usage_seconds.count,count,,,,"Total CPU time spent in all modes (sum of both vcpu and hypervisor usage).",0,kubevirt_handler,short_name,,

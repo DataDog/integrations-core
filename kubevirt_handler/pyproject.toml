@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-kubevirt-handler"
-description = "The Kubevirt Handler check"
+description = "The KubeVirt Handler check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.11"

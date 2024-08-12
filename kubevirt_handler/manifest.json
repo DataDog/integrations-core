@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "",
-    "title": "Kubevirt Handler",
+    "title": "KubeVirt Handler",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -25,7 +25,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 22778164,
-      "source_type_name": "Kubevirt Handler",
+      "source_type_name": "KubeVirt Handler",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
