@@ -1,4 +1,4 @@
-name: Kubevirt API
+name: KubeVirt API
 files:
   - name: kubevirt_api.yaml
     options:

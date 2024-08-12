@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect key metrics to monitor the health of your KubeVirt API service.",
-    "title": "Kubevirt API",
+    "title": "KubeVirt API",
     "media": [],
     "classifier_tags": [
       "Category::Containers",
@@ -25,7 +25,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 21556836,
-      "source_type_name": "Kubevirt API",
+      "source_type_name": "KubeVirt API",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

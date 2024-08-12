@@ -1,4 +1,3 @@
-# CHANGELOG - Kubevirt API
+# CHANGELOG - KubeVirt API
 
 <!-- towncrier release notes start -->
-

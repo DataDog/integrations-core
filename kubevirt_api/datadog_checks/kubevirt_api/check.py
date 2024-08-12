@@ -12,12 +12,12 @@ from .kube_client import KubernetesAPIClient
 from .metrics import METRICS_MAP
 
 
-class KubevirtApiCheck(OpenMetricsBaseCheckV2):
+class KubeVirtApiCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "kubevirt_api"
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
-        super(KubevirtApiCheck, self).__init__(name, init_config, instances)
+        super(KubeVirtApiCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self._parse_config)
         self.check_initializations.append(self._configure_additional_transformers)
 

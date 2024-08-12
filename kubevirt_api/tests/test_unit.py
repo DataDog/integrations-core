@@ -8,7 +8,7 @@ from unittest.mock import MagicMock  # noqa: F401
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.kubevirt_api import KubevirtApiCheck
+from datadog_checks.kubevirt_api import KubeVirtApiCheck
 
 from .conftest import mock_http_responses
 from .mock_response import GET_VMIS_RESPONSE, GET_VMS_RESPONSE
@@ -26,7 +26,7 @@ healthz_tags = [
 def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
     mocker.patch("requests.get", wraps=mock_http_responses)
 
-    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
 
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
@@ -106,7 +106,7 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
 def test_check_sends_zero_count_for_vms(dd_run_check, aggregator, instance, mocker):
     mocker.patch("requests.get", wraps=mock_http_responses)
 
-    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
 
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
@@ -133,7 +133,7 @@ def test_check_sends_zero_count_for_vms(dd_run_check, aggregator, instance, mock
 def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, mocker):
     mocker.patch("requests.get", wraps=mock_http_responses)
 
-    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
 
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
@@ -158,7 +158,7 @@ def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, moc
 
 
 def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, instance):
-    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = []
@@ -178,7 +178,7 @@ def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, i
 def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, instance, mocker):
     mocker.patch("requests.get", wraps=mock_http_responses)
 
-    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_vms.return_value = GET_VMS_RESPONSE["items"]
@@ -204,7 +204,7 @@ BAD_METRICS_HOSTNAME_INSTANCE = {
 def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, instance, mocker):
     mocker.patch("requests.get", wraps=mock_http_responses)
 
-    check = KubevirtApiCheck("kubevirt_api", {}, [BAD_METRICS_HOSTNAME_INSTANCE])
+    check = KubeVirtApiCheck("kubevirt_api", {}, [BAD_METRICS_HOSTNAME_INSTANCE])
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_vms.return_value = GET_VMS_RESPONSE["items"]
@@ -223,7 +223,7 @@ def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, 
 def test_raise_exception_cannot_connect_to_kubernetes_api(dd_run_check, aggregator, instance, mocker, caplog):
     mocker.patch("requests.get", wraps=mock_http_responses)
 
-    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
     with pytest.raises(
         Exception,
     ):
@@ -238,7 +238,7 @@ def test_log_warning_healthz_endpoint_not_provided(dd_run_check, aggregator, ins
     new_instance = deepcopy(instance)
     new_instance.pop("kubevirt_api_healthz_endpoint")
 
-    check = KubevirtApiCheck("kubevirt_api", {}, [new_instance])
+    check = KubeVirtApiCheck("kubevirt_api", {}, [new_instance])
 
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
