@@ -31,4 +31,4 @@ DEFAULT_GO_METRICS = {
     'process_start_time_seconds': 'process.start_time.seconds',
     'process_virtual_memory_bytes': 'process.virtual_memory.bytes',
     'process_virtual_memory_max_bytes': 'process.virtual_memory.max_bytes',
-} 
+}
