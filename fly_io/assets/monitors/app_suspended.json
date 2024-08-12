@@ -20,6 +20,9 @@
             "new_group_delay": 60,
             "timeout_h": 0
         },
+        "tags": [
+            "integration:fly-io"
+        ],
         "type": "query alert"
     }
 }
