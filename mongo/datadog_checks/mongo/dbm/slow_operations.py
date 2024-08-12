@@ -79,16 +79,12 @@ class MongoSlowOperations(DBMAsyncJob):
 
         for db_name in self._check._database_autodiscovery.databases:
             if not is_mongos and self._is_profiling_enabled(db_name):
-                for (
-                    slow_operation,
-                    unobfuscated_command,
-                    query_signature,
-                ) in self._collect_slow_operations_from_profiler(db_name, last_ts=last_collection_timestamp):
+                for slow_operation in self._collect_slow_operations_from_profiler(
+                    db_name, last_ts=last_collection_timestamp
+                ):
                     slow_operation_events.append(self._create_slow_operation_event(slow_operation))
 
-                    self._collect_slow_operation_explain_plan(
-                        slow_operation, unobfuscated_command, db_name, query_signature
-                    )
+                    self._collect_slow_operation_explain_plan(slow_operation, db_name)
 
                     if len(slow_operation_events) >= self._max_operations:
                         break
@@ -96,14 +92,12 @@ class MongoSlowOperations(DBMAsyncJob):
                 slow_operations_from_logs.add(db_name)
 
         if slow_operations_from_logs and len(slow_operation_events) < self._max_operations:
-            for slow_operation, unobfuscated_command, query_signature in self._collect_slow_operations_from_logs(
+            for slow_operation in self._collect_slow_operations_from_logs(
                 slow_operations_from_logs, last_ts=last_collection_timestamp
             ):
                 slow_operation_events.append(self._create_slow_operation_event(slow_operation))
 
-                self._collect_slow_operation_explain_plan(
-                    slow_operation, unobfuscated_command, slow_operation["dbname"], query_signature
-                )
+                self._collect_slow_operation_explain_plan(slow_operation, slow_operation["dbname"])
 
                 if len(slow_operation_events) >= self._max_operations:
                     break
@@ -164,34 +158,31 @@ class MongoSlowOperations(DBMAsyncJob):
                 log_attr = parsed_log.get("attr")
                 if not log_attr or "command" not in log_attr:
                     continue
-                db_name = self._get_db_name(log_attr.get("command"), log_attr.get("ns"))
+                db_name = self._get_db_name(log_attr["command"], log_attr.get("ns"))
                 if db_name not in db_names:
                     continue
                 log_attr["ts"] = ts
                 yield self._obfuscate_slow_operation(log_attr, db_name)
 
-    def _collect_slow_operation_explain_plan(self, slow_operation, unobfuscated_command, dbname, query_signature):
+    def _collect_slow_operation_explain_plan(self, slow_operation, dbname):
         try:
             if should_explain_operation(
                 namespace=slow_operation.get("ns"),
                 op=self._get_slow_operation_op_type(slow_operation),
-                command=unobfuscated_command,
+                command=slow_operation["command"],
                 explain_plan_rate_limiter=self._explained_operations_ratelimiter,
-                explain_plan_cache_key=(dbname, query_signature),
+                explain_plan_cache_key=(dbname, slow_operation["query_signature"]),
             ):
-                self._check.log.debug("Collecting explain plan for slow operation: %s", slow_operation['command'])
                 if slow_operation.get("execStats"):
                     # execStats is available with profiling, so we just need to format it
                     explain_plan = format_explain_plan({"executionStats": slow_operation.get("execStats")})
                 else:
                     # explain the slow operation from the logs
                     explain_plan = get_explain_plan(
-                        self._check.api_client, slow_operation.get("op"), unobfuscated_command, dbname
+                        self._check.api_client, slow_operation.get("op"), slow_operation["command"], dbname
                     )
 
-                explain_plan_payload = self._create_slow_operation_explain_plan_payload(
-                    slow_operation, unobfuscated_command, explain_plan
-                )
+                explain_plan_payload = self._create_slow_operation_explain_plan_payload(slow_operation, explain_plan)
                 self._check.database_monitoring_query_sample(json_util.dumps(explain_plan_payload))
         except Exception as e:
             # Log the error and continue
@@ -199,11 +190,10 @@ class MongoSlowOperations(DBMAsyncJob):
             self._check.log.error("Failed to collect explain plan for slow operation: %s", e)
 
     def _obfuscate_slow_operation(self, slow_operation, db_name):
-        command = slow_operation['command']
-        obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
+        obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(slow_operation["command"]))
         query_signature = compute_exec_plan_signature(obfuscated_command)
         slow_operation['dbname'] = db_name
-        slow_operation['command'] = obfuscated_command
+        slow_operation['obfuscated_command'] = obfuscated_command
         slow_operation['query_signature'] = query_signature
 
         if slow_operation.get('originatingCommand'):
@@ -211,7 +201,7 @@ class MongoSlowOperations(DBMAsyncJob):
                 json_util.dumps(slow_operation['originatingCommand'])
             )
 
-        return slow_operation, command, query_signature
+        return slow_operation
 
     def _get_db_name(self, command, ns):
         return command.get('$db') or ns.split('.', 1)[0]
@@ -248,7 +238,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "query_signature": slow_operation["query_signature"],
             "user": slow_operation.get("user"),  # only available with profiling
             "application": slow_operation.get("appName"),  # only available with profiling
-            "statement": slow_operation.get("command"),
+            "statement": slow_operation["obfuscated_command"],
             "query_hash": slow_operation.get("queryHash"),  # only available with profiling
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
@@ -285,9 +275,7 @@ class MongoSlowOperations(DBMAsyncJob):
 
         return self._sanitize_event(event)
 
-    def _create_slow_operation_explain_plan_payload(
-        self, slow_operation: dict, unobfuscated_command: str, explain_plan: dict
-    ):
+    def _create_slow_operation_explain_plan_payload(self, slow_operation: dict, explain_plan: dict):
         '''
         Create a slow operation explain plan payload
         '''
@@ -307,14 +295,14 @@ class MongoSlowOperations(DBMAsyncJob):
                 "query_signature": slow_operation["query_signature"],
                 "application": slow_operation.get("appName"),
                 "user": slow_operation.get("user"),
-                "statement": slow_operation.get("command"),
+                "statement": slow_operation["obfuscated_command"],
                 "operation_metadata": {
                     "op": slow_operation.get("op") or slow_operation.get("type"),
                     "ns": slow_operation.get("ns"),
-                    "collection": get_command_collection(unobfuscated_command, slow_operation.get("ns")),
-                    "comment": unobfuscated_command.get("comment"),
+                    "collection": get_command_collection(slow_operation["command"], slow_operation.get("ns")),
+                    "comment": slow_operation["command"].get("comment"),
                 },
-                "truncated": get_command_truncation_state(unobfuscated_command),
+                "truncated": get_command_truncation_state(slow_operation["command"]),
                 "source": "slow_query",
             },
             "mongodb": self._sanitize_event(
