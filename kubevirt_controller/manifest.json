@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect key metrics to monitor the health of your KubeVirt Controller service.",
-    "title": "Kubevirt Controller",
+    "title": "KubeVirt Controller",
     "media": [],
     "classifier_tags": [
       "Category::Containers",
@@ -25,7 +25,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 22545001,
-      "source_type_name": "Kubevirt Controller",
+      "source_type_name": "KubeVirt Controller",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
