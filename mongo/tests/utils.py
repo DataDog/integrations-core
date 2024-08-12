@@ -14,6 +14,8 @@ def assert_metrics(check_instance, aggregator, metrics_categories, additional_ta
     for cat in metrics_categories:
         with open(os.path.join(HERE, "results", f"metrics-{cat}.json"), 'r') as f:
             for metric in json.load(f):
+                if metric['name'] == 'mongodb.stats.avgobjsize':
+                    print(aggregator.metrics('mongodb.stats.avgobjsize'))
                 aggregator.assert_metric(
                     metric['name'],
                     value=metric['value'],
