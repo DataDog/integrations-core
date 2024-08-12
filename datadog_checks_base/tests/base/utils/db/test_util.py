@@ -18,6 +18,7 @@ from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
     default_json_event_encoding,
+    get_agent_host_tags,
     obfuscate_sql_with_metadata,
     resolve_db_host,
     tracked_query,
@@ -203,6 +204,12 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
         mock_agent.side_effect = _mock_obfuscate_sql
         statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
         assert statement['query'] == expected_query
+
+
+def test_get_agent_host_tags():
+    want = ["tag1:value1", "tag2:value2", "tag3:value3", "tag4:value4"]
+    got = get_agent_host_tags()
+    assert got == want
 
 
 class JobForTesting(DBMAsyncJob):

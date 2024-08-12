@@ -13,7 +13,6 @@ except ImportError:
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
-from datadog_checks.base.utils.db.utils import get_agent_host_tags
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -69,7 +68,7 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
-            agent_tags=get_agent_host_tags(),
+            agent_tags=datadog_agent.get_config('tags') or [],
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
 

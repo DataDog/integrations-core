@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import re
 from collections import defaultdict
 
@@ -139,6 +140,14 @@ class DatadogAgentStub(object):
     def obfuscate_mongodb_string(self, command):
         # Passthrough stub: obfuscation implementation is in Go code.
         return command
+
+    def get_host_tags(self):
+        return json.dumps(
+            {
+                "system": ["tag1:value1", "tag2:value2"],
+                "google cloud platform": ["tag3:value3", "tag4:value4"],
+            }
+        )
 
 
 # Use the stub as a singleton
