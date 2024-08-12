@@ -213,7 +213,7 @@
                 "query_signature": "a81f9d3c17192d68",
                 "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
                 "mills": 74,
-                "num_yields": 0,
+                "num_yields": 4,
                 "response_length": 0,
                 "nmatched": 608,
                 "nmodified": 441,
@@ -268,8 +268,8 @@
                 "query_signature": "c5b7bcd45c4d9e9",
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
                 "mills": 74,
-                "num_yields": 0,
-                "response_length": 0,
+                "num_yields": 4,
+                "response_length": 60,
                 "cpu_nanos": 74715957,
                 "client": {
                     "hostname": "192.168.65.1:58133"
@@ -321,7 +321,7 @@
                 "query_signature": "ec24a2e9aacce5a0",
                 "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
                 "mills": 27,
-                "num_yields": 0,
+                "num_yields": 2,
                 "response_length": 0,
                 "nmatched": 495,
                 "nmodified": 495,
@@ -376,8 +376,8 @@
                 "query_signature": "c5b7bcd45c4d9e9",
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
                 "mills": 27,
-                "num_yields": 0,
-                "response_length": 0,
+                "num_yields": 2,
+                "response_length": 60,
                 "cpu_nanos": 27721625,
                 "client": {
                     "hostname": "192.168.65.1:58133"
@@ -485,7 +485,7 @@
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
                 "mills": 15,
                 "num_yields": 0,
-                "response_length": 0,
+                "response_length": 60,
                 "cpu_nanos": 15198542,
                 "client": {
                     "hostname": "192.168.65.1:58133"
@@ -541,7 +541,7 @@
                 "query_framework": "classic",
                 "mills": 12,
                 "num_yields": 0,
-                "response_length": 0,
+                "response_length": 14089,
                 "nreturned": 101,
                 "keys_examined": 540,
                 "docs_examined": 540,
@@ -580,7 +580,7 @@
                 "query_framework": "classic",
                 "mills": 14,
                 "num_yields": 0,
-                "response_length": 0,
+                "response_length": 110,
                 "nreturned": 0,
                 "keys_examined": 612,
                 "docs_examined": 612,

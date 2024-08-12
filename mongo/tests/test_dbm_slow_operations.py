@@ -30,6 +30,7 @@ def test_mongo_slow_operations_standalone(aggregator, instance_integration_clust
 
     events = aggregator.get_event_platform_events("dbm-activity")
     slow_operation_payload = [event for event in events if event['dbm_type'] == 'slow_query']
+    print(json.dumps(slow_operation_payload))
 
     with open(os.path.join(HERE, "results", "slow-operations-standalone.json"), 'r') as f:
         expected_slow_operation_payload = json.load(f)
@@ -57,6 +58,7 @@ def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster, 
 
     events = aggregator.get_event_platform_events("dbm-activity")
     slow_operation_payload = [event for event in events if event['dbm_type'] == 'slow_query']
+    print(json.dumps(slow_operation_payload))
 
     with open(os.path.join(HERE, "results", "slow-operations-mongos.json"), 'r') as f:
         expected_slow_operation_payload = json.load(f)
