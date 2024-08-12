@@ -103,6 +103,9 @@ BASE_METRICS = {
     "opLatencies.reads.latency": GAUGE,
     "opLatencies.writes.latency": GAUGE,
     "opLatencies.commands.latency": GAUGE,
+    "opLatencies.reads.latency_avg": (GAUGE, "opLatencies.reads.latency.avg"),
+    "opLatencies.writes.latency_avg": (GAUGE, "opLatencies.writes.latency.avg"),
+    "opLatencies.commands.latency_avg": (GAUGE, "opLatencies.commands.latency.avg"),
     "opcounters.command": RATE,
     "opcounters.delete": RATE,
     "opcounters.getmore": RATE,
@@ -133,8 +136,17 @@ BASE_METRICS = {
     "stats.numExtents": GAUGE,
     "stats.objects": GAUGE,
     "stats.storageSize": GAUGE,
+    "stats.totalSize": GAUGE,
+    "stats.freeStorageSize": GAUGE,
+    "stats.indexFreeStorageSize": GAUGE,
+    "stats.totalFreeStorageSize": GAUGE,
+    "stats.fsUsedSize": GAUGE,
+    "stats.fsTotalSize": GAUGE,
     "sessions.count": GAUGE,
     "uptime": GAUGE,
+    "system.memSizeMB": (GAUGE, "system.mem.total"),  # total amount of system memory
+    "system.memLimitMB": (GAUGE, "system.mem.limit"),  # memory usage limit
+    "system.numCores": (GAUGE, "system.cpu.cores"),  # number of CPU cores
 }
 
 """
@@ -328,13 +340,17 @@ COLLECTION_METRICS = {
     'collection.totalIndexSize': GAUGE,
     # collection latency stats
     'collection.reads.latency': GAUGE,
+    'collection.reads.latency_avg': (GAUGE, 'collection.reads.latency.avg'),
     'collection.reads.ops': RATE,
     'collection.writes.ops': RATE,
     'collection.writes.latency': GAUGE,
+    'collection.writes.latency_avg': (GAUGE, 'collection.writes.latency.avg'),
     'collection.commands.latency': GAUGE,
     'collection.commands.ops': RATE,
+    'collection.commands.latency_avg': (GAUGE, 'collection.commands.latency.avg'),
     'collection.transactions.latency': GAUGE,
     'collection.transactions.ops': RATE,
+    'collection.transactions.latency_avg': (GAUGE, 'collection.transactions.latency.avg'),
     # collection query exec stats
     'collection.collectionScans.total': GAUGE,
     'collection.collectionScans.nonTailable': GAUGE,

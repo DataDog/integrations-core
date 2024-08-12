@@ -63,8 +63,8 @@ class MockedDB(object):
 
     def command(self, command, *args, **_):
         filename = command
-        if command == "dbstats":
-            filename += f"-{self._db_name}"
+        if "dbStats" in command:
+            filename = f"dbstats-{self._db_name}"
         elif command == "collstats":
             coll_name = args[0]
             filename += f"-{coll_name}"

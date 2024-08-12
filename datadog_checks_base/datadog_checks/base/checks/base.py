@@ -1000,7 +1000,10 @@ class AgentCheck(object):
         Parameters:
 
             data (dict[str, str]):
-                The log data to send.
+                The log data to send. The following keys are treated specially, if present:
+
+                - timestamp: should be an integer or float representing the number of seconds since the Unix epoch
+                - ddtags: if not defined, it will automatically be set based on the instance's `tags` option
             cursor (dict[str, Any] or None):
                 Metadata associated with the log which will be saved to disk. The most recent value may be
                 retrieved with the `get_log_cursor` method.
@@ -1011,6 +1014,11 @@ class AgentCheck(object):
         attributes = data.copy()
         if 'ddtags' not in attributes and self.formatted_tags:
             attributes['ddtags'] = self.formatted_tags
+
+        timestamp = attributes.get('timestamp')
+        if timestamp is not None:
+            # convert seconds to milliseconds
+            attributes['timestamp'] = int(timestamp * 1000)
 
         datadog_agent.send_log(to_json(attributes), self.check_id)
         if cursor is not None:

@@ -112,6 +112,10 @@ def instance_min_collection_interval():
     return 15
 
 
+def instance_only_custom_queries():
+    return False
+
+
 def instance_pg_stat_statements_view():
     return 'pg_stat_statements'
 
@@ -141,4 +145,4 @@ def instance_tag_replication_role():
 
 
 def instance_use_global_custom_queries():
-    return 'extend'
+    return 'true'
