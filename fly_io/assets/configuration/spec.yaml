@@ -1,0 +1,66 @@
+name: Fly.io
+files:
+- name: fly_io.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.hidden: true
+        openmetrics_endpoint.required: false
+        headers.display_priority: 4
+        headers.enabled: true
+        headers.description: |
+          Headers to use for every request. An Authorization header including the Fly.io access token is required
+          for authentication for both the OpenMetrics endpoint and REST API.
+          You can alternatively use the `auth_token` option.
+
+          You can create an access token with this command:
+            `TOKEN=$(flyctl auth token)`
+        headers.value.example:
+          Authorization: "Bearer <FLY_ACCESS_TOKEN>"
+        auth_token.display_priority: 2
+        empty_default_hostname.display_priority: 1
+        empty_default_hostname.required: true
+        empty_default_hostname.value.example: true
+        empty_default_hostname.description: |
+          The Fly.io integration is a check where metrics are usually unrelated to the host
+          on which the Agent runs. Setting this parameter to "true" prevents the Agent from attaching the hostname
+          (and the host tags) to the metrics. It is especially important to leave this parameter set to "true" when you are
+          running the Agent inside a Fly.io app, because in this scenario the host tags are unrelated to other metrics.
+    - name: org_slug
+      display_priority: 5
+      enabled: true
+      required: true
+      description: |
+        Fly.io org slug
+        For more information, see https://fly.io/docs/flyctl/orgs/
+      value:
+        display_default: null
+        example: <ORG_SLUG>
+        type: string
+    - name: machines_api_endpoint
+      display_priority: 3
+      enabled: true
+      description: |
+        Endpoint of the Fly.io Machines Restful API.
+        For more information, see https://fly.io/docs/machines/api/working-with-machines-api/
+        If running the check inside your Fly.io environment, use http://_api.internal:4280,
+        otherwise use https://api.machines.dev.
+      value:
+        display_default: null
+        example: http://_api.internal:4280
+        type: string
+    - name: match_string
+      display_priority: 1
+      description: |
+        Match string used to filter the Prometheus data requested from Fly.io.
+        For more information, see https://prometheus.io/docs/prometheus/latest/federation/#configuring-federation
+        By default, all metrics for all apps are collected.
+      value:
+        display_default: '{__name__=~".+"}'
+        example: '{__name__=~"example_app"}'
+        type: string

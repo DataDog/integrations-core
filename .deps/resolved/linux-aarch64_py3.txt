@@ -23,7 +23,7 @@ cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-4
 confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.5.0-20240806143203-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=60264f9a522d204f7d2ffb715991584552091af9a838b8ebea9d51b2c0580d6e
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-42.0.8-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=c4783183f7cb757b73b2ae9aed6599b96338eb957233c58ca8f49a49cc32fd5e
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
-ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=99696ee3dc6b55056d3d4b6165a14c5bd344033a46bab539beb6680254ca9551
+ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.9.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=079d2abf8485ffba9c6db1a6c7f479c087b9a64fb6339182202169ddb0e9900c
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.1.1-py3-none-any.whl#sha256=b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186
 deprecated @ https://agent-int-packages.datadoghq.com/external/deprecated/Deprecated-1.2.14-py2.py3-none-any.whl#sha256=6fac8b097794a90302bdbb17b9b815e732d3c4720583ff1b198499d78470466c
 dnspython @ https://agent-int-packages.datadoghq.com/external/dnspython/dnspython-2.6.1-py3-none-any.whl#sha256=5ef3b9680161f6fa89daf8ad451b5f1a33b18ae8a1c6778cdf4b43f08c0a6e50

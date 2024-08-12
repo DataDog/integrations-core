@@ -1,0 +1,19 @@
+services:
+
+  prometheus:
+    image: caddy:2.7
+    container_name: prometheus
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./prometheus/Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/output.txt:/metrics/metrics
+
+  machines-api:
+    image: caddy:2.7
+    container_name: machines-api
+    ports:
+      - "4280:8080"
+    volumes:
+      - ./machines-api/Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/machines-api:/usr/share/caddy
