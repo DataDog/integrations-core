@@ -34,17 +34,9 @@ from datadog_checks.base.utils.serialization import json
         ("127.0.0.1", "agent_hostname", "agent_hostname"),
         ("192.0.2.1", "agent_hostname", "192.0.2.1"),
         ("socket.gaierror", "agent_hostname", "agent_hostname"),
-        (
-            "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
-            "agent_hostname",
-            "agent_hostname",
-        ),
+        ("greater-than-or-equal-to-64-characters-causes-unicode-error-----", "agent_hostname", "agent_hostname"),
         ("192.0.2.1", "socket.gaierror", "192.0.2.1"),
-        (
-            "192.0.2.1",
-            "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
-            "192.0.2.1",
-        ),
+        ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", "192.0.2.1"),
         ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
         ("192.0.2.1", "192.0.2.254", "192.0.2.1"),
     ],
@@ -118,22 +110,16 @@ def test_ratelimiting_ttl_cache():
     for i in range(5):
         assert cache.acquire(i), "cache is empty so the first set of keys should pass"
     for i in range(5, 10):
-        assert not cache.acquire(
-            i
-        ), "cache is full so we do not expect any more new keys to pass"
+        assert not cache.acquire(i), "cache is full so we do not expect any more new keys to pass"
     for i in range(5):
-        assert not cache.acquire(
-            i
-        ), "none of the first set of keys should pass because they're still under TTL"
+        assert not cache.acquire(i), "none of the first set of keys should pass because they're still under TTL"
 
     assert len(cache) == 5, "cache should be at the max size"
     time.sleep(ttl * 2)
     assert len(cache) == 0, "cache should be empty after the TTL has kicked in"
 
     for i in range(5, 10):
-        assert cache.acquire(
-            i
-        ), "cache should be empty again so these keys should go in OK"
+        assert cache.acquire(i), "cache should be empty again so these keys should go in OK"
 
 
 class DBExceptionForTests(BaseException):
@@ -146,84 +132,68 @@ class DBExceptionForTests(BaseException):
         (
             json.dumps(
                 {
-                    "query": "SELECT * FROM datadog",
-                    "metadata": {
-                        "tables_csv": "datadog,",
-                        "commands": ["SELECT"],
-                        "comments": None,
-                    },
+                    'query': 'SELECT * FROM datadog',
+                    'metadata': {'tables_csv': 'datadog,', 'commands': ['SELECT'], 'comments': None},
                 }
             ),
             {
-                "query": "SELECT * FROM datadog",
-                "metadata": {
-                    "commands": ["SELECT"],
-                    "comments": None,
-                    "tables": ["datadog"],
-                },
+                'query': 'SELECT * FROM datadog',
+                'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
             },
         ),
         (
             # Whitespace test
-            '  {"query":"SELECT * FROM datadog","metadata":{"tables_csv":"datadog","commands":["SELECT"],'
-            '"comments":null}}          ',
+            "  {\"query\":\"SELECT * FROM datadog\",\"metadata\":{\"tables_csv\":\"datadog\",\"commands\":[\"SELECT\"],"
+            "\"comments\":null}}          ",
             {
-                "query": "SELECT * FROM datadog",
-                "metadata": {
-                    "commands": ["SELECT"],
-                    "comments": None,
-                    "tables": ["datadog"],
+                'query': 'SELECT * FROM datadog',
+                'metadata': {'commands': ['SELECT'], 'comments': None, 'tables': ['datadog']},
+            },
+        ),
+        (
+            json.dumps(
+                {
+                    'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
+                    'metadata': {
+                        'tables_csv': '    datadog,  datadog2      ',
+                        'commands': ['SELECT', 'SELECT'],
+                        'comments': ['-- Test comment'],
+                    },
+                }
+            ),
+            {
+                'query': 'SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)',
+                'metadata': {
+                    'commands': ['SELECT', 'SELECT'],
+                    'comments': ['-- Test comment'],
+                    'tables': ['datadog', 'datadog2'],
                 },
             },
         ),
         (
             json.dumps(
                 {
-                    "query": "SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)",
-                    "metadata": {
-                        "tables_csv": "    datadog,  datadog2      ",
-                        "commands": ["SELECT", "SELECT"],
-                        "comments": ["-- Test comment"],
-                    },
+                    'query': 'COMMIT',
+                    'metadata': {'tables_csv': '', 'commands': ['COMMIT'], 'comments': None},
                 }
             ),
             {
-                "query": "SELECT * FROM datadog WHERE age = (SELECT AVG(age) FROM datadog2)",
-                "metadata": {
-                    "commands": ["SELECT", "SELECT"],
-                    "comments": ["-- Test comment"],
-                    "tables": ["datadog", "datadog2"],
-                },
+                'query': 'COMMIT',
+                'metadata': {'commands': ['COMMIT'], 'comments': None, 'tables': None},
             },
         ),
         (
-            json.dumps(
-                {
-                    "query": "COMMIT",
-                    "metadata": {
-                        "tables_csv": "",
-                        "commands": ["COMMIT"],
-                        "comments": None,
-                    },
-                }
-            ),
+            'SELECT * FROM datadog',
             {
-                "query": "COMMIT",
-                "metadata": {"commands": ["COMMIT"], "comments": None, "tables": None},
+                'query': 'SELECT * FROM datadog',
+                'metadata': {},
             },
         ),
         (
-            "SELECT * FROM datadog",
+            'SELECT * FROM datadog',
             {
-                "query": "SELECT * FROM datadog",
-                "metadata": {},
-            },
-        ),
-        (
-            "SELECT * FROM datadog",
-            {
-                "query": "SELECT * FROM datadog",
-                "metadata": {},
+                'query': 'SELECT * FROM datadog',
+                'metadata': {},
             },
         ),
     ],
@@ -232,17 +202,15 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
     def _mock_obfuscate_sql(query, options=None):
         return obfuscator_return_value
 
-    with mock.patch.object(
-        datadog_agent, "obfuscate_sql", passthrough=True
-    ) as mock_agent:
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata("query here does not matter", None)
+        statement = obfuscate_sql_with_metadata('query here does not matter', None)
         assert statement == expected_value
 
     # Check that it can handle None values
     statement = obfuscate_sql_with_metadata(None)
-    assert statement["query"] == ""
-    assert statement["metadata"] == {}
+    assert statement['query'] == ''
+    assert statement['metadata'] == {}
 
 
 @pytest.mark.parametrize(
@@ -260,32 +228,20 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
         ),
     ],
 )
-def test_obfuscate_sql_with_metadata_replace_null_character(
-    input_query, expected_query, replace_null_character
-):
+def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expected_query, replace_null_character):
     def _mock_obfuscate_sql(query, options=None):
-        return json.dumps({"query": query, "metadata": {}})
+        return json.dumps({'query': query, 'metadata': {}})
 
     # Check that it can handle null characters
-    with mock.patch.object(
-        datadog_agent, "obfuscate_sql", passthrough=True
-    ) as mock_agent:
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata(
-            input_query, None, replace_null_character=replace_null_character
-        )
-        assert statement["query"] == expected_query
+        statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
+        assert statement['query'] == expected_query
 
 
 class JobForTesting(DBMAsyncJob):
     def __init__(
-        self,
-        check,
-        run_sync=False,
-        enabled=True,
-        rate_limit=10,
-        min_collection_interval=15,
-        job_execution_time=0,
+        self, check, run_sync=False, enabled=True, rate_limit=10, min_collection_interval=15, job_execution_time=0
     ):
         super(JobForTesting, self).__init__(
             check,
@@ -345,7 +301,7 @@ def test_dbm_async_job_cancel(aggregator):
     assert not job._job_loop_future.running(), "thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    expected_tags = tags + ["job:test-job"]
+    expected_tags = tags + ['job:test-job']
     aggregator.assert_metric("dd.test-dbms.async_job.cancel", tags=expected_tags)
     aggregator.assert_metric("dbm.async_job_test.shutdown")
 
@@ -372,12 +328,7 @@ def test_dbm_sync_job_rate_limit(aggregator):
 def test_dbm_sync_long_job_rate_limit(aggregator):
     collection_interval = 0.5
     rate_limit = 1 / collection_interval
-    job = JobForTesting(
-        AgentCheck(),
-        run_sync=True,
-        rate_limit=rate_limit,
-        job_execution_time=2 * collection_interval,
-    )
+    job = JobForTesting(AgentCheck(), run_sync=True, rate_limit=rate_limit, job_execution_time=2 * collection_interval)
     job.run_job_loop([])
     # despite jobs being executed one after another rate limiter shouldn't block execution
     # as jobs are slower than the collection interval
@@ -406,26 +357,20 @@ def test_dbm_async_job_inactive_stop(aggregator):
     job = JobForTesting(AgentCheck(), rate_limit=10, min_collection_interval=1)
     job.run_job_loop([])
     job._job_loop_future.result()
-    aggregator.assert_metric(
-        "dd.test-dbms.async_job.inactive_stop", tags=["job:test-job"]
-    )
+    aggregator.assert_metric("dd.test-dbms.async_job.inactive_stop", tags=['job:test-job'])
 
 
 @pytest.mark.parametrize(
     "input",
     [
-        pytest.param({"foo": "bar"}, id="dict"),
-        pytest.param({"foo": "bar", "baz": 1}, id="dict-with-multiple-keys"),
-        pytest.param(
-            {"foo": "bar", "baz": 1, "qux": {"quux": "corge"}}, id="nested-dict"
-        ),
-        pytest.param({"foo": b"bar"}, id="dict-with-bytes"),
-        pytest.param({"foo": decimal.Decimal("1.0")}, id="dict-with-decimal"),
-        pytest.param(
-            {"foo": datetime.datetime(2020, 1, 1, 0, 0, 0)}, id="dict-with-datetime"
-        ),
-        pytest.param({"foo": datetime.date(2020, 1, 1)}, id="dict-with-date"),
-        pytest.param({"foo": IPv4Address("192.168.1.1")}, id="dict-with-IPv4Address"),
+        pytest.param({"foo": "bar"}, id='dict'),
+        pytest.param({"foo": "bar", "baz": 1}, id='dict-with-multiple-keys'),
+        pytest.param({"foo": "bar", "baz": 1, "qux": {"quux": "corge"}}, id='nested-dict'),
+        pytest.param({"foo": b'bar'}, id='dict-with-bytes'),
+        pytest.param({"foo": decimal.Decimal("1.0")}, id='dict-with-decimal'),
+        pytest.param({"foo": datetime.datetime(2020, 1, 1, 0, 0, 0)}, id='dict-with-datetime'),
+        pytest.param({"foo": datetime.date(2020, 1, 1)}, id='dict-with-date'),
+        pytest.param({"foo": IPv4Address(u"192.168.1.1")}, id='dict-with-IPv4Address'),
     ],
 )
 def test_default_json_event_encoding(input):
@@ -434,7 +379,7 @@ def test_default_json_event_encoding(input):
 
 
 def test_tracked_query(aggregator):
-    with mock.patch("time.time", side_effect=[100, 101]):
+    with mock.patch('time.time', side_effect=[100, 101]):
         with tracked_query(
             check=AgentCheck(name="testcheck"),
             operation="test_query",
@@ -442,8 +387,5 @@ def test_tracked_query(aggregator):
         ):
             pass
         aggregator.assert_metric(
-            "dd.testcheck.operation.time",
-            tags=["test:tag", "operation:test_query"],
-            count=1,
-            value=1000.0,
+            "dd.testcheck.operation.time", tags=["test:tag", "operation:test_query"], count=1, value=1000.0
         )
