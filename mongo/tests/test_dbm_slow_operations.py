@@ -70,7 +70,6 @@ def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster, 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
-    print(json.dumps(slow_operation_explain_plans_payload))
     with open(os.path.join(HERE, "results", "slow-operations-explain-plans-mongos.json"), 'r') as f:
         expected_slow_operation_explain_plans_payload = json.load(f)
         assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
