@@ -6,8 +6,9 @@ from __future__ import annotations
 import os
 import re
 import sys
-from functools import cache, cached_property
-from typing import TYPE_CHECKING, Callable
+from contextlib import AbstractContextManager, contextmanager, nullcontext
+from functools import cache, cached_property, partial
+from typing import TYPE_CHECKING, Callable, Type
 
 import stamina
 
@@ -20,6 +21,20 @@ if TYPE_CHECKING:
     from ddev.utils.fs import Path
 
 AGENT_VERSION_REGEX = r'^datadog/agent:\d+(?:$|\.(\d+\.\d(?:$|-jmx$)|$))'
+
+
+@contextmanager
+def disable_integration_before_install(config_file):
+    """
+    Disable integration by renaming the config to "conf.yaml.example".
+
+    As we exit the context manager we rename it back to "conf.yaml" to re-enable the integration.
+    """
+
+    old = config_file.name
+    new = config_file.rename(config_file.parent / (config_file.name + ".example"))
+    yield
+    new.rename(config_file.parent / old)
 
 
 class DockerAgent(AgentInterface):
@@ -143,6 +158,7 @@ class DockerAgent(AgentInterface):
         if not self._is_windows_container:
             volumes.append('/proc:/host/proc')
 
+        ensure_local_pkg: Type[AbstractContextManager] | Callable[[], AbstractContextManager] = nullcontext
         # Only mount the volume if the initial configuration is not set to `None`.
         # As an example, the way SNMP does autodiscovery is that the Agent writes what its listener detects
         # in `auto_conf.yaml`. The issue is we mount the entire config directory so changes are always in
@@ -151,6 +167,13 @@ class DockerAgent(AgentInterface):
         # directory that is mounted.
         if self.config_file.is_file():
             volumes.append(f'{self.config_file.parent}:{self._config_mount_dir}')
+            if local_packages:
+                # We only want to enable the integration after we install it from a local package.
+                # That's because we've come across cases where the integration shipped with the agent image crashes
+                # the agent container before we can install a local version that contains a fix.
+                # We disable it when we start the agent container, then re-enable it before we restart the container
+                # which by then has the version from a local package.
+                ensure_local_pkg = partial(disable_integration_before_install, self.config_file)
 
         # It is safe to assume that the directory name is unique across all repos
         for local_package in local_packages:
@@ -206,13 +229,21 @@ class DockerAgent(AgentInterface):
         # The chosen tag
         command.append(agent_build)
 
+        start_commands = self.metadata.get('start_commands', [])
+        post_install_commands = self.metadata.get('post_install_commands', [])
+        with ensure_local_pkg():
+            self._initialize(command, local_packages, start_commands, post_install_commands)
+
+        if local_packages or start_commands or post_install_commands:
+            self.restart()
+
+    def _initialize(self, command, local_packages, start_commands, post_install_commands):
         process = self._captured_process(command)
         if process.returncode:
             raise RuntimeError(
                 f'Unable to start Agent container `{self._container_name}`: {process.stdout.decode("utf-8")}'
             )
 
-        start_commands = self.metadata.get('start_commands', [])
         if start_commands:
             for start_command in start_commands:
                 formatted_command = self._format_command(self.platform.modules.shlex.split(start_command))
@@ -235,7 +266,6 @@ class DockerAgent(AgentInterface):
                         f'`{self._container_name}`'
                     )
 
-        post_install_commands = self.metadata.get('post_install_commands', [])
         if post_install_commands:
             for post_install_command in post_install_commands:
                 formatted_command = self._format_command(self.platform.modules.shlex.split(post_install_command))
@@ -245,9 +275,6 @@ class DockerAgent(AgentInterface):
                     raise RuntimeError(
                         f'Unable to run post-install command in Agent container `{self._container_name}`'
                     )
-
-        if local_packages or start_commands or post_install_commands:
-            self.restart()
 
     def stop(self) -> None:
         stop_commands = self.metadata.get('stop_commands', [])

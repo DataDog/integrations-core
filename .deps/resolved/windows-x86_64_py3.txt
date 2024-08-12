@@ -22,7 +22,7 @@ cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-4
 confluent-kafka @ https://agent-int-packages.datadoghq.com/external/confluent-kafka/confluent_kafka-2.5.0-cp311-cp311-win_amd64.whl#sha256=c05a677b1dbdcf2a4532e2cf41e78d2e2ffb3a6829347caf2825f472cda59e69
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-42.0.8-cp39-abi3-win_amd64.whl#sha256=fa76fbb7596cc5839320000cdd5d0955313696d9511debab7ee7278fc8b5c84a
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
-ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.3-cp311-cp311-win_amd64.whl#sha256=eb2a9db8c07aadd881e59fe147d2b9244a208136201c59a9ec1356bae4f8e77e
+ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.9.3-cp311-cp311-win_amd64.whl#sha256=3bf0bf61d9859d7d11d117f169d65e6c8fbcb53711fee2ce7a6a0707ff540563
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.1.1-py3-none-any.whl#sha256=b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186
 deprecated @ https://agent-int-packages.datadoghq.com/external/deprecated/Deprecated-1.2.14-py2.py3-none-any.whl#sha256=6fac8b097794a90302bdbb17b9b815e732d3c4720583ff1b198499d78470466c
 dnspython @ https://agent-int-packages.datadoghq.com/external/dnspython/dnspython-2.6.1-py3-none-any.whl#sha256=5ef3b9680161f6fa89daf8ad451b5f1a33b18ae8a1c6778cdf4b43f08c0a6e50
