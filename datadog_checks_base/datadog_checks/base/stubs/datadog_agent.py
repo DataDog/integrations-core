@@ -28,6 +28,7 @@ class DatadogAgentStub(object):
         self._hostname = 'stubbed.hostname'
         self._process_start_time = 0
         self._external_tags = []
+        self._host_tags = "{}"
 
     def get_default_config(self):
         return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
@@ -39,6 +40,7 @@ class DatadogAgentStub(object):
         self._config = self.get_default_config()
         self._process_start_time = 0
         self._external_tags = []
+        self._host_tags = "{}"
 
     def assert_logs(self, check_id, logs):
         sent_logs = self._sent_logs[check_id]
@@ -91,6 +93,15 @@ class DatadogAgentStub(object):
     def reset_hostname(self):
         self._hostname = 'stubbed.hostname'
 
+    def get_host_tags(self):
+        return self._host_tags
+    
+    def set_host_tags(self, tagsDict)
+        self._host_tags = json.dumps(tagsDict)
+    
+    def reset_host_tags(self):
+        self._host_tags = "{}"
+
     def get_config(self, config_option):
         return self._config.get(config_option, '')
 
@@ -140,14 +151,6 @@ class DatadogAgentStub(object):
     def obfuscate_mongodb_string(self, command):
         # Passthrough stub: obfuscation implementation is in Go code.
         return command
-
-    def get_host_tags(self):
-        return json.dumps(
-            {
-                "system": ["tag1:value1", "tag2:value2"],
-                "google cloud platform": ["tag3:value3", "tag4:value4"],
-            }
-        )
 
 
 # Use the stub as a singleton
