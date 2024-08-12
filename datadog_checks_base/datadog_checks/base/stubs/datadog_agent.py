@@ -95,10 +95,10 @@ class DatadogAgentStub(object):
 
     def get_host_tags(self):
         return self._host_tags
-    
+
     def set_host_tags(self, tagsDict):
         self._host_tags = json.dumps(tagsDict)
-    
+
     def reset_host_tags(self):
         self._host_tags = "{}"
 
