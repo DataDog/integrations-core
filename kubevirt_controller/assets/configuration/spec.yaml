@@ -1,4 +1,4 @@
-name: KubeVirt Controller
+name: Kubevirt Controller
 files:
   - name: kubevirt_controller.yaml
     options:
