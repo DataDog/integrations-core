@@ -35,7 +35,7 @@ class KubeVirtHandlerCheck(OpenMetricsBaseCheckV2):
     def _report_health_check(self, health_endpoint):
         try:
             self.log.debug("Checking health status at %s", health_endpoint)
-            response = self.http.get(health_endpoint)
+            response = self.http.get(health_endpoint, verify=False)
             response.raise_for_status()
             self.gauge("can_connect", 1, tags=[f"endpoint:{health_endpoint}", *self.base_tags])
         except Exception as e:
