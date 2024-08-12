@@ -49,7 +49,7 @@ def test_resolve_db_host(db_host, agent_hostname, want):
 
 def test_get_agent_host_tags():
     # happy path
-    datadog_agent.set_host_tags(
+    datadog_agent._set_host_tags(
         {
             "system": ["tag1:value1", "tag2:value2"],
             "google cloud platform": ["tag3:value3", "tag4:value4"],
@@ -60,13 +60,13 @@ def test_get_agent_host_tags():
     assert got == want
 
     # invalid tags json
-    datadog_agent.set_host_tags("")
+    datadog_agent._set_host_tags("")
     want = []
     got = get_agent_host_tags()
     assert got == want
 
     # invalid tags value
-    datadog_agent.set_host_tags(
+    datadog_agent._set_host_tags(
         {
             "system": ["tag1:value1", "tag2:value2"],
             "google cloud platform": "tag3:value3",
@@ -77,7 +77,7 @@ def test_get_agent_host_tags():
     assert got == want
 
     # clean up
-    datadog_agent.reset_host_tags()
+    datadog_agent._reset_host_tags()
 
 
 def test_constant_rate_limiter():
