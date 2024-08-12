@@ -270,9 +270,10 @@ class MongoSlowOperations(DBMAsyncJob):
             "write_conflicts": slow_operation.get("writeConflicts"),
             "cpu_nanos": slow_operation.get("cpuNanos"),
             "planning_time_micros": slow_operation.get("planningTimeMicros"),  # only available with profiling
+            "cursor_exhausted": slow_operation.get("cursorExhausted"),
             "upsert": slow_operation.get("upsert"),  # only available with profiling
             "has_sort_stage": slow_operation.get("hasSortStage"),  # only available with profiling
-            "used_disk": slow_operation.get("usedDisk"),  # only available with profiling
+            "used_disk": slow_operation.get("usedDisk"),
             "from_multi_planner": slow_operation.get("fromMultiPlanner"),  # only available with profiling
             "replanned": slow_operation.get("replanned"),  # only available with profiling
             "replan_reason": slow_operation.get("replanReason"),  # only available with profiling
@@ -322,7 +323,7 @@ class MongoSlowOperations(DBMAsyncJob):
                     "ns": slow_operation.get("ns"),
                     "plan_summary": slow_operation.get("planSummary"),
                     "microsecs_running": slow_operation.get("millis", slow_operation.get("durationMillis", 0)) * 1000,
-                    "num_yields": slow_operation.get("numYield", 0),
+                    "num_yields": slow_operation.get("numYield", slow_operation.get("numYields", 0)),
                     "write_conflicts": slow_operation.get("writeConflicts"),
                     "lock_stats": self._get_slow_operation_lock_stats(slow_operation),
                     "flow_control_stats": self._get_slow_operation_flow_control_stats(slow_operation),

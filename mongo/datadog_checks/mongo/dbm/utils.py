@@ -73,7 +73,7 @@ def should_explain_operation(
     if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
         # Skip operations as they are not queries
         return False
-    
+
     if "explain" in command:
         # Skip operations that are explain commands (cannot explain itself)
         return False
