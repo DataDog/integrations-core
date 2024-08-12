@@ -2134,10 +2134,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jf6980f6:
+  jb0447e6:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kubevirt API
+      job-name: KubeVirt API
       target: kubevirt_api
       platform: linux
       runner: '["ubuntu-22.04"]'

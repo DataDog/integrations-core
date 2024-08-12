@@ -306,6 +306,10 @@ coverage:
         target: 75
         flags:
         - kong
+      KubeVirt_API:
+        target: 75
+        flags:
+        - kubevirt_api
       Kube_DNS:
         target: 75
         flags:
@@ -342,10 +346,6 @@ coverage:
         target: 75
         flags:
         - kubernetes_state
-      Kubevirt_API:
-        target: 75
-        flags:
-        - kubevirt_api
       Kyoto_Tycoon:
         target: 75
         flags:
