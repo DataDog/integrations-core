@@ -18,6 +18,10 @@ coverage:
         target: 75
         flags:
         - aspdotnet
+      AWS_Neuron:
+        target: 75
+        flags:
+        - aws_neuron
       ActiveMQ_XML:
         target: 75
         flags:
@@ -769,6 +773,11 @@ flags:
     paths:
     - avi_vantage/datadog_checks/avi_vantage
     - avi_vantage/tests
+  aws_neuron:
+    carryforward: true
+    paths:
+    - aws_neuron/datadog_checks/aws_neuron
+    - aws_neuron/tests
   azure_iot_edge:
     carryforward: true
     paths:
