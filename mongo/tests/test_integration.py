@@ -88,7 +88,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'sessions',
             'hostinfo',
         ],
-        ['sharding_cluster_role:mongos', 'clustername:my_cluster'],
+        ['sharding_cluster_role:mongos', 'clustername:my_cluster', 'hosting_type:self-hosted'],
     )
 
     aggregator.assert_all_metrics_covered()
@@ -105,7 +105,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos']
+    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos', 'hosting_type:self-hosted']
     _assert_mongodb_instance_event(
         aggregator,
         mongos_check,
@@ -149,6 +149,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'replset_state:primary',
         'replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = [
         'count-dbs',
@@ -249,6 +250,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
         'replset_state:secondary',
         'replset_me:mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = [
         'count-dbs',
@@ -312,6 +314,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         'replset_state:arbiter',
         'replset_me:mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
 
@@ -363,6 +366,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         'replset_state:primary',
         'replset_me:mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:configsvr',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = [
         'count-dbs',
@@ -461,6 +465,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
         'replset_state:secondary',
         'replset_me:mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:configsvr',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = [
         'count-dbs',
@@ -519,6 +524,7 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         'replset_name:replset',
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = [
         'count-dbs',
@@ -620,6 +626,7 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         'replset_name:replset',
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = [
         'count-dbs',
@@ -729,6 +736,7 @@ def test_integration_replicaset_secondary(
         'replset_name:replset',
         'replset_state:secondary',
         'replset_me:replset-data-1.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = [
         'count-dbs',
@@ -793,6 +801,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         'replset_name:replset',
         'replset_state:arbiter',
         'replset_me:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
 
@@ -851,7 +860,7 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
         'collection',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories)
+    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -917,7 +926,7 @@ def test_db_names_with_nonexistent_database(check, instance_integration, aggrega
         'collection',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories)
+    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -952,7 +961,7 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
         'collection',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories)
+    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -1047,6 +1056,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         'replset_name:mongo-mongodb-sharded-shard-0',
         'replset_state:primary',
         'sharding_cluster_role:shardsvr',
+        'hosting_type:self-hosted',
     ]
 
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
@@ -1077,7 +1087,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
 
     # Override the deployment type replset_state to secondary
     # next check run should detect the change and re-emit the mongodb instance event
-    mongo_check.api_client.deployment_type.replset_state = SECONDARY_STATE_ID
+    mongo_check.deployment_type.replset_state = SECONDARY_STATE_ID
     dd_run_check(mongo_check)
     assert _get_mongodb_instance_event(aggregator) is not None
 
@@ -1092,6 +1102,7 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         'replset_name:replset',
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+        'hosting_type:self-hosted',
     ]
     metrics_categories = [
         'count-dbs',

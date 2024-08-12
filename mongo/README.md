@@ -542,18 +542,20 @@ The following metrics are **not** collected by default. Use the `additional_metr
 | metric prefix            | what to add to `additional_metrics` to collect it |
 | ------------------------ | ------------------------------------------------- |
 | mongodb.collection       | collection                                        |
-| mongodb.commands         | top                                               |
-| mongodb.getmore          | top                                               |
-| mongodb.insert           | top                                               |
-| mongodb.queries          | top                                               |
-| mongodb.readLock         | top                                               |
-| mongodb.writeLock        | top                                               |
-| mongodb.remove           | top                                               |
-| mongodb.total            | top                                               |
-| mongodb.update           | top                                               |
-| mongodb.writeLock        | top                                               |
+| mongodb.usage.commands   | top                                               |
+| mongodb.usage.getmore    | top                                               |
+| mongodb.usage.insert     | top                                               |
+| mongodb.usage.queries    | top                                               |
+| mongodb.usage.readLock   | top                                               |
+| mongodb.usage.writeLock  | top                                               |
+| mongodb.usage.remove     | top                                               |
+| mongodb.usage.total      | top                                               |
+| mongodb.usage.update     | top                                               |
+| mongodb.usage.writeLock  | top                                               |
 | mongodb.tcmalloc         | tcmalloc                                          |
 | mongodb.metrics.commands | metrics.commands                                  |
+| mongodb.chunks.jumbo     | jumbo_chunks                                      |
+| mongodb.chunks.total     | jumbo_chunks                                      |
 
 ### Events
 
