@@ -834,10 +834,6 @@
                                         {
                                             "alias": "Unique Opens",
                                             "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Open Rate",
-                                            "formula": "query3"
                                         }
                                     ],
                                     "queries": [
@@ -850,11 +846,6 @@
                                             "name": "query2",
                                             "data_source": "metrics",
                                             "query": "sum:mailchimp.campaigns.unique_opens{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type}"
-                                        },
-                                        {
-                                            "name": "query3",
-                                            "data_source": "metrics",
-                                            "query": "sum:mailchimp.campaigns.open_rate{$campaign_id,$campaign_title,$audience,$audience_id,$campaign_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -995,7 +986,7 @@
                     {
                         "id": 7444432481298510,
                         "definition": {
-                            "title": "Email Open Rate (avg)",
+                            "title": "Avg Email Open Rate (Last 30 days)",
                             "title_size": "16",
                             "title_align": "left",
                             "time": {
