@@ -104,7 +104,7 @@ spec:
                       useful, since the calculation of this overhead is not accurate
                       and cannot be entirely known in advance. The ratio that is being
                       set determines by which factor to increase the overhead calculated
-                      by Kubevirt. A higher ratio means that the VMs would be less
+                      by KubeVirt. A higher ratio means that the VMs would be less
                       compromised by node pressures, but would mean that fewer VMs
                       could be scheduled to a node. If not set, the default is 1.
                     type: string
@@ -755,7 +755,7 @@ spec:
                     type: object
                   seccompConfiguration:
                     description: SeccompConfiguration holds Seccomp configuration
-                      for Kubevirt components
+                      for KubeVirt components
                     properties:
                       virtualMachineInstanceProfile:
                         description: VirtualMachineInstanceProfile defines what profile
@@ -3198,7 +3198,7 @@ spec:
                       useful, since the calculation of this overhead is not accurate
                       and cannot be entirely known in advance. The ratio that is being
                       set determines by which factor to increase the overhead calculated
-                      by Kubevirt. A higher ratio means that the VMs would be less
+                      by KubeVirt. A higher ratio means that the VMs would be less
                       compromised by node pressures, but would mean that fewer VMs
                       could be scheduled to a node. If not set, the default is 1.
                     type: string
@@ -3849,7 +3849,7 @@ spec:
                     type: object
                   seccompConfiguration:
                     description: SeccompConfiguration holds Seccomp configuration
-                      for Kubevirt components
+                      for KubeVirt components
                     properties:
                       virtualMachineInstanceProfile:
                         description: VirtualMachineInstanceProfile defines what profile

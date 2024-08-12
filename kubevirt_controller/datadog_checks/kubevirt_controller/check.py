@@ -8,12 +8,12 @@ from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynam
 from .metrics import METRICS_MAP
 
 
-class KubevirtControllerCheck(OpenMetricsBaseCheckV2):
+class KubeVirtControllerCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "kubevirt_controller"
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
-        super(KubevirtControllerCheck, self).__init__(name, init_config, instances)
+        super(KubeVirtControllerCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self._parse_config)
         self.check_initializations.append(self._configure_additional_transformers)
 

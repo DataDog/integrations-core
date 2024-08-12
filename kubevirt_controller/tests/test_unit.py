@@ -5,7 +5,7 @@
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.kubevirt_controller import KubevirtControllerCheck
+from datadog_checks.kubevirt_controller import KubeVirtControllerCheck
 
 from .conftest import mock_http_responses
 
@@ -18,7 +18,7 @@ base_tags = [
 
 def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, instance, mocker):
     mocker.patch("requests.get", wraps=mock_http_responses)
-    check = KubevirtControllerCheck("kubevirt_controller", {}, [instance])
+    check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric(
         "kubevirt_controller.can_connect",
@@ -28,7 +28,7 @@ def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, inst
 
 
 def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, instance):
-    check = KubevirtControllerCheck("kubevirt_controller", {}, [instance])
+    check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
     with pytest.raises(Exception):
         dd_run_check(check)
     aggregator.assert_metric(
@@ -39,7 +39,7 @@ def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, i
 def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
     mocker.patch("requests.get", wraps=mock_http_responses)
 
-    check = KubevirtControllerCheck("kubevirt_controller", {}, [instance])
+    check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
 
     dd_run_check(check)
 
