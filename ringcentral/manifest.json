@@ -16,7 +16,8 @@
       "Category::Metrics",
       "Category::Collaboration",
       "Submitted Data Type::Logs",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
