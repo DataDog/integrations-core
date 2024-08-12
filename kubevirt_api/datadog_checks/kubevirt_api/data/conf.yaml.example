@@ -62,12 +62,12 @@ instances:
     # kube_cluster_name: dev-cluster
 
     ## @param kube_namespace - string - optional
-    ## The namespace where the KubeVirt API is running.  (Provided via autodiscovery template variables)
+    ## The namespace where the KubeVirt API is running.  (Provided by autodiscovery template variables)
     #
     # kube_namespace: kubevirt
 
     ## @param kube_pod_name - string - optional
-    ## The name of the KubeVirt API pod. (Provided via autodiscovery template variables)
+    ## The name of the KubeVirt API pod. (Provided by autodiscovery template variables)
     #
     # kube_pod_name: virt-api-id-1234
 
