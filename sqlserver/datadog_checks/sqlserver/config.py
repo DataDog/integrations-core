@@ -7,6 +7,7 @@ import re
 
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     PROC_CHAR_LIMIT,
@@ -16,7 +17,7 @@ from datadog_checks.sqlserver.const import (
 class SQLServerConfig:
     def __init__(self, init_config, instance, log):
         self.log = log
-        self.tags: list[str] = instance.get("tags", [])
+        self.tags: list[str] = get_agent_host_tags()
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*']) or ['.*']
