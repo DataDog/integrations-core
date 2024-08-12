@@ -51,7 +51,7 @@
       },
       "metrics": {
         "prefix": "ringcentral.",
-        "check": [],
+        "check": ["ringcentral.voice.total_calls", "ringcentral.message.total_messages"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

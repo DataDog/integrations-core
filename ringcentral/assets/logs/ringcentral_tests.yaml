@@ -1,6 +1,6 @@
 id: ringcentral
 tests:
-  - sample: >-
+  - sample: |-
       {
         "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/call-log/agTsuPJvSGncjUA?view=Detailed",
         "id": "agTsuPJvSGncjUA",
@@ -76,7 +76,86 @@ tests:
         ],
         "accountId": "00000000"
       }
-    result: null
+    result:
+      custom: {}
+      message: |-
+        {
+          "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/call-log/agTsuPJvSGncjUA?view=Detailed",
+          "id": "agTsuPJvSGncjUA",
+          "sessionId": "1234567890",
+          "startTime": "2024-08-06T07:51:18.449Z",
+          "duration": 6,
+          "durationMs": 5647,
+          "type": "Voice",
+          "internalType": "International",
+          "direction": "Outbound",
+          "action": "VoIP Call",
+          "result": "Hang Up",
+          "to": {
+            "phoneNumber": "+0000000000"
+          },
+          "from": {
+            "name": "xxxxxxxxx",
+            "phoneNumber": "+0000000000",
+            "extensionId": "00000000",
+            "device": {
+              "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/device/0000000000",
+              "id": "0000000000"
+            }
+          },
+          "extension": {
+            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000",
+            "id": 00000000
+          },
+          "reason": "Hang Up",
+          "reasonDescription": "The caller hung up before the call was answered.",
+          "telephonySessionId": "s-a7280cb1e9559z12d03710000",
+          "partyId": "p-a7280cb1e956abc992z2d03710000-2",
+          "transport": "VoIP",
+          "lastModifiedTime": "2024-08-06T07:51:42.009Z",
+          "billing": {
+            "costIncluded": 0,
+            "costPurchased": 0
+          },
+          "legs": [
+            {
+              "startTime": "2024-08-06T07:51:18.449Z",
+              "duration": 6,
+              "durationMs": 5647,
+              "type": "Voice",
+              "internalType": "International",
+              "direction": "Outbound",
+              "action": "VoIP Call",
+              "result": "Hang Up",
+              "to": {
+                "phoneNumber": "+0000000000"
+              },
+              "from": {
+                "name": "xxxxxxx",
+                "phoneNumber": "+0000000000",
+                "extensionId": "00000000",
+                "device": {
+                  "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/device/00000000000",
+                  "id": "0000000000"
+                }
+              },
+              "extension": {
+                "uri": "https://platform.ringcentral.com/restapi/v1.0/account/0000000/extension/00000000",
+                "id": 00000000
+              },
+              "reason": "Hang Up",
+              "reasonDescription": "The caller hung up before the call was answered.",
+              "telephonySessionId": "s-a7280cb1e955c992z2d03710000",
+              "partyId": "p-a7280cb1e9559z19103710000-2",
+              "transport": "VoIP",
+              "legType": "SipToPstnUnmetered",
+              "master": true
+            }
+          ],
+          "accountId": "00000000"
+        }
+      tags:
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "id": "4b52af9-beee-7779d1e802c7",
@@ -110,4 +189,61 @@ tests:
               "extensionNumber": "000"
           }
       }
-    result: null
+    result:
+      custom:
+        accountId: "12345678"
+        actionId: "CHANGE_USER_ROLE"
+        clientIp: "218.57.154.108"
+        details:
+          parameters:
+            -
+              value: "Super Admin"
+              key: "oldRoleName"
+            -
+              value: "Standard (International)"
+              key: "newRoleName"
+        eventTime: "2024-08-06T10:50:19.442Z"
+        eventType: "UPDATE"
+        id: "4b52af9-beee-7779d1e802c7"
+        initiator:
+          extensionId: "12345678"
+          extensionNumber: "000"
+          name: "xxxxxx"
+          role: "Standard (International)"
+        target:
+          extensionNumber: "000"
+          name: "xxxxxx"
+          objectId: "12345678"
+          objectType: "Extension"
+      message: |-
+        {
+          "accountId" : "12345678",
+          "clientIp" : "218.57.154.108",
+          "initiator" : {
+            "role" : "Standard (International)",
+            "extensionNumber" : "000",
+            "name" : "xxxxxx",
+            "extensionId" : "12345678"
+          },
+          "eventTime" : "2024-08-06T10:50:19.442Z",
+          "actionId" : "CHANGE_USER_ROLE",
+          "details" : {
+            "parameters" : [ {
+              "value" : "Super Admin",
+              "key" : "oldRoleName"
+            }, {
+              "value" : "Standard (International)",
+              "key" : "newRoleName"
+            } ]
+          },
+          "id" : "4b52af9-beee-7779d1e802c7",
+          "eventType" : "UPDATE",
+          "target" : {
+            "extensionNumber" : "000",
+            "name" : "xxxxxx",
+            "objectId" : "12345678",
+            "objectType" : "Extension"
+          }
+        }
+      tags:
+        - "source:LOGS_SOURCE"

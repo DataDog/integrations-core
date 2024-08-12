@@ -66,7 +66,7 @@ pipeline:
         query: "service:voice"
       processors:
         - type: date-remapper
-          name: Define `startTime` field as the official timestamp of the log
+          name: Define `startTime` as the official date of the log
           enabled: true
           sources:
             - startTime
@@ -81,7 +81,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Define `direction` attribute as `direction` tag
+          name: Map attribute `direction` to a tag
           enabled: true
           sources:
             - direction
@@ -91,7 +91,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Define `accountId` attribute as `accountid` tag
+          name: Map attribute `accountId` to tag `accountid`
           enabled: true
           sources:
             - accountId
@@ -107,7 +107,7 @@ pipeline:
         query: "service:audit"
       processors:
         - type: date-remapper
-          name: Define `eventTime` field as the official timestamp of the log
+          name: Define `eventTime` as the official date of the log
           enabled: true
           sources:
             - eventTime
@@ -122,7 +122,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `clientIP` to `network.client.ip`
+          name: Map `clientIp` to `network.client.ip`
           enabled: true
           sources:
             - clientIp
@@ -139,7 +139,7 @@ pipeline:
           target: network.client.geoip
           ip_processing_behavior: do-nothing
         - type: attribute-remapper
-          name: map `initiator.name` to `usr.name`
+          name: Map `initiator.name` to `usr.name`
           enabled: true
           sources:
             - initiator.name
