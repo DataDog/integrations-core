@@ -12,6 +12,7 @@ from six import raise_from
 from ....errors import ConfigurationError
 from ....utils.tracing import traced_class
 from ... import AgentCheck
+from .metrics import DEFAULT_GO_METRICS
 from .scraper import OpenMetricsScraper
 
 
@@ -110,7 +111,11 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         return ChainMap(config, self.get_default_config())
 
     def get_default_config(self):
-        return {}
+        return {
+            metrics = construct_metrics_config(metrics)
+            metrics.append(DEFAULT_GO_METRICS)
+            'metrics':metrics 
+        }
 
     def refresh_scrapers(self):
         pass
