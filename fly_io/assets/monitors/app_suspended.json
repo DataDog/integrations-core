@@ -21,7 +21,7 @@
             "timeout_h": 0
         },
         "tags": [
-            "integration:fly_io"
+            "integration:fly-io"
         ],
         "type": "query alert"
     }
