@@ -227,7 +227,7 @@ FROM
               AND xt.target_name = N'ring_buffer'
     ) AS XML_Data
 CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
-WHERE xdr.value('@timestamp', 'datetime') >= ?
+WHERE xdr.value('@timestamp', 'datetime') > ?
 ORDER BY [Date] DESC;
 """
 

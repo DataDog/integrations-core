@@ -70,6 +70,6 @@ class Deadlocks:
                         last_deadlock_datetime = datetime_obj
                     self.obfuscate_xml(root)
                     converted_xmls.append(ET.tostring(root, encoding='unicode'))
-                self._last_deadlock_timestamp = last_deadlock_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
+                self._last_deadlock_timestamp = last_deadlock_datetime.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                 #pdb.set_trace()
                 return converted_xmls
