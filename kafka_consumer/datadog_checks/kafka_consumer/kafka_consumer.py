@@ -115,7 +115,7 @@ class KafkaCheck(AgentCheck):
 
     def _save_broker_timestamps(self, broker_timestamps):
         """Saves broker timestamps to persistent cache."""
-        self.write_persistent_cache("broker_timestamps", json.dumps(broker_timestamps))
+        self.write_persistent_cache("broker_timestamps_", json.dumps(broker_timestamps))
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
