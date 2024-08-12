@@ -17,12 +17,12 @@ The Sophos Central Cloud integration seamlessly collects all the above listed lo
 
 #### Sophos Central Cloud Configuration
 
-1. Login to [**Sophos Central Platform**][2] with your credentials
+1. Login to [**Sophos Central Platform**][2] with your credentials.
 2. From Sophos Central Admin, go to **My Products** > **General Settings** > **API Credentials Management**.
-3. Then, click on **Add Credential**.
-4. Provide credential name, select the appropriate role, add an optional description and click on **Add** button. The **API credential Summary** for this credential is displayed.
-5. Click on **Show Client Secret** to show the **Client Secret**.
-6. Copy the **Client ID** and **Client Secret**
+3. Click **Add Credential**.
+4. Provide a credential name, select the appropriate role, add an optional description, and click the **Add** button. The **API credential Summary** for this credential is displayed.
+5. Click **Show Client Secret** to display the **Client Secret**.
+6. Copy the **Client ID** and **Client Secret**.
 
 #### Sophos Central Cloud DataDog Integration Configuration
 
@@ -35,7 +35,7 @@ Configure the Datadog endpoint to forward Sophos Central Cloud events as logs to
 | ------------------------------- | -------------------------------------------------------------------------- |
 | Client ID                       | The Client ID from Sophos Central Cloud.                                         |
 | Client Secret                   | The Client Secret from Sophos Central Cloud.                                     |
-| Get Endpoint Details            | Keep it "true" to collect endpoint details for Sophos Central Cloud Alert and Event Logs, otherwise "false".                 |
+| Get Endpoint Details            | Set to "true" to collect endpoint details for Sophos Central Cloud Alert and Event Logs, otherwise set to "false". Default is "true"                 |
 
 ## Data Collected
 
