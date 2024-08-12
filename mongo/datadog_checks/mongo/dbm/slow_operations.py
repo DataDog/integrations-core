@@ -253,9 +253,12 @@ class MongoSlowOperations(DBMAsyncJob):
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
             # metrics
+            # mills from profiler, durationMillis from logs
             "mills": slow_operation.get("millis", slow_operation.get("durationMillis", 0)),
-            "num_yields": slow_operation.get("numYield", 0),
-            "response_length": slow_operation.get("responseLength", 0),
+            # numYield from profiler, numYields from logs
+            "num_yields": slow_operation.get("numYield", slow_operation.get("numYields", 0)),
+            # responseLength from profiler, reslen from logs
+            "response_length": slow_operation.get("responseLength", slow_operation.get("reslen", 0)),
             "nreturned": slow_operation.get("nreturned"),
             "nmatched": slow_operation.get("nMatched"),
             "nmodified": slow_operation.get("nModified"),
