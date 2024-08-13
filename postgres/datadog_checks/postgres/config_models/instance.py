@@ -26,6 +26,7 @@ class ManagedAuthentication(BaseModel):
         frozen=True,
     )
     enabled: Optional[bool] = Field(None, examples=[False])
+    role_arn: Optional[str] = Field(None, examples=['arn:aws:iam::123456789012:role/MyRole'])
 
 
 class Aws(BaseModel):

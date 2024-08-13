@@ -51,7 +51,7 @@ class MongoSlowOperations(DBMAsyncJob):
         if not self._should_collect_slow_operations():
             return
 
-        is_mongos = isinstance(self._check.api_client.deployment_type, MongosDeployment)
+        is_mongos = isinstance(self._check.deployment_type, MongosDeployment)
 
         # set of db names for which we need to collect slow operations from logs
         slow_operations_from_logs = set()
@@ -91,7 +91,7 @@ class MongoSlowOperations(DBMAsyncJob):
             self._submit_slow_operation_payload(slow_operation_events)
 
     def _should_collect_slow_operations(self) -> bool:
-        deployment = self._check.api_client.deployment_type
+        deployment = self._check.deployment_type
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping slow operations collection on arbiter node")
             return False
@@ -200,9 +200,12 @@ class MongoSlowOperations(DBMAsyncJob):
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
             # metrics
+            # mills from profiler, durationMillis from logs
             "mills": slow_operation.get("millis", slow_operation.get("durationMillis", 0)),
-            "num_yields": slow_operation.get("numYield", 0),
-            "response_length": slow_operation.get("responseLength", 0),
+            # numYield from profiler, numYields from logs
+            "num_yields": slow_operation.get("numYield", slow_operation.get("numYields", 0)),
+            # responseLength from profiler, reslen from logs
+            "response_length": slow_operation.get("responseLength", slow_operation.get("reslen", 0)),
             "nreturned": slow_operation.get("nreturned"),
             "nmatched": slow_operation.get("nMatched"),
             "nmodified": slow_operation.get("nModified"),

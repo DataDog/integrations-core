@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 17.5.0 / 2024-08-09
+
+***Added***:
+
+* Added collection of SQL Server Agent jobs history and activity ([#17787](https://github.com/DataDog/integrations-core/pull/17787))
+
+***Fixed***:
+
+* Fix password obfuscation in OLE DB driver error message when one or more backslashes exist in the password. ([#18203](https://github.com/DataDog/integrations-core/pull/18203))
+
+## 17.4.1 / 2024-08-08
+
+***Fixed***:
+
+* Revert "[dbm] fix flapping sqlserver_version" ([#18249](https://github.com/DataDog/integrations-core/pull/18249))
+
 ## 17.4.0 / 2024-07-05
 
 ***Added***:

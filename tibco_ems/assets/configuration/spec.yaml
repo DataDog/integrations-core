@@ -1,0 +1,55 @@
+name: tibco_ems
+files:
+- name: tibco_ems.yaml
+  options:
+  - template: init_config
+    options:
+      - name: tibemsadmin
+        description: |
+          The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
+          , which can be overwritten on an instance.
+        value:
+          type: string
+          example: /usr/bin/tibemsadmin
+      - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      description: Host that the Datadog Tibeco EMS check connects to.
+      value:
+        type: string
+        example: localhost
+    - name: port
+      description: The port used to connect to the Tibco EMS server.
+      value:
+        type: integer
+        example: 7222
+    - name: username
+      description: |
+        Username from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
+        For the check to work, this user must have access so that the Datadog Tibeco EMS
+        check can execute the `show` command.
+      value:
+        type: string
+    - name: password
+      description: |
+        Password from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
+        For the check to work, this user must have access so that the Datadog Tibeco EMS
+        check can execute the `show` command.
+      value:
+        type: string
+    - name: script_path
+      description: |
+        The path to the script that will be executed to collect metrics. Since the script is executed by a subprocess,
+        we need to know the path to the script. This must be the absolute path to the script.
+      value:
+        type: string
+    - name:  tibemsadmin
+      description: |
+        The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
+        , which can be overwritten on an instance.
+
+        This overrides `tibemsadmin` defined in `init_config`.
+      value:
+        type: string
+    - template: instances/default
