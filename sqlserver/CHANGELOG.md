@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 17.5.1 / 2024-08-13
+
+***Fixed***:
+
+* Directly collect time offset for converting times in SQL Server Agent tables to epoch timestamp through a single, deterministic function rather than calculating the offset as a difference between the server time and UTC time which led to innacurate offset in some cases. ([#18292](https://github.com/DataDog/integrations-core/pull/18292))
+
 ## 17.5.0 / 2024-08-09
 
 ***Added***:
