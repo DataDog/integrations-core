@@ -1,1 +1,0 @@
-Directly collect time offset for converting times in SQL Server Agent tables to epoch timestamp through a single, deterministic function rather than calculating the offset as a difference between the server time and UTC time which led to innacurate offset in some cases.
