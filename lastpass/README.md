@@ -40,7 +40,7 @@ reporting events, while out-of-the-box detection rules enhance detection and res
 
 Configure the Datadog endpoint to forward LastPass logs to Datadog.
 
-1. Navigate to `LastPass` integration on DataDog platform.
+1. Navigate to `LastPass` integration on Datadog platform.
 2. Add your LastPass credentials.
 
 | LastPass Parameters | Description                                                          |
