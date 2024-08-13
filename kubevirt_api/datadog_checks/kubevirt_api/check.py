@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import ipaddress
 from typing import Any  # noqa: F401
 from urllib.parse import urlparse
 
@@ -19,12 +18,11 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2):
     def __init__(self, name, init_config, instances):
         super(KubeVirtApiCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self._parse_config)
+        self.check_initializations.append(self._init_base_tags)
         self.check_initializations.append(self._configure_additional_transformers)
 
     def check(self, _):
         # type: (Any) -> None
-
-        self._init_base_tags()
 
         if self.kubevirt_api_healthz_endpoint:
             self._report_health_check(self.kubevirt_api_healthz_endpoint)
@@ -32,8 +30,6 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2):
             self.log.warning(
                 "Skipping health check. Please provide a `kubevirt_api_healthz_endpoint` to ensure the health of the KubeVirt API."  # noqa: E501
             )
-
-        self._validate_metrics_endpoint(self.kubevirt_api_metrics_endpoint)
 
         self._setup_kube_client()
 
@@ -138,21 +134,6 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2):
             tags.append(f"vmi_{label_name}:{value}")
 
         return tags
-
-    def _validate_metrics_endpoint(self, url):
-        parsed_url = urlparse(url)
-
-        host = parsed_url.hostname
-        port = parsed_url.port
-
-        if host and port:
-            try:
-                host = ipaddress.ip_address(host)
-                return host, port
-            except Exception as e:
-                raise ValueError(f"Host '{host}' must be a valid ip address: {str(e)}")
-        else:
-            raise ValueError(f"URL '{url}' does not match the expected format `https://<host_ip>:<port>/<path>`")
 
     def _parse_config(self):
         self.kubevirt_api_metrics_endpoint = self.instance.get("kubevirt_api_metrics_endpoint")
