@@ -109,7 +109,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     def get_config_with_defaults(self, config):
         map = ChainMap(config, self.get_default_config())
-        map['metrics'] = [DEFAULT_GO_METRICS]
+        map['metrics'].append(DEFAULT_GO_METRICS) 
         return map
 
     def get_default_config(self):
