@@ -108,17 +108,12 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             scraper.set_dynamic_tags(*tags)
 
     def get_config_with_defaults(self, config):
-        return ChainMap(config, self.get_default_config())
+        map = ChainMap(config, self.get_default_config())
+        map['metrics'] = [DEFAULT_GO_METRICS]
+        return map
 
     def get_default_config(self):
-        metrics = []
-        metrics.append(DEFAULT_GO_METRICS)
-        config = {
-            'metrics': metrics,
-            'namespace': 'openmetrics',
-        }
-        config.update(self.instance)
-        return config
+        return {}
 
     def refresh_scrapers(self):
         pass
