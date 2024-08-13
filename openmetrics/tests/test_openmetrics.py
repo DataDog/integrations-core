@@ -66,6 +66,11 @@ def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
         tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
         metric_type=aggregator.MONOTONIC_COUNT,
     )
+    aggregator.assert_metric(
+        '{}.go.memstats.frees.count'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
     aggregator.assert_all_metrics_covered()
 
     assert check.http.options['headers']['Accept'] == '*/*'
@@ -95,6 +100,11 @@ def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_respons
     )
     aggregator.assert_metric(
         '{}.counter1.count'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        '{}.go.memstats.frees.count'.format(CHECK_NAME),
         tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
         metric_type=aggregator.MONOTONIC_COUNT,
     )
