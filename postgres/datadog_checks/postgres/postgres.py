@@ -820,7 +820,14 @@ class PostgreSql(AgentCheck):
                 args['sslkey'] = self._config.ssl_key
             if self._config.ssl_password:
                 args['sslpassword'] = self._config.ssl_password
-            conn = psycopg2.connect(**args)
+            try:
+                conn = psycopg2.connect(**args)
+            except psycopg2.OperationalError as e:
+                used_token_auth = password != self._config.password
+                if used_token_auth and "password authentication failed" in str(e):
+                    self.log.info("Token authentication failed, falling back to password authentication")
+                    args['password'] = self._config.password
+                    conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
         conn.set_session(autocommit=True, readonly=True)
         if self._config.query_timeout:
