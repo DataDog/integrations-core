@@ -93,8 +93,6 @@ nav:
     - SNMP: architecture/snmp.md
     - vSphere: architecture/vsphere.md
     - Windows Event Log: architecture/win32_event_log.md
-  - Process:
-    - Integration release: process/integration-release.md
   - FAQ:
     - FAQ: faq/faq.md
     - Acknowledgements: faq/acknowledgements.md

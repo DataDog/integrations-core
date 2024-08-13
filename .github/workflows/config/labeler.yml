@@ -69,6 +69,8 @@ integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
+integration/aws_neuron:
+- aws_neuron/**/*
 integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
@@ -181,6 +183,8 @@ integration/fluentd:
 - fluentd/**/*
 integration/fluxcd:
 - fluxcd/**/*
+integration/fly_io:
+- fly_io/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/gearmand:
@@ -347,6 +351,8 @@ integration/openstack_controller:
 - openstack_controller/**/*
 integration/oracle:
 - oracle/**/*
+integration/ossec_security:
+- ossec_security/**/*
 integration/otel:
 - otel/**/*
 integration/palo_alto_cortex_xdr:
@@ -361,6 +367,8 @@ integration/pgbouncer:
 - pgbouncer/**/*
 integration/php_fpm:
 - php_fpm/**/*
+integration/ping_federate:
+- ping_federate/**/*
 integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
@@ -453,6 +461,8 @@ integration/strimzi:
 - strimzi/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/suricata:
+- suricata/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
@@ -477,6 +487,8 @@ integration/teradata:
 - teradata/**/*
 integration/terraform:
 - terraform/**/*
+integration/tibco_ems:
+- tibco_ems/**/*
 integration/tls:
 - tls/**/*
 integration/tokumx:
