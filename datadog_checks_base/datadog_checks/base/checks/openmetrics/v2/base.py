@@ -115,9 +115,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     def get_default_config(self):
         return {}
     
-    def __repr__(self, config): 
-        return self.get_config_with_defaults(config)
-    
     def refresh_scrapers(self):
         pass
     
