@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from copy import deepcopy
-from unittest.mock import MagicMock  # noqa: F401
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -11,16 +11,10 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubevirt_api import KubeVirtApiCheck
 
 from .conftest import mock_http_responses
+from .constants import BAD_METRICS_HOSTNAME_INSTANCE, HEALTHZ_TAGS
 from .mock_response import GET_VMIS_RESPONSE, GET_VMS_RESPONSE
 
 pytestmark = [pytest.mark.unit]
-
-healthz_tags = [
-    "endpoint:https://10.244.0.38:443/healthz",
-    "pod_name:virt-api-98cf864cc-zkgcd",
-    "kube_namespace:kubevirt",
-    "kube_cluster_name:test-cluster",
-]
 
 
 def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
@@ -38,7 +32,7 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
     aggregator.assert_metric(
         "kubevirt_api.can_connect",
         value=1,
-        tags=healthz_tags,
+        tags=HEALTHZ_TAGS,
     )
 
     metrics_tags = [
@@ -118,7 +112,7 @@ def test_check_sends_zero_count_for_vms(dd_run_check, aggregator, instance, mock
     aggregator.assert_metric(
         "kubevirt_api.can_connect",
         value=1,
-        tags=healthz_tags,
+        tags=HEALTHZ_TAGS,
     )
 
     aggregator.assert_metric(
@@ -145,7 +139,7 @@ def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, moc
     aggregator.assert_metric(
         "kubevirt_api.can_connect",
         value=1,
-        tags=healthz_tags,
+        tags=HEALTHZ_TAGS,
     )
 
     aggregator.assert_metric(
@@ -171,7 +165,7 @@ def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, i
     aggregator.assert_metric(
         "kubevirt_api.can_connect",
         value=0,
-        tags=healthz_tags,
+        tags=HEALTHZ_TAGS,
     )
 
 
@@ -188,17 +182,8 @@ def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, inst
     aggregator.assert_metric(
         "kubevirt_api.can_connect",
         value=1,
-        tags=healthz_tags,
+        tags=HEALTHZ_TAGS,
     )
-
-
-BAD_METRICS_HOSTNAME_INSTANCE = {
-    "kubevirt_api_metrics_endpoint": "https://bad_endpoint:443/metrics",
-    "kubevirt_api_healthz_endpoint": "https://10.244.0.38:443/healthz",
-    "kube_cluster_name": "test-cluster",
-    "kube_namespace": "kubevirt",
-    "kube_pod_name": "virt-api-98cf864cc-zkgcd",
-}
 
 
 def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, instance, mocker):
@@ -216,7 +201,7 @@ def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, 
     aggregator.assert_metric(
         "kubevirt_api.can_connect",
         value=1,
-        tags=healthz_tags,
+        tags=HEALTHZ_TAGS,
     )
 
 

@@ -99,9 +99,16 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2):
             return []
 
         tags = []
-        tags.append(f"vm_name:{vm['metadata']['name']}")
-        tags.append(f"vm_uid:{vm['metadata']['uid']}")
-        tags.append(f"kube_namespace:{vm['metadata']['namespace']}")
+
+        if "metadata" in vm:
+            if "name" in vm["metadata"]:
+                tags.append(f"vm_name:{vm['metadata']['name']}")
+            if "uid" in vm["metadata"]:
+                tags.append(f"vm_uid:{vm['metadata']['uid']}")
+            if "namespace" in vm["metadata"]:
+                tags.append(f"kube_namespace:{vm['metadata']['namespace']}")
+        else:
+            self.log.debug("VM metadata not found")
 
         if self.kube_cluster_name:
             tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
@@ -119,10 +126,18 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2):
             return []
 
         tags = []
-        tags.append(f"vmi_name:{vmi['metadata']['name']}")
-        tags.append(f"vmi_uid:{vmi['metadata']['uid']}")
-        tags.append(f"vmi_phase:{vmi['status']['phase']}")
-        tags.append(f"kube_namespace:{vmi['metadata']['namespace']}")
+
+        if "metadata" in vmi:
+            if "name" in vmi["metadata"]:
+                tags.append(f"vmi_name:{vmi['metadata']['name']}")
+            if "uid" in vmi["metadata"]:
+                tags.append(f"vmi_uid:{vmi['metadata']['uid']}")
+            if "status" in vmi and "phase" in vmi["status"]:
+                tags.append(f"vmi_phase:{vmi['status']['phase']}")
+            if "namespace" in vmi["metadata"]:
+                tags.append(f"kube_namespace:{vmi['metadata']['namespace']}")
+        else:
+            self.log.debug("VMI metadata not found")
 
         if self.kube_cluster_name:
             tags.append(f"kube_cluster_name:{self.kube_cluster_name}")

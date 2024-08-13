@@ -1,6 +1,6 @@
 {
   "title": "KubeVirt Overview",
-  "description": "This dashboard displays a high-level overview of your Teleport cluster. It helps you track key metrics to assess the performance and health of your Teleport services.\n\nFor more information, see [our official documentation](https://docs.datadoghq.com/integrations/teleport). (cloned)",
+  "description": "This dashboard provides an overview of your KubeVirt deployment. You can use this dashboard to:\n\n- Monitor the health of your KubeVirt deployment (virt-api, virt-controller, virt-handler)\n  \n- Track the resource utilization of your VirtualMachines (VM) and VirtualMachineInstances (VMI)\n  \n- Track the performance and resource utilization of your VMIs\\",
   "widgets": [
     {
       "id": 8821438356580436,
