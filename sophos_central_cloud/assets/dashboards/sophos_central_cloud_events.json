@@ -15,7 +15,7 @@
                         "id": 2432309666262138,
                         "definition": {
                             "type": "note",
-                            "content": "Gain better visibility into your organization's security events by monitoring Sophos Central Cloud Alerts logs with this dashboard.\n\nIn the Sophos ecosystem, events include observable occurrences across endpoints and various Sophos products like firewalls and XDR(Extended Detection and Response), while the Events dashboard provides a high-level summary and critical insights into overall malicious activity.\n\nFor Further reading, see:\n\n- [Sophos Central Cloud - Documentation](https://docs.datadoghq.com/integrations/sophos_central_cloud)\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                            "content": "Gain better visibility into your organization's security events by monitoring Sophos Central Cloud logs with this dashboard.\n\nIn the Sophos ecosystem, events include observable occurrences across endpoints and various Sophos products , while the Events dashboard provides a high-level summary and critical insights into overall malicious activity.\n\nFor Further reading, see:\n\n- [Sophos Central Cloud - Documentation](https://docs.datadoghq.com/integrations/sophos_central_cloud)\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -303,7 +303,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:event status:critical"
+                                                "query": "source:sophos-central-cloud service:event status:critical $Endpoint $Group $Status $Endpoint-Type $IP"
                                             }
                                         }
                                     ],
@@ -353,7 +353,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "status:high service:event source:sophos-central-cloud"
+                                                "query": "status:high service:event source:sophos-central-cloud $Endpoint $Group $Status $Endpoint-Type $IP"
                                             }
                                         }
                                     ],
@@ -412,7 +412,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:event status:critical"
+                                                "query": "source:sophos-central-cloud service:event status:critical $Endpoint $Group $Status $Endpoint-Type $IP"
                                             }
                                         }
                                     ],
@@ -478,7 +478,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:event status:medium"
+                                                "query": "source:sophos-central-cloud service:event status:medium $Endpoint $Group $Status $Endpoint-Type $IP"
                                             }
                                         }
                                     ],
@@ -529,7 +529,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:event status:low"
+                                                "query": "source:sophos-central-cloud service:event status:low $Endpoint $Group $Status $Endpoint-Type $IP"
                                             }
                                         }
                                     ],
@@ -580,7 +580,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:event status:info"
+                                                "query": "source:sophos-central-cloud service:event status:info $Endpoint $Group $Status $Endpoint-Type $IP"
                                             }
                                         }
                                     ],
@@ -639,7 +639,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:event status:high"
+                                                "query": "source:sophos-central-cloud service:event status:high $Endpoint $Group $Status $Endpoint-Type $IP"
                                             }
                                         }
                                     ],
@@ -713,7 +713,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:event status:medium"
+                                                "query": "source:sophos-central-cloud service:event status:medium $Endpoint $Group $Status $Endpoint-Type $IP"
                                             }
                                         }
                                     ],
@@ -764,6 +764,268 @@
                 "y": 9,
                 "width": 12,
                 "height": 10
+            }
+        },
+        {
+            "id": 47257897724372,
+            "definition": {
+                "title": "Endpoint Details",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7180074286083912,
+                        "definition": {
+                            "title": "Health Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "events_query_1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@endpoint_details.hostname",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.health.overall",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.health.services.status",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.health.threats.status",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "service:event source:sophos-central-cloud $Endpoint $Status $Group $Endpoint-Type $IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "events_query_1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4860357227818852,
+                        "definition": {
+                            "title": "OS Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "events_query_1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@endpoint_details.hostname",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.os.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.os.platform",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.os.isServer",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "service:event source:sophos-central-cloud $Endpoint $Status $Group $Endpoint-Type $IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "events_query_1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5146252179961906,
+                        "definition": {
+                            "title": "Isolation and Lockdown Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "events_query_1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@endpoint_details.hostname",
+                                                    "limit": 2,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.isolation.adminIsolated",
+                                                    "limit": 2,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.isolation.behaviorallyIsolated",
+                                                    "limit": 2,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.isolation.selfIsolated",
+                                                    "limit": 2,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.isolation.status",
+                                                    "limit": 2,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@endpoint_details.lockdown.status",
+                                                    "limit": 2,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "service:event source:sophos-central-cloud $Endpoint $Status $Group $Endpoint-Type $IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Count",
+                                            "formula": "events_query_1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 19,
+                "width": 12,
+                "height": 13
             }
         },
         {
@@ -1474,271 +1736,10 @@
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 32,
                 "width": 12,
-                "height": 25
-            }
-        },
-        {
-            "id": 47257897724372,
-            "definition": {
-                "title": "Endpoint Details",
-                "background_color": "vivid_blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 7180074286083912,
-                        "definition": {
-                            "title": "Health Status",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "events_query_1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@endpoint_details.hostname",
-                                                    "limit": 5,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.health.overall",
-                                                    "limit": 5,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.health.services.status",
-                                                    "limit": 5,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.health.threats.status",
-                                                    "limit": 5,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "service:event source:sophos-central-cloud $Endpoint $Status $Group $Endpoint-Type $IP"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "alias": "Count",
-                                            "formula": "events_query_1"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4860357227818852,
-                        "definition": {
-                            "title": "OS Details",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "events_query_1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@endpoint_details.hostname",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.os.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.os.platform",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.os.isServer",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "service:event source:sophos-central-cloud $Endpoint $Status $Group $Endpoint-Type $IP"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "alias": "Count",
-                                            "formula": "events_query_1"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 12,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5146252179961906,
-                        "definition": {
-                            "title": "Isolation and Lockdown Status",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "events_query_1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@endpoint_details.hostname",
-                                                    "limit": 2,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.isolation.adminIsolated",
-                                                    "limit": 2,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.isolation.behaviorallyIsolated",
-                                                    "limit": 2,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.isolation.selfIsolated",
-                                                    "limit": 2,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.isolation.status",
-                                                    "limit": 2,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@endpoint_details.lockdown.status",
-                                                    "limit": 2,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "service:event source:sophos-central-cloud $Endpoint $Status $Group $Endpoint-Type $IP"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "alias": "Count",
-                                            "formula": "events_query_1"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 8,
-                            "width": 12,
-                            "height": 4
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 44,
-                "width": 12,
-                "height": 13
+                "height": 25,
+                "is_column_break": true
             }
         },
         {
