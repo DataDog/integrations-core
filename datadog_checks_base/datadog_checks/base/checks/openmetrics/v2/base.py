@@ -109,15 +109,15 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
     def get_config_with_defaults(self, config):
         map = ChainMap(config, self.get_default_config())
-        map['metrics'].append(DEFAULT_GO_METRICS) 
+        map['metrics'].append(DEFAULT_GO_METRICS)
         return map
 
     def get_default_config(self):
         return {}
-    
+
     def refresh_scrapers(self):
         pass
-    
+
     @contextmanager
     def adopt_namespace(self, namespace):
         old_namespace = self.__NAMESPACE__
