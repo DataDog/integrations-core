@@ -53,7 +53,7 @@
           {
             "id": 1280501236012426,
             "definition": {
-              "title": "Total Lastpass Login Attempts",
+              "title": "Total LastPass Login Attempts",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -111,7 +111,7 @@
           {
             "id": 4438774702454684,
             "definition": {
-              "title": "Successful Lastpass Logins",
+              "title": "Successful LastPass Logins",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -168,7 +168,7 @@
           {
             "id": 4674596454830660,
             "definition": {
-              "title": "Failed Lastpass Logins",
+              "title": "Failed LastPass Logins",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -225,7 +225,7 @@
           {
             "id": 8425364252595370,
             "definition": {
-              "title": "Successful/Failed Lastpass Logins Overtime",
+              "title": "Successful/Failed LastPass Logins Overtime",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -323,7 +323,7 @@
             "id": 6185164624143288,
             "definition": {
               "type": "note",
-              "content": "Datadog Cloud SIEM analyzes and correlates reporting events to detect real time threats happening in your Lastpass account. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security).",
+              "content": "Datadog Cloud SIEM analyzes and correlates reporting events to detect real-time threats happening in your LastPass account. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security).",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "left",
@@ -1967,7 +1967,7 @@
           {
             "id": 4102109028396586,
             "definition": {
-              "title": "Top 10 Policy and their Actions",
+              "title": "Top 10 Policies and their Actions",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -2042,7 +2042,7 @@
           {
             "id": 2158310616321462,
             "definition": {
-              "title": "MFA Disabled Actions by Admin Overtime",
+              "title": "MFA-Disabled Actions by Admin Overtime",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
