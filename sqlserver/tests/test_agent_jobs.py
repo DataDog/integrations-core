@@ -36,16 +36,15 @@ WITH HISTORY_ENTRIES AS (
             AND sjh2.instance_id >= sjh1.instance_id
         ) AS completion_instance_id,
         (
-            SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
-                DATEDIFF(SECOND, '19700101',
-                    DATEADD(HOUR, sjh1.run_time / 10000,
-                        DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
-                            DATEADD(SECOND, sjh1.run_time % 100,
-                                CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
-                            )
+            SELECT DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh1.run_time / 10000,
+                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh1.run_time % 100,
+                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
                         )
                     )
                 )
+            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
         ) AS run_epoch_time,
         (
             (sjh1.run_duration / 10000) * 3600
@@ -73,17 +72,16 @@ WHERE
         SELECT 1
         FROM msdb.dbo.sysjobhistory AS sjh2
         WHERE sjh2.instance_id = HISTORY_ENTRIES.completion_instance_id
-        AND (DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
-                    DATEDIFF(SECOND, '19700101',
-                        DATEADD(HOUR, sjh2.run_time / 10000,
-                            DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
-                                DATEADD(SECOND, sjh2.run_time % 100,
-                                    CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
-                                )
-                            )
+        AND (DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh2.run_time / 10000,
+                    DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh2.run_time % 100,
+                            CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
                         )
                     )
-                + (sjh2.run_duration / 10000) * 3600
+                )
+            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
+        + (sjh2.run_duration / 10000) * 3600
         + ((sjh2.run_duration % 10000) / 100) * 60
         + (sjh2.run_duration % 100)) > 0 + {last_collection_time_filter}
     )
@@ -105,16 +103,15 @@ WITH HISTORY_ENTRIES AS (
             AND sjh2.instance_id >= sjh1.instance_id
         ) AS completion_instance_id,
         (
-            SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
-                DATEDIFF(SECOND, '19700101',
-                    DATEADD(HOUR, sjh1.run_time / 10000,
-                        DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
-                            DATEADD(SECOND, sjh1.run_time % 100,
-                                CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
-                            )
+            SELECT DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh1.run_time / 10000,
+                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh1.run_time % 100,
+                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
                         )
                     )
                 )
+            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
         ) AS run_epoch_time,
         (
             (sjh1.run_duration / 10000) * 3600
@@ -142,17 +139,16 @@ WHERE
         SELECT 1
         FROM msdb.dbo.sysjobhistory AS sjh2
         WHERE sjh2.instance_id = HISTORY_ENTRIES.completion_instance_id
-        AND (DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
-                    DATEDIFF(SECOND, '19700101',
-                        DATEADD(HOUR, sjh2.run_time / 10000,
-                            DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
-                                DATEADD(SECOND, sjh2.run_time % 100,
-                                    CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
-                                )
-                            )
+        AND (DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh2.run_time / 10000,
+                    DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh2.run_time % 100,
+                            CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
                         )
                     )
-                + (sjh2.run_duration / 10000) * 3600
+                )
+            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
+        + (sjh2.run_duration / 10000) * 3600
         + ((sjh2.run_duration % 10000) / 100) * 60
         + (sjh2.run_duration % 100)) > 0 + 10000
     )
