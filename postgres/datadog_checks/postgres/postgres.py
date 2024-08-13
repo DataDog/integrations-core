@@ -802,6 +802,12 @@ class PostgreSql(AgentCheck):
                     identity_scope = azure_managed_authentication.get('identity_scope', None)
                     password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
 
+            self.log.info(
+                "Try to connect to %s with %s",
+                self._config.host,
+                "password" if password == self._config.password else "token",
+            )
+
             args = {
                 'host': self._config.host,
                 'user': self._config.user,
