@@ -22,7 +22,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 22902543,
-      "source_type_name": "trend-micro-vision-one-xdr",
+      "source_type_name": "Trend Micro Vision One XDR",
       "events": {
         "creates_events": false
       },
