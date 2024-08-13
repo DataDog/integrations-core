@@ -60,10 +60,9 @@ def test_get_agent_host_tags():
     assert got == want
 
     # invalid tags json
-    datadog_agent._set_host_tags("")
-    want = []
-    got = get_agent_host_tags()
-    assert got == want
+    datadog_agent._set_host_tags("{")
+    with pytest.raises(ValueError):
+        get_agent_host_tags()
 
     # invalid tags value
     datadog_agent._set_host_tags(
@@ -72,9 +71,8 @@ def test_get_agent_host_tags():
             "google cloud platform": "tag3:value3",
         }
     )
-    want = ["tag1:value1", "tag2:value2"]
-    got = get_agent_host_tags()
-    assert got == want
+    with pytest.raises(ValueError):
+        get_agent_host_tags()
 
     # clean up
     datadog_agent._reset_host_tags()
