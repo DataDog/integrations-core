@@ -155,6 +155,8 @@ integration/dns_check:
 - dns_check/**/*
 integration/docker_daemon:
 - docker_daemon/**/*
+integration/docusign:
+- docusign/**/*
 integration/dotnetclr:
 - dotnetclr/**/*
 integration/druid:
