@@ -1,5 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+cisco_sdwan.application.latency,gauge,,millisecond,,The latency in milliseconds by cloud application.,0,cisco_sdwan,,
+cisco_sdwan.application.loss,gauge,,percent,,The packet loss by cloud application.,0,cisco_sdwan,,
+cisco_sdwan.application.qoe,gauge,,,,The QOE score by cloud application.,0,cisco_sdwan,,
 cisco_sdwan.bfd_session.status,gauge,,,,"The status of the BFD session. The value is 1 if the session is up, 0 otherwise.",0,cisco_sdwan,,
+cisco_sdwan.bgp.neighbor,gauge,,,,"The status of each bgp neighbor. Constant metric equal to 1.",0,cisco_sdwan,,
 cisco_sdwan.control_connection.status,gauge,,,,"The status of the control connection. The value is 1 if the connection is up, 0 otherwise.",0,cisco_sdwan,,
 cisco_sdwan.cpu.usage,gauge,,percent,,Percentage of CPU currently being used.,0,cisco_sdwan,,
 cisco_sdwan.crash.count,count,,,,The number of crashes.,0,cisco_sdwan,,
