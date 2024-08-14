@@ -53,18 +53,15 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             'hostname_label': 'instance',
         }
 
+    @handle_error
     def _get_app_status(self, app_name):
         self.log.debug("Getting app status for %s", app_name)
         app_details_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}"
         response = self.http.get(app_details_endpoint)
-        try:
-            response.raise_for_status()
-            app = response.json()
-            app_status = app.get("status")
-            return app_status
-        except Exception:
-            self.log.info("Failed to collect app status for app %s", app_name)
-            return None
+        response.raise_for_status()
+        app = response.json()
+        app_status = app.get("status")
+        return app_status
 
     @handle_error
     def _submit_machine_guest_metrics(self, guest, tags, machine_id):

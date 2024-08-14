@@ -207,19 +207,19 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
     [
         pytest.param(
             {'http_error': {'/v1/apps/example-app-2': MockResponse(status_code=404)}},
-            ['Failed to collect app status for app example-app-2'],
+            ['RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 404'],
             id='one app',
         ),
         pytest.param(
             {
                 'http_error': {
                     '/v1/apps/example-app-1': MockResponse(status_code=404),
-                    '/v1/apps/example-app-2': MockResponse(status_code=404),
+                    '/v1/apps/example-app-2': MockResponse(status_code=500),
                 }
             },
             [
-                'Failed to collect app status for app example-app-2',
-                'Failed to collect app status for app example-app-1',
+                'RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 404',
+                'RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 500',
             ],
             id='two apps',
         ),
