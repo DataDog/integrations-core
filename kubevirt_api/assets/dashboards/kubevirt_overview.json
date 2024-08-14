@@ -6,7 +6,7 @@
       "id": 8821438356580436,
       "definition": {
         "title": "Introduction",
-        "banner_img": "https://i.imgur.com/GVCos8h.png",
+        "banner_img": "/static/images/logos/kubevirt_api_large.svg",
         "show_title": false,
         "type": "group",
         "layout_type": "ordered",
