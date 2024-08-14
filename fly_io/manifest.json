@@ -46,6 +46,9 @@
     },
     "monitors": {
       "app_suspended": "assets/monitors/app_suspended.json"
+    },
+    "dashboards": {
+      "Fly.io Overview ": "assets/dashboards/overview.json"
     }
   },
   "author": {

@@ -492,7 +492,7 @@ def get_log(transformers, name, **modifiers):
     """
     Send a log.
 
-    The required modifiers are `attributes` and `cursor`.
+    The only required modifier is `attributes`.
 
     For example, if you have this configuration:
 

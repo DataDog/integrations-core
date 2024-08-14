@@ -23,7 +23,7 @@ cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-4
 confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.5.0-20240806143151-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=08bb6b65e09b6d24b31cf60295888a7b14351d8ceaf0da1fb45fe5393f33c125
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-42.0.8-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=a0608251135d0e03111152e41f0cc2392d1e74e35703960d4190b2e0f4ca9c70
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
-ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.9.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=c6282b6134ef320f631fb17fd3b8ad3225ee44051d129bd5783b332adf0aae12
+ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=30d22faa574345c49f3de9306788b9b7b0adf3d60efe042328b71aa92599e41b
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.1.1-py3-none-any.whl#sha256=b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186
 deprecated @ https://agent-int-packages.datadoghq.com/external/deprecated/Deprecated-1.2.14-py2.py3-none-any.whl#sha256=6fac8b097794a90302bdbb17b9b815e732d3c4720583ff1b198499d78470466c
 dnspython @ https://agent-int-packages.datadoghq.com/external/dnspython/dnspython-2.6.1-py3-none-any.whl#sha256=5ef3b9680161f6fa89daf8ad451b5f1a33b18ae8a1c6778cdf4b43f08c0a6e50
@@ -110,12 +110,12 @@ s3transfer @ https://agent-int-packages.datadoghq.com/external/s3transfer/s3tran
 securesystemslib @ https://agent-int-packages.datadoghq.com/external/securesystemslib/securesystemslib-0.28.0-py3-none-any.whl#sha256=9e6b9abe36a511d4f52c759069db8f6f650362ba82d6efc7bc7466a458b3f499
 semver @ https://agent-int-packages.datadoghq.com/external/semver/semver-3.0.2-py3-none-any.whl#sha256=b1ea4686fe70b981f85359eda33199d60c53964284e0cfb4977d243e37cf4bf4
 service-identity @ https://agent-int-packages.datadoghq.com/external/service-identity/service_identity-24.1.0-py3-none-any.whl#sha256=a28caf8130c8a5c1c7a6f5293faaf239bbfb7751e4862436920ee6f2616f568a
-setuptools @ https://agent-int-packages.datadoghq.com/external/setuptools/setuptools-72.1.0-py3-none-any.whl#sha256=5a03e1860cf56bb6ef48ce186b0e557fdba433237481a9a625176c2831be15d1
+setuptools @ https://agent-int-packages.datadoghq.com/external/setuptools/setuptools-72.2.0-py3-none-any.whl#sha256=f11dd94b7bae3a156a95ec151f24e4637fb4fa19c878e4d191bfb8b2d82728c4
 simplejson @ https://agent-int-packages.datadoghq.com/external/simplejson/simplejson-3.19.2-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=4d36081c0b1c12ea0ed62c202046dca11438bee48dd5240b7c8de8da62c620e9
 six @ https://agent-int-packages.datadoghq.com/external/six/six-1.16.0-py2.py3-none-any.whl#sha256=8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254
 snowflake-connector-python @ https://agent-int-packages.datadoghq.com/external/snowflake-connector-python/snowflake_connector_python-3.12.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=60675fd83022daef40541d717d006695149c512b283e35741b61a4f48ba537e9
 sortedcontainers @ https://agent-int-packages.datadoghq.com/external/sortedcontainers/sortedcontainers-2.4.0-py2.py3-none-any.whl#sha256=a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0
-soupsieve @ https://agent-int-packages.datadoghq.com/external/soupsieve/soupsieve-2.5-py3-none-any.whl#sha256=eaa337ff55a1579b6549dc679565eac1e3d000563bcb1c8ab0d0fefbc0c2cdc7
+soupsieve @ https://agent-int-packages.datadoghq.com/external/soupsieve/soupsieve-2.6-py3-none-any.whl#sha256=e72c4ff06e4fb6e4b5a9f0f55fe6e81514581fca1515028625d0f299c602ccc9
 stevedore @ https://agent-int-packages.datadoghq.com/external/stevedore/stevedore-5.2.0-py3-none-any.whl#sha256=1c15d95766ca0569cad14cb6272d4d31dae66b011a929d7c18219c176ea1b5c9
 supervisor @ https://agent-int-packages.datadoghq.com/external/supervisor/supervisor-4.2.5-py2.py3-none-any.whl#sha256=2ecaede32fc25af814696374b79e42644ecaba5c09494c51016ffda9602d0f08
 tomlkit @ https://agent-int-packages.datadoghq.com/external/tomlkit/tomlkit-0.13.0-py3-none-any.whl#sha256=7075d3042d03b80f603482d69bf0c8f345c2b30e41699fd8883227f89972b264
@@ -129,4 +129,4 @@ vertica-python @ https://agent-int-packages.datadoghq.com/external/vertica-pytho
 websocket-client @ https://agent-int-packages.datadoghq.com/external/websocket-client/websocket_client-1.8.0-py3-none-any.whl#sha256=17b44cc997f5c498e809b22cdf2d9c7a9e71c02c8cc2b6c56e7c2d1239bfa526
 wrapt @ https://agent-int-packages.datadoghq.com/external/wrapt/wrapt-1.16.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=72554a23c78a8e7aa02abbd699d129eead8b147a23c56e08d08dfc29cfdddca1
 xmltodict @ https://agent-int-packages.datadoghq.com/external/xmltodict/xmltodict-0.13.0-py2.py3-none-any.whl#sha256=aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852
-zipp @ https://agent-int-packages.datadoghq.com/external/zipp/zipp-3.19.2-py3-none-any.whl#sha256=f091755f667055f2d02b32c53771a7a6c8b47e1fdbc4b72a8b9072b3eef8015c
+zipp @ https://agent-int-packages.datadoghq.com/external/zipp/zipp-3.20.0-py3-none-any.whl#sha256=58da6168be89f0be59beb194da1250516fdaa062ccebd30127ac65d30045e10d
