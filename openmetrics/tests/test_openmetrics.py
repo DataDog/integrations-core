@@ -35,6 +35,14 @@ instance_unavailable = {
     'ignore_connection_errors': True,
 }
 
+instance_go_metrics = {
+    'openmetrics_endpoint': 'http://localhost:10249/metrics',
+    'namespace': 'openmetrics',
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1', 'counter2'],
+    'collect_histogram_buckets': True,
+    'collect_default_metrics': True,
+}
+
 
 @pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
 def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
@@ -65,16 +73,6 @@ def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
         '{}.counter2.count'.format(CHECK_NAME),
         tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
         metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        '{}.go.memstats.frees.count'.format(CHECK_NAME),
-        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        '{}.go.memstats.heap.released_bytes'.format(CHECK_NAME),
-        tags=['endpoint:http://localhost:10249/metrics', 'timestamp:123', 'node:host2', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
     )
     aggregator.assert_all_metrics_covered()
 
@@ -108,16 +106,6 @@ def test_openmetrics_use_latest_spec(aggregator, dd_run_check, mock_http_respons
         tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
         metric_type=aggregator.MONOTONIC_COUNT,
     )
-    aggregator.assert_metric(
-        '{}.go.memstats.frees.count'.format(CHECK_NAME),
-        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        '{}.go.memstats.heap.released_bytes'.format(CHECK_NAME),
-        tags=['endpoint:http://localhost:10249/metrics', 'timestamp:123', 'node:host2', 'matched_label:foobar'],
-        metric_type=aggregator.GAUGE,
-    )
     aggregator.assert_all_metrics_covered()
 
     assert check.http.options['headers']['Accept'] == '*/*'
@@ -141,4 +129,47 @@ def test_openmetrics_endpoint_unavailable(aggregator, dd_run_check):
     dd_run_check(check)
 
     # Collects no metrics without error.
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
+def test_default_go_metrics(aggregator, dd_run_check, request, poll_mock_fixture):
+    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+
+    request.getfixturevalue(poll_mock_fixture)
+
+    check = OpenMetricsCheck('openmetrics', {}, [instance_go_metrics])
+    scraper = OpenMetricsScraper(check, instance_go_metrics)
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        '{}.go.memstats.frees.count'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        '{}.go.memstats.heap.released_bytes'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'timestamp:123', 'node:host2', 'matched_label:foobar'],
+        metric_type=aggregator.GAUGE,
+    )
+    aggregator.assert_metric(
+        '{}.renamed.metric1'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host1', 'flavor:test', 'matched_label:foobar'],
+        metric_type=aggregator.GAUGE,
+    )
+    aggregator.assert_metric(
+        '{}.metric2'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'timestamp:123', 'node:host2', 'matched_label:foobar'],
+        metric_type=aggregator.GAUGE,
+    )
+    aggregator.assert_metric(
+        '{}.counter1.count'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        '{}.counter2.count'.format(CHECK_NAME),
+        tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
     aggregator.assert_all_metrics_covered()
