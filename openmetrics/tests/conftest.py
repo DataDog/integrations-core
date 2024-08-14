@@ -41,6 +41,10 @@ def example_metrics_registry():
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
     c3 = Counter('go_memstats_frees_total', 'hits total', ['node'], registry=registry)
     c3.labels(node="host2").inc(42)
+    g2 = Gauge(
+        'go_memstats_heap_released_bytes', 'released bytes', ['matched_label', 'node', 'timestamp'], registry=registry
+    )
+    g2.labels(matched_label="foobar", node="host2", timestamp="123").set(12.2)
     return registry
 
 
