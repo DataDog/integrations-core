@@ -399,6 +399,7 @@ class VSphereAPI(object):
         entity_time = vim.event.EventFilterSpec.ByTime(beginTime=timestamp)
         query_filter = vim.event.EventFilterSpec(eventTypeId=VSAN_EVENT_IDS, time=entity_time)
         events = event_manager.QueryEvents(query_filter)
+        self.log.debug("Received %s vSAN events", len(events))
         return events
 
     @smart_retry
@@ -408,6 +409,7 @@ class VSphereAPI(object):
         health_metrics = []
         performance_metrics = []
         for cluster_reference, nested_ids in cluster_nested_elts.items():
+            self.log.debug("Querying vSAN metrics for cluster %s", cluster_reference.name)
             unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
             processed_health_metrics = {}
             group_id = unprocessed_health_metrics[0].groupId

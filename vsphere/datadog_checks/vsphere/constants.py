@@ -223,7 +223,6 @@ VSAN_EVENT_IDS = [
     'vsan.health.test.cloudhealth.diskusage.event',
     'vsan.health.test.cluster.consistentconfig.event',
     'vsan.health.test.network.hostdisconnected.event',
-    'vsan.health.test.network.hostdisconnected.event',
     'vsan.health.test.overallsummary.event',
     'vsan.health.test.perfsvc.perfsvcstatus.event',
     'vsan.health.test.physicaldisks.diskusage.event',

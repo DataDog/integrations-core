@@ -267,6 +267,7 @@ def test_get_new_events_with_fallback(realtime_instance):
         assert events == [event1, event3]
 
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="vSAN API is only available in Python 3")
 def test_vsan_metrics_api(realtime_instance):
     realtime_instance['get_vsan'] = True
 

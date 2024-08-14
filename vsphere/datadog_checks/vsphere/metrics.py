@@ -64,6 +64,13 @@ PERCENT_METRICS = {
     'vsanDomObj.readCacheHitRate.latest',
 }
 
+VSAN_PERCENT_METRICS = {
+    'congestion',
+    'coreUtilPct',
+    'pcpuUsedPct',
+    'pcpuUtilPct',
+}
+
 # All metrics that can be collected from VirtualMachines.
 VM_METRICS = {
     REALTIME: [
@@ -401,6 +408,59 @@ HOST_METRICS = {
         'virtualDisk.commandsAborted.sum',
     ],
     HISTORICAL: [],
+}
+
+VSAN_METRICS = {
+    'vsan.cluster.congestion',
+    'vsan.cluster.dedupRatio',
+    'vsan.cluster.example_cluster_metric',
+    'vsan.cluster.free',
+    'vsan.cluster.iopsRead',
+    'vsan.cluster.iopsWrite',
+    'vsan.cluster.latencyAvgRead',
+    'vsan.cluster.latencyAvgWrite',
+    'vsan.cluster.oio',
+    'vsan.cluster.savedByDedup',
+    'vsan.cluster.throughputRead',
+    'vsan.cluster.throughputWrite',
+    'vsan.cluster.total',
+    'vsan.cluster.used',
+    'vsan.disk.example_disk_metric',
+    'vsan.disk.ioCountDevRead',
+    'vsan.disk.ioCountDevWrite',
+    'vsan.disk.ioCountRead',
+    'vsan.disk.ioCountWrite',
+    'vsan.disk.iopsDevRead',
+    'vsan.disk.iopsDevWrite',
+    'vsan.disk.iopsRead',
+    'vsan.disk.iopsWrite',
+    'vsan.disk.latencyDevDAvg',
+    'vsan.disk.latencyDevGAvg',
+    'vsan.disk.latencyDevRead',
+    'vsan.disk.latencyDevWrite',
+    'vsan.disk.latencyRead',
+    'vsan.disk.latencyWrite',
+    'vsan.disk.throughputDevRead',
+    'vsan.disk.throughputDevWrite',
+    'vsan.host.clientCacheHitRate',
+    'vsan.host.clientCacheHits',
+    'vsan.host.congestion',
+    'vsan.host.coreUtilPct',
+    'vsan.host.example_host_metric',
+    'vsan.host.iopsRead',
+    'vsan.host.iopsUnmap',
+    'vsan.host.iopsWrite',
+    'vsan.host.latencyAvgRead',
+    'vsan.host.latencyAvgUnmap',
+    'vsan.host.latencyAvgWrite',
+    'vsan.host.oio',
+    'vsan.host.pcpuUsedPct',
+    'vsan.host.pcpuUtilPct',
+    'vsan.host.readCount',
+    'vsan.host.throughputRead',
+    'vsan.host.throughputUnmap',
+    'vsan.host.throughputWrite',
+    'vsan.host.writeCount',
 }
 
 # All metrics that can be collected from Datastores.
