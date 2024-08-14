@@ -80,7 +80,7 @@ cli = [
     "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
     "pydantic>=2.0.2",
-    "pysmi>=0.3.4",
+    "pysmi==0.3.4",
     "securesystemslib[crypto]==0.28.0",
     "semver>=2.13.0",
     "tabulate>=0.8.9",
@@ -91,7 +91,10 @@ cli = [
     # Move towncrier dependency to ddev once we migrate changelog-related commands.
     # We need at least v23.11.0, because it lets us release with empty changelogs:
     # The issue that is fixed: https://github.com/twisted/towncrier/issues/538
-    "towncrier>=23.11.0",
+    # v24.7 changed the way towncrier searches for template files and that broke us.
+    # We have to pin to 23.11.0 until the following issue is done:
+    # https://github.com/twisted/towncrier/issues/641
+    "towncrier==23.11.0",
     "twine>=1.11.0",
     "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml

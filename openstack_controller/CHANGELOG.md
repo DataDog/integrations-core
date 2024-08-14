@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.9.0 / 2024-08-09
+
+***Added***:
+
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 6.8.1 / 2024-07-24
+
+***Fixed***:
+
+* Fixed the heat endpoint for the Openstack Controller ([#17996](https://github.com/DataDog/integrations-core/pull/17996))
+
 ## 6.8.0 / 2024-06-21
 
 ***Added***:

@@ -37,6 +37,7 @@ class InstanceConfig(BaseModel):
     add_missing_keys: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    force_sha1: Optional[bool] = None
     host: str
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None

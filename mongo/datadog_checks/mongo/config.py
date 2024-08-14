@@ -103,6 +103,7 @@ class MongoConfig(object):
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
         self.cluster_name = instance.get('cluster_name', None)
         self._operation_samples_config = instance.get('operation_samples', {})
+        self._slow_operations_config = instance.get('slow_operations', {})
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
@@ -110,7 +111,11 @@ class MongoConfig(object):
         # MongoDB instance hostname override
         self.reported_database_hostname = instance.get('reported_database_hostname', None)
 
+        # MongoDB database auto-discovery, disabled by default
+        self.database_autodiscovery_config = self._get_database_autodiscovery_config(instance)
+
         # Generate tags for service checks and metrics
+        # TODO: service check and metric tags should be updated to be dynamic with auto-discovered databases
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
 
@@ -167,3 +172,53 @@ class MongoConfig(object):
                 self._operation_samples_config.get('explained_operations_per_hour_per_query', 10)
             ),
         }
+
+    @property
+    def slow_operations(self):
+        enabled = False
+        if self.dbm_enabled is True and self._slow_operations_config.get('enabled') is not False:
+            # if DBM is enabled and the operation metrics config is not explicitly disabled, then it is enabled
+            enabled = True
+        return {
+            'enabled': enabled,
+            'collection_interval': self._slow_operations_config.get('collection_interval', 10),
+            'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
+            'max_operations': int(self._slow_operations_config.get('max_operations', 1000)),
+            'explained_operations_cache_maxsize': int(
+                self._slow_operations_config.get('explained_operations_cache_maxsize', 5000)
+            ),
+            'explained_operations_per_hour_per_query': int(
+                self._slow_operations_config.get('explained_operations_per_hour_per_query', 10)
+            ),
+        }
+
+    def _get_database_autodiscovery_config(self, instance):
+        database_autodiscovery_config = instance.get('database_autodiscovery', {"enabled": False})
+        if database_autodiscovery_config['enabled']:
+            if self.db_name != 'admin':
+                # If database_autodiscovery is enabled, the `database` parameter should not be set
+                # because we want to monitor all databases. Unless the `database` parameter is set to 'admin'.
+                self.log.warning(
+                    "The `database` parameter should not be set when `database_autodiscovery` is enabled. "
+                    "The `database` parameter will be ignored."
+                )
+            if self.coll_names:
+                self.log.warning(
+                    "The `collections` parameter should not be set when `database_autodiscovery` is enabled. "
+                    "The `collections` parameter will be ignored."
+                )
+        if self.db_names:
+            # dbnames is deprecated and will be removed in a future version
+            self.log.warning(
+                "The `dbnames` parameter is deprecated and will be removed in a future version. "
+                "To monitor more databases, enable `database_autodiscovery` and use "
+                "`database_autodiscovery.include` instead."
+            )
+            include_list = [f"{db}$" for db in self.db_names]  # Append $ to each db name for exact match
+            if not database_autodiscovery_config['enabled']:
+                # if database_autodiscovery is not enabled, we should enable it
+                database_autodiscovery_config['enabled'] = True
+            if not database_autodiscovery_config.get('include'):
+                # if database_autodiscovery is enabled but include list is not set, set the include list
+                database_autodiscovery_config['include'] = include_list
+        return database_autodiscovery_config

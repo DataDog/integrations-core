@@ -434,6 +434,39 @@
               "layout": { "x": 4, "y": 3, "width": 2, "height": 3 }
             },
             {
+              "id": 5280464410126712,
+              "definition": {
+                "title": "Pods Running By Runtime Class",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                  {
+                    "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$statefulset,$daemonset,$job} by {kube_runtime_class}, 100, 'max', 'desc')",
+                    "conditional_formats": [
+                      {
+                        "comparator": ">",
+                        "palette": "white_on_red",
+                        "value": 2000
+                      },
+                      {
+                        "comparator": ">",
+                        "palette": "white_on_yellow",
+                        "value": 1500
+                      },
+                      {
+                        "comparator": "<=",
+                        "palette": "white_on_green",
+                        "value": 3000
+                      }
+                    ]
+                  }
+                ],
+                "custom_links": []
+              },
+              "layout": { "x": 6, "y": 3, "width": 2, "height": 3 }
+            },
+            {
               "id": 2421837657330594,
               "definition": {
                 "title": "Pods Status Phase",
@@ -491,7 +524,7 @@
                 },
                 "markers": []
               },
-              "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
+              "layout": { "x": 8, "y": 3, "width": 4, "height": 3 }
             }
           ]
         }
@@ -542,7 +575,7 @@
                         "name": "query3"
                       },
                       {
-                        "query": "sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}",
+                        "query": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}",
                         "data_source": "metrics",
                         "name": "query4"
                       }
@@ -625,7 +658,7 @@
                     "on_right_yaxis": false,
                     "queries": [
                       {
-                        "query": "sum:kubernetes.containers.state.waiting{$cluster,$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job} by {pod_name}",
+                        "query": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "data_source": "metrics",
                         "name": "query1"
                       }

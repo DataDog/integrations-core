@@ -632,6 +632,30 @@
         ]
     },
     {
+        "name": "mongodb.oplatencies.reads.latency.avg",
+        "type": 0,
+        "value": 2874788.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.writes.latency.avg",
+        "type": 0,
+        "value": 611.3,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.commands.latency.avg",
+        "type": 0,
+        "value": 8573.2,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.opcounters.commandps",
         "type": 1,
         "value": 7882.0,
@@ -1216,6 +1240,22 @@
         ]
     },
     {
+        "name": "mongodb.wiredtiger.cache.bytes_read_into_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.bytes_written_from_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.wiredtiger.cache.failed_eviction_of_pages_exceeding_the_in_memory_maximumps",
         "type": 1,
         "value": 12.0,
@@ -1257,6 +1297,14 @@
     },
     {
         "name": "mongodb.wiredtiger.cache.pages_read_into_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.pages_requested_from_cache",
         "type": 0,
         "value": 12.0,
         "tags": [

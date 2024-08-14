@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 1.5.0 / 2024-08-09
+
+***Added***:
+
+* Add new offering_price_estimate metric. Changed in Karpenter version 0.36.0 ([#18248](https://github.com/DataDog/integrations-core/pull/18248))
+
+## 1.4.1 / 2024-07-05 / Agent 7.55.0
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
 ## 1.4.0 / 2024-05-31
 
 ***Added***:

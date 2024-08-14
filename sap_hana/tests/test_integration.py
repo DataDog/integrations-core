@@ -15,12 +15,19 @@ from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-def test_check(aggregator, instance, dd_run_check):
+def test_check(aggregator, datadog_agent, instance, dd_run_check):
+    datadog_agent._config['logs_enabled'] = True
+
     check = SapHanaCheck('sap_hana', {}, [instance])
     _run_until_stable(dd_run_check, check, aggregator)
     aggregator.assert_service_check(CAN_CONNECT_SERVICE_CHECK, SapHanaCheck.OK)
     _assert_standard_metrics(aggregator, instance)
+    _assert_logs(check, datadog_agent)
     aggregator.assert_all_metrics_covered()
+
+    datadog_agent._sent_logs.clear()
+    dd_run_check(check)
+    datadog_agent.assert_logs(check.check_id, [])
 
 
 def test_check_invalid_schema(aggregator, instance, dd_run_check):
@@ -47,34 +54,6 @@ def test_check_invalid_schema(aggregator, instance, dd_run_check):
         assert "invalid schema name: UNKNOWN_SCHEMA" in call_args[0][2]
 
     assert check.log.error.call_count == 9
-
-
-def _run_until_stable(dd_run_check, check, aggregator, mock_log=False):
-    retries = 3
-    if mock_log:
-        check.log = mock.MagicMock()
-    dd_run_check(check)
-    while retries and connection_flaked(aggregator):
-        if mock_log:
-            check.log.reset_mock()
-        dd_run_check(check)
-        time.sleep(4 - retries)
-        retries -= 1
-
-
-def _assert_standard_metrics(aggregator, instance):
-    # Not all metrics are present in every check run
-    missing_metrics = []
-    for metric in metrics.STANDARD:
-        if metric in aggregator.metric_names:
-            aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))
-            aggregator.assert_metric_has_tag(metric, 'port:{}'.format(instance['port']))
-        else:
-            missing_metrics.append(metric)
-    assert len(missing_metrics) / len(metrics.STANDARD) < 0.1, 'Missing metrics: %s\nPresent metrics: %s' % (
-        missing_metrics,
-        aggregator.metric_names,
-    )
 
 
 @pytest.mark.parametrize(
@@ -108,3 +87,90 @@ def test_custom_queries(aggregator, dd_run_check, instance_custom_queries, custo
         )
 
     aggregator.assert_all_metrics_covered()
+
+
+def _run_until_stable(dd_run_check, check, aggregator, mock_log=False):
+    retries = 3
+    if mock_log:
+        check.log = mock.MagicMock()
+    dd_run_check(check)
+    while retries and connection_flaked(aggregator):
+        if mock_log:
+            check.log.reset_mock()
+        dd_run_check(check)
+        time.sleep(4 - retries)
+        retries -= 1
+
+
+def _assert_standard_metrics(aggregator, instance):
+    # Not all metrics are present in every check run
+    missing_metrics = []
+    for metric in metrics.STANDARD:
+        if metric in aggregator.metric_names:
+            aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))
+            aggregator.assert_metric_has_tag(metric, 'port:{}'.format(instance['port']))
+        else:
+            missing_metrics.append(metric)
+    assert len(missing_metrics) / len(metrics.STANDARD) < 0.1, 'Missing metrics: %s\nPresent metrics: %s' % (
+        missing_metrics,
+        aggregator.metric_names,
+    )
+
+
+def _assert_logs(check, datadog_agent):
+    datadog_agent.assert_logs(
+        check.check_id,
+        [
+            {
+                'application_name': 'python',
+                'application_user_name': ANY,
+                'audit_policy_name': 'USER_MANAGEMENT',
+                'event_action': 'CREATE USER',
+                'event_status': 'SUCCESSFUL',
+                'grantee': 'DATADOG',
+                'host': ANY,
+                'message': 'CREATE USER SUCCESSFUL',
+                'port': ANY,
+                'service_name': 'nameserver',
+                'statement_string': 'CREATE RESTRICTED USER datadog PASSWORD ***',
+                'statement_user_name': 'SYSTEM',
+                'status': 'INFO',
+                'timestamp': ANY,
+                'user_name': 'SYSTEM',
+            },
+            {
+                'application_name': 'python',
+                'application_user_name': ANY,
+                'audit_policy_name': 'USER_MANAGEMENT',
+                'event_action': 'ALTER USER',
+                'event_status': 'SUCCESSFUL',
+                'grantee': 'DATADOG',
+                'host': ANY,
+                'message': 'ALTER USER SUCCESSFUL',
+                'port': ANY,
+                'service_name': 'nameserver',
+                'statement_string': 'ALTER USER datadog ENABLE CLIENT CONNECT',
+                'statement_user_name': 'SYSTEM',
+                'status': 'INFO',
+                'timestamp': ANY,
+                'user_name': 'SYSTEM',
+            },
+            {
+                'application_name': 'python',
+                'application_user_name': ANY,
+                'audit_policy_name': 'USER_MANAGEMENT',
+                'event_action': 'ALTER USER',
+                'event_status': 'SUCCESSFUL',
+                'grantee': 'DATADOG',
+                'host': ANY,
+                'message': 'ALTER USER SUCCESSFUL',
+                'port': ANY,
+                'service_name': 'nameserver',
+                'statement_string': 'ALTER USER datadog DISABLE PASSWORD LIFETIME',
+                'statement_user_name': 'SYSTEM',
+                'status': 'INFO',
+                'timestamp': ANY,
+                'user_name': 'SYSTEM',
+            },
+        ],
+    )

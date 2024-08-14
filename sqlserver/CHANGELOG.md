@@ -2,7 +2,47 @@
 
 <!-- towncrier release notes start -->
 
-## 17.3.0 / 2024-05-31
+## 17.5.1 / 2024-08-13
+
+***Fixed***:
+
+* Directly collect the time offset for converting times in SQL Server Agent tables to epoch timestamp through a single, deterministic function. This method avoids calculating the offset as a difference between the server time and UTC time, which led to inaccurate offsets in some cases. ([#18292](https://github.com/DataDog/integrations-core/pull/18292))
+
+## 17.5.0 / 2024-08-09
+
+***Added***:
+
+* Added collection of SQL Server Agent jobs history and activity ([#17787](https://github.com/DataDog/integrations-core/pull/17787))
+
+***Fixed***:
+
+* Fix password obfuscation in OLE DB driver error message when one or more backslashes exist in the password. ([#18203](https://github.com/DataDog/integrations-core/pull/18203))
+
+## 17.4.1 / 2024-08-08
+
+***Fixed***:
+
+* Revert "[dbm] fix flapping sqlserver_version" ([#18249](https://github.com/DataDog/integrations-core/pull/18249))
+
+## 17.4.0 / 2024-07-05
+
+***Added***:
+
+* Adding schema collection to sqlserver
+  Schema data includes information about the tables, their columns, indexes, foreign keys, and partitions. ([#17258](https://github.com/DataDog/integrations-core/pull/17258))
+* Set sqlserver integration default odbc driver to agent embedded msodbcsql18 on Linux platform ([#17729](https://github.com/DataDog/integrations-core/pull/17729))
+* Update embedded odbc driver config odbcinist.ini to use msodbcsql 18.3.3.1 ([#17765](https://github.com/DataDog/integrations-core/pull/17765))
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+***Fixed***:
+
+* Filter query metrics by database_name if check is configured to a single non-master db ([#17717](https://github.com/DataDog/integrations-core/pull/17717))
+* [sqlserver] fix missing sqlserver_version ([#17750](https://github.com/DataDog/integrations-core/pull/17750))
+* Hyphen in database name support ([#17775](https://github.com/DataDog/integrations-core/pull/17775))
+* Upgrade `azure-identity` dependency ([#17862](https://github.com/DataDog/integrations-core/pull/17862))
+* Move sqlserver schema foreign key information to the dependent table. ([#17933](https://github.com/DataDog/integrations-core/pull/17933))
+
+## 17.3.0 / 2024-05-31 / Agent 7.55.0
 
 ***Added***:
 

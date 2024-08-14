@@ -18,6 +18,10 @@ coverage:
         target: 75
         flags:
         - aspdotnet
+      AWS_Neuron:
+        target: 75
+        flags:
+        - aws_neuron
       ActiveMQ_XML:
         target: 75
         flags:
@@ -206,6 +210,10 @@ coverage:
         target: 75
         flags:
         - fluentd
+      Fly.io:
+        target: 75
+        flags:
+        - fly_io
       FoundationDB:
         target: 75
         flags:
@@ -678,6 +686,14 @@ coverage:
         target: 75
         flags:
         - fluxcd
+      kyverno:
+        target: 75
+        flags:
+        - kyverno
+      tibco_ems:
+        target: 75
+        flags:
+        - tibco_ems
       vLLM:
         target: 75
         flags:
@@ -753,6 +769,11 @@ flags:
     paths:
     - avi_vantage/datadog_checks/avi_vantage
     - avi_vantage/tests
+  aws_neuron:
+    carryforward: true
+    paths:
+    - aws_neuron/datadog_checks/aws_neuron
+    - aws_neuron/tests
   azure_iot_edge:
     carryforward: true
     paths:
@@ -958,6 +979,11 @@ flags:
     paths:
     - fluxcd/datadog_checks/fluxcd
     - fluxcd/tests
+  fly_io:
+    carryforward: true
+    paths:
+    - fly_io/datadog_checks/fly_io
+    - fly_io/tests
   foundationdb:
     carryforward: true
     paths:
@@ -1128,6 +1154,11 @@ flags:
     paths:
     - kyototycoon/datadog_checks/kyototycoon
     - kyototycoon/tests
+  kyverno:
+    carryforward: true
+    paths:
+    - kyverno/datadog_checks/kyverno
+    - kyverno/tests
   lighttpd:
     carryforward: true
     paths:
@@ -1433,6 +1464,11 @@ flags:
     paths:
     - teradata/datadog_checks/teradata
     - teradata/tests
+  tibco_ems:
+    carryforward: true
+    paths:
+    - tibco_ems/datadog_checks/tibco_ems
+    - tibco_ems/tests
   tls:
     carryforward: true
     paths:

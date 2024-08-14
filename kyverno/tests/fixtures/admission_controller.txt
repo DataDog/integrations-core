@@ -1,0 +1,278 @@
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 4.275e-05
+go_gc_duration_seconds{quantile="0.25"} 5.5541e-05
+go_gc_duration_seconds{quantile="0.5"} 8.3709e-05
+go_gc_duration_seconds{quantile="0.75"} 0.000184543
+go_gc_duration_seconds{quantile="1"} 0.00282675
+go_gc_duration_seconds_sum 0.763286286
+go_gc_duration_seconds_count 3117
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 247
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.21.10"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.7677696e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 3.9614081856e+10
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 3.653476e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 2.81299728e+08
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 5.465512e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.7677696e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 2.1078016e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 2.9876224e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 112304
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 1.3238272e+07
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 5.095424e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.7192515440611184e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 2.81412032e+08
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 12000
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 615888
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 928872
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 3.1691144e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 2.033316e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 3.571712e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 3.571712e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 6.6622728e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 16
+# HELP http_server_duration Measures the duration of inbound HTTP requests.
+# TYPE http_server_duration histogram
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="0.005"} 0
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="0.01"} 0
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="0.025"} 0
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="0.05"} 0
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="0.1"} 0
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="0.25"} 515
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="0.5"} 2023
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="1"} 4269
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="2.5"} 4329
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="5"} 4332
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="10"} 4332
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="15"} 4332
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="20"} 4332
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="25"} 4332
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="30"} 4332
+http_server_duration_bucket{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0",le="+Inf"} 4332
+http_server_duration_sum{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0"} 2173.4379630000035
+http_server_duration_count{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0"} 4332
+# HELP http_server_request_size_total Measures the size of HTTP request messages.
+# TYPE http_server_request_size_total counter
+http_server_request_size_total{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0"} 9.914526e+06
+# HELP http_server_response_size_total Measures the size of HTTP response messages.
+# TYPE http_server_response_size_total counter
+http_server_response_size_total{http_method="POST",http_scheme="https",http_status_code="200",net_host_name="kyverno-svc.kyverno.svc",net_protocol_name="http",net_protocol_version="1.1",otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0"} 1.1019186e+07
+# HELP kyverno_client_queries_total can be used to track the number of client queries sent from Kyverno to the API-server
+# TYPE kyverno_client_queries_total counter
+kyverno_client_queries_total{client_type="apiserver",operation="get",otel_scope_name="kyverno",otel_scope_version="",resource_kind="CustomResourceDefinition",resource_namespace=""} 2
+kyverno_client_queries_total{client_type="kubeclient",operation="create",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Lease",resource_namespace="kyverno"} 2
+kyverno_client_queries_total{client_type="kubeclient",operation="create",otel_scope_name="kyverno",otel_scope_version="",resource_kind="MutatingWebhookConfiguration",resource_namespace=""} 3
+kyverno_client_queries_total{client_type="kubeclient",operation="create",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Secret",resource_namespace="kyverno"} 2
+kyverno_client_queries_total{client_type="kubeclient",operation="create",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ValidatingWebhookConfiguration",resource_namespace=""} 4
+kyverno_client_queries_total{client_type="kubeclient",operation="get",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Lease",resource_namespace="kyverno"} 21572
+kyverno_client_queries_total{client_type="kubeclient",operation="get",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Secret",resource_namespace="kyverno"} 8694
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ClusterRole",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ClusterRoleBinding",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ConfigMap",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ConfigMap",resource_namespace="kyverno"} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Deployment",resource_namespace="kyverno"} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Lease",resource_namespace="kyverno"} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="MutatingWebhookConfiguration",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Namespace",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="RoleBinding",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Secret",resource_namespace="kyverno"} 3
+kyverno_client_queries_total{client_type="kubeclient",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ValidatingWebhookConfiguration",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="rest_client",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Discovery",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kubeclient",operation="server_groups",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Discovery",resource_namespace=""} 49
+kyverno_client_queries_total{client_type="kubeclient",operation="server_resources_for_group_version",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Discovery",resource_namespace=""} 1568
+kyverno_client_queries_total{client_type="kubeclient",operation="update",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Lease",resource_namespace="kyverno"} 25903
+kyverno_client_queries_total{client_type="kubeclient",operation="update",otel_scope_name="kyverno",otel_scope_version="",resource_kind="MutatingWebhookConfiguration",resource_namespace=""} 4547
+kyverno_client_queries_total{client_type="kubeclient",operation="update",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ValidatingWebhookConfiguration",resource_namespace=""} 4547
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ClusterRole",resource_namespace=""} 98
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ClusterRoleBinding",resource_namespace=""} 98
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ConfigMap",resource_namespace=""} 98
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ConfigMap",resource_namespace="kyverno"} 96
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Deployment",resource_namespace="kyverno"} 99
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Lease",resource_namespace="kyverno"} 95
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="MutatingWebhookConfiguration",resource_namespace=""} 96
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Namespace",resource_namespace=""} 96
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="RoleBinding",resource_namespace=""} 95
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Secret",resource_namespace="kyverno"} 290
+kyverno_client_queries_total{client_type="kubeclient",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ValidatingWebhookConfiguration",resource_namespace=""} 100
+kyverno_client_queries_total{client_type="kyverno",operation="get",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ClusterPolicy",resource_namespace=""} 194832
+kyverno_client_queries_total{client_type="kyverno",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ClusterPolicy",resource_namespace=""} 2
+kyverno_client_queries_total{client_type="kyverno",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="GlobalContextEntry",resource_namespace=""} 2
+kyverno_client_queries_total{client_type="kyverno",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Policy",resource_namespace=""} 2
+kyverno_client_queries_total{client_type="kyverno",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="PolicyException",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kyverno",operation="list",otel_scope_name="kyverno",otel_scope_version="",resource_kind="UpdateRequest",resource_namespace=""} 1
+kyverno_client_queries_total{client_type="kyverno",operation="update_status",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ClusterPolicy",resource_namespace=""} 97416
+kyverno_client_queries_total{client_type="kyverno",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="ClusterPolicy",resource_namespace=""} 195
+kyverno_client_queries_total{client_type="kyverno",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="GlobalContextEntry",resource_namespace=""} 191
+kyverno_client_queries_total{client_type="kyverno",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="Policy",resource_namespace=""} 190
+kyverno_client_queries_total{client_type="kyverno",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="PolicyException",resource_namespace=""} 96
+kyverno_client_queries_total{client_type="kyverno",operation="watch",otel_scope_name="kyverno",otel_scope_version="",resource_kind="UpdateRequest",resource_namespace=""} 98
+# HELP kyverno_controller_reconcile_total can be used to track number of reconciliation cycles
+# TYPE kyverno_controller_reconcile_total counter
+kyverno_controller_reconcile_total{controller_name="certmanager-controller",otel_scope_name="kyverno",otel_scope_version=""} 5
+kyverno_controller_reconcile_total{controller_name="config-controller",otel_scope_name="kyverno",otel_scope_version=""} 1
+kyverno_controller_reconcile_total{controller_name="exception-webhook-controller",otel_scope_name="kyverno",otel_scope_version=""} 68
+kyverno_controller_reconcile_total{controller_name="global-context-webhook-controller",otel_scope_name="kyverno",otel_scope_version=""} 68
+kyverno_controller_reconcile_total{controller_name="metrics-config-controller",otel_scope_name="kyverno",otel_scope_version=""} 1
+kyverno_controller_reconcile_total{controller_name="policycache-controller",otel_scope_name="kyverno",otel_scope_version=""} 209
+kyverno_controller_reconcile_total{controller_name="webhook-controller",otel_scope_name="kyverno",otel_scope_version=""} 9012
+# HELP kyverno_http_requests_duration_seconds can be used to track the latencies (in seconds) associated with the entire individual http request.
+# TYPE kyverno_http_requests_duration_seconds histogram
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="0.005"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="0.01"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="0.025"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="0.05"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="0.1"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="0.25"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="0.5"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="1"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="2.5"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="5"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="10"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="15"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="20"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="25"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="30"} 4332
+kyverno_http_requests_duration_seconds_bucket{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version="",le="+Inf"} 4332
+kyverno_http_requests_duration_seconds_sum{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version=""} 1.7992437500000007
+kyverno_http_requests_duration_seconds_count{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version=""} 4332
+# HELP kyverno_http_requests_total can be used to track the number of http requests
+# TYPE kyverno_http_requests_total counter
+kyverno_http_requests_total{http_method="POST",http_url="/verifymutate?timeout=10s",otel_scope_name="kyverno",otel_scope_version=""} 4332
+# HELP kyverno_policy_changes_total can be used to track all the changes associated with the Kyverno policies present on the cluster such as creation, updates and deletions
+# TYPE kyverno_policy_changes_total counter
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="disallow-capabilities",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="disallow-host-namespaces",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="disallow-host-path",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="disallow-host-ports",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="disallow-host-process",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="disallow-privileged-containers",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="disallow-proc-mount",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="disallow-selinux",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="restrict-apparmor-profiles",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="restrict-seccomp",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+kyverno_policy_changes_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_change_type="created",policy_name="restrict-sysctls",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit"} 1
+# HELP kyverno_policy_rule_info_total can be used to track the info of the rules or/and policies present in the cluster. 0 means the rule doesn't exist and has been deleted, 1 means the rule is currently existent in the cluster
+# TYPE kyverno_policy_rule_info_total gauge
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-capabilities",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="adding-capabilities",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-capabilities",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-adding-capabilities",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-capabilities",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-adding-capabilities",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-namespaces",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-host-namespaces",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-namespaces",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-host-namespaces",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-namespaces",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="host-namespaces",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-path",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-host-path",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-path",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-host-path",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-path",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="host-path",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-ports",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-host-ports-none",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-ports",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-host-ports-none",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-ports",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="host-ports-none",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-process",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-host-process-containers",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-process",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-host-process-containers",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-host-process",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="host-process-containers",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-privileged-containers",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-privileged-containers",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-privileged-containers",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-privileged-containers",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-privileged-containers",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="privileged-containers",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-proc-mount",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-check-proc-mount",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-proc-mount",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-check-proc-mount",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-proc-mount",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="check-proc-mount",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-selinux",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-selinux-type",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-selinux",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-selinux-user-role",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-selinux",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-selinux-type",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-selinux",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-selinux-user-role",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-selinux",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="selinux-type",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="disallow-selinux",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="selinux-user-role",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-apparmor-profiles",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="app-armor",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-apparmor-profiles",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-app-armor",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-apparmor-profiles",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-app-armor",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-seccomp",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-check-seccomp",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-seccomp",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-check-seccomp",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-seccomp",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="check-seccomp",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-sysctls",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-check-sysctls",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-sysctls",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="autogen-cronjob-check-sysctls",rule_type="validate",status_ready="true"} 1
+kyverno_policy_rule_info_total{otel_scope_name="kyverno",otel_scope_version="",policy_background_mode="true",policy_name="restrict-sysctls",policy_namespace="-",policy_type="cluster",policy_validation_mode="audit",rule_name="check-sysctls",rule_type="validate",status_ready="true"} 1
+# HELP otel_scope_info Instrumentation Scope metadata
+# TYPE otel_scope_info gauge
+otel_scope_info{otel_scope_name="go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",otel_scope_version="0.49.0"} 1
+otel_scope_info{otel_scope_name="kyverno",otel_scope_version=""} 1
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 428.43
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 11
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 1.2783616e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.71920821207e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 5.652430848e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 0
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0

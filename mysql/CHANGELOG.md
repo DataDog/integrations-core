@@ -2,7 +2,37 @@
 
 <!-- towncrier release notes start -->
 
-## 12.5.1 / 2024-06-11
+## 12.7.0 / 2024-08-09
+
+***Added***:
+
+* Adding databases (schemas) data collection to MySQL
+  These data include information about the tables, their columns, indexes, foreign keys, and partitions. ([#17916](https://github.com/DataDog/integrations-core/pull/17916))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+***Fixed***:
+
+* Fixed group replication metrics for MySQL version < 8.0.2 ([#18024](https://github.com/DataDog/integrations-core/pull/18024))
+
+## 12.6.1 / 2024-07-24
+
+***Fixed***:
+
+* Revert the default 10s mysql connection read_timeout ([#18097](https://github.com/DataDog/integrations-core/pull/18097))
+
+## 12.6.0 / 2024-07-05
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+***Fixed***:
+
+* Fixed the MySQL integration to correctly catch and handle errors raised by the connection attempt ([#17872](https://github.com/DataDog/integrations-core/pull/17872))
+* Fixed a bug in MySQL integration when trying to deconstruct None return ([#17873](https://github.com/DataDog/integrations-core/pull/17873))
+* Fix metadata table source for MySQL 5.6 ([#17875](https://github.com/DataDog/integrations-core/pull/17875))
+
+## 12.5.1 / 2024-06-11 / Agent 7.55.0
 
 ***Fixed***:
 

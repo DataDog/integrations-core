@@ -2,7 +2,22 @@
 
 <!-- towncrier release notes start -->
 
-## 2.8.0 / 2024-05-31
+## 2.10.0 / 2024-08-09
+
+***Added***:
+
+* [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
+* [NDM] [Cisco ACI] Add common NDM tags to metrics ([#18017](https://github.com/DataDog/integrations-core/pull/18017))
+* [NDM] [Cisco ACI] Add config flag for enabling sending metadata to NDM ([#18099](https://github.com/DataDog/integrations-core/pull/18099))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 2.9.0 / 2024-07-05
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+## 2.8.0 / 2024-05-31 / Agent 7.55.0
 
 ***Added***:
 

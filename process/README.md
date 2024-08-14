@@ -21,10 +21,10 @@ While there's no standard default check configuration, here's an example `proces
 ```yaml
 init_config:
 instances:
-- name: ssh
-  search_string:
-    - ssh
-    - sshd
+  - name: ssh
+    search_string:
+      - ssh
+      - sshd
 ```
 
 **Note**: After you make configuration changes, make sure you [restart the Agent][4].

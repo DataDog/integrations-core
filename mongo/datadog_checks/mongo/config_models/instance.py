@@ -42,6 +42,18 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DatabaseAutodiscovery(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+    max_databases: Optional[int] = None
+    refresh_interval: Optional[int] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -60,6 +72,16 @@ class OperationSamples(BaseModel):
     enabled: Optional[bool] = None
 
 
+class SlowOperations(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_operations: Optional[float] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -74,6 +96,7 @@ class InstanceConfig(BaseModel):
     connection_scheme: Optional[str] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database: Optional[str] = None
+    database_autodiscovery: Optional[DatabaseAutodiscovery] = None
     database_instance_collection_interval: Optional[float] = None
     dbm: Optional[bool] = None
     dbnames: Optional[tuple[str, ...]] = None
@@ -90,6 +113,7 @@ class InstanceConfig(BaseModel):
     reported_database_hostname: Optional[str] = None
     server: Optional[str] = None
     service: Optional[str] = None
+    slow_operations: Optional[SlowOperations] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls: Optional[bool] = None

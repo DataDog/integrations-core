@@ -2,7 +2,54 @@
 
 <!-- towncrier release notes start -->
 
-## 36.8.0 / 2024-06-13
+## 36.13.0 / 2024-08-09
+
+***Added***:
+
+* Combine streams to single pipe ([#18273](https://github.com/DataDog/integrations-core/pull/18273))
+* Bump the ddtrace version to 2.9.3 ([#18275](https://github.com/DataDog/integrations-core/pull/18275))
+* Add `log` transformer to the QueryManager ([#18278](https://github.com/DataDog/integrations-core/pull/18278))
+
+## 36.12.0 / 2024-08-06
+
+***Added***:
+
+* Enforce format of timestamp logs attribute ([#18218](https://github.com/DataDog/integrations-core/pull/18218))
+
+***Fixed***:
+
+* Ensures that 'should_bypass_proxy' correctly considers unix:/// URLs ([#18119](https://github.com/DataDog/integrations-core/pull/18119))
+
+## 36.11.0 / 2024-08-06
+
+***Added***:
+
+* Log invalid line when failing to parse OpenMetrics response ([#17514](https://github.com/DataDog/integrations-core/pull/17514))
+* Support log submission from checks ([#18019](https://github.com/DataDog/integrations-core/pull/18019))
+* Allow untyped metrics that we coerce to `counter` to be collected regardless if they have `_total` or not. ([#18054](https://github.com/DataDog/integrations-core/pull/18054))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 36.10.0 / 2024-07-11
+
+***Added***:
+
+* [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
+
+## 36.9.0 / 2024-07-05
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+
+***Fixed***:
+
+* Fix rate limiter in sync mode of DBMAsync job. Prior to this change, the DBMAsync job would not take into account the time of the job execution when throttling by the collection interval. ([#17893](https://github.com/DataDog/integrations-core/pull/17893))
+
+## 36.8.0 / 2024-06-13 / Agent 7.55.0
 
 ***Added***:
 

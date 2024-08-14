@@ -13,7 +13,8 @@
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
-      "Supported OS::Windows"
+      "Supported OS::Windows",
+      "Offering::Integration"
     ]
   },
   "author": {

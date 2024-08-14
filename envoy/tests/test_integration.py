@@ -18,7 +18,12 @@ from .common import (
     requires_new_environment,
 )
 
-pytestmark = [requires_new_environment, pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+pytestmark = [
+    requires_new_environment,
+    pytest.mark.integration,
+    pytest.mark.usefixtures('dd_environment'),
+    pytest.mark.flaky,
+]
 
 
 SKIP_TAG_ASSERTION = [

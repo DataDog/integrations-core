@@ -35,9 +35,22 @@ class MockedCollection(object):
             with open(os.path.join(HERE, "fixtures", "system.replset"), 'r') as f:
                 content = json.load(f, object_hook=json_util.object_hook)
                 self.find_one = MagicMock(return_value=content)
-        else:
-            with open(os.path.join(HERE, "fixtures", f"indexStats-{coll_name}"), 'r') as f:
-                self.aggregate = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
+        elif coll_name == 'system.profile':
+            with open(os.path.join(HERE, "fixtures", "system.profile"), 'r') as f:
+                content = json.load(f, object_hook=json_util.object_hook)
+
+                def mocked_sort(*args, **kwargs):
+                    return content
+
+                self.find = MagicMock(return_value=MagicMock(sort=mocked_sort))
+
+    def aggregate(self, pipeline, session=None, **kwargs):
+        if '$indexStats' in pipeline[0]:
+            with open(os.path.join(HERE, "fixtures", f"$indexStats-{self._coll_name}"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
+        elif '$collStats' in pipeline[0]:
+            with open(os.path.join(HERE, "fixtures", f"$collStats-{self._coll_name}"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
 
 
 class MockedDB(object):
@@ -50,8 +63,8 @@ class MockedDB(object):
 
     def command(self, command, *args, **_):
         filename = command
-        if command == "dbstats":
-            filename += f"-{self._db_name}"
+        if "dbStats" in command:
+            filename = f"dbstats-{self._db_name}"
         elif command == "collstats":
             coll_name = args[0]
             filename += f"-{coll_name}"
@@ -60,10 +73,18 @@ class MockedDB(object):
         elif command in ("find", "count", "aggregate"):
             # At time of writing, those commands only are for custom queries.
             filename = f"custom-query-{command}"
-        elif command in ("explain"):
+        elif command == "explain":
             filename = f"explain-{self.deployment}"
+        elif command == "profile":
+            filename = f"profile-{self._db_name}"
+        elif command == "getLog":
+            filename = f"getLog-{self.deployment}"
         with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
+
+    def list_collection_names(self, session=None, filter=None, comment=None, **kwargs):
+        with open(os.path.join(HERE, "fixtures", "list_collection_names"), 'r') as f:
+            return json.load(f)
 
     def aggregate(self, pipeline, session=None, **kwargs):
         if pipeline[0] == {'$currentOp': {'allUsers': True}}:
