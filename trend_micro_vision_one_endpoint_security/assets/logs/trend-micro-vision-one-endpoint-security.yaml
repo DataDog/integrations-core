@@ -105,8 +105,8 @@ facets:
     source: log
     type: double
     unit:
-      name: byte
       family: bytes
+      name: byte
   - facetType: range
     groups:
       - Trend Micro Vision One Endpoint Security
