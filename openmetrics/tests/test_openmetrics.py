@@ -43,6 +43,17 @@ instance_go_metrics = {
     'collect_default_metrics': True,
 }
 
+instance_wrong_metric_names = {
+    'openmetrics_endpoint': 'http://localhost:10249/metrics',
+    'namespace': 'openmetrics',
+    'metrics': [
+        {'metric_not_exposed_by_this_endpoint': 'renamed.metric'},
+        'misspelled_custom_metric',
+        'imaginary_metric',
+    ],
+    'collect_histogram_buckets': True,
+}
+
 
 @pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
 def test_openmetrics(aggregator, dd_run_check, request, poll_mock_fixture):
@@ -134,12 +145,10 @@ def test_openmetrics_endpoint_unavailable(aggregator, dd_run_check):
 
 @pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
 def test_default_go_metrics(aggregator, dd_run_check, request, poll_mock_fixture):
-    from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 
     request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_go_metrics])
-    scraper = OpenMetricsScraper(check, instance_go_metrics)
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -172,4 +181,16 @@ def test_default_go_metrics(aggregator, dd_run_check, request, poll_mock_fixture
         tags=['endpoint:http://localhost:10249/metrics', 'node:host2'],
         metric_type=aggregator.MONOTONIC_COUNT,
     )
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
+def test_wrong_names_in_config_not_collected(aggregator, dd_run_check, request, poll_mock_fixture):
+
+    request.getfixturevalue(poll_mock_fixture)
+
+    check = OpenMetricsCheck('openmetrics', {}, [instance_wrong_metric_names])
+    dd_run_check(check)
+
+    # Since the endpoint is not exposing metrics with these names, we don't expect to collect anything here
     aggregator.assert_all_metrics_covered()
