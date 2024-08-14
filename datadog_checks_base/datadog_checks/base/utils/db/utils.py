@@ -198,7 +198,9 @@ def get_agent_host_tags():
             if isinstance(value, list):
                 result.extend(value)
             else:
-                raise ValueError('Failed to parse {} tags from the agent host because {} is not a list'.format(key, value))
+                raise ValueError(
+                    'Failed to parse {} tags from the agent host because {} is not a list'.format(key, value)
+                )
     except Exception as e:
         raise ValueError('Failed to parse tags from the agent host: {}. Error: {}'.format(host_tags, str(e)))
     return result
