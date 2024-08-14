@@ -50,6 +50,7 @@ instance_wrong_metric_names = {
         {'metric_not_exposed_by_this_endpoint': 'renamed.metric'},
         'misspelled_custom_metric',
         'imaginary_metric',
+        '{}.go.memstats.heap.released_bytes'.format(CHECK_NAME), 
     ],
     'collect_histogram_buckets': True,
 }
