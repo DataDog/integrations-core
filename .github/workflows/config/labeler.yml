@@ -69,6 +69,8 @@ integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
+integration/aws_neuron:
+- aws_neuron/**/*
 integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
@@ -181,6 +183,8 @@ integration/fluentd:
 - fluentd/**/*
 integration/fluxcd:
 - fluxcd/**/*
+integration/fly_io:
+- fly_io/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/gearmand:
@@ -481,6 +485,8 @@ integration/teradata:
 - teradata/**/*
 integration/terraform:
 - terraform/**/*
+integration/tibco_ems:
+- tibco_ems/**/*
 integration/tls:
 - tls/**/*
 integration/tokumx:
