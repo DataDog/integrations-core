@@ -363,7 +363,7 @@ vsphere.vsan.disk.latencyWrite,gauge,,millisecond,,Total write latency on the VS
 vsphere.vsan.disk.throughputDevRead,gauge,,kibibyte,second,Read throughput from the VSAN device,0,vsphere,vsan disk throughputDevRead,
 vsphere.vsan.disk.throughputDevWrite,gauge,,kibibyte,second,Write throughput to the VSAN device,0,vsphere,vsan disk throughputDevWrite,
 vsphere.vsan.host.clientCacheHitRate,gauge,,percent,,Cache hit rate on the VSAN host client,0,vsphere,vsan host clientCacheHitRate,
-vsphere.vsan.host.clientCacheHits,gauge,,count,,Cache hits on the VSAN host client,0,vsphere,vsan host clientCacheHits,
+vsphere.vsan.host.clientCacheHits,gauge,,occurrence,,Cache hits on the VSAN host client,0,vsphere,vsan host clientCacheHits,
 vsphere.vsan.host.congestion,gauge,,percent,,Congestion percentage on the VSAN host,0,vsphere,vsan host congestion,
 vsphere.vsan.host.coreUtilPct,gauge,,percent,,Core utilization percentage on the VSAN host,0,vsphere,vsan host coreUtilPct,
 vsphere.vsan.host.iopsRead,gauge,,operation,,Total read IOPS on the VSAN host,0,vsphere,vsan host iopsRead,
