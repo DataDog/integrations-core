@@ -186,12 +186,12 @@ def test_default_go_metrics(aggregator, dd_run_check, request, poll_mock_fixture
 
 
 @pytest.mark.parametrize('poll_mock_fixture', ['prometheus_poll_mock', 'openmetrics_poll_mock'])
-def test_wrong_names_in_config_not_collected(aggregator, dd_run_check, request, poll_mock_fixture):
+def test_default_go_metrics_not_collected_if_disabled(aggregator, dd_run_check, request, poll_mock_fixture):
 
     request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_wrong_metric_names])
     dd_run_check(check)
 
-    # Since the endpoint is not exposing metrics with these names, we don't expect to collect anything here
+    # Default go metric collection is not enabled, we don't expect to collect anything here
     aggregator.assert_all_metrics_covered()
