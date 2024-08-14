@@ -195,12 +195,12 @@ def get_agent_host_tags():
     try:
         tags_dict = json.loads(host_tags) or {}
     except Exception as e:
-        raise ValueError(f"Failed to parse tags from the agent host: {host_tags}. Error: {e}.")
+        raise ValueError('Failed to parse tags from the agent host: {}. Error: {}'.format(host_tags, str(e)))
     for key, value in tags_dict.items():
         if isinstance(value, list):
             result.extend(value)
         else:
-            raise ValueError(f"Failed to parse {key} tags from the agent host because {value} is not a list")
+            raise ValueError('Failed to parse {} tags from the agent host because {} is not a list'.format(key, value))
     return result
 
 
