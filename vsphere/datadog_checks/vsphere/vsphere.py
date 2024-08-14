@@ -562,7 +562,7 @@ class VSphereCheck(AgentCheck):
 
     def query_vsan_metrics(self, starting_time):
         # we seek to make 1 call per cluster since the cluster id needs to be passed in the perf manager
-        # {cluster_reference: set([cluster_id, host1_id, host2_id, host1disk1_id, host1disk2_id, ...])}
+        # {cluster_reference: [cluster_id, host1_id, host2_id, host1disk1_id, host1disk2_id, ...]}
         cluster_nested_elts = {}
         entity_ref_ids = {}
         entity_ref_ids['cluster'] = ['cluster-domclient:', 'vsan-cluster-capacity:']
@@ -579,7 +579,6 @@ class VSphereCheck(AgentCheck):
                 id_to_tags[cluster_uuid] = {1: cluster.name, 0: 'cluster'}
                 for host in cluster.host:
                     host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
-                    cluster_uuid = cluster.configurationEx.vsanConfigInfo.defaultConfig.uuid
                     if cluster_uuid not in cluster_nested_elts.keys():
                         cluster_nested_elts[cluster] = [cluster_uuid]
                     cluster_nested_elts[cluster].append(host_uuid)

@@ -265,3 +265,47 @@ def test_get_new_events_with_fallback(realtime_instance):
 
         events = api.get_new_events(start_time=dt.datetime.now())
         assert events == [event1, event3]
+
+def test_vsan_metrics_api(realtime_instance):
+    realtime_instance['get_vsan'] = True
+
+    with patch('datadog_checks.vsphere.api.connect'):
+        with patch('pyVmomi.vim.cluster.VsanPerformanceManager') as MockVsanPerformanceManager:
+            config = VSphereConfig(realtime_instance, {}, MagicMock())
+            api = VSphereAPI(config, MagicMock())
+            folder = api._conn.content.rootFolder
+            folder.name = 'root-folder'
+            cluster = folder.CreateClusterEx(name='a')
+            cluster_nested_elts = {
+                cluster: ['nested-id-1', 'nested-id-2']
+            }
+            entity_ref_ids = {
+                'type1': ['entity-1'],
+                'type2': ['entity-2']
+            }
+            id_to_tags = {
+                'nested-id-1': ['type1'],
+                'nested-id-2': ['type2']
+            }
+            starting_time = dt.datetime(2024, 1, 1)
+
+            mock_vsan_perf_manager = MockVsanPerformanceManager.return_value
+            mock_vsan_perf_manager.QueryClusterHealth.return_value = [
+                MagicMock(groupId='group-1', groupHealth='green', groupTests=[
+                    MagicMock(testId='test.1', testHealth='green'),
+                    MagicMock(testId='test.2', testHealth='yellow')
+                ])
+            ]
+            mock_vsan_perf_manager.QueryVsanPerf.return_value = [
+                MagicMock(entityRefId="cluster-domclient:nested-id-1", value=[
+                    MagicMock(metricId=MagicMock(dynamicProperty=[]))
+                ])
+            ]
+            health_metrics, performance_metrics = api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
+
+            assert len(health_metrics) == 1
+            assert 'vsphere.vsan.cluster.health.count' in health_metrics[0]
+            assert 'vsphere.vsan.cluster.health.1.count' in health_metrics[0]
+            assert 'vsphere.vsan.cluster.health.2.count' in health_metrics[0]
+            assert len(performance_metrics) == 1
+            assert len(performance_metrics[0]) == 1
