@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.8.1 / 2024-08-13
+
+***Fixed***:
+
+* Fix missing metrics `num_yields` and `response_length` for slow operations collected from logs. ([#18305](https://github.com/DataDog/integrations-core/pull/18305))
+
 ## 6.8.0 / 2024-08-09
 
 ***Added***:
