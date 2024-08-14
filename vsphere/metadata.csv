@@ -334,7 +334,7 @@ vsphere.vmop.numUnregister.latest,gauge,,operation,,Number of virtual machine un
 vsphere.vmop.numVMotion.latest,gauge,,operation,,Number of migrations with vMotion (host change operations for powered-on VMs),0,vsphere,vmop numVMotion,
 vsphere.vmop.numXVMotion.latest,gauge,,operation,,Number of host and datastore change operations for powered-on and suspended virtual machines,0,vsphere,vmop numXVMotion,
 vsphere.vsan.cluster.congestion,gauge,,percent,,Congestion percentage in the VSAN cluster,0,vsphere,vsan cluster congestion,
-vsphere.vsan.cluster.dedupRatio,gauge,,ratio,,Deduplication ratio in the VSAN cluster,0,vsphere,vsan cluster dedupRatio,
+vsphere.vsan.cluster.dedupRatio,gauge,,,,Deduplication ratio in the VSAN cluster,0,vsphere,vsan cluster dedupRatio,
 vsphere.vsan.cluster.free,gauge,,kibibyte,,Free capacity of the VSAN cluster,0,vsphere,vsan cluster free,
 vsphere.vsan.cluster.iopsRead,gauge,,operation,,Total read IOPS in the VSAN cluster,0,vsphere,vsan cluster iopsRead,
 vsphere.vsan.cluster.iopsWrite,gauge,,operation,,Total write IOPS in the VSAN cluster,0,vsphere,vsan cluster iopsWrite,
