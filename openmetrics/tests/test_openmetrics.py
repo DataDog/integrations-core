@@ -51,6 +51,7 @@ instance_wrong_metric_names = {
         'misspelled_custom_metric',
         'imaginary_metric',
         '{}.go.memstats.heap.released_bytes'.format(CHECK_NAME), 
+        '{}.go.memstats.frees.count'.format(CHECK_NAME),
     ],
     'collect_histogram_buckets': True,
 }
