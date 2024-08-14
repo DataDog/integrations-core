@@ -1,0 +1,42 @@
+{
+    "name": "Trend Micro Vision One Endpoint Security alert: Multiple high-severity files detected in the same path on a single host",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "source:trend-micro-vision-one-endpoint-security"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "",
+            "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware @risk_level:High ",
+            "groupByFields": [
+                "@filePath",
+                "@source_host_name"
+            ],
+            "distinctFields": [
+                "@file_name"
+            ],
+            "aggregation": "cardinality"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "a > 1",
+            "name": "",
+            "status": "High",
+            "notifications": []
+        }
+    ]
+}

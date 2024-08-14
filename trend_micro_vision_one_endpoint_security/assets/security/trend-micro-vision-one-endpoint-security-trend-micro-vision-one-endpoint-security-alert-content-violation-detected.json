@@ -1,0 +1,52 @@
+{
+    "name": "Trend Micro Vision One Endpoint Security alert: Content violation detected",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "source:trend-micro-vision-one-endpoint-security"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "options": {
+        "detectionMethod": "third_party",
+        "maxSignalDuration": 86400,
+        "keepAlive": 1800,
+        "thirdPartyRuleOptions": {
+            "defaultStatus": "medium",
+            "defaultNotifications": [],
+            "rootQueries": [
+                {
+                    "query": "source:trend-micro-vision-one-endpoint-security service:content-violation ",
+                    "groupByFields": []
+                }
+            ],
+            "signalTitleTemplate": "Trend Micro Vision One Endpoint Security Alert: Content violation detected"
+        },
+        "relatedSignalsFields": []
+    },
+    "queries": [
+        {
+            "query": "source:trend-micro-vision-one-endpoint-security service:content-violation @severity:critical "
+        },
+        {
+            "query": "source:trend-micro-vision-one-endpoint-security service:content-violation @severity:error "
+        },
+        {
+            "query": "source:trend-micro-vision-one-endpoint-security service:content-violation @severity:warning "
+        }
+    ],
+    "cases": [
+        {
+            "status": "Critical"
+        },
+        {
+            "status": "High"
+        },
+        {
+            "status": "Medium"
+        }
+    ]
+}
