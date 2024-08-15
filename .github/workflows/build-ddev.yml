@@ -585,8 +585,7 @@ jobs:
     - name: Download binaries
       uses: actions/download-artifact@v4
       with:
-        pattern: standalone-*
-        name: standalone
+        pattern: standalone*
         path: archives
         merge-multiple: true
 
