@@ -247,7 +247,7 @@ class PostgresConfig:
     def _aws_managed_authentication(aws, password):
         if 'managed_authentication' not in aws:
             # for backward compatibility
-            # if managed_authentication is not set, we assume it is enabled if region is set
+            # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
             managed_authentication = {}
             managed_authentication['enabled'] = 'region' in aws and not password
         else:
