@@ -14,6 +14,7 @@ except ImportError:
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
+import logging
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -25,6 +26,9 @@ DEFAULT_IGNORE_DATABASES = [
     'cloudsqladmin',
     'postgres',
 ]
+
+
+logger = logging.getLogger(__file__)
 
 
 class PostgresConfig:
@@ -198,7 +202,9 @@ class PostgresConfig:
             tags.extend(rds_tags)
 
         if propagate_agent_tags and agent_tags:
+            logger.info("natasha testing agent_tags: %s", agent_tags)
             tags.extend(agent_tags)
+            logger.info("natasha testing tags after agent_tags: %s", tags)
         return tags
 
     @staticmethod
