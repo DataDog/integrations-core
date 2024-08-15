@@ -1,1 +1,2 @@
-Password authentication will be used unless `aws.managed_authentication.enabled` is explicitly
+When password and `aws.region` are set and `aws.managed_authentication` is not set,
+password authentication will be used. IAM Token authentication used to be prioritized.
