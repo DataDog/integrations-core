@@ -60,6 +60,23 @@ MOCKED_PROMETHEUS_METRICS = [
     "fly_io.instance.memory.pressure_some",
 ]
 
+PROMETHEUS_METRICS_ONE_HOST = [
+    "fly_io.app.connect_time.bucket.count",
+    "fly_io.app.connect_time.count.count",
+    "fly_io.app.connect_time.sum.count",
+    "fly_io.app.http_response_time.bucket.count",
+    "fly_io.app.http_response_time.count.count",
+    "fly_io.app.http_response_time.sum.count",
+]
+
+PROMETHEUS_METRICS_NO_HOST = [
+    "fly_io.edge.http_response_time.bucket.count",
+    "fly_io.edge.http_response_time.count.count",
+    "fly_io.edge.http_response_time.sum.count",
+    "fly_io.edge.tls_handshake_time.bucket.count",
+    "fly_io.edge.tls_handshake_time.count.count",
+]
+ALL_PROMETHEUS_METRICS = MOCKED_PROMETHEUS_METRICS + PROMETHEUS_METRICS_NO_HOST + PROMETHEUS_METRICS_ONE_HOST
 ALL_REST_METRICS = [
     'fly_io.app.count',
     'fly_io.machine.count',

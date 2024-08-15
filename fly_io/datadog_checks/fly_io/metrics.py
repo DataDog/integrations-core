@@ -186,4 +186,5 @@ RENAME_LABELS_MAP = {
     'mount': 'fly_mount',
     'instance': 'app_instance_id',
     'le': 'upper_bound',
+    'version': 'tls_version',
 }

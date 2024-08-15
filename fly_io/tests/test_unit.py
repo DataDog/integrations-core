@@ -19,6 +19,8 @@ from .metrics import (
     MACHINE_GUEST_METRICS,
     MACHINE_INIT_METRICS,
     MOCKED_PROMETHEUS_METRICS,
+    PROMETHEUS_METRICS_NO_HOST,
+    PROMETHEUS_METRICS_ONE_HOST,
     VOLUME_METRICS,
 )
 
@@ -33,6 +35,12 @@ def test_check(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
         aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
         aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
+
+    for metric in PROMETHEUS_METRICS_ONE_HOST:
+        aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
+
+    for metric in PROMETHEUS_METRICS_NO_HOST:
+        aggregator.assert_metric(metric, at_least=1, hostname=None)
 
     for metric in ALL_REST_METRICS:
         aggregator.assert_metric(metric)
@@ -56,6 +64,12 @@ def test_no_machines_endpoint(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
         aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
         aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
+
+    for metric in PROMETHEUS_METRICS_ONE_HOST:
+        aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
+
+    for metric in PROMETHEUS_METRICS_NO_HOST:
+        aggregator.assert_metric(metric, at_least=1, hostname=None)
 
     for metric in ALL_REST_METRICS:
         aggregator.assert_metric(metric, count=0)
