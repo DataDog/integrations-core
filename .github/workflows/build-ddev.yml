@@ -319,7 +319,7 @@ jobs:
     - name: Upload standalone binaries
       uses: actions/upload-artifact@v4
       with:
-        name: standalone
+        name: standalone-${{ matrix.job.target }}
         path: ddev/archives/*
         if-no-files-found: error
 
@@ -595,6 +595,9 @@ jobs:
         pattern: installers-*
         path: installers
         merge-multiple: true
+
+    - name: Display structure of downloaded files
+      run: ls -R
 
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@v1.8.14
