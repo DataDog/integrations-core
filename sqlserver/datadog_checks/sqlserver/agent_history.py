@@ -7,7 +7,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION, STATIC_INFO_RDS
 
 try:
     import datadog_agent
@@ -84,6 +84,79 @@ WHERE
     )
 """
 
+AGENT_ACTIVITY_DURATION_QUERY = """\
+SELECT
+    sj.name,
+    CAST(ja.job_id AS char(36)) AS job_id,
+    DATEDIFF(SECOND, ja.start_execution_date, GETDATE()) AS duration_seconds
+FROM msdb.dbo.sysjobactivity AS ja
+INNER JOIN msdb.dbo.sysjobs AS sj
+ON ja.job_id = sj.job_id
+WHERE ja.start_execution_date IS NOT NULL
+    AND ja.stop_execution_date IS NULL
+    AND session_id = (
+        SELECT MAX(session_id)
+        FROM msdb.dbo.sysjobactivity
+    )
+"""
+
+
+AGENT_ACTIVITY_STEPS_QUERY = """\
+WITH ActiveJobs AS (
+    SELECT
+        job_id,
+        last_executed_step_id
+    FROM msdb.dbo.sysjobactivity AS ja
+    WHERE ja.start_execution_date IS NOT NULL
+        AND ja.stop_execution_date IS NULL
+        AND session_id = (
+            SELECT MAX(session_id)
+            FROM msdb.dbo.sysjobactivity
+        )
+),
+CompletedSteps AS (
+    SELECT
+        sjh1.job_id,
+        sjh1.step_id,
+        sjh1.step_name,
+        sjh1.run_status
+    FROM msdb.dbo.sysjobhistory AS sjh1
+    WHERE sjh1.instance_id = (
+        SELECT MAX(instance_id)
+        FROM msdb.dbo.sysjobhistory
+        WHERE job_id = sjh1.job_id
+        AND step_id = sjh1.step_id
+    )
+)
+SELECT
+    j.name,
+    CAST(aj.job_id AS char(36)) AS job_id,
+    cs.step_name,
+    cs.step_id,
+    CASE cs.run_status
+        WHEN 0 THEN 'Failed'
+        WHEN 1 THEN 'Succeeded'
+        WHEN 2 THEN 'Retry'
+        WHEN 3 THEN 'Canceled'
+        WHEN 4 THEN 'In Progress'
+        ELSE 'Unknown'
+    END AS step_run_status,
+    1 AS step_info
+FROM ActiveJobs AS aj
+INNER JOIN CompletedSteps AS cs
+ON aj.job_id = cs.job_id
+    AND aj.last_executed_step_id = cs.step_id
+INNER JOIN msdb.dbo.sysjobs AS j
+ON j.job_id = aj.job_id
+"""
+
+AGENT_ACTIVE_SESSION_DURATION_QUERY = """\
+SELECT TOP 1
+    session_id,
+    DATEDIFF(SECOND, agent_start_date, GETDATE()) AS duration_seconds
+FROM msdb.dbo.syssessions
+ORDER BY session_id DESC
+"""
 
 def agent_check_getter(self):
     return self._check
@@ -95,7 +168,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
-        collection_interval = float(self._config.agent_jobs_config.get('collection_interval', 15))
+        collection_interval = float(self._config.agent_jobs_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
@@ -123,6 +196,49 @@ class SqlserverAgentHistory(DBMAsyncJob):
     def run_job(self):
         self.collect_agent_history()
 
+    def _collect_metrics_rows(self, cursor):
+        self.log.debug("collecting sql server agent jobs activity")
+
+        self.log.debug("Running query [%s]", AGENT_ACTIVITY_DURATION_QUERY)
+        cursor.execute(AGENT_ACTIVITY_DURATION_QUERY)
+        columns = [i[0] for i in cursor.description]
+        # construct row dicts manually as there's no DictCursor for pyodbc
+        duration_rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        self.log.debug("Running query [%s]", AGENT_ACTIVITY_STEPS_QUERY)
+        cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
+        columns = [i[0] for i in cursor.description]
+        # construct row dicts manually as there's no DictCursor for pyodbc
+        step_info_rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        if self._check.static_info_cache.get(STATIC_INFO_RDS, True):
+            return duration_rows, step_info_rows, []
+        
+        self.log.debug("Running query [%s]", AGENT_ACTIVE_SESSION_DURATION_QUERY)
+        cursor.execute(AGENT_ACTIVE_SESSION_DURATION_QUERY)
+        columns = [i[0] for i in cursor.description]
+        # construct row dicts manually as there's no DictCursor for pyodbc
+        session_rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        return duration_rows, step_info_rows, session_rows
+    
+    def _to_metrics_payload(self, duration_rows, step_info_rows, session_rows):
+        return {
+            'host': self._check.resolved_hostname,
+            'timestamp': time.time() * 1000,
+            'min_collection_interval': self.collection_interval,
+            'tags': self.tags,
+            'kind': 'agent_jobs_metrics',
+            'cloud_metadata': self._config.cloud_metadata,
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+            'ddagentversion': datadog_agent.get_version(),
+            'ddagenthostname': self._check.agent_hostname,
+            'duration_rows': duration_rows,
+            'step_info_rows': step_info_rows,
+            'session_rows': session_rows,
+        }
+    
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
         last_collection_time_filter = "{last_collection_time}".format(last_collection_time=self._last_collection_time)
@@ -173,3 +289,8 @@ class SqlserverAgentHistory(DBMAsyncJob):
                 payload = json.dumps(history_event, default=default_json_event_encoding)
                 self.log.debug(payload)
                 self._check.database_monitoring_query_activity(payload)
+
+                duration_rows, step_info_rows, session_rows = self._collect_metrics_rows(cursor)
+                metrics_payload = self._to_metrics_payload(duration_rows, step_info_rows, session_rows)
+                self.log.debug(metrics_payload)
+                self._check.database_monitoring_query_metrics(json.dumps(metrics_payload, default=default_json_event_encoding))
