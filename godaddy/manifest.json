@@ -1,0 +1,65 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "d60bf9ee-043d-4113-b301-e14996a9b17b",
+  "app_id": "godaddy",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights and monitor GoDaddy SSL Certificates.",
+    "title": "GoDaddy",
+    "media": [
+      {
+        "caption": "GoDaddy",
+        "image_url": "images/godaddy.png",
+        "media_type": "image"
+      }
+      
+    ],
+    "classifier_tags": [	
+      "Category::Metrics",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 21264130,
+      "source_type_name": "godaddy",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "godaddy.",
+        "check": "godaddy.certificate.total_certificates",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Godaddy Overview": "assets/dashboards/godaddy.json"
+      
+    },
+    "monitors": {
+      "godaddy_certificate_denied": "assets/monitors/godaddy_certificate_denied.json",
+      "godaddy_certificate_expired": "assets/monitors/godaddy_certificate_expired.json",
+      "godaddy_certificate_in_an_error_state": "assets/monitors/godaddy_certificate_in_an_error_state.json",
+      "godaddy_certificate_revoked": "assets/monitors/godaddy_certificate_revoked.json",
+      "godaddy_days_remaining_for_expiration_of_certificate": "assets/monitors/godaddy_days_remaining_for_expiration_of_certificate.json",
+      "godaddy_domain_dropped_from_request": "assets/monitors/godaddy_domain_dropped_from_request.json",
+      "godaddy_domain_fraud_detected": "assets/monitors/godaddy_domain_fraud_detected.json",
+      "godaddy_domain_verification_failed": "assets/monitors/godaddy_domain_verification_failed.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

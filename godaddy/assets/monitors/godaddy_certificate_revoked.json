@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-16",
+	"last_updated_at": "2024-08-16",
+	"title": "Godaddy Certificate Revoked",
+	"description": "SSL Certificate Validity monitor is in an error state due to a revoked Godaddy certificate. The certificate is no longer valid and cannot be used for secure communication. Check the certificate expiration date, verify the certificate request, or contact the certificate authority (CA) or hosting provider.",
+	"definition": {
+		"id": 149116202,
+		"name": "Godaddy Certificate Revoked",
+		"type": "query alert",
+		"query": "sum(last_1h):max:godaddy.certificate.certificate_status{status:revoked} by {certificateid} >= 1",
+		"message": "The certificate {{certificateid.name}} has been revoked.",
+		"tags": [
+			"service:certificate",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_host_delay": 300,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:GoDaddy"
+	]
+}

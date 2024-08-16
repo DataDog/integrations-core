@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-16",
+	"last_updated_at": "2024-08-16",
+	"title": "Godaddy Days Remaining for Expiration of Certificate",
+	"description": "The SSL certificate for the website is expiring in X days. This means that the certificate will no longer be valid after the expiration date.",
+	"definition": {
+		"id": 149106208,
+		"name": "Godaddy Days Remaining for Expiration of Certificate",
+		"type": "query alert",
+		"query": "min(last_1h):min:godaddy.certificate.certificate_expiration_days{*} by {certificateid} <= 7",
+		"message": "The certificate with id {{certificateid.name}} is set to expire in {{value}} days.",
+		"tags": [
+			"service:certificate",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 7
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_host_delay": 300,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:GoDaddy"
+	]
+}

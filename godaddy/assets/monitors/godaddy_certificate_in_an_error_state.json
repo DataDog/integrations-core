@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-16",
+	"last_updated_at": "2024-08-16",
+	"title": "Godaddy Certificate in an Error State",
+	"description": "Website Availability monitor is in an error state due to a connection timeout error. The server is not responding to requests within a reasonable time frame. Check network connectivity or contact the website administrator or hosting provider.",
+	"definition": {
+		"id": 149884381,
+		"name": "GoDaddy Certificate in an Error State",
+		"type": "query alert",
+		"query": "sum(last_1h):max:godaddy.certificate.certificate_status{status:unused} by {certificateid} >= 1",
+		"message": "The certificate {{certificateid.name}} is currently in an error state (unused).",
+		"tags": [
+			"service:certificate",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_host_delay": 300,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:GoDaddy"
+	]
+}
