@@ -159,7 +159,7 @@ class PostgreSql(AgentCheck):
 
         discovery = PostgresAutodiscovery(
             self,
-            'postgres',
+            self._config.discovery_config.get('global_view_db', 'postgres'),
             self._config.discovery_config,
             self._config.idle_connection_timeout,
         )
