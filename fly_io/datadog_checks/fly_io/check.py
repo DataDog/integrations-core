@@ -64,7 +64,6 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def configure_histogram_transformer(self):
         def histogram_transformer(metric, sample_data, _runtime_data):
             metric_remapped = HISTOGRAM_METRICS[metric.name]
-            self.log.warning("found metric %s, %s", metric.name, metric_remapped)
             for sample, tags, hostname in sample_data:
                 self.count(metric_remapped, sample.value, tags=tags, hostname=hostname)
 
