@@ -8,7 +8,14 @@ from datetime import datetime
 
 from bson import json_util
 
-from datadog_checks.mongo.dbm.utils import format_key_name
+from datadog_checks.mongo.dbm.utils import (
+    format_explain_plan,
+    format_key_name,
+    get_command_collection,
+    get_command_truncation_state,
+    get_explain_plan,
+    should_explain_operation,
+)
 
 try:
     import datadog_agent
@@ -16,7 +23,7 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 
@@ -30,6 +37,12 @@ class MongoSlowOperations(DBMAsyncJob):
         self._slow_operations_config = check._config.slow_operations
         self._collection_interval = self._slow_operations_config["collection_interval"]
         self._max_operations = self._slow_operations_config["max_operations"]
+
+        # _explained_operations_ratelimiter: limit how often we try to re-explain the same query
+        self._explained_operations_ratelimiter = RateLimitingTTLCache(
+            maxsize=self._slow_operations_config['explained_operations_cache_maxsize'],
+            ttl=45 * 60 / self._slow_operations_config['explained_operations_per_hour_per_query'],
+        )
 
         super(MongoSlowOperations, self).__init__(
             check,
@@ -70,6 +83,9 @@ class MongoSlowOperations(DBMAsyncJob):
                     db_name, last_ts=last_collection_timestamp
                 ):
                     slow_operation_events.append(self._create_slow_operation_event(slow_operation))
+
+                    self._collect_slow_operation_explain_plan(slow_operation, db_name)
+
                     if len(slow_operation_events) >= self._max_operations:
                         break
             else:
@@ -80,6 +96,9 @@ class MongoSlowOperations(DBMAsyncJob):
                 slow_operations_from_logs, last_ts=last_collection_timestamp
             ):
                 slow_operation_events.append(self._create_slow_operation_event(slow_operation))
+
+                self._collect_slow_operation_explain_plan(slow_operation, slow_operation["dbname"])
+
                 if len(slow_operation_events) >= self._max_operations:
                     break
 
@@ -139,18 +158,42 @@ class MongoSlowOperations(DBMAsyncJob):
                 log_attr = parsed_log.get("attr")
                 if not log_attr or "command" not in log_attr:
                     continue
-                db_name = self._get_db_name(log_attr.get("command"), log_attr.get("ns"))
+                db_name = self._get_db_name(log_attr["command"], log_attr.get("ns"))
                 if db_name not in db_names:
                     continue
                 log_attr["ts"] = ts
                 yield self._obfuscate_slow_operation(log_attr, db_name)
 
+    def _collect_slow_operation_explain_plan(self, slow_operation, dbname):
+        try:
+            if should_explain_operation(
+                namespace=slow_operation.get("ns"),
+                op=self._get_slow_operation_op_type(slow_operation),
+                command=slow_operation["command"],
+                explain_plan_rate_limiter=self._explained_operations_ratelimiter,
+                explain_plan_cache_key=(dbname, slow_operation["query_signature"]),
+            ):
+                if slow_operation.get("execStats"):
+                    # execStats is available with profiling, so we just need to format it
+                    explain_plan = format_explain_plan({"executionStats": slow_operation.get("execStats")})
+                else:
+                    # explain the slow operation from the logs
+                    explain_plan = get_explain_plan(
+                        self._check.api_client, slow_operation.get("op"), slow_operation["command"], dbname
+                    )
+
+                explain_plan_payload = self._create_slow_operation_explain_plan_payload(slow_operation, explain_plan)
+                self._check.database_monitoring_query_sample(json_util.dumps(explain_plan_payload))
+        except Exception as e:
+            # Log the error and continue
+            # Failures to collect explain plans should not prevent the slow operation from being sent
+            self._check.log.error("Failed to collect explain plan for slow operation: %s", e)
+
     def _obfuscate_slow_operation(self, slow_operation, db_name):
-        command = slow_operation['command']
-        obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
+        obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(slow_operation["command"]))
         query_signature = compute_exec_plan_signature(obfuscated_command)
         slow_operation['dbname'] = db_name
-        slow_operation['command'] = obfuscated_command
+        slow_operation['obfuscated_command'] = obfuscated_command
         slow_operation['query_signature'] = query_signature
 
         if slow_operation.get('originatingCommand'):
@@ -189,13 +232,13 @@ class MongoSlowOperations(DBMAsyncJob):
         event = {
             "timestamp": slow_operation["ts"] * 1000,
             "dbname": slow_operation["dbname"],
-            "op": slow_operation.get("op") or slow_operation.get("type"),
+            "op": self._get_slow_operation_op_type(slow_operation),
             "ns": slow_operation.get("ns"),
             "plan_summary": slow_operation.get("planSummary"),
             "query_signature": slow_operation["query_signature"],
             "user": slow_operation.get("user"),  # only available with profiling
             "application": slow_operation.get("appName"),  # only available with profiling
-            "statement": slow_operation.get("command"),
+            "statement": slow_operation["obfuscated_command"],
             "query_hash": slow_operation.get("queryHash"),  # only available with profiling
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
@@ -217,37 +260,97 @@ class MongoSlowOperations(DBMAsyncJob):
             "write_conflicts": slow_operation.get("writeConflicts"),
             "cpu_nanos": slow_operation.get("cpuNanos"),
             "planning_time_micros": slow_operation.get("planningTimeMicros"),  # only available with profiling
+            "cursor_exhausted": slow_operation.get("cursorExhausted"),
             "upsert": slow_operation.get("upsert"),  # only available with profiling
             "has_sort_stage": slow_operation.get("hasSortStage"),  # only available with profiling
-            "used_disk": slow_operation.get("usedDisk"),  # only available with profiling
+            "used_disk": slow_operation.get("usedDisk"),
             "from_multi_planner": slow_operation.get("fromMultiPlanner"),  # only available with profiling
             "replanned": slow_operation.get("replanned"),  # only available with profiling
             "replan_reason": slow_operation.get("replanReason"),  # only available with profiling
+            "client": self._get_slow_operation_client(slow_operation),
+            "cursor": self._get_slow_operation_cursor(slow_operation),
+            "lock_stats": self._get_slow_operation_lock_stats(slow_operation),
+            "flow_control_stats": self._get_slow_operation_flow_control_stats(slow_operation),
         }
 
+        return self._sanitize_event(event)
+
+    def _create_slow_operation_explain_plan_payload(self, slow_operation: dict, explain_plan: dict):
+        '''
+        Create a slow operation explain plan payload
+        '''
+        event = {
+            "host": self._check._resolved_hostname,
+            "dbm_type": "plan",
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "mongo",
+            "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
+            "timestamp": slow_operation["ts"] * 1000,
+            "network": {
+                "client": self._get_slow_operation_client(slow_operation),
+            },
+            "db": {
+                "instance": slow_operation["dbname"],
+                "plan": explain_plan,
+                "query_signature": slow_operation["query_signature"],
+                "application": slow_operation.get("appName"),
+                "user": slow_operation.get("user"),
+                "statement": slow_operation["obfuscated_command"],
+                "operation_metadata": {
+                    "op": slow_operation.get("op") or slow_operation.get("type"),
+                    "ns": slow_operation.get("ns"),
+                    "collection": get_command_collection(slow_operation["command"], slow_operation.get("ns")),
+                    "comment": slow_operation["command"].get("comment"),
+                },
+                "truncated": get_command_truncation_state(slow_operation["command"]),
+                "source": "slow_query",
+            },
+            "mongodb": self._sanitize_event(
+                {
+                    "op": self._get_slow_operation_op_type(slow_operation),
+                    "ns": slow_operation.get("ns"),
+                    "plan_summary": slow_operation.get("planSummary"),
+                    "microsecs_running": slow_operation.get("millis", slow_operation.get("durationMillis", 0)) * 1000,
+                    "num_yields": slow_operation.get("numYield", slow_operation.get("numYields", 0)),
+                    "write_conflicts": slow_operation.get("writeConflicts"),
+                    "lock_stats": self._get_slow_operation_lock_stats(slow_operation),
+                    "flow_control_stats": self._get_slow_operation_flow_control_stats(slow_operation),
+                    "cursor": self._get_slow_operation_cursor(slow_operation),
+                }
+            ),
+        }
+        return self._sanitize_event(event)
+
+    def _get_slow_operation_op_type(self, slow_operation):
+        return slow_operation.get("op") or slow_operation.get("type")
+
+    def _get_slow_operation_client(self, slow_operation):
         calling_client_hostname = slow_operation.get("client") or slow_operation.get("remote")
         if calling_client_hostname:
-            event["client"] = {"hostname": calling_client_hostname}
+            return {"hostname": calling_client_hostname}
+        return None
 
+    def _get_slow_operation_cursor(self, slow_operation):
         cursor_id = slow_operation.get("cursorid")
         originating_command = slow_operation.get("originatingCommand")
         if cursor_id or originating_command:
-            event["cursor"] = {
+            return {
                 "cursor_id": cursor_id,
                 "originating_command": originating_command,
             }
+        return None
 
+    def _get_slow_operation_lock_stats(self, slow_operation):
         lock_stats = slow_operation.get("locks")
         if lock_stats:
-            event["lock_stats"] = format_key_name(self._check.convert_to_underscore_separated, lock_stats)
+            return format_key_name(self._check.convert_to_underscore_separated, lock_stats)
+        return None
 
+    def _get_slow_operation_flow_control_stats(self, slow_operation):
         flow_control_stats = slow_operation.get("flowControl")
         if flow_control_stats:
-            event["flow_control_stats"] = format_key_name(
-                self._check.convert_to_underscore_separated, flow_control_stats
-            )
-
-        return self._sanitize_event(event)
+            return format_key_name(self._check.convert_to_underscore_separated, flow_control_stats)
+        return None
 
     def _sanitize_event(self, event):
         # remove empty fields

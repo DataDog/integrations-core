@@ -22,7 +22,7 @@ Visualize detailed insights into these logs through the out-of-the-box dashboard
 
 To install the OSSEC Security integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][6] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.54.0.
+**Note**: This step is not necessary for Agent version >= 7.57.0.
 
 Linux command
   ```shell

@@ -395,6 +395,7 @@
                 "docs_examined": 612,
                 "cpu_nanos": 14051708,
                 "planning_time_micros": 12443,
+                "cursor_exhausted": true,
                 "client": {
                     "hostname": "192.168.65.1:58133"
                 },
@@ -793,6 +794,7 @@
                 "docs_examined": 612,
                 "cpu_nanos": 14051708,
                 "planning_time_micros": 12443,
+                "cursor_exhausted": true,
                 "client": {
                     "hostname": "192.168.65.1:58133"
                 },
