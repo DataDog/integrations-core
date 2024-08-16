@@ -5,11 +5,17 @@
 
 import time
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from bson import json_util
 
-from datadog_checks.mongo.dbm.utils import format_key_name
+from datadog_checks.mongo.dbm.utils import (
+    format_key_name,
+    get_command_collection,
+    get_command_truncation_state,
+    get_explain_plan,
+    should_explain_operation,
+)
 
 try:
     import datadog_agent
@@ -43,18 +49,6 @@ SAMPLE_EXCLUDE_KEYS = {
     "dbname",
     "user",
     "client",
-}
-
-SYSTEM_DATABASES = {"admin", "config", "local"}
-
-# exclude keys in sampled operation that cause issues with the explain command
-COMMAND_EXCLUDE_KEYS = {
-    'readConcern',
-    'writeConcern',
-    'needsMerge',
-    'fromMongos',
-    'let',  # let set's the CLUSTER_TIME and NOW in mongos
-    'mayBypassWriteBlocking',
 }
 
 
@@ -131,17 +125,21 @@ class MongoOperationSamples(DBMAsyncJob):
                     now, operation, operation_metadata, obfuscated_command, query_signature
                 )
 
-                if not self._should_explain(
+                if not should_explain_operation(
                     namespace=operation.get("ns"),
                     op=operation.get("op"),
                     command=command,
+                    explain_plan_rate_limiter=self._explained_operations_ratelimiter,
                     explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
                 ):
                     yield activity, None
                     continue
 
-                explain_plan = self._get_explain_plan(
-                    op=operation.get("op"), command=command, dbname=operation_metadata["dbname"]
+                explain_plan = get_explain_plan(
+                    api_client=self._check.api_client,
+                    op=operation.get("op"),
+                    command=command,
+                    dbname=operation_metadata["dbname"],
                 )
                 sample = self._create_operation_sample_payload(
                     now, operation_metadata, obfuscated_command, query_signature, explain_plan, activity
@@ -200,68 +198,6 @@ class MongoOperationSamples(DBMAsyncJob):
 
         return True
 
-    def _should_explain(
-        self, namespace: str, op: Optional[str], command: dict, explain_plan_cache_key: Tuple[str, str]
-    ) -> bool:
-        if not op or op == "none":
-            # Skip operations that are not queries
-            self._check.log.debug("Skipping explain operation without operation type: %s", command)
-            return False
-
-        if op in ("insert", "update", "getmore", "killcursors", "remove"):
-            # Skip operations that are not queries
-            self._check.log.debug("Skipping explain operation type %s: %s", op, command)
-            return False
-
-        if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
-            # Skip operations as they are not queries
-            self._check.log.debug("Skipping operations that are not queries: %s", op, command)
-            return False
-
-        db, _ = namespace.split(".", 1)
-        if db in SYSTEM_DATABASES:
-            self._check.log.debug("Skipping operation for system database %s", db)
-            return False
-
-        if not self._explained_operations_ratelimiter.acquire(explain_plan_cache_key):
-            # Skip operations that have been explained recently
-            self._check.log.debug("Skipping explain operation that was recently explained: %s", command)
-            return False
-
-        return True
-
-    def _get_explain_plan(self, op: Optional[str], command: dict, dbname: str) -> OperationSamplePlan:
-        dbname = command.pop("$db", dbname)
-        try:
-            for key in COMMAND_EXCLUDE_KEYS:
-                command.pop(key, None)
-            explain_plan = self._check.api_client[dbname].command("explain", command, verbosity="executionStats")
-            explain_plan = self._format_explain_plan(explain_plan)
-            return {
-                "definition": explain_plan,
-                "signature": compute_exec_plan_signature(json_util.dumps(explain_plan)),
-            }
-        except Exception as e:
-            self._check.log.error("Could not explain command %s: %s", command, e)
-            return {
-                "collection_errors": [
-                    {
-                        "code": str(type(e).__name__),
-                        "message": str(e),
-                    }
-                ],
-            }
-
-    def _format_explain_plan(self, explain_plan: dict) -> dict:
-        if not explain_plan:
-            return None
-
-        return {
-            key: value
-            for key, value in explain_plan.items()
-            if key not in ("serverInfo", "serverParameters", "command", "ok", "$clusterTime", "operationTime")
-        }
-
     def _get_operation_client(self, operation: dict) -> OperationSampleClient:
         client_metadata = operation.get("clientMetadata", {})
 
@@ -278,35 +214,9 @@ class MongoOperationSamples(DBMAsyncJob):
             return None
         return effective_users[0].get("user")
 
-    def _get_command_truncation_state(self, command: dict) -> Optional[str]:
-        if not command:
-            return None
-        return "truncated" if command.get("$truncated") else "not_truncated"
-
-    def _get_command_collection(self, command: dict, collection_from_ns: str) -> Optional[str]:
-        if collection_from_ns != '$cmd':
-            return collection_from_ns
-
-        # If the collection name parsed from namespace is $cmd
-        # we try to look for the collection in the command
-        for key in (
-            "collection",
-            "find",
-            "aggregate",
-            "update",
-            "insert",
-            "delete",
-            "findAndModify",
-            "distinct",
-            "count",
-        ):
-            collection = command.get(key)
-            if collection and isinstance(collection, str):  # edge case like {"aggregate": 1}
-                return collection
-
     def _get_operation_metadata(self, operation: dict) -> OperationSampleOperationMetadata:
         namespace = operation.get("ns")
-        db, collection = namespace.split(".", 1)
+        db, _ = namespace.split(".", 1)
         command = operation.get("command", {})
         return {
             "type": operation.get("type"),
@@ -314,9 +224,9 @@ class MongoOperationSamples(DBMAsyncJob):
             "shard": operation.get("shard"),
             "dbname": command.get("$db", db),
             "application": operation.get("appName"),
-            "collection": self._get_command_collection(command, collection),
+            "collection": get_command_collection(command, namespace),
             "comment": command.get("comment"),
-            "truncated": self._get_command_truncation_state(command),
+            "truncated": get_command_truncation_state(command),
             "client": self._get_operation_client(operation),
             "user": self._get_operation_user(operation),
             "ns": namespace,
@@ -422,6 +332,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     "ns": operation_metadata["ns"],
                 },
                 "query_truncated": operation_metadata["truncated"],
+                "source": "activity",
             },
             "mongodb": {key: value for key, value in activity.items() if key not in SAMPLE_EXCLUDE_KEYS},
         }
