@@ -38,7 +38,14 @@ instance_unavailable = {
 instance_go_metrics = {
     'openmetrics_endpoint': 'http://localhost:10249/metrics',
     'namespace': 'openmetrics',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1', 'counter2'],
+    'metrics': [
+        {'metric1': 'renamed.metric1'},
+        'metric2',
+        'counter1',
+        'counter2',
+        'go_memstats_frees_total',
+        'go_memstats_heap_released_bytes',
+    ],
     'collect_histogram_buckets': True,
     'collect_default_metrics': True,
 }
