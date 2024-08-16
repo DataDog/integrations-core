@@ -25,8 +25,8 @@ class ManagedAuthentication(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    enabled: Optional[bool] = Field(None, example=False)
-    role_arn: Optional[str] = Field(None, example='arn:aws:iam::123456789012:role/MyRole')
+    enabled: Optional[bool] = Field(None, examples=[False])
+    role_arn: Optional[str] = Field(None, examples=['arn:aws:iam::123456789012:role/MyRole'])
 
 
 class Aws(BaseModel):
@@ -45,8 +45,8 @@ class ManagedAuthentication1(BaseModel):
         frozen=True,
     )
     client_id: Optional[str] = None
-    enabled: Optional[bool] = Field(None, example=False)
-    identity_scope: Optional[str] = Field(None, example='https://ossrdbms-aad.database.windows.net/.default')
+    enabled: Optional[bool] = Field(None, examples=[False])
+    identity_scope: Optional[str] = Field(None, examples=['https://ossrdbms-aad.database.windows.net/.default'])
 
 
 class Azure(BaseModel):
@@ -196,7 +196,7 @@ class QuerySamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int] = None
 
 
-class Relation(BaseModel):
+class Relations(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -259,7 +259,7 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     query_timeout: Optional[int] = None
-    relations: Optional[tuple[Union[str, Relation], ...]] = None
+    relations: Optional[tuple[Union[str, Relations], ...]] = None
     reported_hostname: Optional[str] = None
     service: Optional[str] = None
     ssl: Optional[str] = None
