@@ -2564,7 +2564,7 @@
                     {
                         "id": 2468035497981030,
                         "definition": {
-                            "title": "Top Endpoints by Virus Names",
+                            "title": "Top Endpoints by Virus Name",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
