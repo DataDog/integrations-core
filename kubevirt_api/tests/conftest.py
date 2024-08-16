@@ -78,6 +78,7 @@ def dd_environment():
         instance["kube_namespace"] = "kubevirt"
         instance["kube_pod_name"] = "virt-api-98cf864cc-zkgcd"
         instance["kube_config_dict"] = kubeconfig_content
+        instance["tls_verify"] = "false"
 
         yield {"instances": [instance]}
 
