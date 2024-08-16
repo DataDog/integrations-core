@@ -17,7 +17,7 @@ Configure the Datadog endpoint to forward Contentful events as logs to Datadog. 
 2. Log in to your [Contenful account][3] as space admin.
 3. Go to **Settings > Webhooks**.
 4. Click on **Add Webhook**.
-5. Add name and webhook URL generated from step 1.
+5. Add a name and fill in the webhook URL that you generated in step 1.
 6. For **URL**, select the `POST` method, and for **Active**, select true.
 7. Select the type of Content and Action events that you want to push to Datadog.
 8. Configure filters to trigger the webhook for specific entities if required.
