@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.8.2 / 2024-08-16
+
+***Fixed***:
+
+* Fixed a bug where optional MongoDB collection stats metrics were always collected, regardless of configuration. ([#18342](https://github.com/DataDog/integrations-core/pull/18342))
+
 ## 6.8.1 / 2024-08-13
 
 ***Fixed***:
