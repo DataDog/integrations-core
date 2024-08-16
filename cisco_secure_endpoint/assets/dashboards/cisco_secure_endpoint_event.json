@@ -778,7 +778,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@severity",
+                          "facet": "@event.severity",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -925,7 +925,7 @@
                       "width": "auto"
                     },
                     {
-                      "field": "computer.hostname",
+                      "field": "event.computer.hostname",
                       "width": "auto"
                     },
                     {
@@ -954,7 +954,8 @@
         "x": 0,
         "y": 17,
         "width": 12,
-        "height": 20
+        "height": 20,
+        "is_column_break": true
       }
     },
     {
@@ -987,7 +988,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@file.file_name",
+                          "facet": "@event.file.file_name",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1059,7 +1060,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@tactics",
+                          "facet": "@event.tactics",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1068,7 +1069,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event @file.disposition:(Blocklisted OR Malicious) @evt.name:\"Threat Detected\" $Event-type $Hostname $Detection $Severity"
+                        "query": "source:cisco-secure-endpoint service:event @event.file.disposition:(Blocklisted OR Malicious) @evt.name:\"Threat Detected\" $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -1126,7 +1127,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@techniques",
+                          "facet": "@event.techniques",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1135,7 +1136,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event @file.disposition:(Blocklisted OR Malicious) @evt.name:\"Threat Detected\" $Event-type $Hostname $Detection $Severity"
+                        "query": "source:cisco-secure-endpoint service:event @event.file.disposition:(Blocklisted OR Malicious) @evt.name:\"Threat Detected\" $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -1187,7 +1188,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@tactics",
+                          "facet": "@event.tactics",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1196,7 +1197,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event $Event-type $Hostname $Detection $Severity @tactics:*"
+                        "query": "source:cisco-secure-endpoint service:event @event.tactics:* $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -1239,7 +1240,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@techniques",
+                          "facet": "@event.techniques",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1248,7 +1249,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event $Event-type $Hostname $Detection $Severity @techniques:*"
+                        "query": "source:cisco-secure-endpoint service:event @event.techniques:* $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -1282,7 +1283,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:cisco-secure-endpoint service:event @file.file_name:* $Event-type $Hostname $Detection $Severity",
+                    "query_string": "source:cisco-secure-endpoint service:event @event.file.file_name:* $Event-type $Hostname $Detection $Severity ",
                     "indexes": [],
                     "storage": "hot"
                   },
@@ -1296,35 +1297,35 @@
                       "width": "auto"
                     },
                     {
-                      "field": "file.disposition",
+                      "field": "event.file.disposition",
                       "width": "auto"
                     },
                     {
-                      "field": "file.file_name",
+                      "field": "event.file.file_name",
                       "width": "auto"
                     },
                     {
-                      "field": "file.file_path",
+                      "field": "event.file.file_path",
                       "width": "auto"
                     },
                     {
-                      "field": "file.parent.file_name",
+                      "field": "event.file.parent.file_name",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.policy.name",
+                      "field": "endpoint_details.policy.name",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.operating_system",
+                      "field": "endpoint_details.operating_system",
                       "width": "auto"
                     },
                     {
-                      "field": "tactics",
+                      "field": "event.tactics",
                       "width": "auto"
                     },
                     {
-                      "field": "techniques",
+                      "field": "event.techniques",
                       "width": "auto"
                     },
                     {
@@ -1382,7 +1383,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@detection",
+                          "facet": "@event.detection",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1449,7 +1450,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@detection",
+                          "facet": "@event.detection",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1457,7 +1458,7 @@
                           }
                         },
                         {
-                          "facet": "@severity",
+                          "facet": "@event.severity",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1473,7 +1474,7 @@
                   ],
                   "response_format": "scalar",
                   "sort": {
-                    "count": 500,
+                    "count": 100,
                     "order_by": [
                       {
                         "type": "formula",
@@ -1511,7 +1512,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:cisco-secure-endpoint service:event @detection_id:* $Event-type $Hostname $Severity $Detection ",
+                    "query_string": "source:cisco-secure-endpoint service:event @event.detection_id:* $Event-type $Hostname $Severity $Detection ",
                     "indexes": [],
                     "storage": "hot"
                   },
@@ -1525,7 +1526,7 @@
                       "width": "auto"
                     },
                     {
-                      "field": "detection_id",
+                      "field": "event.detection_id",
                       "width": "auto"
                     },
                     {
@@ -1533,43 +1534,43 @@
                       "width": "auto"
                     },
                     {
-                      "field": "detection",
+                      "field": "event.detection",
                       "width": "auto"
                     },
                     {
-                      "field": "severity",
+                      "field": "event.severity",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.hostname",
+                      "field": "event.computer.hostname",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.active",
+                      "field": "event.computer.active",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.isolation.status",
+                      "field": "endpoint_details.isolation.status",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.is_compromised",
+                      "field": "endpoint_details.is_compromised",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.risk_score",
+                      "field": "endpoint_details.risk_score",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.policy.name",
+                      "field": "endpoint_details.policy.name",
                       "width": "auto"
                     },
                     {
-                      "field": "file.disposition",
+                      "field": "event.file.disposition",
                       "width": "auto"
                     },
                     {
-                      "field": "file.file_name",
+                      "field": "event.file.file_name",
                       "width": "auto"
                     },
                     {
@@ -1599,7 +1600,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:cisco-secure-endpoint service:event $Event-type $Hostname @scan.scanned_files:* $Detection $Severity",
+                    "query_string": "source:cisco-secure-endpoint service:event @event.scan.scanned_files:* $Event-type $Hostname $Detection $Severity ",
                     "indexes": [],
                     "storage": "hot"
                   },
@@ -1613,7 +1614,7 @@
                       "width": "auto"
                     },
                     {
-                      "field": "computer.hostname",
+                      "field": "event.computer.hostname",
                       "width": "auto"
                     },
                     {
@@ -1621,47 +1622,47 @@
                       "width": "auto"
                     },
                     {
-                      "field": "scan.description",
+                      "field": "event.scan.description",
                       "width": "auto"
                     },
                     {
-                      "field": "scan.malicious_detections",
+                      "field": "event.scan.malicious_detections",
                       "width": "auto"
                     },
                     {
-                      "field": "scan.clean",
+                      "field": "event.scan.clean",
                       "width": "auto"
                     },
                     {
-                      "field": "scan.scanned_files",
+                      "field": "event.scan.scanned_files",
                       "width": "auto"
                     },
                     {
-                      "field": "scan.scanned_processes",
+                      "field": "event.scan.scanned_processes",
                       "width": "auto"
                     },
                     {
-                      "field": "scan.scanned_paths",
+                      "field": "event.scan.scanned_paths",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.active",
+                      "field": "event.computer.active",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.isolation.status",
+                      "field": "endpoint_details.isolation.status",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.is_compromised",
+                      "field": "endpoint_details.is_compromised",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.risk_score",
+                      "field": "endpoint_details.risk_score",
                       "width": "auto"
                     },
                     {
-                      "field": "computer.policy.name",
+                      "field": "endpoint_details.policy.name",
                       "width": "auto"
                     },
                     {
@@ -1786,7 +1787,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@computer.hostname",
+                          "facet": "@event.computer.hostname",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1853,7 +1854,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@computer.policy.name",
+                          "facet": "@endpoint_details.policy.name",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1862,7 +1863,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event @severity:Critical $Event-type $Hostname $Detection $Severity"
+                        "query": "source:cisco-secure-endpoint service:event @event.severity:Critical $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -1925,7 +1926,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@computer.policy.name",
+                          "facet": "@endpoint_details.policy.name",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -2001,7 +2002,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event @computer.is_compromised:true $Event-type $Hostname $Detection $Severity"
+                        "query": "source:cisco-secure-endpoint service:event @endpoint_details.is_compromised:true $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -2068,7 +2069,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event @computer.is_compromised:false $Event-type $Hostname $Detection $Severity"
+                        "query": "source:cisco-secure-endpoint service:event @endpoint_details.is_compromised:false $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -2126,7 +2127,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@computer.policy.name",
+                          "facet": "@endpoint_details.policy.name",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -2135,7 +2136,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event @file.disposition:(Blocklisted OR Malicious) @evt.name:\"Threat Detected\" $Event-type $Hostname $Detection $Severity"
+                        "query": "source:cisco-secure-endpoint service:event @event.file.disposition:(Blocklisted OR Malicious) @evt.name:\"Threat Detected\" $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -2193,7 +2194,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@computer.operating_system",
+                          "facet": "@endpoint_details.operating_system",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -2202,7 +2203,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event @file.disposition:(Blocklisted OR Malicious) @evt.name:\"Threat Detected\" $Event-type $Hostname $Detection $Severity"
+                        "query": "source:cisco-secure-endpoint service:event @event.file.disposition:(Blocklisted OR Malicious) @evt.name:\"Threat Detected\" $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
@@ -2252,16 +2253,16 @@
                       ],
                       "compute": {
                         "aggregation": "cardinality",
-                        "metric": "@id"
+                        "metric": "@event.id"
                       },
                       "group_by": [
                         {
-                          "facet": "@computer.operating_system",
+                          "facet": "@endpoint_details.operating_system",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
                             "aggregation": "cardinality",
-                            "metric": "@id"
+                            "metric": "@event.id"
                           }
                         },
                         {
@@ -2270,7 +2271,7 @@
                           "sort": {
                             "order": "desc",
                             "aggregation": "cardinality",
-                            "metric": "@id"
+                            "metric": "@event.id"
                           }
                         }
                       ],
@@ -2327,12 +2328,12 @@
                       ],
                       "compute": {
                         "aggregation": "count",
-                        "metric": "@id, @connector_guid, @event_type_id"
+                        "metric": "@event.id, @event.connector_guid, @event.event_type_id"
                       },
                       "group_by": [
                         {
-                          "facet": "@computer.hostname",
-                          "limit": 5,
+                          "facet": "@event.computer.hostname",
+                          "limit": 2,
                           "sort": {
                             "order": "desc",
                             "aggregation": "count",
@@ -2340,8 +2341,8 @@
                           }
                         },
                         {
-                          "facet": "@usr.name",
-                          "limit": 5,
+                          "facet": "@event.computer.active",
+                          "limit": 2,
                           "sort": {
                             "order": "desc",
                             "aggregation": "count",
@@ -2349,8 +2350,8 @@
                           }
                         },
                         {
-                          "facet": "@computer.active",
-                          "limit": 5,
+                          "facet": "@endpoint_details.risk_score",
+                          "limit": 2,
                           "sort": {
                             "order": "desc",
                             "aggregation": "count",
@@ -2358,17 +2359,8 @@
                           }
                         },
                         {
-                          "facet": "@computer.risk_score",
-                          "limit": 5,
-                          "sort": {
-                            "order": "desc",
-                            "aggregation": "count",
-                            "metric": "@id, @connector_guid, @event_type_id"
-                          }
-                        },
-                        {
-                          "facet": "@computer.is_compromised",
-                          "limit": 5,
+                          "facet": "@endpoint_details.is_compromised",
+                          "limit": 2,
                           "sort": {
                             "order": "desc",
                             "aggregation": "count",
@@ -2377,14 +2369,14 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-endpoint service:event @computer.hostname:* $Event-type $Hostname $Detection $Severity"
+                        "query": "source:cisco-secure-endpoint service:event @event.computer.hostname:* $Event-type $Hostname $Detection $Severity"
                       },
                       "storage": "hot"
                     }
                   ],
                   "response_format": "scalar",
                   "sort": {
-                    "count": 3125,
+                    "count": 16,
                     "order_by": [
                       {
                         "type": "formula",
@@ -2430,19 +2422,19 @@
     },
     {
       "name": "Hostname",
-      "prefix": "@computer.hostname",
+      "prefix": "@event.computer.hostname",
       "available_values": [],
       "default": "*"
     },
     {
       "name": "Detection",
-      "prefix": "detection",
+      "prefix": "@event.detection",
       "available_values": [],
       "default": "*"
     },
     {
       "name": "Severity",
-      "prefix": "@severity",
+      "prefix": "@event.severity",
       "available_values": [],
       "default": "*"
     }
