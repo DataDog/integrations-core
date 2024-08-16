@@ -101,7 +101,7 @@ facets:
     groups:
       - Trend Micro Vision One Endpoint Security
     name: File Size
-    path: trend_micro_vision_one_endpoint_secuirty.file_size
+    path: trend_micro_vision_one_endpoint_security.file_size
     source: log
     type: double
     unit:
@@ -111,21 +111,21 @@ facets:
     groups:
       - Trend Micro Vision One Endpoint Security
     name: Priority
-    path: trend_micro_vision_one_endpoint_secuirty.priority
+    path: trend_micro_vision_one_endpoint_security.priority
     source: log
     type: double
   - facetType: range
     groups:
       - Trend Micro Vision One Endpoint Security
     name: Reputation Score
-    path: trend_micro_vision_one_endpoint_secuirty.reputation_score
+    path: trend_micro_vision_one_endpoint_security.reputation_score
     source: log
     type: double
   - facetType: range
     groups:
       - Trend Micro Vision One Endpoint Security
     name: Threat Probability
-    path: trend_micro_vision_one_endpoint_secuirty.threat_probability
+    path: trend_micro_vision_one_endpoint_security.threat_probability
     source: log
     type: double
 pipeline:
@@ -246,12 +246,12 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `fsize` to `trend_micro_vision_one_endpoint_secuirty.file_size`
+      name: Map `fsize` to `trend_micro_vision_one_endpoint_security.file_size`
       enabled: true
       sources:
         - fsize
       sourceType: attribute
-      target: trend_micro_vision_one_endpoint_secuirty.file_size
+      target: trend_micro_vision_one_endpoint_security.file_size
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
@@ -1287,12 +1287,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `cn3` to `trend_micro_vision_one_endpoint_secuirty.priority`
+          name: Map `cn3` to `trend_micro_vision_one_endpoint_security.priority`
           enabled: true
           sources:
             - cn3
           sourceType: attribute
-          target: trend_micro_vision_one_endpoint_secuirty.priority
+          target: trend_micro_vision_one_endpoint_security.priority
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -1500,12 +1500,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `cn3` to `trend_micro_vision_one_endpoint_secuirty.threat_probability`
+          name: Map `cn3` to `trend_micro_vision_one_endpoint_security.threat_probability`
           enabled: true
           sources:
             - cn3
           sourceType: attribute
-          target: trend_micro_vision_one_endpoint_secuirty.threat_probability
+          target: trend_micro_vision_one_endpoint_security.threat_probability
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -2091,12 +2091,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `cn3` to `trend_micro_vision_one_endpoint_secuirty.reputation_score`
+          name: Map `cn3` to `trend_micro_vision_one_endpoint_security.reputation_score`
           enabled: true
           sources:
             - cn3
           sourceType: attribute
-          target: trend_micro_vision_one_endpoint_secuirty.reputation_score
+          target: trend_micro_vision_one_endpoint_security.reputation_score
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false

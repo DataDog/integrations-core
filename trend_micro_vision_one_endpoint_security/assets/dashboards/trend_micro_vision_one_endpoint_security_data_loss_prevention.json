@@ -409,7 +409,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "max",
-                                                "metric": "@trend_micro_vision_one_endpoint_secuirty.file_size"
+                                                "metric": "@trend_micro_vision_one_endpoint_security.file_size"
                                             },
                                             "group_by": [
                                                 {
@@ -418,7 +418,7 @@
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "max",
-                                                        "metric": "@trend_micro_vision_one_endpoint_secuirty.file_size"
+                                                        "metric": "@trend_micro_vision_one_endpoint_security.file_size"
                                                     }
                                                 }
                                             ],
@@ -490,7 +490,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@trend_micro_vision_one_endpoint_secuirty.file_size"
+                                                "metric": "@trend_micro_vision_one_endpoint_security.file_size"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -727,7 +727,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@trend_micro_vision_one_endpoint_secuirty.file_size",
+                                            "field": "@trend_micro_vision_one_endpoint_security.file_size",
                                             "width": "auto"
                                         }
                                     ]

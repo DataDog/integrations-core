@@ -29,13 +29,13 @@ Use out-of-the-box dashboards to visualize detailed insights into system events,
 #### Get Credentials of Trend Micro Vision One Endpoint Security
 
 1. Log in to the Trend Micro Vision One console.
-2. Go to **Endpoint Security** -> **Standard Endpoint Protection**.
-3. Then, Go to **Administration** -> **Settings** -> **Automation API Access Settings**.<br> The Automation API Access Settings screen appears.
+2. Go to **Endpoint Security** > **Standard Endpoint Protection**.
+3. Then, Go to **Administration** > **Settings** > **Automation API Access Settings**.<br> The Automation API Access Settings screen appears.
 4. Click **Add**.<br> The Application Access Settings section appears and displays the following information:
    1. **API URL**: The Host of the Trend Micro Vision One Endpoint Security console
    2. **Application ID**: The Application ID of the Trend Micro Vision One Endpoint Security console
    3. **API key**: The API key of the Trend Micro Vision One Endpoint Security console
-5. Copy and store the API host, Application ID, and App key in a secure location.
+5. Copy and store the API host, Application ID, and API key in a secure location.
 6. Select **Enable application integration using Apex Central Automation APIs**.
 7. Configure the following settings.
    1. **Application name**: Specify an easily identifiable name for the application.
@@ -44,7 +44,7 @@ Use out-of-the-box dashboards to visualize detailed insights into system events,
 
 #### Get Timezone of Trend Micro Vision One console
 
-1. Go to **Administration** > **Console Settings**.
+1. Go to **Administration** (Sidebar) > **Console Settings**.
 2. Check the timezone from **Current console time**.
 3. Ensure this timezone is selected in the integration configuration.
 

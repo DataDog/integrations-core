@@ -1935,7 +1935,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@trend_micro_vision_one_endpoint_secuirty.priority"
+                                                "metric": "@trend_micro_vision_one_endpoint_security.priority"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -2274,7 +2274,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@trend_micro_vision_one_endpoint_secuirty.priority",
+                                            "field": "@trend_micro_vision_one_endpoint_security.priority",
                                             "width": "auto"
                                         },
                                         {
@@ -3332,7 +3332,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@trend_micro_vision_one_endpoint_secuirty.reputation_score"
+                                                "metric": "@trend_micro_vision_one_endpoint_security.reputation_score"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -3682,7 +3682,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@trend_micro_vision_one_endpoint_secuirty.reputation_score",
+                                            "field": "@trend_micro_vision_one_endpoint_security.reputation_score",
                                             "width": "auto"
                                         },
                                         {

@@ -384,7 +384,7 @@ tests:
         source_mac: "54-BF-64-84-7F-09"
         syslog:
           severity: 3
-        trend_micro_vision_one_endpoint_secuirty:
+        trend_micro_vision_one_endpoint_security:
           priority: 1
       message: '"Jul 01 2024 20:20:20 aaaaaa.manage.trendmicro.com CEF:0|Trend Micro|Apex Central|2019|Log|Intrusion Prevention|3|rt=Jul 01 2024 10:10:10 GMT+00:00 dvchost=OSCEClient23 deviceFacility=Apex One act=Log src=20.20.20.20 dst=30.30.30.30 smac=54-BF-64-84-7F-09 spt=89 dmac=54-BF-64-84-7F-19 dpt=449 cn2Label=Mode cn2=0 deviceDirection=Inbound cn3Label=Priority cn3=1 cn4Label=Severity cn4=1 proto=10009 cs2Label=Application_Type cs2=N/A cn1Label=Rule cn1=1009549 cs1Label=Reason/Rule cs1=1009549 - Detected Terminal Services (RDP) Server Traffic - 1 (ATT&CK T1015,T1043,T1076,T1048,T1032,T1071) cnt=1 deviceNtDomain=APEXTMCM dntdom=OSCEDomain1 deviceFacility=Apex One TMCMLogDetectedHost=shost1 TMCMLogDetectedIP=10.10.10.10 devicePayloadId=1C00290C0360-9CDE11EB-D4B8-F51F-C697 TMCMdevicePlatform=Windows 7 6.1 (Build 7601) Service Pack 1"'
       service: "intrusion-prevention"
@@ -438,7 +438,7 @@ tests:
         syslog:
           severity: 3
         system_process: "notepad.exe"
-        trend_micro_vision_one_endpoint_secuirty:
+        trend_micro_vision_one_endpoint_security:
           threat_probability: 81
         usr:
           name: "admin01"

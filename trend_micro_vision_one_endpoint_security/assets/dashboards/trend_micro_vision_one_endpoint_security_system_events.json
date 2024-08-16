@@ -2024,7 +2024,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@trend_micro_vision_one_endpoint_secuirty.threat_probability"
+                                                "metric": "@trend_micro_vision_one_endpoint_security.threat_probability"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -2440,7 +2440,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@trend_micro_vision_one_endpoint_secuirty.threat_probability",
+                                            "field": "@trend_micro_vision_one_endpoint_security.threat_probability",
                                             "width": "auto"
                                         },
                                         {
