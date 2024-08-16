@@ -1,7 +1,7 @@
 # GoDaddy
 
 ## Overview
-GoDaddy is a prominent web hosting and domain registration company that provides a variety of services to help individuals and businesses establish their online presence. A notable aspect of GoDaddy’s product lineup is their SSL certificate services. GoDaddy offers a range of SSL certificate options to suit different needs, including standard SSL for securing one site, Wildcard SSL for securing multiple subdomains, and more advanced solutions for ecommerce sites requiring the highest level of security.
+GoDaddy is a prominent web hosting and domain registration company that provides a variety of services to help individuals and businesses establish their online presence. A notable aspect of GoDaddy is product lineup is their SSL certificate services. GoDaddy offers a range of SSL certificate options to suit different needs, including standard SSL for securing one site, Wildcard SSL for securing multiple subdomains, and more advanced solutions for ecommerce sites requiring the highest level of security.
 
 The GoDaddy integration seamlessly collects metrics from SSL certificates and domains, directing them into Datadog for analysis. This integration provides insights including total certificates, issued certificates, expired certificates, revoked certificates, count of domains associated with each certificate. It features statistics for certificates that are about to expire along with many additional metrics, all accessible through out-of-the-box dashboards and monitors.
 
