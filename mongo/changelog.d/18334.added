@@ -1,0 +1,1 @@
+Add metric `mongodb.stats.views` to report number of views in the database.

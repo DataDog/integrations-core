@@ -190,7 +190,6 @@ def get_agent_host_tags():
     """
     result = []
     host_tags = datadog_agent.get_host_tags()
-    logger.info("natasha testing dups host tags: %s", host_tags)
     if not host_tags:
         return result
     try:
