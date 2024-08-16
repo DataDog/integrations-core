@@ -25,8 +25,8 @@ from .constants import (
     VOLUME_ENCRYPTED_METRIC,
     VOLUME_SIZE_METRIC,
 )
-from .metrics import HISTOGRAM_METRICS, METRICS, RENAME_LABELS_MAP
 from .errors import handle_error
+from .metrics import HISTOGRAM_METRICS, METRICS, RENAME_LABELS_MAP
 
 
 class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
