@@ -503,6 +503,8 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
+integration/trend_micro_vision_one_xdr:
+- trend_micro_vision_one_xdr/**/*
 integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:

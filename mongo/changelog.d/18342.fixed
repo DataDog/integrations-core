@@ -1,0 +1,2 @@
+Fixed a bug where optional MongoDB collection stats metrics were always collected, regardless of configuration.
+
