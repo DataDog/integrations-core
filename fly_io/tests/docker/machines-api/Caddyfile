@@ -1,0 +1,114 @@
+{
+    debug
+    admin :2019
+}
+:8080 {
+    root * /usr/share/caddy/
+    @get_apps {
+        method GET
+        path /v1/apps*
+        expression {uri}.contains('?')
+        expression {uri}.contains('org_slug')
+    }
+    route @get_apps {
+        rewrite * /GET/v1/apps/org_slug=test/response.json
+        file_server
+    }
+    @get_apps_1 {
+        method GET
+        path /v1/apps/example-app-1
+    }
+    route @get_apps_1 {
+        rewrite * /GET/v1/apps/example-app-1/response.json
+        file_server
+    }
+    @get_apps_2 {
+        method GET
+        path /v1/apps/example-app-2
+    }
+    route @get_apps_2 {
+        rewrite * /GET/v1/apps/example-app-2/response.json
+        file_server
+    }
+    @get_apps_3 {
+        method GET
+        path /v1/apps/example-app-3
+    }
+    route @get_apps_3 {
+        rewrite * /GET/v1/apps/example-app-3/response.json
+        file_server
+    }
+    @get_apps_4 {
+        method GET
+        path /v1/apps/example-app-3
+    }
+    route @get_apps_4 {
+        rewrite * /GET/v1/apps/example-app-3/response.json
+        file_server
+    }
+    @get_apps_machines_1 {
+        method GET
+        path /v1/apps/example-app-1/machines
+    }
+    route @get_apps_machines_1 {
+        rewrite * /GET/v1/apps/example-app-1/machines/response.json
+        file_server
+    }
+    @get_apps_machines_2 {
+        method GET
+        path /v1/apps/example-app-2/machines
+    }
+    route @get_apps_machines_2 {
+        rewrite * /GET/v1/apps/example-app-2/machines/response.json
+        file_server
+    }
+    @get_apps_machines_3 {
+        method GET
+        path /v1/apps/example-app-3/machines
+    }
+    route @get_apps_machines_3 {
+        rewrite * /GET/v1/apps/example-app-3/machines/response.json
+        file_server
+    }
+    @get_apps_machines_4 {
+        method GET
+        path /v1/apps/example-app-4/machines
+    }
+    route @get_apps_machines_4 {
+        rewrite * /GET/v1/apps/example-app-4/machines/response.json
+        file_server
+    }
+    @get_apps_volumes_1 {
+        method GET
+        path /v1/apps/example-app-1/volumes
+    }
+    route @get_apps_volumes_1 {
+        rewrite * /GET/v1/apps/example-app-1/volumes/response.json
+        file_server
+    }
+    @get_apps_volumes_2 {
+        method GET
+        path /v1/apps/example-app-2/volumes
+    }
+    route @get_apps_volumes_2 {
+        rewrite * /GET/v1/apps/example-app-2/volumes/response.json
+        file_server
+    }
+    @get_apps_volumes_3 {
+        method GET
+        path /v1/apps/example-app-3/volumes
+    }
+    route @get_apps_volumes_3 {
+        rewrite * /GET/v1/apps/example-app-3/volumes/response.json
+        file_server
+    }
+    @get_apps_volumes_4 {
+        method GET
+        path /v1/apps/example-app-4/volumes
+    }
+    route @get_apps_volumes_4 {
+        rewrite * /GET/v1/apps/example-app-4/volumes/response.json
+        file_server
+    }
+    file_server browse
+}
