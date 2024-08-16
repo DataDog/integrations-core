@@ -25,7 +25,7 @@ from .constants import (
     VOLUME_ENCRYPTED_METRIC,
     VOLUME_SIZE_METRIC,
 )
-from .metrics import METRICS, RENAME_LABELS_MAP
+from .metrics import HISTOGRAM_METRICS, METRICS, RENAME_LABELS_MAP
 
 
 class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -42,6 +42,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         default_endpoint = f"https://api.fly.io/prometheus/{self.org_slug}/federate?match[]={encoded_match_string}"
         self.openmetrics_endpoint = self.instance.get('openmetrics_endpoint', default_endpoint)
         self.instance['openmetrics_endpoint'] = self.openmetrics_endpoint
+        self.check_initializations.append(self.configure_additional_transformers)
 
     def get_default_config(self):
 
@@ -51,6 +52,23 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             'rename_labels': RENAME_LABELS_MAP,
             'hostname_label': 'instance',
         }
+
+    def configure_additional_transformers(self):
+        metric_transformer = self.scrapers[self.openmetrics_endpoint].metric_transformer
+        metric_transformer.add_custom_transformer(
+            '|'.join(f'{metric}' for metric in HISTOGRAM_METRICS.keys()),
+            self.configure_histogram_transformer(),
+            pattern=True,
+        )
+
+    def configure_histogram_transformer(self):
+        def histogram_transformer(metric, sample_data, _runtime_data):
+            metric_remapped = HISTOGRAM_METRICS[metric.name]
+            self.log.warning("found metric %s, %s", metric.name, metric_remapped)
+            for sample, tags, hostname in sample_data:
+                self.count(metric_remapped, sample.value, tags=tags, hostname=hostname)
+
+        return histogram_transformer
 
     def _get_app_status(self, app_name):
         self.log.debug("Getting app status for %s", app_name)

@@ -27,7 +27,6 @@ from .metrics import (
 
 @pytest.mark.usefixtures('mock_http_get')
 def test_check(dd_run_check, aggregator, instance):
-
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
 
