@@ -109,7 +109,7 @@ def main():
 
         # Fetch or build wheels
         command_args = [
-            str(python_path), '-m', 'pip', '-v', 'wheel',
+            str(python_path), '-m', 'pip', 'wheel',
             '-r', str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir', str(staged_wheel_dir),
             '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
