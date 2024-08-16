@@ -10,6 +10,10 @@ if six.PY3:
 
     from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
+    """
+    Cisco ACI Response Models
+    """
+
     class NodeAttributes(BaseModel):
         address: Optional[str] = None
         fabric_st: Optional[str] = Field(default=None, alias="fabricSt")
@@ -56,6 +60,10 @@ if six.PY3:
                 if 'ethpmPhysIf' in child:
                     return EthpmPhysIf(**child['ethpmPhysIf'])
             return None
+
+    """
+    NDM Models
+    """
 
     class DeviceMetadata(BaseModel):
         id: Optional[str] = Field(default=None)
@@ -158,3 +166,13 @@ if six.PY3:
         devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
         interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
         collect_timestamp: Optional[int] = None
+        size: Optional[int] = Field(default=0, exclude=True)
+
+        model_config = ConfigDict(validate_assignment=True, use_enum_values=True)
+
+        def append_metadata(self, metadata: DeviceMetadata | InterfaceMetadata):
+            if isinstance(metadata, DeviceMetadata):
+                self.devices.append(metadata)
+            if isinstance(metadata, InterfaceMetadata):
+                self.interfaces.append(metadata)
+            self.size += 1
