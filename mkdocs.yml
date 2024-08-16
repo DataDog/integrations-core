@@ -115,6 +115,7 @@ plugins:
             show_if_no_docstring: true
             show_root_heading: true
             show_source: true
+            docstring_style: google
   - pdf-export:
       enabled_if_env: ENABLE_PDF_SITE_EXPORT
 

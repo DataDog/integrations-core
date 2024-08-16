@@ -26,6 +26,7 @@ from .constants import (
     VOLUME_SIZE_METRIC,
 )
 from .metrics import HISTOGRAM_METRICS, METRICS, RENAME_LABELS_MAP
+from .errors import handle_error
 
 
 class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -69,19 +70,17 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         return histogram_transformer
 
+    @handle_error
     def _get_app_status(self, app_name):
         self.log.debug("Getting app status for %s", app_name)
         app_details_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}"
         response = self.http.get(app_details_endpoint)
-        try:
-            response.raise_for_status()
-            app = response.json()
-            app_status = app.get("status")
-            return app_status
-        except Exception:
-            self.log.info("Failed to collect app status for app %s", app_name)
-            return None
+        response.raise_for_status()
+        app = response.json()
+        app_status = app.get("status")
+        return app_status
 
+    @handle_error
     def _submit_machine_guest_metrics(self, guest, tags, machine_id):
         self.log.debug("Getting machine guest metrics for %s", machine_id)
         num_cpus = guest.get("cpus")
@@ -100,12 +99,14 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if memory is not None:
             self.gauge(MACHINE_MEM_METRIC, value=memory, tags=tags, hostname=machine_id)
 
+    @handle_error
     def _submit_machine_init_metrics(self, machine_init, tags, machine_id):
         self.log.debug("Getting machine init metrics for %s", machine_id)
         swap_size_mb = machine_init.get("swap_size_mb")
         if swap_size_mb is not None:
             self.gauge(MACHINE_SWAP_SIZE_METRIC, value=swap_size_mb, tags=tags, hostname=machine_id)
 
+    @handle_error
     def _collect_volumes_for_app(self, app_name, app_tags):
         self.log.debug("Getting volumes for app %s in org %s", app_name, self.org_slug)
         volumes_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/volumes"
@@ -160,6 +161,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             if blocks_avail is not None:
                 self.gauge(VOLUME_BLOCKS_AVAIL_METRIC, value=blocks_avail, tags=all_tags)
 
+    @handle_error
     def _collect_machines_for_app(self, app_name, app_tags):
         self.log.debug("Getting machines for app %s in org %s", app_name, self.org_slug)
         machines_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/machines"
@@ -201,6 +203,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if len(external_host_tags) > 0:
             self.set_external_tags(external_host_tags)
 
+    @handle_error
     def _collect_app_metrics(self):
         self.log.debug("Getting apps for org %s", self.org_slug)
         apps_endpoint = f"{self.machines_api_endpoint}/v1/apps"
