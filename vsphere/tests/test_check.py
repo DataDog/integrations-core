@@ -753,6 +753,21 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
 def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_check):
     realtime_instance['get_vsan'] = True
     check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    mock_cluster = MagicMock()
+    mock_host = MagicMock()
+    mock_disk = MagicMock()
+    mock_infrastructure_cache = MagicMock()
+    check.infrastructure_cache = mock_infrastructure_cache
+    mock_infrastructure_cache.get_mors.return_value = [mock_cluster]
+    mock_cluster.name = 'hello'
+    mock_cluster.configurationEx.vsanConfigInfo.enabled = True
+    mock_cluster.host = [mock_host]
+    mock_host.name = 'world'
+    mock_host.configManager.vsanSystem.config.clusterInfo.nodeUuid = 'TestHostUUID'
+    mock_host.configManager.vsanSystem.QueryDisksForVsan.return_value = [mock_disk]
+    mock_disk.vsanUuid = 'disk'
+
     dd_run_check(check)
 
     aggregator.assert_metric('vsphere.vsan.cluster.time', metric_type=aggregator.GAUGE, count=1)
@@ -768,5 +783,5 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
     aggregator.assert_metric(
         'vsphere.vsan.disk.example_disk_metric',
         count=1,
-        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:new', 'vsphere_disk:world'],
+        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world', 'vsphere_disk:disk'],
     )

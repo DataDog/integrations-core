@@ -157,7 +157,7 @@ class MockedAPI(object):
                         MagicMock(
                             metricId=MagicMock(
                                 label='example_disk_metric',
-                                dynamicProperty=[{0: 'disk', 1: 'hello', 2: 'new', 3: 'world'}],
+                                dynamicProperty=[{0: 'disk', 1: 'hello', 2: 'world', 3: 'disk'}],
                             )
                         )
                     ]
