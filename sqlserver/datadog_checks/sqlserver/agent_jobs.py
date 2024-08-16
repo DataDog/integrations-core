@@ -7,7 +7,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION, STATIC_INFO_RDS
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS, STATIC_INFO_VERSION
 
 try:
     import datadog_agent
@@ -158,17 +158,20 @@ FROM msdb.dbo.syssessions
 ORDER BY session_id DESC
 """
 
+
 def agent_check_getter(self):
     return self._check
 
 
-class SqlserverAgentHistory(DBMAsyncJob):
+class SqlserverAgentJobs(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
-        collection_interval = float(self._config.agent_jobs_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL))
+        collection_interval = float(
+            self._config.agent_jobs_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+        )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
@@ -177,7 +180,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
             history_row_limit = DEFAULT_ROW_LIMIT
         self.history_row_limit = history_row_limit
         self._last_collection_time = int(time.time())
-        super(SqlserverAgentHistory, self).__init__(
+        super(SqlserverAgentJobs, self).__init__(
             check,
             run_sync=True,
             enabled=self._config.agent_jobs_config.get('enabled', False),
@@ -213,7 +216,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
 
         if self._check.static_info_cache.get(STATIC_INFO_RDS, True):
             return duration_rows, step_info_rows, []
-        
+
         self.log.debug("Running query [%s]", AGENT_ACTIVE_SESSION_DURATION_QUERY)
         cursor.execute(AGENT_ACTIVE_SESSION_DURATION_QUERY)
         columns = [i[0] for i in cursor.description]
@@ -221,7 +224,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         session_rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
         return duration_rows, step_info_rows, session_rows
-    
+
     def _to_metrics_payload(self, duration_rows, step_info_rows, session_rows):
         return {
             'host': self._check.resolved_hostname,
@@ -238,7 +241,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
             'step_info_rows': step_info_rows,
             'session_rows': session_rows,
         }
-    
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
         last_collection_time_filter = "{last_collection_time}".format(last_collection_time=self._last_collection_time)
@@ -293,4 +296,6 @@ class SqlserverAgentHistory(DBMAsyncJob):
                 duration_rows, step_info_rows, session_rows = self._collect_metrics_rows(cursor)
                 metrics_payload = self._to_metrics_payload(duration_rows, step_info_rows, session_rows)
                 self.log.debug(metrics_payload)
-                self._check.database_monitoring_query_metrics(json.dumps(metrics_payload, default=default_json_event_encoding))
+                self._check.database_monitoring_query_metrics(
+                    json.dumps(metrics_payload, default=default_json_event_encoding)
+                )

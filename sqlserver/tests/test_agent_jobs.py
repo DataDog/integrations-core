@@ -10,10 +10,7 @@ import pytest
 
 from datadog_checks.sqlserver import SQLServer
 
-from .common import (
-    CHECK_NAME,
-    EXPECTED_AGENT_JOBS_METRICS_COMMON,
-)
+from .common import CHECK_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -171,52 +168,52 @@ AGENT_ACTIVITY_DURATION_QUERY = """\
 """
 
 AGENT_ACTIVITY_STEPS_QUERY = """\
-    WITH ActiveJobs AS (
-        SELECT
-            job_id,
-            last_executed_step_id
-        FROM msdb.dbo.sysjobactivity AS ja
-        WHERE ja.start_execution_date IS NOT NULL
-            AND ja.stop_execution_date IS NULL
-            AND session_id = (
-                SELECT MAX(session_id)
-                FROM msdb.dbo.sysjobactivity
-            )
-    ),
-    CompletedSteps AS (
-        SELECT
-            sjh1.job_id,
-            sjh1.step_id,
-            sjh1.step_name,
-            sjh1.run_status
-        FROM msdb.dbo.sysjobhistory AS sjh1
-        WHERE sjh1.instance_id = (
-            SELECT MAX(instance_id)
-            FROM msdb.dbo.sysjobhistory
-            WHERE job_id = sjh1.job_id
-            AND step_id = sjh1.step_id
-        )
-    )
+WITH ActiveJobs AS (
     SELECT
-        j.name,
-        CAST(aj.job_id AS char(36)) AS job_id,
-        cs.step_name,
-        cs.step_id,
-        CASE cs.run_status
-            WHEN 0 THEN 'Failed'
-            WHEN 1 THEN 'Succeeded'
-            WHEN 2 THEN 'Retry'
-            WHEN 3 THEN 'Canceled'
-            WHEN 4 THEN 'In Progress'
-            ELSE 'Unknown'
-        END AS step_run_status,
-        1 AS step_info
-    FROM ActiveJobs AS aj
-    INNER JOIN CompletedSteps AS cs
-    ON aj.job_id = cs.job_id
-        AND aj.last_executed_step_id = cs.step_id
-    INNER JOIN msdb.dbo.sysjobs AS j
-    ON j.job_id = aj.job_id
+        job_id,
+        last_executed_step_id
+    FROM msdb.dbo.sysjobactivity AS ja
+    WHERE ja.start_execution_date IS NOT NULL
+        AND ja.stop_execution_date IS NULL
+        AND session_id = (
+            SELECT MAX(session_id)
+            FROM msdb.dbo.sysjobactivity
+        )
+),
+CompletedSteps AS (
+    SELECT
+        sjh1.job_id,
+        sjh1.step_id,
+        sjh1.step_name,
+        sjh1.run_status
+    FROM msdb.dbo.sysjobhistory AS sjh1
+    WHERE sjh1.instance_id = (
+        SELECT MAX(instance_id)
+        FROM msdb.dbo.sysjobhistory
+        WHERE job_id = sjh1.job_id
+        AND step_id = sjh1.step_id
+    )
+)
+SELECT
+    j.name,
+    CAST(aj.job_id AS char(36)) AS job_id,
+    cs.step_name,
+    cs.step_id,
+    CASE cs.run_status
+        WHEN 0 THEN 'Failed'
+        WHEN 1 THEN 'Succeeded'
+        WHEN 2 THEN 'Retry'
+        WHEN 3 THEN 'Canceled'
+        WHEN 4 THEN 'In Progress'
+        ELSE 'Unknown'
+    END AS step_run_status,
+    1 AS step_info
+FROM ActiveJobs AS aj
+INNER JOIN CompletedSteps AS cs
+ON aj.job_id = cs.job_id
+    AND aj.last_executed_step_id = cs.step_id
+INNER JOIN msdb.dbo.sysjobs AS j
+ON j.job_id = aj.job_id
 """
 
 JOB_CREATION_QUERY = """\
@@ -436,7 +433,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
             results = cursor.fetchall()
             assert len(results) >= 1, "should have 1 entry in activity and potentially built in job activity"
     check = SQLServer(CHECK_NAME, {}, [agent_jobs_instance])
-    check.agent_history._last_collection_time = now - 1
+    check.agent_jobs._last_collection_time = now - 1
     time.sleep(1)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
@@ -463,9 +460,37 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     assert history_row['run_duration_seconds'] is not None
     assert history_row['step_run_status']
     assert history_row['message']
-    for mname in EXPECTED_AGENT_JOBS_METRICS_COMMON:
-        aggregator.assert_metric(mname, count=1)
-    assert check.agent_history._last_collection_time > now, "should update last collection time appropriately"
+
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    job_metrics = [e for e in dbm_metrics if (e.get('kind', None) == 'agent_jobs_metrics')]
+    assert len(job_metrics) == 1, "should have exactly one job metrics payload"
+    job_metrics_payload = job_metrics[0]
+    # assert that all main fields are present
+    assert job_metrics_payload['host'] == "stubbed.hostname", "wrong hostname"
+    assert job_metrics_payload['kind'] == "agent_jobs_metrics", "wrong kind"
+    assert job_metrics_payload['ddagentversion'], "missing ddagentversion"
+    duration_rows = job_metrics_payload['duration_rows']
+    assert len(duration_rows) == 1, "should have one row of activity for duration"
+    duration_metric = duration_rows[0]
+    assert duration_metric['name']
+    assert duration_metric['job_id']
+    assert duration_metric['duration_seconds'] is not None
+    step_info_rows = job_metrics_payload['step_info_rows']
+    assert len(step_info_rows) == 1, "should have one row of activity for step_info"
+    step_info_metric = step_info_rows[0]
+    assert step_info_metric['name']
+    assert step_info_metric['job_id']
+    assert step_info_metric['step_name']
+    assert step_info_metric['step_id'] is not None
+    assert step_info_metric['step_run_status']
+    assert step_info_metric['step_info']
+    session_rows = job_metrics_payload['session_rows']
+    assert len(session_rows) == 1, "should have one row for session length"
+    session_metric = session_rows[0]
+    assert session_metric['session_id'] is not None
+    assert session_metric['duration_seconds']
+
+    assert check.agent_jobs._last_collection_time > now, "should update last collection time appropriately"
     time.sleep(2)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")

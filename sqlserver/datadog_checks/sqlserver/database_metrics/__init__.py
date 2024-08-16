@@ -4,4 +4,3 @@
 from .database_backup_metrics import SqlserverDatabaseBackupMetrics
 from .db_fragmentation_metrics import SqlserverDBFragmentationMetrics
 from .index_usage_metrics import SqlserverIndexUsageMetrics
-from .database_agent_metrics import SqlserverAgentMetrics
