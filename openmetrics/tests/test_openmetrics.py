@@ -154,7 +154,6 @@ def test_default_go_metrics(aggregator, dd_run_check, request, poll_mock_fixture
     request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_go_metrics])
-    # breakpoint()
     dd_run_check(check)
 
     aggregator.assert_metric(
@@ -208,6 +207,7 @@ def test_default_metrics_init_config(aggregator, dd_run_check, request, poll_moc
     request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {"collect_default_metrics": True}, [instance_new])
+
     dd_run_check(check)
 
     aggregator.assert_metric(
