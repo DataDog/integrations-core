@@ -43,8 +43,6 @@ instance_go_metrics = {
         'metric2',
         'counter1',
         'counter2',
-        'go_memstats_frees_total',
-        'go_memstats_heap_released_bytes',
     ],
     'collect_histogram_buckets': True,
     'collect_default_metrics': True,
@@ -156,6 +154,7 @@ def test_default_go_metrics(aggregator, dd_run_check, request, poll_mock_fixture
     request.getfixturevalue(poll_mock_fixture)
 
     check = OpenMetricsCheck('openmetrics', {}, [instance_go_metrics])
+    # breakpoint()
     dd_run_check(check)
 
     aggregator.assert_metric(
