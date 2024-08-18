@@ -21,7 +21,7 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-
+import time
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 DEFAULT_DEADLOCKS_COLLECTION_INTERVAL = 5
 MAX_PAYLOAD_BYTES = 19e6
