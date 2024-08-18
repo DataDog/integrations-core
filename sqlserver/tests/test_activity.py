@@ -31,7 +31,7 @@ try:
     import pyodbc
 except ImportError:
     pyodbc = None
-
+import time
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
 
@@ -751,8 +751,8 @@ def _get_conn_for_user(instance_docker, user, _autocommit=False):
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], user, "Password12!"
     )
-    conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=_autocommit)
-    conn.timeout = DEFAULT_TIMEOUT
+    conn = pyodbc.connect(conn_str, timeout=1, autocommit=_autocommit)
+    conn.timeout = 1
     return conn
 
 
@@ -948,35 +948,31 @@ def test_deadlocks(dd_run_check, init_config, dbm_instance):
             print(e)
             pass
         conn.commit()
-    bob_conn = _get_conn_for_user(dbm_instance, 'bob')
-    fred_conn = _get_conn_for_user(dbm_instance, 'fred')
-    executor = concurrent.futures.thread.ThreadPoolExecutor(2)
-    event1 = Event()
-    event2 = Event()
-
-    futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
-    futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
-    futures_first_query.result()
-    futures_second_query.result()
-    # Make sure deadlock is killed and db is updated
-    time.sleep(1)
-
-    bob_conn.close()
-    fred_conn.close()
-    bob_conn = _get_conn_for_user(dbm_instance, 'bob')
-    fred_conn = _get_conn_for_user(dbm_instance, 'fred')
-    event3 = Event()
-    event4 = Event()
-    futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event3, event4)
-    futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event3, event4)
-    futures_first_query.result()
-    futures_second_query.result()
-
-    time.sleep(1)
-
-    bob_conn.close()
-    fred_conn.close()
-    executor.shutdown()
+    def create_deadlock():
+        bob_conn = _get_conn_for_user(dbm_instance, 'bob')
+        fred_conn = _get_conn_for_user(dbm_instance, 'fred')
+    
+        executor = concurrent.futures.thread.ThreadPoolExecutor(2)
+        event1 = Event()
+        event2 = Event()
+    
+        futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
+        futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
+        futures_first_query.result()
+        futures_second_query.result()
+        # Make sure deadlock is killed and db is updated
+        time.sleep(1)
+    
+        bob_conn.close()
+        fred_conn.close()
+        executor.shutdown()
+    s = time.time()
+    for i in range(0,700):
+        if i % 70 == 0:
+            spent_from_start = time.time() - s
+            #pdb.set_trace()
+            print("created some deadlocks {}", spent_from_start)
+        create_deadlock()
     dd_run_check(sqlserver_check)
     pdb.set_trace()
     print("Set trace before end to keep sqlserver alive")

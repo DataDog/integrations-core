@@ -239,6 +239,7 @@ class SqlserverActivity(DBMAsyncJob):
         if self._deadlocks_collection_enabled and elapsed_time_deadlocks >= self._deadlocks_collection_interval:
             self._last_deadlocks_collection_time = time.time()
             try:
+                self._log.error("EXECUTING COLLECT DEADLOCKS")
                 self._collect_deadlocks()
             except Exception as e:
                 self._log.error(
@@ -250,14 +251,16 @@ class SqlserverActivity(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_deadlocks(self):
+        start_time = time.time()
         deadlock_xmls = self._deadlocks.collect_deadlocks()
         if len(deadlock_xmls) == 0:
             self._log.error("Collected 0 DEADLOCKS")
-            return 
+            return
         deadlocks_event = self._create_deadlock_event(deadlock_xmls)
         self._log.error("DEADLOCK EVENTS TO BE SENT: {}".format(deadlocks_event))
         payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
         self._check.database_monitoring_query_activity(payload)
+        self._log.error("DEADLOCK COlLECTED {} in {} time".format(len(deadlock_xmls), time.time() - start_time))
         
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
