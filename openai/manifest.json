@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Optimize OpenAI usage: cost estimates, prompt sampling and performance metrics.",
+    "description": "Optimize OpenAI usage (e.g.cost estimates, prompt sampling, performance metrics) or use your OpenAI account for LLM Observability features.",
     "title": "OpenAI",
     "media": [
       {
