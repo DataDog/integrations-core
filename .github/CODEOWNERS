@@ -83,9 +83,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /kubernetes/                                    @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
-/kubernetes_cluster_autoscalar/                 @DataDog/container-integrations @DataDog/agent-integrations 
-/kubernetes_cluster_autoscalar/*.md             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
-/kubernetes_cluster_autoscalar/manifest.json    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubernetes_cluster_autoscaler/                 @DataDog/container-integrations @DataDog/agent-integrations 
+/kubernetes_cluster_autoscaler/*.md             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubernetes_cluster_autoscaler/manifest.json    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes_state/                              @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes_state/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes_state/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
