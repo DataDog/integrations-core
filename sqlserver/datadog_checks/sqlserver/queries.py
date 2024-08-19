@@ -214,40 +214,31 @@ GROUP BY
     FK.name, FK.parent_object_id, FK.referenced_object_id;
 """
 
-DETECT_DEADLOCK_QUERY2 = """
-DECLARE @limit INT = ?;
-SELECT TOP (@limit)
-    xdr.value('@timestamp', 'datetime') AS [Date],
-    xdr.query('.') AS [Event_Data]
+CREATE_DEADLOCK_TEMP_TABLE_QUERY = """
+SELECT 
+    CAST([target_data] AS XML) AS Target_Data
+INTO 
+    TempXMLDatadogData
 FROM 
-    (SELECT CAST([target_data] AS XML) AS Target_Data
-            FROM sys.dm_xe_session_targets AS xt
-            INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
-            WHERE xs.name = N'system_health'
-              AND xt.target_name = N'ring_buffer'
-    ) AS XML_Data
-CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
-WHERE xdr.value('@timestamp', 'datetime') > ?
-ORDER BY [Date] DESC;
+    sys.dm_xe_session_targets AS xt
+INNER JOIN 
+    sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
+WHERE 
+    xs.name = N'system_health'
+AND 
+    xt.target_name = N'ring_buffer';
 """
 
 DETECT_DEADLOCK_QUERY = """
-DECLARE @limit INT = ?;
-SELECT TOP (@limit)
-    xdr.value('@timestamp', 'datetime') AS [Date],
-    xdr.query('.') AS [Event_Data]
-FROM
-    sys.dm_xe_sessions AS xs 
-    INNER JOIN sys.dm_xe_session_targets AS xt
-        ON xs.address = xt.event_session_address
-    CROSS APPLY (SELECT CAST(xt.target_data AS XML) AS Target_Data) AS XML_Data
-    CROSS APPLY XML_Data.Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
+SELECT TOP (?) 
+    xdr.value('@timestamp', 'datetime') AS [Date], xdr.query('.') AS [Event_Data]
+FROM 
+    TempXMLDatadogData
+CROSS APPLY 
+    Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
 WHERE 
-    xs.name = N'DeadlockMonitoring'
-    AND xt.target_name = N'ring_buffer'
-    AND xdr.value('@timestamp', 'datetime') > ?
+    xdr.value('@timestamp', 'datetime') > ?
 ORDER BY [Date] DESC;
-OPTION (FORCE ORDER);
 """
 
 def get_query_ao_availability_groups(sqlserver_major_version):

@@ -8,6 +8,7 @@ from datetime import datetime
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
 
 from datadog_checks.sqlserver.queries import (
+    CREATE_DEADLOCK_TEMP_TABLE_QUERY,
     DETECT_DEADLOCK_QUERY,
 )
 #TODO temp imports:
@@ -50,6 +51,7 @@ class Deadlocks:
     def collect_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                cursor.execute(CREATE_DEADLOCK_TEMP_TABLE_QUERY)
                 cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, self._last_deadlock_timestamp))
                 results = cursor.fetchall()
                 last_deadlock_datetime = datetime.strptime(self._last_deadlock_timestamp, '%Y-%m-%d %H:%M:%S.%f')
