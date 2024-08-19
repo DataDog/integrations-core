@@ -374,3 +374,10 @@
       - <TAG_SUFFIX$>
 - template: instances/http
 - template: instances/default
+- name: collect_default_metrics
+  description: |
+    Enable collection of default Go malloc and process metrics 
+  value:
+    example: false
+    type: boolean
+    display_default: True
