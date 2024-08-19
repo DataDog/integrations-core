@@ -197,7 +197,7 @@ class SqlserverAgentJobs(DBMAsyncJob):
         pass
 
     def run_job(self):
-        self.collect_agent_history()
+        self.collect_agent_jobs()
 
     def _collect_metrics_rows(self, cursor):
         self.log.debug("collecting sql server agent jobs activity")
@@ -280,7 +280,7 @@ class SqlserverAgentJobs(DBMAsyncJob):
         return event
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def collect_agent_history(self):
+    def collect_agent_jobs(self):
         """
         Collects all current agent activity for the SQLServer intance.
         :return:
