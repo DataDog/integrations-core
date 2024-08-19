@@ -21,6 +21,7 @@ def test_mongo_operation_samples_standalone(aggregator, instance_integration_clu
     instance_integration_cluster['dbm'] = True
     instance_integration_cluster['operation_samples'] = {'enabled': True, 'run_sync': True}
     instance_integration_cluster['slow_operations'] = {'enabled': False}
+    instance_integration_cluster['schemas'] = {'enabled': False}
 
     mongo_check = check(instance_integration_cluster)
     with mock_pymongo("standalone"):
@@ -57,6 +58,7 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
     instance_integration_cluster['dbm'] = True
     instance_integration_cluster['operation_samples'] = {'enabled': True, 'run_sync': True}
     instance_integration_cluster['slow_operations'] = {'enabled': False}
+    instance_integration_cluster['schemas'] = {'enabled': False}
 
     mongo_check = check(instance_integration_cluster)
     aggregator.reset()
@@ -89,6 +91,7 @@ def test_mongo_operation_samples_arbiter(aggregator, instance_arbiter, check, dd
     instance_arbiter['cluster_name'] = 'my_cluster'
     instance_arbiter['operation_samples'] = {'enabled': True, 'run_sync': True}
     instance_arbiter['slow_operations'] = {'enabled': False}
+    instance_arbiter['schemas'] = {'enabled': False}
 
     mongo_check = check(instance_arbiter)
     aggregator.reset()

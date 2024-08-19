@@ -111,6 +111,9 @@ class MongoApi(object):
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
+    def index_information(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].index_information(session=session)
+
     def _is_auth_required(self, options):
         # Check if the node is an arbiter. If it is, usually it does not require authentication.
         # However this is a best-effort check as the replica set might focce authentication.
@@ -134,6 +137,9 @@ class MongoApi(object):
 
     def get_log_data(self, session=None):
         return self['admin'].command("getLog", "global", session=session)
+
+    def sample(self, db_name, coll_name, sample_size, session=None):
+        return self[db_name][coll_name].aggregate([{"$sample": {"size": sample_size}}], session=session)
 
     def get_cmdline_opts(self):
         return self["admin"].command("getCmdLineOpts")["parsed"]

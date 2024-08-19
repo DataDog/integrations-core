@@ -1,0 +1,50 @@
+{
+    "_id_": {
+        "v": 2,
+        "key": [
+            [
+                "_id",
+                1
+            ]
+        ]
+    },
+    "name_1": {
+        "v": 2,
+        "key": [
+            [
+                "name",
+                1
+            ]
+        ],
+        "background": true
+    },
+    "address.location_2dsphere": {
+        "v": 2,
+        "key": [
+            [
+                "address.location",
+                "2dsphere"
+            ]
+        ],
+        "background": true,
+        "2dsphereIndexVersion": 3
+    },
+    "property_type_1_room_type_1_beds_1": {
+        "v": 2,
+        "key": [
+            [
+                "property_type",
+                1
+            ],
+            [
+                "room_type",
+                1
+            ],
+            [
+                "beds",
+                1
+            ]
+        ],
+        "background": true
+    }
+}

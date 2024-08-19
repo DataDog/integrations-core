@@ -44,12 +44,19 @@ class MockedCollection(object):
 
                 self.find = MagicMock(return_value=MagicMock(sort=mocked_sort))
 
+    def index_information(self, session=None, **kwargs):
+        with open(os.path.join(HERE, "fixtures", "index_information"), 'r') as f:
+            return json.load(f, object_hook=json_util.object_hook)
+
     def aggregate(self, pipeline, session=None, **kwargs):
         if '$indexStats' in pipeline[0]:
             with open(os.path.join(HERE, "fixtures", f"$indexStats-{self._coll_name}"), 'r') as f:
                 return json.load(f, object_hook=json_util.object_hook)
         elif '$collStats' in pipeline[0]:
             with open(os.path.join(HERE, "fixtures", f"$collStats-{self._coll_name}"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
+        elif '$sample' in pipeline[0]:
+            with open(os.path.join(HERE, "fixtures", f"$sample-{self._coll_name}"), 'r') as f:
                 return json.load(f, object_hook=json_util.object_hook)
 
 
