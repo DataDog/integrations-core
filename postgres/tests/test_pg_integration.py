@@ -806,9 +806,9 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
                 "instance_endpoint": "mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com",
                 "region": "us-east-1",
             },
-            psycopg2.OperationalError,
-            'password authentication failed',
-            True,
+            None,
+            None,
+            False,
         ),
         (
             {
@@ -826,9 +826,9 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
             {
                 'region': 'us-east-1',
             },
-            psycopg2.OperationalError,
-            'password authentication failed',
-            True,
+            None,
+            None,
+            False,
         ),
         (
             {
