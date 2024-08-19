@@ -69,7 +69,6 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
-            agent_tags=get_agent_host_tags(),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
 
@@ -174,7 +173,7 @@ class PostgresConfig:
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
 
-    def _build_tags(self, custom_tags, agent_tags, propagate_agent_tags=True):
+    def _build_tags(self, custom_tags, propagate_agent_tags=False):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
@@ -197,8 +196,12 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
 
-        if propagate_agent_tags and agent_tags:
-            tags.extend(agent_tags)
+        if propagate_agent_tags:
+            try:
+                agent_tags = get_agent_host_tags()
+                tags.extend(agent_tags)
+            except Exception as e:
+                raise ConfigurationError('propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e))
         return tags
 
     @staticmethod
