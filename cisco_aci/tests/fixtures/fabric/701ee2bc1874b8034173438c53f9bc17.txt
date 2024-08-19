@@ -1,0 +1,32 @@
+{
+    "totalCount": "1",
+    "imdata": [
+        {
+            "netflowExporterPol": {
+                "attributes": {
+                    "annotation": "",
+                    "childAction": "",
+                    "descr": "",
+                    "dn": "uni/infra/exporterpol-nf",
+                    "dscp": "CS5",
+                    "dstAddr": "172.18.239.12",
+                    "dstPort": "2055",
+                    "extMngdBy": "",
+                    "lcOwn": "local",
+                    "modTs": "2024-07-03T19:44:03.101+00:00",
+                    "monPolDn": "uni/fabric/monfab-default",
+                    "name": "nf",
+                    "nameAlias": "",
+                    "ownerKey": "",
+                    "ownerTag": "",
+                    "sourceIpType": "custom-src-ip",
+                    "srcAddr": "1.1.0.0/20",
+                    "status": "",
+                    "uid": "15374",
+                    "userdom": ":all:",
+                    "ver": "v9"
+                }
+            }
+        }
+    ]
+}
