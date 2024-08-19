@@ -18,13 +18,12 @@
 				"warning": 0.7
 			},
 			"notify_audit": false,
-			"on_missing_data": "default",
 			"include_tags": true,
 			"new_group_delay": 60
 		},
 		"priority": 3
 	},
 	"tags": [
-		"integration:aws_neuron"
+		"integration:aws-neuron"
 	]
 }
