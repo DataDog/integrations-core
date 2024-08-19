@@ -90,7 +90,7 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
-    ## Configure ICMP pings
+    ## Configure ICMP pings.
     ## The network device is pinged with these settings each time the SNMP
     ## check is run.
     ##
