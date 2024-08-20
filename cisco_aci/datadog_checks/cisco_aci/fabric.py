@@ -85,9 +85,11 @@ class Fabric:
             node_attrs = node.get('attributes', {})
             node_id = node_attrs.get('id', {})
 
+            device_hostname = node_attrs.get('name', '')
+
             user_tags = self.instance.get('tags', [])
             tags = self.tagger.get_fabric_tags(n, 'fabricNode')
-            tags.extend(ndm.common_tags(node_attrs.get('address', ''), hostname, self.namespace))
+            tags.extend(ndm.common_tags(node_attrs.get('address', ''), device_hostname, self.namespace))
             self.external_host_tags[hostname] = tags + self.check_tags + user_tags
 
             pod_id = helpers.get_pod_from_dn(node_attrs['dn'])
@@ -115,8 +117,9 @@ class Fabric:
     def process_eth(self, node):
         self.log.info("processing ethernet ports for %s", node.get('id'))
         hostname = helpers.get_fabric_hostname(node)
+        device_hostname = node.get('name', '')
         pod_id = helpers.get_pod_from_dn(node['dn'])
-        common_tags = ndm.common_tags(node.get('address', ''), hostname, self.namespace)
+        common_tags = ndm.common_tags(node.get('address', ''), device_hostname, self.namespace)
         try:
             eth_list = self.api.get_eth_list(pod_id, node['id'])
         except (exceptions.APIConnectionException, exceptions.APIParsingException):
@@ -130,7 +133,7 @@ class Fabric:
             if self.ndm_enabled():
                 interface_metadata = ndm.create_interface_metadata(e, node.get('address', ''), self.namespace)
                 interfaces.append(interface_metadata)
-                self.submit_interface_status_metric(interface_metadata.status, tags, hostname)
+                self.submit_interface_status_metric(interface_metadata.status, tags, device_hostname)
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)

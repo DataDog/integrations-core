@@ -33,28 +33,32 @@ def test_fabric_mocked(aggregator):
     hn102 = 'pod-1-node-102'
     hn201 = 'pod-1-node-201'
     hn202 = 'pod-1-node-202'
+    device_hn101 = 'leaf101'
+    device_hn102 = 'leaf102'
+    device_hn201 = 'spine201'
+    device_hn202 = 'spine202'
     namespace = 'default'
 
     device_tags_101 = [
-        'device_hostname:{}'.format(hn101),
+        'device_hostname:{}'.format(device_hn101),
         'device_id:{}:{}'.format(namespace, node101),
         'device_ip:{}'.format(node101),
         'device_namespace:{}'.format(namespace),
     ]
     device_tags_102 = [
-        'device_hostname:{}'.format(hn102),
+        'device_hostname:{}'.format(device_hn102),
         'device_id:{}:{}'.format(namespace, node102),
         'device_ip:{}'.format(node102),
         'device_namespace:{}'.format(namespace),
     ]
     device_tags_201 = [
-        'device_hostname:{}'.format(hn201),
+        'device_hostname:{}'.format(device_hn201),
         'device_id:{}:{}'.format(namespace, node201),
         'device_ip:{}'.format(node201),
         'device_namespace:{}'.format(namespace),
     ]
     device_tags_202 = [
-        'device_hostname:{}'.format(hn202),
+        'device_hostname:{}'.format(device_hn202),
         'device_id:{}:{}'.format(namespace, node202),
         'device_ip:{}'.format(node202),
         'device_namespace:{}'.format(namespace),
@@ -84,14 +88,14 @@ def test_fabric_mocked(aggregator):
             assert ndm_metadata == expected_metadata
 
             interface_tag_mapping = {
-                'default:10.0.200.0': hn101,
-                'default:10.0.200.1': hn102,
-                'default:10.0.200.5': hn201,
-                'default:10.0.200.2': hn202,
+                'default:10.0.200.0': (device_hn101, hn101),
+                'default:10.0.200.1': (device_hn102, hn102),
+                'default:10.0.200.5': (device_hn201, hn201),
+                'default:10.0.200.2': (device_hn202, hn202),
             }
 
             for interface in EXPECTED_INTERFACE_METADATA:
-                hn = interface_tag_mapping.get(interface.device_id)
+                device_hn, hn = interface_tag_mapping.get(interface.device_id)
                 device_namespace, device_ip = interface.device_id.split(':')
                 interface_tags = [
                     'port:{}'.format(interface.index),
@@ -101,11 +105,13 @@ def test_fabric_mocked(aggregator):
                     'fabric_pod_id:1',
                     'device_ip:{}'.format(device_ip),
                     'device_namespace:{}'.format(device_namespace),
-                    'device_hostname:{}'.format(hn),
+                    'device_hostname:{}'.format(device_hn),
                     'device_id:{}'.format(interface.device_id),
                     'port.status:{}'.format(interface.status),
                 ]
-                aggregator.assert_metric('cisco_aci.fabric.port.status', value=1.0, tags=interface_tags, hostname=hn)
+                aggregator.assert_metric(
+                    'cisco_aci.fabric.port.status', value=1.0, tags=interface_tags, hostname=device_hn
+                )
 
     metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.cum'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)
@@ -939,7 +945,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:3',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-3',
+            'device_hostname:apic3',
             'device_id:default:10.0.200.3',
             'device_ip:10.0.200.3',
             'device_namespace:default',
@@ -956,7 +962,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:1',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-1',
+            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
             'device_ip:10.0.200.4',
             'device_namespace:default',
@@ -985,7 +991,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:2',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-2',
+            'device_hostname:apic2',
             'device_id:default:10.0.200.6',
             'device_ip:10.0.200.6',
             'device_namespace:default',
@@ -1218,7 +1224,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:3',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-3',
+            'device_hostname:apic3',
             'device_id:default:10.0.200.3',
             'device_ip:10.0.200.3',
             'device_namespace:default',
@@ -1235,7 +1241,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:1',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-1',
+            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
             'device_ip:10.0.200.4',
             'device_namespace:default',
@@ -1264,7 +1270,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:2',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-2',
+            'device_hostname:apic2',
             'device_id:default:10.0.200.6',
             'device_ip:10.0.200.6',
             'device_namespace:default',
@@ -1286,7 +1292,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:3',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-3',
+            'device_hostname:apic3',
             'device_id:default:10.0.200.3',
             'device_ip:10.0.200.3',
             'device_namespace:default',
@@ -1303,7 +1309,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:1',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-1',
+            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
             'device_ip:10.0.200.4',
             'device_namespace:default',
@@ -1321,7 +1327,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:2',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-2',
+            'device_hostname:apic2',
             'device_id:default:10.0.200.6',
             'device_ip:10.0.200.6',
             'device_namespace:default',
@@ -2123,7 +2129,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:3',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-3',
+            'device_hostname:apic3',
             'device_id:default:10.0.200.3',
             'device_ip:10.0.200.3',
             'device_namespace:default',
@@ -2140,7 +2146,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:1',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-1',
+            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
             'device_ip:10.0.200.4',
             'device_namespace:default',
@@ -2158,7 +2164,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:2',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-2',
+            'device_hostname:apic2',
             'device_id:default:10.0.200.6',
             'device_ip:10.0.200.6',
             'device_namespace:default',
@@ -2404,7 +2410,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:3',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-3',
+            'device_hostname:apic3',
             'device_id:default:10.0.200.3',
             'device_ip:10.0.200.3',
             'device_namespace:default',
@@ -2421,7 +2427,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:1',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-1',
+            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
             'device_ip:10.0.200.4',
             'device_namespace:default',
@@ -2450,7 +2456,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:2',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-2',
+            'device_hostname:apic2',
             'device_id:default:10.0.200.6',
             'device_ip:10.0.200.6',
             'device_namespace:default',
@@ -2651,7 +2657,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:3',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-3',
+            'device_hostname:apic3',
             'device_id:default:10.0.200.3',
             'device_ip:10.0.200.3',
             'device_namespace:default',
@@ -2668,7 +2674,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:1',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-1',
+            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
             'device_ip:10.0.200.4',
             'device_namespace:default',
@@ -2686,7 +2692,7 @@ def test_fabric_mocked(aggregator):
             'apic_role:controller',
             'node_id:2',
             'fabric_state:unknown',
-            'device_hostname:pod-1-node-2',
+            'device_hostname:apic2',
             'device_id:default:10.0.200.6',
             'device_ip:10.0.200.6',
             'device_namespace:default',

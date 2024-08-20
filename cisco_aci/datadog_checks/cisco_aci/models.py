@@ -19,6 +19,7 @@ if six.PY3:
         fabric_st: Optional[str] = Field(default=None, alias="fabricSt")
         role: Optional[str] = None
         dn: Optional[str] = None
+        name: Optional[str] = None
         model: Optional[str] = None
         version: Optional[str] = None
         serial: Optional[str] = None
