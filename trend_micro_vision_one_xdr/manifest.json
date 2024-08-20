@@ -32,7 +32,7 @@
   "assets": {
     "integration": {
       "auto_install": false,
-      "source_type_id": 22232775,
+      "source_type_id": 22902543,
       "source_type_name": "Trend Micro Vision One XDR",
       "events": {
         "creates_events": false
