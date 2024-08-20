@@ -12,8 +12,8 @@ import re
 import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
-from threading import Event
 from copy import copy
+import xml.etree.ElementTree as ET
 
 import mock
 import pytest
@@ -26,6 +26,7 @@ from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_he
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT
+from .utils import create_deadlock
 import pdb
 try:
     import pyodbc
@@ -746,13 +747,13 @@ def _load_test_activity_json(filename):
         return json.load(f)
 
 
-def _get_conn_for_user(instance_docker, user, _autocommit=False):
+def _get_conn_for_user(instance_docker, user, timeout = 1, _autocommit=False):
     # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], user, "Password12!"
     )
-    conn = pyodbc.connect(conn_str, timeout=1, autocommit=_autocommit)
-    conn.timeout = 1
+    conn = pyodbc.connect(conn_str, timeout=timeout, autocommit=_autocommit)
+    conn.timeout = timeout
     return conn
 
 
@@ -908,11 +909,21 @@ def test_sanitize_activity_row(dbm_instance, row):
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
 
+#plan - first we need to catch deadlock exception if not try again ?
+
+# there are often 2 deadlocks lets check for that 
+
+# test1 - just that we collect deadlocks and its in stub events
+# test2 - time test that we take deadlocks in delta
+# some crazy scenario if possible like 3 query involved ?
+# deadlock too long ? 
+# we cannot test that real obfuscator is called at least check that its called by unit test 
+
+#TEST That we at least try to apply obfuscation to all required fields !
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_deadlocks(dd_run_check, init_config, dbm_instance):
-    pdb.set_trace()
+def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     dbm_instance['deadlocks'] = {
         'enabled': True,
         'run_sync': True,  #TODO oups run_sync what should be the logic for 2 jobs ?
@@ -922,57 +933,57 @@ def test_deadlocks(dd_run_check, init_config, dbm_instance):
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
 
-    def run_first_deadlock_query(conn, event1, event2):
-        #conn.begin()
-        try:
-            conn.cursor().execute("BEGIN TRAN foo;")
-            conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 1;")
-            event1.set()
-            event2.wait()
-            conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;")
-        except Exception as e:
-            # Exception is expected due to a deadlock
-            print(e)
-            pass
-        conn.commit()
-    def run_second_deadlock_query(conn, event1, event2):
-        #conn.begin()
-        try:
-            event1.wait()
-            conn.cursor().execute("BEGIN TRAN bar;")
-            conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 2;")
-            event2.set()
-            conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;")
-        except Exception as e:
-            # Exception is expected due to a deadlock
-            print(e)
-            pass
-        conn.commit()
-    def create_deadlock():
-        bob_conn = _get_conn_for_user(dbm_instance, 'bob')
-        fred_conn = _get_conn_for_user(dbm_instance, 'fred')
-    
-        executor = concurrent.futures.thread.ThreadPoolExecutor(2)
-        event1 = Event()
-        event2 = Event()
-    
-        futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
-        futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
-        futures_first_query.result()
-        futures_second_query.result()
-        # Make sure deadlock is killed and db is updated
-        time.sleep(1)
-    
+    created_deadlock = False
+    #Rarely instead of a deadlock one of the transactions time outs
+    for i in range(0,3):
+        bob_conn = _get_conn_for_user(dbm_instance, 'bob', 3)
+        fred_conn = _get_conn_for_user(dbm_instance, 'fred', 3)
+        created_deadlock = create_deadlock(bob_conn, fred_conn)
         bob_conn.close()
         fred_conn.close()
-        executor.shutdown()
-    s = time.time()
-    for i in range(0,700):
-        if i % 70 == 0:
-            spent_from_start = time.time() - s
-            #pdb.set_trace()
-            print("created some deadlocks {}", spent_from_start)
-        create_deadlock()
-    dd_run_check(sqlserver_check)
-    pdb.set_trace()
-    print("Set trace before end to keep sqlserver alive")
+        if created_deadlock:
+            break
+    assert created_deadlock, "Couldn't create a deadlock, exiting"
+
+    def execut_test():
+        dd_run_check(sqlserver_check)
+    
+        dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+        if not dbm_activity:
+            return False, "should have collected at least one activity event"
+        matched_event = []
+        
+        for event in dbm_activity:
+            if "sqlserver_deadlocks" in event:
+                matched_event.append(event)
+
+        if len(matched_event) != 1:
+            return False, "should have collected one deadlock payload"
+        deadlocks = matched_event[0]["sqlserver_deadlocks"]
+        if len(deadlocks) < 1:
+            return False, "should have collected one or more deadlock in the payload"    
+        found = False
+        for d in deadlocks:
+            root = ET.fromstring(d)
+            pdb.set_trace()
+            process_list = root.find(".//process-list")
+            for process in process_list.findall('process'):
+                if process.find('inputbuf').text == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;":
+                    found = True      
+        err = ""
+        if not found:
+            err = "Should've collected produced deadlock"
+        return found, err
+    
+    # Sometimes deadlock takes a bit longer to arrive to the ring buffer.
+    # We can may be give it 3 tries
+    err = ""
+    for i in range(0,3):
+        time.sleep(3)
+        res, err = execut_test()
+        if res:
+            return
+    assert False, err
+
+
+  

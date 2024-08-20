@@ -26,7 +26,6 @@ class Deadlocks:
         self._last_deadlock_timestamp = '1900-01-01 01:01:01.111'
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
 
-
     def obfuscate_no_except_wrapper(self, sql_text):
         try:
             sql_text = obfuscate_sql_with_metadata(sql_text, self._config.obfuscator_options, replace_null_character=True)['query']
