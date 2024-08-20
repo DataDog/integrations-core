@@ -201,7 +201,9 @@ class PostgresConfig:
                 agent_tags = get_agent_host_tags()
                 tags.extend(agent_tags)
             except Exception as e:
-                raise ConfigurationError('propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e))
+                raise ConfigurationError(
+                    'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
+                )
         return tags
 
     @staticmethod
