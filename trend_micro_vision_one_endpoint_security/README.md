@@ -1,6 +1,6 @@
 ## Overview
 
-[Trend Micro Vision One Endpoint Security][1] is a cloud-based solution specifically designed for endpoints, servers and cloud workloads.
+[Trend Micro Vision One Endpoint Security][1] is a cloud-based solution specifically designed for endpoints, servers, and cloud workloads.
 
 This integration ingests the following logs:
 
@@ -20,7 +20,7 @@ This integration ingests the following logs:
 - Virus/Malware
 - Web Violation
 
-Use out-of-the-box dashboards to visualize detailed insights into system events, network events and data loss prevention events, security detection and observation, and compliance monitoring.
+Use out-of-the-box dashboards to gain detailed insights into system events, network events, and data loss prevention events, security detection and observation, and compliance monitoring.
 
 ## Setup
 
@@ -29,18 +29,17 @@ Use out-of-the-box dashboards to visualize detailed insights into system events,
 #### Get Credentials of Trend Micro Vision One Endpoint Security
 
 1. Log in to the Trend Micro Vision One console.
-2. Go to **Endpoint Security** > **Standard Endpoint Protection**.
-3. Then, Go to **Administration** > **Settings** > **Automation API Access Settings**.<br> The Automation API Access Settings screen appears.
-4. Click **Add**.<br> The Application Access Settings section appears and displays the following information:
-   1. **API URL**: The Host of the Trend Micro Vision One Endpoint Security console
-   2. **Application ID**: The Application ID of the Trend Micro Vision One Endpoint Security console
-   3. **API key**: The API key of the Trend Micro Vision One Endpoint Security console
-5. Copy and store the API host, Application ID, and API key in a secure location.
-6. Select **Enable application integration using Apex Central Automation APIs**.
-7. Configure the following settings.
+2. Go to **Endpoint Security** > **Standard Endpoint Protection** > **Administration** > **Settings** > **Automation API Access Settings**.<br> The Automation API Access Settings screen appears.
+3. Click **Add**.<br> The Application Access Settings section appears and displays the following information:
+   1. **API URL**: The Host of the Trend Micro Vision One Endpoint Security console.
+   2. **Application ID**: The Application ID of the Trend Micro Vision One Endpoint Security console.
+   3. **API key**: The API key of the Trend Micro Vision One Endpoint Security console.
+4. Copy and store the API host, Application ID, and API key in a secure location.
+5. Select **Enable application integration using Apex Central Automation APIs**.
+6. Configure the following settings.
    1. **Application name**: Specify an easily identifiable name for the application.
    2. **Communication time-out**: Select 120 seconds for a request to reach Apex Central after the application generates the request.
-8. Click **Save**.<br> The Automation API Access Settings screen appears and displays the newly added application in the table.
+7. Click **Save**.<br> The Automation API Access Settings screen appears and displays the newly added application in the table.
 
 #### Get Timezone of Trend Micro Vision One console
 
@@ -66,7 +65,7 @@ Configure the Datadog endpoint to forward Trend Micro Vision One Endpoint Securi
 
 ### Logs
 
-The Trend Micro Vision One Endpoint Security integration collects and forwards security events, including system events, network events and data loss prevention events to Datadog.
+The Trend Micro Vision One Endpoint Security integration collects and forwards security events, including system events, network events, and data loss prevention events to Datadog.
 
 ### Metrics
 
@@ -78,7 +77,7 @@ The Trend Micro Vision One Endpoint Security integration does not include any ev
 
 ## Support
 
-For any further assistance, contact [Datadog support][2].
+For additional assistance, contact [Datadog support][2].
 
 [1]: https://www.trendmicro.com/en_in/business/products/endpoint-security.html
 [2]: https://docs.datadoghq.com/help/

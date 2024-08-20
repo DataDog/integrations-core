@@ -1,6 +1,6 @@
 {
     "title": "Trend Micro Vision One Endpoint Security - Network Events",
-    "description": "This dashboard provides real-time insights into network threats, suspicious traffic, and unauthorized connections, helping to safeguard the network and respond to potential security incidents.",
+    "description": "This dashboard provides real-time insights into network threats, suspicious traffic, and unauthorized connections, helping you safeguard your network and respond to potential security incidents.",
     "widgets": [
         {
             "id": 3524524152707948,
@@ -25,7 +25,7 @@
             "id": 220563971975310,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides real-time insights into network threats, suspicious traffic, and unauthorized connections, helping to safeguard the network and respond to potential security incidents.\n\nThis holistic approach enhances your ability to monitor and manage network security by providing in-depth visibility into network events, traffic patterns, and threat activity, ensuring a robust defence against cyber threats.\n\nFor more information, see the [Trend Micro Vision One Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_endpoint_security).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides real-time insights into network threats, suspicious traffic, and unauthorized connections, helping you safeguard your network and respond to potential security incidents.\n\nThis holistic approach enhances your ability to monitor and manage network security by providing in-depth visibility into network events, traffic patterns, and threat activity, ensuring a robust defense against cyber threats.\n\nFor more information, see the [Trend Micro Vision One Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_endpoint_security).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

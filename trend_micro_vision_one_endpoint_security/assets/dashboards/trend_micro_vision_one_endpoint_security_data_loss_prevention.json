@@ -1,6 +1,6 @@
 {
     "title": "Trend Micro Vision One Endpoint Security - Data Loss Prevention",
-    "description": "This dashboard provides monitoring and alerts for potential data breaches, unauthorized data access, and policy violations, helping to protect sensitive information and ensure data security.",
+    "description": "This dashboard provides monitoring and alerts for potential data breaches, unauthorized data access, and policy violations, helping you protect sensitive information and ensure data security.",
     "widgets": [
         {
             "id": 5780490506620942,
@@ -25,7 +25,7 @@
             "id": 661152336132838,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides monitoring and alerts for potential data breaches, unauthorized data access, and policy violations, helping to protect sensitive information and ensure data security.\n\nThis holistic approach enhances your ability to monitor and mitigate data loss risks, ensuring that sensitive information remains secure and compliant with regulatory requirements.\n\nFor more information, see the [Trend Micro Vision One Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_endpoint_security).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides monitoring and alerts for potential data breaches, unauthorized data access, and policy violations, helping you protect sensitive information and ensure data security.\n\nThis holistic approach enhances your ability to monitor and mitigate data loss risks, ensuring that sensitive information remains secure and compliant with regulatory requirements.\n\nFor more information, see the [Trend Micro Vision One Endpoint Security Integration Documentation](https://docs.datadoghq.com/integrations/trend_micro_vision_one_endpoint_security).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
