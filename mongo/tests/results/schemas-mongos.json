@@ -99,6 +99,41 @@
                             "prevalence": 1.0
                         },
                         {
+                            "name": "nested",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
+                            "name": "nested.a",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
+                            "name": "nested.a.b",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
+                            "name": "nested.a.b.c",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
+                            "name": "nested.a.b.c.d",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
                             "name": "occurrences",
                             "types": [
                                 "Array"
@@ -887,6 +922,41 @@
                                 "Array"
                             ],
                             "prevalence": 1.0
+                        },
+                        {
+                            "name": "nested",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
+                            "name": "nested.a",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
+                            "name": "nested.a.b",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
+                            "name": "nested.a.b.c",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
+                        },
+                        {
+                            "name": "nested.a.b.c.d",
+                            "types": [
+                                "Object"
+                            ],
+                            "prevalence": 0.5
                         },
                         {
                             "name": "occurrences",

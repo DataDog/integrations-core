@@ -261,6 +261,12 @@ files:
           value:
             type: number
             example: 300
+        - name: max_depth
+          description: |
+            Set the maximum depth of nested documents to sample.
+          value:
+            type: number
+            example: 5
     - name: replica_check
       description: |
         Whether or not to read from available replicas.

@@ -204,6 +204,7 @@ class MongoConfig(object):
             'run_sync': is_affirmative(self._schemas_config.get('run_sync', True)),
             'sample_size': int(self._schemas_config.get('sample_size', 10)),
             'max_collections': int(self._schemas_config.get('max_collections', 300)),  # Default to 300
+            'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
         }
 
     def _get_database_autodiscovery_config(self, instance):

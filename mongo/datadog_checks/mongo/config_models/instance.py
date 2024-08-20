@@ -80,6 +80,7 @@ class Schemas(BaseModel):
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     max_collections: Optional[float] = None
+    max_depth: Optional[float] = None
     sample_size: Optional[float] = None
 
 

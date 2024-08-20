@@ -30,6 +30,7 @@ class MongoSchemas(DBMAsyncJob):
         self._collection_interval = self._schemas_config["collection_interval"]
         self._max_collections = self._schemas_config["max_collections"]
         self._sample_size = self._schemas_config["sample_size"]
+        self._max_depth = self._schemas_config["max_depth"]
 
         super(MongoSchemas, self).__init__(
             check,
@@ -110,7 +111,7 @@ class MongoSchemas(DBMAsyncJob):
         field_prevalence = defaultdict(int)
         for doc in sampled_docs:
             doc_structure, field_prevalence = self._analyze_doc_structure(
-                doc, "", field_prevalence, scale=len(sampled_docs)
+                doc, "", field_prevalence, scale=len(sampled_docs), depth=1
             )
             for key, types in doc_structure.items():
                 schema_types[key].update(types)
@@ -193,7 +194,7 @@ class MongoSchemas(DBMAsyncJob):
         self._check.log.debug("Submitting schema payload: %s", json_payload)
         self._check.database_monitoring_metadata(json_payload)
 
-    def _analyze_doc_structure(self, document, path, field_prevalence, scale):
+    def _analyze_doc_structure(self, document, path, field_prevalence, scale, depth=1):
         '''
         Function to analyze the structure of a document and return the field types and counts
         '''
@@ -204,19 +205,20 @@ class MongoSchemas(DBMAsyncJob):
             structure[full_path].add(value_type)
 
             if isinstance(value, dict):
-                nested_structure, field_prevalence = self._analyze_doc_structure(
-                    value, full_path, field_prevalence, scale=scale
-                )
-                for nested_key, nested_types in nested_structure.items():
-                    structure[nested_key].update(nested_types)
                 field_prevalence[full_path] += 1 / scale
+                if depth < self._max_depth:
+                    nested_structure, field_prevalence = self._analyze_doc_structure(
+                        value, full_path, field_prevalence, scale=scale, depth=depth + 1
+                    )
+                    for nested_key, nested_types in nested_structure.items():
+                        structure[nested_key].update(nested_types)
             elif isinstance(value, list):
                 # Count the array field once per document
                 field_prevalence[full_path] += 1 / scale
                 for item in value:
-                    if isinstance(item, dict):
+                    if isinstance(item, dict) and depth < self._max_depth:
                         nested_structure, field_prevalence = self._analyze_doc_structure(
-                            item, full_path, field_prevalence, scale=len(value) * scale
+                            item, full_path, field_prevalence, scale=len(value) * scale, depth=depth + 1
                         )
                         for nested_key, nested_types in nested_structure.items():
                             structure[nested_key].update(nested_types)
