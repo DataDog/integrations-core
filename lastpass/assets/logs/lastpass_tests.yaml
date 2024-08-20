@@ -300,16 +300,15 @@ tests:
       custom:
         Data: "VID: 5516541713708306640 from SFolder33"
         Time: "2024-08-06 05:16:17"
+        VID: "5516541713708306640"
         evt:
           name: "Site added"
         network:
           client:
-            geoip: { }
+            geoip: {}
             ip: "10.10.10.10"
         shared_folder:
           name: "SFolder33"
-        site:
-          VID: "5516541713708306640"
         timestamp: 1.722921377E12
         usr:
           name: "abc@test.com"
@@ -333,7 +332,31 @@ tests:
           "Data": "VID: 4963227935627314198",
           "timestamp": 1722921377000.0
       }
-    result: null
+    result:
+      custom:
+        Data: "VID: 4963227935627314198"
+        Time: "2024-08-06 05:16:17"
+        VID: "4963227935627314198"
+        evt:
+          name: "Username changed"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Username changed",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "VID: 4963227935627314198",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -343,7 +366,31 @@ tests:
           "Data": "VID: 4963227935627314198",
           "timestamp": 1722921377000.0
       }
-    result: null
+    result:
+      custom:
+        Data: "VID: 4963227935627314198"
+        Time: "2024-08-06 05:16:17"
+        VID: "4963227935627314198"
+        evt:
+          name: "Password changed"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Password changed",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "VID: 4963227935627314198",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -353,7 +400,31 @@ tests:
           "Data": "VID: 8129207370202608594",
           "timestamp": 1722921377000.0
       }
-    result: null
+    result:
+      custom:
+        Data: "VID: 8129207370202608594"
+        Time: "2024-08-06 05:16:17"
+        VID: "8129207370202608594"
+        evt:
+          name: "Site changed"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Site changed",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "VID: 8129207370202608594",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -363,7 +434,31 @@ tests:
           "Data": "VID: 8802943594384138037",
           "timestamp": 1722921377000.0
       }
-    result: null
+    result:
+      custom:
+        Data: "VID: 8802943594384138037"
+        Time: "2024-08-06 05:16:17"
+        VID: "8802943594384138037"
+        evt:
+          name: "Deleted sites"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Deleted sites",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "VID: 8802943594384138037",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -373,7 +468,31 @@ tests:
           "Data": "VID: 4963227935627314198",
           "timestamp": 1722921377000.0
       }
-    result: null
+    result:
+      custom:
+        Data: "VID: 4963227935627314198"
+        Time: "2024-08-06 05:16:17"
+        VID: "4963227935627314198"
+        evt:
+          name: "Log in"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Log in",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "VID: 4963227935627314198",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
   - sample: |-
       {
           "Time": "2024-08-06 05:16:17",
@@ -383,4 +502,28 @@ tests:
           "Data": "Secure Note (VID: 7608813617878138489)",
           "timestamp": 1722921377000.0
       }
-    result: null
+    result:
+      custom:
+        Data: "Secure Note (VID: 7608813617878138489)"
+        Time: "2024-08-06 05:16:17"
+        VID: "7608813617878138489"
+        evt:
+          name: "Open secure note"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Open secure note",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "Secure Note (VID: 7608813617878138489)",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+        - "source:LOGS_SOURCE"
