@@ -375,6 +375,7 @@
 - template: instances/http
 - template: instances/default
 - name: collect_default_metrics
+  hidden: true 
   description: |
     Enable collection of default Go malloc and process metrics 
   value:
