@@ -134,11 +134,37 @@ class MongoSchemas(DBMAsyncJob):
                         "field": field,
                         "type": str(index_type),
                     }
-                    for field, index_type in index.get("key", [])
+                    for field, index_type in index_details.get("key", [])
                 ],
+                "type": self._get_index_type(index_name, index_details),
+                "unique": self._is_index_unique(index_name, index_details),
+                "compound": len(index_details.get("key", [])) > 1,
+                "hidden": index_details.get("hidden", False),
+                "partial": "partialFilterExpression" in index_details,
+                "sparse": index_details.get("sparse", False),
+                "ttl": index_details.get("expireAfterSeconds"),
             }
-            for index_name, index in indexes.items()
+            for index_name, index_details in indexes.items()
         ]
+
+    def _is_index_unique(self, index_name, index_details):
+        if index_name == "_id_":
+            return True
+        return index_details.get("unique", False)
+
+    def _get_index_type(self, index_name, index_details):
+        if "2dsphereIndexVersion" in index_details:
+            return "geospatial"
+        if "textIndexVersion" in index_details:
+            return "text"
+        if index_name == "$**_1":
+            return "wildcard"
+        for _, value in index_details.get("key", []):
+            if value == "hashed":
+                return "hashed"
+            if value == "2d":
+                return "geospatial"
+        return "regular"
 
     def _submit_schema_payload(self, database_schemas):
         payload = {

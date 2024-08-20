@@ -156,25 +156,14 @@
                                     "field": "_id",
                                     "type": "1"
                                 }
-                            ]
-                        },
-                        {
-                            "name": "name_1",
-                            "keys": [
-                                {
-                                    "field": "name",
-                                    "type": "1"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "address.location_2dsphere",
-                            "keys": [
-                                {
-                                    "field": "address.location",
-                                    "type": "2dsphere"
-                                }
-                            ]
+                            ],
+                            "type": "regular",
+                            "unique": true,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
                         },
                         {
                             "name": "property_type_1_room_type_1_beds_1",
@@ -191,7 +180,186 @@
                                     "field": "beds",
                                     "type": "1"
                                 }
-                            ]
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "name_1",
+                            "keys": [
+                                {
+                                    "field": "name",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "address.location_2dsphere",
+                            "keys": [
+                                {
+                                    "field": "address.location",
+                                    "type": "2dsphere"
+                                }
+                            ],
+                            "type": "geospatial",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "last_scraped_1",
+                            "keys": [
+                                {
+                                    "field": "last_scraped",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": 3600
+                        },
+                        {
+                            "name": "name_1_listing_url_1",
+                            "keys": [
+                                {
+                                    "field": "name",
+                                    "type": "1"
+                                },
+                                {
+                                    "field": "listing_url",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": true,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "room_type_1",
+                            "keys": [
+                                {
+                                    "field": "room_type",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": true,
+                            "ttl": null
+                        },
+                        {
+                            "name": "name_text_summary_text_space_text",
+                            "keys": [
+                                {
+                                    "field": "_fts",
+                                    "type": "text"
+                                },
+                                {
+                                    "field": "_ftsx",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "text",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "$**_1",
+                            "keys": [
+                                {
+                                    "field": "$**",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "wildcard",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "address.location_2d",
+                            "keys": [
+                                {
+                                    "field": "address.location",
+                                    "type": "2d"
+                                }
+                            ],
+                            "type": "geospatial",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "price_hashed",
+                            "keys": [
+                                {
+                                    "field": "price",
+                                    "type": "hashed"
+                                }
+                            ],
+                            "type": "hashed",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "price_hashed_clearning_fee_1",
+                            "keys": [
+                                {
+                                    "field": "price",
+                                    "type": "hashed"
+                                },
+                                {
+                                    "field": "clearning_fee",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "hashed",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
                         }
                     ]
                 },
@@ -334,25 +502,14 @@
                                     "field": "_id",
                                     "type": "1"
                                 }
-                            ]
-                        },
-                        {
-                            "name": "name_1",
-                            "keys": [
-                                {
-                                    "field": "name",
-                                    "type": "1"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "address.location_2dsphere",
-                            "keys": [
-                                {
-                                    "field": "address.location",
-                                    "type": "2dsphere"
-                                }
-                            ]
+                            ],
+                            "type": "regular",
+                            "unique": true,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
                         },
                         {
                             "name": "property_type_1_room_type_1_beds_1",
@@ -369,7 +526,186 @@
                                     "field": "beds",
                                     "type": "1"
                                 }
-                            ]
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "name_1",
+                            "keys": [
+                                {
+                                    "field": "name",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "address.location_2dsphere",
+                            "keys": [
+                                {
+                                    "field": "address.location",
+                                    "type": "2dsphere"
+                                }
+                            ],
+                            "type": "geospatial",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "last_scraped_1",
+                            "keys": [
+                                {
+                                    "field": "last_scraped",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": 3600
+                        },
+                        {
+                            "name": "name_1_listing_url_1",
+                            "keys": [
+                                {
+                                    "field": "name",
+                                    "type": "1"
+                                },
+                                {
+                                    "field": "listing_url",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": true,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "room_type_1",
+                            "keys": [
+                                {
+                                    "field": "room_type",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": true,
+                            "ttl": null
+                        },
+                        {
+                            "name": "name_text_summary_text_space_text",
+                            "keys": [
+                                {
+                                    "field": "_fts",
+                                    "type": "text"
+                                },
+                                {
+                                    "field": "_ftsx",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "text",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "$**_1",
+                            "keys": [
+                                {
+                                    "field": "$**",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "wildcard",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "address.location_2d",
+                            "keys": [
+                                {
+                                    "field": "address.location",
+                                    "type": "2d"
+                                }
+                            ],
+                            "type": "geospatial",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "price_hashed",
+                            "keys": [
+                                {
+                                    "field": "price",
+                                    "type": "hashed"
+                                }
+                            ],
+                            "type": "hashed",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "price_hashed_clearning_fee_1",
+                            "keys": [
+                                {
+                                    "field": "price",
+                                    "type": "hashed"
+                                },
+                                {
+                                    "field": "clearning_fee",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "hashed",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
                         }
                     ]
                 }
@@ -518,25 +854,14 @@
                                     "field": "_id",
                                     "type": "1"
                                 }
-                            ]
-                        },
-                        {
-                            "name": "name_1",
-                            "keys": [
-                                {
-                                    "field": "name",
-                                    "type": "1"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "address.location_2dsphere",
-                            "keys": [
-                                {
-                                    "field": "address.location",
-                                    "type": "2dsphere"
-                                }
-                            ]
+                            ],
+                            "type": "regular",
+                            "unique": true,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
                         },
                         {
                             "name": "property_type_1_room_type_1_beds_1",
@@ -553,7 +878,186 @@
                                     "field": "beds",
                                     "type": "1"
                                 }
-                            ]
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "name_1",
+                            "keys": [
+                                {
+                                    "field": "name",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "address.location_2dsphere",
+                            "keys": [
+                                {
+                                    "field": "address.location",
+                                    "type": "2dsphere"
+                                }
+                            ],
+                            "type": "geospatial",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "last_scraped_1",
+                            "keys": [
+                                {
+                                    "field": "last_scraped",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": 3600
+                        },
+                        {
+                            "name": "name_1_listing_url_1",
+                            "keys": [
+                                {
+                                    "field": "name",
+                                    "type": "1"
+                                },
+                                {
+                                    "field": "listing_url",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": true,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "room_type_1",
+                            "keys": [
+                                {
+                                    "field": "room_type",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": true,
+                            "ttl": null
+                        },
+                        {
+                            "name": "name_text_summary_text_space_text",
+                            "keys": [
+                                {
+                                    "field": "_fts",
+                                    "type": "text"
+                                },
+                                {
+                                    "field": "_ftsx",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "text",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "$**_1",
+                            "keys": [
+                                {
+                                    "field": "$**",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "wildcard",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "address.location_2d",
+                            "keys": [
+                                {
+                                    "field": "address.location",
+                                    "type": "2d"
+                                }
+                            ],
+                            "type": "geospatial",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "price_hashed",
+                            "keys": [
+                                {
+                                    "field": "price",
+                                    "type": "hashed"
+                                }
+                            ],
+                            "type": "hashed",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "price_hashed_clearning_fee_1",
+                            "keys": [
+                                {
+                                    "field": "price",
+                                    "type": "hashed"
+                                },
+                                {
+                                    "field": "clearning_fee",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "hashed",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
                         }
                     ]
                 },
@@ -696,25 +1200,14 @@
                                     "field": "_id",
                                     "type": "1"
                                 }
-                            ]
-                        },
-                        {
-                            "name": "name_1",
-                            "keys": [
-                                {
-                                    "field": "name",
-                                    "type": "1"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "address.location_2dsphere",
-                            "keys": [
-                                {
-                                    "field": "address.location",
-                                    "type": "2dsphere"
-                                }
-                            ]
+                            ],
+                            "type": "regular",
+                            "unique": true,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
                         },
                         {
                             "name": "property_type_1_room_type_1_beds_1",
@@ -731,7 +1224,186 @@
                                     "field": "beds",
                                     "type": "1"
                                 }
-                            ]
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "name_1",
+                            "keys": [
+                                {
+                                    "field": "name",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "address.location_2dsphere",
+                            "keys": [
+                                {
+                                    "field": "address.location",
+                                    "type": "2dsphere"
+                                }
+                            ],
+                            "type": "geospatial",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "last_scraped_1",
+                            "keys": [
+                                {
+                                    "field": "last_scraped",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": 3600
+                        },
+                        {
+                            "name": "name_1_listing_url_1",
+                            "keys": [
+                                {
+                                    "field": "name",
+                                    "type": "1"
+                                },
+                                {
+                                    "field": "listing_url",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": true,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "room_type_1",
+                            "keys": [
+                                {
+                                    "field": "room_type",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": true,
+                            "ttl": null
+                        },
+                        {
+                            "name": "name_text_summary_text_space_text",
+                            "keys": [
+                                {
+                                    "field": "_fts",
+                                    "type": "text"
+                                },
+                                {
+                                    "field": "_ftsx",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "text",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "$**_1",
+                            "keys": [
+                                {
+                                    "field": "$**",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "wildcard",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "address.location_2d",
+                            "keys": [
+                                {
+                                    "field": "address.location",
+                                    "type": "2d"
+                                }
+                            ],
+                            "type": "geospatial",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "price_hashed",
+                            "keys": [
+                                {
+                                    "field": "price",
+                                    "type": "hashed"
+                                }
+                            ],
+                            "type": "hashed",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "price_hashed_clearning_fee_1",
+                            "keys": [
+                                {
+                                    "field": "price",
+                                    "type": "hashed"
+                                },
+                                {
+                                    "field": "clearning_fee",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "hashed",
+                            "unique": false,
+                            "compound": true,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "ttl": null
                         }
                     ]
                 }
