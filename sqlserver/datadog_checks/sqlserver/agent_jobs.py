@@ -206,26 +206,26 @@ class SqlserverAgentJobs(DBMAsyncJob):
         cursor.execute(AGENT_ACTIVITY_DURATION_QUERY)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
-        duration_rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
         self.log.debug("Running query [%s]", AGENT_ACTIVITY_STEPS_QUERY)
         cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
-        step_info_rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        rows += [dict(zip(columns, row)) for row in cursor.fetchall()]
 
         if self._check.static_info_cache.get(STATIC_INFO_RDS, True):
-            return duration_rows, step_info_rows, []
+            return rows
 
         self.log.debug("Running query [%s]", AGENT_ACTIVE_SESSION_DURATION_QUERY)
         cursor.execute(AGENT_ACTIVE_SESSION_DURATION_QUERY)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
-        session_rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        rows += [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-        return duration_rows, step_info_rows, session_rows
+        return rows
 
-    def _to_metrics_payload(self, duration_rows, step_info_rows, session_rows):
+    def _to_metrics_payload(self, rows):
         return {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
@@ -237,9 +237,7 @@ class SqlserverAgentJobs(DBMAsyncJob):
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
-            'duration_rows': duration_rows,
-            'step_info_rows': step_info_rows,
-            'session_rows': session_rows,
+            'sqlserver_rows': rows
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -293,8 +291,8 @@ class SqlserverAgentJobs(DBMAsyncJob):
                 self.log.debug(payload)
                 self._check.database_monitoring_query_activity(payload)
 
-                duration_rows, step_info_rows, session_rows = self._collect_metrics_rows(cursor)
-                metrics_payload = self._to_metrics_payload(duration_rows, step_info_rows, session_rows)
+                rows = self._collect_metrics_rows(cursor)
+                metrics_payload = self._to_metrics_payload(rows)
                 self.log.debug(metrics_payload)
                 self._check.database_monitoring_query_metrics(
                     json.dumps(metrics_payload, default=default_json_event_encoding)

@@ -469,24 +469,20 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     assert job_metrics_payload['host'] == "stubbed.hostname", "wrong hostname"
     assert job_metrics_payload['kind'] == "agent_jobs_metrics", "wrong kind"
     assert job_metrics_payload['ddagentversion'], "missing ddagentversion"
-    duration_rows = job_metrics_payload['duration_rows']
-    assert len(duration_rows) == 1, "should have one row of activity for duration"
-    duration_metric = duration_rows[0]
+    sqlserver_rows = job_metrics_payload['sqlserver_rows']
+    assert len(sqlserver_rows) == 3, "should have three rows of metrics"
+    duration_metric = sqlserver_rows[0]
     assert duration_metric['name']
     assert duration_metric['job_id']
     assert duration_metric['duration_seconds'] is not None
-    step_info_rows = job_metrics_payload['step_info_rows']
-    assert len(step_info_rows) == 1, "should have one row of activity for step_info"
-    step_info_metric = step_info_rows[0]
+    step_info_metric = sqlserver_rows[1]
     assert step_info_metric['name']
     assert step_info_metric['job_id']
     assert step_info_metric['step_name']
     assert step_info_metric['step_id'] is not None
     assert step_info_metric['step_run_status']
     assert step_info_metric['step_info']
-    session_rows = job_metrics_payload['session_rows']
-    assert len(session_rows) == 1, "should have one row for session length"
-    session_metric = session_rows[0]
+    session_metric = sqlserver_rows[2]
     assert session_metric['session_id'] is not None
     assert session_metric['duration_seconds']
 
