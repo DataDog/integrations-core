@@ -90,9 +90,11 @@ class MongoSchemas(DBMAsyncJob):
     def _discover_collection(self, dbname, collname):
         schema = self._discover_collection_schema(dbname, collname)
         indexes = self._discover_collection_indexes(dbname, collname)
+        is_sharded = self._check.api_client.is_collection_sharded(dbname, collname)
         return {
             "name": collname,
             "namespace": f"{dbname}.{collname}",
+            "sharded": is_sharded,
             "docs": schema,
             "indexes": indexes,
         }

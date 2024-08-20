@@ -13,9 +13,10 @@ from .common import HERE
 
 
 class MockedCollection(object):
-    def __init__(self, db_name, coll_name):
+    def __init__(self, db_name, coll_name, deployment):
         self._coll_name = coll_name
         self._db_name = db_name
+        self.deployment = deployment
         if coll_name in ("oplog.rs", "oplog.$main"):
             with open(os.path.join(HERE, "fixtures", "oplog_rs_options"), 'r') as f:
                 self.options = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
@@ -43,6 +44,9 @@ class MockedCollection(object):
                     return content
 
                 self.find = MagicMock(return_value=MagicMock(sort=mocked_sort))
+        elif db_name == "config" and coll_name == "collections":
+            with open(os.path.join(HERE, "fixtures", f"config-collections-{self.deployment}"), 'r') as f:
+                self.find_one = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
 
     def index_information(self, session=None, **kwargs):
         with open(os.path.join(HERE, "fixtures", "index_information"), 'r') as f:
@@ -66,7 +70,7 @@ class MockedDB(object):
         self.deployment = deployment
 
     def __getitem__(self, coll_name):
-        return MockedCollection(self._db_name, coll_name)
+        return MockedCollection(self._db_name, coll_name, self.deployment)
 
     def command(self, command, *args, **_):
         filename = command

@@ -176,6 +176,16 @@ class MongoApi(object):
             )
             return []
 
+    def is_collection_sharded(self, db_name, coll_name):
+        try:
+            # Check if the collection is sharded by looking for the collection config
+            # in the config.collections collection.
+            collection_config = self["config"]["collections"].find_one({"_id": f"{db_name}.{coll_name}"})
+            return collection_config is not None
+        except OperationFailure as e:
+            self._log.warning("Could not determine if collection %s.%s is sharded: %s", db_name, coll_name, e)
+            return False
+
     @property
     def hostname(self):
         if self.__hostname:

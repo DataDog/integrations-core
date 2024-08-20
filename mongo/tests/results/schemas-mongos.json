@@ -19,6 +19,7 @@
                 {
                     "name": "foo",
                     "namespace": "integration.foo",
+                    "sharded": true,
                     "docs": [
                         [
                             {
@@ -364,6 +365,7 @@
                 {
                     "name": "bar",
                     "namespace": "integration.bar",
+                    "sharded": true,
                     "docs": [
                         [
                             {
@@ -672,6 +674,7 @@
                 {
                     "name": "foo",
                     "namespace": "test.foo",
+                    "sharded": true,
                     "docs": [
                         [
                             {
@@ -1017,6 +1020,7 @@
                 {
                     "name": "bar",
                     "namespace": "test.bar",
+                    "sharded": true,
                     "docs": [
                         [
                             {
