@@ -64,12 +64,16 @@ class MongoSchemas(DBMAsyncJob):
 
             collections = []
             for coll_name in self._check.api_client.list_authorized_collections(db_name):
-                collection = self._discover_collection(db_name, coll_name)
-                collections.append(collection)
-                collected_collections += 1
-                if collected_collections >= self._max_collections:
-                    self._check.log.debug("Reached max collections limit %d", self._max_collections)
-                    break
+                try:
+                    collection = self._discover_collection(db_name, coll_name)
+                    collections.append(collection)
+                    collected_collections += 1
+                    if collected_collections >= self._max_collections:
+                        self._check.log.debug("Reached max collections limit %d", self._max_collections)
+                        break
+                except Exception as e:
+                    self._check.log.error("Error collecting schema for %s.%s: %s", db_name, coll_name, e)
+
             databases.append(
                 {
                     "name": db_name,
