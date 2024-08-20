@@ -111,8 +111,8 @@ class MongoSchemas(DBMAsyncJob):
                 self._sample_size,
             )
 
-        schema_types = defaultdict(set)
-        field_prevalence = defaultdict(int)
+        schema_types = defaultdict(set)  # field -> set(types)
+        field_prevalence = defaultdict(int)  # (field, type) -> prevalence
         for doc in sampled_docs:
             doc_structure, field_prevalence = self._analyze_doc_structure(
                 doc, "", field_prevalence, scale=len(sampled_docs), depth=1
@@ -120,14 +120,20 @@ class MongoSchemas(DBMAsyncJob):
             for key, types in doc_structure.items():
                 schema_types[key].update(types)
 
-        return [
-            {
-                "name": key,
-                "types": sorted(types),
-                "prevalence": round(field_prevalence[key], 3),
-            }
-            for key, types in schema_types.items()
-        ]
+        schema = []
+        for key, types in schema_types.items():
+            schema.extend(
+                [
+                    {
+                        "name": key,
+                        "type": value_type,
+                        "prevalence": round(field_prevalence[(key, value_type)], 3),
+                    }
+                ]
+                for value_type in sorted(types)
+            )
+
+        return schema
 
     def _discover_collection_indexes(self, dbname, collname):
         indexes = self._check.api_client.index_information(dbname, collname)
@@ -216,7 +222,7 @@ class MongoSchemas(DBMAsyncJob):
             structure[full_path].add(value_type)
 
             if isinstance(value, dict):
-                field_prevalence[full_path] += 1 / scale
+                field_prevalence[(full_path, value_type)] += 1 / scale
                 if depth < self._max_depth:
                     nested_structure, field_prevalence = self._analyze_doc_structure(
                         value, full_path, field_prevalence, scale=scale, depth=depth + 1
@@ -225,7 +231,7 @@ class MongoSchemas(DBMAsyncJob):
                         structure[nested_key].update(nested_types)
             elif isinstance(value, list):
                 # Count the array field once per document
-                field_prevalence[full_path] += 1 / scale
+                field_prevalence[(full_path, value_type)] += 1 / scale
                 for item in value:
                     if isinstance(item, dict) and depth < self._max_depth:
                         nested_structure, field_prevalence = self._analyze_doc_structure(
@@ -234,7 +240,7 @@ class MongoSchemas(DBMAsyncJob):
                         for nested_key, nested_types in nested_structure.items():
                             structure[nested_key].update(nested_types)
             else:
-                field_prevalence[full_path] += 1 / scale
+                field_prevalence[(full_path, value_type)] += 1 / scale
 
         return structure, field_prevalence
 
