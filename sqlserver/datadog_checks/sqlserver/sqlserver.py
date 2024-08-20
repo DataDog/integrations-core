@@ -12,7 +12,11 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
+from datadog_checks.base.utils.db.utils import (
+    default_json_event_encoding,
+    resolve_db_host,
+    tracked_query,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
@@ -28,8 +32,7 @@ from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
-from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
-import pdb
+
 try:
     import datadog_agent
 except ImportError:
@@ -81,7 +84,6 @@ from datadog_checks.sqlserver.queries import (
     QUERY_LOG_SHIPPING_PRIMARY,
     QUERY_LOG_SHIPPING_SECONDARY,
     QUERY_SERVER_STATIC_INFO,
-    DETECT_DEADLOCK_QUERY,
     get_query_ao_availability_groups,
     get_query_file_stats,
 )

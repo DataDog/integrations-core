@@ -8,12 +8,13 @@ import concurrent
 import datetime
 import json
 import os
+import pdb
 import re
 import threading
 import time
+import xml.etree.ElementTree as ET
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
-import xml.etree.ElementTree as ET
 
 import mock
 import pytest
@@ -27,12 +28,12 @@ from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_he
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT
 from .utils import create_deadlock
-import pdb
+
 try:
     import pyodbc
 except ImportError:
     pyodbc = None
-import time
+
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
 
@@ -747,7 +748,7 @@ def _load_test_activity_json(filename):
         return json.load(f)
 
 
-def _get_conn_for_user(instance_docker, user, timeout = 1, _autocommit=False):
+def _get_conn_for_user(instance_docker, user, timeout=1, _autocommit=False):
     # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], user, "Password12!"
@@ -909,24 +910,26 @@ def test_sanitize_activity_row(dbm_instance, row):
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
 
-#plan - first we need to catch deadlock exception if not try again ?
 
-# there are often 2 deadlocks lets check for that 
+# plan - first we need to catch deadlock exception if not try again ?
+
+# there are often 2 deadlocks lets check for that
 
 # test1 - just that we collect deadlocks and its in stub events
 # test2 - time test that we take deadlocks in delta
 # some crazy scenario if possible like 3 query involved ?
-# deadlock too long ? 
-# we cannot test that real obfuscator is called at least check that its called by unit test 
+# deadlock too long ?
+# we cannot test that real obfuscator is called at least check that its called by unit test
 
-#TEST That we at least try to apply obfuscation to all required fields !
+# TEST That we at least try to apply obfuscation to all required fields !
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     dbm_instance['deadlocks'] = {
         'enabled': True,
-        'run_sync': True,  #TODO oups run_sync what should be the logic for 2 jobs ?
+        'run_sync': True,  # TODO oups run_sync what should be the logic for 2 jobs ?
         'collection_interval': 0.1,
     }
     dbm_instance['query_activity']['enabled'] = False
@@ -934,8 +937,8 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
 
     created_deadlock = False
-    #Rarely instead of a deadlock one of the transactions time outs
-    for i in range(0,3):
+    # Rarely instead of a deadlock one of the transactions time outs
+    for i in range(0, 3):
         bob_conn = _get_conn_for_user(dbm_instance, 'bob', 3)
         fred_conn = _get_conn_for_user(dbm_instance, 'fred', 3)
         created_deadlock = create_deadlock(bob_conn, fred_conn)
@@ -947,12 +950,12 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
 
     def execut_test():
         dd_run_check(sqlserver_check)
-    
+
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
         if not dbm_activity:
             return False, "should have collected at least one activity event"
         matched_event = []
-        
+
         for event in dbm_activity:
             if "sqlserver_deadlocks" in event:
                 matched_event.append(event)
@@ -961,29 +964,29 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
             return False, "should have collected one deadlock payload"
         deadlocks = matched_event[0]["sqlserver_deadlocks"]
         if len(deadlocks) < 1:
-            return False, "should have collected one or more deadlock in the payload"    
+            return False, "should have collected one or more deadlock in the payload"
         found = False
         for d in deadlocks:
             root = ET.fromstring(d)
             pdb.set_trace()
             process_list = root.find(".//process-list")
             for process in process_list.findall('process'):
-                if process.find('inputbuf').text == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;":
-                    found = True      
+                if (
+                    process.find('inputbuf').text
+                    == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;"
+                ):
+                    found = True
         err = ""
         if not found:
             err = "Should've collected produced deadlock"
         return found, err
-    
+
     # Sometimes deadlock takes a bit longer to arrive to the ring buffer.
     # We can may be give it 3 tries
     err = ""
-    for i in range(0,3):
+    for i in range(0, 3):
         time.sleep(3)
         res, err = execut_test()
         if res:
             return
     assert False, err
-
-
-  

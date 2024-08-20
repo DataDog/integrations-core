@@ -215,31 +215,32 @@ GROUP BY
 """
 
 CREATE_DEADLOCK_TEMP_TABLE_QUERY = """
-SELECT 
+SELECT
     CAST([target_data] AS XML) AS Target_Data
-INTO 
+INTO
     #TempXMLDatadogData
-FROM 
+FROM
     sys.dm_xe_session_targets AS xt
-INNER JOIN 
+INNER JOIN
     sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
-WHERE 
+WHERE
     xs.name = N'system_health'
-AND 
+AND
     xt.target_name = N'ring_buffer';
 """
 
 DETECT_DEADLOCK_QUERY = """
-SELECT TOP (?) 
+SELECT TOP (?)
     xdr.value('@timestamp', 'datetime') AS [Date], xdr.query('.') AS [Event_Data]
-FROM 
+FROM
     #TempXMLDatadogData
-CROSS APPLY 
+CROSS APPLY
     Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
-WHERE 
+WHERE
     xdr.value('@timestamp', 'datetime') > ?
 ORDER BY [Date] DESC;
 """
+
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """

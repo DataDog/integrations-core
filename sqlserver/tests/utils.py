@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import concurrent
 import os
 import string
 import threading
 from copy import copy
 from random import choice, randint, shuffle
-import concurrent
 from threading import Event
 
 import pyodbc
@@ -246,6 +246,7 @@ def normalize_indexes_columns(actual_payload):
                     sorted_columns = sorted(columns)
                     index['column_names'] = ','.join(sorted_columns)
 
+
 def run_first_deadlock_query(conn, event1, event2):
     exception_text = ""
     try:
@@ -261,6 +262,7 @@ def run_first_deadlock_query(conn, event1, event2):
     conn.commit()
     return exception_text
 
+
 def run_second_deadlock_query(conn, event1, event2):
     exception_text = ""
     try:
@@ -275,6 +277,7 @@ def run_second_deadlock_query(conn, event1, event2):
         pass
     conn.commit()
     return exception_text
+
 
 def create_deadlock(bob_conn, fred_conn):
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)

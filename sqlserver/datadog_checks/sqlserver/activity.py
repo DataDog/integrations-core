@@ -14,18 +14,18 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 from datadog_checks.sqlserver.deadlocks import Deadlocks
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-import time
+
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 DEFAULT_DEADLOCKS_COLLECTION_INTERVAL = 5
 MAX_PAYLOAD_BYTES = 19e6
-import pdb
+
 CONNECTIONS_QUERY = """\
 SELECT
     login_name AS user_name,
@@ -148,6 +148,8 @@ def _hash_to_hex(hash) -> str:
 
 def agent_check_getter(self):
     return self._check
+
+
 """     self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
         self._databases_data_collection_interval = config.schemas_config.get(
             "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
@@ -167,6 +169,7 @@ def agent_check_getter(self):
 
         self.enabled = self._databases_data_enabled or self._settings_enabled"""
 
+
 class SqlserverActivity(DBMAsyncJob):
     """Collects query metrics and plans"""
 
@@ -179,7 +182,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._last_deadlocks_collection_time = 0
         self._last_activity_collection_time = 0
 
-        #TODO put back false
+        # TODO put back false
         self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", True))
         self._deadlocks_collection_interval = config.deadlocks_config.get(
             "collection_interval", DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
@@ -193,7 +196,7 @@ class SqlserverActivity(DBMAsyncJob):
         )
         if self._activity_collection_enabled <= 0:
             self._activity_collection_enabled = DEFAULT_ACTIVITY_COLLECTION_INTERVAL
-            
+
         if self._deadlocks_collection_enabled and not self._activity_collection_enabled:
             self.collection_interval = self._deadlocks_collection_interval
         elif not self._deadlocks_collection_enabled and self._activity_collection_enabled:
@@ -256,15 +259,19 @@ class SqlserverActivity(DBMAsyncJob):
         deadlock_xmls_collected = self._deadlocks.collect_deadlocks()
         deadlock_xmls = []
         total_number_of_characters = 0
-        pdb.set_trace()
         for i, deadlock in enumerate(deadlock_xmls_collected):
             total_number_of_characters += len(deadlock)
             if total_number_of_characters > self._deadlock__payload_max_bytes:
-                self._log.warning("We've dropped {} deadlocks from a total of {} deadlocks as the max deadlock payload of {} bytes was exceeded.".format(len(deadlock_xmls) - i, len(deadlock_xmls), self._deadlock_payload_max_bytes))
+                self._log.warning(
+                    """We've dropped {} deadlocks from a total of {} deadlocks as the
+                     max deadlock payload of {} bytes was exceeded.""".format(
+                        len(deadlock_xmls) - i, len(deadlock_xmls), self._deadlock_payload_max_bytes
+                    )
+                )
                 break
             else:
                 deadlock_xmls.append(deadlock)
-        #TODO REMOVE log error
+        # TODO REMOVE log error
         if len(deadlock_xmls) == 0:
             self._log.error("Collected 0 DEADLOCKS")
             return
@@ -273,7 +280,7 @@ class SqlserverActivity(DBMAsyncJob):
         payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
         self._check.database_monitoring_query_activity(payload)
         self._log.error("DEADLOCK COlLECTED {} in {} time".format(len(deadlock_xmls), time.time() - start_time))
-        
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
         self.log.debug("collecting sql server current connections")
@@ -441,10 +448,10 @@ class SqlserverActivity(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "activity",
-            "collection_interval": self._activity_collection_interval, #TODO is it important for whatever reason to have very precise int ?
+            "collection_interval": self._activity_collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
-            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""), 
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_activity": active_sessions,
@@ -453,8 +460,8 @@ class SqlserverActivity(DBMAsyncJob):
         return event
 
     def _create_deadlock_event(self, deadlock_xmls):
-        #TODO WHAT if deadlock xml is just too long ? 
-        #MAX_PAYLOAD_BYTES ? 
+        # TODO WHAT if deadlock xml is just too long ?
+        # MAX_PAYLOAD_BYTES ?
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -463,7 +470,7 @@ class SqlserverActivity(DBMAsyncJob):
             "collection_interval": self._deadlocks_collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
-            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""), 
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_deadlocks": deadlock_xmls,
