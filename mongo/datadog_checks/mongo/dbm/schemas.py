@@ -152,7 +152,7 @@ class MongoSchemas(DBMAsyncJob):
         if index_name == "_id_":
             return True
         return index_details.get("unique", False)
-    
+
     def _is_index_case_insensitive(self, index_details):
         collation = index_details.get("collation")
         if collation:
