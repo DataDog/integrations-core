@@ -874,40 +874,70 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
         schemas._fetch_for_databases()
 
 
-# obfuscate_no_except_wrapper
 def test_deadlock_calls_obfuscator(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     test_xml = """
-                <event name="xml_deadlock_report" package="sqlserver" timestamp="2024-08-20T08:30:35.762Z">
-                	<data name="xml_report">
-                		<type name="xml" package="package0"/>
-                		<value>
-                			<deadlock>
-                				<victim-list>
-                					<victimProcess id="process12108eb088"/>
-                				</victim-list>
-                				<process-list>
-                					<process id="process12108eb088">
-                						<executionStack>
-                							<frame procname="adhoc" line="1" stmtstart="38" stmtend="180" sqlhandle="0">\nunknown    </frame>
-                							<frame procname="adhoc" line="1" stmtend="128" sqlhandle="0">\nunknown    </frame>
-                						</executionStack>
-                						<inputbuf>\nUPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;   </inputbuf>
-                					</process>
-                					<process id="process1215b77088">
-                						<executionStack>
-                							<frame procname="adhoc" line="1" stmtstart="38" stmtend="180" sqlhandle="0">\nunknown    </frame>
-                							<frame procname="adhoc" line="1" stmtend="126" sqlhandle="0">\nunknown    </frame>
-                						</executionStack>
-                						<inputbuf>\nUPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;   </inputbuf>
-                					</process>
-                				</process-list>
-                			</deadlock>
-                		</value>
-                	</data>
-                </event> 
-                """
-    expected_xml_string = '<event name="xml_deadlock_report" package="sqlserver" timestamp="2024-08-20T08:30:35.762Z"> <data name="xml_report"> <type name="xml" package="package0" /> <value> <deadlock> <victim-list> <victimProcess id="process12108eb088" /> </victim-list> <process-list> <process id="process12108eb088"> <executionStack> <frame procname="adhoc" line="1" stmtstart="38" stmtend="180" sqlhandle="0">obfuscated</frame> <frame procname="adhoc" line="1" stmtend="128" sqlhandle="0">obfuscated</frame> </executionStack> <inputbuf>obfuscated</inputbuf> </process> <process id="process1215b77088"> <executionStack> <frame procname="adhoc" line="1" stmtstart="38" stmtend="180" sqlhandle="0">obfuscated</frame> <frame procname="adhoc" line="1" stmtend="126" sqlhandle="0">obfuscated</frame> </executionStack> <inputbuf>obfuscated</inputbuf> </process> </process-list> </deadlock> </value> </data> </event>'
+    <event name="xml_deadlock_report" package="sqlserver" timestamp="2024-08-20T08:30:35.762Z">
+     <data name="xml_report">
+      <type name="xml" package="package0"/>
+      <value>
+       <deadlock>
+        <victim-list>
+         <victimProcess id="process12108eb088"/>
+        </victim-list>
+        <process-list>
+         <process id="process12108eb088">
+          <executionStack>
+           <frame procname="adhoc" line="1" stmtstart="38" stmtend="180" sqlhandle="0">\nunknown    </frame>
+           <frame procname="adhoc" line="1" stmtend="128" sqlhandle="0">\nunknown    </frame>
+          </executionStack>
+          <inputbuf>\nUPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;   </inputbuf>
+         </process>
+         <process id="process1215b77088">
+          <executionStack>
+           <frame procname="adhoc" line="1" stmtstart="38" stmtend="180" sqlhandle="0">\nunknown    </frame>
+           <frame procname="adhoc" line="1" stmtend="126" sqlhandle="0">\nunknown    </frame>
+          </executionStack>
+          <inputbuf>\nUPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;   </inputbuf>
+         </process>
+        </process-list>
+       </deadlock>
+      </value>
+     </data>
+    </event>
+    """
+
+    expected_xml_string = (
+        "<event name=\"xml_deadlock_report\" package=\"sqlserver\" timestamp=\"2024-08-20T08:30:35.762Z\"> "
+        "<data name=\"xml_report\"> "
+        "<type name=\"xml\" package=\"package0\" /> "
+        "<value> "
+        "<deadlock> "
+        "<victim-list> "
+        "<victimProcess id=\"process12108eb088\" /> "
+        "</victim-list> "
+        "<process-list> "
+        "<process id=\"process12108eb088\"> "
+        "<executionStack> "
+        "<frame procname=\"adhoc\" line=\"1\" stmtstart=\"38\" stmtend=\"180\" sqlhandle=\"0\">obfuscated</frame> "
+        "<frame procname=\"adhoc\" line=\"1\" stmtend=\"128\" sqlhandle=\"0\">obfuscated</frame> "
+        "</executionStack> "
+        "<inputbuf>obfuscated</inputbuf> "
+        "</process> "
+        "<process id=\"process1215b77088\"> "
+        "<executionStack> "
+        "<frame procname=\"adhoc\" line=\"1\" stmtstart=\"38\" stmtend=\"180\" sqlhandle=\"0\">obfuscated</frame> "
+        "<frame procname=\"adhoc\" line=\"1\" stmtend=\"126\" sqlhandle=\"0\">obfuscated</frame> "
+        "</executionStack> "
+        "<inputbuf>obfuscated</inputbuf> "
+        "</process> "
+        "</process-list> "
+        "</deadlock> "
+        "</value> "
+        "</data> "
+        "</event>"
+    )
+
     with mock.patch(
         'datadog_checks.sqlserver.deadlocks.Deadlocks.obfuscate_no_except_wrapper', return_value="obfuscated"
     ):

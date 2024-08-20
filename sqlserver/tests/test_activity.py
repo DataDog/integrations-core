@@ -26,7 +26,6 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
-from .conftest import DEFAULT_TIMEOUT
 from .utils import create_deadlock
 
 try:
@@ -938,7 +937,7 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
 
     created_deadlock = False
     # Rarely instead of a deadlock one of the transactions time outs
-    for i in range(0, 3):
+    for _ in range(0, 3):
         bob_conn = _get_conn_for_user(dbm_instance, 'bob', 3)
         fred_conn = _get_conn_for_user(dbm_instance, 'fred', 3)
         created_deadlock = create_deadlock(bob_conn, fred_conn)
@@ -984,9 +983,11 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     # Sometimes deadlock takes a bit longer to arrive to the ring buffer.
     # We can may be give it 3 tries
     err = ""
-    for i in range(0, 3):
+    success = False
+    for _ in range(0, 3):
         time.sleep(3)
         res, err = execut_test()
         if res:
-            return
-    assert False, err
+            success = True
+            break
+    assert success, err
