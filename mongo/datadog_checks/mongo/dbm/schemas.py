@@ -142,6 +142,7 @@ class MongoSchemas(DBMAsyncJob):
                 "hidden": index_details.get("hidden", False),
                 "partial": "partialFilterExpression" in index_details,
                 "sparse": index_details.get("sparse", False),
+                "case_insensitive": self._is_index_case_insensitive(index_details),
                 "ttl": index_details.get("expireAfterSeconds"),
             }
             for index_name, index_details in indexes.items()
@@ -151,6 +152,16 @@ class MongoSchemas(DBMAsyncJob):
         if index_name == "_id_":
             return True
         return index_details.get("unique", False)
+    
+    def _is_index_case_insensitive(self, index_details):
+        collation = index_details.get("collation")
+        if collation:
+            case_level = collation.get("caseLevel")
+            if case_level:
+                return False
+            strength = collation.get("strength")
+            return strength == 1 or strength == 2
+        return False
 
     def _get_index_type(self, index_name, index_details):
         if "2dsphereIndexVersion" in index_details:

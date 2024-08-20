@@ -163,6 +163,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -187,6 +188,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -203,6 +205,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -219,6 +222,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -235,6 +239,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": 3600
                         },
                         {
@@ -255,6 +260,7 @@
                             "hidden": false,
                             "partial": true,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -271,6 +277,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": true,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -291,6 +298,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -307,6 +315,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -323,6 +332,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -339,6 +349,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -359,6 +370,41 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "amenities_1",
+                            "keys": [
+                                {
+                                    "field": "amenities",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "case_insensitive": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "summary_1",
+                            "keys": [
+                                {
+                                    "field": "summary",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "case_insensitive": true,
                             "ttl": null
                         }
                     ]
@@ -509,6 +555,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -533,6 +580,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -549,6 +597,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -565,6 +614,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -581,6 +631,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": 3600
                         },
                         {
@@ -601,6 +652,7 @@
                             "hidden": false,
                             "partial": true,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -617,6 +669,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": true,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -637,6 +690,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -653,6 +707,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -669,6 +724,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -685,6 +741,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -705,6 +762,41 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "amenities_1",
+                            "keys": [
+                                {
+                                    "field": "amenities",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "case_insensitive": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "summary_1",
+                            "keys": [
+                                {
+                                    "field": "summary",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "case_insensitive": true,
                             "ttl": null
                         }
                     ]
@@ -861,6 +953,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -885,6 +978,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -901,6 +995,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -917,6 +1012,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -933,6 +1029,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": 3600
                         },
                         {
@@ -953,6 +1050,7 @@
                             "hidden": false,
                             "partial": true,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -969,6 +1067,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": true,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -989,6 +1088,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1005,6 +1105,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1021,6 +1122,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1037,6 +1139,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1057,6 +1160,41 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "amenities_1",
+                            "keys": [
+                                {
+                                    "field": "amenities",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "case_insensitive": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "summary_1",
+                            "keys": [
+                                {
+                                    "field": "summary",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "case_insensitive": true,
                             "ttl": null
                         }
                     ]
@@ -1207,6 +1345,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1231,6 +1370,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1247,6 +1387,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1263,6 +1404,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1279,6 +1421,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": 3600
                         },
                         {
@@ -1299,6 +1442,7 @@
                             "hidden": false,
                             "partial": true,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1315,6 +1459,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": true,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1335,6 +1480,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1351,6 +1497,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1367,6 +1514,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1383,6 +1531,7 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
                             "ttl": null
                         },
                         {
@@ -1403,6 +1552,41 @@
                             "hidden": false,
                             "partial": false,
                             "sparse": false,
+                            "case_insensitive": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "amenities_1",
+                            "keys": [
+                                {
+                                    "field": "amenities",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "case_insensitive": false,
+                            "ttl": null
+                        },
+                        {
+                            "name": "summary_1",
+                            "keys": [
+                                {
+                                    "field": "summary",
+                                    "type": "1"
+                                }
+                            ],
+                            "type": "regular",
+                            "unique": false,
+                            "compound": false,
+                            "hidden": false,
+                            "partial": false,
+                            "sparse": false,
+                            "case_insensitive": true,
                             "ttl": null
                         }
                     ]
