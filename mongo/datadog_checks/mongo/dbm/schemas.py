@@ -127,27 +127,34 @@ class MongoSchemas(DBMAsyncJob):
 
     def _discover_collection_indexes(self, dbname, collname):
         indexes = self._check.api_client.index_information(dbname, collname)
-        return [
-            {
-                "name": index_name,
-                "keys": [
-                    {
-                        "field": field,
-                        "type": str(index_type),
-                    }
-                    for field, index_type in index_details.get("key", [])
-                ],
-                "type": self._get_index_type(index_name, index_details),
-                "unique": self._is_index_unique(index_name, index_details),
-                "compound": len(index_details.get("key", [])) > 1,
-                "hidden": index_details.get("hidden", False),
-                "partial": "partialFilterExpression" in index_details,
-                "sparse": index_details.get("sparse", False),
-                "case_insensitive": self._is_index_case_insensitive(index_details),
-                "ttl": index_details.get("expireAfterSeconds"),
-            }
-            for index_name, index_details in indexes.items()
-        ]
+        return [self._create_index_payload(index_name, index_details) for index_name, index_details in indexes.items()]
+
+    def _create_index_payload(self, index_name, index_details):
+        payload = {
+            "name": index_name,
+            "keys": [
+                {
+                    "field": field,
+                    "type": str(index_type),
+                }
+                for field, index_type in index_details.get("key", [])
+            ],
+            "type": self._get_index_type(index_name, index_details),
+        }
+
+        # Options represent the index properties, we only include them if they are set
+        options = {
+            "unique": self._is_index_unique(index_name, index_details),
+            "compound": len(index_details.get("key", [])) > 1,
+            "hidden": index_details.get("hidden", False),
+            "partial": "partialFilterExpression" in index_details,
+            "sparse": index_details.get("sparse", False),
+            "case_insensitive": self._is_index_case_insensitive(index_details),
+            "ttl": index_details.get("expireAfterSeconds"),
+        }
+        options = {k: v for k, v in options.items() if v}  # Omit falsey values
+        payload.update(options)
+        return payload
 
     def _is_index_unique(self, index_name, index_details):
         if index_name == "_id_":

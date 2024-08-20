@@ -192,13 +192,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": true,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "unique": true
                         },
                         {
                             "name": "property_type_1_room_type_1_beds_1",
@@ -217,13 +211,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "name_1",
@@ -233,14 +221,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "regular"
                         },
                         {
                             "name": "address.location_2dsphere",
@@ -250,14 +231,7 @@
                                     "type": "2dsphere"
                                 }
                             ],
-                            "type": "geospatial",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "geospatial"
                         },
                         {
                             "name": "last_scraped_1",
@@ -268,12 +242,6 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
                             "ttl": 3600
                         },
                         {
@@ -289,13 +257,8 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
                             "compound": true,
-                            "hidden": false,
-                            "partial": true,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "partial": true
                         },
                         {
                             "name": "room_type_1",
@@ -306,13 +269,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": true,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "sparse": true
                         },
                         {
                             "name": "name_text_summary_text_space_text",
@@ -327,13 +284,7 @@
                                 }
                             ],
                             "type": "text",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "$**_1",
@@ -343,14 +294,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "wildcard",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "wildcard"
                         },
                         {
                             "name": "address.location_2d",
@@ -360,14 +304,7 @@
                                     "type": "2d"
                                 }
                             ],
-                            "type": "geospatial",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "geospatial"
                         },
                         {
                             "name": "price_hashed",
@@ -377,14 +314,7 @@
                                     "type": "hashed"
                                 }
                             ],
-                            "type": "hashed",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "hashed"
                         },
                         {
                             "name": "price_hashed_clearning_fee_1",
@@ -399,13 +329,7 @@
                                 }
                             ],
                             "type": "hashed",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "amenities_1",
@@ -415,14 +339,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "regular"
                         },
                         {
                             "name": "summary_1",
@@ -433,13 +350,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": true,
-                            "ttl": null
+                            "case_insensitive": true
                         }
                     ]
                 },
@@ -584,13 +495,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": true,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "unique": true
                         },
                         {
                             "name": "property_type_1_room_type_1_beds_1",
@@ -609,13 +514,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "name_1",
@@ -625,14 +524,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "regular"
                         },
                         {
                             "name": "address.location_2dsphere",
@@ -642,14 +534,7 @@
                                     "type": "2dsphere"
                                 }
                             ],
-                            "type": "geospatial",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "geospatial"
                         },
                         {
                             "name": "last_scraped_1",
@@ -660,12 +545,6 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
                             "ttl": 3600
                         },
                         {
@@ -681,13 +560,8 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
                             "compound": true,
-                            "hidden": false,
-                            "partial": true,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "partial": true
                         },
                         {
                             "name": "room_type_1",
@@ -698,13 +572,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": true,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "sparse": true
                         },
                         {
                             "name": "name_text_summary_text_space_text",
@@ -719,13 +587,7 @@
                                 }
                             ],
                             "type": "text",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "$**_1",
@@ -735,14 +597,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "wildcard",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "wildcard"
                         },
                         {
                             "name": "address.location_2d",
@@ -752,14 +607,7 @@
                                     "type": "2d"
                                 }
                             ],
-                            "type": "geospatial",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "geospatial"
                         },
                         {
                             "name": "price_hashed",
@@ -769,14 +617,7 @@
                                     "type": "hashed"
                                 }
                             ],
-                            "type": "hashed",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "hashed"
                         },
                         {
                             "name": "price_hashed_clearning_fee_1",
@@ -791,13 +632,7 @@
                                 }
                             ],
                             "type": "hashed",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "amenities_1",
@@ -807,14 +642,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "regular"
                         },
                         {
                             "name": "summary_1",
@@ -825,13 +653,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": true,
-                            "ttl": null
+                            "case_insensitive": true
                         }
                     ]
                 }
@@ -1017,13 +839,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": true,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "unique": true
                         },
                         {
                             "name": "property_type_1_room_type_1_beds_1",
@@ -1042,13 +858,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "name_1",
@@ -1058,14 +868,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "regular"
                         },
                         {
                             "name": "address.location_2dsphere",
@@ -1075,14 +878,7 @@
                                     "type": "2dsphere"
                                 }
                             ],
-                            "type": "geospatial",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "geospatial"
                         },
                         {
                             "name": "last_scraped_1",
@@ -1093,12 +889,6 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
                             "ttl": 3600
                         },
                         {
@@ -1114,13 +904,8 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
                             "compound": true,
-                            "hidden": false,
-                            "partial": true,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "partial": true
                         },
                         {
                             "name": "room_type_1",
@@ -1131,13 +916,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": true,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "sparse": true
                         },
                         {
                             "name": "name_text_summary_text_space_text",
@@ -1152,13 +931,7 @@
                                 }
                             ],
                             "type": "text",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "$**_1",
@@ -1168,14 +941,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "wildcard",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "wildcard"
                         },
                         {
                             "name": "address.location_2d",
@@ -1185,14 +951,7 @@
                                     "type": "2d"
                                 }
                             ],
-                            "type": "geospatial",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "geospatial"
                         },
                         {
                             "name": "price_hashed",
@@ -1202,14 +961,7 @@
                                     "type": "hashed"
                                 }
                             ],
-                            "type": "hashed",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "hashed"
                         },
                         {
                             "name": "price_hashed_clearning_fee_1",
@@ -1224,13 +976,7 @@
                                 }
                             ],
                             "type": "hashed",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "amenities_1",
@@ -1240,14 +986,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "regular"
                         },
                         {
                             "name": "summary_1",
@@ -1258,13 +997,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": true,
-                            "ttl": null
+                            "case_insensitive": true
                         }
                     ]
                 },
@@ -1409,13 +1142,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": true,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "unique": true
                         },
                         {
                             "name": "property_type_1_room_type_1_beds_1",
@@ -1434,13 +1161,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "name_1",
@@ -1450,14 +1171,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "regular"
                         },
                         {
                             "name": "address.location_2dsphere",
@@ -1467,14 +1181,7 @@
                                     "type": "2dsphere"
                                 }
                             ],
-                            "type": "geospatial",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "geospatial"
                         },
                         {
                             "name": "last_scraped_1",
@@ -1485,12 +1192,6 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
                             "ttl": 3600
                         },
                         {
@@ -1506,13 +1207,8 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
                             "compound": true,
-                            "hidden": false,
-                            "partial": true,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "partial": true
                         },
                         {
                             "name": "room_type_1",
@@ -1523,13 +1219,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": true,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "sparse": true
                         },
                         {
                             "name": "name_text_summary_text_space_text",
@@ -1544,13 +1234,7 @@
                                 }
                             ],
                             "type": "text",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "$**_1",
@@ -1560,14 +1244,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "wildcard",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "wildcard"
                         },
                         {
                             "name": "address.location_2d",
@@ -1577,14 +1254,7 @@
                                     "type": "2d"
                                 }
                             ],
-                            "type": "geospatial",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "geospatial"
                         },
                         {
                             "name": "price_hashed",
@@ -1594,14 +1264,7 @@
                                     "type": "hashed"
                                 }
                             ],
-                            "type": "hashed",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "hashed"
                         },
                         {
                             "name": "price_hashed_clearning_fee_1",
@@ -1616,13 +1279,7 @@
                                 }
                             ],
                             "type": "hashed",
-                            "unique": false,
-                            "compound": true,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "compound": true
                         },
                         {
                             "name": "amenities_1",
@@ -1632,14 +1289,7 @@
                                     "type": "1"
                                 }
                             ],
-                            "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": false,
-                            "ttl": null
+                            "type": "regular"
                         },
                         {
                             "name": "summary_1",
@@ -1650,13 +1300,7 @@
                                 }
                             ],
                             "type": "regular",
-                            "unique": false,
-                            "compound": false,
-                            "hidden": false,
-                            "partial": false,
-                            "sparse": false,
-                            "case_insensitive": true,
-                            "ttl": null
+                            "case_insensitive": true
                         }
                     ]
                 }
