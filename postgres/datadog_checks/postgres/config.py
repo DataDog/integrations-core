@@ -6,11 +6,6 @@ from typing import Optional
 
 from six import PY2, PY3, iteritems
 
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
