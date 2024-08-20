@@ -13,7 +13,6 @@ from datadog_checks.sqlserver.queries import (
 
 MAX_DEADLOCKS = 100
 
-
 class Deadlocks:
 
     def __init__(self, check, conn_prefix, config):
