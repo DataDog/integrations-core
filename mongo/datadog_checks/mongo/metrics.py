@@ -142,6 +142,7 @@ BASE_METRICS = {
     "stats.totalFreeStorageSize": GAUGE,
     "stats.fsUsedSize": GAUGE,
     "stats.fsTotalSize": GAUGE,
+    "stats.views": GAUGE,
     "sessions.count": GAUGE,
     "uptime": GAUGE,
     "system.memSizeMB": (GAUGE, "system.mem.total"),  # total amount of system memory

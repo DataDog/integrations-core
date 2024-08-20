@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Track queue size, consumer count, unacknowledged messages, and more.",
-    "title": "tibco_ems",
+    "title": "Tibco EMS",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
