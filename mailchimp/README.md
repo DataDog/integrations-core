@@ -21,11 +21,11 @@ The Mailchimp integration collects and forwards Campaigns and Lists(Audiences) m
 
 ### Service Checks
 
-mailchimp does not include any service checks.
+Mailchimp does not include any service checks.
 
 ### Events
 
-mailchimp does not include any events.
+Mailchimp does not include any events.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][2].
