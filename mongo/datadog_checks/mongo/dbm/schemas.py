@@ -120,7 +120,7 @@ class MongoSchemas(DBMAsyncJob):
             {
                 "name": key,
                 "types": sorted(types),
-                "prevalence": field_prevalence[key],
+                "prevalence": round(field_prevalence[key], 3),
             }
             for key, types in schema_types.items()
         ]
