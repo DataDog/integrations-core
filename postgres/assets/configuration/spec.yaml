@@ -332,6 +332,12 @@ files:
             type: boolean
             example: false
             display_default: false
+        - name: global_view_db
+          description: Database the agent connects to perform autodiscovery operations
+          value:
+            type: string
+            example: postgres
+            display_default: postgres
         - name: max_databases
           description: The maximum number of databases this host should monitor.
           value:
