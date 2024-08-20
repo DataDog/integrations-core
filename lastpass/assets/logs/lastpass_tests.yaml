@@ -324,3 +324,63 @@ tests:
         }
       tags:
         - "source:LOGS_SOURCE"
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Username changed",
+          "Data": "VID: 4963227935627314198",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Password changed",
+          "Data": "VID: 4963227935627314198",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Site changed",
+          "Data": "VID: 8129207370202608594",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Deleted sites",
+          "Data": "VID: 8802943594384138037",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Log in",
+          "Data": "VID: 4963227935627314198",
+          "timestamp": 1722921377000.0
+      }
+    result: null
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Open secure note",
+          "Data": "Secure Note (VID: 7608813617878138489)",
+          "timestamp": 1722921377000.0
+      }
+    result: null

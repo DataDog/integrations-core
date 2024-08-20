@@ -199,20 +199,27 @@ pipeline:
 
               add %{greedyData:policy.name}
     - type: pipeline
-      name: Sites Related Activity
+      name: Vault Item Related Activity
       enabled: true
       filter:
-        query: '@evt.name:("Deleted sites" OR "Site changed" OR "Password changed" OR
-          "Username changed" OR "Site added" OR "Log in") -@Data:"LastPass via
+        query: '@evt.name:("Edit secure note" OR "Add secure note" OR "Open secure note"
+          OR "Site changed" OR "Deleted sites" OR "Site added" OR "Password
+          changed" OR "Username changed" OR "Log in") -@Data:"LastPass via
           Website" '
       processors:
         - type: grok-parser
-          name: Parsing Site Related Info Attribute
+          name: Parsing Vault Item Related Info Attribute
           enabled: true
           source: Data
           samples:
+            - "Secure Note (VID: 1965737432614185751)"
+            - "VID: 4963227935627314198"
             - "VID: 7114762062923152782 from Common_DataDog_Creds"
           grok:
             supportRules: ""
-            matchRules: "login_sharedfolder VID\\: %{numberStr:site.VID} from
-              %{greedyData:shared_folder.name}"
+            matchRules: >
+              Add_Edit_Open Secure Note \(VID\: %{numberStr:VID}\)
+
+              login_sharedfolder VID\: %{numberStr:VID} from %{greedyData:shared_folder.name}
+
+              Site_added_deleted_login_changed_Password_Username_chaged VID\: %{numberStr:VID}
