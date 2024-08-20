@@ -130,7 +130,7 @@ pipeline:
         query: '@evt.name:("Restored shared folder" OR "Update folder permissions" OR
           "Limit shared folder" OR "Removed from shared folder" OR "Add to
           shared folder" OR "Move to shared folder" OR "Created shared folder"
-          OR "Permanently deleted shared folder" OR Deleted shared folder) '
+          OR "Permanently deleted shared folder" OR "Deleted shared folder") '
       processors:
         - type: grok-parser
           name: Parsing Shared Folder Info Attribute
