@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# TODO temp imports:
-import pdb
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
@@ -40,41 +38,45 @@ class Deadlocks:
         return sql_text
 
     def obfuscate_xml(self, root):
-        # TODO put exception here if not found as this would signal in a format change
         process_list = root.find(".//process-list")
+        if process_list is None:
+            return "process-list element not found. The deadlock XML is in an unexpected format."
         for process in process_list.findall('process'):
-            inputbuf = process.find('inputbuf')
-            # TODO inputbuf.text can be truncated, check when live ?
-            inputbuf.text = self.obfuscate_no_except_wrapper(inputbuf.text)
+            for inputbuf in process.findall('.//inputbuf'):
+                if inputbuf.text is not None:
+                    inputbuf.text = self.obfuscate_no_except_wrapper(inputbuf.text)
             for frame in process.findall('.//frame'):
-                frame.text = self.obfuscate_no_except_wrapper(frame.text)
+                if frame.text is not None:
+                    frame.text = self.obfuscate_no_except_wrapper(frame.text)
+        return None
 
     def collect_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                pdb.set_trace()
                 cursor.execute(CREATE_DEADLOCK_TEMP_TABLE_QUERY)
                 cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, self._last_deadlock_timestamp))
                 results = cursor.fetchall()
                 last_deadlock_datetime = datetime.strptime(self._last_deadlock_timestamp, '%Y-%m-%d %H:%M:%S.%f')
                 converted_xmls = []
+                errors = []
                 for result in results:
                     try:
                         root = ET.fromstring(result[1])
                     except Exception as e:
-                        # Other thing do we want to suggest to set ring buffer to 1MB ?
-                        # TODO notify backend ? How ? make a collection_errors array like in metadata json
                         self._log.error(
                             """An error occurred while collecting SQLServer deadlocks.
                              One of the deadlock XMLs couldn't be parsed. The error: {}""".format(
                                 e
                             )
                         )
-
+                        errors.append("Truncated deadlock xml - {}".format(result[:50]))
                     datetime_obj = datetime.strptime(root.get('timestamp'), '%Y-%m-%dT%H:%M:%S.%fZ')
                     if last_deadlock_datetime < datetime_obj:
                         last_deadlock_datetime = datetime_obj
-                    self.obfuscate_xml(root)
-                    converted_xmls.append(ET.tostring(root, encoding='unicode'))
+                    error = self.obfuscate_xml(root)
+                    if not error:
+                        converted_xmls.append(ET.tostring(root, encoding='unicode'))
+                    else:
+                        errors.append(error)
                 self._last_deadlock_timestamp = last_deadlock_datetime.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-                return converted_xmls
+                return converted_xmls, errors

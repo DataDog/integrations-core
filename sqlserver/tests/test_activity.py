@@ -910,17 +910,9 @@ def test_sanitize_activity_row(dbm_instance, row):
     assert isinstance(row['query_plan_hash'], str)
 
 
-# plan - first we need to catch deadlock exception if not try again ?
-
-# there are often 2 deadlocks lets check for that
-
-# test1 - just that we collect deadlocks and its in stub events
 # test2 - time test that we take deadlocks in delta
 # some crazy scenario if possible like 3 query involved ?
 # deadlock too long ?
-# we cannot test that real obfuscator is called at least check that its called by unit test
-
-# TEST That we at least try to apply obfuscation to all required fields !
 
 
 @pytest.mark.integration
