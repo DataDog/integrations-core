@@ -218,7 +218,7 @@ CREATE_DEADLOCK_TEMP_TABLE_QUERY = """
 SELECT 
     CAST([target_data] AS XML) AS Target_Data
 INTO 
-    TempXMLDatadogData
+    #TempXMLDatadogData
 FROM 
     sys.dm_xe_session_targets AS xt
 INNER JOIN 
@@ -233,7 +233,7 @@ DETECT_DEADLOCK_QUERY = """
 SELECT TOP (?) 
     xdr.value('@timestamp', 'datetime') AS [Date], xdr.query('.') AS [Event_Data]
 FROM 
-    TempXMLDatadogData
+    #TempXMLDatadogData
 CROSS APPLY 
     Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
 WHERE 

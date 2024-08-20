@@ -12,7 +12,7 @@ from datadog_checks.sqlserver.queries import (
     DETECT_DEADLOCK_QUERY,
 )
 #TODO temp imports:
-
+import pdb
 
 MAX_DEADLOCKS = 100
 
@@ -51,6 +51,7 @@ class Deadlocks:
     def collect_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                pdb.set_trace()
                 cursor.execute(CREATE_DEADLOCK_TEMP_TABLE_QUERY)
                 cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, self._last_deadlock_timestamp))
                 results = cursor.fetchall()

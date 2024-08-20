@@ -6,6 +6,8 @@ import string
 import threading
 from copy import copy
 from random import choice, randint, shuffle
+import concurrent
+from threading import Event
 
 import pyodbc
 import pytest
@@ -243,6 +245,48 @@ def normalize_indexes_columns(actual_payload):
                     columns = column_names.split(',')
                     sorted_columns = sorted(columns)
                     index['column_names'] = ','.join(sorted_columns)
+
+def run_first_deadlock_query(conn, event1, event2):
+    exception_text = ""
+    try:
+        conn.cursor().execute("BEGIN TRAN foo;")
+        conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 1;")
+        event1.set()
+        event2.wait()
+        conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;")
+    except Exception as e:
+        # Exception is expected due to a deadlock
+        exception_text = str(e)
+        pass
+    conn.commit()
+    return exception_text
+
+def run_second_deadlock_query(conn, event1, event2):
+    exception_text = ""
+    try:
+        event1.wait()
+        conn.cursor().execute("BEGIN TRAN bar;")
+        conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 2;")
+        event2.set()
+        conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;")
+    except Exception as e:
+        # Exception is expected due to a deadlock
+        exception_text = str(e)
+        pass
+    conn.commit()
+    return exception_text
+
+def create_deadlock(bob_conn, fred_conn):
+    executor = concurrent.futures.thread.ThreadPoolExecutor(2)
+    event1 = Event()
+    event2 = Event()
+
+    futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
+    futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
+    exception_1_text = futures_first_query.result()
+    exception_2_text = futures_second_query.result()
+    executor.shutdown()
+    return "deadlock" in exception_1_text or "deadlock" in exception_2_text
 
 
 def deep_compare(obj1, obj2):

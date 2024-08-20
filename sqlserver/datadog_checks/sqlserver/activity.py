@@ -25,7 +25,7 @@ import time
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 DEFAULT_DEADLOCKS_COLLECTION_INTERVAL = 5
 MAX_PAYLOAD_BYTES = 19e6
-
+import pdb
 CONNECTIONS_QUERY = """\
 SELECT
     login_name AS user_name,
@@ -218,6 +218,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
         self._deadlocks = Deadlocks(check, self._conn_key_prefix, self._config)
+        self._deadlock__payload_max_bytes = MAX_PAYLOAD_BYTES
 
     def _close_db_conn(self):
         pass
@@ -252,7 +253,18 @@ class SqlserverActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_deadlocks(self):
         start_time = time.time()
-        deadlock_xmls = self._deadlocks.collect_deadlocks()
+        deadlock_xmls_collected = self._deadlocks.collect_deadlocks()
+        deadlock_xmls = []
+        total_number_of_characters = 0
+        pdb.set_trace()
+        for i, deadlock in enumerate(deadlock_xmls_collected):
+            total_number_of_characters += len(deadlock)
+            if total_number_of_characters > self._deadlock__payload_max_bytes:
+                self._log.warning("We've dropped {} deadlocks from a total of {} deadlocks as the max deadlock payload of {} bytes was exceeded.".format(len(deadlock_xmls) - i, len(deadlock_xmls), self._deadlock_payload_max_bytes))
+                break
+            else:
+                deadlock_xmls.append(deadlock)
+        #TODO REMOVE log error
         if len(deadlock_xmls) == 0:
             self._log.error("Collected 0 DEADLOCKS")
             return
@@ -423,9 +435,6 @@ class SqlserverActivity(DBMAsyncJob):
     def _get_estimated_row_size_bytes(row):
         return len(str(row))
 
-
-
-
     def _create_activity_event(self, active_sessions, active_connections):
         event = {
             "host": self._check.resolved_hostname,
@@ -446,9 +455,6 @@ class SqlserverActivity(DBMAsyncJob):
     def _create_deadlock_event(self, deadlock_xmls):
         #TODO WHAT if deadlock xml is just too long ? 
         #MAX_PAYLOAD_BYTES ? 
-        #TODO compression , couldnt reallly see it in Go code so far but may be its somewhere deeper. 
-        # may be 	flushAndSerializeInParallel FlushAndSerializeInParallel in aggregator.go ? 
-        # compression is Trade off CPU , network ?
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -457,8 +463,8 @@ class SqlserverActivity(DBMAsyncJob):
             "collection_interval": self._deadlocks_collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
-            #TODO ? 'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-            #TODO ? 'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""), 
+            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_deadlocks": deadlock_xmls,
         }
