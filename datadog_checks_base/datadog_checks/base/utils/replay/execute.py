@@ -43,7 +43,7 @@ def run_with_isolation(check, aggregator, datadog_agent):
         ],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         env=env_vars,
     )
     with process:

@@ -46,7 +46,8 @@ deps = [
     "cryptography==42.0.8; python_version > '3.0'",
     "ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'",
     "ddtrace==0.53.2; sys_platform != 'win32' and python_version < '3.0'",
-    "ddtrace==1.11.2; python_version > '3.0'",
+    # https://github.com/DataDog/dd-trace-py/issues/10002
+    "ddtrace==2.10.5; python_version > '3.0'",
     "enum34==1.1.10; python_version < '3.0'",
     "importlib-metadata==2.1.3; python_version < '3.8'",
     "ipaddress==1.0.23; python_version < '3.0'",
