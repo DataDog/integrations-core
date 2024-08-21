@@ -168,7 +168,7 @@ class PostgresConfig:
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
 
-    def _build_tags(self, custom_tags, propagate_agent_tags=True):
+    def _build_tags(self, custom_tags, propagate_agent_tags):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
