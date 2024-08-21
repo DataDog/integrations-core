@@ -1,0 +1,42 @@
+id: aws_neuron
+metric_id: aws-neuron
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: AWS Neuron
+  enabled: true
+  filter:
+    query: 'source:aws_neuron'
+  processors:
+    - type: grok-parser
+      name: Operator compilation
+      enabled: true
+      source: message
+      samples:
+        - 'INFO:Neuron: => aten::Int: 96'
+        - 'INFO:Neuron: => aten::Int: 1 [supported]'
+        - 'INFO:Neuron: => aten::embedding: 3 [not supported]'
+      grok:
+        supportRules: operator %{word:operator.library}::%{word:operator.type}
+        matchRules: 'operator_rule INFO:Neuron: => %{operator}: %{integer:count}( \[%{data:not_compiled_msg}\])?'
+    - type: grok-parser
+      name: Message separation
+      enabled: true
+      source: message
+      samples:
+        - INFO:Neuron:Number of arithmetic operators (pre-compilation) before = 565, fused = 548, percent fused = 96.99%
+        - 'INFO:Neuron: => aten::layer_norm: 25'
+      grok:
+        supportRules: ""
+        matchRules: message_rule %{word:level}:Neuron:( => )?%{data:msg}
+    - type: message-remapper
+      name: Define `msg` as the official message of the log
+      enabled: true
+      sources:
+        - msg
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level
