@@ -19,7 +19,7 @@ The main use case to run the `kubevirt_api` check is as a [cluster level check][
 
 In order to do that, you will need to update some RBAC permissions to give the `datadog-agent` service account read-only access to the`KubeVirt` resources by following the steps below:
 
-1. Bind the `kubevirt.io:view` ClusterRole to the `datadog-agent` service account:
+1. Bind the `kubevirt.io:view` ClusterRole to the `datadog-agent` service account, :
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -33,8 +33,10 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: datadog-agent
-    namespace: default
+    namespace: <DD_NAMESPACE>
 ```
+
+Replace `<DD_NAMESPACE>` with the namespace where you installed the `datadog-agent` service account.
 
 2. Annotate the pods template of your `virt-api` deployment by patching the `KubeVirt` resource as follows:
 
