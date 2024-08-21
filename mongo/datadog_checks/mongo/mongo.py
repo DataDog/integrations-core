@@ -161,7 +161,8 @@ class MongoDb(AgentCheck):
             # For backward compatibility, coll_names is ONLY applied when autodiscovery is not enabled
             # Otherwise, we collect collstats & indexstats for all auto-discovered databases and authorized collections
             coll_names = None if self._database_autodiscovery.autodiscovery_enabled else self._config.coll_names
-            potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
+            if 'collection' in self._config.additional_metrics:
+                potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
             if self._config.collections_indexes_stats:
                 if self._mongo_version_parsed >= Version("3.2"):
                     potential_collectors.append(IndexStatsCollector(self, db_name, tags, coll_names=coll_names))
