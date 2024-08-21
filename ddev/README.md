@@ -16,3 +16,5 @@ Read the [`ddev` installation guide](https://datadoghq.dev/integrations-core/set
 ## Documentation
 
 Read the [`ddev` documentation](https://datadoghq.dev/integrations-core/ddev/about/).
+
+# Checking on the process for external contributors to request review to Datadog agent-integrations team
