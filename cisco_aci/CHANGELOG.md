@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.10.1 / 2024-08-20
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Refactor batched payloads to fix incorrect status + use interface ID if name not available ([#18360](https://github.com/DataDog/integrations-core/pull/18360))
+
 ## 2.10.0 / 2024-08-09
 
 ***Added***:
