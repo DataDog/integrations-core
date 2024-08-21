@@ -4,8 +4,14 @@
 import copy
 import platform
 
-if platform.system() == "Windows":
-    import ctypes
+import pytest
+
+from datadog_checks.dev.utils import ON_WINDOWS
+
+if not ON_WINDOWS:
+    pytest.skip('test_windows requires Windows', allow_module_level=True)
+
+import ctypes
 import socket
 from collections import namedtuple
 
