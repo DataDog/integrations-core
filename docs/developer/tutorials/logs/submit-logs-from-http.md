@@ -37,7 +37,7 @@ ddev env start acme py3.11 --base
 ## Define an Agent Check
 
 We start by registering an implementation for our integration.
-At first it is empty, we will expand it step by step.
+At first it is empty, we will expand on it step by step.
 
 Open `datadog_checks/acme/check.py` in our editor and put the following there:
 
@@ -60,7 +60,7 @@ Can't instantiate abstract class AcmeCheck with abstract method get_log_streams
 ```
 
 We need to define the `get_log_streams` method.
-As [its docs say](../../base/logs-crawlers.md#datadog_checks.base.checks.logs.crawler.base.LogCrawlerCheck.get_log_streams) it must return an iterator over `LogStream` subclasses.
+As [stated in the docs](../../base/logs-crawlers.md#datadog_checks.base.checks.logs.crawler.base.LogCrawlerCheck.get_log_streams), it must return an iterator over `LogStream` subclasses.
 That's what the next section is about.
 
 ## Define a Stream of Logs
