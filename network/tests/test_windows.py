@@ -2,7 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import ctypes
+import platform
+
+if platform.system() == "Windows":
+    import ctypes
 import socket
 from collections import namedtuple
 
@@ -27,14 +30,15 @@ def test_creates_windows_instance(is_linux, is_bsd, is_solaris, is_windows, chec
 
 
 def test_get_tcp_stats_failure():
-    instance = copy.deepcopy(common.INSTANCE)
-    check_instance = WindowsNetwork('network', {}, [instance])
+    if platform.system() == "Windows":
+        instance = copy.deepcopy(common.INSTANCE)
+        check_instance = WindowsNetwork('network', {}, [instance])
 
-    with mock.patch(
-        'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx', side_effect=ctypes.WinError()
-    ), mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric:
-        check_instance.check({})
-        submit_netmetric.assert_not_called()
+        with mock.patch(
+            'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx', side_effect=ctypes.WinError()
+        ), mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric:
+            check_instance.check({})
+            submit_netmetric.assert_not_called()
 
 
 def test_get_tcp_stats(aggregator):
