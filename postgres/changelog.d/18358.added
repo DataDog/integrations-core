@@ -1,1 +1,1 @@
-Propagate agent host tags for postgres integration
+Update the propagate_agent_tags setting. When set to `true`, the tags from the agent host (including the ones in `datadog.yaml`) are added to the check's tags for all instances.
