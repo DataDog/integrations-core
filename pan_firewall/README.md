@@ -95,5 +95,5 @@ Need help? Contact [Datadog support][7].
 [6]: https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.paloaltonetworks.com/pan-os/10-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions
-[9]: https://docs.datadoghq.com/network_monitoring/devices/#vendor-profiles
+[9]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
 
