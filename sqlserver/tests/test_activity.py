@@ -8,7 +8,6 @@ import concurrent
 import datetime
 import json
 import os
-import pdb
 import re
 import threading
 import time
@@ -910,17 +909,12 @@ def test_sanitize_activity_row(dbm_instance, row):
     assert isinstance(row['query_plan_hash'], str)
 
 
-# test2 - time test that we take deadlocks in delta
-# some crazy scenario if possible like 3 query involved ?
-# deadlock too long ?
-
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     dbm_instance['deadlocks'] = {
         'enabled': True,
-        'run_sync': True,  # TODO oups run_sync what should be the logic for 2 jobs ?
+        'run_sync': True,
         'collection_interval': 0.1,
     }
     dbm_instance['query_activity']['enabled'] = False
@@ -928,7 +922,7 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
 
     created_deadlock = False
-    # Rarely instead of a deadlock one of the transactions time outs
+    # Rarely instead of creating a deadlock one of the transactions time outs
     for _ in range(0, 3):
         bob_conn = _get_conn_for_user(dbm_instance, 'bob', 3)
         fred_conn = _get_conn_for_user(dbm_instance, 'fred', 3)
@@ -939,7 +933,7 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
             break
     assert created_deadlock, "Couldn't create a deadlock, exiting"
 
-    def execut_test():
+    def execute_test():
         dd_run_check(sqlserver_check)
 
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
@@ -956,30 +950,34 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
         deadlocks = matched_event[0]["sqlserver_deadlocks"]
         if len(deadlocks) < 1:
             return False, "should have collected one or more deadlock in the payload"
-        found = False
+        found = 0
         for d in deadlocks:
             root = ET.fromstring(d)
-            pdb.set_trace()
             process_list = root.find(".//process-list")
             for process in process_list.findall('process'):
                 if (
                     process.find('inputbuf').text
                     == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;"
                 ):
-                    found = True
+                    found += 1
         err = ""
         if not found:
             err = "Should've collected produced deadlock"
         return found, err
 
     # Sometimes deadlock takes a bit longer to arrive to the ring buffer.
-    # We can may be give it 3 tries
+    # We give it 3 tries
     err = ""
     success = False
     for _ in range(0, 3):
         time.sleep(3)
-        res, err = execut_test()
-        if res:
+        res, err = execute_test()
+        if res == 1:
             success = True
             break
     assert success, err
+
+    # After a deadlock has been collected, we need to ensure that the agent
+    # does not collect the same deadlock again.
+    res, err = execute_test()
+    assert res == 1, "Produced deadlock should be collected only once"
