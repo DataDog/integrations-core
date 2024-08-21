@@ -21,174 +21,126 @@
                         "namespace": "integration.foo",
                         "sharded": false,
                         "docs": [
-                            [
-                                {
-                                    "name": "_id",
-                                    "type": "ObjectId",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "date",
-                                    "type": "Date",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "data",
-                                    "type": "Null",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "data",
-                                    "type": "String",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "available",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "max",
-                                    "type": "Double",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "min",
-                                    "type": "Double",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "count",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "geo",
-                                    "type": "Object",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "geo.type",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "geo.coordinates",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "tags",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested.a",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested.a.b",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested.a.b.c",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested.a.b.c.d",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences.date",
-                                    "type": "Date",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences.count",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences.exists",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "sum",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "geo.test",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences.test",
-                                    "type": "String",
-                                    "prevalence": 0.25
-                                }
-                            ]
+                            {
+                                "name": "_id",
+                                "type": "ObjectId",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "data",
+                                "type": "Null",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "data",
+                                "type": "String",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "available",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "max",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "min",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "count",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo",
+                                "type": "Object",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo.type",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo.coordinates",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "tags",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "nested",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b.c",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b.c.d",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "occurrences",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.count",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.exists",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "sum",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "geo.test",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "occurrences.test",
+                                "type": "String",
+                                "prevalence": 0.25
+                            }
                         ],
                         "indexes": [
                             {
@@ -367,132 +319,96 @@
                         "namespace": "integration.bar",
                         "sharded": false,
                         "docs": [
-                            [
-                                {
-                                    "name": "_id",
-                                    "type": "ObjectId",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "name",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "status",
-                                    "type": "String",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "amount",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "elements",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "rating",
-                                    "type": "Double",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address",
-                                    "type": "Object",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address.street",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address.city",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address.state",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address.zip",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviews",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviews.rating",
-                                    "type": "Double",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviews.comment",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviews.date",
-                                    "type": "Date",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviewed",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "tests",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "dummy",
-                                    "type": "Null",
-                                    "prevalence": 0.5
-                                }
-                            ]
+                            {
+                                "name": "_id",
+                                "type": "ObjectId",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "name",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "status",
+                                "type": "String",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "amount",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "elements",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "rating",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address",
+                                "type": "Object",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.street",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.city",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.state",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.zip",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.rating",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.comment",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviewed",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "tests",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "dummy",
+                                "type": "Null",
+                                "prevalence": 0.5
+                            }
                         ],
                         "indexes": [
                             {
@@ -692,174 +608,126 @@
                         "namespace": "test.foo",
                         "sharded": false,
                         "docs": [
-                            [
-                                {
-                                    "name": "_id",
-                                    "type": "ObjectId",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "date",
-                                    "type": "Date",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "data",
-                                    "type": "Null",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "data",
-                                    "type": "String",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "available",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "max",
-                                    "type": "Double",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "min",
-                                    "type": "Double",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "count",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "geo",
-                                    "type": "Object",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "geo.type",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "geo.coordinates",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "tags",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested.a",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested.a.b",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested.a.b.c",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "nested.a.b.c.d",
-                                    "type": "Object",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences.date",
-                                    "type": "Date",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences.count",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences.exists",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "sum",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "geo.test",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "occurrences.test",
-                                    "type": "String",
-                                    "prevalence": 0.25
-                                }
-                            ]
+                            {
+                                "name": "_id",
+                                "type": "ObjectId",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "data",
+                                "type": "Null",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "data",
+                                "type": "String",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "available",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "max",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "min",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "count",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo",
+                                "type": "Object",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo.type",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo.coordinates",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "tags",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "nested",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b.c",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b.c.d",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "occurrences",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.count",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.exists",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "sum",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "geo.test",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "occurrences.test",
+                                "type": "String",
+                                "prevalence": 0.25
+                            }
                         ],
                         "indexes": [
                             {
@@ -1038,132 +906,96 @@
                         "namespace": "test.bar",
                         "sharded": false,
                         "docs": [
-                            [
-                                {
-                                    "name": "_id",
-                                    "type": "ObjectId",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "name",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "status",
-                                    "type": "String",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "amount",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "elements",
-                                    "type": "Int32",
-                                    "prevalence": 0.5
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "rating",
-                                    "type": "Double",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address",
-                                    "type": "Object",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address.street",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address.city",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address.state",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "address.zip",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviews",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviews.rating",
-                                    "type": "Double",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviews.comment",
-                                    "type": "String",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviews.date",
-                                    "type": "Date",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "reviewed",
-                                    "type": "Int32",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "tests",
-                                    "type": "Array",
-                                    "prevalence": 1.0
-                                }
-                            ],
-                            [
-                                {
-                                    "name": "dummy",
-                                    "type": "Null",
-                                    "prevalence": 0.5
-                                }
-                            ]
+                            {
+                                "name": "_id",
+                                "type": "ObjectId",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "name",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "status",
+                                "type": "String",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "amount",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "elements",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "rating",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address",
+                                "type": "Object",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.street",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.city",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.state",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.zip",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.rating",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.comment",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviewed",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "tests",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "dummy",
+                                "type": "Null",
+                                "prevalence": 0.5
+                            }
                         ],
                         "indexes": [
                             {
