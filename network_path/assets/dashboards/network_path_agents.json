@@ -960,7 +960,7 @@
         {
             "id": 8606036078912332,
             "definition": {
-                "title": "System Probe",
+                "title": "System Probe (focus on RunTraceroute)",
                 "background_color": "purple",
                 "show_title": true,
                 "type": "group",
@@ -980,9 +980,16 @@
                                         "family": "go",
                                         "profile_type_id": "alloc-size",
                                         "limit": 100,
-                                        "query_string": "service:system-probe $AGENT_HOSTNAME $CUSTOM_TAG",
+                                        "query_string": "service:system-probe $AGENT_HOSTNAME $CUSTOM_TAG ",
                                         "profile_scaling_type_id": "complete-profile",
-                                        "filter_operations": []
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "function",
+                                                "value": "\"(*Runner).RunTraceroute\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "b214d5c0-5d54-494a-8133-718f4f3f90fe"
                                     }
                                 }
                             ],
@@ -1008,8 +1015,16 @@
                                         "data_source": "profiling_aggregated_profile",
                                         "family": "go",
                                         "limit": 100,
-                                        "query_string": "service:system-probe $AGENT_HOSTNAME $CUSTOM_TAG",
-                                        "profile_scaling_type_id": "complete-profile"
+                                        "query_string": "service:system-probe $AGENT_HOSTNAME $CUSTOM_TAG ",
+                                        "profile_scaling_type_id": "complete-profile",
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "function",
+                                                "value": "\"(*Runner).RunTraceroute\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "4e894765-0803-451c-b258-295cb2b03816"
                                     }
                                 }
                             ],
@@ -1034,7 +1049,7 @@
         {
             "id": 593954812220378,
             "definition": {
-                "title": "Process Agent",
+                "title": "Process Agent (focus on NpCollector) ",
                 "background_color": "purple",
                 "show_title": true,
                 "type": "group",
@@ -1053,8 +1068,16 @@
                                         "data_source": "profiling_aggregated_profile",
                                         "family": "go",
                                         "limit": 100,
-                                        "query_string": "service:process-agent $AGENT_HOSTNAME $CUSTOM_TAG",
-                                        "profile_scaling_type_id": "complete-profile"
+                                        "query_string": "service:process-agent $AGENT_HOSTNAME $CUSTOM_TAG ",
+                                        "profile_scaling_type_id": "complete-profile",
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "package",
+                                                "value": "\"github.com/DataDog/datadog-agent/comp/networkpath/npcollector/npcollectorimpl\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "961932f0-32ae-4833-802f-b180db70dd67"
                                     }
                                 }
                             ],
@@ -1080,9 +1103,16 @@
                                         "data_source": "profiling_aggregated_profile",
                                         "family": "go",
                                         "limit": 100,
-                                        "query_string": "service:process-agent $AGENT_HOSTNAME $CUSTOM_TAG",
+                                        "query_string": "service:process-agent $AGENT_HOSTNAME $CUSTOM_TAG ",
                                         "profile_scaling_type_id": "complete-profile",
-                                        "filter_operations": []
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "package",
+                                                "value": "\"github.com/DataDog/datadog-agent/comp/networkpath/npcollector/npcollectorimpl\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "5c63c12d-5f88-4ae8-a6e7-61a564ec3aa0"
                                     }
                                 }
                             ],
@@ -1128,8 +1158,14 @@
                                         "limit": 100,
                                         "query_string": "service:datadog-agent $AGENT_HOSTNAME $CUSTOM_TAG ",
                                         "profile_scaling_type_id": "complete-profile",
-                                        "filter_operations": [],
-                                        "favorite_query_id": "b60c9152-c99d-4e2b-a893-0d1897d810bd"
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "package",
+                                                "value": "\"github.com/DataDog/datadog-agent/pkg/collector/corechecks/networkpath\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "76cfb040-7661-4452-82b7-718c15b55e63"
                                     }
                                 }
                             ],
@@ -1157,8 +1193,14 @@
                                         "limit": 100,
                                         "query_string": "service:datadog-agent $AGENT_HOSTNAME $CUSTOM_TAG ",
                                         "profile_scaling_type_id": "complete-profile",
-                                        "filter_operations": [],
-                                        "favorite_query_id": "549f6f6a-672b-4f3b-88e3-ba39bb8446c2"
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "package",
+                                                "value": "\"github.com/DataDog/datadog-agent/pkg/collector/corechecks/networkpath\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "8771ff90-26e9-4114-b908-1c8124389bf9"
                                     }
                                 }
                             ],
