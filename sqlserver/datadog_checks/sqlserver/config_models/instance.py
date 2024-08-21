@@ -68,6 +68,16 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class Deadlocks(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_deadlocks: Optional[float] = None
+
+
 class Gcp(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -185,6 +195,7 @@ class InstanceConfig(BaseModel):
     database_instance_collection_interval: Optional[float] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
+    deadlocks: Optional[Deadlocks] = None
     disable_generic_tags: Optional[bool] = None
     driver: Optional[str] = None
     dsn: Optional[str] = None
