@@ -18,7 +18,7 @@
 
 * Fix password obfuscation in OLE DB driver error message when one or more backslashes exist in the password. ([#18203](https://github.com/DataDog/integrations-core/pull/18203))
 
-## 17.4.1 / 2024-08-08
+## 17.4.1 / 2024-08-08 / Agent 7.56.0
 
 ***Fixed***:
 
