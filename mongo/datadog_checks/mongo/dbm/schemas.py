@@ -53,8 +53,17 @@ class MongoSchemas(DBMAsyncJob):
             )
             return
 
+        base_payload = {
+            "host": self._check._resolved_hostname,
+            "agent_version": datadog_agent.get_version(),
+            "dbms": "mongo",
+            "kind": "mongodb_databases",
+            "collection_interval": self._collection_interval,
+            "dbms_version": self._check._mongo_version,
+            "tags": self._check._get_tags(include_deployment_tags=True),
+        }
+
         collected_collections = 0
-        databases = []
         for db_name in self._check._database_autodiscovery.databases:
             if db_name in MONGODB_SYSTEM_DATABASES:
                 self._check.log.debug("Skipping system database %s", db_name)
@@ -74,14 +83,12 @@ class MongoSchemas(DBMAsyncJob):
                 except Exception as e:
                     self._check.log.error("Error collecting schema for %s.%s: %s", db_name, coll_name, e)
 
-            databases.append(
-                {
-                    "name": db_name,
-                    "collections": collections,
-                }
-            )
+            if not collections:
+                self._check.log.debug("No collections found for database %s", db_name)
+                continue
 
-        self._submit_schema_payload(databases)
+            # Submit one schema payload per database to avoid hitting the payload size limit
+            self._submit_schema_payload(base_payload, db_name, collections)
 
     def _should_collect_schemas(self) -> bool:
         # Only collect schemas on primary or mongos
@@ -197,20 +204,21 @@ class MongoSchemas(DBMAsyncJob):
                 return "geospatial"
         return "regular"
 
-    def _submit_schema_payload(self, database_schemas):
+    def _submit_schema_payload(self, base_payload, dbname, collections):
         payload = {
-            "host": self._check._resolved_hostname,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "mongo",
-            "kind": "mongodb_databases",
-            "collection_interval": self._collection_interval,
-            "dbms_version": self._check._mongo_version,
-            "tags": self._check._get_tags(include_deployment_tags=True),
+            **base_payload,
             "timestamp": time.time() * 1000,
-            "metadata": database_schemas,
+            "metadata": [
+                {
+                    "name": dbname,
+                    "collections": collections,
+                }
+            ],
         }
         json_payload = json_util.dumps(payload)
-        self._check.log.debug("Submitting schema payload: %s", json_payload)
+        self._check.log.debug(
+            "Submitting schema payload for %s with size %d", dbname, len(json_payload.encode("utf-8"))
+        )
         self._check.database_monitoring_metadata(json_payload)
 
     def _analyze_doc_structure(self, document, path, field_prevalence, scale, depth=1):

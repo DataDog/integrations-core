@@ -31,12 +31,13 @@ def test_mongo_schemas_standalone(aggregator, instance_integration_cluster, chec
         run_check_once(mongo_check, dd_run_check)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    mongodb_databases = next((e for e in dbm_metadata if e['kind'] == 'mongodb_databases'), None)
+    mongodb_databases = [e for e in dbm_metadata if e['kind'] == 'mongodb_databases']
 
     with open(os.path.join(HERE, "results", "schemas-standalone.json"), 'r') as f:
         expected_mongodb_databases = json.load(f)
-        print(json.dumps(mongodb_databases))
-        assert mongodb_databases == expected_mongodb_databases
+        assert len(mongodb_databases) == len(expected_mongodb_databases)
+        for i, db in enumerate(mongodb_databases):
+            assert db == expected_mongodb_databases[i]
 
 
 @mock_now(1715911398.1112723)
@@ -55,12 +56,13 @@ def test_mongo_schemas_mongos(aggregator, instance_integration_cluster, check, d
         run_check_once(mongo_check, dd_run_check)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    mongodb_databases = next((e for e in dbm_metadata if e['kind'] == 'mongodb_databases'), None)
+    mongodb_databases = [e for e in dbm_metadata if e['kind'] == 'mongodb_databases']
 
     with open(os.path.join(HERE, "results", "schemas-mongos.json"), 'r') as f:
         expected_mongodb_databases = json.load(f)
-        print(json.dumps(mongodb_databases))
-        assert mongodb_databases == expected_mongodb_databases
+        assert len(mongodb_databases) == len(expected_mongodb_databases)
+        for i, db in enumerate(mongodb_databases):
+            assert db == expected_mongodb_databases[i]
 
 
 @common.shard
