@@ -115,7 +115,7 @@ soupsieve @ https://agent-int-packages.datadoghq.com/external/soupsieve/soupsiev
 sspilib @ https://agent-int-packages.datadoghq.com/external/sspilib/sspilib-0.1.0-cp311-cp311-win_amd64.whl#sha256=61c9067168cce962f7fead42c28804c3a39a164b9a7b660200b8cfe31e3af071
 stevedore @ https://agent-int-packages.datadoghq.com/external/stevedore/stevedore-5.2.0-py3-none-any.whl#sha256=1c15d95766ca0569cad14cb6272d4d31dae66b011a929d7c18219c176ea1b5c9
 supervisor @ https://agent-int-packages.datadoghq.com/external/supervisor/supervisor-4.2.5-py2.py3-none-any.whl#sha256=2ecaede32fc25af814696374b79e42644ecaba5c09494c51016ffda9602d0f08
-tomlkit @ https://agent-int-packages.datadoghq.com/external/tomlkit/tomlkit-0.13.0-py3-none-any.whl#sha256=7075d3042d03b80f603482d69bf0c8f345c2b30e41699fd8883227f89972b264
+tomlkit @ https://agent-int-packages.datadoghq.com/external/tomlkit/tomlkit-0.13.2-py3-none-any.whl#sha256=7a974427f6e119197f670fbbbeae7bef749a6c14e793db934baefc1b5f03efde
 tuf @ https://agent-int-packages.datadoghq.com/external/tuf/tuf-4.0.0-py3-none-any.whl#sha256=a22ab5fa6daf910b3052929fdce42ccad8a300e5e85715daaff9592aed980f7a
 typing-extensions @ https://agent-int-packages.datadoghq.com/external/typing-extensions/typing_extensions-4.12.2-py3-none-any.whl#sha256=04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d
 tzdata @ https://agent-int-packages.datadoghq.com/external/tzdata/tzdata-2024.1-py2.py3-none-any.whl#sha256=9068bc196136463f5245e51efda838afa15aaeca9903f49050dfa2679db4d252

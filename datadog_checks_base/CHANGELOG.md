@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 36.14.0 / 2024-08-19
+
+***Added***:
+
+* Update propagate_agent_tags to propagate all tags from the agent host. ([#18269](https://github.com/DataDog/integrations-core/pull/18269))
+
+***Fixed***:
+
+* Fix ddtrace import issues ([#18324](https://github.com/DataDog/integrations-core/pull/18324))
+
 ## 36.13.0 / 2024-08-09
 
 ***Added***:
