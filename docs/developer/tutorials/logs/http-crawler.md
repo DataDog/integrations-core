@@ -4,9 +4,9 @@
 
 This tutorial assumes you have done the following:
 
-- [set up your environment](../../index.md#getting-started)
-- read the [logs crawler documentation](../../base/logs-crawlers.md)
-- read about the [HTTP capabilities](../../base/http.md) of the base class
+- [Set up your environment](../../index.md#getting-started).
+- Read the [logs crawler documentation](../../base/logs-crawlers.md).
+- Read about the [HTTP capabilities](../../base/http.md) of the base class.
 
 Let's say we are building an integration for an API provided by *ACME Inc.*
 Run the following command to create the scaffolding for our integration:
@@ -31,7 +31,7 @@ def dd_environment():
 
 Then run:
 ```
-ddev env start acme py3.11 --base
+ddev env start acme py3.11 --dev
 ```
 
 ## Define an Agent Check
@@ -81,12 +81,6 @@ class AcmeLogStream(LogStream):
     """Stream of Logs from ACME"""
 ```
 
-Every time we modify the source code, make sure to restart the environment:
-
-```
-ddev env stop acme py3.11 && ddev env start acme py3.11 --base
-```
-
 Now running *the check command* will show a new error:
 
 ```
@@ -94,10 +88,13 @@ TypeError: Can't instantiate abstract class AcmeLogStream with abstract method r
 ```
 
 Once again we need to define a method, this time [`LogStream.records`](../../base/logs-crawlers.md#datadog_checks.base.checks.logs.crawler.stream.LogStream.records).
+This method accepts a `cursor` argument.
+We ignore this argument for now and explain it later.
 
 
 ```python
 from datadog_checks.base.checks.logs.crawler.stream import LogRecord, LogStream
+from datadog_checks.base.utils.time import get_timestamp
 
 ... # Skip AcmeCheck to focus on LogStream.
 
@@ -105,24 +102,33 @@ from datadog_checks.base.checks.logs.crawler.stream import LogRecord, LogStream
 class AcmeLogStream(LogStream):
     """Stream of Logs from ACME"""
 
-    def records(self):
+    def records(self, cursor=None):
         return [
             LogRecord(
                 data={'message': 'This is a log from ACME.', 'level': 'info'},
-                cursor={'timestamp': dt.now().timestamp()},
+                cursor={'timestamp': get_timestamp()},
             )
         ]
 ```
 
 There are several things going on here.
 `AcmeLogStream.records` returns an iterator over `LogRecord` objects.
-We discuss these objects first so to keep the method itself simple we return a list with just one record.
+For simplicity here we return a list with just one record.
+After we understand what each `LogRecord` looks like we can discuss how to generate multiple records.
 
 ### What is a Log Record?
 
 The `LogRecord` class has 2 fields.
 In `data` we put any data in here that we want to submit as a log to Datadog.
 In `cursor` we store a unique identifier for this specific `LogRecord`.
+
+We use the `cursor` field to checkpoint our progress as we scrape the external API.
+In other words, every time our integration completes its run we save the last cursor we submitted.
+We can then resume scraping from this cursor.
+That's what the `cursor` argument to the `records` method is for.
+The very first time the integration runs this `cursor` is `None` because we have no checkpoints.
+Every integration run after that the `cursor` will be the `LogRecord.cursor` of the last `LogRecord` that we yield or return from `records`.
+
 Some things to consider when defining cursors:
 
 - Use UTC time stamps!
@@ -138,5 +144,6 @@ We will construct them from data that we collect from the external API, in this 
 
 Below are some tips and considerations when scraping external APIs:
 
-1. The Agent schedules an integration run every 15 seconds. This functions as a retry mechanism, so there is less need for elaborate retry/backoff setups in integrations.
+1. Don't forget to use the `cursor` argument to checkpoint your progress.
+1. The Agent schedules an integration run approximately every 10-15 seconds. We can treat this as a retry mechanism, so there is no need for elaborate retry or backoff logic in integrations.
 1. The intake won't accept logs that are older than 18 hours. For better performance skip such logs as you generate `LogRecord` items.

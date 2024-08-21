@@ -15,11 +15,10 @@ graph LR
     A[Log Stream] -->|Log Records| B(Log Crawler Check)
     end
     subgraph Agent
-    B -->|Send Logs| C(RTLoader API)
-    C -->|Save Logs| D[(Log File)]
-    E(Logs Agent) -->|Tail Logs| D
+    B -->|Save Logs| C[(Log File)]
+    D(Logs Agent) -->|Tail Logs| C
     end
-    E -->|Submit Logs| F(Logs Intake)
+    D -->|Submit Logs| E(Logs Intake)
 ```
 
 </div>

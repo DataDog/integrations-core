@@ -90,7 +90,7 @@ nav:
       - tutorials/snmp/sim-format.md
       - tutorials/snmp/tools.md
     - Logs:
-      - tutorials/logs/submit-logs-from-http.md
+      - tutorials/logs/http-crawler.md
   - Architecture:
     - IBM i: architecture/ibm_i.md
     - SNMP: architecture/snmp.md
