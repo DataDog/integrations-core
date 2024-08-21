@@ -226,6 +226,7 @@ mongodb.stats.objects,gauge,,object,,Number of objects (documents) in the databa
 mongodb.stats.storagesize,gauge,,byte,,Total amount of space allocated to collections in this database for document storage.,0,mongodb,stats storagesize,,
 mongodb.stats.totalfreestoragesize,gauge,,byte,,Total amount of free storage space allocated for both documents and indexes in all collections in the database.,0,mongodb,stats total free storage size,,
 mongodb.stats.totalsize,gauge,,byte,,Total amount of disk space allocated for both documents and indexes in all collections in the database. Includes used and free storage space.,0,mongodb,stats totalsize,,
+mongodb.stats.views,gauge,,,,Contains a count of the number of views in the database.,0,mongodb,stats views,,
 mongodb.system.cpu.cores,gauge,,core,,The total number of available logical processor cores.,0,mongodb,system cpu cores,,
 mongodb.system.mem.limit,gauge,,megabyte,,The system memory (RAM) usage limit. For example running in a container may impose memory limits that are lower than the total system memory.,0,mongodb,system mem limit,,
 mongodb.system.mem.total,gauge,,megabyte,,The total amount of system memory (RAM).,0,mongodb,system mem total,,

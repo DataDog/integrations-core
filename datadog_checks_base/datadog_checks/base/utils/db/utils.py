@@ -40,6 +40,7 @@ SUBMISSION_METHODS = {
     # These submission methods require more configuration than just a name
     # and a value and therefore must be defined as a custom transformer.
     'service_check': '__service_check',
+    'send_log': '__send_log',
 }
 
 

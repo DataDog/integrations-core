@@ -131,6 +131,10 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /esxi/                                  @DataDog/platform-integrations @DataDog/agent-integrations
 /esxi/manifest.json                     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /esxi/*.md                              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/fly_io/                                @DataDog/platform-integrations @DataDog/agent-integrations
+/fly_io/manifest.json                   @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/fly_io/*.md                            @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/fly_io/assets/logs/                    @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 /openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -272,6 +276,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_one/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /ping_one/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/trend_micro_vision_one_xdr/                                        @DataDog/saas-integrations
+/trend_micro_vision_one_xdr/*.md                                    @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_vision_one_xdr/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_vision_one_xdr/assets/logs/                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /ping_federate/                                                      @DataDog/saas-integrations
 /ping_federate/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
@@ -297,4 +306,4 @@ docs/developer/process/integration-release.md                         @DataDog/a
 
 # LEAVE THE FOLLOWING LOG OWNERSHIP LAST IN THE FILE
 # Make sure logs team is the full owner for all logs related files
-**/assets/logs/                          @DataDog/logs-backend
+**/assets/logs/                          @DataDog/logs-backend @DataDog/siem-logs-reviewers
