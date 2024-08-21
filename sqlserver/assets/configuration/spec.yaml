@@ -760,6 +760,33 @@ files:
           value:
             type: number
             example: 10
+        - name: deadlocks
+          hidden: True
+          description: |
+            Configure the collection of historical deadlock data.
+          options:
+            - name: enabled
+              description: |
+                Enable the collection of historical deadlock data.
+              value:
+                type: boolean
+                example: false
+        
+            - name: collection_interval
+              description: |
+                Set the interval for collecting deadlock data, in seconds. Defaults to 5 seconds.
+              value:
+                type: number
+                example: 5
+            - name: max_deadlocks
+              description: |
+                Set the maximum number of deadlocks to retrieve.
+              value:
+                type: number
+                example: 100
+
+
+
     - template: instances/default
   - template: logs
     example:

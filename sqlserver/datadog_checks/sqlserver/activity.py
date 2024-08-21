@@ -150,26 +150,6 @@ def agent_check_getter(self):
     return self._check
 
 
-"""     self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
-        self._databases_data_collection_interval = config.schemas_config.get(
-            "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
-        )
-        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', False))
-
-        self._settings_collection_interval = float(
-            config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
-        )
-
-        if self._databases_data_enabled and not self._settings_enabled:
-            self.collection_interval = self._databases_data_collection_interval
-        elif not self._databases_data_enabled and self._settings_enabled:
-            self.collection_interval = self._settings_collection_interval
-        else:
-            self.collection_interval = min(self._databases_data_collection_interval, self._settings_collection_interval)
-
-        self.enabled = self._databases_data_enabled or self._settings_enabled"""
-
-
 class SqlserverActivity(DBMAsyncJob):
     """Collects query metrics and plans"""
 
