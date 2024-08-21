@@ -773,10 +773,10 @@ files:
                 example: false
             - name: collection_interval
               description: |
-                Set the interval for collecting deadlock data, in seconds. Defaults to 5 seconds.
+                Set the interval for collecting deadlock data, in seconds. Defaults to 10 seconds.
               value:
                 type: number
-                example: 5
+                example: 10
             - name: max_deadlocks
               description: |
                 Set the maximum number of deadlocks to retrieve.

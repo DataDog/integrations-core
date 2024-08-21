@@ -25,16 +25,16 @@ class Deadlocks:
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
 
     def obfuscate_no_except_wrapper(self, sql_text):
+        sql_text = "ERROR: failed to obfuscate"
         try:
             sql_text = obfuscate_sql_with_metadata(
                 sql_text, self._config.obfuscator_options, replace_null_character=True
             )['query']
         except Exception as e:
             if self._config.log_unobfuscated_queries:
-                self.log.warning("Failed to obfuscate sql text within a deadlock=[%s] | err=[%s]", sql_text, e)
+                self._log.warning("Failed to obfuscate sql text within a deadlock=[%s] | err=[%s]", sql_text, e)
             else:
-                self.log.debug("Failed to obfuscate sql text within a deadlock | err=[%s]", e)
-            sql_text = "ERROR: failed to obfuscate"
+                self._log.debug("Failed to obfuscate sql text within a deadlock | err=[%s]", e)
         return sql_text
 
     def obfuscate_xml(self, root):
@@ -56,7 +56,12 @@ class Deadlocks:
                 self._log.debug("collecting sql server deadlocks")
                 self._log.debug("Running query [%s]", CREATE_DEADLOCK_TEMP_TABLE_QUERY)
                 cursor.execute(CREATE_DEADLOCK_TEMP_TABLE_QUERY)
-                self._log.debug("Running query [%s]", DETECT_DEADLOCK_QUERY)
+                self._log.debug(
+                    "Running query [%s] with max deadlocks %s and timestamp %s",
+                    DETECT_DEADLOCK_QUERY,
+                    self._max_deadlocks,
+                    self._last_deadlock_timestamp,
+                )
                 cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, self._last_deadlock_timestamp))
                 results = cursor.fetchall()
                 last_deadlock_datetime = datetime.strptime(self._last_deadlock_timestamp, '%Y-%m-%d %H:%M:%S.%f')
@@ -73,6 +78,7 @@ class Deadlocks:
                             )
                         )
                         errors.append("Truncated deadlock xml - {}".format(result[:50]))
+                        continue
                     datetime_obj = datetime.strptime(root.get('timestamp'), '%Y-%m-%dT%H:%M:%S.%fZ')
                     if last_deadlock_datetime < datetime_obj:
                         last_deadlock_datetime = datetime_obj
