@@ -50,6 +50,7 @@ METRIC_MAP = {
     'karpenter_cloudprovider_instance_type_cpu_cores': 'cloudprovider.instance.type.cpu_cores',
     'karpenter_cloudprovider_instance_type_memory_bytes': 'cloudprovider.instance.type.memory_bytes',
     'karpenter_cloudprovider_instance_type_offering_available': 'cloudprovider.instance.type.offering_available',
+    'karpenter_cloudprovider_instance_type_offering_price_estimate': 'cloudprovider.instance.type.offering_price_estimate',
     'karpenter_cloudprovider_instance_type_price_estimate': 'cloudprovider.instance.type.price_estimate',
     'karpenter_consistency_errors': 'consistency.errors',
     'karpenter_deprovisioning_actions_performed': 'deprovisioning.actions_performed',

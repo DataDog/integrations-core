@@ -138,5 +138,15 @@
             "cluster:db:local",
             "db:local"
         ]
+    },
+    {
+        "name": "mongodb.stats.views",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "cluster:db:local",
+            "db:local"
+        ]
     }
 ]

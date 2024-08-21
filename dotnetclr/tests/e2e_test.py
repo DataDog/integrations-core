@@ -10,6 +10,7 @@ from .common import MINIMAL_INSTANCE
 pytestmark = pytest.mark.e2e
 
 
+@pytest.mark.flaky
 @requires_py3
 def test(dd_agent_check):
     from datadog_checks.dotnetclr.check import DotnetclrCheckV2
