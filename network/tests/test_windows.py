@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import ctypes
 import socket
 from collections import namedtuple
-from ctypes import WinError as winerror
 
 import mock
 from six import PY3, iteritems
@@ -31,7 +31,7 @@ def test_get_tcp_stats_failure():
     check_instance = WindowsNetwork('network', {}, [instance])
 
     with mock.patch(
-        'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx', side_effect=winerror()
+        'datadog_checks.network.check_windows.Iphlpapi.GetTcpStatisticsEx', side_effect=ctypes.WinError()
     ), mock.patch.object(check_instance, 'submit_netmetric') as submit_netmetric:
         check_instance.check({})
         submit_netmetric.assert_not_called()
