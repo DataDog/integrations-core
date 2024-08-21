@@ -18,12 +18,12 @@ No additional installation is needed on your server.
 
 1. Configure the [Datadog HTTP Reporter][2] in Flink.
 
-     In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][5]:
+     In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][5], and the datacent:
 
     ```yaml
     metrics.reporter.dghttp.factory.class: org.apache.flink.metrics.datadog.DatadogHttpReporterFactory
     metrics.reporter.dghttp.apikey: <DATADOG_API_KEY>
-    metrics.reporter.dghttp.dataCenter: {{< region-param key="dd_datacenter" >}}
+    metrics.reporter.dghttp.dataCenter: US #(optional) The data center (EU/US) to connect to, defaults to US.
     ```
 
 2. Re-map system scopes in your `<FLINK_HOME>/conf/flink-conf.yaml`.
