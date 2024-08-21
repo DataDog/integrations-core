@@ -784,9 +784,6 @@ files:
               value:
                 type: number
                 example: 100
-
-
-
     - template: instances/default
   - template: logs
     example:
