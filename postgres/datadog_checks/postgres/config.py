@@ -35,7 +35,7 @@ class PostgresConfig:
         self.host = instance.get('host', '')
         if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
-        self.port = instance.get('port', '')
+        self.port = instance.get('port', '5432')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
@@ -126,7 +126,7 @@ class PostgresConfig:
         # Remap fully_qualified_domain_name to name
         azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
-            aws['managed_authentication'] = self._aws_managed_authentication(aws)
+            aws['managed_authentication'] = self._aws_managed_authentication(aws, self.password)
             self.cloud_metadata.update({'aws': aws})
         if gcp:
             self.cloud_metadata.update({'gcp': gcp})
@@ -244,12 +244,12 @@ class PostgresConfig:
                 return False
 
     @staticmethod
-    def _aws_managed_authentication(aws):
+    def _aws_managed_authentication(aws, password):
         if 'managed_authentication' not in aws:
             # for backward compatibility
-            # if managed_authentication is not set, we assume it is enabled if region is set
+            # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
             managed_authentication = {}
-            managed_authentication['enabled'] = 'region' in aws
+            managed_authentication['enabled'] = 'region' in aws and not password
         else:
             managed_authentication = aws['managed_authentication']
             enabled = is_affirmative(managed_authentication.get('enabled', False))

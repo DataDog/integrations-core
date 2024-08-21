@@ -2,14 +2,14 @@
   "manifest_version": "2.0.0",
   "app_uuid": "125b7209-7617-4bf5-a88c-a4e1f0fa211d",
   "app_id": "kyverno",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor the health and performance of Kyverno",
-    "title": "kyverno",
+    "title": "Kyverno",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",

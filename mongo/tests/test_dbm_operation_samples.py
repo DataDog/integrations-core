@@ -20,6 +20,7 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 def test_mongo_operation_samples_standalone(aggregator, instance_integration_cluster, check, dd_run_check):
     instance_integration_cluster['dbm'] = True
     instance_integration_cluster['operation_samples'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster['slow_operations'] = {'enabled': False}
 
     mongo_check = check(instance_integration_cluster)
     with mock_pymongo("standalone"):
@@ -42,7 +43,7 @@ def test_mongo_operation_samples_standalone(aggregator, instance_integration_clu
             assert sample == expected_samples[i]
 
     # assert activities
-    with open(os.path.join(HERE, "results", "opeartion-activities-standalone.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "operation-activities-standalone.json"), 'r') as f:
         expected_activities = json.load(f)
         assert len(activity_samples) == len(expected_activities)
         for i, activity in enumerate(activity_samples):
@@ -55,6 +56,7 @@ def test_mongo_operation_samples_standalone(aggregator, instance_integration_clu
 def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster, check, dd_run_check):
     instance_integration_cluster['dbm'] = True
     instance_integration_cluster['operation_samples'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster['slow_operations'] = {'enabled': False}
 
     mongo_check = check(instance_integration_cluster)
     aggregator.reset()
@@ -74,7 +76,7 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
             assert sample == expected_samples[i]
 
     # assert activities
-    with open(os.path.join(HERE, "results", "opeartion-activities-mongos.json"), 'r') as f:
+    with open(os.path.join(HERE, "results", "operation-activities-mongos.json"), 'r') as f:
         expected_activities = json.load(f)
         assert len(activity_samples) == len(expected_activities)
         for i, activity in enumerate(activity_samples):
@@ -86,6 +88,7 @@ def test_mongo_operation_samples_arbiter(aggregator, instance_arbiter, check, dd
     instance_arbiter['dbm'] = True
     instance_arbiter['cluster_name'] = 'my_cluster'
     instance_arbiter['operation_samples'] = {'enabled': True, 'run_sync': True}
+    instance_arbiter['slow_operations'] = {'enabled': False}
 
     mongo_check = check(instance_arbiter)
     aggregator.reset()

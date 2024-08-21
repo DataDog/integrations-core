@@ -147,10 +147,10 @@ instances:
         # history_row_limit: 10000
 
     ## @param availability_group - string - optional
-    ## You can specify an availability group when `include_ao_metrics`
-    ## is enabled to monitor a specific availability group.
-    ## If no availability group is specified, then all availability
-    ## groups on the current replica will output metrics.
+    ## When `include_ao_metrics` is enabled, you can provide the resource 
+    ## group id of a specific availability group that you would like to monitor.
+    ## If no availability group is specified, then we will collect AlwaysOn metrics 
+    ## for all availability groups on the current replica.
     #
     # availability_group: <AVAILABILITY_GROUP>
 

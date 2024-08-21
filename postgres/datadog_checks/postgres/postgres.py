@@ -159,7 +159,7 @@ class PostgreSql(AgentCheck):
 
         discovery = PostgresAutodiscovery(
             self,
-            'postgres',
+            self._config.discovery_config.get('global_view_db', 'postgres'),
             self._config.discovery_config,
             self._config.idle_connection_timeout,
         )
@@ -793,6 +793,7 @@ class PostgreSql(AgentCheck):
                         username=self._config.user,
                         port=self._config.port,
                         region=region,
+                        role_arn=aws_managed_authentication.get('role_arn'),
                     )
             elif 'azure' in self.cloud_metadata:
                 azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']
@@ -800,6 +801,12 @@ class PostgreSql(AgentCheck):
                     client_id = azure_managed_authentication['client_id']
                     identity_scope = azure_managed_authentication.get('identity_scope', None)
                     password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
+
+            self.log.debug(
+                "Try to connect to %s with %s",
+                self._config.host,
+                "password" if password == self._config.password else "token",
+            )
 
             args = {
                 'host': self._config.host,

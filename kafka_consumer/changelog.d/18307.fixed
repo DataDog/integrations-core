@@ -1,0 +1,1 @@
+Fix a typo when writing to persistent cache to calculate the estimated consumer lag.

@@ -81,3 +81,8 @@ files:
           type: boolean
       - template: instances/tls
       - template: instances/default
+  - template: logs
+    example:
+    - type: integration
+      source: sap_hana
+      service: sap_hana

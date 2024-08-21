@@ -190,7 +190,7 @@ files:
         This collection does not involve any additional queries to the database.
       value:
         type: number
-        example: 1800
+        example: 300
         display_default: false
     - name: operation_samples
       description: Configure collection of MongoDB operation samples and explain plans.

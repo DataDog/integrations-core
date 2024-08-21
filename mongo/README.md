@@ -21,7 +21,7 @@ The MongoDB check is included in the [Datadog Agent][2] package. No additional i
 
 ### Architecture
 
-Most low-level metrics (uptime, storage size etc.) needs to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
+Most low-level metrics (uptime, storage size etc.) need to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Standalone" xxx -->
@@ -542,18 +542,20 @@ The following metrics are **not** collected by default. Use the `additional_metr
 | metric prefix            | what to add to `additional_metrics` to collect it |
 | ------------------------ | ------------------------------------------------- |
 | mongodb.collection       | collection                                        |
-| mongodb.commands         | top                                               |
-| mongodb.getmore          | top                                               |
-| mongodb.insert           | top                                               |
-| mongodb.queries          | top                                               |
-| mongodb.readLock         | top                                               |
-| mongodb.writeLock        | top                                               |
-| mongodb.remove           | top                                               |
-| mongodb.total            | top                                               |
-| mongodb.update           | top                                               |
-| mongodb.writeLock        | top                                               |
+| mongodb.usage.commands   | top                                               |
+| mongodb.usage.getmore    | top                                               |
+| mongodb.usage.insert     | top                                               |
+| mongodb.usage.queries    | top                                               |
+| mongodb.usage.readLock   | top                                               |
+| mongodb.usage.writeLock  | top                                               |
+| mongodb.usage.remove     | top                                               |
+| mongodb.usage.total      | top                                               |
+| mongodb.usage.update     | top                                               |
+| mongodb.usage.writeLock  | top                                               |
 | mongodb.tcmalloc         | tcmalloc                                          |
 | mongodb.metrics.commands | metrics.commands                                  |
+| mongodb.chunks.jumbo     | jumbo_chunks                                      |
+| mongodb.chunks.total     | jumbo_chunks                                      |
 
 ### Events
 

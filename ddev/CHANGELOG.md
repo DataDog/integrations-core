@@ -2,6 +2,38 @@
 
 <!-- towncrier release notes start -->
 
+## 10.1.0 / 2024-08-15
+
+***Added***:
+
+* Refactored integration name exclusion mapper and add new entries to exclusion mapper ([#18213](https://github.com/DataDog/integrations-core/pull/18213))
+* Add new ddtrace license to known licenses ([#18221](https://github.com/DataDog/integrations-core/pull/18221))
+* Bump `datadog_checks_dev` requirement ([#18346](https://github.com/DataDog/integrations-core/pull/18346))
+
+***Fixed***:
+
+* Enable local check only after installing it in agent docker container.
+  This avoids crashing the container with a version of the check that comes bundled with the agent before we load the local version of the check.
+  For now limited to docker since that addresses an immediate CI issue. We'll extend it to native agent once we observe it and iron out any kinks. ([#18271](https://github.com/DataDog/integrations-core/pull/18271))
+
+## 10.0.0 / 2024-08-06
+
+***Removed***:
+
+* Remove `ddev release trello ...` commands. We no longer interact with trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
+
+***Added***:
+
+* Add cli option to override org config value at runtime ([#17932](https://github.com/DataDog/integrations-core/pull/17932))
+* Support reading site and api key from org config setting in addition to cli flags. ([#17934](https://github.com/DataDog/integrations-core/pull/17934))
+* Add validation for versions in __about__.py and CHANGELOG: `ddev validate version`. ([#18063](https://github.com/DataDog/integrations-core/pull/18063))
+* Add joule as valid metric units ([#18147](https://github.com/DataDog/integrations-core/pull/18147))
+* Bump datadog_checks_dev dependency to 33.0+ to get new features and bugfixes. ([#18206](https://github.com/DataDog/integrations-core/pull/18206))
+
+***Fixed***:
+
+* Improve messages around dependency spec management ([#17969](https://github.com/DataDog/integrations-core/pull/17969))
+
 ## 9.1.0 / 2024-06-25
 
 ***Security***:
