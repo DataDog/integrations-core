@@ -763,15 +763,14 @@ files:
         - name: deadlocks
           hidden: True
           description: |
-            Configure the collection of historical deadlock data.
+            Configure the collection of deadlock data.
           options:
             - name: enabled
               description: |
-                Enable the collection of historical deadlock data.
+                Enable the collection of deadlock data.
               value:
                 type: boolean
                 example: false
-        
             - name: collection_interval
               description: |
                 Set the interval for collecting deadlock data, in seconds. Defaults to 5 seconds.

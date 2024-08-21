@@ -162,15 +162,14 @@ class SqlserverActivity(DBMAsyncJob):
         self._last_deadlocks_collection_time = 0
         self._last_activity_collection_time = 0
 
-        # TODO put back false
-        self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", True))
+        self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", False))
         self._deadlocks_collection_interval = config.deadlocks_config.get(
             "collection_interval", DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
         )
         if self._deadlocks_collection_interval <= 0:
             self._deadlocks_collection_interval = DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
 
-        self._activity_collection_enabled = is_affirmative(config.activity_config.get("enabled", False))
+        self._activity_collection_enabled = is_affirmative(config.activity_config.get("enabled", True))
         self._activity_collection_interval = config.activity_config.get(
             "collection_interval", DEFAULT_ACTIVITY_COLLECTION_INTERVAL
         )
@@ -201,7 +200,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
         self._deadlocks = Deadlocks(check, self._conn_key_prefix, self._config)
-        self._deadlock__payload_max_bytes = MAX_PAYLOAD_BYTES
+        self._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
 
     def _close_db_conn(self):
         pass
@@ -223,7 +222,6 @@ class SqlserverActivity(DBMAsyncJob):
         if self._deadlocks_collection_enabled and elapsed_time_deadlocks >= self._deadlocks_collection_interval:
             self._last_deadlocks_collection_time = time.time()
             try:
-                self._log.error("EXECUTING COLLECT DEADLOCKS")
                 self._collect_deadlocks()
             except Exception as e:
                 self._log.error(
@@ -235,13 +233,12 @@ class SqlserverActivity(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_deadlocks(self):
-        start_time = time.time()
         deadlock_xmls_collected, errors = self._deadlocks.collect_deadlocks()
         deadlock_xmls = []
         total_number_of_characters = 0
         for i, deadlock in enumerate(deadlock_xmls_collected):
             total_number_of_characters += len(deadlock)
-            if total_number_of_characters > self._deadlock__payload_max_bytes:
+            if total_number_of_characters > self._deadlock_payload_max_bytes:
                 self._log.warning(
                     """We've dropped {} deadlocks from a total of {} deadlocks as the
                      max deadlock payload of {} bytes was exceeded.""".format(
@@ -252,10 +249,8 @@ class SqlserverActivity(DBMAsyncJob):
             else:
                 deadlock_xmls.append(deadlock)
         deadlocks_event = self._create_deadlock_event(deadlock_xmls, errors)
-        self._log.error("DEADLOCK EVENTS TO BE SENT: {}".format(deadlocks_event))
         payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
         self._check.database_monitoring_query_activity(payload)
-        self._log.error("DEADLOCK COlLECTED {} in {} time".format(len(deadlock_xmls), time.time() - start_time))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
