@@ -132,7 +132,7 @@ SELECT
     j.name,
     CAST(aj.job_id AS char(36)) AS job_id,
     cs.step_name,
-    cs.step_id,
+    LTRIM(cs.step_id) AS step_id,
     CASE cs.run_status
         WHEN 0 THEN 'Failed'
         WHEN 1 THEN 'Succeeded'
@@ -152,7 +152,7 @@ ON j.job_id = aj.job_id
 
 AGENT_ACTIVE_SESSION_DURATION_QUERY = """\
 SELECT TOP 1
-    session_id,
+    LTRIM(session_id) AS session_id,
     DATEDIFF(SECOND, agent_start_date, GETDATE()) AS duration_seconds
 FROM msdb.dbo.syssessions
 ORDER BY session_id DESC
@@ -226,6 +226,8 @@ class SqlserverAgentJobs(DBMAsyncJob):
         return rows
 
     def _to_metrics_payload(self, rows):
+        for row in rows:
+            row['database'] = "msdb"
         return {
             'host': self._check.resolved_hostname,
             'timestamp': time.time() * 1000,
