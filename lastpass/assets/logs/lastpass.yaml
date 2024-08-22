@@ -222,4 +222,4 @@ pipeline:
 
               login_sharedfolder VID\: %{numberStr:VID} from %{greedyData:shared_folder.name}
 
-              Site_added_deleted_login_changed_Password_Username_chaged VID\: %{numberStr:VID}
+              Site_added_deleted_login_changed_Password_Username_changed VID\: %{numberStr:VID}
