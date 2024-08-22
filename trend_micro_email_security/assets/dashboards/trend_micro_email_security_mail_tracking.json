@@ -812,7 +812,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking @type:accepted_traffic $Traffic-Type $Direction $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security service:mail-tracking traffic_type:accepted_traffic $Traffic-Type $Direction $Sender $Recipient"
                                             },
                                             "storage": "hot"
                                         }
@@ -864,7 +864,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking @type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security service:mail-tracking traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -916,7 +916,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking @type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security service:mail-tracking traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         },
@@ -1010,7 +1010,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:mail-tracking @type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                                "query": "source:trend-micro-email-security service:mail-tracking traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         },
@@ -1885,7 +1885,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-email-security service:mail-tracking @type:accepted_traffic $Direction $Sender $Recipient $Traffic-Type",
+                                        "query_string": "source:trend-micro-email-security service:mail-tracking traffic_type:accepted_traffic $Direction $Sender $Recipient $Traffic-Type",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -1961,7 +1961,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-email-security service:mail-tracking @type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type",
+                                        "query_string": "source:trend-micro-email-security service:mail-tracking traffic_type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -2034,7 +2034,7 @@
         },
         {
             "name": "Traffic-Type",
-            "prefix": "@type",
+            "prefix": "traffic_type",
             "available_values": [],
             "default": "*"
         },
