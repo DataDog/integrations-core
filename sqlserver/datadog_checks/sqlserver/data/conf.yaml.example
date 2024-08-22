@@ -2,6 +2,12 @@
 #
 init_config:
 
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
+
     ## @param custom_metrics - list of mappings - optional
     ## Collect custom metrics and send them to Datadog based on
     ## your SQL server counters.
@@ -678,6 +684,13 @@ instances:
     ## If the DB specified doesn't exist on the server then don't do the check
     #
     # ignore_missing_database: false
+
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags.
+    ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
+    #
+    # propagate_agent_tags: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

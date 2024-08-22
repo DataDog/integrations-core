@@ -4,6 +4,13 @@ files:
   options:
   - template: init_config
     options:
+    - name: propagate_agent_tags
+      description: |
+        Set to `true` to propagate the tags from `datadog.yaml` to the check.
+        When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+      value:
+        example: false
+        type: boolean
     - name: custom_metrics
       description: |
         Collect custom metrics and send them to Datadog based on
@@ -760,6 +767,14 @@ files:
           value:
             type: number
             example: 10
+    - name: propagate_agent_tags
+      description: |
+        Set to `true` to propagate the tags from `datadog.yaml` to the check.
+        When set to `true`, the tags from `datadog.yaml` are added to the check's tags.
+        This option takes precedence over the `propagate_agent_tags` option in `init_config`.
+      value:
+        example: false
+        type: boolean
     - template: instances/default
   - template: logs
     example:
