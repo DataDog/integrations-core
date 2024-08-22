@@ -1,7 +1,7 @@
 import json
 import csv
 import os
-from utilities import PATH, HEURISTICS_JSON_FILE, HEURISTICS_CSV_FILE, RESULTS_TXT_FILE
+from utilities import PATH, HEURISTICS_JSON_FILE, HEURISTICS_CSV_FILE, RESULTS_TXT_FILE, DASHBOARD_NAMES_CSV_FILE
 from integration_dashboards import get_sorted_dict_by_modified_date
 
 def evaluate_widgets(widgets):
@@ -40,88 +40,99 @@ def evaluate_widgets(widgets):
 	return dict
 
 
-def main(): 
-	array = []
-	stats_dict = get_sorted_dict_by_modified_date(RESULTS_TXT_FILE)
-	for obj in stats_dict:
-		integration = open(os.path.join(PATH, obj['path']), 'r')
-		json_string = integration.read()
-		json_object = json.loads(json_string)
-		dict = {'path': obj['path'], 
-				'last_modified': obj['last_modified'],
-				'email': obj['email'],
-		  		'has_ordered_layout': 'True', 
-				'has_ungrouped_widgets': 'False', 
-				'has_all_title_case_groups': "True",
-				'has_overview_section': 'False',
-				'about_section_contains_text': 'False',
-				'about_section_contains_banner_img': 'False',
-				'total_query_values': 0,
-				'query_values_have_timeseries_background': 0,
-				'query_values_have_conditional_formats': 0,
-				'total_widgets_legends': 0,
-				'widgets_legends_shown': 0,
-				}
+def parse_json_definitions(result_obj, id_map):
+	integration = open(os.path.join(PATH, result_obj['path']), 'r')
+	json_string = integration.read()
+	json_object = json.loads(json_string)
 
-		is_first = True
-		for key in json_object:
-			if(key == 'layout_type'):
-				dict['has_ordered_layout'] = str(json_object[key] != 'free')
+	# default value
+	dict = {'path': result_obj['path'], 
+			'last_modified': result_obj['last_modified'],
+			'email': result_obj['email'],
+			'title': '',
+			'id': '',
+			'short_name': '',
+			'has_ordered_layout': 'True', 
+			'has_ungrouped_widgets': 'False', 
+			'has_all_title_case_groups': "True",
+			'has_overview_section': 'False',
+			'about_section_contains_text': 'False',
+			'about_section_contains_banner_img': 'False',
+			'total_query_values': 0,
+			'query_values_have_timeseries_background': 0,
+			'query_values_have_conditional_formats': 0,
+			'total_widgets_legends': 0,
+			'widgets_legends_shown': 0,
+		}
 
-			if(key == 'widgets'):
-				all_widgets = json_object[key]
-				for widget in all_widgets:
-					definition = widget["definition"]
-					for def_key in definition:
-						# group or note widget at top level
-						if(def_key == 'type'):
-							if(definition[def_key] != ('group' or 'note')):
-								dict['has_ungrouped_widgets'] = str(True)
-							
-							if(definition[def_key] == 'group'):
-								# has title case groups
-								group_title = str(definition['title']).strip()
-								if(len(group_title) > 1 and (not group_title.istitle())):
-									dict['has_all_title_case_groups'] = str(False)
+	is_first = True
+	for key in json_object:
+		if(key == 'layout_type'):
+			dict['has_ordered_layout'] = str(json_object[key] != 'free')
 
-								# overview group
-								has_overview_section = group_title.lower().find('overview')
-								if(has_overview_section != -1):
-									dict['has_overview_section'] = str(True)
+		if(key == 'title'):
+			title_string = str(json_object[key])
+			dict['title'] = title_string
+			if(title_string.find(',') != -1):
+				# TODO: manually since csv file will be affected by comma
+				continue
+			dict['id'] = id_map[title_string]['id']
+			dict['short_name'] = id_map[title_string]['short_name']
+
+		if(key == 'widgets'):
+			all_widgets = json_object[key]
+			for widget in all_widgets:
+				definition = widget["definition"]
+				for def_key in definition:
+					# group or note widget at top level
+					if(def_key == 'type'):
+						if(definition[def_key] != ('group' or 'note')):
+							dict['has_ungrouped_widgets'] = str(True)
+						
+						if(definition[def_key] == 'group'):
+							# has title case groups
+							group_title = str(definition['title']).strip()
+							if(len(group_title) > 1 and (not group_title.istitle())):
+								dict['has_all_title_case_groups'] = str(False)
+
+							# overview group
+							has_overview_section = group_title.lower().find('overview')
+							if(has_overview_section != -1):
+								dict['has_overview_section'] = str(True)
 
 
-								# first group
-								if(is_first):
-									contains_about_text = group_title.lower().find('about')
-									if(contains_about_text != -1):
-										dict['about_section_contains_text'] = str(True)
-									contains_banner_img = 'banner_img' in definition and definition['banner_img'] != None
-									if(contains_banner_img):
-										dict['about_section_contains_banner_img'] = str(True)
+							# first group
+							if(is_first):
+								contains_about_text = group_title.lower().find('about')
+								if(contains_about_text != -1):
+									dict['about_section_contains_text'] = str(True)
+								contains_banner_img = 'banner_img' in definition and definition['banner_img'] != None
+								if(contains_banner_img):
+									dict['about_section_contains_banner_img'] = str(True)
 
-									is_first = False
+								is_first = False
 
 
-								# iterate through widgets
-								if('widgets' in definition):
-									evaluated = evaluate_widgets(definition['widgets'])
-									dict['total_query_values'] += evaluated['query_values']['total']
-									dict['query_values_have_timeseries_background'] += evaluated['query_values']['have_timeseries_background']
-									dict['query_values_have_conditional_formats'] += evaluated['query_values']['have_conditional_formats']
-									dict['total_widgets_legends'] += evaluated['legend']['total']
-									dict['widgets_legends_shown'] += evaluated['legend']['show_legend']
-									
+							# iterate through widgets
+							if('widgets' in definition):
+								evaluated = evaluate_widgets(definition['widgets'])
+								dict['total_query_values'] += evaluated['query_values']['total']
+								dict['query_values_have_timeseries_background'] += evaluated['query_values']['have_timeseries_background']
+								dict['query_values_have_conditional_formats'] += evaluated['query_values']['have_conditional_formats']
+								dict['total_widgets_legends'] += evaluated['legend']['total']
+								dict['widgets_legends_shown'] += evaluated['legend']['show_legend']	
+	return dict
 
-		array.append(dict)
-
+def store_heuristics_in_json_file(heuristics_arr, file):
 	# write to json file
-	heuristics_json = open(HEURISTICS_JSON_FILE, 'w')
-	heuristics_json.write(str(array).replace('\'', '\"'))
+	heuristics_json = open(file, 'w')
+	heuristics_json.write(str(heuristics_arr).replace('\'', '\"'))
 	heuristics_json.close()
 
+def store_heuristics_in_csv_file(heuristics_arr, file):
 	# write to csv file
-	csv_data = json.loads(str(array).replace('\'', '\"'))
-	heuristics_csv = open(HEURISTICS_CSV_FILE, 'w')
+	csv_data = json.loads(str(heuristics_arr).replace('\'', '\"'))
+	heuristics_csv = open(file, 'w')
 	csv_writer = csv.writer(heuristics_csv)
 	
 	# counter used for writing headers to the CSV file
@@ -136,6 +147,30 @@ def main():
 		# data
 		csv_writer.writerow(dashboard.values())
 	heuristics_csv.close()
+
+# creates a mapping of dashboard names to ID and short name from the provided CSV file
+def get_dashboard_names_map(file):
+	dashboard_names_csv = open(file, 'r')
+	csv_reader = csv.reader(dashboard_names_csv)
+	mapping = {}
+
+	for row in csv_reader:
+		mapping[row[2]] = {'id': row[0], 'short_name': row[1]}
+
+	return mapping
+
+
+def main(): 
+	heuristics_arr = []
+	id_map = get_dashboard_names_map(DASHBOARD_NAMES_CSV_FILE)
+	stats_dict = get_sorted_dict_by_modified_date(RESULTS_TXT_FILE)
+	for obj in stats_dict:
+		dict = parse_json_definitions(obj, id_map)
+		heuristics_arr.append(dict)
+
+	store_heuristics_in_json_file(heuristics_arr, HEURISTICS_JSON_FILE)
+	store_heuristics_in_csv_file(heuristics_arr, HEURISTICS_CSV_FILE)
+
   
 if __name__=="__main__": 
     main() 

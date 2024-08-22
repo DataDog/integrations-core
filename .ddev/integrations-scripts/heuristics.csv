@@ -1,276 +1,276 @@
-path,last_modified,email,has_ordered_layout,has_ungrouped_widgets,has_all_title_case_groups,has_overview_section,about_section_contains_text,about_section_contains_banner_img,total_query_values,query_values_have_timeseries_background,query_values_have_conditional_formats,total_widgets_legends,widgets_legends_shown
-elastic/assets/dashboards/metrics.json,2020-11-13,paul.coignet@datadoghq.com,True,True,True,False,False,False,0,0,0,0,0
-nvidia_jetson/assets/dashboards/nvidia_jetson.json,2020-11-17,julien.lebot@datadoghq.com,True,True,True,False,False,False,0,0,0,0,0
-mysql/assets/dashboards/overview.json,2020-11-17,31313038+yzhan289@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-tomcat/assets/dashboards/metrics.json,2020-12-01,36090313+gsalami00@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-postgres/assets/dashboards/postgresql_dashboard.json,2020-12-03,31313038+yzhan289@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-iis/assets/dashboards/iis_dashboard.json,2020-12-04,ChristineTChen@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cassandra/assets/dashboards/cassandra_sstable.json,2020-12-09,ChristineTChen@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cassandra/assets/dashboards/cassandra_read.json,2020-12-09,ChristineTChen@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cassandra/assets/dashboards/cassandra_overview.json,2020-12-09,ChristineTChen@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cassandra/assets/dashboards/cassandra_write.json,2020-12-09,ChristineTChen@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-mcache/assets/dashboards/memcached_dashboard.json,2020-12-11,31313038+yzhan289@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-glusterfs/assets/dashboards/red_hat_gluster_storage.json,2021-01-27,derek@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-jboss_wildfly/assets/dashboards/jboss_wildfly.json,2021-01-27,derek@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-ceph/assets/dashboards/overview.json,2021-01-27,derek@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-marklogic/assets/dashboards/overview.json,2021-01-27,derek@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-aerospike/assets/dashboards/overview.json,2021-01-27,derek@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-azure_iot_edge/assets/dashboards/overview.json,2021-01-27,derek@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-haproxy/assets/dashboards/prometheus_overview.json,2021-01-27,derek@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-voltdb/assets/dashboards/voltdb_overview.json,2021-02-16,florimond.manca@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-riak/assets/dashboards/riak_dashboard.json,2021-02-25,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-btrfs/assets/dashboards/btrfs_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-fluentd/assets/dashboards/fluentd_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-php_fpm/assets/dashboards/php-fpm_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-gearmand/assets/dashboards/gearman_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-kyototycoon/assets/dashboards/kyototycoon_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-couchbase/assets/dashboards/couchbase_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-varnish/assets/dashboards/varnish_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-solr/assets/dashboards/solr_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-nginx/assets/dashboards/NGINX-Metrics_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-sqlserver/assets/dashboards/sqlserver_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-riakcs/assets/dashboards/riakcs_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-tokumx/assets/dashboards/tokumx_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-postfix/assets/dashboards/postfix_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-pgbouncer/assets/dashboards/pgbouncer_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-activemq/assets/dashboards/artemis_dashboard.json,2021-03-23,mike.garabedian@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-cassandra/assets/dashboards/cassandra_overview_screenboard.json,2021-03-24,39505100+luisgonzalex@users.noreply.github.com,False,True,True,False,False,False,0,0,0,0,0
-aspdotnet/assets/dashboards/overview.json,2021-04-13,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,4,0,2,4,0
-twemproxy/assets/dashboards/twemproxy_overview.json,2021-04-26,39505100+luisgonzalex@users.noreply.github.com,True,True,True,False,False,False,8,0,2,12,0
-apache/assets/dashboards/apache_dashboard.json,2021-06-09,daanleenders@gmail.com,False,True,True,False,False,False,0,0,0,0,0
-sonarqube/assets/dashboards/overview.json,2021-07-26,ofekmeister@gmail.com,True,True,True,False,True,True,7,0,3,5,4
-iis/assets/dashboards/iis_overview.json,2021-07-27,46911781+mtoffl01@users.noreply.github.com,False,True,True,False,False,False,0,0,0,0,0
-presto/assets/dashboards/overview.json,2021-08-09,39559662+amymluo@users.noreply.github.com,True,True,True,False,False,False,3,0,0,13,6
-amazon_msk/assets/dashboards/overview.json,2021-08-09,39559662+amymluo@users.noreply.github.com,True,False,False,False,False,True,0,0,0,11,11
-kubernetes/assets/dashboards/kubernetes_statefulsets.json,2021-09-15,cedric.lamoriniere@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-avi_vantage/assets/dashboards/overview.json,2021-09-17,florian.veaux@datadoghq.com,True,True,False,True,True,True,6,0,2,13,13
-haproxy/assets/dashboards/openmetrics_overview.json,2022-03-04,steven.yuen@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-singlestore/assets/dashboards/overview.json,2022-05-02,54044423+npezzotti@users.noreply.github.com,True,False,True,True,False,True,1,0,1,8,8
-snmp_f5/assets/dashboards/f5-networks.json,2022-05-31,florian.veaux@datadoghq.com,True,True,False,False,False,False,3,0,0,44,40
-vault/assets/dashboards/vault_overview_legacy.json,2022-06-16,alex.lopez.zorzano@gmail.com,True,True,True,True,True,True,6,0,5,14,13
-traffic_server/assets/dashboards/overview.json,2022-06-17,sarah.witt@datadoghq.com,True,False,False,True,True,True,1,0,1,28,21
-couch/assets/dashboards/CouchDBv1-overview_dashboard.json,2022-08-03,ian.bucad@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-couch/assets/dashboards/CouchDB-overview_dashboard.json,2022-08-03,ian.bucad@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-kong/assets/dashboards/kong_overview_openmetrics.json,2022-08-22,andrew.zhang@datadoghq.com,True,False,False,False,False,True,8,2,0,8,7
-vertica/assets/dashboards/overview.json,2022-09-14,alex.lopez.zorzano@gmail.com,True,True,True,True,False,True,5,0,4,7,7
-cloudera/assets/dashboards/cloudera_overview.json,2023-01-13,andrew.zhang@datadoghq.com,True,True,True,True,False,True,2,2,0,16,16
-silk/assets/dashboards/silk_overview.json,2023-01-31,andrew.zhang@datadoghq.com,True,True,True,False,False,True,4,4,0,15,0
-kubernetes/assets/dashboards/kubernetes_jobs.json,2023-02-08,97530782+tbavelier@users.noreply.github.com,True,False,False,True,False,False,3,0,3,17,16
-argocd/assets/dashboards/argo_cd_overview.json,2023-03-22,steven.yuen@datadoghq.com,True,False,True,True,False,True,3,0,0,38,38
-twistlock/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-activemq/assets/dashboards/activemq_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-openstack/assets/dashboards/openstack_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-clickhouse/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-mapr/assets/dashboards/mapr_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-weblogic/assets/dashboards/metrics.json,2023-04-24,julia.benais@datadoghq.com,True,True,True,False,False,False,0,0,0,0,0
-weblogic/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,True,True,15,0,5,24,24
-ibm_db2/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-hdfs_datanode/assets/dashboards/hdfs_datanode_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-zk/assets/dashboards/zookeeper_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-lighttpd/assets/dashboards/lighttpd_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-ambari/assets/dashboards/base_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-ibm_i/assets/dashboards/ibm_i_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,False,False,False,0,0,0,20,20
-snmp/assets/dashboards/interface_performance.json,2023-04-24,julia.benais@datadoghq.com,True,False,True,False,False,False,0,0,0,10,0
-snmp/assets/dashboards/datacenter_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,True,False,False,False,0,0,0,6,0
-hudi/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,False,False,True,0,0,0,7,7
-teradata/assets/dashboards/teradata_overview.json,2023-04-24,julia.benais@datadoghq.com,True,True,False,False,False,True,0,0,0,31,31
-sidekiq/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-ibm_mq/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-cert_manager/assets/dashboards/certmanager_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,True,False,2,0,0,4,4
-harbor/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-ibm_ace/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,True,True,False,True,3,2,0,4,4
-istio/assets/dashboards/istio_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-istio/assets/dashboards/istio_1_5_openmetrics_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-istio/assets/dashboards/istio_1_5_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-flink/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-exchange_server/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-ignite/assets/dashboards/ignite_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-systemd/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-boundary/assets/dashboards/boundary_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,False,True,1,0,0,10,10
-arangodb/assets/dashboards/arangodb_overview.json,2023-04-24,julia.benais@datadoghq.com,True,True,False,False,False,True,21,4,2,16,16
-oracle/assets/dashboards/oracle_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-jmeter/assets/dashboards/JMeterOverview.json,2023-04-24,julia.benais@datadoghq.com,True,True,False,False,False,False,3,0,1,3,3
-hdfs_namenode/assets/dashboards/hdfs_namenode_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-marathon/assets/dashboards/marathon-overview_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-kong/assets/dashboards/kong_api.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,False,False,3,2,0,6,2
-kong/assets/dashboards/kong_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-impala/assets/dashboards/impala_statestore_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,True,True,4,3,0,10,10
-impala/assets/dashboards/impala_catalog_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,True,True,2,1,0,11,11
-impala/assets/dashboards/impala_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,True,True,3,3,0,17,12
-impala/assets/dashboards/impala_daemon_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,True,True,0,0,0,12,5
-ibm_was/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-hyperv/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-rabbitmq/assets/dashboards/rabbitmq_screenboard_dashboard.json,2023-04-24,julia.benais@datadoghq.com,True,False,True,True,False,True,0,0,0,8,8
-otel/assets/dashboards/otel_host_metrics_dashboard.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,False,True,True,0,0,0,33,33
-rethinkdb/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-crio/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-gunicorn/assets/dashboards/gunicorn_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-nginx_ingress_controller/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-yarn/assets/dashboards/yarn_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-yarn/assets/dashboards/hadoop_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-confluent_platform/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-envoy/assets/dashboards/envoy_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,True,True,2,0,1,13,12
-tls/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-active_directory/assets/dashboards/active_directory.json,2023-04-24,julia.benais@datadoghq.com,True,True,True,False,False,False,0,0,0,6,0
-pan_firewall/assets/dashboards/palo_alto_networks_firewall_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-nginx/assets/dashboards/plus_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,False,True,True,7,0,6,8,5
-scylla/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-linkerd/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-mesos_slave/assets/dashboards/mesos_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-mysql/assets/dashboards/overview-screenboard.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,False,True,True,3,0,1,17,5
-druid/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-sqlserver/assets/dashboards/SQLServer-Overview_dashboard.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,False,True,True,4,4,1,21,6
-etcd/assets/dashboards/etcd_2_overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-etcd/assets/dashboards/etcd_overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,False,False,True,3,1,1,20,11
-redisdb/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,True,True,True,True,7,0,7,12,6
-hive/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-mcache/assets/dashboards/memcached_screenboard.json,2023-04-24,julia.benais@datadoghq.com,True,False,True,False,True,True,3,0,2,12,9
-mongo/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,True,True,True,7,0,0,14,12
-cockroachdb/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,True,True,False,False,False,True,9,0,0,15,15
-hazelcast/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-cri/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-sap_hana/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-hivemq/assets/dashboards/hivemq.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-kubernetes/assets/dashboards/kubernetes_replicasets.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-kubernetes/assets/dashboards/kubernetes_daemonsets.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-kubernetes/assets/dashboards/kubernetes_services.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-coredns/assets/dashboards/coredns.json,2023-04-24,julia.benais@datadoghq.com,True,False,False,False,True,True,0,0,0,11,5
-kube_metrics_server/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-proxysql/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-cilium/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-mapreduce/assets/dashboards/mapreduce_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-powerdns_recursor/assets/dashboards/powerdns_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-helm/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,True,True,True,False,False,False,0,0,0,0,0
-spark/assets/dashboards/spark_dashboard.json,2023-04-24,julia.benais@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-temporal/assets/dashboards/server_overview.json,2023-04-25,steven.yuen@datadoghq.com,True,False,False,True,False,True,6,5,6,12,5
-sqlserver/assets/dashboards/SQLServer-AlwaysOn_dashboard.json,2023-04-25,julia.benais@datadoghq.com,True,False,False,True,True,True,0,0,0,6,6
-foundationdb/assets/dashboards/foundationdb_latency_probe.json,2023-04-25,julia.benais@datadoghq.com,True,True,True,False,False,False,0,0,0,0,0
-foundationdb/assets/dashboards/foundationdb_transactions_and_queues.json,2023-04-25,julia.benais@datadoghq.com,True,False,True,True,False,True,3,0,3,15,15
-foundationdb/assets/dashboards/foundationdb_processes_and_utilization.json,2023-04-25,julia.benais@datadoghq.com,True,True,False,False,False,False,0,0,0,7,6
-haproxy/assets/dashboards/overview.json,2023-05-22,florent.clarret@datadoghq.com,True,False,False,True,True,True,2,0,1,13,11
-nginx/assets/dashboards/NGINX-Overview_dashboard.json,2023-06-01,andrew.zhang@datadoghq.com,True,False,False,False,False,True,2,0,2,3,1
-oracle/assets/dashboards/dbm_oracle_database_overview.json,2023-06-16,18366081+nenadnoveljic@users.noreply.github.com,True,False,False,False,False,False,0,0,0,55,55
-kube_scheduler/assets/dashboards/overview.json,2023-07-03,ara.pulido@datadoghq.com,True,False,False,False,False,True,0,0,0,15,2
-kube_controller_manager/assets/dashboards/overview.json,2023-07-03,ara.pulido@datadoghq.com,True,False,False,False,False,True,0,0,0,12,2
-kube_apiserver_metrics/assets/dashboards/overview.json,2023-07-03,ara.pulido@datadoghq.com,True,False,False,False,False,True,3,0,0,15,7
-gitlab/assets/dashboards/overview.json,2023-07-05,florent.clarret@datadoghq.com,True,False,False,True,False,True,4,2,0,15,10
-dcgm/assets/dashboards/dcgm_overview.json,2023-07-20,steven.yuen@datadoghq.com,True,False,False,True,False,True,1,0,1,6,5
-langchain/assets/dashboards/overview_dashboard.json,2023-07-21,35776586+Yun-Kim@users.noreply.github.com,True,False,False,True,False,False,8,5,0,11,10
-weaviate/assets/dashboards/overview_dashboard.json,2023-07-27,steven.yuen@datadoghq.com,True,False,False,True,False,False,5,1,0,31,30
-torchserve/assets/dashboards/overview.json,2023-07-27,steven.yuen@datadoghq.com,True,False,False,True,False,True,3,3,0,16,16
-ecs_fargate/assets/dashboards/amazon_fargate_overview.json,2023-08-04,65819327+Johanna-Seif@users.noreply.github.com,False,True,True,False,False,False,0,0,0,0,0
-airbyte/assets/dashboards/airbyte_overview.json,2023-08-22,ilia.kurenkov@datadoghq.com,True,False,False,True,False,True,10,3,1,16,16
-openldap/assets/dashboards/openldap_overview.json,2023-08-28,alex.lopez.zorzano@gmail.com,True,True,True,True,False,False,2,0,0,7,7
-elastic/assets/dashboards/overview.json,2023-08-31,andrew.zhang@datadoghq.com,True,False,False,True,True,True,6,0,5,14,9
-snmp/assets/dashboards/netflow_monitoring.json,2023-10-11,alexandre.yang@datadoghq.com,True,False,True,True,False,False,3,0,0,13,8
-vsphere/assets/dashboards/vmware_vsphere-_property_metrics.json,2023-10-18,sarah.witt@datadoghq.com,True,False,False,False,False,False,0,0,0,0,0
-kubernetes/assets/dashboards/kubernetes_nodes.json,2023-10-25,wassim.dhif@datadoghq.com,True,False,False,True,False,True,4,0,4,24,3
-kubernetes/assets/dashboards/kubernetes_deployments.json,2023-10-31,wassim.dhif@datadoghq.com,True,False,False,True,False,True,8,0,8,19,8
-openstack_controller/assets/dashboards/openstack-controller.json,2023-11-07,josemanuel.almaza@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-openai/assets/dashboards/overview_dashboard.json,2023-12-05,35776586+Yun-Kim@users.noreply.github.com,True,False,False,True,False,False,8,3,0,13,13
-kafka/assets/dashboards/kafka_dashboard.json,2023-12-11,63265430+mackjmr@users.noreply.github.com,True,False,False,True,False,True,6,6,6,21,21
-strimzi/assets/dashboards/overview.json,2023-12-13,kyle.neale@datadoghq.com,True,False,False,True,False,True,1,1,0,28,28
-ray/assets/dashboards/overview_dashboard.json,2023-12-14,kyle.neale@datadoghq.com,True,False,False,True,False,True,2,2,0,14,12
-snmp/assets/dashboards/bgp_ospf_overview.json,2024-01-17,florian.veaux@datadoghq.com,True,True,False,False,False,False,0,0,0,1,0
-vsphere/assets/dashboards/vsphere_overview.json,2024-01-18,sarah.witt@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-kubernetes/assets/dashboards/kubernetes_cpu_memory.json,2024-01-19,pierre.margueritte@datadoghq.com,True,True,False,False,False,False,0,0,0,4,2
-openai/assets/dashboards/usage_overview_dashboard.json,2024-01-24,cmlaverdiere@gmail.com,True,False,True,True,False,False,3,3,0,2,2
-zeek/assets/dashboards/corelight_suricata.json,2024-02-02,35323912+bhargavnariyanicrest@users.noreply.github.com,True,True,True,False,False,False,1,1,0,1,1
-rabbitmq/assets/dashboards/rabbitmq_dashboard.json,2024-02-05,76412946+alai97@users.noreply.github.com,True,False,False,True,False,True,8,8,0,3,3
-teamcity/assets/dashboards/overview.json,2024-02-05,76412946+alai97@users.noreply.github.com,True,False,False,True,False,False,8,8,0,4,1
-calico/assets/dashboards/calico_overview.json,2024-02-06,florent.clarret@datadoghq.com,True,False,False,True,False,False,3,0,0,6,6
-zeek/assets/dashboards/zeek_network_observations.json,2024-02-09,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,2,2,0,1,1
-zeek/assets/dashboards/zeek_dhcp.json,2024-02-09,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,0,0,0,0,0
-zeek/assets/dashboards/zeek_connections.json,2024-02-09,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,3,3,0,3,3
-zeek/assets/dashboards/zeek_diagnostics.json,2024-02-09,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,1,1
-tomcat/assets/dashboards/overview.json,2024-02-13,florent.clarret@datadoghq.com,True,False,False,True,True,True,2,0,2,9,5
-envoy/assets/dashboards/openmetrics_overview.json,2024-02-27,steven.yuen@datadoghq.com,True,False,False,True,True,True,2,0,1,41,41
-airflow/assets/dashboards/overview.json,2024-02-27,kyle.neale@datadoghq.com,True,False,True,True,True,True,0,0,0,12,2
-otel/assets/dashboards/otel_collector_metrics_dashboard.json,2024-03-08,stanley.liu@datadoghq.com,True,False,True,False,True,True,1,1,0,50,48
-consul/assets/dashboards/consul_overview.json,2024-03-11,kyle.neale@datadoghq.com,True,True,False,True,True,True,0,0,0,9,6
-nvidia_triton/assets/dashboards/nvidia_triton_overview.json,2024-03-12,ilia.kurenkov@datadoghq.com,True,False,False,True,False,False,2,2,0,28,28
-spark/assets/dashboards/databricks_overview.json,2024-03-12,kyle.neale@datadoghq.com,True,False,False,True,True,True,4,0,0,14,0
-cilium/assets/dashboards/overview_v2.json,2024-03-13,117179639+patrykpietraszkoDD@users.noreply.github.com,True,False,False,True,False,True,4,0,0,18,0
-cisco_duo/assets/dashboards/cisco_duo_telephony_logs.json,2024-03-15,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_duo/assets/dashboards/cisco_duo_administrator_logs.json,2024-03-15,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_duo/assets/dashboards/cisco_duo_offline_enrollment_logs.json,2024-03-15,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_duo/assets/dashboards/cisco_duo_authentication_logs.json,2024-03-15,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-datadog_cluster_agent/assets/dashboards/datadog_cluster_agent_overview.json,2024-03-15,41540817+adel121@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-tekton/assets/dashboards/overview.json,2024-03-15,florent.clarret@datadoghq.com,True,False,False,True,True,True,0,0,0,9,9
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_user_authentication.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_transparent_firewall.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,2,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_ospf_and_rip_routing.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,0,0,0,1,1
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_application_and_identity_firewall.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,3,0,0,1,1
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_intrusion_protection_system.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_snmp.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_overview.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,18,0,0,18,18
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_security_events.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_command_interface.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_failover.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_vpn_failover.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_ip_stack.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,0,0,0,0,0
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_resource_manager.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_duo/assets/dashboards/cisco_duo_activity_logs.json,2024-03-19,34762907+nisargshah-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-zeek/assets/dashboards/zeek_detection.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,1,1,0,1,1
-zeek/assets/dashboards/zeek_datared.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,True,False,False,0,0,0,0,0
-zeek/assets/dashboards/zeek_network_protocols_ntp_snmp_ssl.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,6,2,0,1,1
-zeek/assets/dashboards/zeek_miscellaneous.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,1,1,0,0,0
-zeek/assets/dashboards/zeek_syslog.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-zeek/assets/dashboards/zeek_dns.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,4,4,0,2,2
-zeek/assets/dashboards/zeek_network_protocols.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,False,False,False,False,9,9,0,2,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_user_id.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_tunnel_inspection.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_globalprotect.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_threat.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_decryption.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_system.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_traffic.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_correlated_events.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_authentication.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_hip_match.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-palo_alto_panorama/assets/dashboards/palo_alto_panorama_config.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_ips.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_audit.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_https_inspection.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_url_filtering.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_malware.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_dlp.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_threat_emulation.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_identity_awareness.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_firewall.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_spam_and_email_security.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_bot.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_exploit.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_application_control.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_ransomware.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_virus.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-cisco_umbrella_dns/assets/dashboards/cisco_umbrella_dns_dns_traffic.json,2024-04-01,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,False,True,True,False,False,4,0,4,2,2
-cisco_umbrella_dns/assets/dashboards/cisco_umbrella_dns_proxied_traffic.json,2024-04-01,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,False,True,True,False,False,3,0,3,4,2
-argo_rollouts/assets/dashboards/argo_rollouts_overview.json,2024-04-09,steven.yuen@datadoghq.com,True,False,False,True,True,True,4,4,0,18,18
-fluxcd/assets/dashboards/fluxcd.json,2024-04-26,ilia.kurenkov@datadoghq.com,True,False,True,True,False,False,4,4,2,8,7
-postgres/assets/dashboards/postgresql_screenboard_dashboard.json,2024-05-08,aldrick.castro@datadoghq.com,True,False,True,False,True,True,2,0,1,13,9
-karpenter/assets/dashboards/karpenter_overview.json,2024-05-09,steven.yuen@datadoghq.com,True,False,True,True,False,False,2,0,0,22,22
-cisco_sdwan/assets/dashboards/cisco_sd-wan.json,2024-05-15,thibaud.cheruy@datadoghq.com,True,False,False,True,False,False,11,8,10,13,0
-win32_event_log/assets/dashboards/windows_event_log_overview.json,2024-05-21,branden.clark@datadoghq.com,True,False,False,True,False,True,5,1,5,3,1
-esxi/assets/dashboards/overview.json,2024-05-28,sarah.witt@datadoghq.com,True,False,False,True,False,True,2,0,0,10,10
-traefik_mesh/assets/dashboards/traefik_mesh_overview.json,2024-05-30,kyle.neale@datadoghq.com,True,False,True,True,True,True,0,0,0,15,4
-teleport/assets/dashboards/teleport_overview.json,2024-06-04,noueman.khalikine@datadoghq.com,True,False,False,True,False,True,8,8,3,25,0
-container/assets/dashboards/containers.json,2024-06-05,32009013+jennchenn@users.noreply.github.com,True,True,False,False,False,False,0,0,0,15,0
-openstack_controller/assets/dashboards/openstack_controller_overview_[default_microversion].json,2024-06-06,144174402+rahulkaukuntla@users.noreply.github.com,True,False,False,True,False,True,58,38,13,26,26
-kubernetes_cluster_autoscaler/assets/dashboards/kubernetes_cluster_autoscaler_overview.json,2024-06-13,43783545+HadhemiDD@users.noreply.github.com,True,False,True,True,False,False,3,3,2,16,14
-zeek/assets/dashboards/zeek_files.json,2024-06-14,105789910+tirthrajchaudhari-crest@users.noreply.github.com,True,True,True,False,False,False,12,12,0,1,1
-snmp/assets/dashboards/ndm_troubleshooting.json,2024-07-09,thibaud.cheruy@datadoghq.com,True,False,False,True,False,False,9,9,4,30,25
-istio/assets/dashboards/overview.json,2024-07-09,steven.yuen@datadoghq.com,True,False,True,True,False,False,2,0,0,47,46
-cisco_aci/assets/dashboards/cisco_aci_dashboard.json,2024-07-11,9274242+zoedt@users.noreply.github.com,True,False,False,True,False,False,5,0,0,6,4
-vault/assets/dashboards/vault_overview.json,2024-07-17,steven.yuen@datadoghq.com,True,False,True,True,True,True,6,0,5,14,13
-snowflake/assets/dashboards/organization_metrics.json,2024-07-18,steven.yuen@datadoghq.com,True,True,False,False,False,False,0,0,0,7,6
-snowflake/assets/dashboards/snowflake.json,2024-07-18,steven.yuen@datadoghq.com,False,True,True,False,False,False,0,0,0,0,0
-vllm/assets/dashboards/overview.json,2024-07-24,ilia.kurenkov@datadoghq.com,True,False,False,True,False,True,6,6,0,15,15
-cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_threat_detection.json,2024-07-25,44285485+hdinh77@users.noreply.github.com,True,True,True,False,False,False,0,0,0,0,0
-kyverno/assets/dashboards/overview.json,2024-07-30,steven.yuen@datadoghq.com,True,False,True,True,False,False,1,0,0,25,25
-argo_workflows/assets/dashboards/argo_workflows.json,2024-07-31,kyle.neale@datadoghq.com,True,False,True,True,False,True,3,3,0,6,6
-vsphere/assets/dashboards/vmware_vsphere_tkg_-_overview.json,2024-08-05,ethan.woodthomas@datadoghq.com,True,True,False,True,False,True,0,0,0,19,18
-datadog_operator/assets/dashboards/operator_overview.json,2024-08-05,ethan.woodthomas@datadoghq.com,True,False,True,True,False,False,12,0,2,23,21
-kubernetes/assets/dashboards/kubernetes_clusters.json,2024-08-05,ethan.woodthomas@datadoghq.com,True,False,False,True,False,True,46,0,35,39,10
-kubernetes/assets/dashboards/kubernetes_dashboard.json,2024-08-05,ethan.woodthomas@datadoghq.com,True,False,False,True,False,True,15,0,7,19,0
-kubernetes/assets/dashboards/kubernetes_pods.json,2024-08-05,ethan.woodthomas@datadoghq.com,True,False,False,True,False,True,0,0,0,13,12
+path,last_modified,email,title,id,short_name,has_ordered_layout,has_ungrouped_widgets,has_all_title_case_groups,has_overview_section,about_section_contains_text,about_section_contains_banner_img,total_query_values,query_values_have_timeseries_background,query_values_have_conditional_formats,total_widgets_legends,widgets_legends_shown
+elastic/assets/dashboards/metrics.json,2020-11-13,paul.coignet@datadoghq.com,Elasticsearch - Metrics,26,elasticsearch_timeboard,True,True,True,False,False,False,0,0,0,0,0
+nvidia_jetson/assets/dashboards/nvidia_jetson.json,2020-11-17,julien.lebot@datadoghq.com,Nvidia Jetson,30414,Nvidia Jetson,True,True,True,False,False,False,0,0,0,0,0
+mysql/assets/dashboards/overview.json,2020-11-17,31313038+yzhan289@users.noreply.github.com,MySQL - Overview,12,mysql,True,True,True,False,False,False,0,0,0,0,0
+tomcat/assets/dashboards/metrics.json,2020-12-01,36090313+gsalami00@users.noreply.github.com,Tomcat - Metrics,32,tomcat,True,True,True,False,False,False,0,0,0,0,0
+postgres/assets/dashboards/postgresql_dashboard.json,2020-12-03,31313038+yzhan289@users.noreply.github.com,Postgres - Metrics,17,postgresql,True,True,True,False,False,False,0,0,0,0,0
+iis/assets/dashboards/iis_dashboard.json,2020-12-04,ChristineTChen@users.noreply.github.com,IIS - Metrics,34,iis,True,True,True,False,False,False,0,0,0,0,0
+cassandra/assets/dashboards/cassandra_sstable.json,2020-12-09,ChristineTChen@users.noreply.github.com,Cassandra - SSTable Management,234,cassandra-sstables,True,True,True,False,False,False,0,0,0,0,0
+cassandra/assets/dashboards/cassandra_read.json,2020-12-09,ChristineTChen@users.noreply.github.com,Cassandra - Read Path,24,cassandra-read,True,True,True,False,False,False,0,0,0,0,0
+cassandra/assets/dashboards/cassandra_overview.json,2020-12-09,ChristineTChen@users.noreply.github.com,Cassandra - Overview,23,cassandra-overview,True,True,True,False,False,False,0,0,0,0,0
+cassandra/assets/dashboards/cassandra_write.json,2020-12-09,ChristineTChen@users.noreply.github.com,Cassandra - Write Path,25,cassandra-write,True,True,True,False,False,False,0,0,0,0,0
+mcache/assets/dashboards/memcached_dashboard.json,2020-12-11,31313038+yzhan289@users.noreply.github.com,Memcached - Metrics,22,memcached,True,True,True,False,False,False,0,0,0,0,0
+glusterfs/assets/dashboards/red_hat_gluster_storage.json,2021-01-27,derek@datadoghq.com,Red Hat Gluster Storage,30428,Red Hat Gluster Storage,False,True,True,False,False,False,0,0,0,0,0
+jboss_wildfly/assets/dashboards/jboss_wildfly.json,2021-01-27,derek@datadoghq.com,JBoss WildFly,30424,JBoss WildFly,False,True,True,False,False,False,0,0,0,0,0
+ceph/assets/dashboards/overview.json,2021-01-27,derek@datadoghq.com,Ceph - Overview,91,ceph,False,True,True,False,False,False,0,0,0,0,0
+marklogic/assets/dashboards/overview.json,2021-01-27,derek@datadoghq.com,MarkLogic - Overview,30400,MarkLogic - Overview,False,True,True,False,False,False,0,0,0,0,0
+aerospike/assets/dashboards/overview.json,2021-01-27,derek@datadoghq.com,Aerospike Overview,30300,Aerospike Overview,False,True,True,False,False,False,0,0,0,0,0
+azure_iot_edge/assets/dashboards/overview.json,2021-01-27,derek@datadoghq.com,Azure IoT Edge - Overview,30427,azure_iot_edge,False,True,True,False,False,False,0,0,0,0,0
+haproxy/assets/dashboards/prometheus_overview.json,2021-01-27,derek@datadoghq.com,HAProxy - Overview (Prometheus),30407,HAProxy - Overview (Prometheus),False,True,True,False,False,False,0,0,0,0,0
+voltdb/assets/dashboards/voltdb_overview.json,2021-02-16,florimond.manca@datadoghq.com,VoltDB - Overview,30434,VoltDB - Overview,False,True,True,False,False,False,0,0,0,0,0
+riak/assets/dashboards/riak_dashboard.json,2021-02-25,39505100+luisgonzalex@users.noreply.github.com,Riak - Metrics,36,riak,True,True,True,False,False,False,0,0,0,0,0
+btrfs/assets/dashboards/btrfs_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,System - Btrfs,61,btrfs,True,True,True,False,False,False,0,0,0,0,0
+fluentd/assets/dashboards/fluentd_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,Fluentd - Metrics,72,fluentd,True,True,True,False,False,False,0,0,0,0,0
+php_fpm/assets/dashboards/php-fpm_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,PHP-FPM - Metrics,78,php-fpm,True,True,True,False,False,False,0,0,0,0,0
+gearmand/assets/dashboards/gearman_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,Gearman - Metrics,38,gearman,True,True,True,False,False,False,0,0,0,0,0
+kyototycoon/assets/dashboards/kyototycoon_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,Kyoto Tycoon - Metrics,49,kyototycoon,True,True,True,False,False,False,0,0,0,0,0
+couchbase/assets/dashboards/couchbase_dashboard.json,2021-03-02,39505100+luisgonzalex@users.noreply.github.com,Couchbase - Metrics,45,couchbase,True,True,True,False,False,False,0,0,0,0,0
+varnish/assets/dashboards/varnish_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,Varnish - Metrics,18,varnish,True,True,True,False,False,False,0,0,0,0,0
+solr/assets/dashboards/solr_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,Solr - Metrics,31,solr,True,True,True,False,False,False,0,0,0,0,0
+nginx/assets/dashboards/NGINX-Metrics_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,NGINX - Metrics,20,NGINX-Metrics,True,True,True,False,False,False,0,0,0,0,0
+sqlserver/assets/dashboards/sqlserver_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,SQLServer - Metrics,33,sqlserver,True,True,True,False,False,False,0,0,0,0,0
+riakcs/assets/dashboards/riakcs_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,Riak CS - Metrics,73,riakcs,True,True,True,False,False,False,0,0,0,0,0
+tokumx/assets/dashboards/tokumx_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,TokuMX - Metrics,53,tokumx,True,True,True,False,False,False,0,0,0,0,0
+postfix/assets/dashboards/postfix_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,Postfix - Metrics,51,postfix,True,True,True,False,False,False,0,0,0,0,0
+pgbouncer/assets/dashboards/pgbouncer_dashboard.json,2021-03-03,39505100+luisgonzalex@users.noreply.github.com,PgBouncer - Metrics,79,pgbouncer,True,True,True,False,False,False,0,0,0,0,0
+activemq/assets/dashboards/artemis_dashboard.json,2021-03-23,mike.garabedian@datadoghq.com,ActiveMQ Artemis - Overview,30442,artemis,False,True,True,False,False,False,0,0,0,0,0
+cassandra/assets/dashboards/cassandra_overview_screenboard.json,2021-03-24,39505100+luisgonzalex@users.noreply.github.com,Cassandra Overview,30444,cassandra-overview-screenboard,False,True,True,False,False,False,0,0,0,0,0
+aspdotnet/assets/dashboards/overview.json,2021-04-13,39505100+luisgonzalex@users.noreply.github.com,ASP.NET - Overview,30457,ASP.NET - Overview,True,True,True,False,False,False,4,0,2,4,0
+twemproxy/assets/dashboards/twemproxy_overview.json,2021-04-26,39505100+luisgonzalex@users.noreply.github.com,Twemproxy - Overview,30463,Twemproxy - Overview,True,True,True,False,False,False,8,0,2,12,0
+apache/assets/dashboards/apache_dashboard.json,2021-06-09,daanleenders@gmail.com,Apache - Overview,19,apache,False,True,True,False,False,False,0,0,0,0,0
+sonarqube/assets/dashboards/overview.json,2021-07-26,ofekmeister@gmail.com,SonarQube Overview,30531,Sonarqube Overview,True,True,True,False,True,True,7,0,3,5,4
+iis/assets/dashboards/iis_overview.json,2021-07-27,46911781+mtoffl01@users.noreply.github.com,IIS - Overview,243,IIS-Overview,False,True,True,False,False,False,0,0,0,0,0
+presto/assets/dashboards/overview.json,2021-08-09,39559662+amymluo@users.noreply.github.com,Presto Overview,30277,Presto Overview,True,True,True,False,False,False,3,0,0,13,6
+amazon_msk/assets/dashboards/overview.json,2021-08-09,39559662+amymluo@users.noreply.github.com,Amazon MSK (Agent) Overview,30303,Amazon MSK Overview,True,False,False,False,False,True,0,0,0,11,11
+kubernetes/assets/dashboards/kubernetes_statefulsets.json,2021-09-15,cedric.lamoriniere@datadoghq.com,Kubernetes StatefulSets Overview,30538,Kubernetes StatefulSets Overview,False,True,True,False,False,False,0,0,0,0,0
+avi_vantage/assets/dashboards/overview.json,2021-09-17,florian.veaux@datadoghq.com,Avi Vantage - Overview,30544,Avi Vantage - Overview,True,True,False,True,True,True,6,0,2,13,13
+haproxy/assets/dashboards/openmetrics_overview.json,2022-03-04,steven.yuen@datadoghq.com,HAProxy - Overview (OpenMetrics),30603,HAProxy - Overview (OpenMetrics),False,True,True,False,False,False,0,0,0,0,0
+singlestore/assets/dashboards/overview.json,2022-05-02,54044423+npezzotti@users.noreply.github.com,Singlestore Overview,30581,Singlestore Overview,True,False,True,True,False,True,1,0,1,8,8
+snmp_f5/assets/dashboards/f5-networks.json,2022-05-31,florian.veaux@datadoghq.com,F5 Networks,30684,F5-Networks,True,True,False,False,False,False,3,0,0,44,40
+vault/assets/dashboards/vault_overview_legacy.json,2022-06-16,alex.lopez.zorzano@gmail.com,Vault - Overview (Legacy),30301,Vault - Overview,True,True,True,True,True,True,6,0,5,14,13
+traffic_server/assets/dashboards/overview.json,2022-06-17,sarah.witt@datadoghq.com,Traffic Server - Overview,30700,Traffic Server - Overview,True,False,False,True,True,True,1,0,1,28,21
+couch/assets/dashboards/CouchDBv1-overview_dashboard.json,2022-08-03,ian.bucad@datadoghq.com,CouchDB (v1) - Overview,30731,couchdb-v1,False,True,True,False,False,False,0,0,0,0,0
+couch/assets/dashboards/CouchDB-overview_dashboard.json,2022-08-03,ian.bucad@datadoghq.com,CouchDB - Overview,14,couchdb,False,True,True,False,False,False,0,0,0,0,0
+kong/assets/dashboards/kong_overview_openmetrics.json,2022-08-22,andrew.zhang@datadoghq.com,Kong Overview [OpenMetrics],30732,Kong Overview OpenMetrics,True,False,False,False,False,True,8,2,0,8,7
+vertica/assets/dashboards/overview.json,2022-09-14,alex.lopez.zorzano@gmail.com,Vertica Overview,30299,Vertica Overview,True,True,True,True,False,True,5,0,4,7,7
+cloudera/assets/dashboards/cloudera_overview.json,2023-01-13,andrew.zhang@datadoghq.com,Cloudera Data Platform - Overview,30902,Cloudera Data Platform Overview,True,True,True,True,False,True,2,2,0,16,16
+silk/assets/dashboards/silk_overview.json,2023-01-31,andrew.zhang@datadoghq.com,Silk - Overview,30596,Silk - Overview,True,True,True,False,False,True,4,4,0,15,0
+kubernetes/assets/dashboards/kubernetes_jobs.json,2023-02-08,97530782+tbavelier@users.noreply.github.com,Kubernetes Jobs and CronJobs Overview,30464,Kubernetes Jobs & Cronjobs Overview,True,False,False,True,False,False,3,0,3,17,16
+argocd/assets/dashboards/argo_cd_overview.json,2023-03-22,steven.yuen@datadoghq.com,Argo CD Overview,30904,Argo CD Overview,True,False,True,True,False,True,3,0,0,38,38
+twistlock/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Prisma Cloud Compute Edition - Overview,265,Twistlock,False,True,True,False,False,False,0,0,0,0,0
+activemq/assets/dashboards/activemq_dashboard.json,2023-04-24,julia.benais@datadoghq.com,ActiveMQ - Overview,29,activemq,False,True,True,False,False,False,0,0,0,0,0
+openstack/assets/dashboards/openstack_dashboard.json,2023-04-24,julia.benais@datadoghq.com,OpenStack - Overview,85,openstack,False,True,True,False,False,False,0,0,0,0,0
+clickhouse/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,ClickHouse Overview,30297,ClickHouse Overview,False,True,True,False,False,False,0,0,0,0,0
+mapr/assets/dashboards/mapr_overview.json,2023-04-24,julia.benais@datadoghq.com,MapR - Overview,30290,MapR - Overview,False,True,True,False,False,False,0,0,0,0,0
+weblogic/assets/dashboards/metrics.json,2023-04-24,julia.benais@datadoghq.com,WebLogic - Metrics,30598,metrics,True,True,True,False,False,False,0,0,0,0,0
+weblogic/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,WebLogic - Overview,30599,overview,True,False,False,True,True,True,15,0,5,24,24
+ibm_db2/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,IBM Db2 Overview,30274,IBM Db2 Overview,False,True,True,False,False,False,0,0,0,0,0
+hdfs_datanode/assets/dashboards/hdfs_datanode_dashboard.json,2023-04-24,julia.benais@datadoghq.com,HDFS Data Node - Overview,41,hdfs_datanode,False,True,True,False,False,False,0,0,0,0,0
+zk/assets/dashboards/zookeeper_dashboard.json,2023-04-24,julia.benais@datadoghq.com,ZooKeeper - Overview,35,zookeeper,False,True,True,False,False,False,0,0,0,0,0
+lighttpd/assets/dashboards/lighttpd_dashboard.json,2023-04-24,julia.benais@datadoghq.com,Lighttpd - Overview,44,lighttpd,False,True,True,False,False,False,0,0,0,0,0
+ambari/assets/dashboards/base_dashboard.json,2023-04-24,julia.benais@datadoghq.com,Ambari base dashboard,30275,Ambari base dashboard,False,True,True,False,False,False,0,0,0,0,0
+ibm_i/assets/dashboards/ibm_i_overview.json,2023-04-24,julia.benais@datadoghq.com,IBM-i - Overview,30545,IBM i Overview,True,False,False,False,False,False,0,0,0,20,20
+snmp/assets/dashboards/interface_performance.json,2023-04-24,julia.benais@datadoghq.com,Interface Performance,30417,Interface Performance,True,False,True,False,False,False,0,0,0,10,0
+snmp/assets/dashboards/datacenter_overview.json,2023-04-24,julia.benais@datadoghq.com,Network Device Monitoring,30409,Datacenter Overview,True,False,True,False,False,False,0,0,0,6,0
+hudi/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Hudi Overview,30574,Hudi Overview,True,False,False,False,False,True,0,0,0,7,7
+teradata/assets/dashboards/teradata_overview.json,2023-04-24,julia.benais@datadoghq.com,Teradata - Overview,30717,Teradata Overview,True,True,False,False,False,True,0,0,0,31,31
+sidekiq/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Sidekiq Overview,30314,Sidekiq Overview,False,True,True,False,False,False,0,0,0,0,0
+ibm_mq/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,IBM MQ - Overview,262,IBM MQ,False,True,True,False,False,False,0,0,0,0,0
+cert_manager/assets/dashboards/certmanager_overview.json,2023-04-24,julia.benais@datadoghq.com,Cert Manager Overview,30443,Cert-Manager Overview Dashboard,True,False,False,True,True,False,2,0,0,4,4
+harbor/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Harbor Integration Dashboard,30276,Harbor Overview,False,True,True,False,False,False,0,0,0,0,0
+ibm_ace/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,IBM ACE Overview,30884,IBM ACE Overview,True,False,True,True,False,True,3,2,0,4,4
+istio/assets/dashboards/istio_overview.json,2023-04-24,julia.benais@datadoghq.com,Istio - Overview (< v1.5),30287,Istio base dashboard,False,True,True,False,False,False,0,0,0,0,0
+istio/assets/dashboards/istio_1_5_openmetrics_overview.json,2023-04-24,julia.benais@datadoghq.com,Istio - Overview (v1.5+) - Openmetrics,30692,Istio Overview 1.5 (OpenMetrics),False,True,True,False,False,False,0,0,0,0,0
+istio/assets/dashboards/istio_1_5_overview.json,2023-04-24,julia.benais@datadoghq.com,Istio - Overview (v1.5+) - Legacy,30320,Istio Overview 1.5,False,True,True,False,False,False,0,0,0,0,0
+flink/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Flink Overview,30312,Flink Overview,False,True,True,False,False,False,0,0,0,0,0
+exchange_server/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Exchange Server Overview,30329,Exchange Server Overview,False,True,True,False,False,False,0,0,0,0,0
+ignite/assets/dashboards/ignite_overview.json,2023-04-24,julia.benais@datadoghq.com,Ignite Overview,30334,Ignite Overview,False,True,True,False,False,False,0,0,0,0,0
+systemd/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Systemd Overview,30281,Systemd Overview,False,True,True,False,False,False,0,0,0,0,0
+boundary/assets/dashboards/boundary_overview.json,2023-04-24,julia.benais@datadoghq.com,Boundary Overview,30880,Boundary Overview,True,False,False,True,False,True,1,0,0,10,10
+arangodb/assets/dashboards/arangodb_overview.json,2023-04-24,julia.benais@datadoghq.com,ArangoDB - Overview,30674,ArangoDB Overview,True,True,False,False,False,True,21,4,2,16,16
+oracle/assets/dashboards/oracle_overview.json,2023-04-24,julia.benais@datadoghq.com,Oracle Database - Overview,240,oracle,False,True,True,False,False,False,0,0,0,0,0
+jmeter/assets/dashboards/JMeterOverview.json,2023-04-24,julia.benais@datadoghq.com,JMeter Overview,30458,JMeter Overview,True,True,False,False,False,False,3,0,1,3,3
+hdfs_namenode/assets/dashboards/hdfs_namenode_dashboard.json,2023-04-24,julia.benais@datadoghq.com,HDFS Name Node - Overview,42,hdfs_namenode,False,True,True,False,False,False,0,0,0,0,0
+marathon/assets/dashboards/marathon-overview_dashboard.json,2023-04-24,julia.benais@datadoghq.com,Marathon - Overview,245,marathon-overview,False,True,True,False,False,False,0,0,0,0,0
+kong/assets/dashboards/kong_api.json,2023-04-24,julia.benais@datadoghq.com,Kong API Overview,30743,Kong API,True,False,False,True,False,False,3,2,0,6,2
+kong/assets/dashboards/kong_overview.json,2023-04-24,julia.benais@datadoghq.com,Kong Overview [Legacy],30304,Kong Overview,False,True,True,False,False,False,0,0,0,0,0
+impala/assets/dashboards/impala_statestore_overview.json,2023-04-24,julia.benais@datadoghq.com,Impala - Statestore - Overview,30744,Impala - Statestore - Overview,True,False,False,True,True,True,4,3,0,10,10
+impala/assets/dashboards/impala_catalog_overview.json,2023-04-24,julia.benais@datadoghq.com,Impala - Catalog - Overview,30745,Impala - Catalog - Overview,True,False,False,True,True,True,2,1,0,11,11
+impala/assets/dashboards/impala_overview.json,2023-04-24,julia.benais@datadoghq.com,Impala - Overview,30747,Impala - Overview,True,False,False,True,True,True,3,3,0,17,12
+impala/assets/dashboards/impala_daemon_overview.json,2023-04-24,julia.benais@datadoghq.com,Impala - Daemon - Overview,30746,Impala - Daemon - Overview,True,False,False,True,True,True,0,0,0,12,5
+ibm_was/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,IBM WebSphere Application Server - Overview,260,IBM_WAS,False,True,True,False,False,False,0,0,0,0,0
+hyperv/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Hyper-V,30273,hyper-v,False,True,True,False,False,False,0,0,0,0,0
+rabbitmq/assets/dashboards/rabbitmq_screenboard_dashboard.json,2023-04-24,julia.benais@datadoghq.com,RabbitMQ Overview (Management Version),237,rabbitmq_screenboard,True,False,True,True,False,True,0,0,0,8,8
+otel/assets/dashboards/otel_host_metrics_dashboard.json,2023-04-24,julia.benais@datadoghq.com,OpenTelemetry Host Metrics Dashboard,30425,OpenTelemetry Dashboard,True,False,False,False,True,True,0,0,0,33,33
+rethinkdb/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,RethinkDB Overview,30328,RethinkDB Overview,False,True,True,False,False,False,0,0,0,0,0
+crio/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,CRI-O - Overview,248,crio,False,True,True,False,False,False,0,0,0,0,0
+gunicorn/assets/dashboards/gunicorn_dashboard.json,2023-04-24,julia.benais@datadoghq.com,Gunicorn - Overview,46,gunicorn,False,True,True,False,False,False,0,0,0,0,0
+nginx_ingress_controller/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Kubernetes NGINX Ingress Controller - Overview,258,nginx_ingress_controller,False,True,True,False,False,False,0,0,0,0,0
+yarn/assets/dashboards/yarn_dashboard.json,2023-04-24,julia.benais@datadoghq.com,Yarn - Overview,89,yarn,False,True,True,False,False,False,0,0,0,0,0
+yarn/assets/dashboards/hadoop_dashboard.json,2023-04-24,julia.benais@datadoghq.com,Hadoop - Overview,90,hadoop,False,True,True,False,False,False,0,0,0,0,0
+confluent_platform/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Confluent Platform Overview,30316,Confluent Platform Overview,False,True,True,False,False,False,0,0,0,0,0
+envoy/assets/dashboards/envoy_overview.json,2023-04-24,julia.benais@datadoghq.com,Envoy - Overview,30293,Envoy - Overview,True,False,False,True,True,True,2,0,1,13,12
+tls/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,TLS Overview,30283,TLS Overview,False,True,True,False,False,False,0,0,0,0,0
+active_directory/assets/dashboards/active_directory.json,2023-04-24,julia.benais@datadoghq.com,Active Directory,30388,Active Directory,True,True,True,False,False,False,0,0,0,6,0
+pan_firewall/assets/dashboards/palo_alto_networks_firewall_overview.json,2023-04-24,julia.benais@datadoghq.com,Palo Alto Networks Firewall Overview,30436,Palo Alto Networks Firewall Overview,False,True,True,False,False,False,0,0,0,0,0
+nginx/assets/dashboards/plus_overview.json,2023-04-24,julia.benais@datadoghq.com,NGINX Plus - Overview,30278,NGINX Plus base overview,True,False,False,False,True,True,7,0,6,8,5
+scylla/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Scylla,30313,Scylla Overview,False,True,True,False,False,False,0,0,0,0,0
+linkerd/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Linkerd - Overview,30302,Linkerd - Overview,False,True,True,False,False,False,0,0,0,0,0
+mesos_slave/assets/dashboards/mesos_overview.json,2023-04-24,julia.benais@datadoghq.com,Mesos - Overview,55,mesos,False,True,True,False,False,False,0,0,0,0,0
+mysql/assets/dashboards/overview-screenboard.json,2023-04-24,julia.benais@datadoghq.com,MySQL,30404,mysql-screenboard,True,False,False,False,True,True,3,0,1,17,5
+druid/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Druid Overview,30288,Druid Overview,False,True,True,False,False,False,0,0,0,0,0
+sqlserver/assets/dashboards/SQLServer-Overview_dashboard.json,2023-04-24,julia.benais@datadoghq.com,SQL Server - Overview,236,SQLServer-Overview,True,False,False,False,True,True,4,4,1,21,6
+etcd/assets/dashboards/etcd_2_overview.json,2023-04-24,julia.benais@datadoghq.com,Etcd v2 - Overview,75,etcd-Screenboard,False,True,True,False,False,False,0,0,0,0,0
+etcd/assets/dashboards/etcd_overview.json,2023-04-24,julia.benais@datadoghq.com,Etcd v3 - Overview,30289,Etcd Overview,True,False,False,False,False,True,3,1,1,20,11
+redisdb/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Redis - Overview,15,redis,True,False,True,True,True,True,7,0,7,12,6
+hive/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Hive Integration Dashboard,30279,Hive Overview,False,True,True,False,False,False,0,0,0,0,0
+mcache/assets/dashboards/memcached_screenboard.json,2023-04-24,julia.benais@datadoghq.com,Memcached - Overview,30416,memcached_screenboard,True,False,True,False,True,True,3,0,2,12,9
+mongo/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,MongoDB - Overview,13,mongodb,True,False,False,True,True,True,7,0,0,14,12
+cockroachdb/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,CockroachDB Overview,30282,CockroachDB Overview,True,True,False,False,False,True,9,0,0,15,15
+hazelcast/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Hazelcast Overview,30338,Hazelcast Overview,False,True,True,False,False,False,0,0,0,0,0
+cri/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,CRI - Overview,247,cri,False,True,True,False,False,False,0,0,0,0,0
+sap_hana/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,SAP HANA Overview,30294,SAP HANA Overview,False,True,True,False,False,False,0,0,0,0,0
+hivemq/assets/dashboards/hivemq.json,2023-04-24,julia.benais@datadoghq.com,HiveMQ Overview,30331,HiveMQ,False,True,True,False,False,False,0,0,0,0,0
+kubernetes/assets/dashboards/kubernetes_replicasets.json,2023-04-24,julia.benais@datadoghq.com,Kubernetes Replicasets Overview,30402,Kubernetes ReplicaSets Overview,False,True,True,False,False,False,0,0,0,0,0
+kubernetes/assets/dashboards/kubernetes_daemonsets.json,2023-04-24,julia.benais@datadoghq.com,Kubernetes DaemonSets Overview,30537,Kubernetes DaemonSets Overview,False,True,True,False,False,False,0,0,0,0,0
+kubernetes/assets/dashboards/kubernetes_services.json,2023-04-24,julia.benais@datadoghq.com,Kubernetes Services Overview,30403,Kubernetes Services Overview,False,True,True,False,False,False,0,0,0,0,0
+coredns/assets/dashboards/coredns.json,2023-04-24,julia.benais@datadoghq.com,CoreDNS,30389,CoreDNS,True,False,False,False,True,True,0,0,0,11,5
+kube_metrics_server/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Kubernetes Metrics Server,30280,Kubernetes Metrics Server - Overview,False,True,True,False,False,False,0,0,0,0,0
+proxysql/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,ProxySQL Overview,30319,ProxySQL Overview,False,True,True,False,False,False,0,0,0,0,0
+cilium/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Cilium Overview,30295,Cilium Overview,False,True,True,False,False,False,0,0,0,0,0
+mapreduce/assets/dashboards/mapreduce_dashboard.json,2023-04-24,julia.benais@datadoghq.com,MapReduce - Overview,88,mapreduce,False,True,True,False,False,False,0,0,0,0,0
+powerdns_recursor/assets/dashboards/powerdns_dashboard.json,2023-04-24,julia.benais@datadoghq.com,PowerDNS Recursor - Overview,97,powerdns,False,True,True,False,False,False,0,0,0,0,0
+helm/assets/dashboards/overview.json,2023-04-24,julia.benais@datadoghq.com,Helm - Overview,30682,Helm - Overview,True,True,True,False,False,False,0,0,0,0,0
+spark/assets/dashboards/spark_dashboard.json,2023-04-24,julia.benais@datadoghq.com,Spark - Overview,95,spark,False,True,True,False,False,False,0,0,0,0,0
+temporal/assets/dashboards/server_overview.json,2023-04-25,steven.yuen@datadoghq.com,Temporal Server Overview,30973,Temporal Server Overview,True,False,False,True,False,True,6,5,6,12,5
+sqlserver/assets/dashboards/SQLServer-AlwaysOn_dashboard.json,2023-04-25,julia.benais@datadoghq.com,SQL Server - AlwaysOn,30906,SQLServer-AlwaysOn,True,False,False,True,True,True,0,0,0,6,6
+foundationdb/assets/dashboards/foundationdb_latency_probe.json,2023-04-25,julia.benais@datadoghq.com,FoundationDB Latency Probe,30606,FoundationDB Latency Probe,True,True,True,False,False,False,0,0,0,0,0
+foundationdb/assets/dashboards/foundationdb_transactions_and_queues.json,2023-04-25,julia.benais@datadoghq.com,FoundationDB Transactions and Queues,30685,FoundationDB Transactions and Queues,True,False,True,True,False,True,3,0,3,15,15
+foundationdb/assets/dashboards/foundationdb_processes_and_utilization.json,2023-04-25,julia.benais@datadoghq.com,FoundationDB Processes and Utilization,30686,FoundationDB Processes and Utilization,True,True,False,False,False,False,0,0,0,7,6
+haproxy/assets/dashboards/overview.json,2023-05-22,florent.clarret@datadoghq.com,HAProxy - Overview,28,haproxy,True,False,False,True,True,True,2,0,1,13,11
+nginx/assets/dashboards/NGINX-Overview_dashboard.json,2023-06-01,andrew.zhang@datadoghq.com,NGINX - Overview,21,NGINX-Overview,True,False,False,False,False,True,2,0,2,3,1
+oracle/assets/dashboards/dbm_oracle_database_overview.json,2023-06-16,18366081+nenadnoveljic@users.noreply.github.com,DBM Oracle Database Overview,30990,DBM Oracle Database Overview,True,False,False,False,False,False,0,0,0,55,55
+kube_scheduler/assets/dashboards/overview.json,2023-07-03,ara.pulido@datadoghq.com,Kubernetes Scheduler Overview,30270,kube_scheduler,True,False,False,False,False,True,0,0,0,15,2
+kube_controller_manager/assets/dashboards/overview.json,2023-07-03,ara.pulido@datadoghq.com,Kubernetes Controller Manager Overview,30271,kube_controller_manager,True,False,False,False,False,True,0,0,0,12,2
+kube_apiserver_metrics/assets/dashboards/overview.json,2023-07-03,ara.pulido@datadoghq.com,Kubernetes API Server Overview,30724,Kubernetes API Server - Overview,True,False,False,False,False,True,3,0,0,15,7
+gitlab/assets/dashboards/overview.json,2023-07-05,florent.clarret@datadoghq.com,GitLab Overview,30315,Gitlab Overview,True,False,False,True,False,True,4,2,0,15,10
+dcgm/assets/dashboards/dcgm_overview.json,2023-07-20,steven.yuen@datadoghq.com,DCGM Exporter (Nvidia GPU Monitoring) Overview,31009,DCGM Exporter (Nvidia GPU Monitoring) Overview,True,False,False,True,False,True,1,0,1,6,5
+langchain/assets/dashboards/overview_dashboard.json,2023-07-21,35776586+Yun-Kim@users.noreply.github.com,LangChain Overview Dashboard,31011,LangChain Overview Dashboard,True,False,False,True,False,False,8,5,0,11,10
+weaviate/assets/dashboards/overview_dashboard.json,2023-07-27,steven.yuen@datadoghq.com,Weaviate Overview Dashboard,31058,Weaviate Overview Dashboard,True,False,False,True,False,False,5,1,0,31,30
+torchserve/assets/dashboards/overview.json,2023-07-27,steven.yuen@datadoghq.com,TorchServe Overview,31052,torchserve_overview,True,False,False,True,False,True,3,3,0,16,16
+ecs_fargate/assets/dashboards/amazon_fargate_overview.json,2023-08-04,65819327+Johanna-Seif@users.noreply.github.com,Amazon Fargate Overview,30311,Amazon Fargate,False,True,True,False,False,False,0,0,0,0,0
+airbyte/assets/dashboards/airbyte_overview.json,2023-08-22,ilia.kurenkov@datadoghq.com,Airbyte Overview,31075,airbyte_overview,True,False,False,True,False,True,10,3,1,16,16
+openldap/assets/dashboards/openldap_overview.json,2023-08-28,alex.lopez.zorzano@gmail.com,OpenLDAP - Overview,30472,OpenLDAP Overview,True,True,True,True,False,False,2,0,0,7,7
+elastic/assets/dashboards/overview.json,2023-08-31,andrew.zhang@datadoghq.com,Elasticsearch - Overview,27,elasticsearch,True,False,False,True,True,True,6,0,5,14,9
+snmp/assets/dashboards/netflow_monitoring.json,2023-10-11,alexandre.yang@datadoghq.com,NetFlow Monitoring,30989,Netflow Monitoring,True,False,True,True,False,False,3,0,0,13,8
+vsphere/assets/dashboards/vmware_vsphere-_property_metrics.json,2023-10-18,sarah.witt@datadoghq.com,VMware vSphere - Property Metrics,31102,VMware vSphere - Property Metrics,True,False,False,False,False,False,0,0,0,0,0
+kubernetes/assets/dashboards/kubernetes_nodes.json,2023-10-25,wassim.dhif@datadoghq.com,Kubernetes Nodes Overview,30340,Kubernetes Nodes Overview,True,False,False,True,False,True,4,0,4,24,3
+kubernetes/assets/dashboards/kubernetes_deployments.json,2023-10-31,wassim.dhif@datadoghq.com,Kubernetes Deployments Overview,30341,Kubernetes Deployments Overview,True,False,False,True,False,True,8,0,8,19,8
+openstack_controller/assets/dashboards/openstack-controller.json,2023-11-07,josemanuel.almaza@datadoghq.com,OpenStack Controller Overview [Legacy],30317,OpenStack Controller Overview,False,True,True,False,False,False,0,0,0,0,0
+openai/assets/dashboards/overview_dashboard.json,2023-12-05,35776586+Yun-Kim@users.noreply.github.com,OpenAI Overview Dashboard,30978,OpenAI Overview Dashboard,True,False,False,True,False,False,8,3,0,13,13
+kafka/assets/dashboards/kafka_dashboard.json,2023-12-11,63265430+mackjmr@users.noreply.github.com,"Kafka, Zookeeper and Kafka Consumer Overview",,,True,False,False,True,False,True,6,6,6,21,21
+strimzi/assets/dashboards/overview.json,2023-12-13,kyle.neale@datadoghq.com,Strimzi Overview,31093,strimzi,True,False,False,True,False,True,1,1,0,28,28
+ray/assets/dashboards/overview_dashboard.json,2023-12-14,kyle.neale@datadoghq.com,Ray Overview Dashboard,31153,Ray Overview Dashboard,True,False,False,True,False,True,2,2,0,14,12
+snmp/assets/dashboards/bgp_ospf_overview.json,2024-01-17,florian.veaux@datadoghq.com,NDM BGP/OSPF Overview,31162,BGP & OSPF Overview,True,True,False,False,False,False,0,0,0,1,0
+vsphere/assets/dashboards/vsphere_overview.json,2024-01-18,sarah.witt@datadoghq.com,VMware vSphere - Overview,249,vsphere-overview,False,True,True,False,False,False,0,0,0,0,0
+kubernetes/assets/dashboards/kubernetes_cpu_memory.json,2024-01-19,pierre.margueritte@datadoghq.com,Kubernetes - CPU & Memory usage,31163,Kubernetes CPU & Memory usage,True,True,False,False,False,False,0,0,0,4,2
+openai/assets/dashboards/usage_overview_dashboard.json,2024-01-24,cmlaverdiere@gmail.com,OpenAI Usage Overview,31040,OpenAI Usage Overview,True,False,True,True,False,False,3,3,0,2,2
+zeek/assets/dashboards/corelight_suricata.json,2024-02-02,35323912+bhargavnariyanicrest@users.noreply.github.com,Corelight Suricata,31170,Corelight Suricata,True,True,True,False,False,False,1,1,0,1,1
+rabbitmq/assets/dashboards/rabbitmq_dashboard.json,2024-02-05,76412946+alai97@users.noreply.github.com,RabbitMQ Overview (OpenMetrics Version),37,rabbitmq,True,False,False,True,False,True,8,8,0,3,3
+teamcity/assets/dashboards/overview.json,2024-02-05,76412946+alai97@users.noreply.github.com,TeamCity Overview,30887,TeamCity Overview,True,False,False,True,False,False,8,8,0,4,1
+calico/assets/dashboards/calico_overview.json,2024-02-06,florent.clarret@datadoghq.com,Calico overview,30578,[calico] dashboard overview,True,False,False,True,False,False,3,0,0,6,6
+zeek/assets/dashboards/zeek_network_observations.json,2024-02-09,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Network Observations,31178,Zeek - Network Observations,True,True,False,False,False,False,2,2,0,1,1
+zeek/assets/dashboards/zeek_dhcp.json,2024-02-09,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - DHCP,31173,Zeek - DHCP,True,True,False,False,False,False,0,0,0,0,0
+zeek/assets/dashboards/zeek_connections.json,2024-02-09,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Connections,31171,Zeek - Connections,True,True,True,False,False,False,3,3,0,3,3
+zeek/assets/dashboards/zeek_diagnostics.json,2024-02-09,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Diagnostics,31174,Zeek - Diagnostics,True,True,True,False,False,False,0,0,0,1,1
+tomcat/assets/dashboards/overview.json,2024-02-13,florent.clarret@datadoghq.com,Tomcat - Overview,259,tomcat--overview,True,False,False,True,True,True,2,0,2,9,5
+envoy/assets/dashboards/openmetrics_overview.json,2024-02-27,steven.yuen@datadoghq.com,Envoy Openmetrics,31186,Envoy Openmetrics Overview,True,False,False,True,True,True,2,0,1,41,41
+airflow/assets/dashboards/overview.json,2024-02-27,kyle.neale@datadoghq.com,Airflow Overview,30298,Airflow Overview,True,False,True,True,True,True,0,0,0,12,2
+otel/assets/dashboards/otel_collector_metrics_dashboard.json,2024-03-08,stanley.liu@datadoghq.com,OpenTelemetry Collector Metrics Dashboard,30773,OpenTelemetry Collector Metrics Dashboard,True,False,True,False,True,True,1,1,0,50,48
+consul/assets/dashboards/consul_overview.json,2024-03-11,kyle.neale@datadoghq.com,Consul Overview,83,consul,True,True,False,True,True,True,0,0,0,9,6
+nvidia_triton/assets/dashboards/nvidia_triton_overview.json,2024-03-12,ilia.kurenkov@datadoghq.com,Nvidia Triton Overview,31157,nvidia_triton,True,False,False,True,False,False,2,2,0,28,28
+spark/assets/dashboards/databricks_overview.json,2024-03-12,kyle.neale@datadoghq.com,Databricks Overview,30437,Databricks Spark Overview,True,False,False,True,True,True,4,0,0,14,0
+cilium/assets/dashboards/overview_v2.json,2024-03-13,117179639+patrykpietraszkoDD@users.noreply.github.com,Cilium Overview v2,31193,Cilium Overview v2,True,False,False,True,False,True,4,0,0,18,0
+cisco_duo/assets/dashboards/cisco_duo_telephony_logs.json,2024-03-15,151627103+mohittilala-crest@users.noreply.github.com,Cisco Duo - Telephony Log Details,31200,Cisco Duo - Telephony Logs,True,True,True,False,False,False,0,0,0,0,0
+cisco_duo/assets/dashboards/cisco_duo_administrator_logs.json,2024-03-15,151627103+mohittilala-crest@users.noreply.github.com,Cisco Duo - Administrator Log Details,31197,Cisco Duo - Administrator Logs,True,True,True,False,False,False,0,0,0,0,0
+cisco_duo/assets/dashboards/cisco_duo_offline_enrollment_logs.json,2024-03-15,151627103+mohittilala-crest@users.noreply.github.com,Cisco Duo - Offline Enrollment Log Details,31199,Cisco Duo - Offline Enrollment Logs,True,True,True,False,False,False,0,0,0,0,0
+cisco_duo/assets/dashboards/cisco_duo_authentication_logs.json,2024-03-15,151627103+mohittilala-crest@users.noreply.github.com,Cisco Duo - Authentication Log Details,31198,Cisco Duo - Authentication Logs,True,True,True,False,False,False,0,0,0,0,0
+datadog_cluster_agent/assets/dashboards/datadog_cluster_agent_overview.json,2024-03-15,41540817+adel121@users.noreply.github.com,Datadog Cluster Agent - Overview,30584,Datadog Cluster Agent - Overview,True,True,True,False,False,False,0,0,0,0,0
+tekton/assets/dashboards/overview.json,2024-03-15,florent.clarret@datadoghq.com,Tekton Overview,31195,Tekton Overview,True,False,False,True,True,True,0,0,0,9,9
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_user_authentication.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - User Authentication,31214,Cisco Secure Firewall - User Authentication,True,True,True,False,False,False,0,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_transparent_firewall.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - Transparent Firewall,31213,Cisco Secure Firewall - Transparent Firewall,True,True,True,False,False,False,2,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_ospf_and_rip_routing.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - OSPF and RIP Routing,31207,Cisco Secure Firewall - OSPF and RIP Routing,True,True,False,False,False,False,0,0,0,1,1
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_application_and_identity_firewall.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - Application and Identity-based Firewall,31202,Cisco Secure Firewall - Application and Identity-based Firewall,True,True,False,False,False,False,3,0,0,1,1
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_intrusion_protection_system.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - Intrusion Protection System,31205,Cisco Secure Firewall - Intrusion Protection System,True,True,True,False,False,False,0,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_snmp.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - SNMP,31211,Cisco Secure Firewall - SNMP,True,True,True,False,False,False,0,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_overview.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - Overview,31208,Cisco Secure Firewall - Overview,True,True,False,False,False,False,18,0,0,18,18
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_security_events.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - Security Events,31210,Cisco Secure Firewall - Security Events,True,True,True,False,False,False,0,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_command_interface.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - Command Interface,31203,Cisco Secure Firewall - Command Interface,True,True,True,False,False,False,0,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_failover.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - Failover,31204,Cisco Secure Firewall - Failover,True,True,True,False,False,False,0,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_vpn_failover.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - VPN Failover,31215,Cisco Secure Firewall - VPN Failover,True,True,True,False,False,False,0,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_ip_stack.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - IP Stack,31206,Cisco Secure Firewall - IP Stack,True,True,False,False,False,False,0,0,0,0,0
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_resource_manager.json,2024-03-19,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Secure Firewall - Resource Manager,31209,Cisco Secure Firewall - Resource Manager,True,True,True,False,False,False,0,0,0,0,0
+cisco_duo/assets/dashboards/cisco_duo_activity_logs.json,2024-03-19,34762907+nisargshah-crest@users.noreply.github.com,Cisco Duo - Activity Log Details,31196,Cisco Duo - Activity Logs,True,True,True,False,False,False,0,0,0,0,0
+zeek/assets/dashboards/zeek_detection.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Detection,31172,Zeek - Detection,True,True,False,False,False,False,1,1,0,1,1
+zeek/assets/dashboards/zeek_datared.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Datared,31217,Zeek - Datared,True,True,True,True,False,False,0,0,0,0,0
+zeek/assets/dashboards/zeek_network_protocols_ntp_snmp_ssl.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,"Zeek - Network Protocols (NTP, SNMP, SSL, Kerberos)",,,True,True,False,False,False,False,6,2,0,1,1
+zeek/assets/dashboards/zeek_miscellaneous.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Miscellaneous,31177,Zeek - Miscellaneous,True,True,False,False,False,False,1,1,0,0,0
+zeek/assets/dashboards/zeek_syslog.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Syslog,31181,Zeek - Syslog,True,True,True,False,False,False,0,0,0,0,0
+zeek/assets/dashboards/zeek_dns.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - DNS,31175,Zeek - DNS,True,True,False,False,False,False,4,4,0,2,2
+zeek/assets/dashboards/zeek_network_protocols.json,2024-03-20,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Network Protocols,31179,Zeek - Network Protocols,True,True,False,False,False,False,9,9,0,2,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_user_id.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: User ID,31232,Palo Alto Panorama: User ID,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_tunnel_inspection.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: Tunnel Inspection,31231,Palo Alto Panorama: Tunnel Inspection,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_globalprotect.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: GlobalProtect,31226,Palo Alto Panorama: Global Protect,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_threat.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: Threat,31229,Palo Alto Panorama: Threat,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_decryption.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: Decryption,31225,Palo Alto Panorama: Decryption,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_system.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: System,31228,Palo Alto Panorama: System,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_traffic.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: Traffic,31230,Palo Alto Panorama: Traffic,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_correlated_events.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: Correlated Events,31224,Palo Alto Panorama: Correlated Events,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_authentication.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: Authentication,31222,Palo Alto Panorama: Authentication,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_hip_match.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: HIP Match,31227,Palo Alto Panorama: HIP Match,True,True,True,False,False,False,0,0,0,0,0
+palo_alto_panorama/assets/dashboards/palo_alto_panorama_config.json,2024-03-26,151627103+mohittilala-crest@users.noreply.github.com,Palo Alto Panorama: Config,31223,Palo Alto Panorama: Config,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_ips.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - IPS,31246,Checkpoint Quantum Firewall: IPS,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_audit.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Audit,31241,Checkpoint Quantum Firewall: Audit,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_https_inspection.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - HTTPS Inspection,31244,Checkpoint Quantum Firewall: HTTPS Inspection,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_url_filtering.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - URL Filtering,31248,Checkpoint Quantum Firewall: URL Filtering,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_malware.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Anti Malware,31236,Checkpoint Quantum Firewall: Anti Malware,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_dlp.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - DLP,31242,Checkpoint Quantum Firewall: DLP,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_threat_emulation.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Threat Emulation,31247,Checkpoint Quantum Firewall: Threat Emulation,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_identity_awareness.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Identity Awareness,31245,Checkpoint Quantum Firewall: Identity Awareness,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_firewall.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Firewall,31243,Checkpoint Quantum Firewall: Firewall,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_spam_and_email_security.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Anti Spam & Email Security,31238,Checkpoint Quantum Firewall: Anti Spam & Email Security,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_bot.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Anti Bot,31234,Checkpoint Quantum Firewall: Anti Bot,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_exploit.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Anti Exploit,31235,Checkpoint Quantum Firewall: Anti Exploit,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_application_control.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Application Control,31240,Checkpoint Quantum Firewall: Application Control,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_ransomware.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Anti Ransomware,31237,Checkpoint Quantum Firewall: Anti Ransomware,True,True,True,False,False,False,0,0,0,0,0
+checkpoint_quantum_firewall/assets/dashboards/checkpoint_quantum_firewall_anti_virus.json,2024-03-27,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Checkpoint Quantum Firewall - Anti Virus,31239,Checkpoint Quantum Firewall: Anti Virus,True,True,True,False,False,False,0,0,0,0,0
+cisco_umbrella_dns/assets/dashboards/cisco_umbrella_dns_dns_traffic.json,2024-04-01,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Umbrella DNS - DNS Traffic,31182,Cisco Umbrella DNS - DNS Traffic,True,False,True,True,False,False,4,0,4,2,2
+cisco_umbrella_dns/assets/dashboards/cisco_umbrella_dns_proxied_traffic.json,2024-04-01,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Cisco Umbrella DNS - Proxied Traffic,31183,Cisco Umbrella DNS - Proxied Traffic,True,False,True,True,False,False,3,0,3,4,2
+argo_rollouts/assets/dashboards/argo_rollouts_overview.json,2024-04-09,steven.yuen@datadoghq.com,Argo Rollouts Overview,31216,Argo Rollouts Overview,True,False,False,True,True,True,4,4,0,18,18
+fluxcd/assets/dashboards/fluxcd.json,2024-04-26,ilia.kurenkov@datadoghq.com,Flux CD Overview,31109,Fluxcd,True,False,True,True,False,False,4,4,2,8,7
+postgres/assets/dashboards/postgresql_screenboard_dashboard.json,2024-05-08,aldrick.castro@datadoghq.com,Postgres - Overview,235,postgresql_screenboard,True,False,True,False,True,True,2,0,1,13,9
+karpenter/assets/dashboards/karpenter_overview.json,2024-05-09,steven.yuen@datadoghq.com,Karpenter Overview,31287,Karpenter Overview,True,False,True,True,False,False,2,0,0,22,22
+cisco_sdwan/assets/dashboards/cisco_sd-wan.json,2024-05-15,thibaud.cheruy@datadoghq.com,Cisco SD-WAN,31293,Cisco SD-WAN,True,False,False,True,False,False,11,8,10,13,0
+win32_event_log/assets/dashboards/windows_event_log_overview.json,2024-05-21,branden.clark@datadoghq.com,Windows Event Log Overview,31296,windows_event_log_overview,True,False,False,True,False,True,5,1,5,3,1
+esxi/assets/dashboards/overview.json,2024-05-28,sarah.witt@datadoghq.com,ESXi Overview,31313,ESXi Overview,True,False,False,True,False,True,2,0,0,10,10
+traefik_mesh/assets/dashboards/traefik_mesh_overview.json,2024-05-30,kyle.neale@datadoghq.com,Traefik Mesh Overview,31317,Traefik Mesh Overview,True,False,True,True,True,True,0,0,0,15,4
+teleport/assets/dashboards/teleport_overview.json,2024-06-04,noueman.khalikine@datadoghq.com,Teleport Overview,31288,Teleport Overview,True,False,False,True,False,True,8,8,3,25,0
+container/assets/dashboards/containers.json,2024-06-05,32009013+jennchenn@users.noreply.github.com,Containers - Overview,30657,Containers,True,True,False,False,False,False,0,0,0,15,0
+openstack_controller/assets/dashboards/openstack_controller_overview_[default_microversion].json,2024-06-06,144174402+rahulkaukuntla@users.noreply.github.com,OpenStack Controller Overview [Default Microversion],31124,OpenStack Controller Overview [Default Microversion],True,False,False,True,False,True,58,38,13,26,26
+kubernetes_cluster_autoscaler/assets/dashboards/kubernetes_cluster_autoscaler_overview.json,2024-06-13,43783545+HadhemiDD@users.noreply.github.com,Kubernetes Cluster Autoscaler Overview,31312,Kubernetes Cluster Autoscaler Overview,True,False,True,True,False,False,3,3,2,16,14
+zeek/assets/dashboards/zeek_files.json,2024-06-14,105789910+tirthrajchaudhari-crest@users.noreply.github.com,Zeek - Files,31176,Zeek - Files,True,True,True,False,False,False,12,12,0,1,1
+snmp/assets/dashboards/ndm_troubleshooting.json,2024-07-09,thibaud.cheruy@datadoghq.com,NDM Troubleshooting,30988,Datadog NDM Environment,True,False,False,True,False,False,9,9,4,30,25
+istio/assets/dashboards/overview.json,2024-07-09,steven.yuen@datadoghq.com,Istio Overview,31358,Istio Overview,True,False,True,True,False,False,2,0,0,47,46
+cisco_aci/assets/dashboards/cisco_aci_dashboard.json,2024-07-11,9274242+zoedt@users.noreply.github.com,Cisco ACI - Overview,242,cisco_aci,True,False,False,True,False,False,5,0,0,6,4
+vault/assets/dashboards/vault_overview.json,2024-07-17,steven.yuen@datadoghq.com,Vault - Overview (OpenMetricsV2),30725,Vault - Overview (OpenMetricsV2),True,False,True,True,True,True,6,0,5,14,13
+snowflake/assets/dashboards/organization_metrics.json,2024-07-18,steven.yuen@datadoghq.com,Snowflake Organization Metrics (Agent-based),30722,Snowflake Organization Metrics,True,True,False,False,False,False,0,0,0,7,6
+snowflake/assets/dashboards/snowflake.json,2024-07-18,steven.yuen@datadoghq.com,Snowflake Overview (Agent-based),30393,Snowflake,False,True,True,False,False,False,0,0,0,0,0
+vllm/assets/dashboards/overview.json,2024-07-24,ilia.kurenkov@datadoghq.com,vLLM Overview,31364,vLLM Overview,True,False,False,True,False,True,6,6,0,15,15
+cisco_secure_firewall/assets/dashboards/cisco_secure_firewall_threat_detection.json,2024-07-25,44285485+hdinh77@users.noreply.github.com,Cisco Secure Firewall - Threat Detection,31212,Cisco Secure Firewall - Threat Detection,True,True,True,False,False,False,0,0,0,0,0
+kyverno/assets/dashboards/overview.json,2024-07-30,steven.yuen@datadoghq.com,Kyverno Overview,31368,Kyverno Overview,True,False,True,True,False,False,1,0,0,25,25
+argo_workflows/assets/dashboards/argo_workflows.json,2024-07-31,kyle.neale@datadoghq.com,Argo Workflows,31250,Argo Workflows,True,False,True,True,False,True,3,3,0,6,6
+vsphere/assets/dashboards/vmware_vsphere_tkg_-_overview.json,2024-08-05,ethan.woodthomas@datadoghq.com,VMware vSphere TKG - Overview,30736,VMware vSphere TKG - Overview,True,True,False,True,False,True,0,0,0,19,18
+datadog_operator/assets/dashboards/operator_overview.json,2024-08-05,ethan.woodthomas@datadoghq.com,Datadog Operator,30955,Datadog Operator Overview,True,False,True,True,False,False,12,0,2,23,21
+kubernetes/assets/dashboards/kubernetes_clusters.json,2024-08-05,ethan.woodthomas@datadoghq.com,Kubernetes Cluster Overview Dashboard,30589,Kubernetes Clusters Overview,True,False,False,True,False,True,46,0,35,39,10
+kubernetes/assets/dashboards/kubernetes_dashboard.json,2024-08-05,ethan.woodthomas@datadoghq.com,Kubernetes - Overview,86,kubernetes,True,False,False,True,False,True,15,0,7,19,0
+kubernetes/assets/dashboards/kubernetes_pods.json,2024-08-05,ethan.woodthomas@datadoghq.com,Kubernetes Pods Overview,30322,Kubernetes - Pods,True,False,False,True,False,True,0,0,0,13,12
