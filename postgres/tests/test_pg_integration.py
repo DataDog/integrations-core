@@ -1115,7 +1115,7 @@ def test_collect_wal_metrics_metrics(aggregator, integration_check, pg_instance,
     check.is_aurora = False
     check.check(pg_instance)
 
-    expected_tags = _get_expected_tags(check, pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance, with_sys_id=False)
     # if collect_wal_metrics is not set, wal metrics are collected on pg >= 10 by default
     expected_count = 0 if collect_wal_metrics is False else 1
     check_file_wal_metrics(aggregator, expected_tags=expected_tags, count=expected_count)

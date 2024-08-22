@@ -136,6 +136,7 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_version)
+        self.check_initializations.append(self.load_system_identifier)
         self.check_initializations.append(self.initialize_is_aurora)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
@@ -940,9 +941,10 @@ class PostgreSql(AgentCheck):
             tags_to_add.append(f'postgresql_version:{self.raw_version}')
 
             # Add system identifier as a tag
-            self.load_system_identifier()
-            tags.append(f'system_identifier:{self.system_identifier}')
-            tags_to_add.append(f'system_identifier:{self.system_identifier}')
+            if self.system_identifier:
+                tags.append(f'system_identifier:{self.system_identifier}')
+                tags_to_add.append(f'system_identifier:{self.system_identifier}')
+
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
