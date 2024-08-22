@@ -56,7 +56,7 @@ pymysql @ https://agent-int-packages.datadoghq.com/external/pymysql/PyMySQL-0.10
 pynacl @ https://agent-int-packages.datadoghq.com/external/pynacl/PyNaCl-1.4.0-cp27-cp27mu-manylinux1_x86_64.whl#sha256=7757ae33dae81c300487591c68790dfb5145c7d03324000433d9a2c141f82af7
 pyparsing @ https://agent-int-packages.datadoghq.com/external/pyparsing/pyparsing-2.4.7-py2.py3-none-any.whl#sha256=ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b
 pysmi @ https://agent-int-packages.datadoghq.com/external/pysmi/pysmi-0.3.4-py2.py3-none-any.whl#sha256=2ec6ebd41aaef562695e7d0058763c6e1e8c1fbf8710804c11ef3a857fc9cad7
-pysnmp @ https://agent-int-packages.datadoghq.com/external/pysnmp/pysnmp-4.4.9-py2.py3-none-any.whl#sha256=128a4832ce170213a59b82e7eeb886fc07d4b2e6eb638db8049af03f1014b0f8
+pysnmp @ https://agent-int-packages.datadoghq.com/external/pysnmp/pysnmp-4.4.10-py2.py3-none-any.whl#sha256=27cf85184963a0453f4bf2e1c86a50fe90b764c1376f6ade3bc68ba5d286de38
 pysnmp-mibs @ https://agent-int-packages.datadoghq.com/external/pysnmp-mibs/pysnmp_mibs-0.1.6-py2.py3-none-any.whl#sha256=5e153ebe8e767c07940cea435f866c623ff6b2376155c7da75085b08d3774d48
 pysocks @ https://agent-int-packages.datadoghq.com/external/pysocks/PySocks-1.7.1-py27-none-any.whl#sha256=08e69f092cc6dbe92a0fdd16eeb9b9ffbc13cadfe5ca4c7bd92ffb078b293299
 python-binary-memcached @ https://agent-int-packages.datadoghq.com/built/python-binary-memcached/python_binary_memcached-0.26.1-20240402154913-py2-none-manylinux2014_x86_64.whl#sha256=781b2f98a07bb11341f1187d39b15515b935f292037aeaf387a6b519498776c7
