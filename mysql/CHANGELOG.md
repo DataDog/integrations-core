@@ -14,7 +14,7 @@
 
 * Fixed group replication metrics for MySQL version < 8.0.2 ([#18024](https://github.com/DataDog/integrations-core/pull/18024))
 
-## 12.6.1 / 2024-07-24
+## 12.6.1 / 2024-07-24 / Agent 7.56.0
 
 ***Fixed***:
 
