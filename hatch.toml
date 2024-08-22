@@ -5,7 +5,7 @@ dependencies = [
   # Plugins
   "mkdocs-minify-plugin~=0.7.1",
   "mkdocs-git-revision-date-localized-plugin~=1.2.0",
-  "mkdocstrings-python~=1.7.0",
+  "mkdocstrings-python~=1.10.0",
   "mkdocs-redirects~=1.2.1",
   "mkdocs-glightbox~=0.3.4",
   "mkdocs-pdf-export-plugin~=0.5.10",

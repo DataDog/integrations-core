@@ -35,7 +35,7 @@ class PostgresConfig:
         self.host = instance.get('host', '')
         if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
-        self.port = instance.get('port', '')
+        self.port = instance.get('port', '5432')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
