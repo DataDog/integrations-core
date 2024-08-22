@@ -73,7 +73,8 @@ instances:
 
     ## @param ignore_databases - list of strings - optional
     ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
-    ## Each value can be a plain string or a Postgres pattern.
+    ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
+    ## set collect_default_database to false in addition to adding it to this array.
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
     #
     # ignore_databases:
@@ -342,6 +343,11 @@ instances:
         ## Enable database autodiscovery.
         #
         # enabled: false
+
+        ## @param global_view_db - string - optional - default: postgres
+        ## Database the agent connects to perform autodiscovery operations
+        #
+        # global_view_db: postgres
 
         ## @param max_databases - integer - optional - default: 100
         ## The maximum number of databases this host should monitor.

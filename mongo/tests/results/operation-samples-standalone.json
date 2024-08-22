@@ -128,7 +128,8 @@
                 "comment": "find",
                 "ns": "integration.products"
             },
-            "query_truncated": "not_truncated"
+            "query_truncated": "not_truncated",
+            "source": "activity"
         },
         "mongodb": {
             "now": 1715911398.1112723,

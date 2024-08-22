@@ -8,7 +8,7 @@ from dateutil.tz import gettz
 
 from datadog_checks.base.utils.time import UTC
 
-from .common import create_query_manager, mock_executor
+from .common import CHECK_ID, create_query_manager, mock_executor
 
 
 class TestColumnTransformers:
@@ -667,3 +667,43 @@ class TestExtraTransformers:
             'percent', 60, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
+
+    def test_log(self, datadog_agent):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'msg', 'type': 'source'},
+                    {'name': 'level', 'type': 'source'},
+                    {'name': 'time', 'type': 'source'},
+                    {'name': 'bar', 'type': 'source'},
+                ],
+                'extras': [
+                    {
+                        'type': 'log',
+                        'attributes': {
+                            'message': 'msg',
+                            'status': 'level',
+                            'date': 'time',
+                            'foo': 'bar',
+                        },
+                    }
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 'Test message', 'INFO', '2024-01-01T12:00:00Z', 'baz']]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        data = {
+            'message': 'Test message',
+            'status': 'INFO',
+            'date': '2024-01-01T12:00:00Z',
+            'foo': 'baz',
+            'ddtags': 'test:foo,test:bar,test:tag1',
+        }
+        datadog_agent.assert_logs(CHECK_ID, [data])
