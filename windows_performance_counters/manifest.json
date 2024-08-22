@@ -15,7 +15,6 @@
       "Supported OS::Windows",
       "Category::IoT",
       "Category::Windows",
-      "Category::OS & System",
       "Offering::Integration"
     ],
     "resources": [
