@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Docusign event logs",
-    "title": "docusign",
+    "title": "Docusign",
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
@@ -21,7 +21,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 22217426,
-      "source_type_name": "docusign",
+      "source_type_name": "Docusign",
       "events": {
         "creates_events": false
       },
