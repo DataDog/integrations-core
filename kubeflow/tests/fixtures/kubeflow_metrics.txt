@@ -1,6 +1,5 @@
 # HELP pipeline_run_duration_seconds Duration of pipeline runs
 # TYPE pipeline_run_duration_seconds histogram
-pipeline_run_duration_seconds{pipeline="example-pipeline", status="success"} 123.45
 pipeline_run_duration_seconds_bucket{pipeline="example-pipeline", status="success",le="0.1"} 0
 pipeline_run_duration_seconds_count{pipeline="example-pipeline", status="success"} 1
 pipeline_run_duration_seconds_sum{pipeline="example-pipeline", status="success"} 123.45
