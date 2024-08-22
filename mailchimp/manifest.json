@@ -32,7 +32,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 21603492,
-      "source_type_name": "mailchimp",
+      "source_type_name": "Mailchimp",
       "events": {
         "creates_events": false
       },
