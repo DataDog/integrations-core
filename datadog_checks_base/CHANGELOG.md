@@ -45,7 +45,7 @@
 
 * [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
 
-## 36.9.0 / 2024-07-05
+## 36.9.0 / 2024-07-05 / Agent 7.56.0
 
 ***Security***:
 
