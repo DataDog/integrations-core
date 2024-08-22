@@ -83,7 +83,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /kubernetes/                                    @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
-/kubernetes_cluster_autoscaler/                 @DataDog/container-integrations @DataDog/agent-integrations
+/kubernetes_cluster_autoscaler/                 @DataDog/container-integrations @DataDog/agent-integrations 
 /kubernetes_cluster_autoscaler/*.md             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes_cluster_autoscaler/manifest.json    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes_state/                              @DataDog/container-integrations @DataDog/agent-integrations
@@ -254,6 +254,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /cisco_secure_endpoint/*.md                                          @DataDog/saas-integrations @DataDog/documentation
 /cisco_secure_endpoint/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
 /cisco_secure_endpoint/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/contentful/                                                         @DataDog/saas-integrations
+/contentful/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
+/contentful/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
+/contentful/assets/logs/                                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /lastpass/                                                          @DataDog/saas-integrations
 /lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation

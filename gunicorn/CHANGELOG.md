@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.7.1 / 2024-08-21
+
+***Fixed***:
+
+* Switch gunicorn to stdlib subprocess ([#18384](https://github.com/DataDog/integrations-core/pull/18384))
+
 ## 2.7.0 / 2024-03-08 / Agent 7.52.0
 
 ***Added***:
