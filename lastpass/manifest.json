@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into LastPass reporting logs",
-    "title": "Lastpass",
+    "title": "LastPass",
     "media": [
       {
         "caption": "LastPass - Reporting Events 1",
@@ -38,7 +38,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 21175115,
-      "source_type_name": "Lastpass",
+      "source_type_name": "LastPass",
       "events": {
         "creates_events": false
       },
