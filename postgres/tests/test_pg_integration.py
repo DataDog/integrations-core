@@ -10,7 +10,6 @@ import psycopg2
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import BUFFERCACHE_METRICS, DatabaseHealthCheckError, PartialFormatter, fmt
@@ -1152,8 +1151,7 @@ def test_propagate_agent_tags(
 
     agent_tags = ["my-env:test-env", "random:tag", "bar:foo"]
 
-    with mock.patch.object(datadog_agent, 'get_config', passthrough=True) as mock_agent:
-        mock_agent.side_effect = lambda option: agent_tags
+    with mock.patch('datadog_checks.postgres.config.get_agent_host_tags', return_value=agent_tags):
         check = integration_check(pg_instance, init_config)
         assert check._config._should_propagate_agent_tags(pg_instance, init_config) == should_propagate_agent_tags
         if should_propagate_agent_tags:
