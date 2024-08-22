@@ -21,7 +21,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 21264130,
-      "source_type_name": "godaddy",
+      "source_type_name": "GoDaddy",
       "events": {
         "creates_events": false
       },
