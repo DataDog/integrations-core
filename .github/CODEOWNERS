@@ -255,6 +255,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /cisco_secure_endpoint/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
 /cisco_secure_endpoint/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/contentful/                                                         @DataDog/saas-integrations
+/contentful/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
+/contentful/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
+/contentful/assets/logs/                                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /mailchimp/                                                          @DataDog/saas-integrations
 /mailchimp/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /mailchimp/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
