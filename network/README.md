@@ -54,11 +54,11 @@ For Datadog [Helm Chart][11] deployment, update chart values with:
 ```yaml
 datadog:
  # Enable AWS ENA metrics collection for network check
- confd:
-   network.yaml: |-
-     init_config:
-     instances:
-       - collect_aws_ena_metrics: true
+  confd:
+    network.yaml: |-
+      init_config:
+      instances:
+        - collect_aws_ena_metrics: true
 
 # Have agent containers use host network with NET_ADMIN capability
 agents:
