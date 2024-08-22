@@ -34,15 +34,10 @@ def snmp_get(config, oids, lookup_mib):
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
     ):
-        if lookup_mib:
-            mibViewController = vbProcessor.getMibViewController(snmpEngine)
-            varBinds = [
-                ObjectType(ObjectIdentity(x[0]), x[1]).resolveWithMib(mibViewController, ignoreErrors=False)
-                for x in varBinds
-            ]
+        newVarBinds = unmakeVarbinds(snmpEngine, varBinds, lookup_mib)
 
         cbCtx['error'] = errorIndication
-        cbCtx['var_binds'] = varBinds
+        cbCtx['var_binds'] = newVarBinds
 
     ctx = {}  # type: Dict[str, Any]
     var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
@@ -165,3 +160,15 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
                 yield var_binds[0]
             else:
                 return
+
+
+def unmakeVarbinds(snmpEngine, varBinds, lookupMib=True):
+    """Taken from pysnmp's varbinds.py, amended to not ignore the errors that return when resolving the MIB."""
+    if lookupMib:
+        mibViewController = vbProcessor.getMibViewController(snmpEngine)
+        varBinds = [
+            ObjectType(ObjectIdentity(x[0]), x[1]).resolveWithMib(mibViewController, ignoreErrors=False)
+            for x in varBinds
+        ]
+
+    return varBinds
