@@ -47,6 +47,7 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "delete",
         "explain",
         "profile",  # command to get profile level
+        "listCollections",
     ]
 )
 
