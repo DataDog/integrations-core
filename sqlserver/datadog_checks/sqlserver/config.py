@@ -5,8 +5,9 @@
 import json
 import re
 
-from datadog_checks.base.config import is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     PROC_CHAR_LIMIT,
