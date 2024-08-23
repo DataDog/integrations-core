@@ -81,7 +81,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map attribute `log.direction` to a tag
+          name: Map attribute `log.direction` to tag `direction`
           enabled: true
           sources:
             - log.direction
