@@ -364,6 +364,9 @@ SHARDED_DATA_DISTRIBUTION_METRICS = {
     'orphanedSizeBytes': (GAUGE, 'sharded_data_distribution.orphaned_size_bytes'),
 }
 
+INDEX_METRICS = {
+    'indexes.accesses.ops': RATE,
+}
 
 """
 Mapping for case-sensitive metric name suffixes.
