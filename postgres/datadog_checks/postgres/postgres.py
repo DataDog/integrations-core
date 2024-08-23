@@ -102,6 +102,7 @@ class PostgreSql(AgentCheck):
         self.version = None
         self.raw_version = None
         self.system_identifier = None
+        self.cluster_name = None
         self.is_aurora = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
@@ -135,6 +136,7 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self._connect)
+        self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
         self.check_initializations.append(self.load_system_identifier)
         self.check_initializations.append(self.initialize_is_aurora)
@@ -432,6 +434,12 @@ class PostgreSql(AgentCheck):
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 cursor.execute('SELECT system_identifier FROM pg_control_system();')
                 self.system_identifier = cursor.fetchone()[0]
+
+    def load_cluster_name(self):
+        with self.db() as conn:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                cursor.execute('SHOW cluster_name;')
+                self.cluster_name = cursor.fetchone()[0]
 
     def load_version(self):
         self.raw_version = self._version_utils.get_raw_version(self.db())
@@ -944,6 +952,11 @@ class PostgreSql(AgentCheck):
             if self.system_identifier:
                 tags.append(f'system_identifier:{self.system_identifier}')
                 tags_to_add.append(f'system_identifier:{self.system_identifier}')
+
+            # Add cluster name if it was set
+            if self.cluster_name:
+                tags.append(f'postgresql_cluster_name:{self.cluster_name}')
+                tags_to_add.append(f'postgresql_cluster_name:{self.cluster_name}')
 
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
