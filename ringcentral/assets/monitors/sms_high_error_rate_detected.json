@@ -2,8 +2,8 @@
 	"version": 2,
 	"created_at": "2024-08-07",
 	"last_updated_at": "2024-08-07",
-	"title": "[RingCentral] SMS high error rate detected",
-	"description": "This monitor triggers an alert when a high error rate occurs while sending SMS through RingCentral. This ensures prompt attention to potential issues affecting SMS delivery reliability.",
+	"title": "SMS error rate is higher than usual",
+	"description": "The error rate rises when a significant number of SMS messages fail to be delivered or sent. This monitor tracks the error rate for SMS delivered/sent via RingCentral, ensuring that any spikes in errors are quickly detected to maintain the reliability of SMS delivery.",
 	"definition": {
 		"id": 150232470,
 		"name": "[RingCentral] SMS high error rate detected",

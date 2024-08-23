@@ -1,7 +1,7 @@
 # RingCentral
 
 ## Overview
-The RingCentral integration seamlessly collects Voice, Audit, A2P SMS and Voice(Analytics) data and ingests them into Datadog for comprehensive analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration empowers users with deep insights into call activities, SMS trends, and audit trails through intuitive, out-of-the-box dashboards. Additionally, it includes pre-configured monitors for proactive notifications on SMS budget overrun and SMS error rates.
+The RingCentral integration seamlessly collects Voice, Audit, A2P SMS, and Voice(Analytics) data and ingests them into Datadog for comprehensive analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. Through intuitive, out-of-the-box dashboards the integration provides insights into call activities, SMS trends, and audit trails. Additionally, it includes pre-configured monitors for proactive notifications on SMS budget overrun and SMS error rates.
 
 ### The integration collects:
 
@@ -47,24 +47,25 @@ To access the Account ID, you need to first access details for a "Super Admin" u
    - The `123456789` is your Account ID.
 
 #### RingCentral Application Client ID and Client Secret
-To find the Cliend ID and Client Secret, you need to regester a new application:
+To find the Client ID and Client Secret, you need to register a new application:
 
 1. Login to your [RingCentral Developer][2] account using a user with Super Admin role or [Custom role](#create-and-assign-a-custom-role). 
 1. Click **Console**.
 1. Under the *Apps* section, click **Register App**.
 1. Select **Rest API app** for the App type .
 1. Fill in the required details for your application, such as the name and description.
-1. Select **No** for "Do you intend to promote this app in the RingCentral App Gallery?"
+
 | Field     | Selection | 
 | ---  | ----------- | 
 | Do you intend to promote this app in the RingCentral App Gallery? | **No** |
 | Auth type | **JWT auth flow** |
 | Issue refresh tokens | **Yes** |
-| Application scopes | Select the following:<br><ul><li>Analytics</li><li>Read Audit Trail</li><li>Read Call Log</li><li>A2P SMS</li>/ul> |
+| Application scopes | Select the following:<br><ul><li>Analytics</li><li>Read Audit Trail</li><li>Read Call Log</li><li>A2P SMS</li></ul>
+|
 1. Click on create App.
 1. After creating the application, find the `clientId` and `clientSecret` in the application settings. 
 1. Copy these credentials. 
-  **Note**: Ensure these credentials are stored securely and not exposed in public repositories or insecure locations.
+- **Note**: Ensure these credentials are stored securely and not exposed in public repositories or insecure locations.
 
 #### RingCentral JWT Token
 1. Login to [RingCentral Developers][2] with the same user you used to find the [Client ID and Client Secret](#ringcentral-application-client-id-and-client-secret).

@@ -1,6 +1,6 @@
 {
   "title": "RingCentral Audit",
-  "description": "The RingCentral Audit dashboard provides a detailed examination of activity within the RingCentral account. It includes the total number of audit logs, highlighting frequent and infrequent actions and detailed insights into audit activities.",
+  "description": "The RingCentral Audit dashboard provides a detailed examination of activity within the RingCentral account. It includes the total number of audit logs, frequent audit logs, infrequent audit logs and detailed insights into audit activities.",
   "widgets": [
     {
       "id": 4130361917849544,
@@ -82,7 +82,7 @@
       "id": 727466998845956,
       "definition": {
         "type": "note",
-        "content": "**Dashboard Overview**\n\nThe RingCentral Audit dashboard provides a detailed examination of activity within the RingCentral account. It includes the total number of audit logs, highlighting frequent and infrequent actions and detailed insights into audit activities.\n\nFor more information, see the [RingCentral Integration Documentation](https://docs.datadoghq.com/integrations/ringcentral/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "content": "**Dashboard Overview**\n\nThe RingCentral Audit dashboard provides a detailed examination of activity within the RingCentral account. It includes the total number of audit logs, frequent audit logs, infrequent audit logs and detailed insights into audit activities.\n\nFor more information, see the [RingCentral Integration Documentation](https://docs.datadoghq.com/integrations/ringcentral/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
         "background_color": "transparent",
         "font_size": "14",
         "text_align": "left",

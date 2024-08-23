@@ -1,6 +1,6 @@
 {
   "title": "RingCentral Message",
-  "description": "The Message Dashboard delivers an in-depth look at A2P SMS metrics within RingCentral, focusing on performance, costs, and message delivery status and provides valuable insights, aiding in effective decision-making and operational efficiency.",
+  "description": "The Message Dashboard delivers an in-depth look at A2P SMS metrics within RingCentral, focusing on performance, costs, and message delivery status. It provides valuable insights, to help you make effective decision and improve operational efficiency.",
   "widgets": [
     {
       "id": 1098312735089554,
