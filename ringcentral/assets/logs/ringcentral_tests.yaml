@@ -2,79 +2,84 @@ id: ringcentral
 tests:
   - sample: |-
       {
-        "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/call-log/agTsuPJvSGncjUA?view=Detailed",
-        "id": "agTsuPJvSGncjUA",
-        "sessionId": "1234567890",
-        "startTime": "2024-08-06T07:51:18.449Z",
-        "duration": 6,
-        "durationMs": 5647,
-        "type": "Voice",
-        "internalType": "International",
-        "direction": "Outbound",
-        "action": "VoIP Call",
-        "result": "Hang Up",
-        "to": {
-          "phoneNumber": "+0000000000"
+        "enrichment_details": {
+          "accountId": "000000000"
         },
-        "from": {
-          "name": "xxxxxxxxx",
-          "phoneNumber": "+0000000000",
-          "extensionId": "00000000",
-          "device": {
-            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/device/0000000000",
-            "id": "0000000000"
-          }
+        "log": {
+          "reason": "Hang Up",
+          "extension": {
+            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000"
+          },
+          "reasonDescription": "The caller hung up before the call was answered.",
+          "lastModifiedTime": "2024-07-23T11:48:10.032Z",
+          "sessionId": "1234567890",
+          "internalType": "International",
+          "transport": "VoIP",
+          "type": "Voice",
+          "uri": "https://platform.ringcentral.com/restapi/v1.0/account/000000000/call-log/aKH2vDGxBbeYjUA?view=Detailed",
+          "billing": {
+            "costIncluded": 0,
+            "costPurchased": 0
+          },
+          "duration": 16,
+          "result": "Hang Up",
+          "telephonySessionId": "s-a7280be05beffz190df6b11d4z296c790000",
+          "legs": [
+            {
+              "reason": "Hang Up",
+              "extension": {
+                "id": 123456789,
+                "uri": "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/000000000"
+              },
+              "reasonDescription": "The caller hung up before the call was answered.",
+              "legType": "SipToPstnUnmetered",
+              "internalType": "International",
+              "transport": "VoIP",
+              "type": "Voice",
+              "master": true,
+              "duration": 16,
+              "result": "Hang Up",
+              "telephonySessionId": "s-a7280be05beffz190df6b11d4z296c790000",
+              "action": "VoIP Call",
+              "startTime": "2024-07-23T12:19:34.664Z",
+              "from": {
+                "phoneNumber": "+00000000000",
+                "name": "xxxxxxxxxxx",
+                "extensionId": "123456789",
+                "device": {
+                  "id": "1234567890",
+                  "uri": "https://platform.ringcentral.com/restapi/v1.0/account/000000000/device/000000000"
+                }
+              },
+              "to": {
+                "phoneNumber": "+0000000000"
+              },
+              "partyId": "p-a7280be05beffz190df6b11d4z296c790000-2",
+              "durationMs": 1687,
+              "direction": "Outbound"
+            }
+          ],
+          "action": "VoIP Call",
+          "startTime": "2024-08-22T17:21:34.668Z",
+          "from": {
+            "phoneNumber": "+000000000",
+            "name": "xxxxxxx",
+            "extensionId": "00000000",
+            "device": {
+              "id": "0000000000",
+              "uri": "https://platform.ringcentral.com/restapi/v1.0/account/0000000/device/00000000"
+            }
+          },
+          "id": "000000000",
+          "to": {
+            "phoneNumber": "+0000000000"
+          },
+          "partyId": "p-a7280be05beffz190df6b11d4z296c790000-2",
+          "durationMs": 1607,
+          "direction": "Outbound"
         },
-        "extension": {
-          "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000",
-          "id": 00000000
-        },
-        "reason": "Hang Up",
-        "reasonDescription": "The caller hung up before the call was answered.",
-        "telephonySessionId": "s-a7280cb1e9559z12d03710000",
-        "partyId": "p-a7280cb1e956abc992z2d03710000-2",
-        "transport": "VoIP",
-        "lastModifiedTime": "2024-08-06T07:51:42.009Z",
-        "billing": {
-          "costIncluded": 0,
-          "costPurchased": 0
-        },
-        "legs": [
-          {
-            "startTime": "2024-08-06T07:51:18.449Z",
-            "duration": 6,
-            "durationMs": 5647,
-            "type": "Voice",
-            "internalType": "International",
-            "direction": "Outbound",
-            "action": "VoIP Call",
-            "result": "Hang Up",
-            "to": {
-              "phoneNumber": "+0000000000"
-            },
-            "from": {
-              "name": "xxxxxxx",
-              "phoneNumber": "+0000000000",
-              "extensionId": "00000000",
-              "device": {
-                "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/device/00000000000",
-                "id": "0000000000"
-              }
-            },
-            "extension": {
-              "uri": "https://platform.ringcentral.com/restapi/v1.0/account/0000000/extension/00000000",
-              "id": 00000000
-            },
-            "reason": "Hang Up",
-            "reasonDescription": "The caller hung up before the call was answered.",
-            "telephonySessionId": "s-a7280cb1e955c992z2d03710000",
-            "partyId": "p-a7280cb1e9559z19103710000-2",
-            "transport": "VoIP",
-            "legType": "SipToPstnUnmetered",
-            "master": true
-          }
-        ],
-        "accountId": "00000000"
+        "service": "voice",
+        "extensionId": 00000000
       }
     result:
       custom: {}

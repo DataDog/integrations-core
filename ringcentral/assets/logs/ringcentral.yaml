@@ -66,35 +66,35 @@ pipeline:
         query: "service:voice"
       processors:
         - type: date-remapper
-          name: Define `startTime` as the official date of the log
+          name: Define `log.startTime` as the official date of the log
           enabled: true
           sources:
-            - startTime
+            - log.startTime
         - type: attribute-remapper
-          name: Map `extension.id` to `extensionId`
+          name: Map `log.extension.id` to `extensionId`
           enabled: true
           sources:
-            - extension.id
+            - log.extension.id
           sourceType: attribute
           target: extensionId
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map attribute `direction` to a tag
+          name: Map attribute `log.direction` to a tag
           enabled: true
           sources:
-            - direction
+            - log.direction
           sourceType: attribute
           target: direction
           targetType: tag
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map attribute `accountId` to tag `accountid`
+          name: Map attribute `enrichment_details.accountId` to tag `accountid`
           enabled: true
           sources:
-            - accountId
+            - enrichment_details.accountId
           sourceType: attribute
           target: accountid
           targetType: tag
