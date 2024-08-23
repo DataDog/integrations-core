@@ -39,6 +39,17 @@ COMMAND_COLLECTION_KEY = frozenset(
     ]
 )
 
+UNEXPLAINABLE_COMMANDS = frozenset(
+    [
+        "getMore",
+        "insert",
+        "update",
+        "delete",
+        "explain",
+        "profile",  # command to get profile level
+    ]
+)
+
 
 def format_key_name(formatter, metric_dict: dict) -> dict:
     # convert camelCase to snake_case
@@ -70,12 +81,8 @@ def should_explain_operation(
         # Skip operations that are not queries
         return False
 
-    if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
-        # Skip operations as they are not queries
-        return False
-
-    if "explain" in command:
-        # Skip operations that are explain commands (cannot explain itself)
+    # if UNEXPLAINABLE_COMMANDS in command, skip
+    if any(command.get(key) for key in UNEXPLAINABLE_COMMANDS):
         return False
 
     db, _ = namespace.split(".", 1)
