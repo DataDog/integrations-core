@@ -2206,7 +2206,7 @@ pipeline:
         - user1@example.com;user2@example.com
       grok:
         supportRules: ""
-        matchRules: senders_rule %{data:senders:array("", ";")}
+        matchRules: senders_rule %{notSpace:senders:array("", ";")}
     - type: grok-parser
       name: Convert `recipients` field into an array
       enabled: true
@@ -2216,7 +2216,7 @@ pipeline:
         - user1@example.com;user2@example.com
       grok:
         supportRules: ""
-        matchRules: recipients_rule %{data:recipients:array("", ";")}
+        matchRules: recipients_rule %{notSpace:recipients:array("", ";")}
     - type: attribute-remapper
       name: Map `TMCMLogDetectedIP`, `src`, `dst` to `endpoint_ip`
       enabled: true
