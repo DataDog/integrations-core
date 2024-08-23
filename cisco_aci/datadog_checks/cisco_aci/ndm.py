@@ -79,23 +79,16 @@ def get_device_info(device):
 
 
 def batch_payloads(namespace, devices, interfaces, collect_ts):
-    """
-    Batch payloads into NetworkDevicesMetadata objects
-    """
-    network_devices_metadata = NetworkDevicesMetadata(namespace=namespace, collect_timestamp=collect_ts)
     for device in devices:
-        current_payload, new_payload = append_to_payload(device, network_devices_metadata, namespace, collect_ts)
-        if new_payload:
-            yield current_payload
-            network_devices_metadata = new_payload
+        yield NetworkDevicesMetadata(namespace=namespace, devices=[device], collect_timestamp=collect_ts)
 
+    current_payload = NetworkDevicesMetadata(namespace=namespace, collect_timestamp=collect_ts)
     for interface in interfaces:
-        current_payload, new_payload = append_to_payload(interface, network_devices_metadata, namespace, collect_ts)
+        current_payload, new_payload = append_to_payload(interface, current_payload, namespace, collect_ts)
         if new_payload:
             yield current_payload
-            network_devices_metadata = new_payload
-
-    yield network_devices_metadata
+            current_payload = new_payload
+    yield current_payload
 
 
 def append_to_payload(item, current_payload, namespace, collect_ts):

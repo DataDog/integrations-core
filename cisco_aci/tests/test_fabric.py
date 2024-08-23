@@ -10,8 +10,9 @@ from datadog_checks.cisco_aci.api import Api
 
 if six.PY3:
     from .fixtures.metadata import (
+        EXPECTED_DEVICE_METADATA_EVENTS,
         EXPECTED_INTERFACE_METADATA,
-        EXPECTED_METADATA_EVENTS,
+        EXPECTED_INTERFACE_METADATA_EVENTS,
     )
 
 from freezegun import freeze_time
@@ -80,8 +81,14 @@ def test_fabric_mocked(aggregator):
 
         if six.PY3:
             ndm_metadata = aggregator.get_event_platform_events("network-devices-metadata")
-            expected_metadata = [event.model_dump(mode="json", exclude_none=True) for event in EXPECTED_METADATA_EVENTS]
-            assert ndm_metadata == expected_metadata
+            device_metadata = [dm for dm in ndm_metadata if 'devices' in dm and len(dm['devices']) > 0]
+            interface_metadata = [im for im in ndm_metadata if 'interfaces' in im and len(im['interfaces']) > 0]
+
+            expected_devices = [event.model_dump() for event in EXPECTED_DEVICE_METADATA_EVENTS]
+            expected_interfaces = [event.model_dump(exclude_none=True) for event in EXPECTED_INTERFACE_METADATA_EVENTS]
+
+            assert device_metadata == expected_devices
+            assert interface_metadata == expected_interfaces
 
             interface_tag_mapping = {
                 'default:10.0.200.0': hn101,

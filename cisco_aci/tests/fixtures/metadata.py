@@ -3201,19 +3201,18 @@ MOCK_TIME_EPOCH = 1326511294
 
 EXPECTED_INTERFACE_METADATA = [InterfaceMetadata(**im) for im in INTERFACE_METADATA]
 
-EXPECTED_METADATA_EVENTS = [
+EXPECTED_DEVICE_METADATA_EVENTS = [
+    NetworkDevicesMetadata(namespace='default', devices=[ndm_meta], collect_timestamp=MOCK_TIME_EPOCH)
+    for ndm_meta in DEVICE_METADATA
+]
+EXPECTED_INTERFACE_METADATA_EVENTS = [
     NetworkDevicesMetadata(
-        namespace='default',
-        devices=DEVICE_METADATA,
-        interfaces=INTERFACE_METADATA[0:93],
-        collect_timestamp=MOCK_TIME_EPOCH,
+        namespace='default', interfaces=INTERFACE_METADATA[0:100], collect_timestamp=MOCK_TIME_EPOCH
     ),
     NetworkDevicesMetadata(
-        namespace='default', interfaces=INTERFACE_METADATA[93:193], collect_timestamp=MOCK_TIME_EPOCH
+        namespace='default', interfaces=INTERFACE_METADATA[100:200], collect_timestamp=MOCK_TIME_EPOCH
     ),
     NetworkDevicesMetadata(
-        namespace='default',
-        interfaces=INTERFACE_METADATA[193::],
-        collect_timestamp=MOCK_TIME_EPOCH,
+        namespace='default', interfaces=INTERFACE_METADATA[200::], collect_timestamp=MOCK_TIME_EPOCH
     ),
 ]
