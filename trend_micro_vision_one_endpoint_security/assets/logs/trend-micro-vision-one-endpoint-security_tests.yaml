@@ -140,7 +140,7 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMLogSeverity: "Second scan engine"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
-        action: "Clean"
+        action: "Unknown"
         application_name: "Apex Central"
         application_version: "2019"
         attributeLabels:
@@ -160,6 +160,7 @@ tests:
         event_id: "MS:Clean"
         event_name: "This is a policyname"
         file_name: "NE_AEP.1550"
+        filter_action: "Clean"
         filter_action_result: "File cleaned"
         filter_type: "URL reputation filter"
         log_type: 1705

@@ -769,7 +769,17 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
-        - name: Lookup for `action` to `filter_action` field
+        - type: attribute-remapper
+          name: Map `action` to `filter_action`
+          enabled: true
+          sources:
+            - action
+          sourceType: attribute
+          target: filter_action
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Lookup for `filter_action` to `filter_action` field
           enabled: true
           source: action
           target: filter_action
