@@ -169,7 +169,7 @@ cilium.operator.eni.resync.total,count,,unit,,[OpenMetrics V1] Number of resync 
 cilium.operator.eni_ec2.rate_limit.duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of duration of client-side rate limiter blocking. Available in Cilium <= v1.9,0,cilium,api rate limit duration sample,
 cilium.operator.eni_ec2.rate_limit.duration.seconds.count,count,,request,,[OpenMetrics V1 and V2] Count of duration of client-side rate limiter blocking. Available in Cilium <= v1.9,0,cilium,api rate limit duration count,
 cilium.operator.eni_ec2.rate_limit.duration.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of duration of client-side rate limiter blocking. Available in Cilium <= v1.9,0,cilium,api rate limit duration sum,
-cilium.operator.errors.warnings.total,counter,,item,,[OpenMetrics V1 and V2] Number of total errors in cilium-operator instances,0,cilium,errors total,
+cilium.operator.errors.warnings.total,count,,item,,[OpenMetrics V1 and V2] Number of total errors in cilium-operator instances,0,cilium,errors total,
 cilium.operator.hive.status,gauge,,item,,[OpenMetrics V1 and V2] Counts of health status levels of Hive components,0,cilium,hive status,
 cilium.operator.identity_gc.entries,gauge,,garbage collection,,[OpenMetrics V1 and V2] The number of alive and deleted identities at the end of a garbage collector run. Available in Cilium v1.11+,0,cilium,gc entries,
 cilium.operator.identity_gc.runs,gauge,,garbage collection,,[OpenMetrics V1 and V2] The number of times identity garbage collector has run. Available in Cilium v1.11+,0,cilium,gc runs,
