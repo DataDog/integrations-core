@@ -3,7 +3,7 @@
 	"created_at": "2024-08-20",
 	"last_updated_at": "2024-08-20",
 	"title": "SSL Certificate in an Error State",
-	"description": "Website Availability monitor is in an error state due to a connection timeout error. The server is not responding to requests within a reasonable time frame. Check network connectivity or contact the website administrator or hosting provider.",
+	"description": "An SSL certificate is currently in an error state and is not being used. This monitor tracks the status of the SSL certificate and triggers an alert when the status changes to unused. This will help ensure that the issue is promptly addressed and the certificate is either corrected or replaced as needed.",
 	"definition": {
 		"id": 149884381,
 		"name": "SSL Certificate is in an Error State",

@@ -3,7 +3,7 @@
 	"created_at": "2024-08-20",
 	"last_updated_at": "2024-08-20",
 	"title": "Domain Dropped from Request",
-	"description": "The domain is no longer associated with the request. This means that the domain is not registered or is not active.",
+	"description": "A domain can be dropped from the request. This monitor tracks the status of the domain and triggers an alert when the status changes to \"dropped.\" This helps ensure that appropriate actions are taken promptly to address the dropped domain and prevent any potential disruptions.",
 	"definition": {
 		"id": 150029151,
 		"name": "Domain Dropped from Request",
