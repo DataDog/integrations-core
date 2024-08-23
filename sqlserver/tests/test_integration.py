@@ -812,6 +812,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     for m in DATABASE_INDEX_METRICS:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
 
+
 @pytest.mark.parametrize(
     'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
     [
@@ -849,5 +850,5 @@ def test_propagate_agent_tags(
             assert all(tag in check.tags for tag in agent_tags)
             check.check(instance_docker)
         aggregator.assert_service_check(
-                'sqlserver.database.can_connect', count=1, status=SQLServer.OK, tags=instance_docker["tags"] + agent_tags
-            )
+            'sqlserver.database.can_connect', count=1, status=SQLServer.OK, tags=instance_docker["tags"] + agent_tags
+        )
