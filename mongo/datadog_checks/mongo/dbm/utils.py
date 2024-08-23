@@ -159,4 +159,4 @@ def obfuscate_command(command: dict):
     obfuscated_command = command.copy()
     for key in ("comment", "lsid", "$clusterTime"):
         obfuscated_command.pop(key, None)
-    return datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
+    return datadog_agent.obfuscate_mongodb_string(json_util.dumps(obfuscated_command))

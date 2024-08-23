@@ -241,6 +241,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "query_hash": slow_operation.get("queryHash"),  # only available with profiling
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
+            "comment": slow_operation["command"].get("comment"),
             # metrics
             # mills from profiler, durationMillis from logs
             "mills": slow_operation.get("millis", slow_operation.get("durationMillis", 0)),
