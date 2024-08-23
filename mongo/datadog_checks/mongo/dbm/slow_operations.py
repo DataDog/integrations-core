@@ -197,8 +197,10 @@ class MongoSlowOperations(DBMAsyncJob):
         slow_operation['obfuscated_command'] = obfuscated_command
         slow_operation['query_signature'] = query_signature
 
-        if slow_operation.get('originatingCommand'):
-            slow_operation['originatingCommand'] = obfuscate_command(slow_operation['originatingCommand'])
+        originating_command = slow_operation.get('originatingCommand')
+        if originating_command:
+            slow_operation['originatingCommandComment'] = originating_command.get('comment')
+            slow_operation['originatingCommand'] = obfuscate_command(originating_command)
 
         return slow_operation
 
@@ -337,6 +339,7 @@ class MongoSlowOperations(DBMAsyncJob):
             return {
                 "cursor_id": cursor_id,
                 "originating_command": originating_command,
+                "comment": slow_operation.get("originatingCommandComment"),
             }
         return None
 

@@ -134,7 +134,8 @@
                     "await_data": false,
                     "originating_command": "{\"aggregate\": \"movies\", \"pipeline\": [{\"$lookup\": {\"from\": \"comments\", \"as\": \"comments\", \"localField\": \"_id\", \"foreignField\": \"movie_id\"}}], \"cursor\": {\"batchSize\": 0}, \"needsMerge\": true, \"let\": {\"NOW\": {\"$literal\": {\"$date\": \"2024-06-13T20:50:10.805Z\"}}, \"CLUSTER_TIME\": {\"$literal\": {\"$timestamp\": {\"t\": 1718311810, \"i\": 6}}}}, \"fromMongos\": true, \"collation\": {\"locale\": \"simple\"}, \"readConcern\": {\"level\": \"local\", \"provenance\": \"implicitDefault\"}, \"writeConcern\": {\"w\": \"majority\", \"wtimeout\": 0, \"provenance\": \"implicitDefault\"}, \"shardVersion\": {\"e\": {\"$oid\": \"666b52b852fa5a96da6d59ae\"}, \"t\": {\"$timestamp\": {\"t\": 1718309560, \"i\": 188}}, \"v\": {\"$timestamp\": {\"t\": 1, \"i\": 5}}}, \"clientOperationKey\": {\"$binary\": {\"base64\": \"zc+70kUAQ5m1zVRdJjwYxw==\", \"subType\": \"04\"}}, \"$configTime\": {\"$timestamp\": {\"t\": 1718311809, \"i\": 1}}, \"$topologyTime\": {\"$timestamp\": {\"t\": 1716428552, \"i\": 3}}, \"$audit\": {\"$impersonatedUser\": {\"user\": \"shopper_4\", \"db\": \"admin\"}, \"$impersonatedRoles\": [{\"role\": \"readWrite\", \"db\": \"dbmorders\"}, {\"role\": \"readWrite\", \"db\": \"integration\"}]}, \"$client\": {\"application\": {\"name\": \"orders-mongo\"}, \"driver\": {\"name\": \"mongo-go-driver\", \"version\": \"v1.15.0\"}, \"os\": {\"type\": \"linux\", \"architecture\": \"amd64\"}, \"platform\": \"go1.22.1\", \"env\": {\"container\": {\"runtime\": \"docker\"}}, \"mongos\": {\"host\": \"ip-172-29-203-167:27017\", \"client\": \"127.0.0.1:50388\", \"version\": \"7.0.9\"}}, \"mayBypassWriteBlocking\": true, \"$db\": \"integration\"}",
                     "plan_summary": "COLLSCAN",
-                    "operation_using_cursor_id": 155914227
+                    "operation_using_cursor_id": 155914227,
+                    "comment": "get more movies"
                 },
                 "type": "op",
                 "op": "getmore",
@@ -202,7 +203,8 @@
                     "await_data": true,
                     "originating_command": "{\"find\": \"oplog.rs\", \"filter\": {\"ts\": {\"$gte\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 17}}}}, \"batchSize\": 13981010, \"tailable\": true, \"awaitData\": true, \"term\": 2, \"maxTimeMS\": 60000, \"readConcern\": {\"level\": \"local\", \"afterClusterTime\": {\"$timestamp\": {\"t\": 0, \"i\": 1}}}, \"$replData\": 1, \"$oplogQueryData\": 1, \"$readPreference\": {\"mode\": \"secondaryPreferred\"}, \"$db\": \"local\"}",
                     "plan_summary": null,
-                    "operation_using_cursor_id": 1399253104
+                    "operation_using_cursor_id": 1399253104,
+                    "comment": null
                 },
                 "type": "op",
                 "op": "getmore",

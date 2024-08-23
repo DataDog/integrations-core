@@ -127,7 +127,8 @@
                     "await_data": true,
                     "originating_command": "{\"find\": \"oplog.rs\", \"filter\": {\"ts\": {\"$gte\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 17}}}}, \"batchSize\": 13981010, \"tailable\": true, \"awaitData\": true, \"term\": 2, \"maxTimeMS\": 60000, \"readConcern\": {\"level\": \"local\", \"afterClusterTime\": {\"$timestamp\": {\"t\": 0, \"i\": 1}}}, \"$replData\": 1, \"$oplogQueryData\": 1, \"$readPreference\": {\"mode\": \"secondaryPreferred\"}, \"$db\": \"local\"}",
                     "plan_summary": null,
-                    "operation_using_cursor_id": 1399253104
+                    "operation_using_cursor_id": 1399253104,
+                    "comment": "oplogReplay"
                 },
                 "type": "op",
                 "op": "getmore",

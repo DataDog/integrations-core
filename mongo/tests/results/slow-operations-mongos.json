@@ -368,7 +368,8 @@
                 },
                 "cursor": {
                     "cursor_id": 5170666760900931828,
-                    "originating_command": null
+                    "originating_command": null,
+                    "comment": null
                 },
                 "lock_stats": {
                     "feature_compatibility_version": {
@@ -775,7 +776,8 @@
                 },
                 "cursor": {
                     "cursor_id": 5170666760900931828,
-                    "originating_command": null
+                    "originating_command": null,
+                    "comment": null
                 },
                 "lock_stats": {
                     "feature_compatibility_version": {
