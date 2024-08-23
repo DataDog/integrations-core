@@ -759,3 +759,53 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is None
+
+@pytest.mark.parametrize(
+    'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
+    [
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+    ],
+)
+def test_propagate_agent_tags(
+    aggregator,
+    dd_run_check,
+    instance_basic,
+    instance_propagate_agent_tags,
+    init_config_propagate_agent_tags,
+    should_propagate_agent_tags,
+):
+    init_config = {}
+    if instance_propagate_agent_tags is not None:
+        instance_basic['propagate_agent_tags'] = instance_propagate_agent_tags
+    if init_config_propagate_agent_tags is not None:
+        init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
+
+    agent_tags = ["my-env:test-env", "random:tag", "bar:foo"]
+
+    with mock.patch('datadog_checks.mysql.config.get_agent_host_tags', return_value=agent_tags):
+        mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+        check = dd_run_check(mysql_check)
+        assert check._config._should_propagate_agent_tags(instance_basic, init_config) == should_propagate_agent_tags
+        if should_propagate_agent_tags:
+            assert all(tag in check.tags for tag in agent_tags)
+            check.check(instance_basic)
+            expected_tags = [
+                'server:{}'.format(HOST),
+                'port:{}'.format(PORT),
+            ]
+        expected_tags = [
+            'server:{}'.format(HOST),
+            'port:{}'.format(PORT),
+            'dd.internal.resource:database_instance:{}'.format(expected_hostname),
+        ]
+        aggregator.assert_service_check(
+            'mysql.can_connect', count=1, status=MySql.OK, tags=expected_tags + agent_tags
+        )
