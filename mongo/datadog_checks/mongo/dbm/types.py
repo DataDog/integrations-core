@@ -131,6 +131,7 @@ class OperationSampleOperationStats(TypedDict, total=False):
     opid: str
     ns: Optional[str]
     plan_summary: Optional[str]
+    query_framework: Optional[str]
     current_op_time: str
     microsecs_running: Optional[int]
     transaction_time_open_micros: Optional[int]
