@@ -236,6 +236,8 @@ cilium.operator.ipam.resync.queued.count,count,,unit,,[OpenMetrics V2] Number of
 cilium.operator.ipam.resync.queued.total,count,,unit,,[OpenMetrics V1] Number of IPAM queued triggers. Available in Cilium v1.9+,0,cilium,ipam queued triggers count,
 cilium.operator.ipam.resync.total,count,,operation,,[OpenMetrics V1] Number of resync operations to synchronize and resolve IP deficit of nodes. Available in Cilium v1.8+,0,cilium,ipam resync operations count,
 cilium.operator.ipam.used_ips,gauge,,unit,,[OpenMetrics V1 and V2] Total used IPs on Node for IPAM allocation,0,cilium,used ips,
+cilium.operator.lbipam.ips.available.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of IP addresses available in a given pool,0,cilium,available pool ips,
+cilium.operator.lbipam.ips.used.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of IP addresses used in a given pool,0,cilium,used pool ips,
 cilium.operator.lbipam.conflicting.pools.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of conflicting pools,0,cilium,conflicting pools,
 cilium.operator.lbipam.services.matching.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of services matching pools,0,cilium,matching pools,
 cilium.operator.lbipam.services.unsatisfied.total,gauge,,unit,,[OpenMetrics V1 and V2] The number of services which did not receive all requested IPs,0,cilium,unsatisfied pools,

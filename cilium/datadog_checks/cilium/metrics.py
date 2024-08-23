@@ -207,6 +207,8 @@ OPERATOR_METRICS = {
     # Cilium 1.15+
     'cilium_hive_status': 'operator.hive.status',
     'cilium_operator_errors_warnings_total': 'operator.errors.warnings.total',
+    'cilium_operator_lbipam_ips_available_total': 'operator.lbipam.ips.available.total',
+    'cilium_operator_lbipam_ips_used_total': 'operator.lbipam.ips.used.total',
     'cilium_operator_lbipam_conflicting_pools_total': 'operator.lbipam.conflicting.pools.total',
     'cilium_operator_lbipam_services_matching_total': 'operator.lbipam.services.matching.total',
     'cilium_operator_lbipam_services_unsatisfied_total': 'operator.lbipam.services.unsatisfied.total',
