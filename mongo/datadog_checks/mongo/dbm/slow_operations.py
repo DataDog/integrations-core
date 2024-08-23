@@ -14,6 +14,7 @@ from datadog_checks.mongo.dbm.utils import (
     get_command_collection,
     get_command_truncation_state,
     get_explain_plan,
+    obfuscate_command,
     should_explain_operation,
 )
 
@@ -190,16 +191,14 @@ class MongoSlowOperations(DBMAsyncJob):
             self._check.log.error("Failed to collect explain plan for slow operation: %s", e)
 
     def _obfuscate_slow_operation(self, slow_operation, db_name):
-        obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(slow_operation["command"]))
+        obfuscated_command = obfuscate_command(slow_operation["command"])
         query_signature = compute_exec_plan_signature(obfuscated_command)
         slow_operation['dbname'] = db_name
         slow_operation['obfuscated_command'] = obfuscated_command
         slow_operation['query_signature'] = query_signature
 
         if slow_operation.get('originatingCommand'):
-            slow_operation['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(
-                json_util.dumps(slow_operation['originatingCommand'])
-            )
+            slow_operation['originatingCommand'] = obfuscate_command(slow_operation['originatingCommand'])
 
         return slow_operation
 

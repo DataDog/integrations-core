@@ -14,6 +14,7 @@ from datadog_checks.mongo.dbm.utils import (
     get_command_collection,
     get_command_truncation_state,
     get_explain_plan,
+    obfuscate_command,
     should_explain_operation,
 )
 
@@ -117,7 +118,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     continue
 
                 command = operation.get("command")
-                obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
+                obfuscated_command = obfuscate_command(command)
                 query_signature = self._get_query_signature(obfuscated_command)
                 operation_metadata = self._get_operation_metadata(operation)
 
@@ -246,7 +247,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
         originating_command = cursor.get("originatingCommand")
         if originating_command:
-            originating_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
+            originating_command = obfuscate_command(originating_command)
 
         return {
             "cursor_id": cursor.get("cursorId"),
