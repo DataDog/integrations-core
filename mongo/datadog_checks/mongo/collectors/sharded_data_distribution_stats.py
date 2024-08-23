@@ -20,13 +20,10 @@ class ShardedDataDistributionStatsCollector(MongoCollector):
         return isinstance(deployment, MongosDeployment)
 
     def collect(self, api):
-        print("Collecting sharded data distribution stats")
         for distribution in api.sharded_data_distribution_stats():
-            print("Distribution: %s" % distribution)
             ns = distribution['ns']
             db, collection = ns.split('.', 1)
             for shard in distribution.get('shards', []):
                 shard_name = shard.pop('shardName')
                 additional_tags = ["db:%s" % db, "collection:%s" % collection, "shard:%s" % shard_name]
-                print("Shard: %s" % shard)
                 self._submit_payload(shard, additional_tags, SHARDED_DATA_DISTRIBUTION_METRICS)
