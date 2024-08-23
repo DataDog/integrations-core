@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_propagate_agent_tags():
+    return False
+
+
 def instance_adoprovider():
     return 'SQLOLEDB'
 
@@ -134,6 +138,10 @@ def instance_only_emit_local():
 
 def instance_proc_only_if_database():
     return 'master'
+
+
+def instance_propagate_agent_tags():
+    return False
 
 
 def instance_server_version():
