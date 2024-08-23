@@ -357,6 +357,10 @@ COLLECTION_METRICS = {
     'collection.collectionScans.nonTailable': GAUGE,
 }
 
+INDEX_METRICS = {
+    'indexes.accesses.ops': RATE,
+}
+
 """
 Mapping for case-sensitive metric name suffixes.
 

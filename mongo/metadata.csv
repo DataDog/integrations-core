@@ -19,6 +19,7 @@ mongodb.collection.commands.latency.avg,gauge,,microsecond,,Average latency for 
 mongodb.collection.commands.opsps,gauge,,operation,second,Number of command operations per second on the collection.,0,mongodb,command operations per second,,
 mongodb.collection.count,gauge,,item,,Total number of objects in the collection.,0,mongodb,number of objects in the collection,,
 mongodb.collection.indexes.accesses.ops,gauge,,event,,Number of time the index was used.,0,mongodb,index usage,,
+mongodb.collection.indexes.accesses.opsps,gauge,,event,,Number of time the index was used per second.,0,mongodb,index usage per second,,
 mongodb.collection.indexsizes,gauge,,byte,,Size of index in bytes.,0,mongodb,index size,,
 mongodb.collection.max,gauge,,document,,Maximum number of documents in a capped collection.,0,mongodb,max documents in capped collection,,
 mongodb.collection.maxsize,gauge,,byte,,Maximum size of a capped collection in bytes.,0,mongodb,max size of capped collection,,
