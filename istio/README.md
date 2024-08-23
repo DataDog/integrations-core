@@ -234,7 +234,8 @@ Be sure to exclude Istio and Envoy metrics from your configuration to avoid high
 #
 instances:
   - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
-    metrics: ['*']
+    metrics:
+    - '.*'
     exclude_metrics:
       - istio_*
       - envoy_*
