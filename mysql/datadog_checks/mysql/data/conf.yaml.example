@@ -52,6 +52,12 @@ instances:
     #
     port: 3306
 
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
+
     ## @param reported_hostname - string - optional
     ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
     ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
@@ -640,12 +646,6 @@ instances:
         ## Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
         #
         # keep_identifier_quotation: false
-
-    ## @param propagate_agent_tags - boolean - optional - default: false
-    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
-    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
-    #
-    # propagate_agent_tags: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
