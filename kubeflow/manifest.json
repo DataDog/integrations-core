@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Integration for Kubeflow",
     "title": "Kubeflow",
     "media": [],
     "classifier_tags": [
@@ -42,7 +42,10 @@
       }
     },
     "monitors": {},
-    "saved_views": {}
+    "saved_views": {},
+    "dashboards": {
+      "Kubeflow Overview": "assets/dashboards/overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
