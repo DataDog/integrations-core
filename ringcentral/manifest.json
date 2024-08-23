@@ -45,7 +45,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 21264130,
-      "source_type_name": "ringcentral",
+      "source_type_name": "RingCentral",
       "events": {
         "creates_events": false
       },
