@@ -6,6 +6,8 @@ tests:
       custom:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
+        application_name: "Apex Central"
+        application_version: "2019"
         attack_discovery_object_information_1: "process - code9.exe - {USER: administrator09}"
         attributeLabels:
           cn1Label: "SLF_RiskLevel"
@@ -20,11 +22,9 @@ tests:
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "700211"
-        event_subname: "Attack Discovery Detections"
+        event_id: "700211"
+        event_name: "Attack Discovery Detections"
         pattern_number: "30.1012.00"
-        product_name: "Apex Central"
-        product_version: "2019"
         risk_level: "Unknown"
         rt: 1719828610000
         rule: "powershell invoke expression"
@@ -47,6 +47,8 @@ tests:
         TMCMLogTarget: "HKCU\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\\COM+"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Ask"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cs2Label: "Policy"
           cs3Label: "Event_Type"
@@ -58,13 +60,11 @@ tests:
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "BM:1000"
-        event_subname: "Behavior Monitoring"
+        event_id: "BM:1000"
+        event_name: "Behavior Monitoring"
         event_type: "File system"
         operation: "Create Process"
         policy_type: "Threat Behavior Analysis"
-        product_name: "Apex Central"
-        product_version: "2019"
         reason: "G"
         risk_level: "High"
         rt: 1719828610000
@@ -87,6 +87,8 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Block"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "SLF_CCCA_RiskLevel"
           cn2Label: "SLF_CCCA_DetectionSource"
@@ -107,8 +109,8 @@ tests:
         domain_hierarchy: "OSCEDomain1"
         domain_name: "DOMAIN"
         endpoint_ip: "10.10.10.10"
-        event_name: "CnC:Block"
-        event_subname: "CnC Callback"
+        event_id: "CnC:Block"
+        event_name: "CnC Callback"
         log_type: 1756
         network:
           client:
@@ -117,8 +119,7 @@ tests:
           destination:
             geoip: {}
             ip: "30.30.30.30"
-        product_name: "Apex Central"
-        product_version: "2019"
+        product_version: 11.0
         risk_level: "Low"
         rt: 1719828610000
         server_host: "localhost"
@@ -140,6 +141,8 @@ tests:
         TMCMLogSeverity: "Second scan engine"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Clean"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "Severity"
           cn2Label: "Filter_Action_Result"
@@ -154,8 +157,8 @@ tests:
         deviceExternalId: 1
         deviceFacility: "Deep Discovery Email Inspector"
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
-        event_name: "MS:Clean"
-        event_subname: "This is a policyname"
+        event_id: "MS:Clean"
+        event_name: "This is a policyname"
         file_name: "NE_AEP.1550"
         filter_action_result: "File cleaned"
         filter_type: "URL reputation filter"
@@ -165,8 +168,7 @@ tests:
             geoip: {}
             ip: "20.20.20.20"
         policy_settings: "This is policy content"
-        product_name: "Apex Central"
-        product_version: "2019"
+        product_version: 3.2
         reason: "B"
         reason_code_source: 20
         recipient: "user@test.com"
@@ -195,6 +197,8 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Passed"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "Product"
           cn2Label: "Action"
@@ -215,8 +219,8 @@ tests:
         domain_hierarchy: "OSCEDomain1"
         endpoint_host_name: "Sample_Host"
         endpoint_ip: "10.10.10.10"
-        event_name: "700106"
-        event_subname: "Data Loss Prevention"
+        event_id: "700106"
+        event_name: "Data Loss Prevention"
         externalId: 101
         filePath: "D:\\\\2. DRIVER\\\\drivers WIN7\\\\Drivers\\\\DP_CardReader_14032.7z\\\\O2Micro\\\\FORCED\\\\6x86\\\\"
         file_name: "O2MDFvst.INF"
@@ -226,9 +230,7 @@ tests:
             geoip: {}
             ip: "20.20.20.20"
         policy_name: "N/A"
-        product_name: "Apex Central"
         product_type: 15
-        product_version: "2019"
         rt: 1719828610000
         rule_name: "SAMPLE RULE SET"
         server_host:
@@ -252,6 +254,8 @@ tests:
       custom:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "Product"
           cn2Label: "Device_Type"
@@ -265,14 +269,12 @@ tests:
         device_type: "USB storage device"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "700107"
-        event_subname: "Device Access Control"
+        event_id: "700107"
+        event_name: "Device Access Control"
         file_name: "F:\\\\Autorun.inf"
         host_name: "Sample_Host"
         permission: "Floppy disks"
         product_id: 15
-        product_name: "Apex Central"
-        product_version: "2019"
         rt: 1719828610000
         server_host: "localhost"
         severity: "info"
@@ -293,6 +295,8 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Blocked"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "Connection_Status"
           cs1Label: "Version"
@@ -307,8 +311,8 @@ tests:
         deviceNtDomain: "APEXTMCM"
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
         domain_hierarchy: "OSCEDomain1"
-        event_name: "EAC:1"
-        event_subname: "Endpoint Application Control Violation Information"
+        event_id: "EAC:1"
+        event_name: "Endpoint Application Control Violation Information"
         fileHash: "c0869b72C5606D22D92A6AC986686BB87485A25b"
         file_name: "P2P_TEST.exe"
         network:
@@ -318,8 +322,6 @@ tests:
         pattern_version: "1.299.00"
         policy_name: "TestPolicy"
         process_command_line: "C:\\\\P2P_TEST.exe"
-        product_name: "Apex Central"
-        product_version: "2019"
         rt: 1719828610000
         rule_name: "Test"
         severity: "info"
@@ -339,7 +341,8 @@ tests:
       custom:
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Log"
-        application_name: "N/A"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "Rule"
           cn2Label: "Mode"
@@ -359,8 +362,8 @@ tests:
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "Log"
-        event_subname: "Intrusion Prevention"
+        event_id: "Log"
+        event_name: "Intrusion Prevention"
         network:
           client:
             geoip: {}
@@ -371,8 +374,6 @@ tests:
             ip: "30.30.30.30"
             port: 449
         no_of_detection: 1
-        product_name: "Apex Central"
-        product_version: "2019"
         proto: "ND"
         reason: "1009549 - Detected Terminal Services (RDP) Server Traffic - 1 (ATT&CK T1015,T1043,T1076,T1048,T1032,T1071)"
         risk_level: "Low"
@@ -399,6 +400,8 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "File cleaned"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "ThreatType"
           cn2Label: "DetectionType"
@@ -420,17 +423,15 @@ tests:
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "PML:File cleaned"
-        event_subname: "Detection01"
+        event_id: "PML:File cleaned"
+        event_name: "Detection01"
         fileHash: "177750B65A21A9043105FD0820B85B58CF148A01"
         filePath: "C:\\\\test01\\\\aaa.exe"
         file_name: "aaa.exe"
         infection_channel: "Local drive"
         infection_source: "https://10.1.1.1"
         process_command: "notepad.exe -test"
-        product_name: "Apex Central"
         product_server: "OSCE01"
-        product_version: "2019"
         reason: "E"
         rt: 1719828610000
         server_host: "OSCEClient11"
@@ -456,6 +457,8 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Pass"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "SLF_PatternType"
           cs2Label: "NCIE_ThreatName"
@@ -469,8 +472,8 @@ tests:
         deviceProcessName: "C:\\\\Windows\\\\system32\\\\svchost-1.exe"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "NCIE:Pass"
-        event_subname: "Suspicious Connection"
+        event_id: "NCIE:Pass"
+        event_name: "Suspicious Connection"
         log_type: 1756
         network:
           client:
@@ -482,8 +485,6 @@ tests:
             ip: "30.30.30.30"
             port: 80
         pattern_type: "User-defined block list"
-        product_name: "Apex Central"
-        product_version: "2019"
         reason: "F"
         rt: 1719828610000
         server_host: "shost1"
@@ -504,6 +505,8 @@ tests:
       custom:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "Risk_Level"
           cs1Label: "Security_Threat"
@@ -519,13 +522,11 @@ tests:
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "VAD"
-        event_subname: "VAN_RANSOMWARE.umxxhelloransom_abc"
+        event_id: "VAD"
+        event_name: "VAN_RANSOMWARE.umxxhelloransom_abc"
         fileHash: "3395856CE81F2B7382DEE72602F798B642F14140"
         file_name: "C:\\\\\\\\QA_Log.zip"
         process_name: "VA"
-        product_name: "Apex Central"
-        product_version: "2019"
         protocol: "1 sourceServiceNameTest1@trend.com.tw"
         reason: "E"
         risk_level: "No Risk"
@@ -551,6 +552,8 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Reboot system successfully"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "PatternType"
           cs1Label: "VirusName"
@@ -564,16 +567,14 @@ tests:
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
         engine_version: "6.2.3027"
+        event_id: "Spyware Detected"
         event_name: "Spyware Detected"
-        event_subname: "Spyware Detected"
         filePath: "F:\\\\Malware\\\\psas\\\\rsrc2.bin"
         file_name: "F:\\\\Malware\\\\psas\\\\rsrc2.bin"
         log_type: 1727
         no_of_detection: 1
         pattern_type: 1073741840
         pattern_version: 1297
-        product_name: "Apex Central"
-        product_version: "2019"
         rt: 1719828610000
         server_host: "ApexOneClient01"
         severity: "info"
@@ -594,6 +595,8 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Log"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "SLF_ProductVersion"
           cn2Label: "SLF_SourceType"
@@ -610,14 +613,13 @@ tests:
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "FH:Log"
-        event_subname: "Suspicious Files"
+        event_id: "FH:Log"
+        event_name: "Suspicious Files"
         fileHash: "D6712CAE5EC821F910E14945153AE7871AA536CA"
         file_path: "C:\\\\Users\\\\Administrator\\\\Desktop\\\\BT-SHA1-SAMPLE\\\\"
         file_type: "SLF_TrueFileType"
         log_type: 1766
-        product_name: "Apex Central"
-        product_version: "2019"
+        product_version: 11
         reason: "E"
         rt: 1719828610000
         scan_type: "Scheduled scan"
@@ -639,6 +641,8 @@ tests:
         ApexCentralHost: "Standard Endpoint Protection Manager"
         TMCMdevicePlatform: "Windows 11 10.0 (Build 22631)"
         action: "File quarantined"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cn1Label: "Pattern"
           cn2Label: "Second_Action"
@@ -658,7 +662,7 @@ tests:
         domain_hierarchy: "Workgroup\\\\\\\\"
         endpoint_ip: "10.10.10.10"
         engine_version: "23.620.1013"
-        event_name: "AV:File quarantined"
+        event_id: "AV:File quarantined"
         fileHash: "D27265074C9EAC2E2122ED69294DBC4D7CCE9141"
         filePath: "C:\\\\\\\\Users\\\\\\\\Test\\\\\\\\Downloads\\\\\\\\"
         file_name: "eicar_com (88).zip"
@@ -667,9 +671,8 @@ tests:
         malware_name: "Eicar_test_file"
         no_of_detection: 1
         pattern_version: 1947100
-        product_name: "Apex Central"
         product_server: "bbbbbb.manage.trendmicro.com"
-        product_version: "2019"
+        product_version: 14.0
         reason_code: "virus log"
         risk_level: "Low"
         rt: 1719828610000
@@ -697,6 +700,8 @@ tests:
         ApexCentralHost: "TW-CHRIS-W2019"
         TMCMdevicePlatform: "Windows 7 6.1 (Build 7601) Service Pack 1"
         action: "Pass"
+        application_name: "Apex Central"
+        application_version: "2019"
         attributeLabels:
           cs1Label: "SLF_PolicyName"
         cntLabel: "AggregatedCount"
@@ -708,8 +713,8 @@ tests:
         devicePayloadId: "1C00290C0360-9CDE11EB-D4B8-F51F-C697"
         domain_hierarchy: "OSCEDomain1"
         endpoint_ip: "10.10.10.10"
-        event_name: "WB:7"
-        event_subname: "7"
+        event_id: "WB:7"
+        event_name: "7"
         file_name: "test.txt"
         filter_blocking_type: "User-defined"
         network:
@@ -717,8 +722,6 @@ tests:
             port: 80
         no_of_detection: 1
         policy_name: "External User Policy"
-        product_name: "Apex Central"
-        product_version: "2019"
         protocol: "Telnet"
         reason: "G"
         rt: 1719828610000
