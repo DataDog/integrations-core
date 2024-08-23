@@ -165,7 +165,7 @@ pipeline:
 
           extract_key_value_pair %{data::keyvalue("=", "\\]\\[{}\"\" :;,/!''\\(\\)*~#&$%^?+\\\\")}
         matchRules: trend_micro_vision_one_endpoint_security_rule
-          %{extract_data_till_pipe_delimited}\|%{extract_data_till_pipe_delimited}\|%{extract_data_till_pipe_delimited:product_name}\|%{extract_data_till_pipe_delimited:product_version}\|%{extract_data_till_pipe_delimited:event_name}\|%{extract_data_till_pipe_delimited:event_subname}\|%{integer:syslog.severity}\|%{extract_key_value_pair}"
+          %{extract_data_till_pipe_delimited}\|%{extract_data_till_pipe_delimited}\|%{extract_data_till_pipe_delimited:application_name}\|%{extract_data_till_pipe_delimited:application_version}\|%{extract_data_till_pipe_delimited:event_id}\|%{extract_data_till_pipe_delimited:event_name}\|%{integer:syslog.severity}\|%{extract_key_value_pair}"
     - type: grok-parser
       name: Parsing the `rt` attribute to convert it into UNIX timestamp
       enabled: true
@@ -1460,6 +1460,16 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
+          name: Map `dvchost` to `product_server`
+          enabled: true
+          sources:
+            - dvchost
+          sourceType: attribute
+          target: product_server
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
           name: Map `app` to `infection_channel`
           enabled: true
           sources:
@@ -1896,12 +1906,22 @@ pipeline:
         query: service:virus-malware
       processors:
         - type: attribute-remapper
-          name: Map `event_subname` to `malware_name`
+          name: Map `event_name` to `malware_name`
           enabled: true
           sources:
-            - event_subname
+            - event_name
           sourceType: attribute
           target: malware_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `dvchost` to `product_server`
+          enabled: true
+          sources:
+            - dvchost
+          sourceType: attribute
+          target: product_server
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -2598,6 +2618,16 @@ pipeline:
         - cn3Label
       sourceType: attribute
       target: attributeLabels.cn3Label
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `cn4Label` to `attributeLabels.cn4Label`
+      enabled: true
+      sources:
+        - cn4Label
+      sourceType: attribute
+      target: attributeLabels.cn4Label
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false

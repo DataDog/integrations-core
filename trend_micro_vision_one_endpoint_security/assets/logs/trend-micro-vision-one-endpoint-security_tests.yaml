@@ -344,11 +344,11 @@ tests:
           cn1Label: "Rule"
           cn2Label: "Mode"
           cn3Label: "Priority"
+          cn4Label: "Severity"
           cs1Label: "Reason/Rule"
           cs2Label: "Application_Type"
         cn2: 0
         cn4: 1
-        cn4Label: "Severity"
         destination_mac: "54-BF-64-84-7F-19"
         detection_mode: "No"
         deviceDirection: "Inbound"
@@ -429,6 +429,7 @@ tests:
         infection_source: "https://10.1.1.1"
         process_command: "notepad.exe -test"
         product_name: "Apex Central"
+        product_server: "OSCE01"
         product_version: "2019"
         reason: "E"
         rt: 1719828610000
@@ -667,6 +668,7 @@ tests:
         no_of_detection: 1
         pattern_version: 1947100
         product_name: "Apex Central"
+        product_server: "bbbbbb.manage.trendmicro.com"
         product_version: "2019"
         reason_code: "virus log"
         risk_level: "Low"
