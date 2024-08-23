@@ -760,6 +760,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is None
 
+
 @pytest.mark.parametrize(
     'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
     [
