@@ -195,13 +195,27 @@
             "id": "168f02a638de42f6b66b60b01f905830",
             "interface": "public",
             "region_id": "RegionOne",
-            "url": "http://127.0.0.1:8004/heat-api",
+            "url": "http://127.0.0.1:8004/heat-api/v1/6e39099cccde4f809b003d9e0dd09304",
             "region": "RegionOne"
           }
         ],
         "id": "36f45c02edba4500adc2bc5974d22bf0",
         "type": "orchestration",
         "name": "heat"
+      },
+      {
+        "endpoints": [
+          {
+            "id": "c30ed0931098498d97f20500bf1351e1",
+            "interface": "public",
+            "region_id": "RegionOne",
+            "url": "http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304",
+            "region": "RegionOne"
+          }
+        ],
+        "id": "a27a95824e5349a69ba6c014cd7da3be",
+        "type": "object-store",
+        "name": "swift"
       }
     ]
   }

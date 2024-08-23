@@ -86,6 +86,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
+    instance_docker['agent_jobs'] = {'enabled': False}
     autodiscovery_dbs = ['master', 'msdb', 'datadog_test-1']
     if database_autodiscovery:
         instance_docker['autodiscovery_include'] = autodiscovery_dbs

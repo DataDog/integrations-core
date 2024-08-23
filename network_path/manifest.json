@@ -1,0 +1,49 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "3913cf32-d869-4852-beda-9e3e9d9e2feb",
+  "app_id": "network-path",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Network Path integration collects traceroute data.",
+    "title": "Network Path",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Category::Network",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Network Path",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "datadog.network_path.",
+        "check": "datadog.network_path.path.monitored",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 20095380,
+      "auto_install": true
+    },
+    "dashboards": {
+      "Network Path Agents": "assets/dashboards/network_path_agents.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

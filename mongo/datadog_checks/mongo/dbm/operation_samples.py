@@ -5,16 +5,23 @@
 
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 
 from bson import json_util
+
+from datadog_checks.mongo.dbm.utils import (
+    format_key_name,
+    get_command_collection,
+    get_command_truncation_state,
+    get_explain_plan,
+    should_explain_operation,
+)
 
 try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.tracking import tracked_method
@@ -27,6 +34,7 @@ from .types import (
     OperationSampleEvent,
     OperationSampleOperationMetadata,
     OperationSampleOperationStats,
+    OperationSampleOperationStatsCursor,
     OperationSamplePlan,
 )
 
@@ -42,8 +50,6 @@ SAMPLE_EXCLUDE_KEYS = {
     "user",
     "client",
 }
-
-SYSTEM_DATABASES = {"admin", "config", "local"}
 
 
 def agent_check_getter(self):
@@ -64,9 +70,9 @@ class MongoOperationSamples(DBMAsyncJob):
         super(MongoOperationSamples, self).__init__(
             check,
             rate_limit=1 / self._collection_interval,
-            run_sync=self._operation_samples_config.get("run_sync", False),  # Default to running sync
+            run_sync=self._operation_samples_config.get("run_sync", False),
             enabled=self._operation_samples_config["enabled"],
-            dbms="mongodb",
+            dbms="mongo",
             min_collection_interval=check._config.min_collection_interval,
             job_name="operation-samples",
         )
@@ -80,17 +86,17 @@ class MongoOperationSamples(DBMAsyncJob):
     def collect_operation_samples(self):
         if not self._should_collect_operation_samples():
             return
-
         now = time.time()
 
         activities = []
 
-        for activity, sample in self._get_operation_samples(now):
+        for activity, sample in self._get_operation_samples(
+            now, databases_monitored=self._check._database_autodiscovery.databases
+        ):
             if sample:
                 self._check.log.debug("Sending operation sample: %s", sample)
                 self._check.database_monitoring_query_sample(json_util.dumps(sample))
             activities.append(activity)
-
         activities_payload = self._create_activities_payload(now, activities)
         self._check.log.debug("Sending activities payload: %s", activities_payload)
         self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
@@ -98,16 +104,16 @@ class MongoOperationSamples(DBMAsyncJob):
         self._last_sampled_timestamp = now
 
     def _should_collect_operation_samples(self) -> bool:
-        deployment = self._check.api_client.deployment_type
+        deployment = self._check.deployment_type
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping operation samples collection on arbiter node")
             return False
         return True
 
-    def _get_operation_samples(self, now):
+    def _get_operation_samples(self, now, databases_monitored: List[str]):
         for operation in self._get_current_op():
             try:
-                if not self._should_include_operation(operation):
+                if not self._should_include_operation(operation, databases_monitored):
                     continue
 
                 command = operation.get("command")
@@ -119,16 +125,21 @@ class MongoOperationSamples(DBMAsyncJob):
                     now, operation, operation_metadata, obfuscated_command, query_signature
                 )
 
-                if not self._should_explain(
+                if not should_explain_operation(
+                    namespace=operation.get("ns"),
                     op=operation.get("op"),
                     command=command,
+                    explain_plan_rate_limiter=self._explained_operations_ratelimiter,
                     explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
                 ):
                     yield activity, None
                     continue
 
-                explain_plan = self._get_explain_plan(
-                    op=operation.get("op"), command=command, dbname=operation_metadata["dbname"]
+                explain_plan = get_explain_plan(
+                    api_client=self._check.api_client,
+                    op=operation.get("op"),
+                    command=command,
+                    dbname=operation_metadata["dbname"],
                 )
                 sample = self._create_operation_sample_payload(
                     now, operation_metadata, obfuscated_command, query_signature, explain_plan, activity
@@ -144,7 +155,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Found operation: %s", operation)
             yield operation
 
-    def _should_include_operation(self, operation: dict) -> bool:
+    def _should_include_operation(self, operation: dict, databases_monitored: List[str]) -> bool:
         # Skip operations from db that are not configured to be monitored
         namespace = operation.get("ns")
         if not namespace:
@@ -152,15 +163,11 @@ class MongoOperationSamples(DBMAsyncJob):
             return False
 
         db, _ = namespace.split(".", 1)
-        if self._check._config.db_names is not None:
-            if db not in self._check._config.db_names:
-                self._check.log.debug(
-                    "Skipping operation for database %s because it is not configured to be monitored", db
-                )
-                return False
-
-        if db in SYSTEM_DATABASES:
-            self._check.log.debug("Skipping operation for system database %s", db)
+        if db not in databases_monitored:
+            self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
+            return False
+        if db == "admin":
+            self._check.log.debug("Skipping operation for admin database: %s", operation)
             return False
 
         # Skip operations without a command
@@ -191,59 +198,6 @@ class MongoOperationSamples(DBMAsyncJob):
 
         return True
 
-    def _should_explain(self, op: Optional[str], command: dict, explain_plan_cache_key: Tuple[str, str]) -> bool:
-        if not op or op == "none":
-            # Skip operations that are not queries
-            self._check.log.debug("Skipping explain operation without operation type: %s", command)
-            return False
-
-        if op in ("insert", "update", "getmore", "killcursors", "remove"):
-            # Skip operations that are not queries
-            self._check.log.debug("Skipping explain operation type %s: %s", op, command)
-            return False
-
-        if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
-            # Skip operations as they are not queries
-            self._check.log.debug("Skipping operations that are not queries: %s", op, command)
-            return False
-
-        if not self._explained_operations_ratelimiter.acquire(explain_plan_cache_key):
-            # Skip operations that have been explained recently
-            self._check.log.debug("Skipping explain operation that was recently explained: %s", command)
-            return False
-
-        return True
-
-    def _get_explain_plan(self, op: Optional[str], command: dict, dbname: str) -> OperationSamplePlan:
-        dbname = command.pop("$db", dbname)
-        try:
-            explain_plan = self._check.api_client[dbname].command("explain", command, verbosity="executionStats")
-            explain_plan = self._format_explain_plan(explain_plan)
-            return {
-                "definition": explain_plan,
-                "signature": compute_exec_plan_signature(json_util.dumps(explain_plan)),
-            }
-        except Exception as e:
-            self._check.log.error("Could not explain command %s: %s", command, e)
-            return {
-                "collection_errors": [
-                    {
-                        "code": str(type(e).__name__),
-                        "message": str(e),
-                    }
-                ],
-            }
-
-    def _format_explain_plan(self, explain_plan: dict) -> dict:
-        if not explain_plan:
-            return None
-
-        return {
-            key: value
-            for key, value in explain_plan.items()
-            if key not in ("serverInfo", "serverParameters", "command", "ok", "$clusterTime", "operationTime")
-        }
-
     def _get_operation_client(self, operation: dict) -> OperationSampleClient:
         client_metadata = operation.get("clientMetadata", {})
 
@@ -260,35 +214,9 @@ class MongoOperationSamples(DBMAsyncJob):
             return None
         return effective_users[0].get("user")
 
-    def _get_command_truncation_state(self, command: dict) -> Optional[str]:
-        if not command:
-            return None
-        return "truncated" if command.get("$truncated") else "not_truncated"
-
-    def _get_command_collection(self, command: dict, collection_from_ns: str) -> Optional[str]:
-        if collection_from_ns != '$cmd':
-            return collection_from_ns
-
-        # If the collection name parsed from namespace is $cmd
-        # we try to look for the collection in the command
-        for key in (
-            "collection",
-            "find",
-            "aggregate",
-            "update",
-            "insert",
-            "delete",
-            "findAndModify",
-            "distinct",
-            "count",
-        ):
-            collection = command.get(key)
-            if collection and isinstance(collection, str):  # edge case like {"aggregate": 1}
-                return collection
-
     def _get_operation_metadata(self, operation: dict) -> OperationSampleOperationMetadata:
         namespace = operation.get("ns")
-        db, collection = namespace.split(".", 1)
+        db, _ = namespace.split(".", 1)
         command = operation.get("command", {})
         return {
             "type": operation.get("type"),
@@ -296,12 +224,42 @@ class MongoOperationSamples(DBMAsyncJob):
             "shard": operation.get("shard"),
             "dbname": command.get("$db", db),
             "application": operation.get("appName"),
-            "collection": self._get_command_collection(command, collection),
+            "collection": get_command_collection(command, namespace),
             "comment": command.get("comment"),
-            "truncated": self._get_command_truncation_state(command),
+            "truncated": get_command_truncation_state(command),
             "client": self._get_operation_client(operation),
             "user": self._get_operation_user(operation),
             "ns": namespace,
+        }
+
+    def _get_operation_cursor(self, operation: dict) -> Optional[OperationSampleOperationStatsCursor]:
+        cursor = operation.get("cursor")
+        if not cursor:
+            return None
+
+        created_date = cursor.get("createdDate")
+        if created_date:
+            created_date = created_date.isoformat()
+        last_access_date = cursor.get("lastAccessDate")
+        if last_access_date:
+            last_access_date = last_access_date.isoformat()
+
+        originating_command = cursor.get("originatingCommand")
+        if originating_command:
+            originating_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
+
+        return {
+            "cursor_id": cursor.get("cursorId"),
+            "created_date": created_date,
+            "last_access_date": last_access_date,
+            "n_docs_returned": cursor.get("nDocsReturned", 0),
+            "n_batches_returned": cursor.get("nBatchesReturned", 0),
+            "no_cursor_timeout": cursor.get("noCursorTimeout", False),
+            "tailable": cursor.get("tailable", False),
+            "await_data": cursor.get("awaitData", False),
+            "originating_command": originating_command,
+            "plan_summary": cursor.get("planSummary"),
+            "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
         }
 
     def _get_operation_stats(self, operation: dict) -> OperationSampleOperationStats:
@@ -311,6 +269,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "opid": operation.get("opid"),  # str
             "ns": operation.get("ns"),  # str
             "plan_summary": operation.get("planSummary"),  # str
+            "query_framework": operation.get("queryFramework"),  # str
             "current_op_time": operation.get("currentOpTime"),  # str  start time of the operation
             "microsecs_running": operation.get("microsecs_running"),  # int
             "transaction_time_open_micros": operation.get("transaction", {}).get("timeOpenMicros"),  # int
@@ -320,13 +279,21 @@ class MongoOperationSamples(DBMAsyncJob):
             "num_yields": operation.get("numYields", 0),  # int
             # Locks
             "waiting_for_lock": operation.get("waitingForLock", False),  # bool
-            "locks": self._format_key_name(operation.get("locks", {})),  # dict
-            "lock_stats": self._format_key_name(operation.get("lockStats", {})),  # dict
+            "locks": format_key_name(self._check.convert_to_underscore_separated, operation.get("locks", {})),  # dict
+            "lock_stats": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("lockStats", {})
+            ),  # dict
             # Flow control
             "waiting_for_flow_control": operation.get("waitingForFlowControl", False),  # bool
-            "flow_control_stats": self._format_key_name(operation.get("flowControlStats", {})),  # dict
+            "flow_control_stats": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("flowControlStats", {})
+            ),  # dict
             # Latches
-            "waiting_for_latch": operation.get("waitingForLatch", False),  # bool
+            "waiting_for_latch": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("waitingForLatch", {})
+            ),  # dict
+            # cursor
+            "cursor": self._get_operation_cursor(operation),  # dict
         }
 
     def _get_query_signature(self, obfuscated_command: str) -> str:
@@ -345,7 +312,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "host": self._check._resolved_hostname,
             "dbm_type": "plan",
             "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "mongodb",
+            "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
             "timestamp": now * 1000,
             "network": {
@@ -366,6 +333,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     "ns": operation_metadata["ns"],
                 },
                 "query_truncated": operation_metadata["truncated"],
+                "source": "activity",
             },
             "mongodb": {key: value for key, value in activity.items() if key not in SAMPLE_EXCLUDE_KEYS},
         }
@@ -397,24 +365,10 @@ class MongoOperationSamples(DBMAsyncJob):
         return {
             "host": self._check._resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "mongodb",
+            "ddsource": "mongo",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(include_deployment_tags=True),
             "timestamp": now * 1000,
             "mongodb_activity": activities,
         }
-
-    def _format_key_name(self, metric_dict: Dict) -> dict:
-        # convert camelCase to snake_case
-        formatted = {}
-        for key, value in metric_dict.items():
-            formatted_key = to_native_string(self._check.convert_to_underscore_separated(key))
-            if formatted_key in metric_dict:
-                # If the formatted_key already exists (conflict), use the original key
-                formatted_key = key
-            if isinstance(value, dict):
-                formatted[formatted_key] = self._format_key_name(value)
-            else:
-                formatted[formatted_key] = value
-        return formatted

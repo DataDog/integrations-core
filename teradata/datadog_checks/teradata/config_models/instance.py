@@ -42,7 +42,7 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
-class Table(BaseModel):
+class Tables(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -76,7 +76,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     ssl_mode: Optional[Literal['Allow', 'Disable', 'Prefer', 'Require']] = None
     ssl_protocol: Optional[str] = None
-    tables: Optional[Union[tuple[str, ...], Table]] = None
+    tables: Optional[Union[tuple[str, ...], Tables]] = None
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None

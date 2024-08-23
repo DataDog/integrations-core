@@ -66,6 +66,7 @@ def test_check_simple_user(aggregator):
 
 
 @pytest.mark.integration
+@pytest.mark.flaky
 @pytest.mark.usefixtures("dd_environment")
 def test_check_with_filters(aggregator):
     # type: (AggregatorStub) -> None

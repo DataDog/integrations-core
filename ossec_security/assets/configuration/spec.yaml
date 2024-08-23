@@ -1,0 +1,10 @@
+name: ossec-security
+files:
+- name: ossec_security.yaml
+  options:
+  - template: logs
+    example:
+    - type: udp
+      port: <PORT>
+      source: ossec-security
+      service: ossec-security

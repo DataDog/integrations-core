@@ -53,7 +53,8 @@ def get_long_state_name(state):
 
 
 class Deployment(object):
-    def __init__(self):
+    def __init__(self, hosting_type):
+        self.hosting_type = hosting_type
         self.use_shards = False
 
     def is_principal(self):
@@ -73,6 +74,8 @@ class Deployment(object):
         The tags are subject to change in the event of a deployment type update,
         such as a replica set member state change.
         """
+        if self.hosting_type:
+            return ["hosting_type:{}".format(self.hosting_type)]
         return []
 
     @property
@@ -84,8 +87,8 @@ class Deployment(object):
 
 
 class MongosDeployment(Deployment):
-    def __init__(self, shard_map):
-        super(MongosDeployment, self).__init__()
+    def __init__(self, hosting_type, shard_map):
+        super(MongosDeployment, self).__init__(hosting_type)
         self.use_shards = True
         self.shard_map = shard_map
 
@@ -107,7 +110,7 @@ class MongosDeployment(Deployment):
 
     @property
     def deployment_tags(self):
-        return ["sharding_cluster_role:mongos"]
+        return super(MongosDeployment, self).deployment_tags + ["sharding_cluster_role:mongos"]
 
     @property
     def instance_metadata(self):
@@ -138,10 +141,11 @@ class MongosDeployment(Deployment):
 
 
 class ReplicaSetDeployment(Deployment):
-    def __init__(self, replset_name, replset_state, hosts, cluster_role=None):
-        super(ReplicaSetDeployment, self).__init__()
+    def __init__(self, hosting_type, replset_name, replset_state, hosts, replset_me, cluster_role=None):
+        super(ReplicaSetDeployment, self).__init__(hosting_type)
         self.replset_name = replset_name
         self.replset_state = replset_state
+        self.replset_me = replset_me
         self.replset_state_name = get_state_name(replset_state).lower()
         self.use_shards = cluster_role is not None
         self.cluster_role = cluster_role
@@ -161,9 +165,12 @@ class ReplicaSetDeployment(Deployment):
 
     @property
     def deployment_tags(self):
-        tags = [
+        tags = super(ReplicaSetDeployment, self).deployment_tags + [
             "replset_name:{}".format(self.replset_name),
             "replset_state:{}".format(self.replset_state_name),
+            # in a replica set, the 'me' field is the [hostname]:[port]
+            # of the node responding to this command.
+            "replset_me:{}".format(self.replset_me),
         ]
         if self.use_shards:
             tags.append('sharding_cluster_role:{}'.format(self.cluster_role))
@@ -193,6 +200,9 @@ class ReplicaSetDeployment(Deployment):
 
 
 class StandaloneDeployment(Deployment):
+    def __init__(self, hosting_type):
+        super(StandaloneDeployment, self).__init__(hosting_type)
+
     def is_principal(self):
         # A standalone always have full visibility.
         return True

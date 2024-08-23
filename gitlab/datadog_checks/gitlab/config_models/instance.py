@@ -29,7 +29,7 @@ class AuthToken(BaseModel):
     writer: Optional[MappingProxyType[str, Any]] = None
 
 
-class ExtraMetric(BaseModel):
+class ExtraMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         extra='allow',
@@ -74,7 +74,7 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
-class Metric(BaseModel):
+class Metrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         extra='allow',
@@ -94,7 +94,7 @@ class Proxy(BaseModel):
     no_proxy: Optional[tuple[str, ...]] = None
 
 
-class ShareLabel(BaseModel):
+class ShareLabels(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -131,7 +131,7 @@ class InstanceConfig(BaseModel):
     exclude_metrics: Optional[tuple[str, ...]] = None
     exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
-    extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetric]]], ...]] = None
+    extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
     gitaly_server_endpoint: Optional[str] = None
     gitlab_url: Optional[str] = None
     headers: Optional[MappingProxyType[str, Any]] = None
@@ -156,7 +156,7 @@ class InstanceConfig(BaseModel):
     labels_mapper: Optional[MappingProxyType[str, Any]] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
-    metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metric]]], ...]] = None
+    metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
     min_collection_interval: Optional[float] = None
     namespace: Optional[str] = Field(None, pattern='\\w*')
     non_cumulative_histogram_buckets: Optional[bool] = None
@@ -180,7 +180,7 @@ class InstanceConfig(BaseModel):
     send_monotonic_counter: Optional[bool] = None
     send_monotonic_with_gauge: Optional[bool] = None
     service: Optional[str] = None
-    share_labels: Optional[MappingProxyType[str, Union[bool, ShareLabel]]] = None
+    share_labels: Optional[MappingProxyType[str, Union[bool, ShareLabels]]] = None
     skip_proxy: Optional[bool] = None
     tag_by_endpoint: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None

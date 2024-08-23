@@ -11,7 +11,7 @@ Connect MongoDB to Datadog in order to:
 
 You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
 
-**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba AsparaDB and AWS DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
+**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and AWS DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
 
 ## Setup
 
@@ -21,7 +21,7 @@ The MongoDB check is included in the [Datadog Agent][2] package. No additional i
 
 ### Architecture
 
-Most low-level metrics (uptime, storage size etc.) needs to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
+Most low-level metrics (uptime, storage size etc.) need to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Standalone" xxx -->
@@ -44,7 +44,12 @@ db.createUser({
   "roles": [
     { role: "read", db: "admin" },
     { role: "clusterMonitor", db: "admin" },
-    { role: "read", db: "local" }
+    { role: "read", db: "local" },
+    # Grant additional read-only access to the database you want to collect collection/index statistics from.
+    { role: "read", db: "mydb" },
+    { role: "read", db: "myanotherdb" },
+    # Alternatively, grant read-only access to all databases.
+    { role: "readAnyDatabase", db: "admin" }
   ]
 })
 ```
@@ -72,7 +77,12 @@ db.createUser({
   "roles": [
     { role: "read", db: "admin" },
     { role: "clusterMonitor", db: "admin" },
-    { role: "read", db: "local" }
+    { role: "read", db: "local" },
+    # Grant additional read-only access to the database you want to collect collection/index statistics from.
+    { role: "read", db: "mydb" },
+    { role: "read", db: "myanotherdb" },
+    # Alternatively, grant read-only access to all databases.
+    { role: "readAnyDatabase", db: "admin" }
   ]
 })
 ```
@@ -196,6 +206,81 @@ To configure this check for an Agent running on a host:
        #
        options:
          authSource: admin
+   ```
+
+2. [Restart the Agent][6].
+
+##### Database Autodiscovery
+
+Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance. 
+Please note that database autodiscovery is disabled by default. Read access to the autodiscovered databases is required to collect metrics from them.
+To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
+
+```yaml
+   init_config:
+
+   instances:
+       ## @param hosts - list of strings - required
+       ## Hosts to collect metrics from, as is appropriate for your deployment topology.
+       ## E.g. for a standalone deployment, specify the hostname and port of the mongod instance.
+       ## For replica sets or sharded clusters, see instructions in the sample conf.yaml.
+       ## Only specify multiple hosts when connecting through mongos
+       #
+     - hosts:
+         - <HOST>:<PORT>
+
+       ## @param username - string - optional
+       ## The username to use for authentication.
+       #
+       username: datadog
+
+       ## @param password - string - optional
+       ## The password to use for authentication.
+       #
+       password: <UNIQUE_PASSWORD>
+
+       ## @param options - mapping - optional
+       ## Connection options. For a complete list, see:
+       ## https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
+       #
+       options:
+         authSource: admin
+
+       ## @param database_autodiscovery - mapping - optional
+       ## Enable database autodiscovery to automatically collect metrics from all your MongoDB databases.
+       #
+       database_autodiscovery:
+         ## @param enabled - boolean - required
+         ## Enable database autodiscovery.
+         #
+         enabled: true
+
+         ## @param include - list of strings - optional
+         ## List of databases to include in the autodiscovery. Use regular expressions to match multiple databases.
+         ## For example, to include all databases starting with "mydb", use "^mydb.*".
+         ## By default, include is set to ".*" and all databases are included.
+         #
+         include:
+            - "^mydb.*"
+
+         ## @param exclude - list of strings - optional
+         ## List of databases to exclude from the autodiscovery. Use regular expressions to match multiple databases.
+         ## For example, to exclude all databases starting with "mydb", use "^mydb.*".
+         ## When the exclude list conflicts with include list, the exclude list takes precedence.
+         #
+         exclude:
+            - "^mydb2.*"
+            - "admin$"
+
+         ## @param max_databases - integer - optional
+         ## Maximum number of databases to collect metrics from. The default value is 100.
+         #
+         max_databases: 100
+
+         ## @param refresh_interval - integer - optional
+         ## Interval in seconds to refresh the list of databases. The default value is 600 seconds.
+         #
+         refresh_interval: 600
    ```
 
 2. [Restart the Agent][6].
@@ -457,18 +542,20 @@ The following metrics are **not** collected by default. Use the `additional_metr
 | metric prefix            | what to add to `additional_metrics` to collect it |
 | ------------------------ | ------------------------------------------------- |
 | mongodb.collection       | collection                                        |
-| mongodb.commands         | top                                               |
-| mongodb.getmore          | top                                               |
-| mongodb.insert           | top                                               |
-| mongodb.queries          | top                                               |
-| mongodb.readLock         | top                                               |
-| mongodb.writeLock        | top                                               |
-| mongodb.remove           | top                                               |
-| mongodb.total            | top                                               |
-| mongodb.update           | top                                               |
-| mongodb.writeLock        | top                                               |
+| mongodb.usage.commands   | top                                               |
+| mongodb.usage.getmore    | top                                               |
+| mongodb.usage.insert     | top                                               |
+| mongodb.usage.queries    | top                                               |
+| mongodb.usage.readLock   | top                                               |
+| mongodb.usage.writeLock  | top                                               |
+| mongodb.usage.remove     | top                                               |
+| mongodb.usage.total      | top                                               |
+| mongodb.usage.update     | top                                               |
+| mongodb.usage.writeLock  | top                                               |
 | mongodb.tcmalloc         | tcmalloc                                          |
 | mongodb.metrics.commands | metrics.commands                                  |
+| mongodb.chunks.jumbo     | jumbo_chunks                                      |
+| mongodb.chunks.total     | jumbo_chunks                                      |
 
 ### Events
 

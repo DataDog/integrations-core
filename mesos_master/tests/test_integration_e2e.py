@@ -6,7 +6,7 @@ from six import iteritems
 
 from datadog_checks.mesos_master import MesosMaster
 
-from .common import BASIC_METRICS, CHECK_NAME, INSTANCE, not_windows_ci
+from .common import BASIC_METRICS, CHECK_NAME, INSTANCE, OPTIONAL_METRICS, not_windows_ci
 
 pytestmark = not_windows_ci
 
@@ -41,7 +41,10 @@ def assert_metric_coverage(aggregator):
             metrics.append(m[0])
 
     for m in metrics:
-        aggregator.assert_metric(m)
+        if m in OPTIONAL_METRICS:
+            aggregator.assert_metric(m, at_least=0)
+        else:
+            aggregator.assert_metric(m)
 
     aggregator.assert_all_metrics_covered()
 

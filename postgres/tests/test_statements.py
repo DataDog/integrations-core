@@ -39,6 +39,7 @@ from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_13
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
+CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
@@ -87,7 +88,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'incremental_query_metrics': True}
+    dbm_instance['query_metrics']['incremental_query_metrics'] = True
     connections = {}
 
     def normalize_query(q):
@@ -225,8 +226,6 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     connections = {}
 
     def _run_queries():
@@ -532,7 +531,10 @@ def dbm_instance(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
+    # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
+    # This prevents DBMAsync from skipping job executions, as it is designed
+    # to not execute jobs more frequently than their collection period.
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': CLOSE_TO_ZERO_INTERVAL}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -703,7 +705,7 @@ def test_failed_explain_handling(
             "dogs_noschema",
             "SELECT * FROM kennel WHERE id = %s",
             123,
-            "error:explain-invalid_schema-<class 'psycopg2.errors.InvalidSchemaName'>",
+            "error:explain-no_plans_possible",
             [{'code': 'invalid_schema', 'message': "<class 'psycopg2.errors.InvalidSchemaName'>"}],
             StatementTruncationState.not_truncated.value,
             [],
@@ -722,10 +724,10 @@ def test_failed_explain_handling(
                 "datadog.explain_statement exists in the database. See "
                 "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
                 " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
-                "/* service='datadog-agent' */ SELECT datadog.explain_stateme...\n"
-                "                                             ^\nHINT:  No function matches the given name"
-                " and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function "
-                "dbname=dogs_nofunc host=stubbed.hostname",
+                "... DDIGNORE */ /* service='datadog-agent' */ SELECT datadog.ex...\n"
+                "                                                             ^\nHINT:  No function matches the given "
+                "name and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function"
+                " dbname=dogs_nofunc host=stubbed.hostname",
             ],
         ),
         (
@@ -754,6 +756,9 @@ def test_failed_explain_handling(
         ),
     ],
 )
+@pytest.mark.parametrize(
+    "dbstrict,ignore_databases", [(True, []), (False, []), (False, ['foo']), (False, ['postgres'])]
+)
 def test_statement_samples_collect(
     aggregator,
     integration_check,
@@ -769,9 +774,14 @@ def test_statement_samples_collect(
     expected_statement_truncated,
     datadog_agent,
     expected_warnings,
+    dbstrict,
+    ignore_databases,
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['dbstrict'] = dbstrict
+    dbm_instance['dbname'] = dbname
+    dbm_instance['ignore_databases'] = ignore_databases
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -801,18 +811,19 @@ def test_statement_samples_collect(
             assert len(matching) == 0, "did not expect to catch any events"
             return
 
-        assert len(matching) == 1, "missing captured event"
-        event = matching[0]
-        assert event['db']['query_truncated'] == expected_statement_truncated
-
         if expected_error_tag:
-            assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
+            if len(matching) > 0:
+                event = matching[0]
+                assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
             aggregator.assert_metric(
                 "dd.postgres.statement_samples.error",
                 tags=tags + [expected_error_tag, 'agent_hostname:stubbed.hostname'],
                 hostname='stubbed.hostname',
             )
         else:
+            assert len(matching) == 1, "missing captured event"
+            event = matching[0]
+            assert event['db']['query_truncated'] == expected_statement_truncated
             assert set(event['ddtags'].split(',')) == set(tags)
             assert event['db']['plan']['definition'] is not None, "missing execution plan"
             assert 'Plan' in json.loads(event['db']['plan']['definition']), "invalid json execution plan"
@@ -860,6 +871,9 @@ def test_statement_metadata(
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
+    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -944,6 +958,9 @@ def test_statement_reported_hostname(
 ):
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
+    dbm_instance['query_samples']['collection_interval'] = 0.0000001
     dbm_instance['reported_hostname'] = reported_hostname
 
     check = integration_check(dbm_instance)
@@ -1741,26 +1758,15 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     dbm_instance['query_samples'] = {'enabled': True, 'run_sync': True}
     check = integration_check(dbm_instance)
     check._connect()
-    with pytest.raises(psycopg2.errors.UndefinedTable):
-        check.check(dbm_instance)
-
-    # run asynchronously, loop will crash the first time it tries to run as the table doesn't exist
-    dbm_instance['query_samples']['run_sync'] = False
-    check = integration_check(dbm_instance)
-    check._connect()
     check.check(dbm_instance)
-    # make sure there were no unhandled exceptions
-    check.statement_samples._job_loop_future.result()
-    aggregator.assert_metric(
-        "dd.postgres.async_job.error",
-        tags=_get_expected_tags(
-            check,
-            dbm_instance,
-            with_db=True,
-            job='query-samples',
-            error="database-<class 'psycopg2.errors.UndefinedTable'>",
-        ),
+
+    print(check.warnings)
+    assert check.warnings[0].startswith(
+        "Unable to collect activity columns in dbname=datadog_test. Check that the function "
+        "wrong_view exists in the database. See "
+        "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting"
     )
+    assert "code=undefined-pg-stat-activity-view dbname=datadog_test host=stubbed.hostname" in check.warnings[0]
 
 
 @pytest.mark.parametrize(

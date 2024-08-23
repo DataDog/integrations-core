@@ -1,4 +1,4 @@
-<div class="alert alert-info">The Cisco SD-WAN NDM integration is in private beta.</div>
+<div class="alert alert-info">The Cisco SD-WAN NDM integration is in public beta.</div>
 
 # Agent Check: Cisco SD-WAN
 
@@ -8,7 +8,7 @@ The Cisco SD-WAN integration lets you monitor your Cisco SD-WAN environment with
 
 ## Setup
 
-**Note**: The Cisco SD-WAN NDM integration is in **Beta** and will not be billed until it is Generally Available.
+**The Cisco SD-WAN NDM integration is in Beta and will not be billed until it is Generally Available.**
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 

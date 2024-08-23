@@ -16,7 +16,22 @@
       "Category::Message Queues",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/rabbitmq-monitoring"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/rabbitmq-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog"
+      }
     ]
   },
   "author": {

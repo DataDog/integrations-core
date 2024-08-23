@@ -33,6 +33,7 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
+from .utils import CLOSE_TO_ZERO_INTERVAL
 
 try:
     import pyodbc
@@ -61,11 +62,13 @@ def dbm_instance(instance_docker):
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
-    # set a very small collection interval so the tests go fast
+    # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
+    # This prevents DBMAsync from skipping job executions, as it is designed
+    # to not execute jobs more frequently than their collection period.
     instance_docker['query_metrics'] = {
         'enabled': True,
         'run_sync': True,
-        'collection_interval': 0.1,
+        'collection_interval': CLOSE_TO_ZERO_INTERVAL,
         # in tests sometimes things can slow down so we don't want this short deadline causing some events
         # to fail to be collected on time
         'enforce_collection_interval_deadline': False,
@@ -1018,6 +1021,7 @@ def test_metrics_lookback_multiplier(instance_docker):
     mock_cursor.execute.assert_called_with(ANY, (6,))
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.2.1 / 2024-05-31
+## 6.2.2 / 2024-07-05 / Agent 7.56.0
+
+***Fixed***:
+
+* Fix prometheus entry ([#17878](https://github.com/DataDog/integrations-core/pull/17878))
+
+## 6.2.1 / 2024-05-31 / Agent 7.55.0
 
 ***Fixed***:
 

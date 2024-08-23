@@ -13,7 +13,8 @@
     "media": [],
     "classifier_tags": [
       "Category::OS & System",
-      "Supported OS::Windows"
+      "Supported OS::Windows",
+      "Offering::Integration"
     ]
   },
   "author": {
