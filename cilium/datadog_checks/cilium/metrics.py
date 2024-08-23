@@ -107,6 +107,19 @@ AGENT_METRICS = {
     'cilium_kvstore_initial_sync_completed': 'kvstore.initial_sync_completed',
     'cilium_k8s_client_rate_limiter_duration_seconds': 'k8s_client.rate_limiter_duration.seconds',
     'cilium_policy_change_total': 'policy.change.total',
+    # Cilium 1.15+
+    'cilium_bpf_map_capacity': 'bpf.map.capacity',
+    'cilium_hive_status': 'hive.status',
+    'cilium_ipam_capacity': 'ipam.capacity',
+    'cilium_endpoint_max_ifindex': 'endpoint.max.ifindex',
+    'cilium_cidrgroups_referenced': 'cidrgroups.referenced',
+    'cilium_cidrgroup_translation_time_stats_seconds': 'cidrgroup.translation.time.stats.seconds',
+    'cilium_k8s_workqueue_adds_total': 'k8s.workqueue.adds.total',
+    'cilium_k8s_workqueue_depth': 'k8s.workqueue.depth',
+    'cilium_k8s_workqueue_longest_running_processor_seconds': 'k8s.workqueue.logenst.running.processor.seconds',
+    'cilium_k8s_workqueue_retries_total': 'k8s.workqueue.retries.total',
+    'cilium_k8s_workqueue_unfinished_work_seconds': 'k8s.workqueue.unfinished.work.seconds',
+    'cilium_version': 'version',
 }
 
 OPERATOR_V2_OVERRIDES = {
@@ -191,6 +204,12 @@ OPERATOR_METRICS = {
     'cilium_operator_ipam_needed_ips': 'operator.ipam.needed_ips',
     'cilium_operator_ipam_release_duration_seconds': 'operator.ipam.release.duration.seconds',
     'cilium_operator_ipam_used_ips': 'operator.ipam.used_ips',
+    # Cilium 1.15+
+    'cilium_hive_status': 'operator.hive.status',
+    'cilium_operator_errors_warnings_total': 'operator.errors.warnings.total',
+    'cilium_operator_lbipam_conflicting_pools_total': 'operator.lbipam.conflicting.pools.total',
+    'cilium_operator_lbipam_services_matching_total': 'operator.lbipam.services.matching.total',
+    'cilium_operator_lbipam_services_unsatisfied_total': 'operator.lbipam.services.unsatisfied.total',
 }
 
 AGENT_V2_METRICS = deepcopy(AGENT_METRICS)
