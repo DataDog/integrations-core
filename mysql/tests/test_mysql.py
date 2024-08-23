@@ -801,11 +801,6 @@ def test_propagate_agent_tags(
                 'server:{}'.format(HOST),
                 'port:{}'.format(PORT),
             ]
-        expected_tags = [
-            'server:{}'.format(HOST),
-            'port:{}'.format(PORT),
-            'dd.internal.resource:database_instance:{}'.format(expected_hostname),
-        ]
-        aggregator.assert_service_check(
-            'mysql.can_connect', count=1, status=MySql.OK, tags=expected_tags + agent_tags
-        )
+            aggregator.assert_service_check(
+                'mysql.can_connect', count=1, status=MySql.OK, tags=expected_tags + agent_tags
+            )
