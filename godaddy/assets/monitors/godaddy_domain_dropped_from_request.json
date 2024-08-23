@@ -1,35 +1,35 @@
 {
-"version": 2,
-"created_at": "2024-08-16",
-"last_updated_at": "2024-08-16",
-"title": "Godaddy Domain Dropped from Request",
-"description": "The domain is no longer associated with the request. This means that the domain is not registered or is not active.",
-"definition": {
-	"id": 150029151,
-	"name": "GoDaddy Domain Dropped from Request",
-	"type": "query alert",
-	"query": "sum(last_1h):max:godaddy.certificate.domain_status{status:dropped} by {domain_name} >= 1",
-	"message": "The domain {{domain_name.name}} has been dropped from the request.",
-	"tags": [
-		"service:domain",
-		"source:godaddy"
-	],
-	"options": {
-		"thresholds": {
-			"critical": 1
+	"version": 2,
+	"created_at": "2024-08-20",
+	"last_updated_at": "2024-08-20",
+	"title": "Domain Dropped from Request",
+	"description": "The domain is no longer associated with the request. This means that the domain is not registered or is not active.",
+	"definition": {
+		"id": 150029151,
+		"name": "Domain Dropped from Request",
+		"type": "query alert",
+		"query": "sum(last_1h):max:godaddy.certificate.domain_status{domain_status:dropped} by {domain_name} >= 1",
+		"message": "The domain {{domain_name.name}} has been dropped from the request. Please review and take the necessary actions.",
+		"tags": [
+			"service:domain",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_group_delay": 0,
+			"silenced": {}
 		},
-		"notify_audit": false,
-		"include_tags": true,
-		"notify_no_data": false,
-		"new_group_delay": 0,
-		"silenced": {}
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
 	},
-	"priority": null,
-	"restriction_policy": {
-		"bindings": []
-	}
-},
-"tags": [
-	"integration:godaddy"
-]
+	"tags": [
+		"integration:godaddy"
+	]
 }

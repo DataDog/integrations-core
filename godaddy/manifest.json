@@ -12,8 +12,13 @@
     "title": "GoDaddy",
     "media": [
       {
-        "caption": "GoDaddy",
-        "image_url": "images/godaddy.png",
+        "caption": "GoDaddy Overview",
+        "image_url": "images/godaddy_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "GoDaddy Overview",
+        "image_url": "images/godaddy_2.png",
         "media_type": "image"
       }
       
@@ -28,7 +33,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 21264130,
-      "source_type_name": "godaddy",
+      "source_type_name": "GoDaddy",
       "events": {
         "creates_events": false
       },
@@ -42,18 +47,18 @@
       }
     },
     "dashboards": {
-      "Godaddy Overview": "assets/dashboards/godaddy.json"
+      "GoDaddy Overview": "assets/dashboards/godaddy_overview.json"
       
     },
     "monitors": {
-      "godaddy_certificate_denied": "assets/monitors/godaddy_certificate_denied.json",
-      "godaddy_certificate_expired": "assets/monitors/godaddy_certificate_expired.json",
-      "godaddy_certificate_in_an_error_state": "assets/monitors/godaddy_certificate_in_an_error_state.json",
-      "godaddy_certificate_revoked": "assets/monitors/godaddy_certificate_revoked.json",
-      "godaddy_days_remaining_for_expiration_of_certificate": "assets/monitors/godaddy_days_remaining_for_expiration_of_certificate.json",
-      "godaddy_domain_dropped_from_request": "assets/monitors/godaddy_domain_dropped_from_request.json",
-      "godaddy_domain_fraud_detected": "assets/monitors/godaddy_domain_fraud_detected.json",
-      "godaddy_domain_verification_failed": "assets/monitors/godaddy_domain_verification_failed.json"
+      "SSL Certificate Denied": "assets/monitors/godaddy_certificate_denied.json",
+      "SSL Certificate Expired": "assets/monitors/godaddy_certificate_expired.json",
+      "SSL Certificate in an Error State": "assets/monitors/godaddy_certificate_in_an_error_state.json",
+      "SSL Certificate Revoked": "assets/monitors/godaddy_certificate_revoked.json",
+      "SSL Certificate Expiration Alert": "assets/monitors/godaddy_days_remaining_for_expiration_of_certificate.json",
+      "Domain Dropped from Request": "assets/monitors/godaddy_domain_dropped_from_request.json",
+      "Domain Fraud Detected": "assets/monitors/godaddy_domain_fraud_detected.json",
+      "Domain Verification Failed": "assets/monitors/godaddy_domain_verification_failed.json"
     }
   },
   "author": {
