@@ -127,7 +127,7 @@ In other words, every time our integration completes its run we save the last cu
 We can then resume scraping from this cursor.
 That's what the `cursor` argument to the `records` method is for.
 The very first time the integration runs this `cursor` is `None` because we have no checkpoints.
-For every subsequent integration run, the `cursor` will be set to the `LogRecord.cursor` of the last `LogRecord` yielded or returned from records.
+For every subsequent integration run, the `cursor` will be set to the `LogRecord.cursor` of the last `LogRecord` yielded or returned from `records`.
 
 Some things to consider when defining cursors:
 
@@ -145,5 +145,5 @@ We will construct them from data that we collect from the external API, in this 
 Below are some tips and considerations when scraping external APIs:
 
 1. Use the `cursor` argument to checkpoint your progress.
-1. The Agent schedules an integration run approximately every 10-15 seconds. We can treat this as a retry mechanism, so there is no need for elaborate retry or backoff logic in integrations.
+1. The Agent schedules an integration run approximately every 10-15 seconds.
 1. The intake won't accept logs that are older than 18 hours. For better performance skip such logs as you generate `LogRecord` items.
