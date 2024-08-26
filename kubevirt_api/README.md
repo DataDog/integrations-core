@@ -19,7 +19,7 @@ The main use case to run the `kubevirt_api` check is as a [cluster level check][
 
 In order to do that, you will need to update some RBAC permissions to give the `datadog-agent` service account read-only access to the`KubeVirt` resources by following the steps below:
 
-1. Bind the `kubevirt.io:view` ClusterRole to the `datadog-agent` service account, :
+1. Bind the `kubevirt.io:view` ClusterRole to the `datadog-agent` service account:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -53,14 +53,9 @@ spec:
     patches:
       - resourceType: Deployment
         resourceName: virt-api
-        patch: '{"spec": {"template":{"metadata":{"annotations": {
-        "ad.datadoghq.com/virt-api.check_names": "[\"kubevirt_api\"]",
-        "ad.datadoghq.com/virt-api.init_configs": "[{}]",
-        "ad.datadoghq.com/virt-api.instances": "[{ \"kube_cluster_name\": \"<DD_CLUSTER_NAME>\", \"kubevirt_api_metrics_endpoint\": \"https://%%host%%:%%port%%/metrics\",\"kubevirt_api_healthz_endpoint\": \"https://%%host%%:%%port%%/healthz\", \"kube_namespace\":%%kube_namespace%%, \"kube_pod_name\":\"%%kube_pod_name%%\"}]"}}}}}'
+        patch: '{"spec":{"template":{"metadata":{"annotations":{"ad.datadoghq.com/virt-api.check_names":"[\"kubevirt_api\"]","ad.datadoghq.com/virt-api.init_configs":"[{}]","ad.datadoghq.com/virt-api.instances":"[{\"kubevirt_api_metrics_endpoint\":\"https://%%host%%:%%port%%/metrics\",\"kubevirt_api_healthz_endpoint\":\"https://%%host%%:%%port%%/healthz\",\"kube_namespace\":\"%%kube_namespace%%\",\"kube_pod_name\":\"%%kube_pod_name%%\",\"tls_verify\":\"false\"}]"}}}}}'
         type: strategic
 ```
-
-Replace `<DD_CLUSTER_NAME>` with the name you want for your cluster.
 
 ### Validation
 
