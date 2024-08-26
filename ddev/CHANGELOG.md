@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 10.1.0 / 2024-08-15
+
+***Added***:
+
+* Refactored integration name exclusion mapper and add new entries to exclusion mapper ([#18213](https://github.com/DataDog/integrations-core/pull/18213))
+* Add new ddtrace license to known licenses ([#18221](https://github.com/DataDog/integrations-core/pull/18221))
+* Bump `datadog_checks_dev` requirement ([#18346](https://github.com/DataDog/integrations-core/pull/18346))
+
+***Fixed***:
+
+* Enable local check only after installing it in agent docker container.
+  This avoids crashing the container with a version of the check that comes bundled with the agent before we load the local version of the check.
+  For now limited to docker since that addresses an immediate CI issue. We'll extend it to native agent once we observe it and iron out any kinks. ([#18271](https://github.com/DataDog/integrations-core/pull/18271))
+
 ## 10.0.0 / 2024-08-06
 
 ***Removed***:

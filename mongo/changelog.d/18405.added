@@ -1,0 +1,1 @@
+Add metric `mongodb.collection.indexes.accesses.opsps` to measure number of times the index was used per second.

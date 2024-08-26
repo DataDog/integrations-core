@@ -707,7 +707,8 @@
                 "comment": "sort",
                 "ns": "integration.$cmd"
             },
-            "query_truncated": "not_truncated"
+            "query_truncated": "not_truncated",
+            "source": "activity"
         },
         "mongodb": {
             "now": 1715911398.1112723,
@@ -717,6 +718,7 @@
             "opid": "shard04:265665",
             "ns": "integration.$cmd",
             "plan_summary": null,
+            "query_framework": null,
             "current_op_time": "2024-05-20T14:36:56.231+00:00",
             "microsecs_running": 29232,
             "transaction_time_open_micros": null,
@@ -751,13 +753,13 @@
             "waiting_for_flow_control": false,
             "flow_control_stats": {},
             "waiting_for_latch": {},
+            "cursor": null,
             "type": "op",
             "op": "query",
             "shard": "shard04",
             "collection": "users",
             "comment": "sort",
-            "truncated": "not_truncated",
-            "cursor": null
+            "truncated": "not_truncated"
         }
     }
 ]

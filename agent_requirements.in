@@ -23,7 +23,7 @@ cryptography==3.3.2; python_version < '3.0'
 cryptography==42.0.8; python_version > '3.0'
 ddtrace==0.32.2; sys_platform == 'win32' and python_version < '3.0'
 ddtrace==0.53.2; sys_platform != 'win32' and python_version < '3.0'
-ddtrace==2.9.3; python_version > '3.0'
+ddtrace==2.10.5; python_version > '3.0'
 dnspython==1.16.0; python_version < '3.0'
 dnspython==2.6.1; python_version > '3.0'
 enum34==1.1.10; python_version < '3.0'
@@ -73,7 +73,7 @@ pyopenssl==24.2.1; python_version > '3.0'
 pysmi==0.3.4; python_version < '3.0'
 pysmi==1.4.4; python_version > '3.0'
 pysnmp-mibs==0.1.6
-pysnmp==4.4.9
+pysnmp==4.4.10
 pysocks==1.7.1
 python-binary-memcached==0.26.1; sys_platform != 'win32' and python_version < '3.0'
 python-binary-memcached==0.31.2; sys_platform != 'win32' and python_version > '3.0'

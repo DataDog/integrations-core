@@ -69,6 +69,8 @@ integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
+integration/aws_neuron:
+- aws_neuron/**/*
 integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
@@ -125,6 +127,8 @@ integration/container:
 - container/**/*
 integration/containerd:
 - containerd/**/*
+integration/contentful:
+- contentful/**/*
 integration/coredns:
 - coredns/**/*
 integration/couch:
@@ -501,6 +505,8 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
+integration/trend_micro_vision_one_xdr:
+- trend_micro_vision_one_xdr/**/*
 integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:

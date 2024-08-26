@@ -233,6 +233,7 @@ instances:
     ##   * `top` - Usage statistics for each collection
     ##   * `collection` - Metrics of the specified collections
     ##   * `jumbo_chunks` - Count and percentage of jumbo chunks. Ignored on mongod instances.
+    ##   * `sharded_data_distribution` - Distribution of data in sharded collections.
     #
     # additional_metrics:
     #   - metrics.commands
@@ -240,6 +241,7 @@ instances:
     #   - top
     #   - collection
     #   - jumbo_chunks
+    #   - sharded_data_distribution
 
     ## @param collections - list of strings - optional
     ## Collect metrics on specific collections from the database specified

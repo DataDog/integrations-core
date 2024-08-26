@@ -5,6 +5,7 @@
 from pymongo.errors import OperationFailure
 
 from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.metrics import INDEX_METRICS
 
 
 class IndexStatsCollector(MongoCollector):
@@ -29,13 +30,14 @@ class IndexStatsCollector(MongoCollector):
         for coll_name in coll_names:
             try:
                 for stats in api.index_stats(self.db_name, coll_name):
-                    idx_tags = self.base_tags + [
+                    additional_tags = [
                         "name:{0}".format(stats.get('name', 'unknown')),
                         "collection:{0}".format(coll_name),
                         "db:{0}".format(self.db_name),
                     ]
-                    val = int(stats.get('accesses', {}).get('ops', 0))
-                    self.gauge('mongodb.collection.indexes.accesses.ops', val, idx_tags)
+                    if stats.get('shard'):
+                        additional_tags.append("shard:{0}".format(stats['shard']))
+                    self._submit_payload({"indexes": stats}, additional_tags, INDEX_METRICS, "collection")
             except OperationFailure as e:
                 # Atlas restricts $indexStats on system collections
                 self.log.warning("Could not collect index stats for collection %s: %s", coll_name, e)

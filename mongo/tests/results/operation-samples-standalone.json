@@ -128,7 +128,8 @@
                 "comment": "find",
                 "ns": "integration.products"
             },
-            "query_truncated": "not_truncated"
+            "query_truncated": "not_truncated",
+            "source": "activity"
         },
         "mongodb": {
             "now": 1715911398.1112723,
@@ -138,6 +139,7 @@
             "opid": 1538838,
             "ns": "integration.products",
             "plan_summary": "COLLSCAN",
+            "query_framework": null,
             "current_op_time": "2024-05-16T18:06:38.419+00:00",
             "microsecs_running": 167,
             "transaction_time_open_micros": null,
@@ -174,13 +176,13 @@
                 },
                 "capture_name": "FutureResolution"
             },
+            "cursor": null,
             "type": "op",
             "op": "query",
             "shard": null,
             "collection": "products",
             "comment": "find",
-            "truncated": "not_truncated",
-            "cursor": null
+            "truncated": "not_truncated"
         }
     }
 ]
