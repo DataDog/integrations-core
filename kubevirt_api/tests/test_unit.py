@@ -38,7 +38,6 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
     metrics_tags = [
         "endpoint:https://10.244.0.38:443/metrics",
         "kube_namespace:kubevirt",
-        "kube_cluster_name:test-cluster",
         "pod_name:virt-api-98cf864cc-zkgcd",
     ]
 
@@ -63,7 +62,6 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
 
     # VM metrics
     vm_tags = [
-        "kube_cluster_name:test-cluster",
         "kube_namespace:default",
         "vm_name:testvm",
         "vm_uid:46bc4e2b-d287-4408-8393-c7accdd73291",
@@ -78,7 +76,6 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
 
     # VMI metrics
     vmi_tags = [
-        "kube_cluster_name:test-cluster",
         "kube_namespace:default",
         "vmi_domain:testvm",
         "vmi_name:testvm-2",
@@ -115,13 +112,7 @@ def test_check_sends_zero_count_for_vms(dd_run_check, aggregator, instance, mock
         tags=HEALTHZ_TAGS,
     )
 
-    aggregator.assert_metric(
-        "kubevirt_api.vm.count",
-        value=0,
-        tags=[
-            "kube_cluster_name:test-cluster",
-        ],
-    )
+    aggregator.assert_metric("kubevirt_api.vm.count", value=0)
 
 
 def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, mocker):
@@ -142,20 +133,13 @@ def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, moc
         tags=HEALTHZ_TAGS,
     )
 
-    aggregator.assert_metric(
-        "kubevirt_api.vmi.count",
-        value=0,
-        tags=[
-            "kube_cluster_name:test-cluster",
-        ],
-    )
+    aggregator.assert_metric("kubevirt_api.vmi.count", value=0)
 
 
 def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, instance):
     check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
-    check.kube_client.get_pods.return_value = []
     check.kube_client.get_vms.return_value = []
     check.kube_client.get_vmis.return_value = []
 

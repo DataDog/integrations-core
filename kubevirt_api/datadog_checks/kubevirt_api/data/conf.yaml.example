@@ -56,11 +56,6 @@ instances:
     #
     # kubevirt_api_healthz_endpoint: https://<YOUR_IP>:443/healthz
 
-    ## @param kube_cluster_name - string - optional
-    ## The name of the Kubernetes cluster.
-    #
-    # kube_cluster_name: dev-cluster
-
     ## @param kube_namespace - string - optional
     ## The namespace where the KubeVirt API is running.  (Provided by autodiscovery template variables)
     #

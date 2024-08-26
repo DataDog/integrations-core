@@ -43,10 +43,6 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.base_vm_tags = []
         self.base_pod_tags = []
 
-        if self.kube_cluster_name:
-            self.base_vm_tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
-            self.base_pod_tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
-
         if self.kube_namespace:
             self.base_pod_tags.append(f"kube_namespace:{self.kube_namespace}")
 
@@ -111,9 +107,6 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         else:
             self.log.debug("VM metadata not found")
 
-        if self.kube_cluster_name:
-            tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
-
         for label, value in vm["spec"]["template"]["metadata"]["labels"].items():
             if not label.startswith("kubevirt.io/"):
                 continue
@@ -140,9 +133,6 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         else:
             self.log.debug("VMI metadata not found")
 
-        if self.kube_cluster_name:
-            tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
-
         for label, value in vmi["metadata"]["labels"].items():
             if not label.startswith("kubevirt.io/"):
                 continue
@@ -154,7 +144,6 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def _parse_config(self):
         self.kubevirt_api_metrics_endpoint = self.instance.get("kubevirt_api_metrics_endpoint")
         self.kubevirt_api_healthz_endpoint = self.instance.get("kubevirt_api_healthz_endpoint")
-        self.kube_cluster_name = self.instance.get("kube_cluster_name")
         self.kube_namespace = self.instance.get("kube_namespace")
         self.kube_pod_name = self.instance.get("kube_pod_name")
 

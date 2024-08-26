@@ -74,7 +74,6 @@ def dd_environment():
 
         instance["kubevirt_api_metrics_endpoint"] = f"https://{host}:{port}/metrics"
         instance["kubevirt_api_healthz_endpoint"] = f"https://{host}:{port}/healthz"
-        instance["kube_cluster_name"] = "test-cluster-e2e"
         instance["kube_namespace"] = "kubevirt"
         instance["kube_pod_name"] = "virt-api-98cf864cc-zkgcd"
         instance["kube_config_dict"] = kubeconfig_content
@@ -89,7 +88,6 @@ def instance():
         "kubevirt_api_metrics_endpoint": "https://10.244.0.38:443/metrics",
         "kubevirt_api_healthz_endpoint": "https://10.244.0.38:443/healthz",
         "kube_namespace": "kubevirt",
-        "kube_cluster_name": "test-cluster",
         "kube_pod_name": "virt-api-98cf864cc-zkgcd",
     }
 
