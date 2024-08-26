@@ -223,6 +223,6 @@ class MongoConfig(object):
                 database_autodiscovery_config['include'] = include_list
         # Limit the maximum number of collections per database to monitor
         database_autodiscovery_config["max_collections_per_database"] = int(
-            database_autodiscovery_config.get("max_collections_per_database", 20)
+            database_autodiscovery_config.get("max_collections_per_database", 100)
         )
         return database_autodiscovery_config
