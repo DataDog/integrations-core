@@ -63,8 +63,8 @@ class MockedDB(object):
 
     def command(self, command, *args, **_):
         filename = command
-        if command == "dbstats":
-            filename += f"-{self._db_name}"
+        if "dbStats" in command:
+            filename = f"dbstats-{self._db_name}"
         elif command == "collstats":
             coll_name = args[0]
             filename += f"-{coll_name}"
@@ -90,6 +90,9 @@ class MockedDB(object):
         if pipeline[0] == {'$currentOp': {'allUsers': True}}:
             # mock the $currentOp aggregation used for operation sampling
             with open(os.path.join(HERE, "fixtures", f"$currentOp-{self.deployment}"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
+        elif pipeline[0] == {"$shardedDataDistribution": {}}:
+            with open(os.path.join(HERE, "fixtures", "$shardedDataDistribution"), 'r') as f:
                 return json.load(f, object_hook=json_util.object_hook)
         return []
 

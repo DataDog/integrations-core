@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 4.3.0 / 2024-07-05
+## 4.3.1 / 2024-08-09
+
+***Fixed***:
+
+* Fix handling of projects with no builds. We used to refresh all the projects whenever we encountered a build config that didn't have any builds associated with it. Now we refresh only the specific build config that's lacking builds. ([#18041](https://github.com/DataDog/integrations-core/pull/18041))
+* Fix handling of deleted build config ([#18122](https://github.com/DataDog/integrations-core/pull/18122))
+
+## 4.3.0 / 2024-07-05 / Agent 7.56.0
 
 ***Added***:
 

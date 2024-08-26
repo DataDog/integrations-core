@@ -6,7 +6,8 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:test",
-            "clustername:my_cluster"
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
         ]
     },
     {
@@ -16,7 +17,8 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:test",
-            "clustername:my_cluster"
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
         ]
     },
     {
@@ -26,7 +28,8 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:integration",
-            "clustername:my_cluster"
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
         ]
     },
     {
@@ -36,7 +39,8 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:test",
-            "clustername:my_cluster"
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
         ]
     }
 ]
