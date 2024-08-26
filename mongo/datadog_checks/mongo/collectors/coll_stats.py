@@ -65,6 +65,10 @@ class CollStatsCollector(MongoCollector):
                 continue
 
             for coll_stats in collection_stats:
+                additional_tags = ["db:%s" % self.db_name, "collection:%s" % coll_name]
+                if coll_stats.get('shard'):
+                    # If the collection is sharded, add the shard tag
+                    additional_tags.append("shard:%s" % coll_stats['shard'])
                 # Submit the metrics
                 if self.coll_stats_pipeline_supported:
                     storage_stats = coll_stats.get('storageStats', {})
@@ -72,18 +76,16 @@ class CollStatsCollector(MongoCollector):
                     query_stats = coll_stats.get('queryExecStats', {})
                     latency_stats = self.__calculate_oplatency_avg(latency_stats)
                     payload = {'collection': {**storage_stats, **latency_stats, **query_stats}}
+                    index_sizes = storage_stats.get('indexSizes', {})
                 else:
                     payload = {'collection': coll_stats}
-                additional_tags = ["db:%s" % self.db_name, "collection:%s" % coll_name]
-                if coll_stats.get('shard'):
-                    # If the collection is sharded, add the shard tag
-                    additional_tags.append("shard:%s" % coll_stats['shard'])
+                    index_sizes = coll_stats.get('indexSizes', {})
                 self._submit_payload(payload, additional_tags, COLLECTION_METRICS)
 
                 # Submit the indexSizes metrics manually
-                index_sizes = storage_stats.get('indexSizes', {})
-                metric_name_alias = self._normalize("collection.indexSizes", AgentCheck.gauge)
-                for idx, val in iteritems(index_sizes):
-                    # we tag the index
-                    idx_tags = self.base_tags + additional_tags + ["index:%s" % idx]
-                    self.gauge(metric_name_alias, val, tags=idx_tags)
+                if index_sizes:
+                    metric_name_alias = self._normalize("collection.indexSizes", AgentCheck.gauge)
+                    for idx, val in iteritems(index_sizes):
+                        # we tag the index
+                        idx_tags = self.base_tags + additional_tags + ["index:%s" % idx]
+                        self.gauge(metric_name_alias, val, tags=idx_tags)
