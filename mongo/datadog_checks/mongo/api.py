@@ -108,6 +108,10 @@ class MongoApi(object):
             session=session,
         )
 
+    def coll_stats_compatable(self, db_name, coll_name, session=None):
+        # collStats is deprecated in MongoDB 6.2. Use the $collStats aggregation stage instead.
+        return self[db_name][coll_name].command('collStats', session=session)
+
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 

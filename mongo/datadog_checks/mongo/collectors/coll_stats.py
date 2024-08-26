@@ -20,6 +20,7 @@ class CollStatsCollector(MongoCollector):
         self.coll_names = coll_names
         self.db_name = db_name
         self.max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
+        self.coll_stats_pipeline_supported = True
 
     def compatible_with(self, deployment):
         # Can only be run once per cluster.
@@ -37,12 +38,27 @@ class CollStatsCollector(MongoCollector):
                 latency['latency_avg'] = round(latency.get('latency', 0) / latency['ops'], 1)
         return latency_stats
 
+    def _get_collection_stats(self, api, coll_name):
+        if not self.coll_stats_pipeline_supported:
+            return [api.coll_stats_compatable(self.db_name, coll_name)]
+        try:
+            return api.coll_stats(self.db_name, coll_name)
+        except OperationFailure as e:
+            # Failed to get collection stats using $collStats aggregation
+            self.log.debug(
+                "Failed not collect stats for collection %s with $collStats, fallback to collStats command",
+                coll_name,
+                e,
+            )
+            self.coll_stats_pipeline_supported = False
+            return [api.coll_stats_compatable(self.db_name, coll_name)]
+
     def collect(self, api):
         coll_names = self._get_collections(api)
         for coll_name in coll_names:
             # Grab the stats from the collection
             try:
-                collection_stats = api.coll_stats(self.db_name, coll_name)
+                collection_stats = self._get_collection_stats(api, coll_name)
             except OperationFailure as e:
                 # Atlas restricts $collStats on system collections
                 self.log.warning("Could not collect stats for collection %s: %s", coll_name, e)
@@ -50,11 +66,14 @@ class CollStatsCollector(MongoCollector):
 
             for coll_stats in collection_stats:
                 # Submit the metrics
-                storage_stats = coll_stats.get('storageStats', {})
-                latency_stats = coll_stats.get('latencyStats', {})
-                query_stats = coll_stats.get('queryExecStats', {})
-                latency_stats = self.__calculate_oplatency_avg(latency_stats)
-                payload = {'collection': {**storage_stats, **latency_stats, **query_stats}}
+                if self.coll_stats_pipeline_supported:
+                    storage_stats = coll_stats.get('storageStats', {})
+                    latency_stats = coll_stats.get('latencyStats', {})
+                    query_stats = coll_stats.get('queryExecStats', {})
+                    latency_stats = self.__calculate_oplatency_avg(latency_stats)
+                    payload = {'collection': {**storage_stats, **latency_stats, **query_stats}}
+                else:
+                    payload = {'collection': coll_stats}
                 additional_tags = ["db:%s" % self.db_name, "collection:%s" % coll_name]
                 if coll_stats.get('shard'):
                     # If the collection is sharded, add the shard tag
