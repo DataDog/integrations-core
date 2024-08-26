@@ -183,17 +183,6 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping explain operation: %s", operation)
             return False
 
-        # Skip sampled operations that are older than the last sampled timestamp
-        current_op_time = operation.get("currentOpTime")
-        if not current_op_time:
-            self._check.log.debug("Skipping operation without currentOpTime: %s", operation)
-            return False
-
-        current_op_time_ts = datetime.strptime(current_op_time, "%Y-%m-%dT%H:%M:%S.%f%z").timestamp()
-        if self._last_sampled_timestamp and current_op_time_ts <= self._last_sampled_timestamp:
-            self._check.log.debug("Skipping operation older than last sampled timestamp: %s", operation)
-            return False
-
         return True
 
     def _get_operation_client(self, operation: dict) -> OperationSampleClient:
