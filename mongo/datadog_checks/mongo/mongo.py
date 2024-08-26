@@ -24,6 +24,7 @@ from datadog_checks.mongo.collectors import (
     ReplicaCollector,
     ReplicationOpLogCollector,
     ServerStatusCollector,
+    ShardedDataDistributionStatsCollector,
     TopCollector,
 )
 from datadog_checks.mongo.collectors.conn_pool_stats import ConnPoolStatsCollector
@@ -143,6 +144,8 @@ class MongoDb(AgentCheck):
             potential_collectors.append(JumboStatsCollector(self, tags))
         if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
+        if 'sharded_data_distribution' in self._config.additional_metrics:
+            potential_collectors.append(ShardedDataDistributionStatsCollector(self, tags))
         assert self._mongo_version is not None, "No MongoDB version is set, make sure you refreshed the metadata."
         if self._mongo_version_parsed >= Version("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
