@@ -21,10 +21,7 @@ def test_mongo_slow_operations_standalone(aggregator, instance_integration_clust
     instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
     instance_integration_cluster_autodiscovery['dbm'] = True
     instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': True, 'run_sync': True}
-    instance_integration_cluster_autodiscovery['database_autodiscovery'] = {
-        'enabled': True,
-        'include': ['integration$', 'test$'],
-    }
+    instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
     instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
     instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
 
@@ -60,10 +57,7 @@ def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster_a
     instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
     instance_integration_cluster_autodiscovery['dbm'] = True
     instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': True, 'run_sync': True}
-    instance_integration_cluster_autodiscovery['database_autodiscovery'] = {
-        'enabled': True,
-        'include': ['integration$', 'test$'],
-    }
+    instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
     instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
     instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
 

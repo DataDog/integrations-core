@@ -247,7 +247,7 @@ files:
             Enable collection of schemas. Requires `dbm: true`.
           value:
             type: boolean
-            example: true
+            example: false
         - name: collection_interval
           description: |
             Set the schemas collection interval in seconds. Each collection involves sampling documents
@@ -265,9 +265,13 @@ files:
             example: 10
         - name: max_collections
           description: |
-            Set the maximum number of collections to sample per interval.
+            Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
+            per database is bounded by `database_autodiscovery.max_collection_per_database`. By setting this option, you
+            are adding an additional limit to the total number of collections across all monitored databases that schemas
+            will be collected from. By default, this option is not set.
           value:
             type: number
+            display_default: null
             example: 300
         - name: max_depth
           description: |

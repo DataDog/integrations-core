@@ -196,14 +196,17 @@ class MongoConfig(object):
     @property
     def schemas(self):
         enabled = False
-        if self.dbm_enabled is True and self._schemas_config.get('enabled') is not False:
+        if self.dbm_enabled is True and self._schemas_config.get('enabled') is True:
+            # if DBM is enabled and the schemas config is enabled, then it is enabled
+            # By default, schemas collection is disabled
             enabled = True
+        max_collections = self._schemas_config.get('max_collections')
         return {
             'enabled': enabled,
             'collection_interval': self._schemas_config.get('collection_interval', 600),
             'run_sync': is_affirmative(self._schemas_config.get('run_sync', True)),
             'sample_size': int(self._schemas_config.get('sample_size', 10)),
-            'max_collections': int(self._schemas_config.get('max_collections', 300)),  # Default to 300
+            'max_collections': int(max_collections) if max_collections else None,
             'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
         }
 

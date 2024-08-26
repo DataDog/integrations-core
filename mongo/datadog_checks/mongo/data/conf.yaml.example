@@ -186,10 +186,10 @@ instances:
     #
     # schemas:
 
-        ## @param enabled - boolean - optional - default: true
+        ## @param enabled - boolean - optional - default: false
         ## Enable collection of schemas. Requires `dbm: true`.
         #
-        # enabled: true
+        # enabled: false
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the schemas collection interval in seconds. Each collection involves sampling documents
@@ -204,8 +204,11 @@ instances:
         #
         # sample_size: 10
 
-        ## @param max_collections - number - optional - default: 300
-        ## Set the maximum number of collections to sample per interval.
+        ## @param max_collections - number - optional
+        ## Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
+        ## per database is bounded by `database_autodiscovery.max_collection_per_database`. By setting this option, you
+        ## are adding an additional limit to the total number of collections across all monitored databases that schemas
+        ## will be collected from. By default, this option is not set.
         #
         # max_collections: 300
 

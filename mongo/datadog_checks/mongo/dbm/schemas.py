@@ -31,6 +31,7 @@ class MongoSchemas(DBMAsyncJob):
         self._max_collections = self._schemas_config["max_collections"]
         self._sample_size = self._schemas_config["sample_size"]
         self._max_depth = self._schemas_config["max_depth"]
+        self._max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
 
         super(MongoSchemas, self).__init__(
             check,
@@ -64,21 +65,23 @@ class MongoSchemas(DBMAsyncJob):
         }
 
         collected_collections = 0
-        for db_name in self._check._database_autodiscovery.databases:
+        for db_name in self._check.databases_monitored:
             if db_name in MONGODB_SYSTEM_DATABASES:
                 self._check.log.debug("Skipping system database %s", db_name)
                 continue
-            if collected_collections >= self._max_collections:
+            if self._max_collections and collected_collections >= self._max_collections:
                 break
 
             collections = []
-            for coll_name in self._check.api_client.list_authorized_collections(db_name):
+            for coll_name in self._check.api_client.list_authorized_collections(
+                db_name, limit=self._max_collections_per_database
+            ):
                 try:
                     collection = self._discover_collection(db_name, coll_name)
                     collections.append(collection)
                     collected_collections += 1
-                    if collected_collections >= self._max_collections:
-                        self._check.log.debug("Reached max collections limit %d", self._max_collections)
+                    if self._max_collections and collected_collections >= self._max_collections:
+                        self._check.log.debug("max_collection is configured to %d and reached", self._max_collections)
                         break
                 except Exception as e:
                     self._check.log.error("Error collecting schema for %s.%s: %s", db_name, coll_name, e)
