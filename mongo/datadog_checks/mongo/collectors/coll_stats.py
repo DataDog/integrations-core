@@ -19,6 +19,7 @@ class CollStatsCollector(MongoCollector):
         super(CollStatsCollector, self).__init__(check, tags)
         self.coll_names = coll_names
         self.db_name = db_name
+        self.max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
 
     def compatible_with(self, deployment):
         # Can only be run once per cluster.
@@ -27,7 +28,7 @@ class CollStatsCollector(MongoCollector):
     def _get_collections(self, api):
         if self.coll_names:
             return self.coll_names
-        return api.list_authorized_collections(self.db_name)
+        return api.list_authorized_collections(self.db_name, limit=self.max_collections_per_database)
 
     def __calculate_oplatency_avg(self, latency_stats):
         """Calculate the average operation latency."""
