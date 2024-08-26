@@ -9,7 +9,7 @@ from typing import List, Optional, Tuple
 
 from bson import json_util
 
-from datadog_checks.mongo.dbm.utils import format_key_name
+from datadog_checks.mongo.dbm.utils import UNEXPLAINABLE_COMMANDS, format_key_name
 
 try:
     import datadog_agent
@@ -213,7 +213,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping explain operation type %s: %s", op, command)
             return False
 
-        if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
+        if any(command.get(key) for key in UNEXPLAINABLE_COMMANDS):
             # Skip operations as they are not queries
             self._check.log.debug("Skipping operations that are not queries: %s", op, command)
             return False
