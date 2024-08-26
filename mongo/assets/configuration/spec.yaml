@@ -293,12 +293,13 @@ files:
           * `top` - Usage statistics for each collection
           * `collection` - Metrics of the specified collections
           * `jumbo_chunks` - Count and percentage of jumbo chunks. Ignored on mongod instances.
+          * `sharded_data_distribution` - Distribution of data in sharded collections.
       value:
         type: array
         items:
           type: string
         example:
-          [metrics.commands, tcmalloc, top, collection, jumbo_chunks]
+          [metrics.commands, tcmalloc, top, collection, jumbo_chunks, sharded_data_distribution]
     - name: collections
       description: |
         Collect metrics on specific collections from the database specified

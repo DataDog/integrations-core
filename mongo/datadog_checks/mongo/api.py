@@ -111,6 +111,9 @@ class MongoApi(object):
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
+    def sharded_data_distribution_stats(self, session=None):
+        return self["admin"].aggregate([{"$shardedDataDistribution": {}}], session=session)
+
     def _is_auth_required(self, options):
         # Check if the node is an arbiter. If it is, usually it does not require authentication.
         # However this is a best-effort check as the replica set might focce authentication.
