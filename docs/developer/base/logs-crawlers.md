@@ -3,7 +3,7 @@
 ## Overview
 
 Some systems expose their logs from HTTP endpoints instead of files that the Logs Agent can tail.
-In such cases, you can create an agent integration to crawl the endpoints and submit the logs.
+In such cases, you can create an Agent integration to crawl the endpoints and submit the logs.
 
 This diagram shows how a logs crawler agent integration that fits into the agent.
 

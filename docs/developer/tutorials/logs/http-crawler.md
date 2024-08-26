@@ -61,11 +61,11 @@ Can't instantiate abstract class AcmeCheck with abstract method get_log_streams
 
 We need to define the `get_log_streams` method.
 As [stated in the docs](../../base/logs-crawlers.md#datadog_checks.base.checks.logs.crawler.base.LogCrawlerCheck.get_log_streams), it must return an iterator over `LogStream` subclasses.
-That's what the next section is about.
+The next section describes this further.
 
 ## Define a Stream of Logs
 
-In the same file let's add a `LogStream` subclass and return it (wrapped in a list) from `AcmeCheck.get_log_streams`:
+In the same file, add a `LogStream` subclass and return it (wrapped in a list) from `AcmeCheck.get_log_streams`:
 
 ```python
 from datadog_checks.base.checks.logs.crawler.base import LogCrawlerCheck
@@ -127,7 +127,7 @@ In other words, every time our integration completes its run we save the last cu
 We can then resume scraping from this cursor.
 That's what the `cursor` argument to the `records` method is for.
 The very first time the integration runs this `cursor` is `None` because we have no checkpoints.
-Every integration run after that the `cursor` will be the `LogRecord.cursor` of the last `LogRecord` that we yield or return from `records`.
+For every subsequent integration run, the `cursor` will be set to the `LogRecord.cursor` of the last `LogRecord` yielded or returned from records.
 
 Some things to consider when defining cursors:
 
@@ -139,11 +139,11 @@ Some things to consider when defining cursors:
 ### Scraping for Log Records
 
 In our toy example we returned a list with just one record.
-In practice we will need to create list or lazy iterator over `LogRecord`s.
+In practice we will need to create a list or lazy iterator over `LogRecord`s.
 We will construct them from data that we collect from the external API, in this case the one from *ACME*.
 
 Below are some tips and considerations when scraping external APIs:
 
-1. Don't forget to use the `cursor` argument to checkpoint your progress.
+1. Use the `cursor` argument to checkpoint your progress.
 1. The Agent schedules an integration run approximately every 10-15 seconds. We can treat this as a retry mechanism, so there is no need for elaborate retry or backoff logic in integrations.
 1. The intake won't accept logs that are older than 18 hours. For better performance skip such logs as you generate `LogRecord` items.
