@@ -5,7 +5,6 @@
 
 from datadog_checks.base.utils.common import to_native_string
 
-
 UNEXPLAINABLE_COMMANDS = frozenset(
     [
         "getMore",
@@ -17,6 +16,7 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "listCollections",
     ]
 )
+
 
 def format_key_name(formatter, metric_dict: dict) -> dict:
     # convert camelCase to snake_case
