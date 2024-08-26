@@ -357,6 +357,17 @@ COLLECTION_METRICS = {
     'collection.collectionScans.nonTailable': GAUGE,
 }
 
+SHARDED_DATA_DISTRIBUTION_METRICS = {
+    'numOrphanedDocs': (GAUGE, 'sharded_data_distribution.num_orphaned_docs'),
+    'numOwnedDocuments': (GAUGE, 'sharded_data_distribution.num_owned_documents'),
+    'ownedSizeBytes': (GAUGE, 'sharded_data_distribution.owned_size_bytes'),
+    'orphanedSizeBytes': (GAUGE, 'sharded_data_distribution.orphaned_size_bytes'),
+}
+
+INDEX_METRICS = {
+    'indexes.accesses.ops': RATE,
+}
+
 """
 Mapping for case-sensitive metric name suffixes.
 
@@ -388,4 +399,5 @@ AVAILABLE_METRICS = {
     'top': TOP_METRICS,
     'collection': COLLECTION_METRICS,
     'jumbo_chunks': {},
+    'sharded_data_distribution': SHARDED_DATA_DISTRIBUTION_METRICS,
 }

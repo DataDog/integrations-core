@@ -102,6 +102,9 @@ class MockedDB(object):
             # mock the $currentOp aggregation used for operation sampling
             with open(os.path.join(HERE, "fixtures", f"$currentOp-{self.deployment}"), 'r') as f:
                 return json.load(f, object_hook=json_util.object_hook)
+        elif pipeline[0] == {"$shardedDataDistribution": {}}:
+            with open(os.path.join(HERE, "fixtures", "$shardedDataDistribution"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
         return []
 
 
