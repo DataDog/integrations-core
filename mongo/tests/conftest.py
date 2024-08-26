@@ -154,6 +154,7 @@ def instance_integration_cluster_autodiscovery(instance_integration_cluster):
     instance = copy.deepcopy(instance_integration_cluster)
     instance["database_autodiscovery"] = {
         "enabled": True,
+        "max_collections_per_database": 5,
     }
     return instance
 
