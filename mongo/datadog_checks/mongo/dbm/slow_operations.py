@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 
 from bson import json_util
+from pymongo.errors import OperationFailure
 
 from datadog_checks.mongo.dbm.utils import (
     format_explain_plan,
@@ -117,16 +118,20 @@ class MongoSlowOperations(DBMAsyncJob):
         return True
 
     def _is_profiling_enabled(self, db_name):
-        profiling_level = self._check.api_client.get_profiling_level(db_name)
-        level = profiling_level.get("was", 0)  # profiling by default is disabled
-        slowms = profiling_level.get("slowms", 100)  # slowms threshold is 100ms by default
-        tags = self._check._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
-        tags.append("db:%s" % db_name)
-        # Emit the profiling level and slowms as raw metrics
-        # raw ensures that level = 0 is also emitted
-        self._check.gauge('mongodb.profiling.level', level, tags=tags, raw=True)
-        self._check.gauge('mongodb.profiling.slowms', slowms, tags=tags, raw=True)
-        return level > 0
+        try:
+            profiling_level = self._check.api_client.get_profiling_level(db_name)
+            level = profiling_level.get("was", 0)  # profiling by default is disabled
+            slowms = profiling_level.get("slowms", 100)  # slowms threshold is 100ms by default
+            tags = self._check._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
+            tags.append("db:%s" % db_name)
+            # Emit the profiling level and slowms as raw metrics
+            # raw ensures that level = 0 is also emitted
+            self._check.gauge('mongodb.profiling.level', level, tags=tags, raw=True)
+            self._check.gauge('mongodb.profiling.slowms', slowms, tags=tags, raw=True)
+            return level > 0
+        except OperationFailure:
+            # If the command fails, we assume profiling is not enabled
+            return False
 
     def _collect_slow_operations_from_profiler(self, db_name, last_ts):
         profiling_data = self._check.api_client.get_profiling_data(db_name, datetime.fromtimestamp(last_ts))
