@@ -225,7 +225,7 @@ tests:
         externalId: 101
         filePath: "D:\\\\2. DRIVER\\\\drivers WIN7\\\\Drivers\\\\DP_CardReader_14032.7z\\\\O2Micro\\\\FORCED\\\\6x86\\\\"
         file_name: "O2MDFvst.INF"
-        forensic_file_can_be_downloaded: "Yes"
+        forensic_file_can_be_downloaded: "No"
         incident_source: 12467
         network:
           client:
@@ -236,8 +236,8 @@ tests:
         rt: 1719828610000
         rule_name: "SAMPLE RULE SET"
         server_host:
-          - "Sampledvchost"
-          - "localhost"
+        - "Sampledvchost"
+        - "localhost"
         severity: "info"
         source_host_name: "ApexOneClient01"
         source_mac: "34-E6-D7-84-BC-7F"
@@ -248,8 +248,9 @@ tests:
       service: "data-loss-prevention"
       status: "info"
       tags:
-        - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1719828610000
+
   - sample: "\"Jul 01 2024 20:20:20 aaaaaa.manage.trendmicro.com CEF:0|Trend Micro|Apex Central|2019|700107|Device Access Control|3|rt=Jul 01 2024 10:10:10 GMT+00:00 cs1Label=Product_Entity/Endpoint cs1=Sample_Host shost=shost1 dvchost=localhost cn1Label=Product cn1=15 sproc=C:\\\\Windows\\\\explorer.exe fname=F:\\\\Autorun.inf cn2Label=Device_Type cn2=0 cn3Label=Permission cn3=3 deviceFacility=Apex One deviceNtDomain=APEXTMCM dntdom=OSCEDomain1 TMCMLogDetectedHost=shost1 TMCMLogDetectedIP=10.10.10.10 ApexCentralHost=TW-CHRIS-W2019 devicePayloadId=1C00290C0360-9CDE11EB-D4B8-F51F-C697 TMCMdevicePlatform=Windows 7 6.1 (Build 7601) Service Pack 1\""
     service: "device-access-control"
     result:
