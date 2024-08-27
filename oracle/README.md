@@ -8,7 +8,6 @@ The Oracle integration is deprecated and will be removed in a future release. Fo
 
 We strongly recommend upgrading to the latest Datadog Agent to take full advantage of the new Oracle integration, along with the [Database Monitoring (DBM)][2] feature, for enhanced insights into query performance and database health. DBM offers a comprehensive set of features, including query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
-
 ## Overview
 
 The Oracle integration provides health and performance metrics for your Oracle database in near real-time. Visualize these metrics with the provided dashboard and create monitors to alert your team on Oracle database states.
