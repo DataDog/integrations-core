@@ -73,17 +73,17 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.11.7"
+ENV PYTHON_VERSION="3.12.4"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash 'c117c6444494bbe4cc937e8a5a61899d53f7f5c5bc573c5d130304e457d54024'; `
+      -Hash 'da5809df5cb05200b3a528a186f39b7d6186376ce051b0a393f1ddf67c995258'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
-    & 'C:\Program Files\Python311\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
-    & 'C:\Program Files\Python311\python.exe' -m pip install --no-warn-script-location virtualenv; `
-    & 'C:\Program Files\Python311\python.exe' -m virtualenv 'C:\py3'; `
-    Add-ToPath -Append 'C:\Program Files\Python311'
+    & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
+    & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location virtualenv; `
+    & 'C:\Program Files\Python312\python.exe' -m virtualenv 'C:\py3'; `
+    Add-ToPath -Append 'C:\Program Files\Python312'
 
 # Install Python 2
 ENV PYTHON_VERSION="2.7.18"

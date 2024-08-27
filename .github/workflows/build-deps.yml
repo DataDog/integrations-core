@@ -108,7 +108,7 @@ jobs:
       if: matrix.job.image == 'linux-aarch64'
       run: |
         mkdir -p ~/miniconda3
-        wget https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-aarch64.sh -O ~/miniconda3/miniconda.sh
+        wget https://repo.anaconda.com/miniconda/Miniconda3-py312_24.5.0-0-Linux-aarch64.sh -O ~/miniconda3/miniconda.sh
         bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
         rm -rf ~/miniconda3/miniconda.sh
         ~/miniconda3/bin/conda init bash
@@ -204,7 +204,7 @@ jobs:
     env:
       TARGET_NAME: macos-x86_64
       OUT_DIR: output/macos-x86_64
-      DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.11/bin/python"
+      DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
       DD_PYTHON2: "/Library/Frameworks/Python.framework/Versions/2.7/bin/python"
 
     steps:
@@ -218,7 +218,7 @@ jobs:
     - name: Set up Python
       env:
         # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
-        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.11.5/python-3.11.5-macos11.pkg"
+        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.12.4/python-3.12.4-macos11.pkg"
         PYTHON2_DOWNLOAD_URL: "https://www.python.org/ftp/python/2.7.18/python-2.7.18-macosx10.9.pkg"
       run: |-
         curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
