@@ -83,7 +83,7 @@ RUN Get-RemoteFile `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location virtualenv; `
     & 'C:\Program Files\Python312\python.exe' -m virtualenv 'C:\py3'; `
-    Add-ToPath -Append 'C:\Program Files\Python311'
+    Add-ToPath -Append 'C:\Program Files\Python312'
 
 # Install Python 2
 ENV PYTHON_VERSION="2.7.18"
