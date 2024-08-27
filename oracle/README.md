@@ -4,7 +4,7 @@
 
 ## Deprecation notice
 
-The Oracle integration is deprecated and will be removed in a future release. For customers using Datadog Agent version 7.52.0 or earlier, the existing Oracle integration will continue to function. Starting from Datadog Agent version 7.53.0, the Oracle integration has been automatically migrated to the new implementation written in Go, available in [datadog-agent][16].
+The Oracle integration is deprecated and will be removed in a future release. For customers using Datadog Agent version 7.52.0 or earlier, the existing Oracle integration will continue to function. Starting from Datadog Agent version 7.53.0, the Oracle integration has been automatically migrated to the new implementation written in Go, available in [`datadog-agent`][16].
 
 We strongly recommend upgrading to the latest Datadog Agent to take full advantage of the new Oracle integration, along with the [Database Monitoring (DBM)][2] feature, for enhanced insights into query performance and database health. DBM offers a comprehensive set of features, including query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
