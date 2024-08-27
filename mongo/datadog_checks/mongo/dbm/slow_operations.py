@@ -64,7 +64,7 @@ class MongoSlowOperations(DBMAsyncJob):
 
         slow_operation_events = []
 
-        for db_name in self._check._database_autodiscovery.databases:
+        for db_name in self._check.databases_monitored:
             if not is_mongos and self._is_profiling_enabled(db_name):
                 for slow_operation in self._collect_slow_operations_from_profiler(
                     db_name, last_ts=last_collection_timestamp

@@ -96,9 +96,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
         activities = []
 
-        for activity, sample in self._get_operation_samples(
-            now, databases_monitored=self._check._database_autodiscovery.databases
-        ):
+        for activity, sample in self._get_operation_samples(now, databases_monitored=self._check.databases_monitored):
             if sample:
                 self._check.log.debug("Sending operation sample: %s", sample)
                 self._check.database_monitoring_query_sample(json_util.dumps(sample))

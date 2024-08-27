@@ -153,12 +153,19 @@ class MongoApi(object):
     def server_status(self):
         return self['admin'].command('serverStatus')
 
-    def list_authorized_collections(self, db_name):
+    def list_authorized_collections(
+        self,
+        db_name,
+        limit=None,
+    ):
         try:
-            return self[db_name].list_collection_names(
+            coll_names = self[db_name].list_collection_names(
                 filter={"type": "collection"},  # Only return collections, not views
                 authorizedCollections=True,
             )
+            if limit:
+                return coll_names[:limit]
+            return coll_names
         except OperationFailure:
             # The user is not authorized to run listCollections on this database.
             # This is NOT a critical error, so we log it as a warning.

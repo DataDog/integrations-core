@@ -17,11 +17,14 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 
 @mock_now(1715911398.1112723)
 @common.standalone
-def test_mongo_operation_samples_standalone(aggregator, instance_integration_cluster, check, dd_run_check):
-    instance_integration_cluster['dbm'] = True
-    instance_integration_cluster['operation_samples'] = {'enabled': True, 'run_sync': True}
+def test_mongo_operation_samples_standalone(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
+):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
 
-    mongo_check = check(instance_integration_cluster)
+    mongo_check = check(instance_integration_cluster_autodiscovery)
     with mock_pymongo("standalone"):
         aggregator.reset()
         run_check_once(mongo_check, dd_run_check)
@@ -52,11 +55,12 @@ def test_mongo_operation_samples_standalone(aggregator, instance_integration_clu
 
 @mock_now(1715911398.11127223)
 @common.shard
-def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster, check, dd_run_check):
-    instance_integration_cluster['dbm'] = True
-    instance_integration_cluster['operation_samples'] = {'enabled': True, 'run_sync': True}
+def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
 
-    mongo_check = check(instance_integration_cluster)
+    mongo_check = check(instance_integration_cluster_autodiscovery)
     aggregator.reset()
     with mock_pymongo("mongos"):
         run_check_once(mongo_check, dd_run_check)

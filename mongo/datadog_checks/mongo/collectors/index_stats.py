@@ -14,6 +14,7 @@ class IndexStatsCollector(MongoCollector):
         super(IndexStatsCollector, self).__init__(check, tags)
         self.coll_names = coll_names
         self.db_name = db_name
+        self.max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
 
     def compatible_with(self, deployment):
         # Can only be run once per cluster.
@@ -22,7 +23,7 @@ class IndexStatsCollector(MongoCollector):
     def _get_collections(self, api):
         if self.coll_names:
             return self.coll_names
-        return api.list_authorized_collections(self.db_name)
+        return api.list_authorized_collections(self.db_name, limit=self.max_collections_per_database)
 
     def collect(self, api):
         coll_names = self._get_collections(api)
