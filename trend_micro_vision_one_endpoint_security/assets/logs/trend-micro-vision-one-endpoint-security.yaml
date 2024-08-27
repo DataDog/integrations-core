@@ -1174,6 +1174,14 @@ pipeline:
             204,Cloud storage (Evernote)
             211,Document management (SharePoint)
           type: lookup-processor
+        - name: Lookup for `cfp1` to `forensic_file_can_be_downloaded` field
+          enabled: true
+          source: cfp1
+          target: forensic_file_can_be_downloaded
+          lookupTable: |-
+            0,No
+            1,Yes
+          type: lookup-processor
     - type: pipeline
       name: Remap attributes for Device Access Control logs
       enabled: true
@@ -1231,14 +1239,6 @@ pipeline:
             2,List device content only
             3,Floppy disks
             4,Block
-          type: lookup-processor
-        - name: Lookup for `cfp1` to `forensic_file_can_be_downloaded` field
-          enabled: true
-          source: cfp1
-          target: forensic_file_can_be_downloaded
-          lookupTable: |-
-            0,No
-            1,Yes
           type: lookup-processor
     - type: pipeline
       name: Remap attributes for Intrusion Prevention logs
@@ -1868,6 +1868,16 @@ pipeline:
       filter:
         query: service:virtual-analyzer-detections
       processors:
+        - type: attribute-remapper
+          name: Map `dvchost` to `product_server`
+          enabled: true
+          sources:
+            - dvchost
+          sourceType: attribute
+          target: product_server
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `cs1` to `security_threat_name`
           enabled: true
@@ -2668,6 +2678,16 @@ pipeline:
         - c6a3Label
       sourceType: attribute
       target: attributeLabels.c6a3Label
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `cfp1Label` to `attributeLabels.cfp1Label`
+      enabled: true
+      sources:
+        - cfp1Label
+      sourceType: attribute
+      target: attributeLabels.cfp1Label
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false

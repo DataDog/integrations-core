@@ -201,6 +201,7 @@ tests:
         application_name: "Apex Central"
         application_version: "2019"
         attributeLabels:
+          cfp1Label: "ForensicFileAvailable"
           cn1Label: "Product"
           cn2Label: "Action"
           cn3Label: "Channel"
@@ -210,7 +211,6 @@ tests:
           cs5Label: "Rule"
           cs6Label: "Template"
         cfp1: 0
-        cfp1Label: "ForensicFileAvailable"
         channel_type: "Removable storage"
         cn2: 4
         cn3: 0
@@ -225,6 +225,7 @@ tests:
         externalId: 101
         filePath: "D:\\\\2. DRIVER\\\\drivers WIN7\\\\Drivers\\\\DP_CardReader_14032.7z\\\\O2Micro\\\\FORCED\\\\6x86\\\\"
         file_name: "O2MDFvst.INF"
+        forensic_file_can_be_downloaded: "Yes"
         incident_source: 12467
         network:
           client:
@@ -500,7 +501,7 @@ tests:
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1719828610000
-  - sample: "\"Jul 01 2024 20:20:20 aaaaaa.manage.trendmicro.com CEF:0|Trend Micro|Apex Central|2019|VAD|VAN_RANSOMWARE.umxxhelloransom_abc|3|deviceExternalId=1 rt=Jul 01 2024 10:10:10 GMT+00:00 deviceFacility=Apex One dvchost=OSCE01 dhost=Isolate-ClientA dst=10.10.101.0 app=1 sourceServiceNameTest1@trend.com.tw destinationServiceName=Test2@tmcm.extbeta.com;Test3@tmcm.extbeta.com sproc=VA fileHash=3395856CE81F2B7382DEE72602F798B642F14140 fname=C:\\\\\\\\QA_Log.zip request=http://127.1.1.1 cs1Label=Security_Threat cs1=VAN_RANSOMWARE.umxxhelloransom_abc cn1Label=Risk_Level cn1=0 cs2Label=Threat_Categories cs2=Anti-security, self-preservation cs3Label=Cloud_Service_Vendor cs3=Google Drive reason=E deviceNtDomain=APEXTMCM dntdom=OSCEDomain1 TMCMLogDetectedHost=OSCEClient TMCMLogDetectedIP=10.10.10.10 ApexCentralHost=TW-CHRIS-W2019 devicePayloadId=1C00290C0360-9CDE11EB-D4B8-F51F-C697 TMCMdevicePlatform=Windows 7 6.1 (Build 7601) Service Pack 1\""
+  - sample: "\"Jul 01 2024 20:20:20 aaaaaa.manage.trendmicro.com CEF:0|Trend Micro|Apex Central|2019|VAD|VAN_RANSOMWARE.umxxhelloransom_abc|3|deviceExternalId=1 rt=Jul 01 2024 10:10:10 GMT+00:00 deviceFacility=Apex One dvchost=OSCE01 dhost=Isolate-ClientA dst=10.10.101.0 app=1 sourceServiceName=Test1@trend.com.tw destinationServiceName=Test2@tmcm.extbeta.com;Test3@tmcm.extbeta.com sproc=VA fileHash=3395856CE81F2B7382DEE72602F798B642F14140 fname=C:\\\\\\\\QA_Log.zip request=http://127.1.1.1 cs1Label=Security_Threat cs1=VAN_RANSOMWARE.umxxhelloransom_abc cn1Label=Risk_Level cn1=0 cs2Label=Threat_Categories cs2=Anti-security, self-preservation cs3Label=Cloud_Service_Vendor cs3=Google Drive reason=E deviceNtDomain=APEXTMCM dntdom=OSCEDomain1 TMCMLogDetectedHost=OSCEClient TMCMLogDetectedIP=10.10.10.10 ApexCentralHost=TW-CHRIS-W2019 devicePayloadId=1C00290C0360-9CDE11EB-D4B8-F51F-C697 TMCMdevicePlatform=Windows 7 6.1 (Build 7601) Service Pack 1\""
     service: "virtual-analyzer-detections"
     result:
       custom:
@@ -528,7 +529,8 @@ tests:
         fileHash: "3395856CE81F2B7382DEE72602F798B642F14140"
         file_name: "C:\\\\\\\\QA_Log.zip"
         process_name: "VA"
-        protocol: "1 sourceServiceNameTest1@trend.com.tw"
+        product_server: "OSCE01"
+        protocol: "SMTP"
         reason: "E"
         risk_level: "No Risk"
         rt: 1719828610000
@@ -536,11 +538,12 @@ tests:
         security_threat_type: "Anti-security, self-preservation"
         server_host: "Isolate-ClientA"
         severity: "info"
+        sourceServiceName: "Test1@trend.com.tw"
         source_host_name: "OSCEClient"
         syslog:
           severity: 3
         url: "http://127.1.1.1"
-      message: "\"Jul 01 2024 20:20:20 aaaaaa.manage.trendmicro.com CEF:0|Trend Micro|Apex Central|2019|VAD|VAN_RANSOMWARE.umxxhelloransom_abc|3|deviceExternalId=1 rt=Jul 01 2024 10:10:10 GMT+00:00 deviceFacility=Apex One dvchost=OSCE01 dhost=Isolate-ClientA dst=10.10.101.0 app=1 sourceServiceNameTest1@trend.com.tw destinationServiceName=Test2@tmcm.extbeta.com;Test3@tmcm.extbeta.com sproc=VA fileHash=3395856CE81F2B7382DEE72602F798B642F14140 fname=C:\\\\\\\\QA_Log.zip request=http://127.1.1.1 cs1Label=Security_Threat cs1=VAN_RANSOMWARE.umxxhelloransom_abc cn1Label=Risk_Level cn1=0 cs2Label=Threat_Categories cs2=Anti-security, self-preservation cs3Label=Cloud_Service_Vendor cs3=Google Drive reason=E deviceNtDomain=APEXTMCM dntdom=OSCEDomain1 TMCMLogDetectedHost=OSCEClient TMCMLogDetectedIP=10.10.10.10 ApexCentralHost=TW-CHRIS-W2019 devicePayloadId=1C00290C0360-9CDE11EB-D4B8-F51F-C697 TMCMdevicePlatform=Windows 7 6.1 (Build 7601) Service Pack 1\""
+      message: "\"Jul 01 2024 20:20:20 aaaaaa.manage.trendmicro.com CEF:0|Trend Micro|Apex Central|2019|VAD|VAN_RANSOMWARE.umxxhelloransom_abc|3|deviceExternalId=1 rt=Jul 01 2024 10:10:10 GMT+00:00 deviceFacility=Apex One dvchost=OSCE01 dhost=Isolate-ClientA dst=10.10.101.0 app=1 sourceServiceName=Test1@trend.com.tw destinationServiceName=Test2@tmcm.extbeta.com;Test3@tmcm.extbeta.com sproc=VA fileHash=3395856CE81F2B7382DEE72602F798B642F14140 fname=C:\\\\\\\\QA_Log.zip request=http://127.1.1.1 cs1Label=Security_Threat cs1=VAN_RANSOMWARE.umxxhelloransom_abc cn1Label=Risk_Level cn1=0 cs2Label=Threat_Categories cs2=Anti-security, self-preservation cs3Label=Cloud_Service_Vendor cs3=Google Drive reason=E deviceNtDomain=APEXTMCM dntdom=OSCEDomain1 TMCMLogDetectedHost=OSCEClient TMCMLogDetectedIP=10.10.10.10 ApexCentralHost=TW-CHRIS-W2019 devicePayloadId=1C00290C0360-9CDE11EB-D4B8-F51F-C697 TMCMdevicePlatform=Windows 7 6.1 (Build 7601) Service Pack 1\""
       service: "virtual-analyzer-detections"
       status: "info"
       tags:
