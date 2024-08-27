@@ -1,0 +1,4 @@
+Improve mongo integration compatibility with aws documentdb
+- fallback to `collStats` command when `$collStats` aggregation pipeline is not available
+- fix NoneType error with replication metrics collection
+- fix `list_collection_names` error on unsupported filter `Type`
