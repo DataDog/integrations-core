@@ -13,7 +13,6 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::Windows",
       "Category::Network",
       "Offering::Integration"
     ]
