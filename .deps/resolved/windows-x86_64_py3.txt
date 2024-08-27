@@ -31,7 +31,7 @@ envier @ https://agent-int-packages.datadoghq.com/external/envier/envier-0.5.2-p
 filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3.15.4-py3-none-any.whl#sha256=6ca1fffae96225dab4c6eaf1c4f4f28cd2568d3ec2a44e15a08520504de468e7
 foundationdb @ https://agent-int-packages.datadoghq.com/built/foundationdb/foundationdb-6.3.24-20240402154628-py3-none-win_amd64.whl#sha256=07e8e97e51dc9248d58d60d33076b82380135c31ab3727a33b885cea17e34bc7
 google-auth @ https://agent-int-packages.datadoghq.com/external/google-auth/google_auth-2.34.0-py2.py3-none-any.whl#sha256=72fd4733b80b6d777dcde515628a9eb4a577339437012874ea286bca7261ee65
-idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.7-py3-none-any.whl#sha256=82fee1fc78add43492d3a1898bfa6d8a904cc97d8427f683ed8e798d07761aa0
+idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.8-py3-none-any.whl#sha256=050b4e5baadcd44d760cedbd2b8e639f2ff89bbc7a5730fcc662954303377aac
 importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-8.0.0-py3-none-any.whl#sha256=15584cf2b1bf449d98ff8a6ff1abef57bf20f3ac6454f431736cd3e660921b2f
 in-toto @ https://agent-int-packages.datadoghq.com/external/in-toto/in_toto-2.0.0-py3-none-any.whl#sha256=eaf71733cdd5b2309b58b24169c13c24701da72baa43b7432d1dffc308e7bf32
 iso8601 @ https://agent-int-packages.datadoghq.com/external/iso8601/iso8601-2.1.0-py3-none-any.whl#sha256=aac4145c4dcb66ad8b648a02830f5e2ff6c24af20f4f482689be402db2429242

@@ -20,7 +20,7 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=eccee9a6b2de285fcb1d06324c19daf4cf49f927130d58eac494a095b11dee0b
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.8-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=30bee7cddd85c04ec49c753b53580364d907cc05c44daafe31b924a352e5e525
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20240402154838-py3-none-manylinux2014_x86_64.whl#sha256=aba3c1683ef1b2099933e030464d29b3ad1c206784ebd15d8a7147ecd6ba24e1
-confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.5.0-20240806143151-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=08bb6b65e09b6d24b31cf60295888a7b14351d8ceaf0da1fb45fe5393f33c125
+confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.5.0-20240826142123-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=ec0216c853d26f4aceb3d296aa505e9bdaa791d5faa20daf2e082e6043efb51a
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-42.0.8-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=a0608251135d0e03111152e41f0cc2392d1e74e35703960d4190b2e0f4ca9c70
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=30d22faa574345c49f3de9306788b9b7b0adf3d60efe042328b71aa92599e41b
@@ -33,7 +33,7 @@ filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3
 foundationdb @ https://agent-int-packages.datadoghq.com/built/foundationdb/foundationdb-6.3.24-20240402154840-py3-none-manylinux2014_x86_64.whl#sha256=14259f824080062cc890965747597ff00a9d6c76a1eb926673fed68a45860ccd
 google-auth @ https://agent-int-packages.datadoghq.com/external/google-auth/google_auth-2.34.0-py2.py3-none-any.whl#sha256=72fd4733b80b6d777dcde515628a9eb4a577339437012874ea286bca7261ee65
 gssapi @ https://agent-int-packages.datadoghq.com/built/gssapi/gssapi-1.8.3-20240806143151-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=fb5aabad6cdb8473c6cba118625bb9fe27eb732cd5d028c966d91eaf15c35aa2
-idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.7-py3-none-any.whl#sha256=82fee1fc78add43492d3a1898bfa6d8a904cc97d8427f683ed8e798d07761aa0
+idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.8-py3-none-any.whl#sha256=050b4e5baadcd44d760cedbd2b8e639f2ff89bbc7a5730fcc662954303377aac
 importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-8.0.0-py3-none-any.whl#sha256=15584cf2b1bf449d98ff8a6ff1abef57bf20f3ac6454f431736cd3e660921b2f
 in-toto @ https://agent-int-packages.datadoghq.com/external/in-toto/in_toto-2.0.0-py3-none-any.whl#sha256=eaf71733cdd5b2309b58b24169c13c24701da72baa43b7432d1dffc308e7bf32
 iso8601 @ https://agent-int-packages.datadoghq.com/external/iso8601/iso8601-2.1.0-py3-none-any.whl#sha256=aac4145c4dcb66ad8b648a02830f5e2ff6c24af20f4f482689be402db2429242
