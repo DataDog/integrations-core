@@ -97,7 +97,7 @@
                     {
                         "id": 3003257047015150,
                         "definition": {
-                            "title": "Host CPU",
+                            "title": "Host CPU (avg)",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -122,7 +122,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:system.cpu.user{$AGENT_HOSTNAME,$CUSTOM_TAG} by {host}"
+                                            "query": "avg:system.cpu.user{$AGENT_HOSTNAME,$CUSTOM_TAG}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -151,7 +151,7 @@
                     {
                         "id": 3478725624423596,
                         "definition": {
-                            "title": "Host Memory",
+                            "title": "Host Memory (avg)",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -180,12 +180,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:system.mem.used{$AGENT_HOSTNAME,$CUSTOM_TAG} by {host}"
+                                            "query": "avg:system.mem.used{$AGENT_HOSTNAME,$CUSTOM_TAG}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:system.mem.total{$AGENT_HOSTNAME,$CUSTOM_TAG} by {host}"
+                                            "query": "avg:system.mem.total{$AGENT_HOSTNAME,$CUSTOM_TAG}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -443,6 +443,312 @@
                             "width": 4,
                             "height": 2
                         }
+                    },
+                    {
+                        "id": 2316094716819006,
+                        "definition": {
+                            "title": "System Probe CPU Seconds (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.system_probe.process_cpu_seconds_total{$AGENT_HOSTNAME,$CUSTOM_TAG}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4630572178539994,
+                        "definition": {
+                            "title": "System Probe RSS mem (bytes)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.system_probe.process_resident_memory_bytes{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1085929506651900,
+                        "definition": {
+                            "title": "Process Agent CPU Seconds (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.process_agent.process_cpu_seconds_total{$AGENT_HOSTNAME,$CUSTOM_TAG}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4324226834483334,
+                        "definition": {
+                            "title": "Process Agent RSS mem (bytes)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.process_agent.process_resident_memory_bytes{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 8,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 953441750885200,
+                        "definition": {
+                            "title": "Datadog Agent CPU Seconds (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.agent.process_cpu_seconds_total{$AGENT_HOSTNAME,$CUSTOM_TAG}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2528664338824474,
+                        "definition": {
+                            "title": "Datadog Agent RSS mem (bytes)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.agent.process_resident_memory_bytes{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 10,
+                            "width": 6,
+                            "height": 2
+                        }
                     }
                 ]
             },
@@ -450,7 +756,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 7
+                "height": 13
             }
         },
         {
@@ -463,9 +769,103 @@
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 2839230241220094,
+                        "id": 8675082138980638,
                         "definition": {
                             "title": "Check Duration (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.check_duration{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7544046419413904,
+                        "definition": {
+                            "title": "Check Interval (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.check_interval{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2839230241220094,
+                        "definition": {
+                            "title": "Check Duration (avg per host)",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -504,7 +904,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
+                            "y": 2,
                             "width": 6,
                             "height": 2
                         }
@@ -512,7 +912,7 @@
                     {
                         "id": 546095207376682,
                         "definition": {
-                            "title": "Check Interval (avg)",
+                            "title": "Check Interval (avg per host)",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -551,7 +951,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 0,
+                            "y": 2,
                             "width": 6,
                             "height": 2
                         }
@@ -598,7 +998,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 2,
+                            "y": 4,
                             "width": 6,
                             "height": 2
                         }
@@ -645,7 +1045,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 2,
+                            "y": 4,
                             "width": 6,
                             "height": 2
                         }
@@ -691,7 +1091,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 4,
+                            "y": 6,
                             "width": 6,
                             "height": 2
                         }
@@ -737,7 +1137,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 4,
+                            "y": 6,
                             "width": 6,
                             "height": 2
                         }
@@ -746,9 +1146,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 16,
                 "width": 12,
-                "height": 7
+                "height": 9
             }
         },
         {
@@ -952,7 +1352,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 17,
+                "y": 25,
                 "width": 12,
                 "height": 5
             }
@@ -1041,7 +1441,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 22,
+                "y": 30,
                 "width": 12,
                 "height": 9
             }
@@ -1129,7 +1529,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 31,
+                "y": 39,
                 "width": 12,
                 "height": 9
             }
@@ -1217,7 +1617,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 40,
+                "y": 48,
                 "width": 12,
                 "height": 9
             }
