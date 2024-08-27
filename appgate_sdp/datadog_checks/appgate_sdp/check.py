@@ -23,10 +23,11 @@ class AppgateSdpCheck(OpenMetricsBaseCheckV2):
             'metrics': [METRIC_MAP],
                     } 
     def check(self, instance): 
+#       type: (Any) -> None
         endpoint = instance.get('openmetrics_endpoint')
         if endpoint is None:
             ConfigurationError("Unable to find openmetrics_endpoint in conf.yaml file.")
-    super().check(instance)
+    # super().check(instance)
 
         # Use self.instance to read the check configuration
         # self.url = self.instance.get("url")
@@ -44,7 +45,7 @@ class AppgateSdpCheck(OpenMetricsBaseCheckV2):
         # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
         # self.check_initializations.append(self._query_manager.compile_queries)
 
-    def check(self, _):
+    # def check(self, _):
         # type: (Any) -> None
         # The following are useful bits of code to help new users get started.
 
@@ -105,4 +106,4 @@ class AppgateSdpCheck(OpenMetricsBaseCheckV2):
         # self.service_check("can_connect", AgentCheck.OK)
 
         # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        # self.service_check("can_connect", AgentCheck.CRITICAL)
