@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 6.9.0 / 2024-08-27
+
+***Added***:
+
+* Add config option `database_autodiscovery.max_collections_per_database` to limit max number of collections to be monitored per autodiscoverd database. This option is applied to collection stats metrics and collection indexes stats metrics. ([#18416](https://github.com/DataDog/integrations-core/pull/18416))
+
+***Fixed***:
+
+* Skip collect explain plan for get profile level & listCollections command. ([#18408](https://github.com/DataDog/integrations-core/pull/18408))
+
 ## 6.8.2 / 2024-08-16
 
 ***Fixed***:
