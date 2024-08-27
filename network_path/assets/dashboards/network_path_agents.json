@@ -1410,7 +1410,7 @@
                     {
                         "id": 1353830448501936,
                         "definition": {
-                            "title": "Path Collector",
+                            "title": "Path Origin",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -1434,7 +1434,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip} by {host,collector}.fill(null)"
+                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip} by {host,collector,origin}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
