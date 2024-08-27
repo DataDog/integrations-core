@@ -115,6 +115,9 @@ class MongoApi(object):
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
+    def index_information(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].index_information(session=session)
+
     def sharded_data_distribution_stats(self, session=None):
         return self["admin"].aggregate([{"$shardedDataDistribution": {}}], session=session)
 
@@ -141,6 +144,9 @@ class MongoApi(object):
 
     def get_log_data(self, session=None):
         return self['admin'].command("getLog", "global", session=session)
+
+    def sample(self, db_name, coll_name, sample_size, session=None):
+        return self[db_name][coll_name].aggregate([{"$sample": {"size": sample_size}}], session=session)
 
     def get_cmdline_opts(self):
         return self["admin"].command("getCmdLineOpts")["parsed"]
@@ -187,6 +193,16 @@ class MongoApi(object):
         if limit:
             return coll_names[:limit]
         return coll_names
+
+    def is_collection_sharded(self, db_name, coll_name):
+        try:
+            # Check if the collection is sharded by looking for the collection config
+            # in the config.collections collection.
+            collection_config = self["config"]["collections"].find_one({"_id": f"{db_name}.{coll_name}"})
+            return collection_config is not None
+        except OperationFailure as e:
+            self._log.warning("Could not determine if collection %s.%s is sharded: %s", db_name, coll_name, e)
+            return False
 
     @property
     def hostname(self):

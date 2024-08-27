@@ -104,6 +104,7 @@ class MongoConfig(object):
         self.cluster_name = instance.get('cluster_name', None)
         self._operation_samples_config = instance.get('operation_samples', {})
         self._slow_operations_config = instance.get('slow_operations', {})
+        self._schemas_config = instance.get('schemas', {})
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
@@ -190,6 +191,23 @@ class MongoConfig(object):
             'explained_operations_per_hour_per_query': int(
                 self._slow_operations_config.get('explained_operations_per_hour_per_query', 10)
             ),
+        }
+
+    @property
+    def schemas(self):
+        enabled = False
+        if self.dbm_enabled is True and self._schemas_config.get('enabled') is True:
+            # if DBM is enabled and the schemas config is enabled, then it is enabled
+            # By default, schemas collection is disabled
+            enabled = True
+        max_collections = self._schemas_config.get('max_collections')
+        return {
+            'enabled': enabled,
+            'collection_interval': self._schemas_config.get('collection_interval', 600),
+            'run_sync': is_affirmative(self._schemas_config.get('run_sync', True)),
+            'sample_size': int(self._schemas_config.get('sample_size', 10)),
+            'max_collections': int(max_collections) if max_collections else None,
+            'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
         }
 
     def _get_database_autodiscovery_config(self, instance):
