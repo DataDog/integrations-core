@@ -85,6 +85,8 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 You can limit the number of VMs pulled in with the VMWare integration using the `vsphere.d/conf.yaml` file. See the `resource_filters` parameter section in the [sample vsphere.d/conf.yaml][4].
 
+### Note: Make Sure `collect_tags: true` is set
+
 ### Monitoring vSphere Tanzu Kubernetes Grid (TKG)
 
 The Datadog vSphere integration collects metrics and events from your [TKG][13] VMs and control plane VMs automatically. To collect more granular information about your TKG cluster, including container-, pod-, and node-level metrics, you can install the [Datadog Agent][14] on your cluster. See the [distribution documentation][15] for example configuration files specific to TKG.
