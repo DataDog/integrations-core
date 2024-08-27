@@ -10,7 +10,7 @@ Red Hat OpenShift is an open source container application platform based on the 
 
 The default configuration Datadog provides targets OpenShift 3.7.0+ and OpenShift 4.0+, as it relies on features and endpoints introduced in this version.
 
-To install the Agent, see the [Agent installation instructions][2] for general Kubernetes instructions and the [Kubernetes Distributions page][15] for OpenShift centric configuration examples.
+To install the Agent, see the [Agent installation instructions][2] for general Kubernetes instructions and the [Kubernetes Distributions page][15] for OpenShift configuration examples.
 
 Alternatively, the [Datadog Operator][3] can be used to install and manage the Datadog Agent. The Datadog Operator can be installed using OpenShift's [OperatorHub][4].
 
@@ -23,14 +23,14 @@ If you are deploying the Datadog Agent using any of the methods linked in the in
 
 For instructions on how to install the Datadog Operator and `DatadogAgent` resource in OpenShift, see the [OpenShift installation guide][6].
 
-If the Operator has been deployed with Operator Lifecycle Manager (OLM), then the necessary default SCCs present in OpenShift are automatically associated with the `datadog-agent-scc` Service Account. The Datadog components can then be deployed with the `DatadogAgent` CustomResourceDefinition, referencing this Service Account on the Node Agent and Cluster Agent pods.
+If you deploy the Operator with Operator Lifecycle Manager (OLM), then the necessary default SCCs present in OpenShift are automatically associated with the `datadog-agent-scc` Service Account. You can then deploy the Datadog components with the `DatadogAgent` CustomResourceDefinition, referencing this Service Account on the Node Agent and Cluster Agent pods.
 
-See the [Distributions][15] page and the [Operator repo for more examples][17].
+See the [Distributions][15] page and the [Operator repo][17]  for more examples.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Helm" xxx -->
 
-The SCC can be created directly within your Datadog Agent's `values.yaml`. Add the following block parameters under the `agents` and `clusterAgent` section to create their respective SCCs.
+You can create the SCC directly within your Datadog Agent's `values.yaml`. Add the following block parameters under the `agents` and `clusterAgent` section to create their respective SCCs.
 
 ```yaml
 datadog:
@@ -47,9 +47,9 @@ clusterAgent:
       create: true
 ```
 
-You can apply this when you initially deploy the Agent. Or, you can execute a `helm upgrade` after making this change to apply the SCC. 
+You can apply this when you initially deploy the Agent, or you can execute a `helm upgrade` after making this change to apply the SCC. 
 
-See the [Distributions][15] page and the [Helm repo for more examples][16].
+See the [Distributions][15] page and the [Helm repo][16] for more examples.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Daemonset" xxx -->
@@ -100,7 +100,7 @@ ports:
 
 #### Custom Datadog SCC for all features
 
-The Helm Chart and Datadog Operator will manage the SCC for you. To alternatively manage it yourself be sure to include the correct configurations based on your features enabled.
+The Helm Chart and Datadog Operator manage the SCC for you by default. To manage it yourself instead, make sure to include the correct configurations based on the features you have enabled.
 
 If SELinux is in permissive mode or disabled, enable the `hostaccess` SCC to benefit from all features.
 If SELinux is in enforcing mode, it is recommended to grant [the `spc_t` type][11] to the datadog-agent pod. In order to deploy the agent you can use the following [datadog-agent SCC][12] that can be applied after [creating the datadog-agent service account][9]. It grants the following permissions:
@@ -127,15 +127,15 @@ runAsUser:
 
 ### Log collection
 
-The Datadog Agent's log collection is set up in OpenShift largely the same as other Kubernetes clusters. The Datadog Operator and Helm Chart will mount in the `/var/log/pods` directory that the Datadog Agent pod will use to monitor the logs of the pods and containers on its respective host. However, with the Datadog Operator you do need to apply additional SELinux options in order to give the Agent permissions to read these log files.
+The Datadog Agent's log collection is set up in OpenShift largely the same as other Kubernetes clusters. The Datadog Operator and Helm Chart mount in the `/var/log/pods` directory, which the Datadog Agent pod uses to monitor the logs of the pods and containers on its respective host. However, with the Datadog Operator, you need to apply additional SELinux options to give the Agent permissions to read these log files.
 
 See [Kubernetes Log Collection][7] for further general information and the [Distributions][15] page for configuration examples.
 
 ### APM
 
-In Kubernetes there are three main options to route the data from the application pod to the Datadog Agent pod. The Unix Domain Socket (UDS), the HostIP:HostPort option (TCP/IP), and the Kubernetes Service. The Datadog Operator and Helm Chart default to the UDS option as this is the most resource efficient, however, this option doesn't work well in OpenShift. As it requires elevated SCC and SELinux options in both the Agent pod and application pod.
+In Kubernetes, there are three main options to route the data from the application pod to the Datadog Agent pod: the Unix Domain Socket (UDS), the HostIP:HostPort option (TCP/IP), and the Kubernetes Service. The Datadog Operator and Helm Chart default to the UDS option as this is the most resource efficient. However, this option doesn't work well in OpenShift, as it requires elevated SCC and SELinux options in both the Agent pod and application pod.
 
-Datadog recommends to disable the UDS option explicitly to avoid this, and avoid the Admission Controller injecting this configuration.
+Datadog recommends disabling the UDS option explicitly to avoid this, and to avoid the Admission Controller injecting this configuration.
 
 See [Kubernetes APM - Trace Collection][18] for further general information and the [Distributions][15] page for configuration examples.
 
