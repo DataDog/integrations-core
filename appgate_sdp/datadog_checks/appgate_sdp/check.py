@@ -3,20 +3,30 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
+from .metrics import METRIC_MAP
 
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 # from json import JSONDecodeError
 
 
-class AppgateSdpCheck(AgentCheck):
+class AppgateSdpCheck(OpenMetricsBaseCheckV2):
 
-    # This will be the prefix of every metric and service check the integration sends
-    __NAMESPACE__ = 'appgate_sdp'
+    __NAMESPACE__ = 'appgate'
 
     def __init__(self, name, init_config, instances):
         super(AppgateSdpCheck, self).__init__(name, init_config, instances)
+
+    def get_default_config(self):
+        return {
+            'metrics': [METRIC_MAP],
+                    } 
+    def check(self, instance): 
+        endpoint = instance.get('openmetrics_endpoint')
+        if endpoint is None:
+            ConfigurationError("Unable to find openmetrics_endpoint in conf.yaml file.")
+    super().check(instance)
 
         # Use self.instance to read the check configuration
         # self.url = self.instance.get("url")
