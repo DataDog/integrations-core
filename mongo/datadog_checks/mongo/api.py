@@ -108,6 +108,10 @@ class MongoApi(object):
             session=session,
         )
 
+    def coll_stats_compatable(self, db_name, coll_name, session=None):
+        # collStats is deprecated in MongoDB 6.2. Use the $collStats aggregation stage instead.
+        return self[db_name].command({'collStats': coll_name}, session=session)
+
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
@@ -161,24 +165,28 @@ class MongoApi(object):
         db_name,
         limit=None,
     ):
+        coll_names = []
         try:
             coll_names = self[db_name].list_collection_names(
                 filter={"type": "collection"},  # Only return collections, not views
                 authorizedCollections=True,
             )
-            if limit:
-                return coll_names[:limit]
-            return coll_names
-        except OperationFailure:
-            # The user is not authorized to run listCollections on this database.
-            # This is NOT a critical error, so we log it as a warning.
-            self._log.warning(
-                "Not authorized to run 'listCollections' on db %s, "
-                "please make sure the user has read access on the database or "
-                "add the database to the `database_autodiscovery.exclude` list in the configuration file",
-                db_name,
-            )
-            return []
+        except OperationFailure as e:
+            if e.code == 303 and e.details.get("errmsg") == "Field 'type' is currently not supported":
+                # Filter by type is not supported on AWS DocumentDB
+                coll_names = self[db_name].list_collection_names(authorizedCollections=True)
+            else:
+                # The user is not authorized to run listCollections on this database.
+                # This is NOT a critical error, so we log it as a warning.
+                self._log.warning(
+                    "Not authorized to run 'listCollections' on db %s, "
+                    "please make sure the user has read access on the database or "
+                    "add the database to the `database_autodiscovery.exclude` list in the configuration file",
+                    db_name,
+                )
+        if limit:
+            return coll_names[:limit]
+        return coll_names
 
     @property
     def hostname(self):
