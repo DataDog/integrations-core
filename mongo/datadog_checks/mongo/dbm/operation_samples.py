@@ -90,9 +90,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
         activities = []
 
-        for activity, sample in self._get_operation_samples(
-            now, databases_monitored=self._check._database_autodiscovery.databases
-        ):
+        for activity, sample in self._get_operation_samples(now, databases_monitored=self._check.databases_monitored):
             if sample:
                 self._check.log.debug("Sending operation sample: %s", sample)
                 self._check.database_monitoring_query_sample(json_util.dumps(sample))
@@ -269,6 +267,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "opid": operation.get("opid"),  # str
             "ns": operation.get("ns"),  # str
             "plan_summary": operation.get("planSummary"),  # str
+            "query_framework": operation.get("queryFramework"),  # str
             "current_op_time": operation.get("currentOpTime"),  # str  start time of the operation
             "microsecs_running": operation.get("microsecs_running"),  # int
             "transaction_time_open_micros": operation.get("transaction", {}).get("timeOpenMicros"),  # int

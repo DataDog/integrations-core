@@ -8,7 +8,11 @@ if six.PY3:
     from enum import IntEnum, StrEnum
     from typing import Optional
 
-    from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+    from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
+
+    """
+    Cisco ACI Response Models
+    """
 
     class NodeAttributes(BaseModel):
         address: Optional[str] = None
@@ -45,6 +49,16 @@ if six.PY3:
         desc: Optional[str] = None
         router_mac: Optional[str] = Field(default=None, alias="routerMac")
 
+        @model_validator(mode='before')
+        @classmethod
+        def validate_name(cls, data: dict) -> dict:
+            if isinstance(data, dict):
+                name = data.get('name')
+                id = data.get('id')
+                if not name or name == '':
+                    data['name'] = id
+            return data
+
     class PhysIf(BaseModel):
         attributes: L1PhysIfAttributes
         children: Optional[list] = Field(default_factory=list)
@@ -56,6 +70,10 @@ if six.PY3:
                 if 'ethpmPhysIf' in child:
                     return EthpmPhysIf(**child['ethpmPhysIf'])
             return None
+
+    """
+    NDM Models
+    """
 
     class DeviceMetadata(BaseModel):
         id: Optional[str] = Field(default=None)
@@ -158,3 +176,13 @@ if six.PY3:
         devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
         interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
         collect_timestamp: Optional[int] = None
+        size: Optional[int] = Field(default=0, exclude=True)
+
+        model_config = ConfigDict(validate_assignment=True, use_enum_values=True)
+
+        def append_metadata(self, metadata: DeviceMetadata | InterfaceMetadata):
+            if isinstance(metadata, DeviceMetadata):
+                self.devices.append(metadata)
+            if isinstance(metadata, InterfaceMetadata):
+                self.interfaces.append(metadata)
+            self.size += 1

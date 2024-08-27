@@ -126,7 +126,9 @@ integration/consul_connect:
 integration/container:
   - container/**/*
 integration/containerd:
-  - containerd/**/*
+- containerd/**/*
+integration/contentful:
+- contentful/**/*
 integration/coredns:
   - coredns/**/*
 integration/couch:
