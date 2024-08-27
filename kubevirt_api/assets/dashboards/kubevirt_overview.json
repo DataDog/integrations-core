@@ -564,7 +564,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:kubevirt_api.can_connect{$kube_node, $kube_namespace, $kube_cluster_name} by {endpoint}"
+                      "query": "sum:kubevirt_api.can_connect{$kube_node, $kube_namespace, $kube_cluster_name} by {pod_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1404,6 +1404,257 @@
         "height": 7,
         "is_column_break": true
       }
+    },
+    {
+      "id": 239904209946238,
+      "definition": {
+        "title": "Virt Handler",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5703785089249894,
+            "definition": {
+              "title": "Workqueue Add Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.adds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 2806655813300116,
+            "definition": {
+              "title": "Workqueue Depth",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.depth{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 6817919317573044,
+            "definition": {
+              "title": "Workqueue Queue Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.queue_duration_seconds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 5109294262350614,
+            "definition": {
+              "title": "Workqueue Work Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.work_duration_seconds.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 9, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 1283819053231866,
+            "definition": {
+              "title": "Workqueue Unfinished Work",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.unfinished_work_seconds{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 5751484418557652,
+            "definition": {
+              "title": "Workqueue Retries",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kubevirt_handler.workqueue.retries.count{$kube_namespace,$kube_cluster_name,$kube_node} by {pod_name,name}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 3, "y": 2, "width": 3, "height": 2 }
+          },
+          {
+            "id": 8742120090105740,
+            "definition": {
+              "title": "Workqueue Longest Running Processor",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [{ "formula": "query1" }],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kubevirt_handler.workqueue.longest_running_processor_seconds{$kube_cluster_name,$kube_namespace} by {pod_name,name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 2, "width": 6, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 32, "width": 12, "height": 5 }
     }
   ],
   "template_variables": [
