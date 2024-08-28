@@ -136,9 +136,7 @@ class MySQLActivity(DBMAsyncJob):
                 'Waiting for events_waits_current availability to be determined by the check, skipping run.'
             )
         # Azure flexible server 
-        azure_deployment_type = ""
-        if self._config.cloud_metadata.get("azure") is not None:
-            azure_deployment_type = self._config.cloud_metadata.get("azure")["deployment_type"]
+        azure_deployment_type = self._config.cloud_metadata.get("azure", {}).get("deployment_type")
         if self._check.events_wait_current_enabled is False and azure_deployment_type != 'flexible_server':
             self._check.record_warning(
                 DatabaseConfigurationError.events_waits_current_not_enabled,
