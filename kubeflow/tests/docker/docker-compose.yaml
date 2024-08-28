@@ -7,4 +7,4 @@ services:
       - "9090:9090"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ../fixtures/kubeflow.txt:/metrics/metrics
+      - ../fixtures/kubeflow_metrics.txt:/metrics/metrics
