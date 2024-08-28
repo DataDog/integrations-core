@@ -155,7 +155,7 @@ if six.PY3:
 
         @field_validator("index", mode="before")
         @classmethod
-        def parse_index(cls, index: int | None) -> int | None:
+        def parse_index(cls, index: str | int | None) -> int | None:
             if type(index) == str:
                 split = re.split('eth|/', index)
                 return int(split[-1])
