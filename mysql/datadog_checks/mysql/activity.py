@@ -135,21 +135,21 @@ class MySQLActivity(DBMAsyncJob):
             self._log.debug(
                 'Waiting for events_waits_current availability to be determined by the check, skipping run.'
             )
-        # Azure flexible server 
-        azure_deployment_type = self._config.cloud_metadata.get("azure", {}).get("deployment_type")
-        if self._check.events_wait_current_enabled is False and azure_deployment_type != 'flexible_server':
-            self._check.record_warning(
-                DatabaseConfigurationError.events_waits_current_not_enabled,
-                warning_with_tags(
-                    'Query activity and wait event collection is disabled on this host. To enable it, the setup '
-                    'consumer `performance-schema-consumer-events-waits-current` must be enabled on the MySQL server. '
-                    'Please refer to the troubleshooting documentation: '
-                    'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#%s',
-                    DatabaseConfigurationError.events_waits_current_not_enabled.value,
-                    code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
-                    host=self._check.resolved_hostname,
-                ),
-            )
+        if self._check.events_wait_current_enabled is False:
+            azure_deployment_type = self._config.cloud_metadata.get("azure", {}).get("deployment_type")
+            if azure_deployment_type != "flexible_server":
+                self._check.record_warning(
+                    DatabaseConfigurationError.events_waits_current_not_enabled,
+                    warning_with_tags(
+                        'Query activity and wait event collection is disabled on this host. To enable it, the setup '
+                        'consumer `performance-schema-consumer-events-waits-current` '
+                        'must be enabled on the MySQL server. Please refer to the troubleshooting documentation: '
+                        'https://docs.datadoghq.com/database_monitoring/setup_mysql/troubleshooting#%s',
+                        DatabaseConfigurationError.events_waits_current_not_enabled.value,
+                        code=DatabaseConfigurationError.events_waits_current_not_enabled.value,
+                        host=self._check.resolved_hostname,
+                    ),
+                )
             return
         self._check_version()
         self._collect_activity()

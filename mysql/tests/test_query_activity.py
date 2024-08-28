@@ -476,28 +476,31 @@ def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, agg
     assert check.warnings == []
     assert dbm_activity, "should have collected at least one activity"
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
     "cloud_metadata",
     [
-        (
-            {
-                'azure': {
-                    'deployment_type': 'flexible_server',
-                    'name': 'my-instance',
-                },
+        {
+            'azure': {
+                'deployment_type': 'flexible_server',
+                'name': 'my-instance',
             },
-        ),
-    ]
+        },
+    ],
 )
-def test_events_wait_current_disabled_no_warning_azure_flexible_server(dbm_instance, dd_run_check, root_conn, aggregator, cloud_metadata):
+def test_events_wait_current_disabled_no_warning_azure_flexible_server(
+    dbm_instance, dd_run_check, root_conn, aggregator, cloud_metadata
+):
     '''
-    This test verifies that the check will not emit a warning if the events_waits_current is disabled and Azure deployment_type is flexible_server.
+    This test verifies that the check will not emit a warning
+    if the events_waits_current is disabled and Azure deployment_type is flexible_server.
     '''
     if cloud_metadata:
         for k, v in cloud_metadata.items():
             dbm_instance[k] = v
+    dbm_instance['options']['extra_performance_metrics'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
     # disable events_waits_current, expect events_wait_current_enabled to be set to False
