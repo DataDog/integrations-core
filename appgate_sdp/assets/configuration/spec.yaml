@@ -7,7 +7,38 @@ files:
     - template: init_config/openmetrics
   - template: instances
     options:
-  - template: instances/openmetrics
+    - template: instances/openmetrics
+      overrides: 
+        raw_metric_prefix.hidden: true 
+        hostname_label.hidden: true
+        hostname_format.hidden: true 
+        collect_histogram_buckets.hidden: true
+        non_cumulative_histogram_buckets.hidden: true 
+        histogram_buckets_as_distributions.hidden: true 
+        collect_counters_with_distributions.hidden: true 
+        share_labels.hidden: true 
+        raw_line_filters.hidden: true 
+        cache_metric_wildcards.hidden: true 
+        telemetry.hidden: true 
+        ntlm_domain.hidden: true 
+        kerberos_auth.hidden: true 
+        kerberos_cache.hidden: true 
+        kerberos_delegate.hidden: true 
+        kerberos_force_initiate.hidden: true 
+        kerberos_hostname.hidden: true 
+        kerberos_principal.hidden: true 
+        kerberos_keytab.hidden: true 
+        auth_token.hidden: true 
+        aws_region.hidden: true 
+        aws_host.hidden: true 
+        aws_service.hidden: true 
+        read_timeout.hidden: true 
+        log_requests.hidden: true 
+        headers.hidden: true 
+        extra_headers.hidden: true 
+        request_size.hidden: true 
+        auth_type.description: ""
+
   - template: instances/openmetrics_legacy_base
     hidden: true
     overrides:

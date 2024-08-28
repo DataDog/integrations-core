@@ -2,6 +2,38 @@
 #
 init_config:
 
+    ## @param proxy - mapping - optional
+    ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported like so:
+    ##
+    ##   socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #   - <HOSTNAME_1>
+    #   - <HOSTNAME_2>
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## If set to `true`, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
+    #
+    # skip_proxy: false
+
+    ## @param timeout - number - optional - default: 10
+    ## The timeout for connecting to services.
+    #
+    # timeout: 10
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -13,7 +45,267 @@ init_config:
 #
 instances:
 
-  -
+    ## @param openmetrics_endpoint - string - required
+    ## The URL exposing metrics in the OpenMetrics format.
+    #
+  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+
+    ## @param extra_metrics - (list of string or mapping) - optional
+    ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
+    ## what the check collects by default. If the check already collects a metric, then
+    ## metric definitions here take precedence. Metrics may be defined in 3 ways:
+    ##
+    ## 1. If the item is a string, then it represents the exposed metric name, and
+    ##    the sent metric name will be identical. For example:
+    ##
+    ##      extra_metrics:
+    ##      - <METRIC_1>
+    ##      - <METRIC_2>
+    ## 2. If the item is a mapping, then the keys represent the exposed metric names.
+    ##
+    ##      a. If a value is a string, then it represents the sent metric name. For example:
+    ##
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
+    ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##         The `name` represents the sent metric name, and the `type` represents how
+    ##         the metric should be handled, overriding any type information the endpoint
+    ##         may provide. For example:
+    ##
+    ##           extra_metrics:
+    ##           - <EXPOSED_METRIC_1>:
+    ##               name: <SENT_METRIC_1>
+    ##               type: <METRIC_TYPE_1>
+    ##           - <EXPOSED_METRIC_2>:
+    ##               name: <SENT_METRIC_2>
+    ##               type: <METRIC_TYPE_2>
+    ##
+    ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
+    ##
+    ## Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
+    ## suffix. For example, to collect the counter metric `promhttp_metric_handler_requests_total`, specify
+    ## `promhttp_metric_handler_requests`. This submits to Datadog the metric name appended with `.count`.
+    ## For more information, see:
+    ## https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
+    ##
+    ## Regular expressions may be used to match the exposed metric names, for example:
+    ##
+    ##   extra_metrics:
+    ##   - ^network_(ingress|egress)_.+
+    ##   - .+:
+    ##       type: gauge
+    #
+    # extra_metrics: []
+
+    ## @param exclude_metrics - list of strings - optional
+    ## A list of metrics to exclude, with each entry being either
+    ## the exact metric name or a regular expression.
+    ## In order to exclude all metrics but the ones matching a specific filter,
+    ## you can use a negative lookahead regex like:
+    ##   - ^(?!foo).*$
+    #
+    # exclude_metrics: []
+
+    ## @param exclude_metrics_by_labels - mapping - optional
+    ## A mapping of labels to exclude metrics with matching label name and their corresponding metric values. To match
+    ## all values of a label, set it to `true`.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    ##
+    ## For example, the following configuration instructs the check to exclude all metrics with
+    ## a label `worker` or a label `pid` with the value of either `23` or `42`.
+    ##
+    ##   exclude_metrics_by_labels:
+    ##     worker: true
+    ##     pid:
+    ##     - '23'
+    ##     - '42'
+    #
+    # exclude_metrics_by_labels: {}
+
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to exclude, useful for high cardinality values like timestamps or UUIDs.
+    ## May be used in conjunction with `include_labels`.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    #
+    # exclude_labels: []
+
+    ## @param include_labels - list of strings - optional
+    ## A list of labels to include. May be used in conjunction with `exclude_labels`.
+    ## Labels defined in `exclude_labels` will take precedence in case of overlap.
+    ##
+    ## Note: Label filtering happens before `rename_labels`.
+    #
+    # include_labels: []
+
+    ## @param rename_labels - mapping - optional
+    ## A mapping of label names to their new names.
+    #
+    # rename_labels:
+    #   <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
+    #   <LABEL_NAME_2>: <NEW_LABEL_NAME_2>
+
+    ## @param enable_health_service_check - boolean - optional - default: true
+    ## Whether or not to send a service check named `<NAMESPACE>.openmetrics.health` which reports
+    ## the health of the `openmetrics_endpoint`.
+    #
+    # enable_health_service_check: true
+
+    ## @param ignore_connection_errors - boolean - optional - default: false
+    ## Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+    #
+    # ignore_connection_errors: false
+
+    ## @param use_process_start_time - boolean - optional - default: false
+    ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
+    ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
+    ## initial value can be assumed for counters. This requires keeping metrics in memory until the entire
+    ## response is received.
+    #
+    # use_process_start_time: false
+
+    ## @param cache_shared_labels - boolean - optional - default: true
+    ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
+    ## for improved performance.
+    ##
+    ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
+    #
+    # cache_shared_labels: true
+
+    ## @param ignore_tags - list of strings - optional
+    ## A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
+    #
+    # ignore_tags:
+    #   - <FULL:TAG>
+    #   - <TAG_PREFIX:.*>
+    #   - <TAG_SUFFIX$>
+
+    ## @param proxy - mapping - optional
+    ## This overrides the `proxy` setting in `init_config`.
+    ##
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported, for example:
+    ##
+    ##   socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #   - <HOSTNAME_1>
+    #   - <HOSTNAME_2>
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## This overrides the `skip_proxy` setting in `init_config`.
+    ##
+    ## If set to `true`, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
+    #
+    # skip_proxy: false
+
+    ## @param auth_type - string - optional - default: basic
+    #
+    # auth_type: basic
+
+    ## @param use_legacy_auth_encoding - boolean - optional - default: true
+    ## When `auth_type` is set to `basic`, this determines whether to encode as `latin1` rather than `utf-8`.
+    #
+    # use_legacy_auth_encoding: true
+
+    ## @param username - string - optional
+    ## The username to use if services are behind basic or digest auth.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to use if services are behind basic or NTLM auth.
+    #
+    # password: <PASSWORD>
+
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
+    #
+    # tls_verify: true
+
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
+
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    #
+    # tls_ignore_warning: false
+
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate's authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
+    #
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format or a directory
+    ## containing several CA certificates in PEM format. If a directory, the directory
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
+    #
+    # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
+    ## @param timeout - number - optional - default: 10
+    ## The timeout for accessing services.
+    ##
+    ## This overrides the `timeout` setting in `init_config`.
+    #
+    # timeout: 10
+
+    ## @param connect_timeout - number - optional
+    ## The connect timeout for accessing services. Defaults to `timeout`.
+    #
+    # connect_timeout: <CONNECT_TIMEOUT>
+
+    ## @param persist_connections - boolean - optional - default: false
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
+    #
+    # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -42,3 +334,15 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
