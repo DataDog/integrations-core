@@ -1470,6 +1470,16 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
+          name: Map `shost` to `infected_endpoint`
+          enabled: true
+          sources:
+            - shost
+          sourceType: attribute
+          target: infected_endpoint
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
           name: Map `dvchost` to `product_server`
           enabled: true
           sources:

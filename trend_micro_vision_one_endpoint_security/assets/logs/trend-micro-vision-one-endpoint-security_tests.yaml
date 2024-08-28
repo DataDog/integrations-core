@@ -431,6 +431,7 @@ tests:
         fileHash: "177750B65A21A9043105FD0820B85B58CF148A01"
         filePath: "C:\\\\test01\\\\aaa.exe"
         file_name: "aaa.exe"
+        infected_endpoint: "10.0.0.1"
         infection_channel: "Local drive"
         infection_source: "https://10.1.1.1"
         process_command: "notepad.exe -test"
