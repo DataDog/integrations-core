@@ -2,6 +2,12 @@
 
 ![Oracle Dashboard][1]
 
+## Deprecation notice
+
+The Oracle integration is deprecated and will be removed in a future release. For customers using Datadog Agent version 7.52.0 or earlier, the existing Oracle integration will continue to function. Starting from Datadog Agent version 7.53.0, the Oracle integration has been automatically migrated to the new implementation written in Go, available in [`datadog-agent`][16].
+
+We strongly recommend upgrading to the latest Datadog Agent to take full advantage of the new Oracle integration, along with the [Database Monitoring (DBM)][2] feature, for enhanced insights into query performance and database health. DBM offers a comprehensive set of features, including query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
+
 ## Overview
 
 The Oracle integration provides health and performance metrics for your Oracle database in near real-time. Visualize these metrics with the provided dashboard and create monitors to alert your team on Oracle database states.
@@ -440,3 +446,4 @@ Need help? Contact [Datadog support][14].
 [13]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 [14]: https://docs.datadoghq.com/help/
 [15]: https://docs.oracle.com/en/database/oracle/oracle-database/19/mxcli/installing-and-removing-oracle-database-client.html
+[16]: https://github.com/DataDog/datadog-agent/tree/main/pkg/collector/corechecks/oracle
