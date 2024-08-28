@@ -26,18 +26,14 @@ def test_check_mock_karpenter_openmetrics(dd_run_check, instance, aggregator, mo
 
 
 def test_check_mock_karpenter_v1_openmetrics(dd_run_check, instance, aggregator, mock_http_response):
-    print("Starting my test")
     mock_http_response(file_path=get_fixture_path('karpenter_metrics_v1.txt'))
-    print("loaded test curl")
     check = KarpenterCheck('karpenter', {}, [instance])
-    print("about to do run_check")
     dd_run_check(check)
-    print("check has been ran!")
 
     for metric in TEST_V1_METRICS:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'test:tag')
-    print("For metric in TEST -- loop completed :)")
+
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('karpenter.openmetrics.health', ServiceCheck.OK)
 
