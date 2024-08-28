@@ -305,12 +305,22 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `cs2` to `network.client.ip`
+          name: Map `shost` to `source_host_name`
+          enabled: true
+          sources:
+            - shost
+          sourceType: attribute
+          target: source_host_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `cs2` to `endpoint_ip`
           enabled: true
           sources:
             - cs2
           sourceType: attribute
-          target: network.client.ip
+          target: endpoint_ip
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -670,12 +680,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `src` to `network.client.ip`
+          name: Map `src` to `endpoint_ip`
           enabled: true
           sources:
             - src
           sourceType: attribute
-          target: network.client.ip
+          target: endpoint_ip
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -781,7 +791,7 @@ pipeline:
           overrideOnConflict: false
         - name: Lookup for `filter_action` to `filter_action` field
           enabled: true
-          source: action
+          source: filter_action
           target: filter_action
           lookupTable: |-
             0,Unknown
@@ -2268,12 +2278,10 @@ pipeline:
         supportRules: ""
         matchRules: recipients_rule %{notSpace:recipients:array("", ";")}
     - type: attribute-remapper
-      name: Map `TMCMLogDetectedIP`, `src`, `dst` to `endpoint_ip`
+      name: Map `TMCMLogDetectedIP` to `endpoint_ip`
       enabled: true
       sources:
         - TMCMLogDetectedIP
-        - src
-        - dst
       sourceType: attribute
       target: endpoint_ip
       targetType: attribute
@@ -2334,24 +2342,12 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `TMCMLogDetectedHost`, `shost` to `source_host_name`
+      name: Map `TMCMLogDetectedHost` to `source_host_name`
       enabled: true
       sources:
         - TMCMLogDetectedHost
-        - shost
       sourceType: attribute
       target: source_host_name
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `dhost`, `dvchost` to `server_host`
-      enabled: true
-      sources:
-        - dhost
-        - dvchost
-      sourceType: attribute
-      target: server_host
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
