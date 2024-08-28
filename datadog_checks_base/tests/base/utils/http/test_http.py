@@ -117,6 +117,27 @@ class TestSession:
             assert hasattr(http.session, key)
             assert getattr(http.session, key) == value
 
+    def test_timeout(self):
+        """
+        Respect the request timeout.
+
+        Here we test two things:
+        - We pass the timemout option correctly to the requests library.
+        - We let the requests.exceptions.Timeout bubble up from the requests library.
+
+        We trust requests to respect the timeout so we mock its response.
+        """
+
+        mock_session = mock.create_autospec(requests.Session)
+        mock_session.get.side_effect = requests.exceptions.Timeout()
+        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08}, session=mock_session)
+
+        with pytest.raises(requests.exceptions.Timeout):
+            http.get('https://foobar.com')
+
+        assert 'timeout' in mock_session.get.call_args.kwargs, mock_session.get.call_args.kwargs
+        assert mock_session.get.call_args.kwargs['timeout'] == (0.08, 0.08)
+
 
 class TestLogger:
     def test_default(self, caplog):
@@ -174,10 +195,3 @@ class TestLogger:
         expected_message = 'Sending GET request to https://www.google.com'
         for _, _, message in caplog.record_tuples:
             assert message != expected_message
-
-
-class TestIntegration:
-    def test_session_timeout(self):
-        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08})
-        with pytest.raises(requests.exceptions.Timeout):
-            http.get('https://httpbin.org/delay/0.10')
