@@ -46,7 +46,7 @@ def tag(app, final):
         new_tag = f'{major_minor_version}.{patch_version}'
     else:
         next_rc = click.prompt(
-            'Which RC number are we tagging? (hit ENTER to accept suggestion)', type=int, default=next_rc_guess
+            'What RC number should be tagged? (hit ENTER to accept suggestion)', type=int, default=next_rc_guess
         )
         new_tag = f'{major_minor_version}.{patch_version}-rc.{next_rc}'
         if Version(new_tag) in this_release_tags:
