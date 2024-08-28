@@ -114,8 +114,6 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
 
     check = TeamCityRest('teamcity', {}, [instance])
 
-    expected_error = "Failed to establish a new connection"
-
     with pytest.raises(Exception, match=expected_error):
         dd_run_check(check)
 
