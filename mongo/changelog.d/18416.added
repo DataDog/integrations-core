@@ -1,1 +1,0 @@
-Add config option `database_autodiscovery.max_collections_per_database` to limit max number of collections to be monitored per autodiscoverd database. This option is applied to collection stats metrics and collection indexes stats metrics.
