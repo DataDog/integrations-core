@@ -41,8 +41,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "monitors": {},
-    "saved_views": {},
+    "monitors": {
+      "Kubeflow Monitor": "assets/monitors/kubeflow.json"
+    },
     "dashboards": {
       "Kubeflow Overview": "assets/dashboards/overview.json"
     }
