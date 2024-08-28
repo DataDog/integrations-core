@@ -30,7 +30,7 @@ ipaddress @ https://agent-int-packages.datadoghq.com/external/ipaddress/ipaddres
 jmespath @ https://agent-int-packages.datadoghq.com/external/jmespath/jmespath-0.10.0-py2.py3-none-any.whl#sha256=cdf6525904cc597730141d61b36f2e4b8ecc257c420fa2f4549bac2c2d0cb72f
 kubernetes @ https://agent-int-packages.datadoghq.com/external/kubernetes/kubernetes-18.20.0-py2.py3-none-any.whl#sha256=ff31ec17437293e7d4e1459f1228c42d27c7724dfb56b4868aba7a901a5b72c9
 ldap3 @ https://agent-int-packages.datadoghq.com/external/ldap3/ldap3-2.9.1-py2.py3-none-any.whl#sha256=5869596fc4948797020d3f03b7939da938778a0f9e2009f7a072ccf92b8e8d70
-lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-4.9.2-cp27-cp27m-win_amd64.whl#sha256=4c8f293f14abc8fd3e8e01c5bd86e6ed0b6ef71936ded5bf10fe7a5efefbaca3
+lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-4.9.4-cp27-cp27m-win_amd64.whl#sha256=cb53669442895763e61df5c995f0e8361b61662f26c1b04ee82899c2789c8f69
 lz4 @ https://agent-int-packages.datadoghq.com/external/lz4/lz4-2.2.1-cp27-cp27m-win_amd64.whl#sha256=ffb272017186dec10e05a85a08932915bae59368c903f55d04a4637f48fdbd8c
 mmh3 @ https://agent-int-packages.datadoghq.com/built/mmh3/mmh3-2.5.1-20240402154756-cp27-cp27m-win_amd64.whl#sha256=47a5e955144ca3644750f79501a1c0a1500ccbe163ad65996cad8af9bea4d96a
 ntlm-auth @ https://agent-int-packages.datadoghq.com/external/ntlm-auth/ntlm_auth-1.5.0-py2.py3-none-any.whl#sha256=f1527c581dbf149349134fc2d789d50af2a400e193206956fa0ab456ccc5a8ba
