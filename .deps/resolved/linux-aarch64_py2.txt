@@ -31,7 +31,7 @@ ipaddress @ https://agent-int-packages.datadoghq.com/external/ipaddress/ipaddres
 jmespath @ https://agent-int-packages.datadoghq.com/external/jmespath/jmespath-0.10.0-py2.py3-none-any.whl#sha256=cdf6525904cc597730141d61b36f2e4b8ecc257c420fa2f4549bac2c2d0cb72f
 kubernetes @ https://agent-int-packages.datadoghq.com/external/kubernetes/kubernetes-18.20.0-py2.py3-none-any.whl#sha256=ff31ec17437293e7d4e1459f1228c42d27c7724dfb56b4868aba7a901a5b72c9
 ldap3 @ https://agent-int-packages.datadoghq.com/external/ldap3/ldap3-2.9.1-py2.py3-none-any.whl#sha256=5869596fc4948797020d3f03b7939da938778a0f9e2009f7a072ccf92b8e8d70
-lxml @ https://agent-int-packages.datadoghq.com/built/lxml/lxml-4.9.2-20240806143214-cp27-cp27mu-manylinux2014_aarch64.manylinux_2_17_aarch64.whl#sha256=539a8d715a7b7915e0232c9a6eee89583342649997255ee17b17f1f0b1121df5
+lxml @ https://agent-int-packages.datadoghq.com/built/lxml/lxml-4.9.4-20240828124958-cp27-cp27mu-manylinux2014_aarch64.manylinux_2_17_aarch64.whl#sha256=12b5225d00f406e17d5d72a40325335b86ecc7fbe1b488f5f2b342f0d25ef41a
 lz4 @ https://agent-int-packages.datadoghq.com/built/lz4/lz4-2.2.1-20240806143215-cp27-cp27mu-manylinux2014_aarch64.manylinux_2_17_aarch64.whl#sha256=4433dd9be47ad60f1a1b71c61d73226a8300af76d9e70ce2d2e0ac3a8f5acfe6
 mmh3 @ https://agent-int-packages.datadoghq.com/built/mmh3/mmh3-2.5.1-20240806143215-cp27-cp27mu-manylinux2014_aarch64.manylinux_2_17_aarch64.whl#sha256=dc1a52fc33a01714f1ec7f72a180c3935c5e06d41e2c55a683aaa6f08b16e906
 monotonic @ https://agent-int-packages.datadoghq.com/external/monotonic/monotonic-1.6-py2.py3-none-any.whl#sha256=68687e19a14f11f26d140dd5c86f3dba4bf5df58003000ed467e0e2a69bca96c
