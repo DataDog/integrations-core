@@ -37,6 +37,9 @@ files:
         headers.hidden: true 
         extra_headers.hidden: true 
         request_size.hidden: true 
+        min_collection_interval.hidden: true 
+        empty_default_hostname.hidden: true 
+        metric_patterns.hidden: true 
         auth_type.description: ""
 
   - template: instances/openmetrics_legacy_base
