@@ -34,7 +34,7 @@
       },
       "metrics": {
         "prefix": "kubeflow.",
-        "check": "",
+        "check": "kubeflow.pipeline.run.status",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
