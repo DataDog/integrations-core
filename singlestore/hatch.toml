@@ -1,13 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-    "--py2",
-    "--disallow-untyped-defs",
-    "--follow-imports silent",
-    "--install-types",
-    "--non-interactive",
-    "datadog_checks/singlestore",
-]
+
 mypy-deps = [
   "types-PyMySQL==1.1.0.1",
 ]
