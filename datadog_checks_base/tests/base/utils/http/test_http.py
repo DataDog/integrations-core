@@ -7,7 +7,6 @@ import mock
 import pytest
 import requests
 import requests_unixsocket
-from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
@@ -81,7 +80,7 @@ class TestUnixDomainSocket:
         assert adapter is not None
         assert isinstance(adapter, requests_unixsocket.UnixAdapter)
 
-    @pytest.mark.flaky(max_runs=3, rerun_filter=lambda err, name, test, plugin: PY2)
+    @pytest.mark.flaky(max_runs=3)
     @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
     def test_uds_request(self, uds_path):
         # type: (str) -> None
@@ -113,7 +112,7 @@ class TestSession:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        for key, value in iteritems(http.options):
+        for key, value in http.options.items():
             assert hasattr(http.session, key)
             assert getattr(http.session, key) == value
 

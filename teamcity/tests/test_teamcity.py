@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import pytest
 from mock import ANY, patch
-from six import PY2
 
 from datadog_checks.teamcity.constants import (
     SERVICE_CHECK_BUILD_PROBLEMS,
@@ -27,8 +26,6 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.usefixtures('dd_environment'),
 ]
-
-BUILD_TAGS = BUILD_TAGS + ['instance_name:SampleProject_Build'] if PY2 else BUILD_TAGS
 
 
 def test_build_event(dd_run_check, aggregator, rest_instance):
@@ -117,14 +114,7 @@ def test_validate_config(dd_run_check, build_config, expected_error, caplog):
 
     check = TeamCityRest('teamcity', {}, [instance])
 
-    if PY2:
-        if instance.get('projects'):
-            expected_error = (
-                '`projects` option is not supported for Python 2. '
-                'Use the `build_configuration` option or upgrade to Python 3.'
-            )
-        else:
-            expected_error = "Failed to establish a new connection"
+    expected_error = "Failed to establish a new connection"
 
     with pytest.raises(Exception, match=expected_error):
         dd_run_check(check)
@@ -140,7 +130,7 @@ def test_collect_build_stats(dd_run_check, aggregator, rest_instance, teamcity_r
     for metric in BUILD_STATS_METRICS:
         metric_name = metric['name']
         expected_val = metric['value']
-        expected_tags = metric['tags'] if not PY2 else metric['tags'] + ['instance_name:SampleProject_Build']
+        expected_tags = metric['tags']
 
         aggregator.assert_metric(metric_name, tags=expected_tags, value=expected_val)
 
@@ -157,7 +147,7 @@ def test_collect_test_results(dd_run_check, aggregator, rest_instance, teamcity_
 
     for res in EXPECTED_SERVICE_CHECK_TEST_RESULTS:
         expected_status = res['value']
-        expected_tests_tags = res['tags'] if not PY2 else res['tags'] + ['instance_name:SampleProject_Build']
+        expected_tests_tags = res['tags']
         aggregator.assert_service_check(
             'teamcity.{}'.format(SERVICE_CHECK_TEST_RESULTS), status=expected_status, tags=expected_tests_tags
         )
