@@ -126,6 +126,28 @@ METRIC_MAP = {
     'workqueue_retries': 'workqueue_retries',
     'workqueue_unfinished_work_seconds': 'workqueue.unfinished.work_seconds',
     'workqueue_work_duration_seconds': 'workqueue.work.duration_seconds',
+    # new Karpenter V1 metric names
+    'karpenter_nodes_termination_duration_seconds': 'nodes.termination.time_seconds',
+    'karpenter_nodes_terminated_total': 'nodes.terminated',
+    'karpenter_nodes_leases_deleted_total': 'nodes.leases_deleted',
+    'karpenter_nodes_created_total': 'nodes.created',
+    'karpenter_pods_startup_duration_seconds': 'pods.startup.time_seconds',
+    'karpenter_voluntary_disruption_queue_failures_total': 'disruption.replacement.nodeclaim.failures',
+    'karpenter_voluntary_disruption_decision_evaluation_duration_seconds': 'disruption.evaluation.duration_seconds',
+    'karpenter_voluntary_disruption_eligible_nodes': 'disruption.eligible_nodes',
+    'karpenter_voluntary_disruption_consolidation_timeouts_total': 'disruption.consolidation_timeouts',
+    'karpenter_nodepools_allowed_disruptions': 'disruption.budgets.allowed_disruptions',
+    'karpenter_voluntary_disruption_decisions_total': 'disruption.actions_performed',
+    'karpenter_scheduler_scheduling_duration_seconds': 'provisioner.scheduling.simulation.duration_seconds',
+    'karpenter_scheduler_queue_depth': 'provisioner.scheduling.queue_depth',
+    'karpenter_interruption_received_messages_total': 'interruption.received_messages',
+    'karpenter_interruption_deleted_messages_total': 'interruption.deleted_messages',
+    'karpenter_interruption_message_queue_duration_seconds': 'interruption.message.latency.time_seconds',
+    'karpenter_nodepools_usage': 'nodepool_usage',
+    'karpenter_nodepools_limit': 'nodepool_limit',
+    'karpenter_nodeclaims_terminated_total': 'nodeclaims_terminated',
+    'karpenter_nodeclaims_disrupted_total': 'nodeclaims_disrupted',
+    'karpenter_nodeclaims_created_total': 'nodeclaims_created',
 }
 
 RENAME_LABELS_MAP = {
