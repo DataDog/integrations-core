@@ -8,7 +8,7 @@ Red Hat OpenShift is an open source container application platform based on the 
 
 ### Installation
 
-The default configuration Datadog provides targets OpenShift 3.7.0+ and OpenShift 4.0+, as it relies on features and endpoints introduced in this version.
+This core configuration supports OpenShift 3.11 and OpenShift 4, but it works best with OpenShift 4.
 
 To install the Agent, see the [Agent installation instructions][2] for general Kubernetes instructions and the [Kubernetes Distributions page][15] for OpenShift configuration examples.
 
