@@ -85,7 +85,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -156,7 +156,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -224,7 +224,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -292,7 +292,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -341,7 +341,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:application-control $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -356,6 +356,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -454,7 +458,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -525,7 +529,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -593,7 +597,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -661,7 +665,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -729,7 +733,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -778,7 +782,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:attack-discovery-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -793,6 +797,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -879,7 +887,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -950,7 +958,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1017,7 +1025,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1089,7 +1097,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1152,7 +1160,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1220,7 +1228,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1269,7 +1277,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:behavior-monitoring $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1284,6 +1292,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -1386,7 +1398,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1458,7 +1470,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1521,7 +1533,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1589,7 +1601,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1638,7 +1650,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:device-access-control $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1653,6 +1665,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -1743,7 +1759,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1819,7 +1835,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1890,7 +1906,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -1953,7 +1969,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2028,7 +2044,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2086,7 +2102,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2149,7 +2165,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2217,7 +2233,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2285,7 +2301,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2353,7 +2369,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2402,7 +2418,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:predictive-machine-learning $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2417,6 +2433,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -2523,7 +2543,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2599,7 +2619,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2667,7 +2687,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2735,7 +2755,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2803,7 +2823,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -2852,7 +2872,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:spyware-grayware $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2867,6 +2887,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -2961,7 +2985,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3033,7 +3057,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3103,7 +3127,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3160,7 +3184,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3223,7 +3247,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3291,7 +3315,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3340,7 +3364,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:suspicious-file-information $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -3355,6 +3379,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -3456,7 +3484,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3517,7 +3545,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3588,7 +3616,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3651,7 +3679,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3719,7 +3747,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3787,7 +3815,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3855,7 +3883,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3923,7 +3951,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -3991,7 +4019,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4059,7 +4087,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4127,7 +4155,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4176,7 +4204,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:virtual-analyzer-detections $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -4191,6 +4219,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -4305,7 +4337,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4372,7 +4404,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4443,7 +4475,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4510,7 +4542,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4578,7 +4610,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4646,7 +4678,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4714,7 +4746,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4782,7 +4814,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4854,7 +4886,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4917,7 +4949,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS"
+                                                "query": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS"
                                             },
                                             "storage": "hot"
                                         }
@@ -4966,7 +4998,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-OS",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security service:virus-malware $Endpoint-Name $Endpoint-IP $Endpoint-OS",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -4981,6 +5013,10 @@
                                         },
                                         {
                                             "field": "source_host_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "endpoint_ip",
                                             "width": "auto"
                                         },
                                         {
@@ -5049,6 +5085,12 @@
         {
             "name": "Endpoint-Name",
             "prefix": "@source_host_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Endpoint-IP",
+            "prefix": "@endpoint_ip",
             "available_values": [],
             "default": "*"
         },

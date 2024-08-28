@@ -77,7 +77,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -154,7 +154,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -243,7 +243,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -305,7 +305,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -389,7 +389,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -453,7 +453,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -522,7 +522,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -589,7 +589,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -658,7 +658,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -706,7 +706,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User",
+                                        "query_string": "source:trend-micro-vision-one-endpoint-security $Event-Type $Endpoint-Name $User $Endpoint-OS $Endpoint-IP",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -841,7 +841,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:critical $Endpoint-Name $Event-Type $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:critical $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -892,7 +892,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:high $Endpoint-Name $Event-Type $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:high $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -948,7 +948,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:critical $Endpoint-Name $Event-Type $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:critical $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1013,7 +1013,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:medium $Endpoint-Name $Event-Type $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:medium $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1064,7 +1064,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:low $Endpoint-Name $Event-Type $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:low $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1115,7 +1115,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:info $Endpoint-Name $Event-Type $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:info $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1168,7 +1168,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:high $Endpoint-Name $Event-Type $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:high $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1235,7 +1235,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-vision-one-endpoint-security status:medium $Endpoint-Name $Event-Type $User"
+                                                "query": "source:trend-micro-vision-one-endpoint-security status:medium $Endpoint-Name $Event-Type $User $Endpoint-OS $Endpoint-IP"
                                             }
                                         }
                                     ],
@@ -1286,6 +1286,12 @@
         {
             "name": "Endpoint-Name",
             "prefix": "@source_host_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Endpoint-IP",
+            "prefix": "@endpoint_ip",
             "available_values": [],
             "default": "*"
         },
