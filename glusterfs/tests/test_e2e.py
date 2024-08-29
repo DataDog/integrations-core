@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.glusterfs import GlusterfsCheck
 
-# from .common import EXPECTED_METRICS
+from .common import E2E_METRICS 
 
 pytestmark = pytest.mark.e2e
 
@@ -14,10 +14,8 @@ pytestmark = pytest.mark.e2e
 def test_e2e(dd_agent_check, config):
     aggregator = dd_agent_check(config)
 
-    # for metric in EXPECTED_METRICS:
-    #     aggregator.assert_metric(metric)
+    for metric in E2E_METRICS:
+        aggregator.assert_metric(metric)
 
-    # aggregator.assert_service_check("glusterfs.brick.health", GlusterfsCheck.CRITICAL)
-    # aggregator.assert_service_check("glusterfs.volume.health", GlusterfsCheck.CRITICAL)
     aggregator.assert_service_check("glusterfs.cluster.health", GlusterfsCheck.OK)
     aggregator.assert_all_metrics_covered()

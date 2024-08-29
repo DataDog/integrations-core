@@ -41,3 +41,10 @@ EXPECTED_METRICS = [
     "glusterfs.volume.snapshot.count",
     "glusterfs.volume.used.percent",
 ]
+
+E2E_METRICS = [
+    'glusterfs.cluster.nodes.active',
+    'glusterfs.cluster.nodes.count',
+    'glusterfs.cluster.volumes.count',
+    'glusterfs.cluster.volumes.started',
+]
