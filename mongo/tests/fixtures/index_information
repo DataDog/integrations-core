@@ -1,0 +1,179 @@
+{
+    "_id_": {
+        "v": 2,
+        "key": [
+            [
+                "_id",
+                1
+            ]
+        ]
+    },
+    "property_type_1_room_type_1_beds_1": {
+        "v": 2,
+        "key": [
+            [
+                "property_type",
+                1
+            ],
+            [
+                "room_type",
+                1
+            ],
+            [
+                "beds",
+                1
+            ]
+        ],
+        "background": true
+    },
+    "name_1": {
+        "v": 2,
+        "key": [
+            [
+                "name",
+                1
+            ]
+        ],
+        "background": true
+    },
+    "address.location_2dsphere": {
+        "v": 2,
+        "key": [
+            [
+                "address.location",
+                "2dsphere"
+            ]
+        ],
+        "background": true,
+        "2dsphereIndexVersion": 3
+    },
+    "last_scraped_1": {
+        "v": 2,
+        "key": [
+            [
+                "last_scraped",
+                1
+            ]
+        ],
+        "expireAfterSeconds": 3600
+    },
+    "name_1_listing_url_1": {
+        "v": 2,
+        "key": [
+            [
+                "name",
+                1
+            ],
+            [
+                "listing_url",
+                1
+            ]
+        ],
+        "partialFilterExpression": {
+            "beds": {
+                "$gt": 3
+            }
+        }
+    },
+    "room_type_1": {
+        "v": 2,
+        "key": [
+            [
+                "room_type",
+                1
+            ]
+        ],
+        "sparse": true
+    },
+    "name_text_summary_text_space_text": {
+        "v": 2,
+        "key": [
+            [
+                "_fts",
+                "text"
+            ],
+            [
+                "_ftsx",
+                1
+            ]
+        ],
+        "weights": {
+            "name": 1,
+            "space": 1,
+            "summary": 1
+        },
+        "default_language": "english",
+        "language_override": "language",
+        "textIndexVersion": 3
+    },
+    "$**_1": {
+        "v": 2,
+        "key": [
+            [
+                "$**",
+                1
+            ]
+        ]
+    },
+    "address.location_2d": {
+        "v": 2,
+        "key": [
+            [
+                "address.location",
+                "2d"
+            ]
+        ]
+    },
+    "price_hashed": {
+        "v": 2,
+        "key": [
+            [
+                "price",
+                "hashed"
+            ]
+        ]
+    },
+    "price_hashed_clearning_fee_1": {
+        "v": 2,
+        "key": [
+            [
+                "price",
+                "hashed"
+            ],
+            [
+                "clearning_fee",
+                1
+            ]
+        ]
+    },
+    "amenities_1": {
+        "v": 2,
+        "key": [
+            [
+                "amenities",
+                1
+            ]
+        ]
+    },
+    "summary_1": {
+        "v": 2,
+        "key": [
+            [
+                "summary",
+                1
+            ]
+        ],
+        "collation": {
+            "locale": "en",
+            "caseLevel": false,
+            "caseFirst": "off",
+            "strength": 2,
+            "numericOrdering": false,
+            "alternate": "non-ignorable",
+            "maxVariable": "punct",
+            "normalization": false,
+            "backwards": false,
+            "version": "57.1"
+        }
+    }
+}

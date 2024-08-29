@@ -157,6 +157,8 @@ integration/dns_check:
 - dns_check/**/*
 integration/docker_daemon:
 - docker_daemon/**/*
+integration/docusign:
+- docusign/**/*
 integration/dotnetclr:
 - dotnetclr/**/*
 integration/druid:
@@ -289,6 +291,8 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/lastpass:
+- lastpass/**/*
 integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
@@ -405,6 +409,8 @@ integration/riak:
 - riak/**/*
 integration/riakcs:
 - riakcs/**/*
+integration/ringcentral:
+- ringcentral/**/*
 integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:

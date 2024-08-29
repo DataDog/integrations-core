@@ -1,19 +1,12 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-    "--py2",
-    "--disallow-untyped-defs",
-    "--install-types",
-    "--non-interactive",
-    "datadog_checks/",
-    "tests/",
-]
+
 mypy-deps = [
   "types-mock==0.1.5",
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.11"]
+python = ["3.11"]
 # Can't support lower 2.3 patch versions due to: https://github.com/rethinkdb/rethinkdb/issues/6108
 version = ["2.3", "2.4"]
 
