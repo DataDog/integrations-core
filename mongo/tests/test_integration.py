@@ -67,6 +67,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     instance_integration_cluster['dbm'] = dbm
     instance_integration_cluster['operation_samples'] = {'enabled': False}
     instance_integration_cluster['slow_operations'] = {'enabled': False}
+    instance_integration_cluster['schemas'] = {'enabled': False}
     mongos_check = check(instance_integration_cluster)
     mongos_check._last_states_by_server = {0: 1, 1: 2, 2: 2}
 

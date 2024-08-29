@@ -38,6 +38,7 @@ from datadog_checks.mongo.common import (
 )
 from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
+from datadog_checks.mongo.dbm.schemas import MongoSchemas
 from datadog_checks.mongo.dbm.slow_operations import MongoSlowOperations
 from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
 
@@ -114,6 +115,7 @@ class MongoDb(AgentCheck):
         # DBM
         self._operation_samples = MongoOperationSamples(check=self)
         self._slow_operations = MongoSlowOperations(check=self)
+        self._schemas = MongoSchemas(check=self)
 
         # Database autodiscovery
         self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
@@ -270,6 +272,7 @@ class MongoDb(AgentCheck):
                 self._send_database_instance_metadata()
                 self._operation_samples.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
                 self._slow_operations.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
+                self._schemas.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()

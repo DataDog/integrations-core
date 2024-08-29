@@ -8,7 +8,7 @@
 		"name": "Latency is high on {{instance_id.name}} ",
 		"type": "query alert",
 		"query": "avg(last_5m):avg:aws_neuron.execution.latency_seconds{*} by {instance_id} > 2",
-		"message": "",
+		"message": "{{#is_alert}}The average execution latency on {{instance_id.name}} has been {{value}} over the past 5 minutes.{{/is_alert}}\n{{#is_recovery}}The execution latency of {{instance_id.name}} has recovered below the threshold of {{threshold}}.{{/is_recovery}}",
 		"tags": [
 			"integration:aws_neuron"
 		],

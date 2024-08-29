@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 
 from bson import json_util
+from pymongo.errors import OperationFailure
 
 from datadog_checks.mongo.dbm.utils import (
     format_explain_plan,
@@ -14,6 +15,7 @@ from datadog_checks.mongo.dbm.utils import (
     get_command_collection,
     get_command_truncation_state,
     get_explain_plan,
+    obfuscate_command,
     should_explain_operation,
 )
 
@@ -117,16 +119,20 @@ class MongoSlowOperations(DBMAsyncJob):
         return True
 
     def _is_profiling_enabled(self, db_name):
-        profiling_level = self._check.api_client.get_profiling_level(db_name)
-        level = profiling_level.get("was", 0)  # profiling by default is disabled
-        slowms = profiling_level.get("slowms", 100)  # slowms threshold is 100ms by default
-        tags = self._check._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
-        tags.append("db:%s" % db_name)
-        # Emit the profiling level and slowms as raw metrics
-        # raw ensures that level = 0 is also emitted
-        self._check.gauge('mongodb.profiling.level', level, tags=tags, raw=True)
-        self._check.gauge('mongodb.profiling.slowms', slowms, tags=tags, raw=True)
-        return level > 0
+        try:
+            profiling_level = self._check.api_client.get_profiling_level(db_name)
+            level = profiling_level.get("was", 0)  # profiling by default is disabled
+            slowms = profiling_level.get("slowms", 100)  # slowms threshold is 100ms by default
+            tags = self._check._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
+            tags.append("db:%s" % db_name)
+            # Emit the profiling level and slowms as raw metrics
+            # raw ensures that level = 0 is also emitted
+            self._check.gauge('mongodb.profiling.level', level, tags=tags, raw=True)
+            self._check.gauge('mongodb.profiling.slowms', slowms, tags=tags, raw=True)
+            return level > 0
+        except OperationFailure:
+            # If the command fails, we assume profiling is not enabled
+            return False
 
     def _collect_slow_operations_from_profiler(self, db_name, last_ts):
         profiling_data = self._check.api_client.get_profiling_data(db_name, datetime.fromtimestamp(last_ts))
@@ -190,16 +196,16 @@ class MongoSlowOperations(DBMAsyncJob):
             self._check.log.error("Failed to collect explain plan for slow operation: %s", e)
 
     def _obfuscate_slow_operation(self, slow_operation, db_name):
-        obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(slow_operation["command"]))
+        obfuscated_command = obfuscate_command(slow_operation["command"])
         query_signature = compute_exec_plan_signature(obfuscated_command)
         slow_operation['dbname'] = db_name
         slow_operation['obfuscated_command'] = obfuscated_command
         slow_operation['query_signature'] = query_signature
 
-        if slow_operation.get('originatingCommand'):
-            slow_operation['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(
-                json_util.dumps(slow_operation['originatingCommand'])
-            )
+        originating_command = slow_operation.get('originatingCommand')
+        if originating_command:
+            slow_operation['originatingCommandComment'] = originating_command.get('comment')
+            slow_operation['originatingCommand'] = obfuscate_command(originating_command)
 
         return slow_operation
 
@@ -242,6 +248,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "query_hash": slow_operation.get("queryHash"),  # only available with profiling
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
+            "comment": slow_operation["command"].get("comment"),
             # metrics
             # mills from profiler, durationMillis from logs
             "mills": slow_operation.get("millis", slow_operation.get("durationMillis", 0)),
@@ -337,6 +344,7 @@ class MongoSlowOperations(DBMAsyncJob):
             return {
                 "cursor_id": cursor_id,
                 "originating_command": originating_command,
+                "comment": slow_operation.get("originatingCommandComment"),
             }
         return None
 

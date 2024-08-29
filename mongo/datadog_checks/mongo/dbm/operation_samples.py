@@ -4,7 +4,6 @@
 
 
 import time
-from datetime import datetime
 from typing import List, Optional
 
 from bson import json_util
@@ -14,6 +13,7 @@ from datadog_checks.mongo.dbm.utils import (
     get_command_collection,
     get_command_truncation_state,
     get_explain_plan,
+    obfuscate_command,
     should_explain_operation,
 )
 
@@ -115,7 +115,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     continue
 
                 command = operation.get("command")
-                obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
+                obfuscated_command = obfuscate_command(command)
                 query_signature = self._get_query_signature(obfuscated_command)
                 operation_metadata = self._get_operation_metadata(operation)
 
@@ -183,17 +183,6 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping explain operation: %s", operation)
             return False
 
-        # Skip sampled operations that are older than the last sampled timestamp
-        current_op_time = operation.get("currentOpTime")
-        if not current_op_time:
-            self._check.log.debug("Skipping operation without currentOpTime: %s", operation)
-            return False
-
-        current_op_time_ts = datetime.strptime(current_op_time, "%Y-%m-%dT%H:%M:%S.%f%z").timestamp()
-        if self._last_sampled_timestamp and current_op_time_ts <= self._last_sampled_timestamp:
-            self._check.log.debug("Skipping operation older than last sampled timestamp: %s", operation)
-            return False
-
         return True
 
     def _get_operation_client(self, operation: dict) -> OperationSampleClient:
@@ -243,8 +232,10 @@ class MongoOperationSamples(DBMAsyncJob):
             last_access_date = last_access_date.isoformat()
 
         originating_command = cursor.get("originatingCommand")
+        originating_command_comment = None
         if originating_command:
-            originating_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
+            originating_command_comment = originating_command.get("comment")
+            originating_command = obfuscate_command(originating_command)
 
         return {
             "cursor_id": cursor.get("cursorId"),
@@ -256,6 +247,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "tailable": cursor.get("tailable", False),
             "await_data": cursor.get("awaitData", False),
             "originating_command": originating_command,
+            "comment": originating_command_comment,
             "plan_summary": cursor.get("planSummary"),
             "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
         }
