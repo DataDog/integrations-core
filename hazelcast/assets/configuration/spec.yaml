@@ -24,6 +24,7 @@ files:
         type: object
         example:
           UP: OK
+          ACTIVE: OK
     - template: instances/jmx
       overrides:
         host.required: false

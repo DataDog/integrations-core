@@ -2,10 +2,14 @@
 
 [[envs.default.matrix]]
 python = ["3.11"]
-version = ["5.0"]
+version = ["4.0", "5.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
+  { key = "HAZELCAST_VERSION", value = "4.0.1", if = ["4.0"] },
   { key = "HAZELCAST_VERSION", value = "5.3.7", if = ["5.0"] },
+  { key = "HAZELCAST_MANCENTER_VERSION", value = "4.0.1", if = ["4.0"] },
   { key = "HAZELCAST_MANCENTER_VERSION", value = "5.3.3", if = ["5.0"] },
+  { key = "HAZELCAST_MC_INIT_CMD", value = "./mc-conf.sh", if = ["4.0"] },
+  { key = "HAZELCAST_MC_INIT_CMD", value = "./bin/mc-conf.sh", if = ["5.0"] },
 ]

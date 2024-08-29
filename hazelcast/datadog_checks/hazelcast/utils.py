@@ -5,7 +5,10 @@ from datadog_checks.base.constants import ServiceCheck
 
 # Cluster state is not reflected here, this check is purely for Management Center.
 MC_CLUSTER_STATES = {
+    # hazelcast 5:
     'UP': ServiceCheck.OK,
+    # hazelcast 4:
+    'ACTIVE': ServiceCheck.OK,
 }
 
 

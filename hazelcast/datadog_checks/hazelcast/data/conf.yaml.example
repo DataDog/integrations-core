@@ -107,6 +107,7 @@ instances:
     #
     # mc_cluster_states:
     #   UP: OK
+    #   ACTIVE: OK
 
     ## @param user - string - optional
     ## User to use when connecting to JMX.

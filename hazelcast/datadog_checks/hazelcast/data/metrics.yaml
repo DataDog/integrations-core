@@ -540,15 +540,6 @@ jmx_metrics:
         invocationTimeoutMillis:
           alias: hazelcast.member.invocation_timeout_millis
           metric_type: gauge
-        lastCallId:
-          alias: hazelcast.member.invocations.last_call_id
-          metric_type: gauge
-        pending:
-          alias: hazelcast.member.invocations.pending
-          metric_type: gauge
-        usedPercentage:
-          alias: hazelcast.member.invocations.used_percentage
-          metric_type: gauge
         ioThreadId:
           alias: hazelcast.member.io_thread_id
           metric_type: gauge
@@ -834,9 +825,6 @@ jmx_metrics:
         unknownTime:
           alias: hazelcast.member.unknown_time
           metric_type: gauge
-        unknownCount:
-          alias: hazelcast.member.unknown_count
-          metric_type: gauge
         unloadedClassesCount:
           alias: hazelcast.member.unloaded_classes_count
           metric_type: gauge
@@ -860,6 +848,51 @@ jmx_metrics:
           metric_type: gauge
         writeQueueSize:
           alias: hazelcast.member.write_queue_size
+          metric_type: gauge
+
+        # metrics in 4 and 5 but at different locations
+        # hazelcast 5
+        lastCallId:
+          alias: hazelcast.member.invocations.last_call_id
+          metric_type: gauge
+        pending:
+          alias: hazelcast.member.invocations.pending
+          metric_type: gauge
+        usedPercentage:
+          alias: hazelcast.member.invocations.used_percentage
+          metric_type: gauge
+        unknownCount:
+          alias: hazelcast.member.unknown_count
+          metric_type: gauge
+        # hazelcast 4
+        invocations.lastCallId:
+          alias: hazelcast.member.invocations.last_call_id
+          metric_type: gauge
+        invocations.pending:
+          alias: hazelcast.member.invocations.pending
+          metric_type: gauge
+        invocations.usedPercentage:
+          alias: hazelcast.member.invocations.used_percentage
+          metric_type: gauge
+        unknowsnCount: # typo on hazelcast's side
+          alias: hazelcast.member.unknown_count
+          metric_type: gauge
+
+        # hazelcast 4 only
+        connectionType:
+          alias: hazelcast.member.connection_type
+          metric_type: gauge
+        monitorCount:
+          alias: hazelcast.member.monitor_count
+          metric_type: gauge
+        packetsReceived:
+          alias: hazelcast.member.packets_received
+          metric_type: gauge
+        packetsSend:
+          alias: hazelcast.member.packets_send
+          metric_type: gauge
+        stateVersion:
+          alias: hazelcast.member.state_version
           metric_type: gauge
   # Queue
   - include:
