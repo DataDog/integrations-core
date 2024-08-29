@@ -53,7 +53,7 @@ For Datadog [Helm Chart][11] deployment, update chart values with:
 
 ```yaml
 datadog:
- # Enable AWS ENA metrics collection for network check
+  # Enable AWS ENA metrics collection for network check
   confd:
     network.yaml: |-
       init_config:
