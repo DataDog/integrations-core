@@ -53,11 +53,9 @@ class GlusterfsCheck(AgentCheck):
 
     def check(self, _):
         if self.use_sudo:
-            out = subprocess.run(
-                ['sudo', '-ln', self.gstatus_cmd], capture_output=True, text=True
-            )
+            out = subprocess.run(['sudo', '-ln', self.gstatus_cmd], capture_output=True, text=True)
             if out.returncode != 0 or not out.stdout:
-                raise Exception('The dd-agent user does not have sudo access: {!r}'.format(err or test_sudo))
+                raise Exception('The dd-agent user does not have sudo access: {!r}'.format(out.stderr or out.stdout))
             gluster_args = 'sudo {}'.format(self.gstatus_cmd)
         else:
             gluster_args = self.gstatus_cmd
@@ -201,4 +199,3 @@ class GlusterfsCheck(AgentCheck):
             self.service_check(sc_name, AgentCheck.CRITICAL, tags=tags, message=msg)
         else:
             self.service_check(sc_name, AgentCheck.UNKNOWN, tags=tags, message=msg)
-
