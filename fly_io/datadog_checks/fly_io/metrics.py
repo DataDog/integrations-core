@@ -4,20 +4,16 @@
 
 FLY_EDGE_METRICS = {
     'fly_edge_http_responses_count': {'name': 'edge.http_responses', 'type': 'counter'},
-    'fly_edge_http_response_time_seconds': {'name': 'edge.http_response_time', 'type': 'histogram'},
     'fly_edge_tcp_connects_count': {'name': 'edge.tcp_connects', 'type': 'counter'},
     'fly_edge_tcp_disconnects_count': {'name': 'edge.tcp_disconnects', 'type': 'counter'},
     'fly_edge_data_out': {'name': 'edge.data_out', 'type': 'counter'},
     'fly_edge_data_in': {'name': 'edge.data_in', 'type': 'counter'},
     'fly_edge_tls_handshake_errors': {'name': 'edge.tls_handshake_errors', 'type': 'counter'},
-    'fly_edge_tls_handshake_time_seconds': {'name': 'edge.tls_handshake_time', 'type': 'histogram'},
 }
 
 FLY_APP_METRICS = {
     'fly_app_concurrency': {'name': 'app.concurrency', 'type': 'gauge'},
     'fly_app_http_responses_count': {'name': 'app.http_responses', 'type': 'counter'},
-    'fly_app_http_response_time_seconds': {'name': 'app.http_response_time', 'type': 'histogram'},
-    'fly_app_connect_time_seconds': {'name': 'app.connect_time', 'type': 'histogram'},
     'fly_app_tcp_connects_count': {'name': 'app.tcp_connects', 'type': 'counter'},
     'fly_app_tcp_disconnects_count': {'name': 'app.tcp_disconnects', 'type': 'counter'},
 }
@@ -171,10 +167,27 @@ METRICS = {
     **FLY_POSTGRES_METRICS,
 }
 
+HISTOGRAM_METRICS = {
+    'fly_edge_http_response_time_seconds_count': 'edge.http_response_time.count',
+    'fly_edge_http_response_time_seconds_sum': 'edge.http_response_time.sum',
+    'fly_edge_http_response_time_seconds_bucket': 'edge.http_response_time.bucket',
+    'fly_edge_tls_handshake_time_seconds_bucket': 'edge.tls_handshake_time.bucket',
+    'fly_edge_tls_handshake_time_seconds_count': 'edge.tls_handshake_time.count',
+    'fly_edge_tls_handshake_time_seconds_sum': 'edge.tls_handshake_time.sum',
+    'fly_app_http_response_time_seconds_bucket': 'app.http_response_time.bucket',
+    'fly_app_http_response_time_seconds_count': 'app.http_response_time.count',
+    'fly_app_http_response_time_seconds_sum': 'app.http_response_time.sum',
+    'fly_app_connect_time_seconds_bucket': 'app.connect_time.bucket',
+    'fly_app_connect_time_seconds_count': 'app.connect_time.count',
+    'fly_app_connect_time_seconds_sum': 'app.connect_time.sum',
+}
+
 RENAME_LABELS_MAP = {
     'app': 'app_name',
     'region': 'fly_region',
     'host': 'fly_hypervisor_id',
     'mount': 'fly_mount',
     'instance': 'app_instance_id',
+    'le': 'upper_bound',
+    'version': 'tls_version',
 }

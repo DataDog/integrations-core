@@ -8,7 +8,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import USE_FLY_LAB
 from .conftest import INSTANCE
-from .metrics import ALL_REST_METRICS, MOCKED_PROMETHEUS_METRICS
+from .metrics import ALL_PROMETHEUS_METRICS, ALL_REST_METRICS
 
 
 @pytest.mark.e2e
@@ -18,7 +18,7 @@ def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(instance, rate=True)
 
     aggregator.assert_service_check('fly_io.openmetrics.health', ServiceCheck.OK, count=2)
-    for metric in MOCKED_PROMETHEUS_METRICS + ALL_REST_METRICS:
+    for metric in ALL_PROMETHEUS_METRICS + ALL_REST_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()

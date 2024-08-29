@@ -127,6 +127,8 @@ integration/container:
 - container/**/*
 integration/containerd:
 - containerd/**/*
+integration/contentful:
+- contentful/**/*
 integration/coredns:
 - coredns/**/*
 integration/couch:
@@ -293,6 +295,8 @@ integration/linkerd:
 - linkerd/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
+integration/mailchimp:
+- mailchimp/**/*
 integration/mapr:
 - mapr/**/*
 integration/mapreduce:
