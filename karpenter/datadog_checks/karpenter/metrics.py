@@ -128,9 +128,6 @@ METRIC_MAP = {
     'workqueue_work_duration_seconds': 'workqueue.work.duration_seconds',
     # new Karpenter V1 metric names
     'karpenter_nodes_termination_duration_seconds': 'nodes.termination.time_seconds',
-    'karpenter_nodes_terminated_total': 'nodes.terminated',
-    'karpenter_nodes_leases_deleted_total': 'nodes.leases_deleted',
-    'karpenter_nodes_created_total': 'nodes.created',
     'karpenter_pods_startup_duration_seconds': 'pods.startup.time_seconds',
     'karpenter_voluntary_disruption_queue_failures_total': 'disruption.replacement.nodeclaim.failures',
     'karpenter_voluntary_disruption_decision_evaluation_duration_seconds': 'disruption.evaluation.duration_seconds',
