@@ -142,9 +142,6 @@ METRIC_MAP = {
     'karpenter_interruption_message_queue_duration_seconds': 'interruption.message.latency.time_seconds',
     'karpenter_nodepools_usage': 'nodepool_usage',
     'karpenter_nodepools_limit': 'nodepool_limit',
-    'karpenter_nodeclaims_terminated_total': 'nodeclaims_terminated',
-    'karpenter_nodeclaims_disrupted_total': 'nodeclaims_disrupted',
-    'karpenter_nodeclaims_created_total': 'nodeclaims_created',
 }
 
 RENAME_LABELS_MAP = {
