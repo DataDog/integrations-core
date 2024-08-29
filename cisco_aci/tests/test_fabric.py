@@ -94,7 +94,7 @@ def test_fabric_mocked(aggregator):
                 hn = interface_tag_mapping.get(interface.device_id)
                 device_namespace, device_ip = interface.device_id.split(':')
                 interface_tags = [
-                    'port:{}'.format(interface.index),
+                    'port:{}'.format(interface.name),
                     'medium:broadcast',
                     'snmpTrapSt:enable',
                     'node_id:{}'.format(hn.split('-')[-1]),
