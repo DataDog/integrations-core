@@ -15,7 +15,7 @@
                         "id": 627079437959474,
                         "definition": {
                             "type": "note",
-                            "content": "Gain better visibility into your organization's security events by monitoring Sophos Central Cloud Alerts logs with this dashboard. \n\nIn the Sophos ecosystem, alerts are a curated subset of events, identified based on their significance or potential harm through proprietary rules. The Alerts Overview dashboard then provides a high-level summary and critical insights into the overall malicious activity.\n\nFor Further reading, see:\n\n- [Sophos Central Cloud - Documentation](https://docs.datadoghq.com/integrations/sophos_central_cloud)\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                            "content": "Gain better visibility into your organization's security alerts by monitoring Sophos Central Cloud Alerts logs with this dashboard. \n\nIn the Sophos ecosystem, alerts are a curated subset of events, identified based on their significance or potential harm through proprietary rules. The Alerts Overview dashboard then provides a high-level summary and critical insights into the overall malicious activity.\n\nFor Further reading, see:\n\n- [Sophos Central Cloud - Documentation](https://docs.datadoghq.com/integrations/sophos_central_cloud)\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -304,7 +304,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:alert status:critical"
+                                                "query": "source:sophos-central-cloud service:alert status:critical $Endpoint $Status $IP $Endpoint-Type"
                                             }
                                         }
                                     ],
@@ -354,7 +354,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "status:high service:alert source:sophos-central-cloud"
+                                                "query": "status:high service:alert source:sophos-central-cloud $Endpoint $Status $IP $Endpoint-Type"
                                             }
                                         }
                                     ],
@@ -413,7 +413,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:alert status:critical"
+                                                "query": "source:sophos-central-cloud service:alert status:critical $Endpoint $Status $IP $Endpoint-Type"
                                             }
                                         }
                                     ],
@@ -479,7 +479,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:alert status:medium"
+                                                "query": "source:sophos-central-cloud service:alert status:medium $Endpoint $Status $IP $Endpoint-Type"
                                             }
                                         }
                                     ],
@@ -530,7 +530,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:alert status:low"
+                                                "query": "source:sophos-central-cloud service:alert status:low $Endpoint $Status $IP $Endpoint-Type"
                                             }
                                         }
                                     ],
@@ -581,7 +581,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:alert status:info"
+                                                "query": "source:sophos-central-cloud service:alert status:info $Endpoint $Status $IP $Endpoint-Type"
                                             }
                                         }
                                     ],
@@ -640,7 +640,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:alert status:high"
+                                                "query": "source:sophos-central-cloud service:alert status:high $Endpoint $Status $IP $Endpoint-Type"
                                             }
                                         }
                                     ],
@@ -714,7 +714,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:sophos-central-cloud service:alert status:medium"
+                                                "query": "source:sophos-central-cloud service:alert status:medium $Endpoint $Status $IP $Endpoint-Type"
                                             }
                                         }
                                     ],
@@ -1588,7 +1588,8 @@
                 "x": 0,
                 "y": 19,
                 "width": 12,
-                "height": 33
+                "height": 33,
+                "is_column_break": true
             }
         },
         {

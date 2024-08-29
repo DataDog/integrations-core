@@ -35,7 +35,7 @@ Configure the Datadog endpoint to forward Sophos Central Cloud events as logs to
 | ------------------------------- | -------------------------------------------------------------------------- |
 | Client ID                       | The Client ID from Sophos Central Cloud.                                         |
 | Client Secret                   | The Client Secret from Sophos Central Cloud.                                     |
-| Get Endpoint Details            | Set to "true" to collect endpoint details for Sophos Central Cloud Alert and Event Logs, otherwise set to "false".                 |
+| Get Endpoint Details            | Set to "true" to collect endpoint details for Sophos Central Cloud Alert and Event Logs, otherwise set to "false". Default is "true".                 |
 
 ## Data Collected
 
