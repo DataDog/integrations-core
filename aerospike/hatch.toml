@@ -1,12 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-    "--py2",
-    "--follow-imports silent",
-    "--install-types",
-    "--non-interactive",
-    "datadog_checks/aerospike",
-]
+
 
 [[envs.default.matrix]]
 python = ["3.11"]
