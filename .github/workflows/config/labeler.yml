@@ -407,6 +407,8 @@ integration/riak:
 - riak/**/*
 integration/riakcs:
 - riakcs/**/*
+integration/ringcentral:
+- ringcentral/**/*
 integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
