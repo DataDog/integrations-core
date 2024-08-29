@@ -4,14 +4,14 @@
 
 This integration ingests the following logs:
 
-- Audit
-- DLP
-- Rejection
-- TTP Attachment
-- TTP Impersonation
-- TTP URL
+- Audit : Audit logs allow you to search, review, and export logs regarding account access and configuration changes made by administrators.
+- DLP : Data Loss Prevention (DLP) is a set of practices designed to secure confidential business data as well as detect and head off data loss resulting from breaches and malicious attacks.
+- Rejection : Rejected messages contain a virus signature, or destined to a recipient that doesn't exist. In these instances no email data is accepted by Mimecast, and Rejected messages cannot be retrieved.
+- TTP Attachment : Targeted Threat Protection(TTP) against attachment is an advanced service, that protects customers from the growing risk of spear phishing and other targeted attacks using email attachments.
+- TTP Impersonation : Targeted Threat Protection(TTP) Impersonation Protect helps prevent impersonation attacks by scanning emails in real time for signs of an attack.
+- TTP URL : Targeted Threat Protection(TTP) URL Protection is an email security service that rewrites all inbound email links and scans the destination website in real-time when clicked by the user.
 
-The Mimecast integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into audit, dlp, malicious attachments in email, email sent by user as an impersonated identity, phishing email links, and many more through the out-of-the-box dashboards.
+The Mimecast integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into audit, DDP, malicious attachments in email, email sent by user as an impersonated identity, phishing email links, and many more through the out-of-the-box dashboards.
 
 ## Setup
 
