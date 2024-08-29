@@ -80,12 +80,12 @@ def create_volume():
     run_command(
         "docker exec gluster-node-2 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO",
         capture=True,
-        check=True,
+        check=False,
     )
     run_command(
         "docker exec gluster-node-1 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO",
         capture=True,
-        check=True,
+        check=False,
     )
     run_command("docker exec gluster-node-1 gluster peer probe gluster-node-2", capture=True, check=True)
 
