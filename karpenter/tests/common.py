@@ -168,7 +168,6 @@ TEST_V1_METRICS = [
     'karpenter.disruption.evaluation.duration_seconds.sum',
     'karpenter.disruption.eligible_nodes',
     'karpenter.disruption.budgets.allowed_disruptions',
-    # 'karpenter.disruption.actions_performed.count',
     'karpenter.provisioner.scheduling.simulation.duration_seconds.sum',
     'karpenter.provisioner.scheduling.simulation.duration_seconds.count',
     'karpenter.provisioner.scheduling.simulation.duration_seconds.bucket',
