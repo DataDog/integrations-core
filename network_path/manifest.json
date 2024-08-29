@@ -13,7 +13,6 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::Windows",
       "Category::Network",
       "Offering::Integration"
     ]
@@ -35,6 +34,9 @@
       },
       "source_type_id": 20095380,
       "auto_install": true
+    },
+    "dashboards": {
+      "Network Path Agents": "assets/dashboards/network_path_agents.json"
     }
   },
   "author": {

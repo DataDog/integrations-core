@@ -539,23 +539,24 @@ See the [MongoDB 3.0 Manual][23] for more detailed descriptions of some of these
 
 The following metrics are **not** collected by default. Use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
-| metric prefix            | what to add to `additional_metrics` to collect it |
-| ------------------------ | ------------------------------------------------- |
-| mongodb.collection       | collection                                        |
-| mongodb.usage.commands   | top                                               |
-| mongodb.usage.getmore    | top                                               |
-| mongodb.usage.insert     | top                                               |
-| mongodb.usage.queries    | top                                               |
-| mongodb.usage.readLock   | top                                               |
-| mongodb.usage.writeLock  | top                                               |
-| mongodb.usage.remove     | top                                               |
-| mongodb.usage.total      | top                                               |
-| mongodb.usage.update     | top                                               |
-| mongodb.usage.writeLock  | top                                               |
-| mongodb.tcmalloc         | tcmalloc                                          |
-| mongodb.metrics.commands | metrics.commands                                  |
-| mongodb.chunks.jumbo     | jumbo_chunks                                      |
-| mongodb.chunks.total     | jumbo_chunks                                      |
+| metric prefix                     | what to add to `additional_metrics` to collect it |
+| --------------------------------- | ------------------------------------------------- |
+| mongodb.collection                | collection                                        |
+| mongodb.usage.commands            | top                                               |
+| mongodb.usage.getmore             | top                                               |
+| mongodb.usage.insert              | top                                               |
+| mongodb.usage.queries             | top                                               |
+| mongodb.usage.readLock            | top                                               |
+| mongodb.usage.writeLock           | top                                               |
+| mongodb.usage.remove              | top                                               |
+| mongodb.usage.total               | top                                               |
+| mongodb.usage.update              | top                                               |
+| mongodb.usage.writeLock           | top                                               |
+| mongodb.tcmalloc                  | tcmalloc                                          |
+| mongodb.metrics.commands          | metrics.commands                                  |
+| mongodb.chunks.jumbo              | jumbo_chunks                                      |
+| mongodb.chunks.total              | jumbo_chunks                                      |
+| mongodb.sharded_data_distribution | sharded_data_distribution                         |
 
 ### Events
 
