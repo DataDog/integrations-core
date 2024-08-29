@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.glusterfs import GlusterfsCheck
 
-from .common import E2E_METRICS 
+from .common import E2E_METRICS
 
 pytestmark = pytest.mark.e2e
 
