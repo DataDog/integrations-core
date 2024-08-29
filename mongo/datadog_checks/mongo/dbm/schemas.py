@@ -61,7 +61,7 @@ class MongoSchemas(DBMAsyncJob):
             "kind": "mongodb_databases",
             "collection_interval": self._collection_interval,
             "dbms_version": self._check._mongo_version,
-            "tags": self._check._get_tags(include_deployment_tags=True),
+            "tags": self._check._get_tags(),
         }
 
         collected_collections = 0

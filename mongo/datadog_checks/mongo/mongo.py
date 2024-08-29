@@ -253,12 +253,13 @@ class MongoDb(AgentCheck):
             return []
         return [f"dd.internal.resource:database_instance:{self._resolved_hostname}"]
 
-    def _get_tags(self, include_deployment_tags=False, include_internal_resource_tags=False):
+    def _get_tags(self, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)
-        if include_deployment_tags:
-            tags.extend(self.deployment_type.deployment_tags)
+        tags.extend(self.deployment_type.deployment_tags)
         if include_internal_resource_tags:
             tags.extend(self.internal_resource_tags)
+        if isinstance(self.deployment_type, ReplicaSetDeployment):
+            tags.extend(self.deployment_type.replset_tags)
         return tags
 
     def check(self, _):
@@ -270,9 +271,9 @@ class MongoDb(AgentCheck):
             # DBM
             if self._config.dbm_enabled:
                 self._send_database_instance_metadata()
-                self._operation_samples.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
-                self._slow_operations.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
-                self._schemas.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
+                self._operation_samples.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
+                self._slow_operations.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
+                self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
@@ -299,7 +300,7 @@ class MongoDb(AgentCheck):
 
     def _collect_metrics(self):
         deployment = self.deployment_type
-        tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
+        tags = self._get_tags(include_internal_resource_tags=True)
 
         dbnames = self._get_db_names(tags)
         self.refresh_collectors(deployment, dbnames, tags)
@@ -357,7 +358,7 @@ class MongoDb(AgentCheck):
         deployment = self.deployment_type
         if self._resolved_hostname not in self._database_instance_emitted:
             # DO NOT emit with internal resource tags, as the metadata event is used to CREATE the databse instance
-            tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=False)
+            tags = self._get_tags()
             mongodb_instance_metadata = {"cluster_name": self._config.cluster_name} | deployment.instance_metadata
             database_instance = {
                 "host": self._resolved_hostname,
@@ -389,8 +390,15 @@ class MongoDb(AgentCheck):
         replset_state = repl_set_payload["myState"]
         hosts = [m['name'] for m in repl_set_payload.get("members", [])]
         replset_me = is_master_payload.get('me')
+        replset_tags = is_master_payload.get('tags')
         return ReplicaSetDeployment(
-            hosting_type, replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role
+            hosting_type,
+            replset_name,
+            replset_state,
+            hosts,
+            replset_me,
+            cluster_role=cluster_role,
+            replset_tags=replset_tags,
         )
 
     def refresh_deployment_type(self):
