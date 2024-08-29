@@ -73,7 +73,7 @@ You can view these events in [Event Explorer][5].
 
 Need help? Contact [Datadog support][4].
 
-[1]: https://docs.microsoft.com/azure/active-directory/reports-monitoring/overview-reports#activity-reports
+[1]: https://learn.microsoft.com/entra/identity/monitoring-health/overview-monitoring-health
 [2]: https://docs.datadoghq.com/logs/guide/azure-logging-guide/
 [3]: https://docs.microsoft.com/en-us/azure/active-directory/reports-monitoring/tutorial-azure-monitor-stream-logs-to-event-hub
 [4]: https://docs.datadoghq.com/help
