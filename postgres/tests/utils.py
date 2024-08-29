@@ -121,12 +121,12 @@ def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
     return run_query_thread(pg_instance, vacuum_query, application_name, init_stmts)
 
 
-def run_one_check(check, db_instance, cancel=True):
+def run_one_check(check, cancel=True):
     """
     Run check and immediately cancel.
     Waits for all threads to close before continuing.
     """
-    check.check(db_instance)
+    check.run()
     if cancel:
         check.cancel()
     if check.statement_samples._job_loop_future is not None:

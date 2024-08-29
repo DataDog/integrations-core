@@ -162,7 +162,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
     del pg_instance['dbname']
     pg_instance["database_autodiscovery"]['refresh'] = 1
     check = integration_check(pg_instance)
-    run_one_check(check, pg_instance)
+    run_one_check(check)
 
     assert check.autodiscovery is not None
     databases = check.autodiscovery.get_items()
