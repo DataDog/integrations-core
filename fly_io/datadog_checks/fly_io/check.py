@@ -25,7 +25,8 @@ from .constants import (
     VOLUME_ENCRYPTED_METRIC,
     VOLUME_SIZE_METRIC,
 )
-from .metrics import METRICS, RENAME_LABELS_MAP
+from .errors import handle_error
+from .metrics import HISTOGRAM_METRICS, METRICS, RENAME_LABELS_MAP
 
 
 class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -42,6 +43,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         default_endpoint = f"https://api.fly.io/prometheus/{self.org_slug}/federate?match[]={encoded_match_string}"
         self.openmetrics_endpoint = self.instance.get('openmetrics_endpoint', default_endpoint)
         self.instance['openmetrics_endpoint'] = self.openmetrics_endpoint
+        self.check_initializations.append(self.configure_additional_transformers)
 
     def get_default_config(self):
 
@@ -52,19 +54,33 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             'hostname_label': 'instance',
         }
 
+    def configure_additional_transformers(self):
+        metric_transformer = self.scrapers[self.openmetrics_endpoint].metric_transformer
+        metric_transformer.add_custom_transformer(
+            '|'.join(f'{metric}' for metric in HISTOGRAM_METRICS.keys()),
+            self.configure_histogram_transformer(),
+            pattern=True,
+        )
+
+    def configure_histogram_transformer(self):
+        def histogram_transformer(metric, sample_data, _runtime_data):
+            metric_remapped = HISTOGRAM_METRICS[metric.name]
+            for sample, tags, hostname in sample_data:
+                self.count(metric_remapped, sample.value, tags=tags, hostname=hostname)
+
+        return histogram_transformer
+
+    @handle_error
     def _get_app_status(self, app_name):
         self.log.debug("Getting app status for %s", app_name)
         app_details_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}"
         response = self.http.get(app_details_endpoint)
-        try:
-            response.raise_for_status()
-            app = response.json()
-            app_status = app.get("status")
-            return app_status
-        except Exception:
-            self.log.info("Failed to collect app status for app %s", app_name)
-            return None
+        response.raise_for_status()
+        app = response.json()
+        app_status = app.get("status")
+        return app_status
 
+    @handle_error
     def _submit_machine_guest_metrics(self, guest, tags, machine_id):
         self.log.debug("Getting machine guest metrics for %s", machine_id)
         num_cpus = guest.get("cpus")
@@ -83,12 +99,14 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if memory is not None:
             self.gauge(MACHINE_MEM_METRIC, value=memory, tags=tags, hostname=machine_id)
 
+    @handle_error
     def _submit_machine_init_metrics(self, machine_init, tags, machine_id):
         self.log.debug("Getting machine init metrics for %s", machine_id)
         swap_size_mb = machine_init.get("swap_size_mb")
         if swap_size_mb is not None:
             self.gauge(MACHINE_SWAP_SIZE_METRIC, value=swap_size_mb, tags=tags, hostname=machine_id)
 
+    @handle_error
     def _collect_volumes_for_app(self, app_name, app_tags):
         self.log.debug("Getting volumes for app %s in org %s", app_name, self.org_slug)
         volumes_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/volumes"
@@ -143,6 +161,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             if blocks_avail is not None:
                 self.gauge(VOLUME_BLOCKS_AVAIL_METRIC, value=blocks_avail, tags=all_tags)
 
+    @handle_error
     def _collect_machines_for_app(self, app_name, app_tags):
         self.log.debug("Getting machines for app %s in org %s", app_name, self.org_slug)
         machines_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/machines"
@@ -184,6 +203,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if len(external_host_tags) > 0:
             self.set_external_tags(external_host_tags)
 
+    @handle_error
     def _collect_app_metrics(self):
         self.log.debug("Getting apps for org %s", self.org_slug)
         apps_endpoint = f"{self.machines_api_endpoint}/v1/apps"

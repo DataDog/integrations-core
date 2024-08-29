@@ -152,15 +152,17 @@ class ReplicaCollector(MongoCollector):
 
         # Collect the number of votes
         config = self.get_votes_config(api)
-        votes = 0
-        total = 0.0
-        for member in config.get('members', []):
-            total += member.get('votes', 1)
-            if member['_id'] == current['_id']:
-                votes = member.get('votes', 1)
-        result['votes'] = votes
-        result['voteFraction'] = votes / total
-        result['state'] = status['myState']
+        if config:
+            # local.system.replset not available on AWS DocumentDB
+            votes = 0
+            total = 0.0
+            for member in config.get('members', []):
+                total += member.get('votes', 1)
+                if member['_id'] == current['_id']:
+                    votes = member.get('votes', 1)
+            result['votes'] = votes
+            result['voteFraction'] = votes / total
+            result['state'] = status['myState']
         self._submit_payload({'replSet': result})
         if is_primary:
             # Submit events

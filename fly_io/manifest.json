@@ -37,7 +37,10 @@
       },
       "metrics": {
         "prefix": "fly_io.",
-        "check": "fly_io.instance.up",
+        "check": [
+          "fly_io.instance.up",
+          "fly_io.machine.cpus.count"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
