@@ -8,7 +8,7 @@
 		"name": "High amount of execution errors on {{instance_id.name}}",
 		"type": "query alert",
 		"query": "sum(last_5m):sum:aws_neuron.execution.errors.count{*} by {instance_id}.as_count() > 10",
-		"message": "",
+		"message": "{{#is_alert}}{{instance_id.name}} has experienced {{value}} execution errors over the last 5 minutes.{{/is_alert}}\n{{#is_recovery}}The number of execution errors on {{instance_id.name}} is back below the threshold of {{threshold}}.{{/is_recovery}}",
 		"tags": [
 			"integration:aws_neuron"
 		],
