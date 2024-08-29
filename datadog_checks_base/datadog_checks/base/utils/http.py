@@ -156,7 +156,7 @@ class RequestsWrapper(object):
         'tls_protocols_allowed',
     )
 
-    def __init__(self, instance, init_config, remapper=None, logger=None):
+    def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
         self.logger = logger or LOGGER
         default_fields = dict(STANDARD_FIELDS)
 
@@ -329,7 +329,7 @@ class RequestsWrapper(object):
         # https://requests.readthedocs.io/en/latest/user/advanced/#session-objects
         # https://requests.readthedocs.io/en/latest/user/advanced/#keep-alive
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
-        self._session = None
+        self._session = session
 
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
