@@ -10,13 +10,13 @@ except ImportError:
 
 import os
 import shlex
+import subprocess
 from typing import Dict, List  # noqa: F401
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
 
@@ -53,10 +53,10 @@ class GlusterfsCheck(AgentCheck):
 
     def check(self, _):
         if self.use_sudo:
-            test_sudo, err, rcode = get_subprocess_output(
-                ['sudo', '-ln', self.gstatus_cmd], self.log, raise_on_empty_output=False
+            out = subprocess.run(
+                ['sudo', '-ln', self.gstatus_cmd], capture_output=True, text=True
             )
-            if rcode != 0 or not test_sudo:
+            if out.returncode != 0 or not out.stdout:
                 raise Exception('The dd-agent user does not have sudo access: {!r}'.format(err or test_sudo))
             gluster_args = 'sudo {}'.format(self.gstatus_cmd)
         else:
@@ -66,8 +66,12 @@ class GlusterfsCheck(AgentCheck):
         gluster_args = shlex.split(gluster_args)
         self.log.debug("gstatus command: %s", gluster_args)
         try:
-            output, _, _ = get_subprocess_output(gluster_args, self.log)
-            gstatus = json.loads(output)
+            output = subprocess.run(gluster_args, capture_output=True, text=True)
+            if output.stdout.lstrip().startswith('{'):
+                json_data_str = output.stdout
+            else:
+                json_data_str = output.stdout.split('\n', 1)[-1]
+            gstatus = json.loads(json_data_str)
         except JSONDecodeError as e:
             self.log.warning("Unable to decode gstatus output: %s", str(e))
             raise
@@ -197,3 +201,4 @@ class GlusterfsCheck(AgentCheck):
             self.service_check(sc_name, AgentCheck.CRITICAL, tags=tags, message=msg)
         else:
             self.service_check(sc_name, AgentCheck.UNKNOWN, tags=tags, message=msg)
+
