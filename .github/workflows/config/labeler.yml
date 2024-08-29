@@ -201,6 +201,8 @@ integration/gke:
 - gke/**/*
 integration/glusterfs:
 - glusterfs/**/*
+integration/godaddy:
+- godaddy/**/*
 integration/go-metro:
 - go-metro/**/*
 integration/go_expvar:
