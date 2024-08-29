@@ -68,5 +68,4 @@ The LastPass integration does not include any events.
 For further assistance, contact [Datadog Support][2].
 
 [1]: https://www.lastpass.com/products/business
-
 [2]: https://docs.datadoghq.com/help/
