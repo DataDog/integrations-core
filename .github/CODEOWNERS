@@ -260,6 +260,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /contentful/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
 /contentful/assets/logs/                                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/lastpass/                                                          @DataDog/saas-integrations
+/lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/lastpass/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/lastpass/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /mailchimp/                                                          @DataDog/saas-integrations
 /mailchimp/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /mailchimp/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation

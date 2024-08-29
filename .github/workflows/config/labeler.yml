@@ -291,6 +291,8 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/lastpass:
+- lastpass/**/*
 integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
