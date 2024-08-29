@@ -11,7 +11,7 @@ This integration ingests the following logs:
 - TTP Impersonation : Targeted Threat Protection(TTP) Impersonation Protect helps prevent impersonation attacks by scanning emails in real time for signs of an attack.
 - TTP URL : Targeted Threat Protection(TTP) URL Protection is an email security service that rewrites all inbound email links and scans the destination website in real-time when clicked by the user.
 
-The Mimecast integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into audit, DDP, malicious attachments in email, email sent by user as an impersonated identity, phishing email links, and many more through the out-of-the-box dashboards.
+The Mimecast integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into audit, DLP, malicious attachments in email, email sent by user as an impersonated identity, phishing email links, and many more through the out-of-the-box dashboards.
 
 ## Setup
 
