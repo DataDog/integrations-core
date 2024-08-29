@@ -32,7 +32,7 @@ INSTANCES = {
         'add_missing_keys': True,
     },
     'bad_hostname': {
-        'host': 'wronghost',
+        'host': 'bad.example.com',
         'port': 22,
         'username': 'datadog01',
         'password': 'abcd',
@@ -53,10 +53,14 @@ INSTANCE_INTEGRATION = {
 
 def wait_for_threads():
     for thread in threading.enumerate():
-        try:
-            thread.join(THREAD_TIMEOUT)
-        except RuntimeError:
-            pass
+        # We skip the dummy threads since they can't be joined
+        if isinstance(thread, threading._DummyThread):
+            continue
+        else:
+            try:
+                thread.join(THREAD_TIMEOUT)
+            except RuntimeError:
+                pass
 
 
 def _test_check(aggregator, instance):

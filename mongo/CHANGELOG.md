@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 6.9.0 / 2024-08-27
+
+***Added***:
+
+* Add config option `database_autodiscovery.max_collections_per_database` to limit max number of collections to be monitored per autodiscoverd database. This option is applied to collection stats metrics and collection indexes stats metrics. ([#18416](https://github.com/DataDog/integrations-core/pull/18416))
+
+***Fixed***:
+
+* Skip collect explain plan for get profile level & listCollections command. ([#18408](https://github.com/DataDog/integrations-core/pull/18408))
+
 ## 6.8.2 / 2024-08-16
 
 ***Fixed***:
@@ -52,7 +62,7 @@
 * Fix the default null value for waiting_for_latch in operation sampling. When an operation is not waiting for latch, waiting_for_latch should be an empty dict instead of boolean False. ([#17997](https://github.com/DataDog/integrations-core/pull/17997))
 * Fix connection error `SCRAM-SHA-256 requires a username` when connection option authMechanism is provided ([#18156](https://github.com/DataDog/integrations-core/pull/18156))
 
-## 6.7.2 / 2024-07-19
+## 6.7.2 / 2024-07-19 / Agent 7.56.0
 
 ***Fixed***:
 

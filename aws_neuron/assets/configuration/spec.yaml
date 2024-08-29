@@ -13,3 +13,8 @@ files:
             openmetrics_endpoint.description: |
               Endpoint exposing Neuron's Prometheus metrics. For more information, refer to
               https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-monitor-user-guide.html.
+    - template: logs
+      example:
+      - type: docker
+        source: aws_neuron
+        service: <SERVICE>
