@@ -134,7 +134,7 @@ METRIC_MAP = {
     'karpenter_voluntary_disruption_eligible_nodes': 'disruption.eligible_nodes',
     'karpenter_voluntary_disruption_consolidation_timeouts_total': 'disruption.consolidation_timeouts',
     'karpenter_nodepools_allowed_disruptions': 'disruption.budgets.allowed_disruptions',
-    'karpenter_voluntary_disruption_decisions_total': 'disruption.actions_performed',
+    'karpenter_voluntary_disruption_decisions': 'disruption.actions_performed',
     'karpenter_scheduler_scheduling_duration_seconds': 'provisioner.scheduling.simulation.duration_seconds',
     'karpenter_scheduler_queue_depth': 'provisioner.scheduling.queue_depth',
     'karpenter_interruption_message_queue_duration_seconds': 'interruption.message.latency.time_seconds',
