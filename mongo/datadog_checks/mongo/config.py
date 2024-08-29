@@ -104,6 +104,7 @@ class MongoConfig(object):
         self.cluster_name = instance.get('cluster_name', None)
         self._operation_samples_config = instance.get('operation_samples', {})
         self._slow_operations_config = instance.get('slow_operations', {})
+        self._schemas_config = instance.get('schemas', {})
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
@@ -184,6 +185,29 @@ class MongoConfig(object):
             'collection_interval': self._slow_operations_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
             'max_operations': int(self._slow_operations_config.get('max_operations', 1000)),
+            'explained_operations_cache_maxsize': int(
+                self._slow_operations_config.get('explained_operations_cache_maxsize', 5000)
+            ),
+            'explained_operations_per_hour_per_query': int(
+                self._slow_operations_config.get('explained_operations_per_hour_per_query', 10)
+            ),
+        }
+
+    @property
+    def schemas(self):
+        enabled = False
+        if self.dbm_enabled is True and self._schemas_config.get('enabled') is True:
+            # if DBM is enabled and the schemas config is enabled, then it is enabled
+            # By default, schemas collection is disabled
+            enabled = True
+        max_collections = self._schemas_config.get('max_collections')
+        return {
+            'enabled': enabled,
+            'collection_interval': self._schemas_config.get('collection_interval', 600),
+            'run_sync': is_affirmative(self._schemas_config.get('run_sync', True)),
+            'sample_size': int(self._schemas_config.get('sample_size', 10)),
+            'max_collections': int(max_collections) if max_collections else None,
+            'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
         }
 
     def _get_database_autodiscovery_config(self, instance):
@@ -215,4 +239,8 @@ class MongoConfig(object):
             if not database_autodiscovery_config.get('include'):
                 # if database_autodiscovery is enabled but include list is not set, set the include list
                 database_autodiscovery_config['include'] = include_list
+        # Limit the maximum number of collections per database to monitor
+        database_autodiscovery_config["max_collections_per_database"] = int(
+            database_autodiscovery_config.get("max_collections_per_database", 100)
+        )
         return database_autodiscovery_config

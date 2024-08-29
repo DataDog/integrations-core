@@ -141,6 +141,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
+        cache: 'pip'
 
     - name: Restore cache
       if: inputs.repo == 'core'
@@ -397,9 +398,9 @@ jobs:
 
     - name: Upload coverage data
       if: >
-        inputs.standard && 
-        !github.event.repository.private && 
-        always() && 
+        inputs.standard &&
+        !github.event.repository.private &&
+        always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
       uses: codecov/codecov-action@v4

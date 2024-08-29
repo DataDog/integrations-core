@@ -1,9 +1,6 @@
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
 
-[envs.default]
-dependencies = ["deepdiff"]
-
 [[envs.default.matrix]]
 python = ["3.12"]
 os = ["linux"]

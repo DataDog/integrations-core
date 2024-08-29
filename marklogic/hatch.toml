@@ -1,19 +1,12 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-    "--disallow-untyped-defs",
-    "--py2",
-    "--install-types",
-    "--non-interactive",
-    "datadog_checks/",
-    "tests/",
-]
+
 mypy-deps = [
     "types-mock==0.1.5",
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.12"]
+python = [3.12]
 version = ["9.0", "10.0", "11.0"]
 
 [envs.default.overrides]

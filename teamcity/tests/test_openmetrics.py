@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY2
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -10,7 +9,6 @@ from .common import PROMETHEUS_METRICS, PROMETHEUS_METRICS_2023_05_04, get_fixtu
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.parametrize(
     'fixture_path, metrics_set, node_id',
     [

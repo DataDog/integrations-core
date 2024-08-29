@@ -1,17 +1,9 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-  "--py2",
-  "--check-untyped-defs",
-  "--follow-imports",
-  "silent",
-  "datadog_checks/base/checks/base.py",
-  "datadog_checks/base/checks/win/winpdh_base.py",
-  "datadog_checks/base/checks/win/wmi/__init__.py",
-]
+
 
 [[envs.default.matrix]]
-python = ["2.7", "3.12"]
+python = [3.12]
 
 [envs.default]
 features = ["db", "deps", "http", "json", "kube"]

@@ -24,6 +24,7 @@ from datadog_checks.mongo.collectors import (
     ReplicaCollector,
     ReplicationOpLogCollector,
     ServerStatusCollector,
+    ShardedDataDistributionStatsCollector,
     TopCollector,
 )
 from datadog_checks.mongo.collectors.conn_pool_stats import ConnPoolStatsCollector
@@ -37,6 +38,7 @@ from datadog_checks.mongo.common import (
 )
 from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
+from datadog_checks.mongo.dbm.schemas import MongoSchemas
 from datadog_checks.mongo.dbm.slow_operations import MongoSlowOperations
 from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
 
@@ -113,6 +115,7 @@ class MongoDb(AgentCheck):
         # DBM
         self._operation_samples = MongoOperationSamples(check=self)
         self._slow_operations = MongoSlowOperations(check=self)
+        self._schemas = MongoSchemas(check=self)
 
         # Database autodiscovery
         self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
@@ -143,6 +146,8 @@ class MongoDb(AgentCheck):
             potential_collectors.append(JumboStatsCollector(self, tags))
         if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
+        if 'sharded_data_distribution' in self._config.additional_metrics:
+            potential_collectors.append(ShardedDataDistributionStatsCollector(self, tags))
         assert self._mongo_version is not None, "No MongoDB version is set, make sure you refreshed the metadata."
         if self._mongo_version_parsed >= Version("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
@@ -154,14 +159,14 @@ class MongoDb(AgentCheck):
             # regardless of the auto-discovery settings.
             potential_collectors.append(DbStatCollector(self, db_name, dbstats_tag_dbname, tags))
 
-        monitored_dbs = all_dbs if self._database_autodiscovery.autodiscovery_enabled else [self._config.db_name]
         # When autodiscovery is enabled, we collect collstats and indexstats for all auto-discovered databases
         # Otherwise, we collect collstats and indexstats for the database specified in the configuration
-        for db_name in monitored_dbs:
+        for db_name in self.databases_monitored:
             # For backward compatibility, coll_names is ONLY applied when autodiscovery is not enabled
             # Otherwise, we collect collstats & indexstats for all auto-discovered databases and authorized collections
             coll_names = None if self._database_autodiscovery.autodiscovery_enabled else self._config.coll_names
-            potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
+            if 'collection' in self._config.additional_metrics:
+                potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
             if self._config.collections_indexes_stats:
                 if self._mongo_version_parsed >= Version("3.2"):
                     potential_collectors.append(IndexStatsCollector(self, db_name, tags, coll_names=coll_names))
@@ -267,6 +272,7 @@ class MongoDb(AgentCheck):
                 self._send_database_instance_metadata()
                 self._operation_samples.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
                 self._slow_operations.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
+                self._schemas.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
@@ -315,6 +321,12 @@ class MongoDb(AgentCheck):
         if database_count:
             self.gauge('mongodb.dbs', database_count, tags=tags)
         return dbnames
+
+    @property
+    def databases_monitored(self):
+        if self._database_autodiscovery.autodiscovery_enabled:
+            return self._database_autodiscovery.databases
+        return [self._config.db_name]
 
     def _diagnose_tls(self):
         # Check TLS config. Specifically, we might want to check that if `tls` is

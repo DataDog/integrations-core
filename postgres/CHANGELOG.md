@@ -2,7 +2,26 @@
 
 <!-- towncrier release notes start -->
 
-## 19.0.1 / 2024-07-31
+## 19.1.0 / 2024-08-09
+
+***Added***:
+
+* Add global custom queries for Postgres ([#17993](https://github.com/DataDog/integrations-core/pull/17993))
+* Added warning when SSL option for Postgres check is invalid ([#18047](https://github.com/DataDog/integrations-core/pull/18047))
+* Allow filtering of schema collection in Postgres using regexes to include or exclude objects ([#18145](https://github.com/DataDog/integrations-core/pull/18145))
+* Collect blk read/write time from pg_stat_database ([#18169](https://github.com/DataDog/integrations-core/pull/18169))
+* Use QueryManager to collect `custom_queries` and `global_custom_queries`. `custom_queries` now supports configurable `collection_interval`. ([#18183](https://github.com/DataDog/integrations-core/pull/18183))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Add new config option `role_arn` to AWS managed authentication to support cross account IAM auth. ([#18228](https://github.com/DataDog/integrations-core/pull/18228))
+
+***Fixed***:
+
+* Fixed Postgres settings collection for common extensions ([#18043](https://github.com/DataDog/integrations-core/pull/18043))
+* Fixed Postgres check crash when pg_stat_statements was not yet loaded ([#18081](https://github.com/DataDog/integrations-core/pull/18081))
+* Remove schema collection and dependency on relation metrics. Instead a warning is issued when the missing metrics will impact which tables are collected.
+  Removed the autodiscovery dependency on relation metrics; autodiscovery should now work even if relation metrics are not configured. ([#18144](https://github.com/DataDog/integrations-core/pull/18144))
+
+## 19.0.1 / 2024-07-31 / Agent 7.56.0
 
 ***Fixed***:
 

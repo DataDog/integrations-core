@@ -1,0 +1,28 @@
+[
+    {
+        "_id": "xxxx.xxxx",
+        "lastmodEpoch": {
+            "$oid": "66bf755abb96ca928ec3c56e"
+        },
+        "lastmod": {
+            "$date": "2024-08-16T15:50:50.239Z"
+        },
+        "timestamp": {
+            "$timestamp": {
+                "t": 1723823450,
+                "i": 26
+            }
+        },
+        "uuid": {
+            "$binary": {
+                "base64": "jXpuM/CHSQeStNHbJbsZlQ==",
+                "subType": "04"
+            }
+        },
+        "key": {
+            "_id": "hashed"
+        },
+        "unique": false,
+        "noBalance": false
+    }
+]

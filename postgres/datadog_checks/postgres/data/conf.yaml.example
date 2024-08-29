@@ -3,8 +3,8 @@
 init_config:
 
     ## @param propagate_agent_tags - boolean - optional - default: false
-    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
-    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
     #
     # propagate_agent_tags: false
 
@@ -73,7 +73,8 @@ instances:
 
     ## @param ignore_databases - list of strings - optional
     ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
-    ## Each value can be a plain string or a Postgres pattern.
+    ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
+    ## set collect_default_database to false in addition to adding it to this array.
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
     #
     # ignore_databases:
@@ -342,6 +343,11 @@ instances:
         ## Enable database autodiscovery.
         #
         # enabled: false
+
+        ## @param global_view_db - string - optional - default: postgres
+        ## Database the agent connects to perform autodiscovery operations
+        #
+        # global_view_db: postgres
 
         ## @param max_databases - integer - optional - default: 100
         ## The maximum number of databases this host should monitor.
@@ -620,6 +626,9 @@ instances:
         ## To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
         ## If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
         ## `aws.region` is required to enable IAM Authentication.
+        ##
+        ## Optionally, you can set `aws.managed_authentication.role_arn` to specify the IAM role ARN.
+        ## This can be used to perform cross-account authentication.
         #
         # managed_authentication: {}
 
@@ -814,8 +823,8 @@ instances:
         # keep_identifier_quotation: false
 
     ## @param propagate_agent_tags - boolean - optional - default: false
-    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
-    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags.
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
     ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
     #
     # propagate_agent_tags: false
