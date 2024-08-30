@@ -1,12 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-    "--disallow-untyped-defs",
-    "--py2",
-    "--install-types",
-    "--non-interactive",
-    "datadog_checks/",
-]
+
 
 [[envs.default.matrix]]
 python = ["3.11"]

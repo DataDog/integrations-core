@@ -1,21 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-  "--py2",
-  "--disallow-untyped-defs",
-  "--follow-imports",
-  "silent",
-  "--install-types",
-  "--non-interactive",
-  "datadog_checks/vsphere/api.py",
-  "datadog_checks/vsphere/api_rest.py",
-  "datadog_checks/vsphere/cache.py",
-  "datadog_checks/vsphere/config.py",
-  "datadog_checks/vsphere/constants.py",
-  "datadog_checks/vsphere/metrics.py",
-  "datadog_checks/vsphere/utils.py",
-  "datadog_checks/vsphere/vsphere.py",
-]
+
 
 [[envs.default.matrix]]
 python = ["3.11"]
