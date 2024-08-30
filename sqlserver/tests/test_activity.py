@@ -944,9 +944,11 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
         for event in dbm_activity:
             if "sqlserver_deadlocks" in event:
                 matched_event.append(event)
-
-        if len(matched_event) != 1:
-            return False, "should have collected one deadlock payload"
+        
+        collected_deadlocks = len(matched_event)
+        if collected_deadlocks != 1:
+            return False, "should have collected one deadlock payload. collected: {}".format(collected_deadlocks)   
+        
         deadlocks = matched_event[0]["sqlserver_deadlocks"]
         if len(deadlocks) < 1:
             return False, "should have collected one or more deadlock in the payload"
