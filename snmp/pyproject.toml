@@ -42,7 +42,7 @@ deps = [
     "futures==3.4.0; python_version < '3.0'",
     "ipaddress==1.0.23; python_version < '3.0'",
     "ply==3.11",
-    "pyasn1==0.4.6",
+    "pyasn1==0.4.8",
     "pycryptodomex==3.20.0",
     "pysmi==0.3.4; python_version < '3.0'",
     "pysmi==1.4.4; python_version > '3.0'",
