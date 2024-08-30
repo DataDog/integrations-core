@@ -64,8 +64,17 @@ def is_compatible_wheel(
     return True
 
 
-def generate_lock_file(requirements_file: Path, lock_file: Path) -> None:
-    target, _, python_version = lock_file.stem.rpartition('_')
+def generate_lock_file(
+    requirements_file: Path,
+    lock_file_folder: Path,
+    target: str,
+    python_version: str,
+) -> None:
+    python_target = target_python_for_major(python_version)
+    # The lockfiles contain the major.minor Python version
+    # so that the Agent can transition safely
+    lock_file = lock_file_folder / f'{target}_{python_target}.txt'
+
     python_major = python_version[-1]
 
     dependencies: dict[str, str] = {}
@@ -139,9 +148,11 @@ def main():
     for target in Path(args.targets_dir).iterdir():
         for python_version in target.iterdir():
             if python_version.name.startswith('py'):
-                python_target = target_python_for_major(python_version.name.strip('py'))
                 generate_lock_file(
-                    python_version / 'frozen.txt', LOCK_FILE_DIR / f'{target.name}_{python_target}.txt'
+                    python_version / 'frozen.txt',
+                    LOCK_FILE_DIR,
+                    target.name,
+                    python_version.name.strip('py'),
                 )
 
         if (image_digest_file := target / 'image_digest').is_file():
