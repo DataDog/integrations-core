@@ -175,6 +175,10 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         metric_transformer.add_custom_transformer(r".*", self.configure_transformer_kubevirt_metrics(), pattern=True)
 
     def configure_transformer_kubevirt_metrics(self):
+        """
+        Return a metrics transformer that adds tags to all the collected metrics.
+        """
+
         def transform(_metric, sample_data, _runtime_data):
             for sample, tags, hostname in sample_data:
                 metric_name = _metric.name
@@ -184,22 +188,22 @@ class KubeVirtApiCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 if metric_name not in METRICS_MAP:
                     continue
 
-                # add tags
+                # attach tags to the metric
                 tags = tags + self.base_pod_tags
 
-                # get mapped metric name
+                # apply the METRICS_MAP mapping for the metric name
                 new_metric_name = METRICS_MAP[metric_name]
                 if isinstance(new_metric_name, dict) and "name" in new_metric_name:
                     new_metric_name = new_metric_name["name"]
 
-                # send metric
-                metric_transformer = self.scrapers[self.kubevirt_api_metrics_endpoint].metric_transformer
-
+                # call the correct metric submission method based on the metric type
                 if metric_type == "counter":
                     self.count(new_metric_name + ".count", sample.value, tags=tags, hostname=hostname)
                 elif metric_type == "gauge":
                     self.gauge(new_metric_name, sample.value, tags=tags, hostname=hostname)
                 else:
+                    metric_transformer = self.scrapers[self.kubevirt_api_metrics_endpoint].metric_transformer
+
                     native_transformer = get_native_dynamic_transformer(
                         self, new_metric_name, None, metric_transformer.global_options
                     )
