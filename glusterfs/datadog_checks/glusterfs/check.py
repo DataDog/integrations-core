@@ -68,6 +68,9 @@ class GlusterfsCheck(AgentCheck):
         gluster_args += ' -a -o json -u g'
         self.log.debug("gstatus command: %s", gluster_args)
         try:
+            # In testing I saw that even though we request the json, sometimes there's a line that appears at the top
+            # and thus will break the json loading. A line like:
+            # 'Note: Unable to get self-heal status for one or more volumes \n'
             stdout, stderr, returncode = self._get_gstatus_output(gluster_args)
             if stdout.lstrip().startswith('{'):
                 json_data = stdout

@@ -56,6 +56,7 @@ def mock_gstatus_data():
 
 
 def create_volume():
+    # The image for some reason doesn't actually start glusterd. So the below two lines will start it manually.
     run_command(
         "docker exec gluster-node-2 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO",
         capture=True,
