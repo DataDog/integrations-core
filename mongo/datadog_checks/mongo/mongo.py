@@ -292,7 +292,7 @@ class MongoDb(AgentCheck):
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
             self._mongo_modules = server_info.get('modules', [])
-            self.set_metadata('modules', self._mongo_modules.join(','))
+            self.set_metadata('modules', ','.join(self._mongo_modules))
             self.log.debug('modules: %s', self._mongo_modules)
         if self._resolved_hostname is None:
             self._resolved_hostname = self._config.reported_database_hostname or self.api_client.hostname
