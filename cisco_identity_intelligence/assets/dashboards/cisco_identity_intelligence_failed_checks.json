@@ -1,7 +1,7 @@
 {
     "title": "Cisco Identity Intelligence - Failed Checks",
-    "description": "This dashboard provides information about the Failed Checks generated on Cisco Identity Intelligence(OORT).",
-    "widgets": [
+    "description": "This dashboard provides information about the failed checks generated on Cisco Identity Intelligence (OORT).",
+        "widgets": [
         {
             "id": 5527090904543100,
             "definition": {
@@ -261,7 +261,7 @@
                         "id": 5996232744860254,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates Failed Checks logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](https://app.datadoghq.com/security?query=source%3Acisco-identity-intelligence%20&agg_m=count&agg_m_source=base&agg_t=count&column=time&fromUser=false&order=desc&start=1722941024113&end=1723027424113&paused=false). ",
+                            "content": "Datadog Cloud SIEM analyzes and correlates Failed Checks logs to detect threats to your environment in real time. If you don't see signals, ensure you've enabled [Datadog Cloud SIEM](https://app.datadoghq.com/security?query=source%3Acisco-identity-intelligence%20&agg_m=count&agg_m_source=base&agg_t=count&column=time&fromUser=false&order=desc&start=1722941024113&end=1723027424113&paused=false). ",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "left",
