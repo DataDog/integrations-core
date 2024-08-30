@@ -112,13 +112,14 @@ class MongoDb(AgentCheck):
 
         self.diagnosis.register(self._diagnose_tls)
 
+        # Database autodiscovery
+        self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
+
         # DBM
         self._operation_samples = MongoOperationSamples(check=self)
         self._slow_operations = MongoSlowOperations(check=self)
         self._schemas = MongoSchemas(check=self)
 
-        # Database autodiscovery
-        self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
         self._api = None
 
     @property
