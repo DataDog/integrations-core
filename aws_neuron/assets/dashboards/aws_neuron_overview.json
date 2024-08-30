@@ -1,6 +1,6 @@
 {
   "title": "AWS Neuron Dashboard",
-  "description": "[[suggested_dashboards]]",
+  "description": "This dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency and memory usage.",
   "widgets": [
     {
       "id": 6979231130018708,
@@ -36,7 +36,7 @@
             "id": 4721541429420236,
             "definition": {
               "type": "note",
-              "content": "# Useful Links\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)\\\n[AWS Neuron Integration]()",
+              "content": "# Useful Links\n\n[AWS Neuron Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\\\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -59,7 +59,7 @@
         "x": 0,
         "y": 0,
         "width": 5,
-        "height": 6
+        "height": 7
       }
     },
     {
@@ -71,6 +71,27 @@
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
+          {
+            "id": 5198931877490734,
+            "definition": {
+              "type": "note",
+              "content": "This overview provides a quick look into the general status and health of your Neuron instances.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 7,
+              "height": 1
+            }
+          },
           {
             "id": 8720449453186756,
             "definition": {
@@ -113,7 +134,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 7,
               "height": 2
             }
@@ -155,7 +176,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 2,
+              "y": 3,
               "width": 2,
               "height": 1
             }
@@ -180,7 +201,7 @@
             },
             "layout": {
               "x": 2,
-              "y": 2,
+              "y": 3,
               "width": 5,
               "height": 3
             }
@@ -227,15 +248,15 @@
             },
             "layout": {
               "x": 0,
-              "y": 3,
+              "y": 4,
               "width": 2,
               "height": 1
             }
           },
           {
-            "id": 4942897037508018,
+            "id": 4990133775519788,
             "definition": {
-              "title": "NeuronCores in use",
+              "title": "Average execution latency",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -246,13 +267,13 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aws_neuron.neuroncore.utilization_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}",
+                      "query": "avg:aws_neuron.execution.latency_seconds{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}",
                       "aggregator": "avg"
                     }
                   ],
                   "formulas": [
                     {
-                      "formula": "count_nonzero(query1)"
+                      "formula": "query1"
                     }
                   ]
                 }
@@ -262,7 +283,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 4,
+              "y": 5,
               "width": 2,
               "height": 1
             }
@@ -273,14 +294,14 @@
         "x": 5,
         "y": 0,
         "width": 7,
-        "height": 6
+        "height": 7
       }
     },
     {
       "id": 6659947028871704,
       "definition": {
         "title": "Execution Status",
-        "background_color": "green",
+        "background_color": "vivid_green",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
@@ -289,8 +310,8 @@
             "id": 468925319074014,
             "definition": {
               "type": "note",
-              "content": "Monitoring  execution status helps identify the operational state of machine learning models, ensuring they are running as expected. Tracking execution latency provides insights into the performance and efficiency of model inference, helping optimize response times and resource usage",
-              "background_color": "transparent",
+              "content": "Monitoring execution status helps identify the operational state of machine learning models, ensuring they are running as expected. Tracking execution latency provides insights into the performance and efficiency of model inference, helping optimize response times and resource usage.",
+              "background_color": "green",
               "font_size": "14",
               "text_align": "center",
               "vertical_align": "top",
@@ -328,16 +349,14 @@
                     {
                       "alias": "Executions success rate",
                       "style": {
-                        "palette": "green",
-                        "palette_index": 3
+                        "palette": "green"
                       },
                       "formula": "query1"
                     },
                     {
                       "alias": "Execution error rate",
                       "style": {
-                        "palette": "warm",
-                        "palette_index": 3
+                        "palette": "red"
                       },
                       "formula": "query2"
                     }
@@ -346,12 +365,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:aws_neuron.execution.status.count{status_type:completed , $instance_id, $instance_type, $availability_zone, $region, $subnet_id}.as_rate()"
+                      "query": "avg:aws_neuron.execution.status.count{status_type:completed , $instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {instance_id}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:aws_neuron.execution.status.count{not status_type:completed}.as_rate()"
+                      "query": "avg:aws_neuron.execution.status.count{not status_type:completed} by {instance_id}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -435,7 +454,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 6,
+        "y": 7,
         "width": 12,
         "height": 5
       }
@@ -444,7 +463,7 @@
       "id": 8841094143294328,
       "definition": {
         "title": "Resource utilization",
-        "background_color": "vivid_purple",
+        "background_color": "vivid_green",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
@@ -454,7 +473,7 @@
             "definition": {
               "type": "note",
               "content": "Make the most out of your system by monitoring resource utilization at multiple scales. Tracking NeuronCore utilization helps assess how effectively the model is using the allocated Neuron cores, guiding optimization for better performance. Additionally, the system utilization metrics provide a bird's eye view of the system resources.",
-              "background_color": "transparent",
+              "background_color": "green",
               "font_size": "14",
               "text_align": "center",
               "vertical_align": "top",
@@ -503,7 +522,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aws_neuron.neuroncore.utilization_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {neuroncore}"
+                      "query": "avg:aws_neuron.neuroncore.utilization_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {neuroncore,instance_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -625,7 +644,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 11,
+        "y": 12,
         "width": 12,
         "height": 5
       }
@@ -634,7 +653,7 @@
       "id": 7322947690579954,
       "definition": {
         "title": "vCPU",
-        "background_color": "vivid_blue",
+        "background_color": "vivid_green",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
@@ -644,7 +663,7 @@
             "definition": {
               "type": "note",
               "content": "By tracking the Neuron runtime's vCPU usage, you can ensure that your models are efficiently utilizing the allocated resources. Meanwhile, monitoring the overall system vCPU usage helps in identifying potential bottlenecks or underutilization, enabling better resource management and capacity planning across your entire system.",
-              "background_color": "transparent",
+              "background_color": "green",
               "font_size": "14",
               "text_align": "center",
               "vertical_align": "top",
@@ -774,7 +793,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 17,
         "width": 12,
         "height": 5,
         "is_column_break": true
@@ -784,7 +803,7 @@
       "id": 4920675792552564,
       "definition": {
         "title": "Memory",
-        "background_color": "vivid_pink",
+        "background_color": "vivid_green",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
@@ -794,7 +813,7 @@
             "definition": {
               "type": "note",
               "content": "Monitoring the Neuron runtime's memory usage helps ensure that the memory allocated for model execution is efficiently used, avoiding potential bottlenecks. Tracking system memory usage provides a broader view of overall system memory consumption, helping to prevent resource exhaustion and maintain overall system stability.",
-              "background_color": "transparent",
+              "background_color": "green",
               "font_size": "14",
               "text_align": "center",
               "vertical_align": "top",
@@ -851,7 +870,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "line"
+                  "display_type": "bars"
                 }
               ]
             },
@@ -888,7 +907,13 @@
                         "palette": "classic",
                         "palette_index": 4
                       },
-                      "formula": "query1"
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
                     }
                   ],
                   "queries": [
@@ -974,7 +999,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 22,
         "width": 12,
         "height": 5
       }
@@ -983,7 +1008,7 @@
       "id": 6335068973644062,
       "definition": {
         "title": "Logs",
-        "background_color": "purple",
+        "background_color": "green",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
@@ -992,8 +1017,8 @@
             "id": 2270740140504733,
             "definition": {
               "type": "note",
-              "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream set up to filter erroneous logs for your perusal.",
-              "background_color": "transparent",
+              "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream configured to filter erroneous logs for your perusal.",
+              "background_color": "green",
               "font_size": "14",
               "text_align": "center",
               "vertical_align": "top",
@@ -1012,7 +1037,7 @@
           {
             "id": 3745226166465988,
             "definition": {
-              "title": "Count per Log Status",
+              "title": "Error log count",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1037,23 +1062,12 @@
                       "name": "a",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:aws-neuron "
+                        "query": "source:aws-neuron status:ERROR "
                       },
                       "indexes": [
                         "*"
                       ],
-                      "group_by": [
-                        {
-                          "facet": "status",
-                          "limit": 50,
-                          "sort": {
-                            "aggregation": "count",
-                            "order": "desc",
-                            "metric": "count"
-                          },
-                          "should_exclude_missing": true
-                        }
-                      ],
+                      "group_by": [],
                       "compute": {
                         "aggregation": "count",
                         "metric": "count"
@@ -1081,7 +1095,7 @@
           {
             "id": 5222865640613950,
             "definition": {
-              "title": "Neuron Logs",
+              "title": "Neuron logs",
               "title_size": "16",
               "title_align": "left",
               "requests": [
@@ -1130,7 +1144,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 10,
+        "y": 27,
         "width": 12,
         "height": 6
       }
