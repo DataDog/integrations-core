@@ -118,6 +118,9 @@ class MongoApi(object):
     def index_information(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].index_information(session=session)
 
+    def list_search_indexes(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].list_search_indexes(session=session)
+
     def sharded_data_distribution_stats(self, session=None):
         return self["admin"].aggregate([{"$shardedDataDistribution": {}}], session=session)
 

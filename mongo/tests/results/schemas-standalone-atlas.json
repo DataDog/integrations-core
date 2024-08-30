@@ -9,8 +9,7 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
-            "hosting_type:self-hosted",
-            "sharding_cluster_role:mongos"
+            "hosting_type:mongodb-atlas"
         ],
         "timestamp": 1715911398111.2722,
         "metadata": [
@@ -20,7 +19,7 @@
                     {
                         "name": "foo",
                         "namespace": "integration.foo",
-                        "sharded": true,
+                        "sharded": false,
                         "docs": [
                             {
                                 "name": "_id",
@@ -314,12 +313,29 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": []
+                        "search_indexes": [
+                            {
+                                "mappings": {
+                                    "dynamic": true,
+                                    "fields": [
+                                        {
+                                            "field": "highlight",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "name": "cast_fullplot_genres_title",
+                                "queryable": true,
+                                "status": "READY",
+                                "type": "search",
+                                "version": 1
+                            }
+                        ]
                     },
                     {
                         "name": "bar",
                         "namespace": "integration.bar",
-                        "sharded": true,
+                        "sharded": false,
                         "docs": [
                             {
                                 "name": "_id",
@@ -583,7 +599,24 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": []
+                        "search_indexes": [
+                            {
+                                "mappings": {
+                                    "dynamic": true,
+                                    "fields": [
+                                        {
+                                            "field": "highlight",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "name": "cast_fullplot_genres_title",
+                                "queryable": true,
+                                "status": "READY",
+                                "type": "search",
+                                "version": 1
+                            }
+                        ]
                     }
                 ]
             }
@@ -599,8 +632,7 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
-            "hosting_type:self-hosted",
-            "sharding_cluster_role:mongos"
+            "hosting_type:mongodb-atlas"
         ],
         "timestamp": 1715911398111.2722,
         "metadata": [
@@ -610,7 +642,7 @@
                     {
                         "name": "foo",
                         "namespace": "test.foo",
-                        "sharded": true,
+                        "sharded": false,
                         "docs": [
                             {
                                 "name": "_id",
@@ -904,12 +936,29 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": []
+                        "search_indexes": [
+                            {
+                                "mappings": {
+                                    "dynamic": true,
+                                    "fields": [
+                                        {
+                                            "field": "highlight",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "name": "cast_fullplot_genres_title",
+                                "queryable": true,
+                                "status": "READY",
+                                "type": "search",
+                                "version": 1
+                            }
+                        ]
                     },
                     {
                         "name": "bar",
                         "namespace": "test.bar",
-                        "sharded": true,
+                        "sharded": false,
                         "docs": [
                             {
                                 "name": "_id",
@@ -1173,7 +1222,24 @@
                                 "case_insensitive": true
                             }
                         ],
-                        "search_indexes": []
+                        "search_indexes": [
+                            {
+                                "mappings": {
+                                    "dynamic": true,
+                                    "fields": [
+                                        {
+                                            "field": "highlight",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "name": "cast_fullplot_genres_title",
+                                "queryable": true,
+                                "status": "READY",
+                                "type": "search",
+                                "version": 1
+                            }
+                        ]
                     }
                 ]
             }

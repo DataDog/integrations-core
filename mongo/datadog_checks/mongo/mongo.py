@@ -32,6 +32,7 @@ from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
 from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import (
     SERVICE_CHECK_NAME,
+    HostingType,
     MongosDeployment,
     ReplicaSetDeployment,
     StandaloneDeployment,
@@ -50,14 +51,6 @@ except ImportError:
     from ..stubs import datadog_agent
 
 long = int
-
-
-class HostingType:
-    ATLAS = "mongodb-atlas"
-    ALIBABA_APSARADB = "alibaba-apsaradb"
-    DOCUMENTDB = "amazon-documentdb"
-    SELF_HOSTED = "self-hosted"
-    UNKNOWN = "unknown"
 
 
 class MongoDb(AgentCheck):
