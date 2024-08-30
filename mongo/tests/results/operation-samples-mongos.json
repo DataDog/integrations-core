@@ -696,10 +696,10 @@
                 },
                 "signature": "5991253f621eccd0"
             },
-            "query_signature": "6324f030638a5dc0",
+            "query_signature": "50114961ffa245f7",
             "application": null,
             "user": "test",
-            "statement": "{\"find\": \"users\", \"projection\": {\"$sortKey\": {\"$meta\": \"sortKey\"}}, \"sort\": {\"user_id\": 1}, \"needsMerge\": true, \"let\": {\"CLUSTER_TIME\": {\"$literal\": {\"t\": 1716215816, \"i\": 1}}, \"NOW\": {\"$literal\": \"2024-05-20T14:36:56.231+00:00\"}}, \"fromMongos\": true, \"singleBatch\": false, \"writeConcern\": {\"w\": \"majority\", \"wtimeout\": 0, \"provenance\": \"implicitDefault\"}, \"readConcern\": {\"level\": \"local\", \"provenance\": \"implicitDefault\"}, \"shardVersion\": {\"t\": {\"$timestamp\": {\"t\": 1716215708, \"i\": 12}}, \"e\": {\"$oid\": \"664b5f9d05fee29701ab2bfb\"}, \"v\": {\"$timestamp\": {\"t\": 1, \"i\": 7}}}, \"clientOperationKey\": {\"$binary\": {\"base64\": \"cZAjiXzbSZianZ+RrPdTaA==\", \"subType\": \"04\"}}, \"comment\": \"sort\", \"lsid\": {\"id\": {\"$binary\": {\"base64\": \"/5W615FQTDardJroxkDVTg==\", \"subType\": \"04\"}}, \"uid\": {\"$binary\": {\"base64\": \"47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\", \"subType\": \"00\"}}}, \"$clusterTime\": {\"clusterTime\": {\"$timestamp\": {\"t\": 1716215816, \"i\": 1}}, \"signature\": {\"hash\": {\"$binary\": {\"base64\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAA=\", \"subType\": \"00\"}}, \"keyId\": 0}}, \"$configTime\": {\"$timestamp\": {\"t\": 1716215814, \"i\": 1}}, \"$topologyTime\": {\"$timestamp\": {\"t\": 1716215696, \"i\": 24}}, \"$audit\": {\"$impersonatedUsers\": [{\"user\": \"test\", \"db\": \"admin\"}], \"$impersonatedRoles\": [{\"role\": \"root\", \"db\": \"admin\"}]}, \"$client\": {\"driver\": {\"name\": \"PyMongo\", \"version\": \"4.7.2\"}, \"os\": {\"type\": \"Darwin\", \"name\": \"Darwin\", \"architecture\": \"arm64\", \"version\": \"14.4.1\"}, \"platform\": \"CPython 3.9.16.final.0\", \"mongos\": {\"host\": \"7203110cbd0b:27017\", \"client\": \"192.168.65.1:39545\", \"version\": \"6.0.15\"}}, \"mayBypassWriteBlocking\": true, \"$db\": \"integration\"}",
+            "statement": "{\"find\": \"users\", \"projection\": {\"$sortKey\": {\"$meta\": \"sortKey\"}}, \"sort\": {\"user_id\": 1}, \"needsMerge\": true, \"let\": {\"CLUSTER_TIME\": {\"$literal\": {\"t\": 1716215816, \"i\": 1}}, \"NOW\": {\"$literal\": \"2024-05-20T14:36:56.231+00:00\"}}, \"fromMongos\": true, \"singleBatch\": false, \"writeConcern\": {\"w\": \"majority\", \"wtimeout\": 0, \"provenance\": \"implicitDefault\"}, \"readConcern\": {\"level\": \"local\", \"provenance\": \"implicitDefault\"}, \"shardVersion\": {\"t\": {\"$timestamp\": {\"t\": 1716215708, \"i\": 12}}, \"e\": {\"$oid\": \"664b5f9d05fee29701ab2bfb\"}, \"v\": {\"$timestamp\": {\"t\": 1, \"i\": 7}}}, \"clientOperationKey\": {\"$binary\": {\"base64\": \"cZAjiXzbSZianZ+RrPdTaA==\", \"subType\": \"04\"}}, \"$configTime\": {\"$timestamp\": {\"t\": 1716215814, \"i\": 1}}, \"$topologyTime\": {\"$timestamp\": {\"t\": 1716215696, \"i\": 24}}, \"$audit\": {\"$impersonatedUsers\": [{\"user\": \"test\", \"db\": \"admin\"}], \"$impersonatedRoles\": [{\"role\": \"root\", \"db\": \"admin\"}]}, \"$client\": {\"driver\": {\"name\": \"PyMongo\", \"version\": \"4.7.2\"}, \"os\": {\"type\": \"Darwin\", \"name\": \"Darwin\", \"architecture\": \"arm64\", \"version\": \"14.4.1\"}, \"platform\": \"CPython 3.9.16.final.0\", \"mongos\": {\"host\": \"7203110cbd0b:27017\", \"client\": \"192.168.65.1:39545\", \"version\": \"6.0.15\"}}, \"mayBypassWriteBlocking\": true, \"$db\": \"integration\"}",
             "operation_metadata": {
                 "op": "query",
                 "shard": "shard04",
@@ -707,16 +707,18 @@
                 "comment": "sort",
                 "ns": "integration.$cmd"
             },
-            "query_truncated": "not_truncated"
+            "query_truncated": "not_truncated",
+            "source": "activity"
         },
         "mongodb": {
             "now": 1715911398.1112723,
-            "query_signature": "6324f030638a5dc0",
+            "query_signature": "50114961ffa245f7",
             "active": true,
             "desc": "conn143",
             "opid": "shard04:265665",
             "ns": "integration.$cmd",
             "plan_summary": null,
+            "query_framework": null,
             "current_op_time": "2024-05-20T14:36:56.231+00:00",
             "microsecs_running": 29232,
             "transaction_time_open_micros": null,
@@ -751,13 +753,13 @@
             "waiting_for_flow_control": false,
             "flow_control_stats": {},
             "waiting_for_latch": {},
+            "cursor": null,
             "type": "op",
             "op": "query",
             "shard": "shard04",
             "collection": "users",
             "comment": "sort",
-            "truncated": "not_truncated",
-            "cursor": null
+            "truncated": "not_truncated"
         }
     }
 ]
