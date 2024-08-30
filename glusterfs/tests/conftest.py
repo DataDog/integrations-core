@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
-import subprocess
 from unittest import mock
 
 import pytest
@@ -51,11 +50,8 @@ def mock_gstatus_data():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'gstatus.txt')
     with open(f_name) as f:
         data = f.read()
-    mock_output = mock.Mock(spec=subprocess.CompletedProcess)
-    mock_output.stdout = data
-    mock_output.stderr = b''
-    mock_output.returncode = 0
-    with mock.patch('datadog_checks.glusterfs.check.subprocess.run', return_value=(mock_output)):
+
+    with mock.patch('datadog_checks.glusterfs.check.GlusterfsCheck._get_gstatus_output', return_value=(data, "", 0)):
         yield
 
 
@@ -72,15 +68,15 @@ def create_volume():
     )
 
     commands = [
-        "gluster-node-2 mkdir -p /export-test",
-        "gluster-node-1 mkdir -p /export-test",
-        "gluster-node-1 gluster peer probe gluster-node-2",
-        "gluster-node-1 gluster volume create gv0 replica 2 gluster-node-1:/export-test gluster-node-2:/export-test force",  # noqa
-        "gluster-node-1 gluster volume start gv0",
+        "node-2 mkdir -p /export-test",
+        "node-1 mkdir -p /export-test",
+        "node-1 gluster peer probe gluster-node-2",
+        "node-1 gluster volume create gv0 replica 2 gluster-node-1:/export-test gluster-node-2:/export-test force",
+        "node-1 gluster volume start gv0",
     ]
 
     for command in commands:
-        run_command(f"docker exec {command}", capture=True, check=True)
+        run_command(f"docker exec gluster-{command}", capture=True, check=True)
 
 
 def delete_volume():

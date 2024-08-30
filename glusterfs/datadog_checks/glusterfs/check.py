@@ -9,7 +9,6 @@ except ImportError:
     from simplejson import JSONDecodeError
 
 import os
-import shlex
 import subprocess
 from typing import Dict, List  # noqa: F401
 
@@ -51,24 +50,29 @@ class GlusterfsCheck(AgentCheck):
         self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
+    def _get_gstatus_output(self, cmd):
+
+        res = subprocess.run(cmd.split(), capture_output=True, text=True)
+        return res.stdout, res.stderr, res.returncode
+
     def check(self, _):
         if self.use_sudo:
-            out = subprocess.run(['sudo', '-ln', self.gstatus_cmd], capture_output=True, text=True)
-            if out.returncode != 0 or not out.stdout:
-                raise Exception('The dd-agent user does not have sudo access: {!r}'.format(out.stderr or out.stdout))
+            cmd = [f'sudo -ln {self.gstatus_cmd}']
+            stdout, stderr, returncode = self._get_gstatus_output(cmd)
+            if returncode != 0 or not stdout:
+                raise Exception('The dd-agent user does not have sudo access: {!r}'.format(stderr or stdout))
             gluster_args = 'sudo {}'.format(self.gstatus_cmd)
         else:
             gluster_args = self.gstatus_cmd
         # Ensures units are universally the same by specifying the --units flag
         gluster_args += ' -a -o json -u g'
-        gluster_args = shlex.split(gluster_args)
         self.log.debug("gstatus command: %s", gluster_args)
         try:
-            output = subprocess.run(gluster_args, capture_output=True, text=True)
-            if output.stdout.lstrip().startswith('{'):
-                json_data = output.stdout
+            stdout, stderr, returncode = self._get_gstatus_output(gluster_args)
+            if stdout.lstrip().startswith('{'):
+                json_data = stdout
             else:
-                json_data = output.stdout.split('\n', 1)[-1]
+                json_data = stdout.split('\n', 1)[-1]
             gstatus = json.loads(json_data)
         except JSONDecodeError as e:
             self.log.warning("Unable to decode gstatus output: %s", str(e))
