@@ -50,7 +50,7 @@ The GoDaddy integration does not include any logs.
 
 ### Metrics
 
-The GoDaddy integration collects and forwards Certificates and Domains metrics to Datadog. See [metadata.csv][5] for a list of metrics provided by this integration.
+The GoDaddy integration collects and forwards Certificates and their Domains metrics to Datadog. See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 

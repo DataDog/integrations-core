@@ -21,7 +21,6 @@
         "image_url": "images/godaddy_2.png",
         "media_type": "image"
       }
-      
     ],
     "classifier_tags": [
       "Category::Metrics",
@@ -48,7 +47,6 @@
     },
     "dashboards": {
       "GoDaddy Overview": "assets/dashboards/godaddy_overview.json"
-      
     },
     "monitors": {
       "SSL Certificate Denied": "assets/monitors/godaddy_certificate_denied.json",

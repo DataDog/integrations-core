@@ -246,10 +246,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation
 /cisco_umbrella_dns/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
 
-/godaddy/                                                 @DataDog/saas-integrations
-/godaddy/*.md                                             @DataDog/saas-integrations @DataDog/documentation
-/godaddy/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
-
 /cisco_duo/                                                          @DataDog/saas-integrations
 /cisco_duo/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /cisco_duo/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
