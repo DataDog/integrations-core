@@ -1306,9 +1306,11 @@ class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 def run_ssl_server():
     cert_file = os.path.join(CERTIFICATE_DIR, 'server.pem')
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain(cert_file)
 
     httpd = BaseHTTPServer.HTTPServer((SSL_SERVER_ADDRESS, SSL_SERVER_PORT), StandaloneAppsResponseHandler)
-    httpd.socket = ssl.wrap_socket(httpd.socket, certfile=cert_file, server_side=False)
+    httpd.socket = context.wrap_socket(httpd.socket, server_side=False)
     httpd.timeout = 5
 
     threading.Thread(target=httpd.handle_request).start()
