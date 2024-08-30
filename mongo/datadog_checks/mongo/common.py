@@ -141,7 +141,9 @@ class MongosDeployment(Deployment):
 
 
 class ReplicaSetDeployment(Deployment):
-    def __init__(self, hosting_type, replset_name, replset_state, hosts, replset_me, cluster_role=None):
+    def __init__(
+        self, hosting_type, replset_name, replset_state, hosts, replset_me, cluster_role=None, replset_tags=None
+    ):
         super(ReplicaSetDeployment, self).__init__(hosting_type)
         self.replset_name = replset_name
         self.replset_state = replset_state
@@ -153,6 +155,7 @@ class ReplicaSetDeployment(Deployment):
         self.is_secondary = replset_state == SECONDARY_STATE_ID
         self.is_arbiter = replset_state == ARBITER_STATE_ID
         self.hosts = hosts
+        self._replset_tags = replset_tags
 
     def is_principal(self):
         # There is only ever one primary node in a replica set.
@@ -175,6 +178,12 @@ class ReplicaSetDeployment(Deployment):
         if self.use_shards:
             tags.append('sharding_cluster_role:{}'.format(self.cluster_role))
         return tags
+
+    @property
+    def replset_tags(self):
+        if not self._replset_tags:
+            return []
+        return ["replset_{}:{}".format(k.lower(), v) for k, v in self._replset_tags.items()]
 
     @property
     def instance_metadata(self):

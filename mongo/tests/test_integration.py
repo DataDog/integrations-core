@@ -527,6 +527,8 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -629,6 +631,8 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -1105,6 +1109,8 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
