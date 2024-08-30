@@ -1,6 +1,6 @@
 ## Overview
 
-[Cisco Secure Email Threat Defense][1] is an integrated cloud-native security solution for Microsoft 365 that focuses on simple deployment, easy attack remediation, and providing superior visibility into inbound, outbound, and internal user-to-user messages. It detects phishing, scam, malicious and BEC types of threats using advanced threat detection capabilities and resolves them in real time.
+[Cisco Secure Email Threat Defense][1] is an integrated cloud-native security solution for Microsoft 365 that focuses on simple deployment, easy attack remediation, and providing superior visibility into inbound, outbound, and internal user-to-user messages.
 
 This integration ingests the following logs:
 - Message: Message logs provide detailed information about email communications, including sender, recipient, timestamps, subject, and threat-related data for analysis and monitoring.
