@@ -66,10 +66,10 @@ class GlusterfsCheck(AgentCheck):
         try:
             output = subprocess.run(gluster_args, capture_output=True, text=True)
             if output.stdout.lstrip().startswith('{'):
-                json_data_str = output.stdout
+                json_data = output.stdout
             else:
-                json_data_str = output.stdout.split('\n', 1)[-1]
-            gstatus = json.loads(json_data_str)
+                json_data = output.stdout.split('\n', 1)[-1]
+            gstatus = json.loads(json_data)
         except JSONDecodeError as e:
             self.log.warning("Unable to decode gstatus output: %s", str(e))
             raise
