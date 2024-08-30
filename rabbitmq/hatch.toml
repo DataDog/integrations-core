@@ -10,7 +10,7 @@ dependencies = [
 # We still support metrics from management plugin as a legacy option.
 [[envs.default.matrix]]
 python = ["3.12"]
-version = ["3.7", 3.12]
+version = ["3.7", "3.11"]
 flavor = ["mgmt", "openmetrics"]
 
 [envs.default.overrides]
