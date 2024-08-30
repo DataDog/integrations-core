@@ -1,6 +1,6 @@
-# CHANGELOG - Ringcentral
+# CHANGELOG - RingCentral
 
-## 1.0.0 / 2024-08-30
+## 1.0.0 / 2024-08-08
 
 ***Added***:
 
