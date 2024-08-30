@@ -81,6 +81,36 @@ RUN \
  RELATIVE_PATH="krb5-{{version}}/src" \
  bash install-from-source.sh --without-keyutils --without-system-verto --without-libedit --disable-static
 
+# libxml & libxslt for lxml
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
+ VERSION="2.12.6" \
+ SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
+ RELATIVE_PATH="libxml2-{{version}}" \
+ bash install-from-source.sh \
+ --without-iconv \
+ --without-python \
+ --without-icu \
+ --without-debug \
+ --without-mem-debug \
+ --without-run-debug \
+ --without-legacy \
+ --without-catalog \
+ --without-docbook \
+ --disable-static
+
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
+ VERSION="1.1.39" \
+ SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
+ RELATIVE_PATH="libxslt-{{version}}" \
+ bash install-from-source.sh \
+ --without-python \
+ --without-crypto \
+ --without-profiler \
+ --without-debugger \
+ --disable-static
+
 # libpq and pg_config as needed by psycopg2
 RUN \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
