@@ -157,7 +157,7 @@
       "id": 7368651598732064,
       "definition": {
         "type": "note",
-        "content": "Gain a comprehensive understanding of your organization's email security posture by monitoring Cisco Secure Email Threat Defense messages with this dashboard.\n\nCisco Secure Email Threat Defense is an integrated cloud-native security solution for Microsoft 365 that focuses on simple deployment, easy attack remediation, and superior visibility.\n\nCisco Secure Email Threat Defense message logs provide a detailed information of email communication events within an organization. These logs capture information such as sender details, recipient information, timestamps, subject lines, threat-related data and remediation action taken against threats. These logs are invaluable for assessing the effectiveness of your email security measures, analyzing threat patterns, and identifying potential vulnerabilities. By monitoring Cisco Secure Email Threat Defense messages, you can proactively respond to threats, refine your security policies, and maintain a resilient email environment.\n\nFor Further Reading, see:\n-  [Cisco Secure Email Threat Defense - Messages Documentation](https://www.cisco.com/c/en/us/td/docs/security/email-threat-defense/user-guide/secure-email-threat-defense-user-guide/messages.html)",
+        "content": "Cisco Secure Email Threat Defense is an integrated cloud-native security solution for Microsoft 365 that focuses on simple deployment, easy attack remediation, and superior visibility.\n\nGain a comprehensive understanding of your organization's email security posture by monitoring Cisco Secure Email Threat Defense messages with this dashboard.\n\nFor more information, see the [Cisco Secure Email Threat Defense Integration Documentation](https://docs.datadoghq.com/integrations/cisco_secure_email_threat_defense/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
@@ -175,7 +175,7 @@
       }
     },
     {
-      "id": 6651399775525772,
+      "id": 4095854872655154,
       "definition": {
         "title": "Datadog Cloud SIEM",
         "title_align": "center",
@@ -185,10 +185,10 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 156645424307362,
+            "id": 5695359814344638,
             "definition": {
               "type": "note",
-              "content": "\nDatadog Cloud SIEM analyzes and correlates Workbench Message logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates Cisco Secure Email Threat Defense logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "left",
@@ -206,7 +206,7 @@
             }
           },
           {
-            "id": 3736002884899858,
+            "id": 8240249358608954,
             "definition": {
               "title": "CRITICALs",
               "title_size": "16",
@@ -218,7 +218,7 @@
                     {
                       "comparator": ">",
                       "custom_bg_color": "#bc303c",
-                      "palette": "white_on_red",
+                      "palette": "custom_bg",
                       "value": 0
                     }
                   ],
@@ -239,7 +239,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:cisco-secure-email-threat-defense service:message status:critical $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                        "query": "source:cisco-secure-email-threat-defense service:message status:critical $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
                       }
                     }
                   ],
@@ -247,12 +247,7 @@
                 }
               ],
               "autoscale": true,
-              "custom_links": [
-                {
-                  "label": "View related Security Signals",
-                  "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Acritical&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                }
-              ],
+              "custom_links": [],
               "precision": 2
             },
             "layout": {
@@ -263,7 +258,7 @@
             }
           },
           {
-            "id": 3236392300292874,
+            "id": 784120760854102,
             "definition": {
               "title": "MEDIUMs",
               "title_size": "16",
@@ -275,7 +270,7 @@
                     {
                       "comparator": ">",
                       "custom_bg_color": "#e5a21c",
-                      "palette": "white_on_yellow",
+                      "palette": "custom_bg",
                       "value": 0
                     }
                   ],
@@ -296,7 +291,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:cisco-secure-email-threat-defense service:message status:medium $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                        "query": "source:cisco-secure-email-threat-defense service:message status:medium $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
                       }
                     }
                   ],
@@ -304,12 +299,7 @@
                 }
               ],
               "autoscale": true,
-              "custom_links": [
-                {
-                  "label": "View related Security Signals",
-                  "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Amedium&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                }
-              ],
+              "custom_links": [],
               "precision": 2
             },
             "layout": {
@@ -320,7 +310,7 @@
             }
           },
           {
-            "id": 459178430067410,
+            "id": 3530407921023602,
             "definition": {
               "title": "Critical Security Signals",
               "type": "toplist",
@@ -355,7 +345,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-email-threat-defense service:message status:critical $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                        "query": "source:cisco-secure-email-threat-defense service:message status:critical $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
                       }
                     }
                   ],
@@ -393,7 +383,7 @@
             }
           },
           {
-            "id": 3948090867337416,
+            "id": 2491037229821244,
             "definition": {
               "title": "HIGHs",
               "title_size": "16",
@@ -405,7 +395,7 @@
                     {
                       "comparator": ">",
                       "custom_bg_color": "#d33043",
-                      "palette": "white_on_red",
+                      "palette": "custom_bg",
                       "value": 0
                     }
                   ],
@@ -426,7 +416,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:cisco-secure-email-threat-defense service:message status:high $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                        "query": "source:cisco-secure-email-threat-defense service:message status:high $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
                       }
                     }
                   ],
@@ -434,12 +424,7 @@
                 }
               ],
               "autoscale": true,
-              "custom_links": [
-                {
-                  "label": "View related Security Signals",
-                  "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Ahigh&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                }
-              ],
+              "custom_links": [],
               "precision": 2,
               "timeseries_background": {
                 "type": "area"
@@ -453,7 +438,7 @@
             }
           },
           {
-            "id": 8928127300309100,
+            "id": 8204924914123364,
             "definition": {
               "title": "LOWs",
               "title_size": "16",
@@ -464,8 +449,8 @@
                   "conditional_formats": [
                     {
                       "comparator": ">",
-                      "custom_bg_color": "#bc303c",
-                      "palette": "white_on_yellow",
+                      "custom_bg_color": "#ffb52b",
+                      "palette": "custom_bg",
                       "value": 0
                     }
                   ],
@@ -486,7 +471,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:cisco-secure-email-threat-defense service:message status:low $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                        "query": "source:cisco-secure-email-threat-defense service:message status:low $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
                       }
                     }
                   ],
@@ -494,12 +479,7 @@
                 }
               ],
               "autoscale": true,
-              "custom_links": [
-                {
-                  "label": "View related Security Signals",
-                  "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Acritical&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                }
-              ],
+              "custom_links": [],
               "precision": 2
             },
             "layout": {
@@ -510,7 +490,7 @@
             }
           },
           {
-            "id": 7757756029400394,
+            "id": 4870072164485532,
             "definition": {
               "title": "INFOs",
               "title_size": "16",
@@ -521,8 +501,8 @@
                   "conditional_formats": [
                     {
                       "comparator": ">",
-                      "custom_bg_color": "#bc303c",
-                      "palette": "white_on_yellow",
+                      "custom_bg_color": "#84c1e0",
+                      "palette": "custom_bg",
                       "value": 0
                     }
                   ],
@@ -543,7 +523,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:cisco-secure-email-threat-defense service:message status:info $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                        "query": "source:cisco-secure-email-threat-defense service:message status:info $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
                       }
                     }
                   ],
@@ -551,12 +531,7 @@
                 }
               ],
               "autoscale": true,
-              "custom_links": [
-                {
-                  "label": "View related Security Signals",
-                  "link": "/security?query=source%3Aslack%20service%3Aaudit-logs-service%20status%3Acritical&column=time&order=desc&product=siem&view=signal&viz=stream&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
-                }
-              ],
+              "custom_links": [],
               "precision": 2
             },
             "layout": {
@@ -567,7 +542,7 @@
             }
           },
           {
-            "id": 141597713824064,
+            "id": 8352832592776530,
             "definition": {
               "title": "High Security Signals",
               "type": "toplist",
@@ -602,7 +577,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-email-threat-defense service:message status:high $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                        "query": "source:cisco-secure-email-threat-defense service:message status:high $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
                       }
                     }
                   ],
@@ -640,7 +615,7 @@
             }
           },
           {
-            "id": 996944336626518,
+            "id": 4116388008201394,
             "definition": {
               "title": "Medium Security Signals",
               "type": "toplist",
@@ -675,7 +650,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:cisco-secure-email-threat-defense service:message status:medium $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                        "query": "source:cisco-secure-email-threat-defense service:message status:medium $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
                       }
                     }
                   ],
@@ -718,7 +693,7 @@
         "x": 0,
         "y": 8,
         "width": 12,
-        "height": 1
+        "height": 10
       }
     },
     {
@@ -1312,7 +1287,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 9,
+        "y": 18,
         "width": 12,
         "height": 1
       }
@@ -1330,7 +1305,7 @@
             "id": 4049706201072298,
             "definition": {
               "type": "note",
-              "content": "In Cisco Secure Email Threat Defense, a **threat** refers to any malicious or suspicious activity detected within email traffic, such as phishing attempts, malware attachments, or spam. An event that is classified with a verdict of **scam, malicious, phishing,** or **BEC** is known as a **threat** event. The system identifies and mitigates these threats to protect the organization's email infrastructure from potential harm.",
+              "content": "In Cisco Secure Email Threat Defense, a **threat** refers to any malicious or suspicious activity detected within email traffic, such as phishing attempts, malware attachments, or spam. An event that is classified with a verdict of **scam, malicious, phishing,** or **BEC** is known as a **threat** event.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
@@ -1944,7 +1919,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 10,
+        "y": 19,
         "width": 12,
         "height": 18
       }
@@ -1962,7 +1937,7 @@
             "id": 2829814920022400,
             "definition": {
               "type": "note",
-              "content": "This group will include all the events(messages) logs with following verdicts: BEC, Scam, Phishing, Malicious, Spam, Gray mail, Neutral. ",
+              "content": "This group includes all the events(messages) logs with following verdicts: BEC, Scam, Phishing, Malicious, Spam, Gray mail, Neutral. ",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "left",
@@ -2736,9 +2711,10 @@
       },
       "layout": {
         "x": 0,
-        "y": 28,
+        "y": 37,
         "width": 12,
-        "height": 1
+        "height": 33,
+        "is_column_break": true
       }
     },
     {
@@ -2958,9 +2934,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 29,
+        "y": 70,
         "width": 12,
-        "height": 1
+        "height": 12
       }
     }
   ],
