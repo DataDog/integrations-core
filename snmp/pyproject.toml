@@ -47,7 +47,7 @@ deps = [
     "pysmi==0.3.4; python_version < '3.0'",
     "pysmi==1.4.4; python_version > '3.0'",
     "pysnmp-mibs==0.1.6",
-    "pysnmp==6.0.13",
+    "pysnmp==6.2.2",
 ]
 
 [project.urls]
