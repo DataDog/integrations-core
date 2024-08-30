@@ -69,6 +69,7 @@ def create_volume():
         check=True,
     )
     run_command("docker exec gluster-node-1 mkdir -p /export-test", capture=True, check=True)
+    # run_command("docker exec gluster-node-1 yum update -y", capture=True, check=True)
     run_command("docker exec gluster-node-1 yum install -y python3", capture=True, check=True)
     run_command(
         "docker exec gluster-node-1 curl -LO https://github.com/gluster/gstatus/releases/download/v1.0.5/gstatus",
@@ -88,6 +89,12 @@ def create_volume():
         check=False,
     )
     run_command("docker exec gluster-node-1 gluster peer probe gluster-node-2", capture=True, check=True)
+    run_command(
+        "docker exec gluster-node-1 gluster volume create gv0 replica 2 gluster-node-1:/export-test gluster-node-2:/export-test force",  # noqa
+        capture=True,
+        check=True,
+    )
+    run_command("docker exec gluster-node-1 gluster volume start gv0", capture=True, check=True)
 
 
 def delete_volume():

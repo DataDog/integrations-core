@@ -3,28 +3,28 @@ services:
     container_name: gluster-node-1
     image: gluster/gluster-centos:latest
     privileged: true
-    volumes:
-      - glusterfs_etc_volume1:/etc/glusterfs
-      - glusterfs_lib_volume1:/var/lib/glusterd
-      - glusterfs_log_volume1:/var/log/glusterfs
-      - gulsterfs_data_volume1:/data/glusterfs
+    # volumes:
+    #   - glusterfs_etc_volume1:/etc/glusterfs
+    #   - glusterfs_lib_volume1:/var/lib/glusterd
+    #   - glusterfs_log_volume1:/var/log/glusterfs
+    #   - gulsterfs_data_volume1:/data/glusterfs
 
   gs2:
     container_name: gluster-node-2
     image: gluster/gluster-centos:latest  # Adding image for consistency
     privileged: true  # Adding privileged for consistency
-    volumes:
-      - glusterfs_etc_volume2:/etc/glusterfs
-      - glusterfs_lib_volume2:/var/lib/glusterd
-      - glusterfs_log_volume2:/var/log/glusterfs
-      - gulsterfs_data_volume2:/data/glusterfs
+    # volumes:
+    #   - glusterfs_etc_volume2:/etc/glusterfs
+    #   - glusterfs_lib_volume2:/var/lib/glusterd
+    #   - glusterfs_log_volume2:/var/log/glusterfs
+    #   - gulsterfs_data_volume2:/data/glusterfs
 
-volumes:
-  glusterfs_etc_volume1:
-  glusterfs_lib_volume1:
-  glusterfs_log_volume1:
-  gulsterfs_data_volume1:
-  glusterfs_etc_volume2:
-  glusterfs_lib_volume2:
-  glusterfs_log_volume2:
-  gulsterfs_data_volume2:
+# volumes:
+#   glusterfs_etc_volume1:
+#   glusterfs_lib_volume1:
+#   glusterfs_log_volume1:
+#   gulsterfs_data_volume1:
+#   glusterfs_etc_volume2:
+#   glusterfs_lib_volume2:
+#   glusterfs_log_volume2:
+#   gulsterfs_data_volume2:
