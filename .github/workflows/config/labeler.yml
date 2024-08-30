@@ -201,6 +201,8 @@ integration/gke:
 - gke/**/*
 integration/glusterfs:
 - glusterfs/**/*
+integration/godaddy:
+- godaddy/**/*
 integration/go-metro:
 - go-metro/**/*
 integration/go_expvar:
@@ -291,6 +293,8 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/lastpass:
+- lastpass/**/*
 integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
