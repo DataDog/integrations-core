@@ -3,8 +3,7 @@
 ## Overview
 GoDaddy is a prominent web hosting and domain registration company that provides a variety of services to help individuals and businesses establish their online presence. A notable aspect of GoDaddy product lineup is their SSL certificate services. GoDaddy offers a range of SSL certificate options to suit different needs, including standard SSL for securing one site, Wildcard SSL for securing multiple subdomains, and more advanced solutions for ecommerce sites requiring the highest level of security.
 
-The GoDaddy integration seamlessly collects metrics from SSL certificates and domains, directing them into Datadog for analysis. This integration provides insights including total certificates, issued certificates, expired certificates, revoked certificates, count of domains associated with each certificate. It features statistics for certificates that are about to expire along with many additional metrics, all accessible through out-of-the-box dashboards and monitors.
-
+The GoDaddy integration seamlessly collects metrics from SSL certificates and their domains, directing them into Datadog for analysis. This integration provides insights including total certificates, issued certificates, expired certificates, revoked certificates, count of domains associated with each certificate. It features statistics for certificates that are about to expire along with many additional metrics, all accessible through out-of-the-box dashboards and monitors.
 
 ## Setup
 
@@ -12,7 +11,7 @@ The GoDaddy integration seamlessly collects metrics from SSL certificates and do
 
 #### GoDaddy API KEY and API Secret
 
-- Go to [Godaddy Developer Portal][1]
+- Go to [GoDaddy Developer Portal][1]
 - Sign in with your GoDaddy account.
 - Select "API Keys".
 - Choose "Create New API Key".
@@ -24,12 +23,12 @@ The GoDaddy integration seamlessly collects metrics from SSL certificates and do
 - Ensure these credentials are stored securely and not exposed in public repositories or insecure locations.
 - After preserving your API Key and Secret in a separate document, click on "Got It".
 
-#### Godaddy Customer Number (ShopperID)
+#### GoDaddy Customer Number (ShopperID)
 
 - Go to your GoDaddy [Login & PIN page][2]. You might be prompted to sign in.
 - Under Login Info, find your Customer number(ShopperId).
 
-### Godaddy Datadog Integration Configuration
+### GoDaddy Datadog Integration Configuration
 
 Configure the Datadog endpoint to forward GoDaddy metrics to Datadog.
 
@@ -38,7 +37,7 @@ Configure the Datadog endpoint to forward GoDaddy metrics to Datadog.
 
 | GoDaddy Parameters               | Description                            |
 |----------------------------------|----------------------------------------|
-| GoDaddy API key                  | The API key of GoDaddy.                |                                                    |
+| GoDaddy API key                  | The API key of GoDaddy.                |
 | GoDaddy Secret Key               | The Secret Key of GoDaddy              |
 | GoDaddy Customer Number          | The GoDaddy Customer Number(ShopperId) |
 
