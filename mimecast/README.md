@@ -7,7 +7,7 @@ This integration ingests the following logs:
 - Audit : Audit logs allow you to search, review, and export logs regarding account access and configuration changes made by administrators.
 - DLP : Data Loss Prevention (DLP) is a set of practices designed to secure confidential business data as well as detect and head off data loss resulting from breaches and malicious attacks.
 - Rejection : Rejected messages contain a virus signature, or destined to a recipient that doesn't exist. In these instances no email data is accepted by Mimecast, and Rejected messages cannot be retrieved.
-- TTP Attachment : Targeted Threat Protection(TTP) against attachment is an advanced service, that protects customers from the growing risk of spear phishing and other targeted attacks using email attachments.
+- TTP Attachment : Targeted Threat Protection(TTP) Attachment Protection protects customers from spear phishing attacks that use email attachments.
 - TTP Impersonation : Targeted Threat Protection(TTP) Impersonation Protect helps prevent impersonation attacks by scanning emails in real time for signs of an attack.
 - TTP URL : Targeted Threat Protection(TTP) URL Protection is an email security service that rewrites all inbound email links and scans the destination website in real-time when clicked by the user.
 
