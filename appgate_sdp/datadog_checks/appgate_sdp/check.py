@@ -22,11 +22,11 @@ class AppgateSdpCheck(OpenMetricsBaseCheckV2):
         return {
             'metrics': [METRIC_MAP],
                     } 
-    def check(self, instance): 
-#       type: (Any) -> None
-        endpoint = instance.get('openmetrics_endpoint')
-        if endpoint is None:
-            ConfigurationError("Unable to find openmetrics_endpoint in conf.yaml file.")
+#     def check(self, instance): 
+# #       type: (Any) -> None
+#         endpoint = instance.get('openmetrics_endpoint')
+#         if endpoint is None:
+#             ConfigurationError("Unable to find openmetrics_endpoint in conf.yaml file.")
     # super().check(instance)
 
         # Use self.instance to read the check configuration
