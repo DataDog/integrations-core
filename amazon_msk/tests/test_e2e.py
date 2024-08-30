@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY2
 
 from datadog_checks.amazon_msk import AmazonMskCheck
 from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
@@ -42,7 +41,6 @@ def test_node_check_legacy(dd_agent_check, instance_legacy, mock_e2e_client):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_node_check(dd_agent_check, instance, mock_e2e_client):
     aggregator = dd_agent_check(instance, rate=True)
 

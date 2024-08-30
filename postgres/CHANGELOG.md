@@ -21,7 +21,7 @@
 * Remove schema collection and dependency on relation metrics. Instead a warning is issued when the missing metrics will impact which tables are collected.
   Removed the autodiscovery dependency on relation metrics; autodiscovery should now work even if relation metrics are not configured. ([#18144](https://github.com/DataDog/integrations-core/pull/18144))
 
-## 19.0.1 / 2024-07-31
+## 19.0.1 / 2024-07-31 / Agent 7.56.0
 
 ***Fixed***:
 

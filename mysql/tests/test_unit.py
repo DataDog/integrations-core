@@ -9,13 +9,13 @@ import mock
 import psutil
 import pymysql
 import pytest
-from deepdiff import DeepDiff
 
 from datadog_checks.mysql import MySql
 from datadog_checks.mysql.databases_data import DatabasesData, SubmitData
 from datadog_checks.mysql.version_utils import get_version
 
 from . import common
+from .utils import deep_compare
 
 pytestmark = pytest.mark.unit
 
@@ -373,15 +373,14 @@ def test_submit_data():
         "tags": "some",
         "cloud_metadata": "some",
         "metadata": [
-            {"name": "test_db1", "default_character_set_name": "latin1", "tables": [1, 2]},
+            {"name": "test_db1", "default_character_set_name": "latin1", "tables": [1, 2, 1, 2]},
             {"name": "test_db2", "default_character_set_name": "latin1", "tables": [1, 2]},
         ],
-        "timestamp": 1.1,
     }
-    difference = DeepDiff(
-        json.loads(submitted_data[0]), expected_data, exclude_paths="root['timestamp']", ignore_order=True
-    )
-    assert len(difference) == 0
+
+    data = json.loads(submitted_data[0])
+    data.pop("timestamp")
+    assert deep_compare(data, expected_data)
 
 
 def test_fetch_throws():

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from six import PY2
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.testing import requires_py3
@@ -216,14 +215,10 @@ def test_cert_expired(aggregator, instance_remote_cert_expired):
 
     aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=c.CRITICAL, tags=c._tags, count=1)
-    if PY2:
-        aggregator.assert_service_check(SERVICE_CHECK_VERSION, count=0)
-        aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, count=0)
-    else:
-        aggregator.assert_service_check(SERVICE_CHECK_VERSION, count=0)
-        aggregator.assert_service_check(
-            SERVICE_CHECK_EXPIRATION, status=c.CRITICAL, tags=c._tags, message='Certificate has expired', count=1
-        )
+    aggregator.assert_service_check(SERVICE_CHECK_VERSION, count=0)
+    aggregator.assert_service_check(
+        SERVICE_CHECK_EXPIRATION, status=c.CRITICAL, tags=c._tags, message='Certificate has expired', count=1
+    )
 
     aggregator.assert_all_metrics_covered()
 

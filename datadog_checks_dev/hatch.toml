@@ -7,7 +7,7 @@ e2e-env = false
 DDEV_TESTING_PLUGIN = "true"
 
 [[envs.default.matrix]]
-python = ["2.7", "3.11"]
+python = ["3.11"]
 
 [envs.default.overrides]
 matrix.python.features = [
