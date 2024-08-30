@@ -228,7 +228,7 @@ class MongoSchemas(DBMAsyncJob):
             "type": search_index["type"],
             "status": search_index["status"],
             "queryable": search_index["queryable"],
-            "version": search_index.get("latestDefinitionVersion", {}).get("version"),
+            "version": str(search_index.get("latestDefinitionVersion", {}).get("version", "")),
             "mappings": {
                 "dynamic": definition_mappings.get("dynamic"),
                 "fields": [
