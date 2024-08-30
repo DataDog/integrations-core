@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
 import six
 
 if six.PY3:
@@ -123,7 +125,7 @@ if six.PY3:
     class InterfaceMetadata(BaseModel):
         device_id: Optional[str] = Field(default=None)
         id_tags: list = Field(default_factory=list)
-        index: Optional[str] = Field(default=None)
+        index: Optional[int] = Field(default=None)
         name: Optional[str] = Field(default=None)
         description: Optional[str] = Field(default=None)
         mac_address: Optional[str] = Field(default=None)
@@ -150,6 +152,16 @@ if six.PY3:
             if oper_status == "up" or oper_status == 1:
                 return OperStatus.UP
             return OperStatus.DOWN
+
+        @field_validator("index", mode="before")
+        @classmethod
+        def parse_index(cls, index: str | int | None) -> int | None:
+            if type(index) == str:
+                split = re.split('eth|/', index)
+                return int(split[-1])
+            if type(index) == int:
+                return index
+            return None
 
         @computed_field
         @property

@@ -73,6 +73,18 @@ class OperationSamples(BaseModel):
     enabled: Optional[bool] = None
 
 
+class Schemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_collections: Optional[float] = None
+    max_depth: Optional[float] = None
+    sample_size: Optional[float] = None
+
+
 class SlowOperations(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -112,6 +124,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     replica_check: Optional[bool] = None
     reported_database_hostname: Optional[str] = None
+    schemas: Optional[Schemas] = None
     server: Optional[str] = None
     service: Optional[str] = None
     slow_operations: Optional[SlowOperations] = None

@@ -201,6 +201,8 @@ integration/gke:
 - gke/**/*
 integration/glusterfs:
 - glusterfs/**/*
+integration/godaddy:
+- godaddy/**/*
 integration/go-metro:
 - go-metro/**/*
 integration/go_expvar:
@@ -291,12 +293,16 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/lastpass:
+- lastpass/**/*
 integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
 - linkerd/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
+integration/mailchimp:
+- mailchimp/**/*
 integration/mapr:
 - mapr/**/*
 integration/mapreduce:
@@ -405,6 +411,8 @@ integration/riak:
 - riak/**/*
 integration/riakcs:
 - riakcs/**/*
+integration/ringcentral:
+- ringcentral/**/*
 integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:

@@ -1,13 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-    "--py2",
-    "--disallow-untyped-defs",
-    "--install-types",
-    "--non-interactive",
-    "datadog_checks/",
-    "tests/",
-]
+
 mypy-deps = [
   "types-mock==0.1.5",
 ]

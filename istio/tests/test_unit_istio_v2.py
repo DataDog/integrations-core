@@ -4,7 +4,6 @@
 import copy
 
 import pytest
-from six import PY2
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -14,9 +13,6 @@ from . import common
 from .utils import _assert_tags_excluded, get_fixture_path
 
 FIXTURE_DIR = '{}/fixtures'.format(get_here())
-
-
-pytestmark = [pytest.mark.skipif(PY2, reason='Test only available on Python 3')]
 
 
 def test_istiod(aggregator, dd_run_check, mock_http_response):
