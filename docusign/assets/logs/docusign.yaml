@@ -133,7 +133,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: geo-ip-parser
-      name: GeoIP Parser for `network.destination.ip` (ipAddress)
+      name: GeoIP Parser for `network.client.ip` (ipAddress)
       enabled: true
       sources:
         - network.client.ip
