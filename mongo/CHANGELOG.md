@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.8.2 / 2024-08-16
+
+***Fixed***:
+
+* Fixed a bug where optional MongoDB collection stats metrics were always collected, regardless of configuration. ([#18342](https://github.com/DataDog/integrations-core/pull/18342))
+
 ## 6.8.1 / 2024-08-13
 
 ***Fixed***:
@@ -46,7 +52,7 @@
 * Fix the default null value for waiting_for_latch in operation sampling. When an operation is not waiting for latch, waiting_for_latch should be an empty dict instead of boolean False. ([#17997](https://github.com/DataDog/integrations-core/pull/17997))
 * Fix connection error `SCRAM-SHA-256 requires a username` when connection option authMechanism is provided ([#18156](https://github.com/DataDog/integrations-core/pull/18156))
 
-## 6.7.2 / 2024-07-19
+## 6.7.2 / 2024-07-19 / Agent 7.56.0
 
 ***Fixed***:
 

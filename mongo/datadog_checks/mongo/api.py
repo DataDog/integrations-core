@@ -111,6 +111,9 @@ class MongoApi(object):
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
+    def sharded_data_distribution_stats(self, session=None):
+        return self["admin"].aggregate([{"$shardedDataDistribution": {}}], session=session)
+
     def _is_auth_required(self, options):
         # Check if the node is an arbiter. If it is, usually it does not require authentication.
         # However this is a best-effort check as the replica set might focce authentication.
@@ -153,12 +156,19 @@ class MongoApi(object):
     def server_status(self):
         return self['admin'].command('serverStatus')
 
-    def list_authorized_collections(self, db_name):
+    def list_authorized_collections(
+        self,
+        db_name,
+        limit=None,
+    ):
         try:
-            return self[db_name].list_collection_names(
+            coll_names = self[db_name].list_collection_names(
                 filter={"type": "collection"},  # Only return collections, not views
                 authorizedCollections=True,
             )
+            if limit:
+                return coll_names[:limit]
+            return coll_names
         except OperationFailure:
             # The user is not authorized to run listCollections on this database.
             # This is NOT a critical error, so we log it as a warning.

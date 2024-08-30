@@ -12,4 +12,5 @@ from .index_stats import IndexStatsCollector
 from .replica import ReplicaCollector
 from .replication_info import ReplicationOpLogCollector
 from .server_status import ServerStatusCollector
+from .sharded_data_distribution_stats import ShardedDataDistributionStatsCollector
 from .top import TopCollector

@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 36.14.0 / 2024-08-19
+
+***Added***:
+
+* Update propagate_agent_tags to propagate all tags from the agent host. ([#18269](https://github.com/DataDog/integrations-core/pull/18269))
+
+***Fixed***:
+
+* Fix ddtrace import issues ([#18324](https://github.com/DataDog/integrations-core/pull/18324))
+
 ## 36.13.0 / 2024-08-09
 
 ***Added***:
@@ -35,7 +45,7 @@
 
 * [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
 
-## 36.9.0 / 2024-07-05
+## 36.9.0 / 2024-07-05 / Agent 7.56.0
 
 ***Security***:
 

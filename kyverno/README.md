@@ -1,4 +1,4 @@
-# Agent Check: kyverno
+# Agent Check: Kyverno
 
 ## Overview
 

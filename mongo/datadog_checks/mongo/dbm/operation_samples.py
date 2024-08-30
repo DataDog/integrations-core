@@ -14,6 +14,7 @@ from datadog_checks.mongo.dbm.utils import (
     get_command_collection,
     get_command_truncation_state,
     get_explain_plan,
+    obfuscate_command,
     should_explain_operation,
 )
 
@@ -90,9 +91,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
         activities = []
 
-        for activity, sample in self._get_operation_samples(
-            now, databases_monitored=self._check._database_autodiscovery.databases
-        ):
+        for activity, sample in self._get_operation_samples(now, databases_monitored=self._check.databases_monitored):
             if sample:
                 self._check.log.debug("Sending operation sample: %s", sample)
                 self._check.database_monitoring_query_sample(json_util.dumps(sample))
@@ -117,7 +116,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     continue
 
                 command = operation.get("command")
-                obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
+                obfuscated_command = obfuscate_command(command)
                 query_signature = self._get_query_signature(obfuscated_command)
                 operation_metadata = self._get_operation_metadata(operation)
 
@@ -245,8 +244,10 @@ class MongoOperationSamples(DBMAsyncJob):
             last_access_date = last_access_date.isoformat()
 
         originating_command = cursor.get("originatingCommand")
+        originating_command_comment = None
         if originating_command:
-            originating_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
+            originating_command_comment = originating_command.get("comment")
+            originating_command = obfuscate_command(originating_command)
 
         return {
             "cursor_id": cursor.get("cursorId"),
@@ -258,6 +259,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "tailable": cursor.get("tailable", False),
             "await_data": cursor.get("awaitData", False),
             "originating_command": originating_command,
+            "comment": originating_command_comment,
             "plan_summary": cursor.get("planSummary"),
             "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
         }
@@ -269,6 +271,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "opid": operation.get("opid"),  # str
             "ns": operation.get("ns"),  # str
             "plan_summary": operation.get("planSummary"),  # str
+            "query_framework": operation.get("queryFramework"),  # str
             "current_op_time": operation.get("currentOpTime"),  # str  start time of the operation
             "microsecs_running": operation.get("microsecs_running"),  # int
             "transaction_time_open_micros": operation.get("transaction", {}).get("timeOpenMicros"),  # int
