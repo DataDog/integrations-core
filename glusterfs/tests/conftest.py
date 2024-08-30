@@ -60,24 +60,6 @@ def mock_gstatus_data():
 
 
 def create_volume():
-    run_command("docker exec gluster-node-2 mkdir -p /export-test", capture=True, check=True)
-    run_command("docker exec gluster-node-1 rm -rf /etc/yum.repos.d/", capture=True, check=True)
-    run_command("docker exec gluster-node-1 mkdir /etc/yum.repos.d/", capture=True, check=True)
-    run_command(
-        "docker exec gluster-node-1 curl -o /etc/yum.repos.d/CentOS-Base.repo https://gist.githubusercontent.com/steveny91/a7f2b8f474b11d6dc6b7e9d0dd2a3386/raw/d87627a67d7ef313cd462ebac9c7a5f998dc81b9/gistfile1.txt",
-        capture=True,
-        check=True,
-    )
-    run_command("docker exec gluster-node-1 mkdir -p /export-test", capture=True, check=True)
-    # run_command("docker exec gluster-node-1 yum update -y", capture=True, check=True)
-    run_command("docker exec gluster-node-1 yum install -y python3", capture=True, check=True)
-    run_command(
-        "docker exec gluster-node-1 curl -LO https://github.com/gluster/gstatus/releases/download/v1.0.5/gstatus",
-        capture=True,
-        check=True,
-    )
-    run_command("docker exec gluster-node-1 chmod +x ./gstatus", capture=True, check=True)
-    run_command("docker exec gluster-node-1 mv ./gstatus /usr/local/bin/gstatus", capture=True, check=True)
     run_command(
         "docker exec gluster-node-2 /usr/sbin/glusterd -p /var/run/glusterd.pid --log-level INFO",
         capture=True,
@@ -88,13 +70,17 @@ def create_volume():
         capture=True,
         check=False,
     )
-    run_command("docker exec gluster-node-1 gluster peer probe gluster-node-2", capture=True, check=True)
-    run_command(
-        "docker exec gluster-node-1 gluster volume create gv0 replica 2 gluster-node-1:/export-test gluster-node-2:/export-test force",  # noqa
-        capture=True,
-        check=True,
-    )
-    run_command("docker exec gluster-node-1 gluster volume start gv0", capture=True, check=True)
+
+    commands = [
+        "gluster-node-2 mkdir -p /export-test",
+        "gluster-node-1 mkdir -p /export-test",
+        "gluster-node-1 gluster peer probe gluster-node-2",
+        "gluster-node-1 gluster volume create gv0 replica 2 gluster-node-1:/export-test gluster-node-2:/export-test force",  # noqa
+        "gluster-node-1 gluster volume start gv0",
+    ]
+
+    for command in commands:
+        run_command(f"docker exec {command}", capture=True, check=True)
 
 
 def delete_volume():

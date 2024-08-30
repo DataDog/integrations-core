@@ -1,7 +1,8 @@
 services:
   gs1:
     container_name: gluster-node-1
-    image: gluster/gluster-centos:latest
+    # image: gluster/gluster-centos:latest
+    build: ./
     privileged: true
     # volumes:
     #   - glusterfs_etc_volume1:/etc/glusterfs
@@ -11,7 +12,8 @@ services:
 
   gs2:
     container_name: gluster-node-2
-    image: gluster/gluster-centos:latest  # Adding image for consistency
+    build: ./
+    # image: gluster/gluster-centos:latest  # Adding image for consistency
     privileged: true  # Adding privileged for consistency
     # volumes:
     #   - glusterfs_etc_volume2:/etc/glusterfs
