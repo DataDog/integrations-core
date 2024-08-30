@@ -298,6 +298,8 @@ class MongoDb(AgentCheck):
             self._resolved_hostname = self._config.reported_database_hostname or self.api_client.hostname
             self.set_metadata('resolved_hostname', self._resolved_hostname)
             self.log.debug('resolved_hostname: %s', self._resolved_hostname)
+        if self._config.cluster_name:
+            self.set_metadata('cluster_name', self._config.cluster_name)
 
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
