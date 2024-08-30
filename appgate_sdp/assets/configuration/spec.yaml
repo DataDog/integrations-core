@@ -9,6 +9,8 @@ files:
     options:
     - template: instances/openmetrics
       overrides: 
+        openmetrics_endpoint.required: true
+        openmetrics_endpoint.value.example: http://localhost:5556/metrics
         raw_metric_prefix.hidden: true 
         hostname_label.hidden: true
         hostname_format.hidden: true 

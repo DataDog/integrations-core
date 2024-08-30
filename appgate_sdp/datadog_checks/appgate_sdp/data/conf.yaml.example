@@ -48,7 +48,7 @@ instances:
     ## @param openmetrics_endpoint - string - required
     ## The URL exposing metrics in the OpenMetrics format.
     #
-  - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
+  - openmetrics_endpoint: http://localhost:5556/metrics
 
     ## @param extra_metrics - (list of string or mapping) - optional
     ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
