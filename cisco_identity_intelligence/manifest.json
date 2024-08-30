@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "3ff74387-4fdb-4af7-8615-a5e0e41fd36b",
   "app_id": "cisco-identity-intelligence",
-  "display_on_public_website": true,
+  "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
