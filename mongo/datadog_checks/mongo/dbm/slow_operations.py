@@ -132,7 +132,7 @@ class MongoSlowOperations(DBMAsyncJob):
             profiling_level = self._check.api_client.get_profiling_level(db_name)
             level = profiling_level.get("was", 0)  # profiling by default is disabled
             slowms = profiling_level.get("slowms", 100)  # slowms threshold is 100ms by default
-            tags = self._check._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
+            tags = self._check._get_tags(include_internal_resource_tags=True)
             tags.append("db:%s" % db_name)
             # Emit the profiling level and slowms as raw metrics
             # raw ensures that level = 0 is also emitted
@@ -303,7 +303,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "dbm_type": "plan",
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
-            "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
+            "ddtags": ",".join(self._check._get_tags()),
             "timestamp": slow_operation["ts"] * 1000,
             "network": {
                 "client": self._get_slow_operation_client(slow_operation),
@@ -383,7 +383,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "ddsource": "mongo",
             "dbm_type": "slow_query",
             "collection_interval": self._collection_interval,
-            "ddtags": self._check._get_tags(include_deployment_tags=True),
+            "ddtags": self._check._get_tags(),
             "timestamp": time.time() * 1000,
             "mongodb_slow_queries": slow_operation_events,
         }
