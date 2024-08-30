@@ -12,7 +12,7 @@ boto3 @ https://agent-int-packages.datadoghq.com/external/boto3/boto3-1.34.153-p
 botocore @ https://agent-int-packages.datadoghq.com/external/botocore/botocore-1.34.153-py3-none-any.whl#sha256=9fc2ad40be8c103ab9bfcb48b97b117d299d0b3a542cdd30134ee2935bee827a
 bytecode @ https://agent-int-packages.datadoghq.com/external/bytecode/bytecode-0.15.1-py3-none-any.whl#sha256=0a1dc340cac823cff605609b8b214f7f9bf80418c6b9e0fc8c6db1793c27137d
 cachetools @ https://agent-int-packages.datadoghq.com/external/cachetools/cachetools-5.4.0-py3-none-any.whl#sha256=3ae3b49a3d5e28a77a0be2b37dbcb89005058959cb2323858c2657c4a8cab474
-cattrs @ https://agent-int-packages.datadoghq.com/external/cattrs/cattrs-23.2.3-py3-none-any.whl#sha256=0341994d94971052e9ee70662542699a3162ea1e0c62f7ce1b4a57f563685108
+cattrs @ https://agent-int-packages.datadoghq.com/external/cattrs/cattrs-24.1.0-py3-none-any.whl#sha256=043bb8af72596432a7df63abcff0055ac0f198a4d2e95af8db5a936a7074a761
 certifi @ https://agent-int-packages.datadoghq.com/external/certifi/certifi-2024.7.4-py3-none-any.whl#sha256=c198e21b1289c2ab85ee4e67bb4b4ef3ead0892059901a8d5b622f24a1101e90
 cffi @ https://agent-int-packages.datadoghq.com/external/cffi/cffi-1.17.0-cp311-cp311-win_amd64.whl#sha256=b50aaac7d05c2c26dfd50c3321199f019ba76bb650e346a6ef3616306eed67b0
 charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-normalizer/charset_normalizer-3.3.2-cp311-cp311-win_amd64.whl#sha256=663946639d296df6a2bb2aa51b60a2454ca1cb29835324c640dafb5ff2131a77
@@ -32,7 +32,7 @@ filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3
 foundationdb @ https://agent-int-packages.datadoghq.com/built/foundationdb/foundationdb-6.3.24-20240402154628-py3-none-win_amd64.whl#sha256=07e8e97e51dc9248d58d60d33076b82380135c31ab3727a33b885cea17e34bc7
 google-auth @ https://agent-int-packages.datadoghq.com/external/google-auth/google_auth-2.34.0-py2.py3-none-any.whl#sha256=72fd4733b80b6d777dcde515628a9eb4a577339437012874ea286bca7261ee65
 idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.8-py3-none-any.whl#sha256=050b4e5baadcd44d760cedbd2b8e639f2ff89bbc7a5730fcc662954303377aac
-importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-8.0.0-py3-none-any.whl#sha256=15584cf2b1bf449d98ff8a6ff1abef57bf20f3ac6454f431736cd3e660921b2f
+importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-8.4.0-py3-none-any.whl#sha256=66f342cc6ac9818fc6ff340576acd24d65ba0b3efabb2b4ac08b598965a4a2f1
 in-toto @ https://agent-int-packages.datadoghq.com/external/in-toto/in_toto-2.0.0-py3-none-any.whl#sha256=eaf71733cdd5b2309b58b24169c13c24701da72baa43b7432d1dffc308e7bf32
 iso8601 @ https://agent-int-packages.datadoghq.com/external/iso8601/iso8601-2.1.0-py3-none-any.whl#sha256=aac4145c4dcb66ad8b648a02830f5e2ff6c24af20f4f482689be402db2429242
 jaydebeapi @ https://agent-int-packages.datadoghq.com/external/jaydebeapi/JayDeBeApi-1.2.3-py3-none-any.whl#sha256=d6256bdad1e14414225fbc839f7d56922ea3abc06153f3a57490fee909fecd64
@@ -54,7 +54,7 @@ msal-extensions @ https://agent-int-packages.datadoghq.com/external/msal-extensi
 netifaces @ https://agent-int-packages.datadoghq.com/built/netifaces/netifaces-0.11.0-20240402154629-cp311-cp311-win_amd64.whl#sha256=e00ed4567b7dbf9f3a0b0b98535b13f932a1e81ee4efbbeb56218a7bf3aaacd2
 oauthlib @ https://agent-int-packages.datadoghq.com/external/oauthlib/oauthlib-3.2.2-py3-none-any.whl#sha256=8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca
 openstacksdk @ https://agent-int-packages.datadoghq.com/external/openstacksdk/openstacksdk-3.3.0-py3-none-any.whl#sha256=e6d4121b87354984caf0e3c032e2ebf4d4440374f86c81c27ec52ca5df359157
-opentelemetry-api @ https://agent-int-packages.datadoghq.com/external/opentelemetry-api/opentelemetry_api-1.26.0-py3-none-any.whl#sha256=7d7ea33adf2ceda2dd680b18b1677e4152000b37ca76e679da71ff103b943064
+opentelemetry-api @ https://agent-int-packages.datadoghq.com/external/opentelemetry-api/opentelemetry_api-1.27.0-py3-none-any.whl#sha256=953d5871815e7c30c81b56d910c707588000fff7a3ca1c73e6531911d53065e7
 oracledb @ https://agent-int-packages.datadoghq.com/external/oracledb/oracledb-1.3.2-cp311-cp311-win_amd64.whl#sha256=cedd48e7d107884d4a19c9ad449b3c3cb3b3e4d67a6eddacb966b1370cc1f35e
 orjson @ https://agent-int-packages.datadoghq.com/external/orjson/orjson-3.10.6-cp311-none-win_amd64.whl#sha256=227df19441372610b20e05bdb906e1742ec2ad7a66ac8350dcfd29a63014a83b
 os-service-types @ https://agent-int-packages.datadoghq.com/external/os-service-types/os_service_types-1.7.0-py2.py3-none-any.whl#sha256=0505c72205690910077fb72b88f2a1f07533c8d39f2fe75b29583481764965d6
