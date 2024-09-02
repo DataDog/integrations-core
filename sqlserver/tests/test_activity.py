@@ -9,6 +9,7 @@ import datetime
 import json
 import os
 import re
+import csv
 import threading
 import time
 import xml.etree.ElementTree as ET
@@ -908,6 +909,23 @@ def test_sanitize_activity_row(dbm_instance, row):
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
+    dbm_instance['deadlocks'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': 0.1,
+    }
+    dbm_instance['query_activity']['enabled'] = False
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
+    dd_run_check(sqlserver_check)
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    deadlock_event_found = False
+    for event in dbm_activity:
+        if "sqlserver_deadlocks" in event:
+            deadlock_event_found = True
+    assert not deadlock_event_found, "shouldn't have collected a deadlock event"
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -947,7 +965,10 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
         
         collected_deadlocks = len(matched_event)
         if collected_deadlocks != 1:
-            return False, "should have collected one deadlock payload. collected: {}".format(collected_deadlocks)   
+            with open("/tmp/output.csv", "w", newline="") as file:
+                for row in matched_event:
+                    file.write(str(row) + "\n")            
+            return False, "Should have collected one deadlock payload, but collected: {}. Events {}".format(collected_deadlocks, matched_event)
         
         deadlocks = matched_event[0]["sqlserver_deadlocks"]
         if len(deadlocks) < 1:
