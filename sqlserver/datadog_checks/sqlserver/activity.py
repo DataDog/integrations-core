@@ -234,6 +234,12 @@ class SqlserverActivity(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_deadlocks(self):
         deadlock_xmls_collected, errors = self._deadlocks.collect_deadlocks()
+        if errors:
+            print(
+                """An error occurred while parsing SQLServer deadlocks. The error - {}""".format(
+                    errors
+                )
+            )
         deadlock_xmls = []
         total_number_of_characters = 0
         for i, deadlock in enumerate(deadlock_xmls_collected):

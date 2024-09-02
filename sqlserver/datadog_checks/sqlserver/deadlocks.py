@@ -25,16 +25,16 @@ class Deadlocks:
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
 
     def obfuscate_no_except_wrapper(self, sql_text):
-        sql_text = "ERROR: failed to obfuscate"
         try:
             sql_text = obfuscate_sql_with_metadata(
                 sql_text, self._config.obfuscator_options, replace_null_character=True
             )['query']
         except Exception as e:
+            sql_text = "ERROR: failed to obfuscate"
             if self._config.log_unobfuscated_queries:
                 self._log.warning("Failed to obfuscate sql text within a deadlock=[%s] | err=[%s]", sql_text, e)
             else:
-                self._log.debug("Failed to obfuscate sql text within a deadlock | err=[%s]", e)
+                self._log.warning("Failed to obfuscate sql text within a deadlock | err=[%s]", e)
         return sql_text
 
     def obfuscate_xml(self, root):
