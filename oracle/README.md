@@ -1,4 +1,4 @@
-# Oracle Integration
+# Oracle Database Integration
 
 ![Oracle Dashboard][1]
 
@@ -322,6 +322,8 @@ To configure this check for an Agent running on a host:
    ```
 
 **Note:** For the Agent releases between `7.50.1` (inclusive) and `7.53.0` (exclusive), the configuration subdirectory is `oracle-dbm.d`. For all other Agent releases, the configuration directory is `oracle.d`.
+
+**Note**: Oracle Real Application Cluster (RAC) customers must configure the Agent for each RAC node, because the Agent collects information from every node separately by querying `V$` views. The Agent doesn't query any `GV$` views to avoid generating interconnect traffic.
 
 2. [Restart the Agent][7].
 

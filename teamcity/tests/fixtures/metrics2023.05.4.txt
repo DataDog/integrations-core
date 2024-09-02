@@ -1,0 +1,469 @@
+# Welcome to TeamCity metrics in Prometheus format
+# To get all metrics including experimental ones, add ?experimental=true parameter to the request
+# To see the more human-friendly list of available metrics,
+# go to Administration -> Diagnostics -> Metrics tab
+#
+#
+# HELP agents_cloud_starting Number of starting and not yet connected cloud agents
+# TYPE agents_cloud_starting gauge
+agents_cloud_starting{nodeId="MAIN_SERVER",} 0.0
+# HELP agents_connected_authorized Number of connected and authorized build agents
+# TYPE agents_connected_authorized gauge
+agents_connected_authorized{nodeId="MAIN_SERVER",} 1.0
+# HELP agents_running_builds Number of build agents which are running builds
+# TYPE agents_running_builds gauge
+agents_running_builds{nodeId="MAIN_SERVER",} 0.0
+# HELP build_queue_optimization_time_milliseconds Build queue optimization time
+# TYPE build_queue_optimization_time_milliseconds summary
+build_queue_optimization_time_milliseconds_count{nodeId="MAIN_SERVER",type="build_with_more_changes_available",} 0.0
+build_queue_optimization_time_milliseconds_sum{nodeId="MAIN_SERVER",type="build_with_more_changes_available",} 0.0
+build_queue_optimization_time_milliseconds_count{nodeId="MAIN_SERVER",type="build_with_same_revisions_available",} 0.0
+build_queue_optimization_time_milliseconds_sum{nodeId="MAIN_SERVER",type="build_with_same_revisions_available",} 0.0
+build_queue_optimization_time_milliseconds_count{nodeId="MAIN_SERVER",type="other",} 0.0
+build_queue_optimization_time_milliseconds_sum{nodeId="MAIN_SERVER",type="other",} 0.0
+# HELP build_triggers_execution_milliseconds Total time spent processing build triggers
+# TYPE build_triggers_execution_milliseconds summary
+build_triggers_execution_milliseconds_count{nodeId="MAIN_SERVER",} 380.0
+build_triggers_execution_milliseconds_sum{nodeId="MAIN_SERVER",} 735.0
+# HELP buildConfigurations Number of build configurations
+# TYPE buildConfigurations gauge
+buildConfigurations{nodeId="MAIN_SERVER",} 0.0
+# HELP buildConfigurations_active Number of active build configurations
+# TYPE buildConfigurations_active gauge
+buildConfigurations_active{nodeId="MAIN_SERVER",} 0.0
+# HELP buildConfigurations_composite_active Number of active composite configurations
+# TYPE buildConfigurations_composite_active gauge
+buildConfigurations_composite_active{nodeId="MAIN_SERVER",} 0.0
+# HELP builds Number of builds in the database
+# TYPE builds gauge
+builds{nodeId="MAIN_SERVER",} 0.0
+# HELP builds_queued Build queue size
+# TYPE builds_queued gauge
+builds_queued{nodeId="MAIN_SERVER",} 0.0
+# HELP builds_running Number of running builds
+# TYPE builds_running gauge
+builds_running{nodeId="MAIN_SERVER",} 0.0
+# HELP builds_started Number of started builds
+# TYPE builds_started counter
+builds_started{nodeId="MAIN_SERVER",} 0.0
+# HELP cpu_count The number of processors available to the Java virtual machine
+# TYPE cpu_count gauge
+cpu_count{nodeId="MAIN_SERVER",} 10.0
+# HELP cpu_usage_process The "recent cpu usage" for the Java Virtual Machine process
+# TYPE cpu_usage_process gauge
+cpu_usage_process{nodeId="MAIN_SERVER",} 0.053657796023708466
+# HELP cpu_usage_system The "recent cpu usage" for the whole system
+# TYPE cpu_usage_system gauge
+cpu_usage_system{nodeId="MAIN_SERVER",} 0.2698412698412698
+# HELP database_connections_active Number of active database connections
+# TYPE database_connections_active gauge
+database_connections_active{nodeId="MAIN_SERVER",} 0.0
+# HELP diskUsage_artifacts_bytes Artifacts disk usage
+# TYPE diskUsage_artifacts_bytes gauge
+diskUsage_artifacts_bytes{nodeId="MAIN_SERVER",projectId="_Root",} 0.0
+# HELP diskUsage_logs_bytes Build logs disk usage
+# TYPE diskUsage_logs_bytes gauge
+diskUsage_logs_bytes{nodeId="MAIN_SERVER",projectId="_Root",} 0.0
+# HELP executors_asyncXmlRpc_activeTasks Running executor tasks for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_activeTasks gauge
+executors_asyncXmlRpc_activeTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_asyncXmlRpc_completedTasks Completed executor tasks for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_completedTasks gauge
+executors_asyncXmlRpc_completedTasks{nodeId="MAIN_SERVER",} 2.0
+# HELP executors_asyncXmlRpc_maxQueueCapacity Queue capacity for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_maxQueueCapacity gauge
+executors_asyncXmlRpc_maxQueueCapacity{nodeId="MAIN_SERVER",} 300.0
+# HELP executors_asyncXmlRpc_poolSize Pool size for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_poolSize gauge
+executors_asyncXmlRpc_poolSize{nodeId="MAIN_SERVER",} 1.0
+# HELP executors_asyncXmlRpc_queuedTasks Number of queued tasks for asyncXmlRpc
+# TYPE executors_asyncXmlRpc_queuedTasks gauge
+executors_asyncXmlRpc_queuedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_asyncXmlRpc_rejectsCount Rejects count for adding task to asyncXmlRpc
+# TYPE executors_asyncXmlRpc_rejectsCount gauge
+executors_asyncXmlRpc_rejectsCount{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_baseVcsExecutor_activeTasks Running executor tasks for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_activeTasks gauge
+executors_baseVcsExecutor_activeTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_baseVcsExecutor_completedTasks Completed executor tasks for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_completedTasks gauge
+executors_baseVcsExecutor_completedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_baseVcsExecutor_maxQueueCapacity Queue capacity for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_maxQueueCapacity gauge
+executors_baseVcsExecutor_maxQueueCapacity{nodeId="MAIN_SERVER",} 1000.0
+# HELP executors_baseVcsExecutor_poolSize Pool size for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_poolSize gauge
+executors_baseVcsExecutor_poolSize{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_baseVcsExecutor_queuedTasks Number of queued tasks for baseVcsExecutor
+# TYPE executors_baseVcsExecutor_queuedTasks gauge
+executors_baseVcsExecutor_queuedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_baseVcsExecutor_rejectsCount Rejects count for adding task to baseVcsExecutor
+# TYPE executors_baseVcsExecutor_rejectsCount gauge
+executors_baseVcsExecutor_rejectsCount{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_buildChains_changesCollector_activeTasks Running executor tasks for buildChains.changesCollector
+# TYPE executors_buildChains_changesCollector_activeTasks gauge
+executors_buildChains_changesCollector_activeTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_buildChains_changesCollector_completedTasks Completed executor tasks for buildChains.changesCollector
+# TYPE executors_buildChains_changesCollector_completedTasks gauge
+executors_buildChains_changesCollector_completedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_buildChains_changesCollector_maxQueueCapacity Queue capacity for buildChains.changesCollector
+# TYPE executors_buildChains_changesCollector_maxQueueCapacity gauge
+executors_buildChains_changesCollector_maxQueueCapacity{nodeId="MAIN_SERVER",} 3000.0
+# HELP executors_buildChains_changesCollector_poolSize Pool size for buildChains.changesCollector
+# TYPE executors_buildChains_changesCollector_poolSize gauge
+executors_buildChains_changesCollector_poolSize{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_buildChains_changesCollector_queuedTasks Number of queued tasks for buildChains.changesCollector
+# TYPE executors_buildChains_changesCollector_queuedTasks gauge
+executors_buildChains_changesCollector_queuedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_buildChains_changesCollector_rejectsCount Rejects count for adding task to buildChains.changesCollector
+# TYPE executors_buildChains_changesCollector_rejectsCount gauge
+executors_buildChains_changesCollector_rejectsCount{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_cleanupExecutor_activeTasks Running executor tasks for cleanupExecutor
+# TYPE executors_cleanupExecutor_activeTasks gauge
+executors_cleanupExecutor_activeTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_cleanupExecutor_completedTasks Completed executor tasks for cleanupExecutor
+# TYPE executors_cleanupExecutor_completedTasks gauge
+executors_cleanupExecutor_completedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_cleanupExecutor_maxQueueCapacity Queue capacity for cleanupExecutor
+# TYPE executors_cleanupExecutor_maxQueueCapacity gauge
+executors_cleanupExecutor_maxQueueCapacity{nodeId="MAIN_SERVER",} 500.0
+# HELP executors_cleanupExecutor_poolSize Pool size for cleanupExecutor
+# TYPE executors_cleanupExecutor_poolSize gauge
+executors_cleanupExecutor_poolSize{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_cleanupExecutor_queuedTasks Number of queued tasks for cleanupExecutor
+# TYPE executors_cleanupExecutor_queuedTasks gauge
+executors_cleanupExecutor_queuedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_cleanupExecutor_rejectsCount Rejects count for adding task to cleanupExecutor
+# TYPE executors_cleanupExecutor_rejectsCount gauge
+executors_cleanupExecutor_rejectsCount{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_lowPriorityExecutor_activeTasks Running executor tasks for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_activeTasks gauge
+executors_lowPriorityExecutor_activeTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_lowPriorityExecutor_completedTasks Completed executor tasks for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_completedTasks gauge
+executors_lowPriorityExecutor_completedTasks{nodeId="MAIN_SERVER",} 18.0
+# HELP executors_lowPriorityExecutor_maxQueueCapacity Queue capacity for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_maxQueueCapacity gauge
+executors_lowPriorityExecutor_maxQueueCapacity{nodeId="MAIN_SERVER",} 10000.0
+# HELP executors_lowPriorityExecutor_poolSize Pool size for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_poolSize gauge
+executors_lowPriorityExecutor_poolSize{nodeId="MAIN_SERVER",} 5.0
+# HELP executors_lowPriorityExecutor_queuedTasks Number of queued tasks for lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_queuedTasks gauge
+executors_lowPriorityExecutor_queuedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_lowPriorityExecutor_rejectsCount Rejects count for adding task to lowPriorityExecutor
+# TYPE executors_lowPriorityExecutor_rejectsCount gauge
+executors_lowPriorityExecutor_rejectsCount{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_normalExecutor_activeTasks Running executor tasks for normalExecutor
+# TYPE executors_normalExecutor_activeTasks gauge
+executors_normalExecutor_activeTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_normalExecutor_completedTasks Completed executor tasks for normalExecutor
+# TYPE executors_normalExecutor_completedTasks gauge
+executors_normalExecutor_completedTasks{nodeId="MAIN_SERVER",} 46.0
+# HELP executors_normalExecutor_maxQueueCapacity Queue capacity for normalExecutor
+# TYPE executors_normalExecutor_maxQueueCapacity gauge
+executors_normalExecutor_maxQueueCapacity{nodeId="MAIN_SERVER",} 3000.0
+# HELP executors_normalExecutor_poolSize Pool size for normalExecutor
+# TYPE executors_normalExecutor_poolSize gauge
+executors_normalExecutor_poolSize{nodeId="MAIN_SERVER",} 14.0
+# HELP executors_normalExecutor_queuedTasks Number of queued tasks for normalExecutor
+# TYPE executors_normalExecutor_queuedTasks gauge
+executors_normalExecutor_queuedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_normalExecutor_rejectsCount Rejects count for adding task to normalExecutor
+# TYPE executors_normalExecutor_rejectsCount gauge
+executors_normalExecutor_rejectsCount{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_periodicalVcsExecutor_activeTasks Running executor tasks for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_activeTasks gauge
+executors_periodicalVcsExecutor_activeTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_periodicalVcsExecutor_completedTasks Completed executor tasks for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_completedTasks gauge
+executors_periodicalVcsExecutor_completedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_periodicalVcsExecutor_maxQueueCapacity Queue capacity for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_maxQueueCapacity gauge
+executors_periodicalVcsExecutor_maxQueueCapacity{nodeId="MAIN_SERVER",} 2000.0
+# HELP executors_periodicalVcsExecutor_poolSize Pool size for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_poolSize gauge
+executors_periodicalVcsExecutor_poolSize{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_periodicalVcsExecutor_queuedTasks Number of queued tasks for periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_queuedTasks gauge
+executors_periodicalVcsExecutor_queuedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_periodicalVcsExecutor_rejectsCount Rejects count for adding task to periodicalVcsExecutor
+# TYPE executors_periodicalVcsExecutor_rejectsCount gauge
+executors_periodicalVcsExecutor_rejectsCount{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_tomcatHttpThreadPool_activeTasks Apache Tomcat HTTP thread pool active threads number
+# TYPE executors_tomcatHttpThreadPool_activeTasks gauge
+executors_tomcatHttpThreadPool_activeTasks{nodeId="MAIN_SERVER",port="8111",} 1.0
+# HELP executors_tomcatHttpThreadPool_poolSize Apache Tomcat HTTP thread pool size
+# TYPE executors_tomcatHttpThreadPool_poolSize gauge
+executors_tomcatHttpThreadPool_poolSize{nodeId="MAIN_SERVER",port="8111",} 200.0
+# HELP executors_triggersExecutor_activeTasks Running executor tasks for triggersExecutor
+# TYPE executors_triggersExecutor_activeTasks gauge
+executors_triggersExecutor_activeTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_triggersExecutor_completedTasks Completed executor tasks for triggersExecutor
+# TYPE executors_triggersExecutor_completedTasks gauge
+executors_triggersExecutor_completedTasks{nodeId="MAIN_SERVER",} 760.0
+# HELP executors_triggersExecutor_maxQueueCapacity Queue capacity for triggersExecutor
+# TYPE executors_triggersExecutor_maxQueueCapacity gauge
+executors_triggersExecutor_maxQueueCapacity{nodeId="MAIN_SERVER",} 2.147483647E9
+# HELP executors_triggersExecutor_poolSize Pool size for triggersExecutor
+# TYPE executors_triggersExecutor_poolSize gauge
+executors_triggersExecutor_poolSize{nodeId="MAIN_SERVER",} 2.0
+# HELP executors_triggersExecutor_queuedTasks Number of queued tasks for triggersExecutor
+# TYPE executors_triggersExecutor_queuedTasks gauge
+executors_triggersExecutor_queuedTasks{nodeId="MAIN_SERVER",} 0.0
+# HELP executors_triggersExecutor_rejectsCount Rejects count for adding task to triggersExecutor
+# TYPE executors_triggersExecutor_rejectsCount gauge
+executors_triggersExecutor_rejectsCount{nodeId="MAIN_SERVER",} 0.0
+# HELP http_requests_duration_milliseconds Duration of http requests to the server
+# TYPE http_requests_duration_milliseconds histogram
+http_requests_duration_milliseconds_sum{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",} 175.0
+http_requests_duration_milliseconds_count{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",} 3.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="300",} 3.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="500",} 3.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="1000",} 3.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="3000",} 3.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="10000",} 3.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="60000",} 3.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="600000",} 3.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="+Inf",} 3.0
+http_requests_duration_milliseconds_sum{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",} 399.0
+http_requests_duration_milliseconds_count{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",} 2.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="300",} 1.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="500",} 2.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="1000",} 2.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="3000",} 2.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="10000",} 2.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="60000",} 2.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="600000",} 2.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="+Inf",} 2.0
+http_requests_duration_milliseconds_sum{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",} 2119.0
+http_requests_duration_milliseconds_count{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",} 22.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="300",} 21.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="500",} 22.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="1000",} 22.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="3000",} 22.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="10000",} 22.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="60000",} 22.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="600000",} 22.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="+Inf",} 22.0
+http_requests_duration_milliseconds_sum{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",} 1558.0
+http_requests_duration_milliseconds_count{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",} 10.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="300",} 9.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="500",} 10.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="1000",} 10.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="3000",} 10.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="10000",} 10.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="60000",} 10.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="600000",} 10.0
+http_requests_duration_milliseconds_bucket{apiType="rest_api",clientType="web_ui",essential="true",nodeId="MAIN_SERVER",le="+Inf",} 10.0
+http_requests_duration_milliseconds_sum{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",} 38.0
+http_requests_duration_milliseconds_count{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="300",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="500",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="1000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="3000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="10000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="60000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="600000",} 4.0
+http_requests_duration_milliseconds_bucket{apiType="rpc2",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="+Inf",} 4.0
+http_requests_duration_milliseconds_sum{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",} 13886.0
+http_requests_duration_milliseconds_count{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",} 79.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="300",} 77.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="500",} 78.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="1000",} 78.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="3000",} 78.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="10000",} 78.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="60000",} 79.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="600000",} 79.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="tc_agent",essential="false",nodeId="MAIN_SERVER",le="+Inf",} 79.0
+http_requests_duration_milliseconds_sum{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",} 61172.0
+http_requests_duration_milliseconds_count{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",} 494.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="300",} 480.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="500",} 484.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="1000",} 487.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="3000",} 488.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="10000",} 492.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="60000",} 494.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="600000",} 494.0
+http_requests_duration_milliseconds_bucket{apiType="other",clientType="web_ui",essential="false",nodeId="MAIN_SERVER",le="+Inf",} 494.0
+# HELP httpSessions_active Number of active HTTP sessions
+# TYPE httpSessions_active gauge
+httpSessions_active{nodeId="MAIN_SERVER",} 1.0
+# HELP io_agent_updates_reads_bytes Agent updates read bytes
+# TYPE io_agent_updates_reads_bytes counter
+io_agent_updates_reads_bytes{nodeId="MAIN_SERVER",} 3.02367103E8
+# HELP jvm_buffer_count An estimate of the number of buffers in the pool
+# TYPE jvm_buffer_count gauge
+jvm_buffer_count{id="direct",nodeId="MAIN_SERVER",} 37.0
+jvm_buffer_count{id="mapped",nodeId="MAIN_SERVER",} 0.0
+# HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool
+# TYPE jvm_buffer_memory_used_bytes gauge
+jvm_buffer_memory_used_bytes{id="direct",nodeId="MAIN_SERVER",} 746042.0
+jvm_buffer_memory_used_bytes{id="mapped",nodeId="MAIN_SERVER",} 0.0
+# HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool
+# TYPE jvm_buffer_total_capacity_bytes gauge
+jvm_buffer_total_capacity_bytes{id="direct",nodeId="MAIN_SERVER",} 746042.0
+jvm_buffer_total_capacity_bytes{id="mapped",nodeId="MAIN_SERVER",} 0.0
+# HELP jvm_gc_count Number of GC calls
+# TYPE jvm_gc_count gauge
+jvm_gc_count{nodeId="MAIN_SERVER",} 87.0
+# HELP jvm_gc_duration_total_milliseconds Total GC duration since JVM start
+# TYPE jvm_gc_duration_total_milliseconds gauge
+jvm_gc_duration_total_milliseconds{nodeId="MAIN_SERVER",} 1911.0
+# HELP jvm_gc_live_data_size_bytes Size of old generation memory pool after a full GC
+# TYPE jvm_gc_live_data_size_bytes gauge
+jvm_gc_live_data_size_bytes{nodeId="MAIN_SERVER",} 1.31091696E8
+# HELP jvm_gc_max_data_size_bytes Max size of old generation memory pool
+# TYPE jvm_gc_max_data_size_bytes gauge
+jvm_gc_max_data_size_bytes{nodeId="MAIN_SERVER",} 7.16177408E8
+# HELP jvm_gc_memory_allocated_bytes Incremented for an increase in the size of the young generation memory pool after one GC to before the next
+# TYPE jvm_gc_memory_allocated_bytes counter
+jvm_gc_memory_allocated_bytes{nodeId="MAIN_SERVER",} 1.7349581496E10
+# HELP jvm_gc_memory_promoted_bytes Count of positive increases in the size of the old generation memory pool before GC to after GC
+# TYPE jvm_gc_memory_promoted_bytes counter
+jvm_gc_memory_promoted_bytes{nodeId="MAIN_SERVER",} 1.78430656E8
+# HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use
+# TYPE jvm_memory_committed_bytes gauge
+jvm_memory_committed_bytes{area="heap",id="PS Eden Space",nodeId="MAIN_SERVER",} 3.24534272E8
+jvm_memory_committed_bytes{area="heap",id="PS Old Gen",nodeId="MAIN_SERVER",} 7.16177408E8
+jvm_memory_committed_bytes{area="heap",id="PS Survivor Space",nodeId="MAIN_SERVER",} 1.572864E7
+jvm_memory_committed_bytes{area="nonheap",id="Code Cache",nodeId="MAIN_SERVER",} 7.7922304E7
+jvm_memory_committed_bytes{area="nonheap",id="Compressed Class Space",nodeId="MAIN_SERVER",} 2.8090368E7
+jvm_memory_committed_bytes{area="nonheap",id="Metaspace",nodeId="MAIN_SERVER",} 2.37789184E8
+# HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management
+# TYPE jvm_memory_max_bytes gauge
+jvm_memory_max_bytes{area="heap",id="PS Eden Space",nodeId="MAIN_SERVER",} 3.26631424E8
+jvm_memory_max_bytes{area="heap",id="PS Old Gen",nodeId="MAIN_SERVER",} 7.16177408E8
+jvm_memory_max_bytes{area="heap",id="PS Survivor Space",nodeId="MAIN_SERVER",} 1.572864E7
+jvm_memory_max_bytes{area="nonheap",id="Code Cache",nodeId="MAIN_SERVER",} 2.5165824E8
+jvm_memory_max_bytes{area="nonheap",id="Compressed Class Space",nodeId="MAIN_SERVER",} 1.073741824E9
+jvm_memory_max_bytes{area="nonheap",id="Metaspace",nodeId="MAIN_SERVER",} -1.0
+# HELP jvm_memory_used_bytes The amount of used memory
+# TYPE jvm_memory_used_bytes gauge
+jvm_memory_used_bytes{area="heap",id="PS Eden Space",nodeId="MAIN_SERVER",} 1.6484608E8
+jvm_memory_used_bytes{area="heap",id="PS Old Gen",nodeId="MAIN_SERVER",} 2.06176528E8
+jvm_memory_used_bytes{area="heap",id="PS Survivor Space",nodeId="MAIN_SERVER",} 9078800.0
+jvm_memory_used_bytes{area="nonheap",id="Code Cache",nodeId="MAIN_SERVER",} 7.7118464E7
+jvm_memory_used_bytes{area="nonheap",id="Compressed Class Space",nodeId="MAIN_SERVER",} 2.506816E7
+jvm_memory_used_bytes{area="nonheap",id="Metaspace",nodeId="MAIN_SERVER",} 2.20162568E8
+# HELP jvm_threads The current number of live threads including both daemon and non-daemon threads
+# TYPE jvm_threads gauge
+jvm_threads{nodeId="MAIN_SERVER",} 128.0
+# HELP jvm_threads_daemon The current number of live daemon threads
+# TYPE jvm_threads_daemon gauge
+jvm_threads_daemon{nodeId="MAIN_SERVER",} 80.0
+# HELP node_events_unprocessed Current number of unprocessed multi-node events
+# TYPE node_events_unprocessed gauge
+node_events_unprocessed{nodeId="MAIN_SERVER",} 0.0
+# HELP node_locks_taken Current number of taken multi-node locks
+# TYPE node_locks_taken gauge
+node_locks_taken{nodeId="MAIN_SERVER",} 0.0
+# HELP node_tasks_accepted Multi-node tasks accepted
+# TYPE node_tasks_accepted counter
+node_tasks_accepted{nodeId="MAIN_SERVER",} 9.0
+# HELP node_tasks_finished Multi-node tasks finished
+# TYPE node_tasks_finished counter
+node_tasks_finished{nodeId="MAIN_SERVER",} 2.0
+# HELP node_tasks_pending Current number of pending multi-node tasks
+# TYPE node_tasks_pending gauge
+node_tasks_pending{nodeId="MAIN_SERVER",} 18.0
+# HELP process_queue_milliseconds Time to process build queue and start builds
+# TYPE process_queue_milliseconds summary
+process_queue_milliseconds_count{nodeId="MAIN_SERVER",} 757.0
+process_queue_milliseconds_sum{nodeId="MAIN_SERVER",} 3477.0
+# HELP process_queue_parts_milliseconds Time spent on builds optimization while processing the build queue
+# TYPE process_queue_parts_milliseconds summary
+process_queue_parts_milliseconds_count{nodeId="MAIN_SERVER",part="optimization",} 757.0
+process_queue_parts_milliseconds_sum{nodeId="MAIN_SERVER",part="optimization",} 79.0
+process_queue_parts_milliseconds_count{nodeId="MAIN_SERVER",part="startBuilds",} 0.0
+process_queue_parts_milliseconds_sum{nodeId="MAIN_SERVER",part="startBuilds",} 0.0
+process_queue_parts_milliseconds_count{nodeId="MAIN_SERVER",part="compatibleAgents",} 0.0
+process_queue_parts_milliseconds_sum{nodeId="MAIN_SERVER",part="compatibleAgents",} 0.0
+process_queue_parts_milliseconds_count{nodeId="MAIN_SERVER",part="preconditions",} 0.0
+process_queue_parts_milliseconds_sum{nodeId="MAIN_SERVER",part="preconditions",} 0.0
+# HELP process_websocket_send_pending_messages_milliseconds Time to send all pending WebSocket messages to UI
+# TYPE process_websocket_send_pending_messages_milliseconds summary
+process_websocket_send_pending_messages_milliseconds_count{nodeId="MAIN_SERVER",} 845.0
+process_websocket_send_pending_messages_milliseconds_sum{nodeId="MAIN_SERVER",} 136.0
+# HELP projects Number of projects
+# TYPE projects gauge
+projects{nodeId="MAIN_SERVER",} 1.0
+# HELP projects_active Number of active projects
+# TYPE projects_active gauge
+projects_active{nodeId="MAIN_SERVER",} 1.0
+# HELP pullRequests_batch_time_milliseconds Pull request retrieval, batch, duration
+# TYPE pullRequests_batch_time_milliseconds summary
+pullRequests_batch_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="azureDevOps",} 0.0
+pullRequests_batch_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="azureDevOps",} 0.0
+pullRequests_batch_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="bitbucketCloud",} 0.0
+pullRequests_batch_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="bitbucketCloud",} 0.0
+pullRequests_batch_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="bitbucketServer",} 0.0
+pullRequests_batch_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="bitbucketServer",} 0.0
+pullRequests_batch_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="github",} 0.0
+pullRequests_batch_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="github",} 0.0
+pullRequests_batch_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="gitlab",} 0.0
+pullRequests_batch_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="gitlab",} 0.0
+pullRequests_batch_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="jetbrainsSpace",} 0.0
+pullRequests_batch_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="jetbrainsSpace",} 0.0
+# HELP pullRequests_single_time_milliseconds Pull request retrieval, individual, duration
+# TYPE pullRequests_single_time_milliseconds summary
+pullRequests_single_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="azureDevOps",} 0.0
+pullRequests_single_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="azureDevOps",} 0.0
+pullRequests_single_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="bitbucketCloud",} 0.0
+pullRequests_single_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="bitbucketCloud",} 0.0
+pullRequests_single_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="bitbucketServer",} 0.0
+pullRequests_single_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="bitbucketServer",} 0.0
+pullRequests_single_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="github",} 0.0
+pullRequests_single_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="github",} 0.0
+pullRequests_single_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="gitlab",} 0.0
+pullRequests_single_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="gitlab",} 0.0
+pullRequests_single_time_milliseconds_count{nodeId="MAIN_SERVER",providerType="jetbrainsSpace",} 0.0
+pullRequests_single_time_milliseconds_sum{nodeId="MAIN_SERVER",providerType="jetbrainsSpace",} 0.0
+# HELP runningBuilds_numberOfUnprocessedMessages The number of build log messages received from the agents but not yet processed
+# TYPE runningBuilds_numberOfUnprocessedMessages gauge
+runningBuilds_numberOfUnprocessedMessages{nodeId="MAIN_SERVER",} 0.0
+# HELP server_cleanup_lastFinished_finishTimestamp_milliseconds When the last finished cleanup was finished
+# TYPE server_cleanup_lastFinished_finishTimestamp_milliseconds gauge
+server_cleanup_lastFinished_finishTimestamp_milliseconds{nodeId="MAIN_SERVER",} 0.0
+# HELP server_cleanup_lastFinished_startTimestamp_milliseconds When the last finished cleanup was started
+# TYPE server_cleanup_lastFinished_startTimestamp_milliseconds gauge
+server_cleanup_lastFinished_startTimestamp_milliseconds{nodeId="MAIN_SERVER",} 0.0
+# HELP server_cleanup_lastStarted_startTimestamp_milliseconds When the last cleanup was started
+# TYPE server_cleanup_lastStarted_startTimestamp_milliseconds gauge
+server_cleanup_lastStarted_startTimestamp_milliseconds{nodeId="MAIN_SERVER",} 0.0
+# HELP server_uptime_milliseconds Time since the server process started initializing
+# TYPE server_uptime_milliseconds gauge
+server_uptime_milliseconds{nodeId="MAIN_SERVER",} 526909.0
+# HELP system_load_average_1m The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time
+# TYPE system_load_average_1m gauge
+system_load_average_1m{nodeId="MAIN_SERVER",} 3.75634765625
+# HELP teamcity_cache_InvestigationTestRunsHolder_projectScopes Number of project scopes in the InvestigationTestRunsHolder scopes cache
+# TYPE teamcity_cache_InvestigationTestRunsHolder_projectScopes gauge
+teamcity_cache_InvestigationTestRunsHolder_projectScopes{nodeId="MAIN_SERVER",} 0.0
+# HELP teamcity_cache_InvestigationTestRunsHolder_testNames Number of tests in the InvestigationTestRunsHolder scopes cache
+# TYPE teamcity_cache_InvestigationTestRunsHolder_testNames gauge
+teamcity_cache_InvestigationTestRunsHolder_testNames{nodeId="MAIN_SERVER",} 0.0
+# HELP teamcity_cache_InvestigationTestRunsHolder_testRuns Number of test runs in the InvestigationTestRunsHolder cache
+# TYPE teamcity_cache_InvestigationTestRunsHolder_testRuns gauge
+teamcity_cache_InvestigationTestRunsHolder_testRuns{nodeId="MAIN_SERVER",} 0.0
+# HELP users_active Number of unique user sessions within last hour
+# TYPE users_active gauge
+users_active{nodeId="MAIN_SERVER",} 1.0
+# HELP vcsChangesCollection_delay_milliseconds Delay of the checking for changes operations invoked by: Starting build or build chain
+# TYPE vcsChangesCollection_delay_milliseconds summary
+vcsChangesCollection_delay_milliseconds_count{nodeId="MAIN_SERVER",requestor="BUILD",} 0.0
+vcsChangesCollection_delay_milliseconds_sum{nodeId="MAIN_SERVER",requestor="BUILD",} 0.0
+vcsChangesCollection_delay_milliseconds_count{nodeId="MAIN_SERVER",requestor="COMMIT_HOOK",} 0.0
+vcsChangesCollection_delay_milliseconds_sum{nodeId="MAIN_SERVER",requestor="COMMIT_HOOK",} 0.0
+vcsChangesCollection_delay_milliseconds_count{nodeId="MAIN_SERVER",requestor="UNKNOWN",} 0.0
+vcsChangesCollection_delay_milliseconds_sum{nodeId="MAIN_SERVER",requestor="UNKNOWN",} 0.0
+vcsChangesCollection_delay_milliseconds_count{nodeId="MAIN_SERVER",requestor="USER",} 0.0
+vcsChangesCollection_delay_milliseconds_sum{nodeId="MAIN_SERVER",requestor="USER",} 0.0
+vcsChangesCollection_delay_milliseconds_count{nodeId="MAIN_SERVER",requestor="VCS_TRIGGER_QUIET_PERIOD",} 0.0
+vcsChangesCollection_delay_milliseconds_sum{nodeId="MAIN_SERVER",requestor="VCS_TRIGGER_QUIET_PERIOD",} 0.0
+# HELP vcsRootInstances_active Number of active of VCS root instances
+# TYPE vcsRootInstances_active gauge
+vcsRootInstances_active{nodeId="MAIN_SERVER",} 0.0
+# HELP vcsRoots Number of VCS roots
+# TYPE vcsRoots gauge
+vcsRoots{nodeId="MAIN_SERVER",} 0.0

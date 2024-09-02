@@ -27,8 +27,11 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
     common_tags = [
         'snmp_profile:eaton-epdu',
         'snmp_host:eaton-epdu.device.name',
+        'device_hostname:eaton-epdu.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
@@ -243,6 +246,7 @@ def test_e2e_profile_eaton_epdu(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.534.6.6.7',
         'vendor': 'eaton',
         'device_type': 'pdu',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

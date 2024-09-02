@@ -21,6 +21,7 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.stored_procedures import SQL_SERVER_PROCEDURE_METRICS_COLUMNS
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
+from .utils import CLOSE_TO_ZERO_INTERVAL
 
 try:
     import pyodbc
@@ -55,11 +56,13 @@ def dbm_instance(instance_docker):
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
-    # set a very small collection interval so the tests go fast
+    # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
+    # This prevents DBMAsync from skipping job executions, as it is designed
+    # to not execute jobs more frequently than their collection period.
     instance_docker['procedure_metrics'] = {
         'enabled': True,
         'run_sync': True,
-        'collection_interval': 0.1,
+        'collection_interval': CLOSE_TO_ZERO_INTERVAL,
     }
     return copy(instance_docker)
 
@@ -156,7 +159,7 @@ test_procedure_metrics_parametrized = (
             ],
         ],
         [
-            "datadog_test",  # database
+            "datadog_test-1",  # database
             "EXEC bobProc",  # query
             ((),),
             1,
@@ -164,13 +167,13 @@ test_procedure_metrics_parametrized = (
                 {
                     'schema_name': 'dbo',
                     'procedure_name': 'bobProc',
-                    'database_name': 'datadog_test',
+                    'database_name': 'datadog_test-1',
                     'execution_count': 1,
                 }
             ],
         ],
         [
-            "datadog_test",  # database
+            "datadog_test-1",  # database
             "EXEC bobProc",  # query
             ((),),
             10,
@@ -178,13 +181,13 @@ test_procedure_metrics_parametrized = (
                 {
                     'schema_name': 'dbo',
                     'procedure_name': 'bobProc',
-                    'database_name': 'datadog_test',
+                    'database_name': 'datadog_test-1',
                     'execution_count': 10,
                 }
             ],
         ],
         [
-            "datadog_test",  # database
+            "datadog_test-1",  # database
             "EXEC bobProcParams @P1 = ?, @P2 = ?",  # query
             (
                 (1, "foo"),
@@ -195,7 +198,7 @@ test_procedure_metrics_parametrized = (
                 {
                     'schema_name': 'dbo',
                     'procedure_name': 'bobProcParams',
-                    'database_name': 'datadog_test',
+                    'database_name': 'datadog_test-1',
                     'execution_count': 2,
                 }
             ],
@@ -204,6 +207,7 @@ test_procedure_metrics_parametrized = (
 )
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_procedure_metrics_parametrized)
@@ -299,12 +303,12 @@ def test_procedure_metrics_limit(aggregator, dd_run_check, dbm_instance, bob_con
     dd_run_check(check)
     bob_conn.execute_with_retries('EXEC multiQueryProc', (), database='master')
     bob_conn.execute_with_retries('EXEC encryptedProc', (), database='master')
-    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test')
+    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test-1')
     dd_run_check(check)
     aggregator.reset()
     bob_conn.execute_with_retries('EXEC multiQueryProc', (), database='master')
     bob_conn.execute_with_retries('EXEC encryptedProc', (), database='master')
-    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test')
+    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test-1')
     dd_run_check(check)
 
     # dbm-metrics

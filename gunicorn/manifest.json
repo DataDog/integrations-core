@@ -14,7 +14,14 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-gunicorn-performance"
+      }
     ]
   },
   "author": {
@@ -55,9 +62,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "gunicorn_processes": "assets/saved_views/gunicorn_processes.json"
-    },
-    "logs": {
-      "source": "gunicorn"
     }
   }
 }

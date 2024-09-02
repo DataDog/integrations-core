@@ -3173,7 +3173,7 @@
                             "requests": [
                                 {
                                     "display_type": "bars",
-                                    "q": "sum:kubernetes_state.container.waiting{$cluster,reason:crashloopbackoff,*,$scope} by {pod_name}",
+                                    "q": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,reason:crashloopbackoff,*,$scope} by {pod_name}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -3551,10 +3551,10 @@
                                         },
                                         {
                                             "alias_name": "waiting",
-                                            "expression": "sum:kubernetes_state.container.waiting{$cluster,$scope}"
+                                            "expression": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,$scope}"
                                         }
                                     ],
-                                    "q": "sum:kubernetes_state.container.ready{$cluster,$scope}, sum:kubernetes_state.container.running{$cluster,$scope}, sum:kubernetes_state.container.terminated{$cluster,$scope}, sum:kubernetes_state.container.waiting{$cluster,$scope}",
+                                    "q": "sum:kubernetes_state.container.ready{$cluster,$scope}, sum:kubernetes_state.container.running{$cluster,$scope}, sum:kubernetes_state.container.terminated{$cluster,$scope}, sum:kubernetes_state.container.status_report.count.waiting{$cluster,$scope}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -3650,7 +3650,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.containers.state.waiting{$cluster,reason:crashloopbackoff,$scope} by {pod_name}"
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,reason:crashloopbackoff,$scope} by {pod_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",

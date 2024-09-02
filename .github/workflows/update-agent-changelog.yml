@@ -16,7 +16,7 @@ jobs:
         ref: master
         fetch-depth: 0
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.11"
     - name: Install ddev from local folder
@@ -54,12 +54,12 @@ jobs:
           Finalize Agent release ${{ env.AGENT_VERSION }} updating the changelog files.
 
           ### Motivation
-          
+
           Agent ${{ env.AGENT_VERSION }} has been released.
 
           ### Additional Notes
           <!-- Anything else we should know when reviewing? -->
-          
+
           This PR was automatically generated.
         title: Finalize Agent release ${{ env.AGENT_VERSION }}
         branch: bot/update-agent-changelog-${{ env.AGENT_VERSION }}

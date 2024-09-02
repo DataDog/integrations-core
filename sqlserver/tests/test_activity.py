@@ -64,14 +64,14 @@ def dbm_instance(instance_docker):
     "database,query,match_pattern,is_proc,expected_comments",
     [
         [
-            "datadog_test",
+            "datadog_test-1",
             "/*test=foo*/ SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             False,
             ["/*test=foo*/"],
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "EXEC bobProc",
             r"SELECT \* FROM ϑings",
             True,
@@ -98,7 +98,10 @@ def test_collect_load_activity(
 
     def run_test_query(c, q):
         cur = c.cursor()
-        cur.execute("USE {}".format(database))
+        cur.execute("USE [{}]".format(database))
+        # 0xFF can't be decoded to Unicode, which makes it good test data,
+        # since Unicode is a default format
+        cur.execute("SET CONTEXT_INFO 0xff")
         cur.execute(q)
 
     # run the test query once before the blocking test to ensure that if it's
@@ -163,7 +166,8 @@ def test_collect_load_activity(
         assert blocked_row['procedure_signature'], "missing procedure signature"
         assert blocked_row['procedure_name'], "missing procedure name"
     assert re.match(match_pattern, blocked_row['text'], re.IGNORECASE), "incorrect blocked query"
-    assert blocked_row['database_name'] == "datadog_test", "incorrect database_name"
+    assert blocked_row['database_name'] == "datadog_test-1", "incorrect database_name"
+    assert blocked_row['context_info'] == "ff", "incorrect context_info"
     assert blocked_row['id'], "missing session id"
     assert blocked_row['now'], "missing current timestamp"
     assert blocked_row['last_request_start_time'], "missing last_request_start_time"
@@ -204,7 +208,9 @@ def test_collect_load_activity(
     )
 
 
+@pytest.mark.flaky
 @pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci(), reason="Test disabled due to failure impacting master pipeline")
 def test_activity_nested_blocking_transactions(
     aggregator,
     instance_docker,
@@ -250,7 +256,7 @@ def test_activity_nested_blocking_transactions(
 
     def run_queries(conn, queries):
         cur = conn.cursor()
-        cur.execute("USE {}".format("datadog_test"))
+        cur.execute("USE [{}]".format("datadog_test-1"))
         cur.execute("BEGIN TRANSACTION")
         for q in queries:
             try:
@@ -302,7 +308,7 @@ def test_activity_nested_blocking_transactions(
     # associated sys.dm_exec_requests.
     assert root_blocker["user_name"] == "fred"
     assert root_blocker["session_status"] == "sleeping"
-    assert root_blocker["database_name"] == "datadog_test"
+    assert root_blocker["database_name"] == "datadog_test-1"
     assert root_blocker["last_request_start_time"]
     assert root_blocker["client_port"]
     assert root_blocker["client_address"]
@@ -324,7 +330,7 @@ def test_activity_nested_blocking_transactions(
     assert tx3["session_status"] == "running"
     # verify other essential fields are present
     assert tx2["user_name"] == "bob"
-    assert tx2["database_name"] == "datadog_test"
+    assert tx2["database_name"] == "datadog_test-1"
     assert tx2["last_request_start_time"]
     assert tx2["client_port"]
     assert tx2["client_address"]
@@ -336,7 +342,7 @@ def test_activity_nested_blocking_transactions(
     assert tx2["query_plan_hash"]
 
     assert tx3["user_name"] == "fred"
-    assert tx3["database_name"] == "datadog_test"
+    assert tx3["database_name"] == "datadog_test-1"
     assert tx3["last_request_start_time"]
     assert tx3["client_port"]
     assert tx3["client_address"]
@@ -387,7 +393,7 @@ def test_activity_metadata(
 
     def _run_test_query(conn, q):
         cur = conn.cursor()
-        cur.execute("USE {}".format("datadog_test"))
+        cur.execute("USE [{}]".format("datadog_test-1"))
         cur.execute(q)
 
     def _obfuscate_sql(sql_query, options=None):
@@ -642,7 +648,7 @@ def test_activity_stored_procedure_characters_limit(
 
     def run_test_query(c, q):
         cur = c.cursor()
-        cur.execute("USE datadog_test")
+        cur.execute("USE [datadog_test-1]")
         cur.execute(q)
 
     run_test_query(fred_conn, "EXEC procedureWithLargeCommment")

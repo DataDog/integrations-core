@@ -1,3 +1,0 @@
-Fixed bug where `statement_timeout` setting incorrectly reflected integration connection value instead of database level
-- Adjusted `statement_timeout` to apply at the session level post-database connection.
-- Modified the `pg_settings` query to select `reset_val` when sourced from 'session', guaranteeing the retrieval of the accurate server-level setting.

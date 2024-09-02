@@ -424,6 +424,30 @@ admission_webhooks_library_injection_attempts{injected="true",language="java"} 4
 # HELP admission_webhooks_library_injection_errors Number of library injection failures by language
 # TYPE admission_webhooks_library_injection_errors counter
 admission_webhooks_library_injection_errors{language="java"} 1
+# HELP admission_webhooks_cws_exec_instrumentation_attempts Distribution of exec requests instrumentation attempts by CWS Instrumentation mode
+# TYPE admission_webhooks_cws_exec_instrumentation_attempts histogram
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="already_instrumented",le="0"} 0
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="already_instrumented",le="+Inf"} 1
+admission_webhooks_cws_exec_instrumentation_attempts_sum{injected="false",mode="init_container",reason="already_instrumented"} 1
+admission_webhooks_cws_exec_instrumentation_attempts_count{injected="false",mode="init_container",reason="already_instrumented"} 1
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="pod_not_instrumented",le="0"} 0
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="pod_not_instrumented",le="+Inf"} 2
+admission_webhooks_cws_exec_instrumentation_attempts_sum{injected="false",mode="init_container",reason="pod_not_instrumented"} 2
+admission_webhooks_cws_exec_instrumentation_attempts_count{injected="false",mode="init_container",reason="pod_not_instrumented"} 2
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="true",mode="init_container",reason="",le="0"} 0
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="true",mode="init_container",reason="",le="+Inf"} 1
+admission_webhooks_cws_exec_instrumentation_attempts_sum{injected="true",mode="init_container",reason=""} 1
+admission_webhooks_cws_exec_instrumentation_attempts_count{injected="true",mode="init_container",reason=""} 1
+# HELP admission_webhooks_cws_pod_instrumentation_attempts Distribution of pod requests instrumentation attempts by CWS Instrumentation mode
+# TYPE admission_webhooks_cws_pod_instrumentation_attempts histogram
+admission_webhooks_cws_pod_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="already_instrumented",le="0"} 0
+admission_webhooks_cws_pod_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="already_instrumented",le="+Inf"} 1
+admission_webhooks_cws_pod_instrumentation_attempts_sum{injected="false",mode="init_container",reason="already_instrumented"} 1
+admission_webhooks_cws_pod_instrumentation_attempts_count{injected="false",mode="init_container",reason="already_instrumented"} 1
+admission_webhooks_cws_pod_instrumentation_attempts_bucket{injected="true",mode="init_container",reason="",le="0"} 0
+admission_webhooks_cws_pod_instrumentation_attempts_bucket{injected="true",mode="init_container",reason="",le="+Inf"} 1
+admission_webhooks_cws_pod_instrumentation_attempts_sum{injected="true",mode="init_container",reason=""} 1
+admission_webhooks_cws_pod_instrumentation_attempts_count{injected="true",mode="init_container",reason=""} 1
 # HELP kubernetes_apiserver_emitted_events Number of events emitted by the check.
 # TYPE kubernetes_apiserver_emitted_events counter
 kubernetes_apiserver_emitted_events{kind="ConfigMap",type="Normal"} 7
@@ -453,3 +477,22 @@ language_detection_dca_handler_processed_requests{status="success"} 3
 language_detection_patcher_patches{namespace="default",owner_kind="Deployment",owner_name="dummy-dsd-app-java",status="error"} 1
 language_detection_patcher_patches{namespace="default",owner_kind="Deployment",owner_name="dummy-dsd-app-java",status="retry"} 1
 language_detection_patcher_patches{namespace="default",owner_kind="Deployment",owner_name="dummy-python-app",status="success"} 1
+# HELP tagger_stored_entities Number of entities in the store.
+# TYPE tagger_stored_entities gauge
+tagger_stored_entities{prefix="internal",source="workloadmeta-static"} 1
+# HELP tagger_updated_entities Number of updates made to entities.
+# TYPE tagger_updated_entities counter
+tagger_updated_entities 2
+# HELP workloadmeta_events_received Number of events received by the workloadmeta store.
+# TYPE workloadmeta_events_received counter
+workloadmeta_events_received{kind="kubernetes_node",source="kubeapiserver"} 1
+# HELP workloadmeta_notifications_sent Number of notifications sent by workloadmeta to its subscribers
+# TYPE workloadmeta_notifications_sent counter
+workloadmeta_notifications_sent{status="success",subscriber_name="tagger-workloadmeta"} 1
+# HELP workloadmeta_pull_duration The time it takes to pull from the collectors (in seconds)
+# HELP workloadmeta_stored_entities Number of entities in the store.
+# TYPE workloadmeta_stored_entities gauge
+workloadmeta_stored_entities{kind="kubernetes_node",source="kubeapiserver"} 1
+# HELP workloadmeta_subscribers Number of subscribers.
+# TYPE workloadmeta_subscribers gauge
+workloadmeta_subscribers 2

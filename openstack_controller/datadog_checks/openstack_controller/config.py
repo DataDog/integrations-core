@@ -45,6 +45,7 @@ class OpenstackConfig:
         self.user = config.user
         self.nova_microversion = config.nova_microversion
         self.ironic_microversion = config.ironic_microversion
+        self.cinder_microversion = config.cinder_microversion
         self.endpoint_interface = config.endpoint_interface
         self.endpoint_region_id = config.endpoint_region_id
         self.paginated_limit = config.paginated_limit
@@ -66,6 +67,9 @@ class OpenstackConfig:
         if self.ironic_microversion:
             self._validate_microversion(self.ironic_microversion, 'ironic')
 
+        if self.cinder_microversion:
+            self._validate_microversion(self.cinder_microversion, 'cinder')
+
     def _validate_microversion(self, microversion, service):
         is_latest = microversion.lower() == 'latest'
         is_float = False
@@ -79,7 +83,11 @@ class OpenstackConfig:
             is_float = float(microversion)
         except Exception:
             pass
-        if not is_latest and not is_float:
+        if (
+            not is_latest
+            and not is_float
+            and (service != 'cinder' or (service == 'cinder' and 'volume' not in microversion))
+        ):
             raise ConfigurationError(
                 "Invalid `{}_microversion`: {}; please specify a valid version, see the Openstack documentation"
                 "for more details: https://docs.openstack.org/api-guide/compute/microversions.html".format(

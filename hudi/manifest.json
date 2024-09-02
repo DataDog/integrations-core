@@ -15,7 +15,8 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -54,9 +55,6 @@
       "hudi_error_logs": "assets/saved_views/error_logs.json",
       "hudi_overview": "assets/saved_views/hudi_overview.json",
       "hudi_patterns": "assets/saved_views/hudi_patterns.json"
-    },
-    "logs": {
-      "source": "hudi"
     }
   }
 }

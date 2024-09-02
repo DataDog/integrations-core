@@ -15,7 +15,18 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Category::Metrics",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/agent/openmetrics/"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/developers/openmetrics/"
+      }
     ]
   },
   "author": {

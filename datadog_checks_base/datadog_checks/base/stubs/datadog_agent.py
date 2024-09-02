@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import re
+from collections import defaultdict
 
 from six import iteritems
 
-from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.serialization import from_json, to_json
 
 
 class DatadogAgentStub(object):
@@ -19,22 +21,32 @@ class DatadogAgentStub(object):
     """
 
     def __init__(self):
+        self._sent_logs = defaultdict(list)
         self._metadata = {}
         self._cache = {}
         self._config = self.get_default_config()
         self._hostname = 'stubbed.hostname'
         self._process_start_time = 0
         self._external_tags = []
+        self._host_tags = "{}"
 
     def get_default_config(self):
         return {'enable_metadata_collection': True, 'disable_unsafe_yaml': True}
 
     def reset(self):
+        self._sent_logs.clear()
         self._metadata.clear()
         self._cache.clear()
         self._config = self.get_default_config()
         self._process_start_time = 0
         self._external_tags = []
+        self._host_tags = "{}"
+
+    def assert_logs(self, check_id, logs):
+        sent_logs = self._sent_logs[check_id]
+        assert sent_logs == logs, 'Expected {} logs for check {}, found {}. Submitted logs: {}'.format(
+            len(logs), check_id, len(self._sent_logs[check_id]), repr(self._sent_logs)
+        )
 
     def assert_metadata(self, check_id, data):
         actual = {}
@@ -81,6 +93,15 @@ class DatadogAgentStub(object):
     def reset_hostname(self):
         self._hostname = 'stubbed.hostname'
 
+    def get_host_tags(self):
+        return self._host_tags
+
+    def _set_host_tags(self, tags_dict):
+        self._host_tags = json.dumps(tags_dict)
+
+    def _reset_host_tags(self):
+        self._host_tags = "{}"
+
     def get_config(self, config_option):
         return self._config.get(config_option, '')
 
@@ -92,6 +113,9 @@ class DatadogAgentStub(object):
 
     def set_check_metadata(self, check_id, name, value):
         self._metadata[(check_id, name)] = value
+
+    def send_log(self, log_line, check_id):
+        self._sent_logs[check_id].append(from_json(log_line))
 
     def set_external_tags(self, external_tags):
         self._external_tags = external_tags
@@ -110,8 +134,8 @@ class DatadogAgentStub(object):
         if options:
             # Options provided is a JSON string because the Go stub requires it, whereas
             # the python stub does not for things such as testing.
-            if json.loads(options).get('return_json_metadata', False):
-                return json.dumps({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
+            if from_json(options).get('return_json_metadata', False):
+                return to_json({'query': re.sub(r'\s+', ' ', query or '').strip(), 'metadata': {}})
         return re.sub(r'\s+', ' ', query or '').strip()
 
     def obfuscate_sql_exec_plan(self, plan, normalize=False):
@@ -123,6 +147,10 @@ class DatadogAgentStub(object):
 
     def set_process_start_time(self, time):
         self._process_start_time = time
+
+    def obfuscate_mongodb_string(self, command):
+        # Passthrough stub: obfuscation implementation is in Go code.
+        return command
 
 
 # Use the stub as a singleton

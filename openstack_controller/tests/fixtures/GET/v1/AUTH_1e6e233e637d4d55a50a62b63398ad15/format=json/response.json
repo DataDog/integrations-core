@@ -1,0 +1,14 @@
+[
+    {
+        "name": "container_1",
+        "count": 1,
+        "bytes": 490,
+        "last_modified": "2024-05-22T13:23:23.011420"
+    },
+    {
+        "name": "container_2",
+        "count": 0,
+        "bytes": 0,
+        "last_modified": "2024-05-22T14:40:36.172670"
+    }
+]

@@ -17,7 +17,18 @@
       "Category::Tracing",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Traces",
+      "Submitted Data Type::Events",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics"
+      }
     ]
   },
   "author": {
@@ -63,9 +74,6 @@
     },
     "saved_views": {
       "elasticsearch_processes": "assets/saved_views/elasticsearch_processes.json"
-    },
-    "logs": {
-      "source": "elasticsearch"
     }
   }
 }

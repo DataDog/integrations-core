@@ -1,0 +1,178 @@
+[
+    {
+        "name": "mongodb.sharded_data_distribution.num_orphaned_docs",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo",
+            "shard:shard0"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.num_owned_documents",
+        "type": 0,
+        "value": 4996.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo",
+            "shard:shard0"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.owned_size_bytes",
+        "type": 0,
+        "value": 544564.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo",
+            "shard:shard0"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.orphaned_size_bytes",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo",
+            "shard:shard0"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.num_orphaned_docs",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo",
+            "shard:shard1"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.num_owned_documents",
+        "type": 0,
+        "value": 5097.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo",
+            "shard:shard1"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.owned_size_bytes",
+        "type": 0,
+        "value": 555573.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo",
+            "shard:shard1"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.orphaned_size_bytes",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo",
+            "shard:shard1"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.num_orphaned_docs",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar",
+            "shard:shard0"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.num_owned_documents",
+        "type": 0,
+        "value": 4996.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar",
+            "shard:shard0"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.owned_size_bytes",
+        "type": 0,
+        "value": 544564.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar",
+            "shard:shard0"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.orphaned_size_bytes",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar",
+            "shard:shard0"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.num_orphaned_docs",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar",
+            "shard:shard1"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.num_owned_documents",
+        "type": 0,
+        "value": 5097.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar",
+            "shard:shard1"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.owned_size_bytes",
+        "type": 0,
+        "value": 555573.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar",
+            "shard:shard1"
+        ]
+    },
+    {
+        "name": "mongodb.sharded_data_distribution.orphaned_size_bytes",
+        "type": 0,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar",
+            "shard:shard1"
+        ]
+    }
+]

@@ -22,13 +22,13 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       id: python
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Check cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       id: cache
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
@@ -68,7 +68,7 @@ jobs:
       run: pip install ./datadog_checks_base[deps] ./datadog_checks_dev
 
     - name: Cache dependencies
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: steps.cache.outputs.cache-hit != 'true'
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}

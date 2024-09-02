@@ -16,7 +16,8 @@
       "Category::Oracle",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -55,9 +56,6 @@
     "monitors": {
       "active_threads": "assets/monitors/active_threads.json",
       "stuck_threads": "assets/monitors/stuck_threads.json"
-    },
-    "logs": {
-      "source": "weblogic"
     },
     "saved_views": {
       "weblogic_error_logs": "assets/saved_views/error_logs.json",

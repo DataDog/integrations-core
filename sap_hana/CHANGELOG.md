@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.2.0 / 2024-03-22
+## 3.3.0 / 2024-08-09
+
+***Added***:
+
+* Collect audit logs ([#18193](https://github.com/DataDog/integrations-core/pull/18193))
+
+## 3.2.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

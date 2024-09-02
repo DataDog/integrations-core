@@ -1,6 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import PY3
+
+if PY3:
+    from datadog_checks.base.agent import datadog_agent
+
+    if datadog_agent.get_config('use_boringssl'):
+        import urllib3.contrib.pyopenssl
+
+        urllib3.contrib.pyopenssl.inject_into_urllib3()
+
 from .__about__ import __version__
 from .checks import AgentCheck
 from .checks.openmetrics import OpenMetricsBaseCheck

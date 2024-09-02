@@ -2,6 +2,71 @@
 
 <!-- towncrier release notes start -->
 
+## 33.1.0 / 2024-08-15
+
+***Added***:
+
+* Refactored integration name exclusion mapper and add new entries to exclusion mapper ([#18213](https://github.com/DataDog/integrations-core/pull/18213))
+
+## 33.0.0 / 2024-08-05
+
+***Removed***:
+
+* Remove `ddev release trello ...` commands. We no longer interact with Trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
+
+***Added***:
+
+* Show descriptions of templates in ddev create help. ([#18039](https://github.com/DataDog/integrations-core/pull/18039))
+* Add an exception for Zabbix (Community Edition) to pass validations ([#18197](https://github.com/DataDog/integrations-core/pull/18197))
+
+***Fixed***:
+
+* Improve messages around dependency spec management ([#17969](https://github.com/DataDog/integrations-core/pull/17969))
+* [NDM] Pin pysmi version for breaking generate traps DB tests ([#18066](https://github.com/DataDog/integrations-core/pull/18066))
+* Pin towncrier to 23.11, subsequent release broke us. ([#18168](https://github.com/DataDog/integrations-core/pull/18168))
+
+## 32.2.1 / 2024-06-28
+
+***Fixed***:
+
+* Update new integration template ([#17474](https://github.com/DataDog/integrations-core/pull/17474))
+
+## 32.2.0 / 2024-06-25
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+***Added***:
+
+* Add license override for requests-unixsocket2 ([#17702](https://github.com/DataDog/integrations-core/pull/17702))
+
+***Fixed***:
+
+* CheckEndpoints lets its clients pass alternative to `urllib.requests.urlopen` which:
+  1. exposes the external dependency more clearly
+  2. supports deterministic testing ([#17614](https://github.com/DataDog/integrations-core/pull/17614))
+* Replace DD_LOGS_CONFIG_DD_URL with DD_LOGS_CONFIG_LOGS_DD_URL ([#17890](https://github.com/DataDog/integrations-core/pull/17890))
+
+## 32.1.1 / 2024-05-09
+
+***Fixed***:
+
+* Fix trailing `,` in manifest.json generation template ([#17538](https://github.com/DataDog/integrations-core/pull/17538))
+
+## 32.1.0 / 2024-05-03
+
+***Added***:
+
+* Update the default dashboard template file to include directions for contributors. ([#17286](https://github.com/DataDog/integrations-core/pull/17286))
+* Add a new column to metadata.csv templates called `sample_tags` ([#17491](https://github.com/DataDog/integrations-core/pull/17491))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+* Bump pytest and require flaky minimum version ([#17269](https://github.com/DataDog/integrations-core/pull/17269))
+* Remove trailing new line in template file ([#17513](https://github.com/DataDog/integrations-core/pull/17513))
+
 ## 32.0.0 / 2024-03-21
 
 ***Removed***:

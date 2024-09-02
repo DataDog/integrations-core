@@ -8,6 +8,10 @@ F5 Networks is an application delivery networking and security company. Collect 
 
 All metrics from F5 appliances are collected from SNMP. To start collecting metrics, install and configure the SNMP integration. See the [Network Device Monitoring][2] documentation for more details and configuration options.
 
+## Vendor profiles
+
+Specific supported vendor profiles for this integration can be found on the [network vendors][6] page.
+
 ## Data Collected
 
 ### Metrics
@@ -38,3 +42,4 @@ Need help? Contact [Datadog support][5].
 [3]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [4]: https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/
 [5]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/

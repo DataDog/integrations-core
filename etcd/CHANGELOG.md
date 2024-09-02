@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.2 / 2024-07-05 / Agent 7.56.0
+
+***Fixed***:
+
+* Fix prometheus entry ([#17878](https://github.com/DataDog/integrations-core/pull/17878))
+
+## 6.2.1 / 2024-05-31 / Agent 7.55.0
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
 ## 6.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

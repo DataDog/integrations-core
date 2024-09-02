@@ -12,11 +12,15 @@
     "title": "TorchServe",
     "media": [],
     "classifier_tags": [
+      "Category::Configuration & Deployment",
+      "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Log Collection",
-      "Category::AI/ML"
+      "Category::AI/ML",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -47,9 +51,6 @@
     },
     "monitors": {
       "error_ratio": "assets/monitors/error_ratio.json"
-    },
-    "logs": {
-      "source": "torchserve"
     },
     "dashboards": {
       "torchserve_overview": "assets/dashboards/overview.json"

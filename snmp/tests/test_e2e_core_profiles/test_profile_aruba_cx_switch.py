@@ -29,8 +29,11 @@ def test_e2e_profile_aruba_cx_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:aruba-cx-switch',
         'snmp_host:aruba-cx-switch.device.name',
+        'device_hostname:aruba-cx-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -186,6 +189,7 @@ def test_e2e_profile_aruba_cx_switch(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.47196.4.1.1.1.999',
         'vendor': 'aruba',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

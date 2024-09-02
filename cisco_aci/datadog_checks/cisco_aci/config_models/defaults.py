@@ -60,12 +60,20 @@ def instance_min_collection_interval():
     return 15
 
 
+def instance_namespace():
+    return 'default'
+
+
 def instance_persist_connections():
     return False
 
 
 def instance_request_size():
     return 16
+
+
+def instance_send_ndm_metadata():
+    return False
 
 
 def instance_skip_proxy():

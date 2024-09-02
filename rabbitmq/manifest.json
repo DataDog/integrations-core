@@ -16,7 +16,22 @@
       "Category::Message Queues",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/rabbitmq-monitoring"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/rabbitmq-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog"
+      }
     ]
   },
   "author": {
@@ -57,15 +72,14 @@
       "disk_usage": "assets/monitors/disk_usage.json",
       "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json",
       "disk_usage_prometheus": "assets/monitors/disk_usage_prometheus.json",
-      "message_unack_prometheus": "assets/monitors/message_unack_prometheus.json"
+      "message_unack_prometheus": "assets/monitors/message_unack_prometheus.json",
+      "consumers_at_zero": "assets/monitors/consumers_at_zero.json",
+      "message_ready": "assets/monitors/message_ready.json"
     },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
       "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json",
       "rabbitmq_processes": "assets/saved_views/rabbitmq_processes.json"
-    },
-    "logs": {
-      "source": "rabbitmq"
     }
   }
 }

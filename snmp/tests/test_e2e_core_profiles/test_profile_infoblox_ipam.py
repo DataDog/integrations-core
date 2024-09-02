@@ -30,8 +30,11 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
     common_tags = [
         'snmp_profile:infoblox-ipam',
         'snmp_host:infoblox-ipam.device.name',
+        'device_hostname:infoblox-ipam.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'ib_hardware_type:Jaded oxen Jaded forward but zombies forward their',
         'ib_nios_version:zombies driving forward oxen but acted oxen',
@@ -93,6 +96,7 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.7779.3.7',
         'vendor': 'infoblox',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

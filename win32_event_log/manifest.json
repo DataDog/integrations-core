@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
   "app_uuid": "8a0f4809-8470-4f7c-a7e8-350ba64123aa",
-  "app_id": "win32-event-log",
+  "app_id": "event-viewer",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -14,7 +14,30 @@
     "classifier_tags": [
       "Supported OS::Windows",
       "Category::OS & System",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-windows-server-2012"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collect-windows-server-2012-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/windows-server-monitoring"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-windows-event-logs-with-datadog/"
+      }
     ]
   },
   "author": {
@@ -25,7 +48,9 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Win32",
+      "source_type_id": 47,
+      "source_type_name": "Event Viewer",
+      "auto_install": true,
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -38,6 +63,9 @@
     },
     "logs": {
       "source": "windows.events"
+    },
+    "dashboards": {
+      "windows_event_log_overview": "assets/dashboards/windows_event_log_overview.json"
     }
   }
 }

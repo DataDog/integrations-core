@@ -6,7 +6,6 @@ from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
-from packaging.version import Version
 
 from datadog_checks.base.types import ServiceCheck
 
@@ -100,6 +99,7 @@ pytestmark = [pytest.mark.unit]
         'cloudera_client cm_client with custom tags',
     ],
 )
+@pytest.mark.usefixtures('cloudera_cm_client')
 def test_client(
     aggregator,
     dd_run_check,
@@ -108,16 +108,7 @@ def test_client(
     expected_exception,
     expected_service_checks,
 ):
-    with expected_exception, mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
-        return_value=Version('7.0.0'),
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
-        return_value=[],
-    ), mock.patch(
-        'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
-        return_value=[],
-    ):
+    with expected_exception:
         check = cloudera_check(instance)
         dd_run_check(check)
         for expected_service_check in expected_service_checks:
@@ -128,3 +119,27 @@ def test_client(
                 message=expected_service_check.get('message'),
                 tags=expected_service_check.get('tags'),
             )
+
+
+def test_client_ssl(dd_run_check, cloudera_check, cloudera_cm_client):
+    instance = {
+        'api_url': 'http://localhost:8080/api/v48/',
+        'cloudera_client': 'cm_client',
+        'verify_ssl': True,
+        'ssl_ca_cert': 'ssl_ca_cert_path',
+        'cert_file': 'cert_file_path',
+        'key_file': 'key_file_path',
+    }
+    check = cloudera_check(instance)
+    dd_run_check(check)
+    cloudera_cm_client.assert_called_once_with(
+        mock.ANY,
+        api_url='http://localhost:8080/api/v48/',
+        workload_username='~',
+        workload_password='~',
+        max_parallel_requests=4,
+        verify_ssl=True,
+        ssl_ca_cert='ssl_ca_cert_path',
+        cert_file='cert_file_path',
+        key_file='key_file_path',
+    )

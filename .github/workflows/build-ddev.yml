@@ -45,7 +45,7 @@ jobs:
       run: python -m build
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: python-artifacts
         path: ddev/dist/*
@@ -108,7 +108,7 @@ jobs:
         tar --strip-components=1 -xzf - -C $PYAPP_REPO
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -142,7 +142,7 @@ jobs:
 
     - name: Download Python artifacts
       if: ${{ !startsWith(github.event.ref, 'refs/tags') }}
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: python-artifacts
         path: ddev/dist
@@ -214,9 +214,9 @@ jobs:
 
     - name: Upload staged managed archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: staged-managed-${{ runner.os }}
+        name: staged-managed-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
         if-no-files-found: error
 
@@ -235,9 +235,9 @@ jobs:
 
     - name: Upload staged standalone archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: staged-standalone-${{ runner.os }}
+        name: staged-standalone-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
         if-no-files-found: error
 
@@ -245,9 +245,9 @@ jobs:
     # can upload directly at this point
     - name: Upload standalone archive
       if: runner.os == 'Linux'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: standalone
+        name: standalone-${{ matrix.job.target }}
         path: ddev/packaging/*
         if-no-files-found: error
 
@@ -265,7 +265,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -304,10 +304,11 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: staged-standalone-${{ runner.os }}
+        pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
+        merge-multiple: true
 
     - name: Extract staged standalone binaries
       run: ${{ steps.script-extract.outputs.script }}
@@ -316,9 +317,9 @@ jobs:
       run: ${{ steps.script-prepare.outputs.script }}
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: standalone
+        name: standalone-${{ matrix.job.target }}
         path: ddev/archives/*
         if-no-files-found: error
 
@@ -326,10 +327,11 @@ jobs:
       run: rm -rf archives bin targets
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: staged-managed-${{ runner.os }}
+        pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
+        merge-multiple: true
 
     - name: Extract staged managed binaries
       run: ${{ steps.script-extract.outputs.script }}
@@ -349,10 +351,11 @@ jobs:
         mv build/*/release/*/*.{exe,msi} installers
 
     - name: Upload installers
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: installers
+        name: installers-${{ runner.os }}
         path: ddev/installers/*
+        if-no-files-found: error
 
   macos-packaging:
     name: Build macOS installer and sign/notarize artifacts
@@ -368,43 +371,21 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install PyOxidizer ${{ env.PYOXIDIZER_VERSION }}
       run: pip install pyoxidizer==${{ env.PYOXIDIZER_VERSION }}
 
-    # TODO: Use the next official release after 0.22.0 by removing these 2 blocks, uncommenting
-    # the following one, and changing the artifact name to reflect the next version. See:
-    # https://github.com/indygreg/apple-platform-rs/issues/82
-    #
-    # We use the artifact from the latest scheduled nightly job because installing
-    # with Cargo from scratch takes ~10 minutes
     - name: Install rcodesign
-      uses: dawidd6/action-download-artifact@v2
-      with:
-        repo: indygreg/apple-platform-rs
-        workflow: rcodesign.yml
-        event: schedule
-        workflow_conclusion: success
-        name: exe-rcodesign-x86_64-apple-darwin
-        path: /usr/local/bin
-        search_artifacts: true
-        check_artifacts: true
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Finalize rcodesign
-      run: chmod +x /usr/local/bin/rcodesign
-
-    # - name: Install rcodesign
-    #   env:
-    #     ARCHIVE_NAME: "apple-codesign-0.22.0-x86_64-apple-darwin"
-    #   run: >-
-    #     curl -L
-    #     "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.22.0/$ARCHIVE_NAME.tar.gz"
-    #     |
-    #     tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+      env:
+        ARCHIVE_NAME: "apple-codesign-0.27.0-x86_64-apple-darwin"
+      run: >-
+        curl -L
+        "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
+        |
+        tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
 
     - name: Write credentials
       env:
@@ -473,10 +454,11 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: staged-standalone-${{ runner.os }}
+        pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
+        merge-multiple: true
 
     - name: Extract staged standalone binaries
       run: ${{ steps.script-extract.outputs.script }}
@@ -497,9 +479,9 @@ jobs:
         done
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: standalone
+        name: standalone-${{ runner.os }}
         path: ddev/archives/*
         if-no-files-found: error
 
@@ -507,10 +489,11 @@ jobs:
       run: rm -rf archives bin notarize-bin
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: staged-managed-${{ runner.os }}
+        pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
+        merge-multiple: true
 
     - name: Extract staged managed binaries
       run: ${{ steps.script-extract.outputs.script }}
@@ -576,10 +559,11 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Upload installer
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: installers
+        name: installers-${{ runner.os }}
         path: ddev/signed/${{ steps.pkg.outputs.path }}
+        if-no-files-found: error
 
   publish:
     name: Publish release
@@ -593,32 +577,34 @@ jobs:
 
     steps:
     - name: Download Python artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: python-artifacts
         path: dist
 
     - name: Download binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: standalone
+        pattern: standalone*
         path: archives
+        merge-multiple: true
 
     - name: Download installers
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: installers
+        pattern: installers-*
         path: installers
+        merge-multiple: true
 
     - name: Push Python artifacts to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.8.6
+      uses: pypa/gh-action-pypi-publish@v1.8.14
       with:
         skip-existing: true
         user: __token__
         password: ${{ secrets.PYPI_TOKEN_DDEV }}
 
     - name: Add assets to current release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: |-
           archives/*

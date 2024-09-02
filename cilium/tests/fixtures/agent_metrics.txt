@@ -1290,3 +1290,31 @@ cilium_kvstore_initial_sync_completed{scope="identities/v1",source_cluster="foo"
 cilium_kvstore_initial_sync_completed{scope="identities/v1",source_cluster="foo", action="read"} 1
 cilium_kvstore_initial_sync_completed{scope="ip/v1",source_cluster="foo", action="write"} 1
 cilium_kvstore_initial_sync_completed{scope="ip/v1",source_cluster="foo", action="read"} 1
+# HELP cilium_services_events_total Number of services events labeled by action type
+# TYPE cilium_services_events_total counter
+cilium_services_events_total{action="add"} 117
+cilium_services_events_total{action="update"} 1063
+# HELP cilium_cidrgroup_policies Number of CNPs and CCNPs referencing at least one CiliumCIDRGroup
+# TYPE cilium_cidrgroup_policies gauge
+cilium_cidrgroup_policies 0
+# HELP cilium_k8s_client_rate_limiter_duration_seconds Kubernetes client rate limiter latency in seconds. Broken down by path and method.
+# TYPE cilium_k8s_client_rate_limiter_duration_seconds histogram
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="0.005"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="0.025"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="0.1"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="0.25"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="0.5"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="1"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="2"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="4"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="8"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="15"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="30"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="60"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_bucket{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}",le="+Inf"} 54
+cilium_k8s_client_rate_limiter_duration_seconds_sum{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}"} 0.00015540600000000005
+cilium_k8s_client_rate_limiter_duration_seconds_count{method="DELETE",path="/apis/cilium.io/v2/namespaces/{namespace}/ciliumendpoints/{name}"} 54
+# HELP cilium_policy_change_total Number of policy changes by outcome
+# TYPE cilium_policy_change_total counter
+cilium_policy_change_total{outcome="fail"} 106
+cilium_policy_change_total{outcome="success"} 24128

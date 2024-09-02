@@ -46,6 +46,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert len(event["metadata"]) > 0
     assert set(event["metadata"][0].keys()) == {'name', 'setting', 'source', 'sourcefile', 'pending_restart'}
     assert all(not k['name'].startswith('max_wal') for k in event['metadata'])
+    assert next((k for k in event['metadata'] if k['name'].startswith('pg_trgm')), None) is not None
     statement_timeout_setting = next((k for k in event['metadata'] if k['name'] == 'statement_timeout'), None)
     assert statement_timeout_setting is not None
     # statement_timeout should be server level setting not session level
@@ -53,8 +54,8 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
 
 
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
-    dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
-    dbm_instance['relations'] = [{'relation_regex': ".*"}]
+    dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 600}
+    dbm_instance['relations'] = []
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
     check = integration_check(dbm_instance)
@@ -97,7 +98,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         # there should only two schemas, 'public' and 'datadog'. datadog is empty
         schema = database_metadata[0]['schemas'][0]
         schema_name = schema['name']
-        assert schema_name in ['public', 'datadog']
+        assert schema_name in ['public', 'public2', 'datadog']
         if schema_name == 'public':
             for table in schema['tables']:
                 tables_got.append(table['name'])
@@ -120,6 +121,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
                 if table['name'] == "cities":
                     keys = list(table.keys())
                     assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name", "owner"])
+                    assert len(table['indexes']) == 1
                     assert_fields(list(table['indexes'][0].keys()), ['name', 'definition'])
                 if float(POSTGRES_VERSION) >= 11:
                     if table['name'] in ('test_part', 'test_part_no_activity'):
@@ -133,6 +135,240 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
 
     assert_fields(tables_got, tables_set)
     assert_not_fields(tables_got, tables_not_reported_set)
+
+
+def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
+    test_cases = [
+        [
+            {'include_databases': ['.*'], 'include_schemas': ['public'], 'include_tables': ['.*']},
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+                "pgtable",
+                "pg_newtable",
+                "cities",
+            ],
+            [],
+        ],
+        [
+            {'exclude_tables': ['person.*']},
+            [
+                "pgtable",
+                "pg_newtable",
+                "cities",
+            ],
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+            ],
+        ],
+        [
+            {'include_tables': ['person.*'], 'exclude_tables': ['person.*']},
+            [],
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+            ],
+        ],
+        [
+            {'include_tables': ['person.*', "cities"]},
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+                "cities",
+            ],
+            [
+                "pgtable",
+                "pg_newtable",
+            ],
+        ],
+        [
+            {'exclude_tables': ['person.*', "cities"]},
+            [
+                "pgtable",
+                "pg_newtable",
+            ],
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+                "cities",
+            ],
+        ],
+        [
+            {'include_tables': ['person.*1', "cities"], 'exclude_tables': ['person.*2', "pg.*"]},
+            [
+                "cities",
+                "personsdup1",
+                "personsdup10",
+                "personsdup11",
+            ],
+            [
+                "persons",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup12",
+                "pgtable",
+                "pg_newtable",
+            ],
+        ],
+    ]
+
+    del dbm_instance['dbname']
+    dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
+    dbm_instance['relations'] = [{'relation_regex': ".*"}]
+
+    for tc in test_cases:
+        dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 600, **tc[0]}
+        check = integration_check(dbm_instance)
+        run_one_check(check, dbm_instance)
+        dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+        tables_got = []
+
+        for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+            database_metadata = schema_event['metadata']
+            schema = database_metadata[0]['schemas'][0]
+            schema_name = schema['name']
+            assert schema_name in ['public', 'public2', 'datadog']
+            if schema_name == 'public':
+                for table in schema['tables']:
+                    tables_got.append(table['name'])
+
+        assert_fields(tables_got, tc[1])
+        assert_not_fields(tables_got, tc[2])
+        aggregator.reset()
+
+
+def test_get_table_filter(integration_check, dbm_instance):
+    test_cases = [
+        [{'include_tables': ['cats']}, " AND (c.relname ~ 'cats')"],
+        [{'exclude_tables': ['dogs']}, " AND NOT (c.relname ~ 'dogs')"],
+        [
+            {'include_tables': ['cats', "'people'"], 'exclude_tables': ['dogs', 'iguanas\\d+']},
+            " AND (c.relname ~ 'cats' OR c.relname ~ '''people''')"
+            " AND NOT (c.relname ~ 'dogs' OR c.relname ~ 'iguanas\\d+')",
+        ],
+    ]
+    for tc in test_cases:
+        dbm_instance['collect_schemas'] = tc[0]
+        check = integration_check(dbm_instance)
+        metadata = check.metadata_samples
+        filter = metadata._get_tables_filter()
+        assert filter == tc[1]
+
+
+def test_should_collect_metadata(integration_check, dbm_instance):
+    test_cases = [
+        [{'include_databases': ['d.*']}, "db", "database", True],
+        [{'include_databases': ['d.*']}, "db", "database", True],
+        [{'include_databases': ['c.*'], 'include_schemas': ['d.*']}, "db", "database", False],
+        [{'include_databases': ['d.*'], 'exclude_schemas': ['d.*']}, "db", "database", True],
+        [{'exclude_databases': ['c.*']}, "db", "database", True],
+        [{'exclude_databases': ['d.*']}, "db", "database", False],
+        [{'include_databases': ['d.*'], 'exclude_databases': ['c.*']}, "db", "database", True],
+        [{'include_databases': ['c.*'], 'exclude_databases': ['c.*']}, "db", "database", False],
+        [{'include_databases': ['d.*'], 'exclude_databases': ['b$']}, "db", "database", False],
+        [{'include_databases': ['c.*']}, "sch", "schema", True],
+        [{'exclude_databases': ['sc.*']}, "sch", "schema", True],
+        [{'include_schemas': ['p.*']}, "public", "schema", True],
+        [{'include_schemas': ['x.*']}, "public", "schema", False],
+        [{'exclude_schemas': ['z.*']}, "public", "schema", True],
+        [{'exclude_schemas': ['l.*']}, "public", "schema", False],
+        [{'include_schemas': ['p.*'], 'exclude_schemas': ['z.*']}, "public", "schema", True],
+        [{'include_schemas': ['z.*'], 'exclude_schemas': ['c$']}, "public", "schema", False],
+        [{'include_schemas': ['p.*'], 'exclude_schemas': ['b.*']}, "public", "schema", False],
+    ]
+    for tc in test_cases:
+        dbm_instance['collect_schemas'] = tc[0]
+        check = integration_check(dbm_instance)
+        metadata = check.metadata_samples
+
+        assert metadata._should_collect_metadata(tc[1], tc[2]) == tc[3], tc
+
+
+def test_collect_schemas_max_tables(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5, 'max_tables': 1}
+    dbm_instance['relations'] = []
+    dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
+    del dbm_instance['dbname']
+    check = integration_check(dbm_instance)
+    run_one_check(check, dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+        database_metadata = schema_event['metadata']
+        assert len(database_metadata[0]['schemas'][0]['tables']) == 1
+
+    # Rerun check with relations enabled
+    dbm_instance['relations'] = [{'relation_regex': '.*'}]
+    check = integration_check(dbm_instance)
+    run_one_check(check, dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+        database_metadata = schema_event['metadata']
+        assert len(database_metadata[0]['schemas'][0]['tables']) == 1
 
 
 def assert_fields(keys: List[str], fields: List[str]):

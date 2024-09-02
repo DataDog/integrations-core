@@ -30,8 +30,11 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
     common_tags = [
         'snmp_profile:ibm-lenovo-server',
         'snmp_host:ibm-lenovo-server.device.name',
+        'device_hostname:ibm-lenovo-server.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'ibm_imm_machine_level_product_name:Jaded acted their but acted kept driving ' 'Jaded Jaded',
         'ibm_imm_machine_level_serial_number:driving quaintly quaintly but driving',
@@ -135,6 +138,7 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.2.3.51.3',
         'vendor': 'ibm',
         'device_type': 'server',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

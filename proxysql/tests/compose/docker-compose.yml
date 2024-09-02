@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   proxysql:
     image: proxysql/proxysql:${PROXYSQL_VERSION}

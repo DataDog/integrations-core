@@ -29,8 +29,11 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
     common_tags = [
         'snmp_profile:apc-pdu',
         'snmp_host:apc-pdu.device.name',
+        'device_hostname:apc-pdu.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'powernet_r_pdu_ident_firmware_rev:kept zombies forward acted zombies but kept forward',
         'powernet_r_pdu_ident_hardware_rev:zombies forward their',
@@ -167,6 +170,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.318.1.3.4.5',
         'vendor': 'apc',
         'device_type': 'pdu',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

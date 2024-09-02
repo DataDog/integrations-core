@@ -30,8 +30,7 @@ RUN yum install -y openssl-devel && \
  && yum remove -y openssl-devel
 
 # Set up virtual environment for Python 2
-RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"; \
- /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script-location virtualenv \
+RUN /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m virtualenv /py2
 
 # openssl
@@ -54,11 +53,11 @@ RUN yum install -y perl-IPC-Cmd && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.11.5
+ENV PYTHON3_VERSION=3.11.8
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58" \
+ SHA256="d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON_VERSION} \
@@ -81,9 +80,9 @@ RUN \
 
 # libxml & libxslt for lxml
 RUN \
- DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.10/libxml2-{{version}}.tar.xz" \
- VERSION="2.10.3" \
- SHA256="5d2cc3d78bec3dbe212a9d7fa629ada25a7da928af432c93060ff5c17ee28a9c" \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
+ VERSION="2.12.6" \
+ SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
  RELATIVE_PATH="libxml2-{{version}}" \
  bash install-from-source.sh \
  --without-iconv \
@@ -99,8 +98,8 @@ RUN \
 
 RUN \
  DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
- VERSION="1.1.37" \
- SHA256="3a4b27dc8027ccd6146725950336f1ec520928f320f144eb5fa7990ae6123ab4" \
+ VERSION="1.1.39" \
+ SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
  RELATIVE_PATH="libxslt-{{version}}" \
  bash install-from-source.sh \
  --without-python \
@@ -126,7 +125,9 @@ RUN \
  VERSION="2.3.9" \
  SHA256="52833eac3d681c8b0c9a5a65f2ebd745b3a964f208fc748f977e44015a31b207" \
  RELATIVE_PATH=unixODBC-{{version}} \
- bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install
+ bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install \
+ # This is the folder where unixODBC searches for driver config and where we ask customers to copy their config to
+ --sysconfdir=/opt/datadog-agent/embedded/etc
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \
@@ -157,8 +158,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.4.0" \
- SHA256="816e41809c043ff285e8c0f06a75a1fa250211bbfb2dc0a037eeef39f1a9e427" \
+ VERSION="8.9.1" \
+ SHA256="291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \
@@ -177,14 +178,6 @@ RUN \
     --without-libssh2 \
     --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
-
-# https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
-# https://github.com/rust-lang/cargo/issues/10762
-ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-
-# Environment variables to help openssl crate find OpenSSL
-ENV OPENSSL_LIB_DIR="/usr/local/lib64"
-ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 # Set up runner
 COPY runner_dependencies.txt /runner_dependencies.txt

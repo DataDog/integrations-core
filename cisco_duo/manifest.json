@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8d3e0e2f-df52-4a12-a976-3ded71553a3a",
   "app_id": "cisco-duo",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -40,7 +40,8 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -61,9 +62,6 @@
       "Cisco Duo - Administrator Logs": "assets/dashboards/cisco_duo_administrator_logs.json",
       "Cisco Duo - Telephony Logs": "assets/dashboards/cisco_duo_telephony_logs.json",
       "Cisco Duo - Offline Enrollment Logs": "assets/dashboards/cisco_duo_offline_enrollment_logs.json"
-    },
-    "logs": {
-      "source": "cisco-duo"
     }
   },
   "author": {

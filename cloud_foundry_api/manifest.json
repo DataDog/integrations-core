@@ -16,7 +16,8 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Cloud",
-      "Category::Orchestration"
+      "Category::Orchestration",
+      "Offering::Integration"
     ]
   },
   "author": {

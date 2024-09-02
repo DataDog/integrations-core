@@ -16,7 +16,9 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Log Collection",
-      "Category::AI/ML"
+      "Category::AI/ML",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -48,9 +50,6 @@
     "monitors": {
       "[Nvidia Triton] GPU utilization is high": "assets/monitors/gpu_utilization.json",
       "[Nvidia Triton] CPU Memory Usage is high": "assets/monitors/cpu_memory.json"
-    },
-    "logs": {
-      "source": "nvidia_triton"
     }
   },
   "author": {

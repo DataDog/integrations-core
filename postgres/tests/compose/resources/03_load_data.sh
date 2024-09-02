@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+# Create extensions for settings testing
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    CREATE EXTENSION IF NOT EXISTS hstore;
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+EOSQL
+
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE TABLE cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     INSERT INTO cities VALUES ('New York', 'USA'), ('Beautiful city of lights', 'France');
@@ -28,6 +36,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     SELECT * FROM persons;
     SELECT * FROM persons;
     SELECT * FROM persons;
+    CREATE SCHEMA public2;
+    CREATE TABLE public2.cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
 EOSQL

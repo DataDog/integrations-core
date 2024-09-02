@@ -115,6 +115,7 @@ class ServiceView(object):
     }
     STARTUP_TYPE_DELAYED_AUTO = "automatic_delayed_start"
     STARTUP_TYPE_UNKNOWN = "unknown"
+    DISPLAY_NAME_UNKNOWN = "Not_Found"
 
     def __init__(self, scm_handle, name):
         self.scm_handle = scm_handle
@@ -259,7 +260,7 @@ class WindowsService(AgentCheck):
         # See test_name_regex_order()
         service_filters = sorted(service_filters, reverse=True, key=lambda x: len(x.name or ""))
 
-        for short_name, _, service_status in service_statuses:
+        for short_name, display_name, service_status in service_statuses:
             service_view = ServiceView(scm_handle, short_name)
 
             if 'ALL' not in services:
@@ -285,6 +286,9 @@ class WindowsService(AgentCheck):
             tags = ['windows_service:{}'.format(short_name)]
             tags.extend(custom_tags)
 
+            if instance.get('collect_display_name_as_tag', False):
+                tags.append('display_name:{}'.format(display_name))
+
             if instance.get('windows_service_startup_type_tag', False):
                 try:
                     tags.append('windows_service_startup_type:{}'.format(service_view.startup_type_string()))
@@ -305,14 +309,16 @@ class WindowsService(AgentCheck):
             for service in services_unseen:
                 # if a name doesn't match anything (wrong name or no permission to access the service), report UNKNOWN
                 status = self.UNKNOWN
-                startup_type_string = ServiceView.STARTUP_TYPE_UNKNOWN
 
                 tags = ['windows_service:{}'.format(service)]
 
                 tags.extend(custom_tags)
 
                 if instance.get('windows_service_startup_type_tag', False):
-                    tags.append('windows_service_startup_type:{}'.format(startup_type_string))
+                    tags.append('windows_service_startup_type:{}'.format(ServiceView.STARTUP_TYPE_UNKNOWN))
+
+                if instance.get('collect_display_name_as_tag', False):
+                    tags.append('display_name:{}'.format(ServiceView.DISPLAY_NAME_UNKNOWN))
 
                 if not instance.get('disable_legacy_service_tag', False):
                     self._log_deprecation('service_tag', 'windows_service')

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.9.0 / 2024-07-05 / Agent 7.56.0
+
+***Added***:
+
+* [tcp_checks] If dns-resolve failed don't report metrics. ([#17912](https://github.com/DataDog/integrations-core/pull/17912))
+
 ## 4.8.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

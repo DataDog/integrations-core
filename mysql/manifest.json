@@ -16,7 +16,14 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics"
+      }
     ]
   },
   "author": {
@@ -61,9 +68,6 @@
       "operations_overview": "assets/saved_views/operations_overview.json",
       "slow_operations": "assets/saved_views/slow_operations.json",
       "mysql_processes": "assets/saved_views/mysql_processes.json"
-    },
-    "logs": {
-      "source": "mysql"
     }
   }
 }

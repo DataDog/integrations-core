@@ -16,7 +16,8 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -44,9 +45,6 @@
       },
       "source_type_id": 10022,
       "auto_install": true
-    },
-    "logs": {
-      "source": "squid"
     }
   }
 }

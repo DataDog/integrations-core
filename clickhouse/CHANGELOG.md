@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 3.4.0 / 2024-03-22
+## 3.6.0 / 2024-07-05 / Agent 7.56.0
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+## 3.5.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Add new ClickHouse metrics ([#17218](https://github.com/DataDog/integrations-core/pull/17218))
+
+## 3.4.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

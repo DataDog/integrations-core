@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Integration for Karpenter",
+    "description": "Monitor the health and performance of Karpenter",
     "title": "Karpenter",
     "media": [],
     "classifier_tags": [
@@ -20,7 +20,14 @@
       "Category::Log Collection",
       "Category::Provisioning",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/container-native-integrations/#autoscaling-and-resource-utilization-with-karpenter"
+      }
     ]
   },
   "assets": {
@@ -44,10 +51,7 @@
       "auto_install": true
     },
     "dashboards": {
-      "karpenter_overview": "assets/dashboards/karpenter_overview.json"
-    },
-    "logs": {
-      "source": "karpenter"
+      "Karpenter Overview": "assets/dashboards/karpenter_overview.json"
     },
     "monitors": {
       "pod states": "assets/monitors/pod_state.json"

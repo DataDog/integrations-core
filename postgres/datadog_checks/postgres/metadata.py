@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import re
 import time
 from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
 
@@ -42,6 +43,17 @@ pending_restart
 FROM pg_settings
 """
 
+PG_EXTENSIONS_QUERY = """
+SELECT extname FROM pg_extension;
+"""
+
+PG_EXTENSION_LOADER_QUERY = {
+    'pg_trgm': "SELECT word_similarity('foo', 'bar');",
+    'plpgsql': "DO $$ BEGIN PERFORM 1; END$$;",
+    'pgcrypto': "SELECT armor('foo');",
+    'hstore': "SELECT 'a=>1'::hstore;",
+}
+
 DATABASE_INFORMATION_QUERY = """
 SELECT db.oid                        AS id,
        datname                       AS NAME,
@@ -71,7 +83,8 @@ FROM   pg_class c
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r', 'p' )
        AND c.relispartition != 't'
-       AND c.relnamespace = {schema_oid};
+       AND c.relnamespace = {schema_oid}
+       {filter};
 """
 
 PG_TABLES_QUERY_V9 = """
@@ -84,7 +97,8 @@ FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r' )
-       AND c.relnamespace = {schema_oid};
+       AND c.relnamespace = {schema_oid}
+       {filter};
 """
 
 
@@ -104,9 +118,10 @@ WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
 PG_INDEXES_QUERY = """
 SELECT indexname AS NAME,
        indexdef  AS definition,
+       schemaname,
        tablename
 FROM   pg_indexes
-WHERE  {table_names_like};
+WHERE  schemaname='{schema_name}' AND ({table_names_like});
 """
 
 PG_CHECK_FOR_FOREIGN_KEY = """
@@ -144,7 +159,7 @@ PARTITION_KEY_QUERY = """
 SELECT relname,
        pg_get_partkeydef(oid) AS partition_key
 FROM   pg_class
-WHERE  relname in ({table_names});
+WHERE  oid in ({table_ids});
 """
 
 NUM_PARTITIONS_QUERY = """
@@ -285,9 +300,15 @@ class PostgresMetadata(DBMAsyncJob):
 
             for database in schema_metadata:
                 dbname = database["name"]
+                if not self._should_collect_metadata(dbname, "database"):
+                    continue
+
                 with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
                     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                         for schema in database["schemas"]:
+                            if not self._should_collect_metadata(schema["name"], "schema"):
+                                continue
+
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
                             table_chunks = list(get_list_chunks(tables, chunk_size))
 
@@ -295,7 +316,7 @@ class PostgresMetadata(DBMAsyncJob):
                             tables_buffer = []
 
                             for tables in table_chunks:
-                                table_info = self._query_table_information(cursor, tables)
+                                table_info = self._query_table_information(cursor, schema['name'], tables)
 
                                 tables_buffer = [*tables_buffer, *table_info]
                                 for t in table_info:
@@ -309,6 +330,33 @@ class PostgresMetadata(DBMAsyncJob):
                             if len(tables_buffer) > 0:
                                 self._flush_schema(base_event, database, schema, tables_buffer)
             self._is_schemas_collection_in_progress = False
+
+    def _should_collect_metadata(self, name, metadata_type):
+        for re_str in self._config.schemas_metadata_config.get(
+            "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
+        ):
+            regex = re.compile(re_str)
+            if regex.search(name):
+                self._log.debug(
+                    "Excluding {metadata_type} {name} from metadata collection "
+                    "because of {re_str}".format(metadata_type=metadata_type, name=name, re_str=re_str)
+                )
+                return False
+
+        includes = self._config.schemas_metadata_config.get(
+            "include_{metadata_type}s".format(metadata_type=metadata_type), []
+        )
+        if len(includes) == 0:
+            return True
+        for re_str in includes:
+            regex = re.compile(re_str)
+            if regex.search(name):
+                self._log.debug(
+                    "Including {metadata_type} {name} in metadata collection "
+                    "because of {re_str}".format(metadata_type=metadata_type, name=name, re_str=re_str)
+                )
+                return True
+        return False
 
     def _flush_schema(self, base_event, database, schema, tables):
         event = {
@@ -376,20 +424,52 @@ class PostgresMetadata(DBMAsyncJob):
 
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
-        limit = self._config.schemas_metadata_config.get("max_tables", 300)
-        if self._config.relations:
-            if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
-                cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id))
-            else:
-                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
-            rows = cursor.fetchall()
-            table_info = [dict(row) for row in rows]
-            return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
-
+        filter = self._get_tables_filter()
+        if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
+            cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
         else:
-            # Config error should catch the case where schema collection is enabled
-            # and relation metrics aren't, but adding a warning here just in case
-            self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
+            cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
+        rows = cursor.fetchall()
+        table_info = [dict(row) for row in rows]
+
+        limit = self._config.schemas_metadata_config.get("max_tables", 300)
+
+        if len(table_info) <= limit:
+            return table_info
+
+        if not self._config.relations:
+            self._check.log.warning(
+                "Number of tables exceeds limit of %d set by max_tables but "
+                "relation metrics are not configured for %s."
+                "Please configure relation metrics for all tables to sort by most active."
+                "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
+                "for details on how to enable relation metrics.",
+                limit,
+                dbname,
+            )
+            return table_info[:limit]
+
+        return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
+
+    def _get_tables_filter(self):
+        includes = self._config.schemas_metadata_config.get("include_tables", [])
+        excludes = self._config.schemas_metadata_config.get("exclude_tables", [])
+        if len(includes) == 0 and len(excludes) == 0:
+            return ""
+
+        sql = ""
+        if len(includes) > 0:
+            sql += " AND ("
+            sql += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in includes)
+            sql += ")"
+
+        if len(excludes) > 0:
+            sql += " AND NOT ("
+            sql += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in excludes)
+            sql += ")"
+
+        return sql
 
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
@@ -406,18 +486,14 @@ class PostgresMetadata(DBMAsyncJob):
                 # if we don't have metrics in our cache for this table, return 0
                 table_data = cache.get(dbname, {}).get(
                     info["name"],
-                    {"postgresql.index_scans": 0, "postgresql.seq_scans": 0},
+                    {"index_scans": 0, "seq_scans": 0},
                 )
-                return table_data.get("postgresql.index_scans", 0) + table_data.get("postgresql.seq_scans", 0)
+                return table_data.get("index_scans", 0) + table_data.get("seq_scans", 0)
             else:
                 # get activity
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
                 row = cursor.fetchone()
                 return row.get("total_activity", 0) if row is not None else 0
-
-        # We only sort to filter by top so no need to waste resources if we're going to return everything
-        if len(table_info) <= limit:
-            return table_info
 
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
@@ -455,7 +531,7 @@ class PostgresMetadata(DBMAsyncJob):
         return table_payloads
 
     def _query_table_information(
-        self, cursor: psycopg2.extensions.cursor, table_info: List[Dict[str, Union[str, bool]]]
+        self, cursor: psycopg2.extensions.cursor, schema_name: str, table_info: List[Dict[str, Union[str, bool]]]
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information . Returns a dictionary
@@ -481,11 +557,10 @@ class PostgresMetadata(DBMAsyncJob):
         tables = {t.get("name"): {**t, "num_partitions": 0} for t in table_info}
         table_name_lookup = {t.get("id"): t.get("name") for t in table_info}
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
-        table_names = ",".join(["'{}'".format(t.get("name")) for t in table_info])
         table_names_like = " OR ".join(["tablename LIKE '{}%'".format(t.get("name")) for t in table_info])
 
         # Get indexes
-        cursor.execute(PG_INDEXES_QUERY.format(table_names_like=table_names_like))
+        cursor.execute(PG_INDEXES_QUERY.format(schema_name=schema_name, table_names_like=table_names_like))
         rows = cursor.fetchall()
         for row in rows:
             # Partition indexes in some versions of Postgres have appended digits for each partition
@@ -497,7 +572,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         # Get partitions
         if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-            cursor.execute(PARTITION_KEY_QUERY.format(table_names=table_names))
+            cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
             rows = cursor.fetchall()
             for row in rows:
                 tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
@@ -549,10 +624,20 @@ class PostgresMetadata(DBMAsyncJob):
     def _collect_postgres_settings(self):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+                # Get loaded extensions
+                cursor.execute(PG_EXTENSIONS_QUERY)
+                rows = cursor.fetchall()
+                query = PG_SETTINGS_QUERY
+                for row in rows:
+                    extension = row['extname']
+                    if extension in PG_EXTENSION_LOADER_QUERY:
+                        query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
+                    else:
+                        self._log.warning("unable to collect settings for unknown extension %s", extension)
+
                 if self.pg_settings_ignored_patterns:
-                    query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ALL(%s)"
-                else:
-                    query = PG_SETTINGS_QUERY
+                    query = query + " WHERE name NOT LIKE ALL(%s)"
+
                 self._log.debug(
                     "Running query [%s] and patterns are %s",
                     query,

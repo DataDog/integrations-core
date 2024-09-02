@@ -13,9 +13,12 @@
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
+      "Category::Data Stores",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {

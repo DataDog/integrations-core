@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   teamcity:
     image: mockserver/mockserver:latest
