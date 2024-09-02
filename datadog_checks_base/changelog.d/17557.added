@@ -1,1 +1,0 @@
-Add TimedCache for controlled cache expiration. The TimedCache sets TTL on initialization and expires when TTL is reached.

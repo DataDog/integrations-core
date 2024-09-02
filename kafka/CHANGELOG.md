@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.16.0 / 2024-05-31 / Agent 7.55.0
+
+***Added***:
+
+* Add bufferpool-wait-time-ns-total and bufferpool-wait-ratio metrics for kafka producer ([#17612](https://github.com/DataDog/integrations-core/pull/17612))
+
 ## 2.15.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

@@ -16,7 +16,8 @@
       "Category::Message Queues",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -47,9 +48,6 @@
       ],
       "source_type_id": 10143,
       "auto_install": true
-    },
-    "logs": {
-      "source": "pulsar"
     }
   }
 }

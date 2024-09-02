@@ -16,7 +16,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Configuration & Deployment",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -50,9 +51,6 @@
     },
     "dashboards": {
       "Boundary Overview": "assets/dashboards/boundary_overview.json"
-    },
-    "logs": {
-      "source": "boundary"
     }
   }
 }

@@ -21,7 +21,7 @@
                     "rel": "bookmark"
                 }
             ],
-            "node_uuid": "a27588a6-518d-49b4-a23c-3d51255a7e8b",
+            "node_uuid": "bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
             "ports": [
                 {
                     "href": "http://127.0.0.1/baremetal/v1/portgroups/032ce3fb-8181-4d6f-8b8e-f2adaa913f28/ports",

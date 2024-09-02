@@ -18,6 +18,10 @@ coverage:
         target: 75
         flags:
         - aspdotnet
+      AWS_Neuron:
+        target: 75
+        flags:
+        - aws_neuron
       ActiveMQ_XML:
         target: 75
         flags:
@@ -206,6 +210,10 @@ coverage:
         target: 75
         flags:
         - fluentd
+      Fly.io:
+        target: 75
+        flags:
+        - fly_io
       FoundationDB:
         target: 75
         flags:
@@ -322,6 +330,10 @@ coverage:
         target: 75
         flags:
         - kube_apiserver_metrics
+      Kubernetes_Cluster_Autoscaler:
+        target: 75
+        flags:
+        - kubernetes_cluster_autoscaler
       Kubernetes_Controller_Manager:
         target: 75
         flags:
@@ -570,14 +582,14 @@ coverage:
         target: 75
         flags:
         - teamcity
-      Teleport:
-        target: 75
-        flags:
-        - teleport
       Tekton:
         target: 75
         flags:
         - tekton
+      Teleport:
+        target: 75
+        flags:
+        - teleport
       Temporal:
         target: 75
         flags:
@@ -594,6 +606,10 @@ coverage:
         target: 75
         flags:
         - torchserve
+      Traefik_Mesh:
+        target: 75
+        flags:
+        - traefik_mesh
       Traffic_Server:
         target: 75
         flags:
@@ -670,6 +686,18 @@ coverage:
         target: 75
         flags:
         - fluxcd
+      kyverno:
+        target: 75
+        flags:
+        - kyverno
+      tibco_ems:
+        target: 75
+        flags:
+        - tibco_ems
+      vLLM:
+        target: 75
+        flags:
+        - vllm
       vSphere:
         target: 75
         flags:
@@ -741,6 +769,11 @@ flags:
     paths:
     - avi_vantage/datadog_checks/avi_vantage
     - avi_vantage/tests
+  aws_neuron:
+    carryforward: true
+    paths:
+    - aws_neuron/datadog_checks/aws_neuron
+    - aws_neuron/tests
   azure_iot_edge:
     carryforward: true
     paths:
@@ -946,6 +979,11 @@ flags:
     paths:
     - fluxcd/datadog_checks/fluxcd
     - fluxcd/tests
+  fly_io:
+    carryforward: true
+    paths:
+    - fly_io/datadog_checks/fly_io
+    - fly_io/tests
   foundationdb:
     carryforward: true
     paths:
@@ -1101,6 +1139,11 @@ flags:
     paths:
     - kubelet/datadog_checks/kubelet
     - kubelet/tests
+  kubernetes_cluster_autoscaler:
+    carryforward: true
+    paths:
+    - kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler
+    - kubernetes_cluster_autoscaler/tests
   kubernetes_state:
     carryforward: true
     paths:
@@ -1111,6 +1154,11 @@ flags:
     paths:
     - kyototycoon/datadog_checks/kyototycoon
     - kyototycoon/tests
+  kyverno:
+    carryforward: true
+    paths:
+    - kyverno/datadog_checks/kyverno
+    - kyverno/tests
   lighttpd:
     carryforward: true
     paths:
@@ -1396,16 +1444,16 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
-  teleport:
-    carryforward: true
-    paths:
-    - teleport/datadog_checks/teleport
-    - teleport/tests
   tekton:
     carryforward: true
     paths:
     - tekton/datadog_checks/tekton
     - tekton/tests
+  teleport:
+    carryforward: true
+    paths:
+    - teleport/datadog_checks/teleport
+    - teleport/tests
   temporal:
     carryforward: true
     paths:
@@ -1416,6 +1464,11 @@ flags:
     paths:
     - teradata/datadog_checks/teradata
     - teradata/tests
+  tibco_ems:
+    carryforward: true
+    paths:
+    - tibco_ems/datadog_checks/tibco_ems
+    - tibco_ems/tests
   tls:
     carryforward: true
     paths:
@@ -1431,6 +1484,11 @@ flags:
     paths:
     - torchserve/datadog_checks/torchserve
     - torchserve/tests
+  traefik_mesh:
+    carryforward: true
+    paths:
+    - traefik_mesh/datadog_checks/traefik_mesh
+    - traefik_mesh/tests
   traffic_server:
     carryforward: true
     paths:
@@ -1461,6 +1519,11 @@ flags:
     paths:
     - vertica/datadog_checks/vertica
     - vertica/tests
+  vllm:
+    carryforward: true
+    paths:
+    - vllm/datadog_checks/vllm
+    - vllm/tests
   voltdb:
     carryforward: true
     paths:

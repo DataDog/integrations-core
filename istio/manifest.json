@@ -20,7 +20,22 @@
       "Supported OS::macOS",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
-      "Submitted Data Type::Traces"
+      "Submitted Data Type::Traces",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-istio-with-datadog"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/istio-metrics/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/istio-datadog/"
+      }
     ]
   },
   "author": {
@@ -60,13 +75,13 @@
     "dashboards": {
       "Istio base dashboard": "assets/dashboards/istio_overview.json",
       "Istio Overview 1.5": "assets/dashboards/istio_1_5_overview.json",
-      "Istio Overview 1.5 (OpenMetrics)": "assets/dashboards/istio_1_5_openmetrics_overview.json"
+      "Istio Overview 1.5 (OpenMetrics)": "assets/dashboards/istio_1_5_openmetrics_overview.json",
+      "Istio Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json"
-    },
-    "logs": {
-      "source": "istio"
+      "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json",
+      "xDS Push Error Rate": "assets/monitors/xds_push_error_rate.json",
+      "Istio Proxy Requests Error Percentage": "assets/monitors/request_error_rate.json"
     },
     "saved_views": {
       "Istio Overview": "assets/saved_views/istio_overview.json",

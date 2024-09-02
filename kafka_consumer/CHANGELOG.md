@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 4.6.0 / 2024-08-09
+
+***Added***:
+
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 4.5.0 / 2024-07-05 / Agent 7.56.0
+
+***Added***:
+
+* Kafka consumer : add consumer group state as tag ([#17686](https://github.com/DataDog/integrations-core/pull/17686))
+
+## 4.4.0 / 2024-06-11 / Agent 7.55.0
+
+***Added***:
+
+* Update `confluent_kafka` and `librdkafka` ([#17726](https://github.com/DataDog/integrations-core/pull/17726))
+
 ## 4.3.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:

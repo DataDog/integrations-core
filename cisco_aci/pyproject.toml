@@ -30,7 +30,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=36.10.0",
 ]
 dynamic = [
     "version",
@@ -40,7 +40,7 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "cryptography==3.3.2; python_version < '3.0'",
-    "cryptography==42.0.5; python_version > '3.0'",
+    "cryptography==42.0.8; python_version > '3.0'",
 ]
 
 [project.urls]

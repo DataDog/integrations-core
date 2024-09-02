@@ -237,14 +237,6 @@ REST_IRONIC_MICROVERSION_1_80 = {
     'use_legacy_check_version': False,
 }
 
-REST_IRONIC_MICROVERSION_1_10 = {
-    'keystone_server_url': 'http://127.0.0.1:8080/identity',
-    'username': 'admin',
-    'password': 'password',
-    'ironic_microversion': '1.10',
-    'use_legacy_check_version': False,
-}
-
 REST_MICROVERSION_3_70 = {
     'keystone_server_url': 'http://127.0.0.1:8080/identity',
     'username': 'admin',
@@ -465,13 +457,6 @@ SDK_IRONIC_MICROVERSION_1_80 = {
     'openstack_cloud_name': 'test_cloud',
     'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
     'ironic_microversion': '1.80',
-    'use_legacy_check_version': False,
-}
-
-SDK_IRONIC_MICROVERSION_1_10 = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'ironic_microversion': '1.10',
     'use_legacy_check_version': False,
 }
 

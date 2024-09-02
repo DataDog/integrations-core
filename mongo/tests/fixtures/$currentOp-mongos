@@ -1,0 +1,817 @@
+[
+    {
+        "shard": "shard04",
+        "type": "op",
+        "host": "2b5ae3681d72:27021",
+        "desc": "conn143",
+        "connectionId": 143,
+        "client_s": "192.168.224.16:52298",
+        "clientMetadata": {
+            "driver": {
+                "name": "PyMongo",
+                "version": "4.7.2"
+            },
+            "os": {
+                "type": "Darwin",
+                "name": "Darwin",
+                "architecture": "arm64",
+                "version": "14.4.1"
+            },
+            "platform": "CPython 3.9.16.final.0",
+            "mongos": {
+                "host": "7203110cbd0b:27017",
+                "client": "192.168.65.1:39545",
+                "version": "6.0.15"
+            }
+        },
+        "active": true,
+        "currentOpTime": "2024-05-20T14:36:56.231+00:00",
+        "effectiveUsers": [
+            {
+                "user": "test",
+                "db": "admin"
+            }
+        ],
+        "threaded": true,
+        "opid": "shard04:265665",
+        "operationKey": {
+            "$binary": {
+                "base64": "cZAjiXzbSZianZ+RrPdTaA==",
+                "subType": "04"
+            }
+        },
+        "lsid": {
+            "id": {
+                "$binary": {
+                    "base64": "/5W615FQTDardJroxkDVTg==",
+                    "subType": "04"
+                }
+            },
+            "uid": {
+                "$binary": {
+                    "base64": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+                    "subType": "00"
+                }
+            }
+        },
+        "secs_running": 0,
+        "microsecs_running": 29232,
+        "op": "query",
+        "ns": "integration.$cmd",
+        "command": {
+            "find": "users",
+            "projection": {
+                "$sortKey": {
+                    "$meta": "sortKey"
+                }
+            },
+            "sort": {
+                "user_id": 1
+            },
+            "needsMerge": true,
+            "let": {
+                "CLUSTER_TIME": {
+                    "$literal": {
+                        "t": 1716215816,
+                        "i": 1
+                    }
+                },
+                "NOW": {
+                    "$literal": "2024-05-20T14:36:56.231+00:00"
+                }
+            },
+            "fromMongos": true,
+            "singleBatch": false,
+            "writeConcern": {
+                "w": "majority",
+                "wtimeout": 0,
+                "provenance": "implicitDefault"
+            },
+            "readConcern": {
+                "level": "local",
+                "provenance": "implicitDefault"
+            },
+            "shardVersion": {
+                "t": {
+                    "$timestamp": {
+                        "t": 1716215708,
+                        "i": 12
+                    }
+                },
+                "e": {
+                    "$oid": "664b5f9d05fee29701ab2bfb"
+                },
+                "v": {
+                    "$timestamp": {
+                        "t": 1,
+                        "i": 7
+                    }
+                }
+            },
+            "clientOperationKey": {
+                "$binary": {
+                    "base64": "cZAjiXzbSZianZ+RrPdTaA==",
+                    "subType": "04"
+                }
+            },
+            "comment": "sort",
+            "lsid": {
+                "id": {
+                    "$binary": {
+                        "base64": "/5W615FQTDardJroxkDVTg==",
+                        "subType": "04"
+                    }
+                },
+                "uid": {
+                    "$binary": {
+                        "base64": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+                        "subType": "00"
+                    }
+                }
+            },
+            "$clusterTime": {
+                "clusterTime": {
+                    "$timestamp": {
+                        "t": 1716215816,
+                        "i": 1
+                    }
+                },
+                "signature": {
+                    "hash": {
+                        "$binary": {
+                            "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                            "subType": "00"
+                        }
+                    },
+                    "keyId": 0
+                }
+            },
+            "$configTime": {
+                "$timestamp": {
+                    "t": 1716215814,
+                    "i": 1
+                }
+            },
+            "$topologyTime": {
+                "$timestamp": {
+                    "t": 1716215696,
+                    "i": 24
+                }
+            },
+            "$audit": {
+                "$impersonatedUsers": [
+                    {
+                        "user": "test",
+                        "db": "admin"
+                    }
+                ],
+                "$impersonatedRoles": [
+                    {
+                        "role": "root",
+                        "db": "admin"
+                    }
+                ]
+            },
+            "$client": {
+                "driver": {
+                    "name": "PyMongo",
+                    "version": "4.7.2"
+                },
+                "os": {
+                    "type": "Darwin",
+                    "name": "Darwin",
+                    "architecture": "arm64",
+                    "version": "14.4.1"
+                },
+                "platform": "CPython 3.9.16.final.0",
+                "mongos": {
+                    "host": "7203110cbd0b:27017",
+                    "client": "192.168.65.1:39545",
+                    "version": "6.0.15"
+                }
+            },
+            "mayBypassWriteBlocking": true,
+            "$db": "integration"
+        },
+        "numYields": 0,
+        "locks": {
+            "FeatureCompatibilityVersion": "r",
+            "Global": "r"
+        },
+        "waitingForLock": false,
+        "lockStats": {
+            "FeatureCompatibilityVersion": {
+                "acquireCount": {
+                    "r": 1,
+                    "R": 1,
+                    "w": 1,
+                    "W": 1
+                }
+            },
+            "Global": {
+                "acquireCount": {
+                    "r": 1
+                }
+            },
+            "Mutex": {
+                "acquireCount": {
+                    "r": 1
+                }
+            }
+        },
+        "waitingForFlowControl": false,
+        "flowControlStats": {}
+    },
+    {
+        "type": "op",
+        "host": "ip-172-29-199-110:27018",
+        "desc": "conn703087",
+        "connectionId": 703087,
+        "client_s": "172.29.203.167:57468",
+        "appName": "orders-mongo",
+        "clientMetadata": {
+            "application": {
+                "name": "orders-mongo"
+            },
+            "driver": {
+                "name": "mongo-go-driver",
+                "version": "v1.15.0"
+            },
+            "os": {
+                "type": "linux",
+                "architecture": "amd64"
+            },
+            "platform": "go1.22.1",
+            "env": {
+                "container": {
+                    "runtime": "docker"
+                }
+            },
+            "mongos": {
+                "host": "ip-172-29-203-167:27017",
+                "client": "127.0.0.1:50388",
+                "version": "7.0.9"
+            }
+        },
+        "active": true,
+        "currentOpTime": "2024-06-13T20:50:10.834+00:00",
+        "effectiveUsers": [
+            {
+                "user": "shopper_4",
+                "db": "admin"
+            }
+        ],
+        "threaded": true,
+        "opid": "shard2:155914227",
+        "lsid": {
+            "id": {
+                "$binary": {
+                    "base64": "zLd+DNpkQdqkWN1AZ828SA==",
+                    "subType": "04"
+                }
+            },
+            "uid": {
+                "$binary": {
+                    "base64": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+                    "subType": "00"
+                }
+            }
+        },
+        "secs_running": 0,
+        "microsecs_running": 26789,
+        "op": "getmore",
+        "ns": "integration.movies",
+        "redacted": false,
+        "command": {
+            "getMore": 7153547462305880513,
+            "collection": "movies",
+            "lsid": {
+                "id": {
+                    "$binary": {
+                        "base64": "zLd+DNpkQdqkWN1AZ828SA==",
+                        "subType": "04"
+                    }
+                },
+                "uid": {
+                    "$binary": {
+                        "base64": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+                        "subType": "00"
+                    }
+                }
+            },
+            "$clusterTime": {
+                "clusterTime": {
+                    "$timestamp": {
+                        "t": 1718311810,
+                        "i": 6
+                    }
+                },
+                "signature": {
+                    "hash": {
+                        "$binary": {
+                            "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                            "subType": "00"
+                        }
+                    },
+                    "keyId": 0
+                }
+            },
+            "$configTime": {
+                "$timestamp": {
+                    "t": 1718311809,
+                    "i": 1
+                }
+            },
+            "$topologyTime": {
+                "$timestamp": {
+                    "t": 1716428552,
+                    "i": 3
+                }
+            },
+            "$audit": {
+                "$impersonatedUser": {
+                    "user": "shopper_4",
+                    "db": "admin"
+                },
+                "$impersonatedRoles": [
+                    {
+                        "role": "readWrite",
+                        "db": "dbmorders"
+                    },
+                    {
+                        "role": "readWrite",
+                        "db": "integration"
+                    }
+                ]
+            },
+            "$client": {
+                "application": {
+                    "name": "orders-mongo"
+                },
+                "driver": {
+                    "name": "mongo-go-driver",
+                    "version": "v1.15.0"
+                },
+                "os": {
+                    "type": "linux",
+                    "architecture": "amd64"
+                },
+                "platform": "go1.22.1",
+                "env": {
+                    "container": {
+                        "runtime": "docker"
+                    }
+                },
+                "mongos": {
+                    "host": "ip-172-29-203-167:27017",
+                    "client": "127.0.0.1:50388",
+                    "version": "7.0.9"
+                }
+            },
+            "mayBypassWriteBlocking": true,
+            "$db": "integration"
+        },
+        "queryFramework": "classic",
+        "planSummary": "COLLSCAN",
+        "cursor": {
+            "cursorId": 7153547462305880513,
+            "createdDate": {
+                "$date": "2024-06-13T20:50:10.806Z"
+            },
+            "lastAccessDate": {
+                "$date": "2024-06-13T20:50:10.806Z"
+            },
+            "nDocsReturned": 0,
+            "nBatchesReturned": 1,
+            "noCursorTimeout": false,
+            "tailable": false,
+            "awaitData": false,
+            "originatingCommand": {
+                "aggregate": "movies",
+                "pipeline": [
+                    {
+                        "$lookup": {
+                            "from": "comments",
+                            "as": "comments",
+                            "localField": "_id",
+                            "foreignField": "movie_id"
+                        }
+                    }
+                ],
+                "comment": "get more movies",
+                "cursor": {
+                    "batchSize": 0
+                },
+                "needsMerge": true,
+                "let": {
+                    "NOW": {
+                        "$literal": {
+                            "$date": "2024-06-13T20:50:10.805Z"
+                        }
+                    },
+                    "CLUSTER_TIME": {
+                        "$literal": {
+                            "$timestamp": {
+                                "t": 1718311810,
+                                "i": 6
+                            }
+                        }
+                    }
+                },
+                "fromMongos": true,
+                "collation": {
+                    "locale": "simple"
+                },
+                "readConcern": {
+                    "level": "local",
+                    "provenance": "implicitDefault"
+                },
+                "writeConcern": {
+                    "w": "majority",
+                    "wtimeout": 0,
+                    "provenance": "implicitDefault"
+                },
+                "shardVersion": {
+                    "e": {
+                        "$oid": "666b52b852fa5a96da6d59ae"
+                    },
+                    "t": {
+                        "$timestamp": {
+                            "t": 1718309560,
+                            "i": 188
+                        }
+                    },
+                    "v": {
+                        "$timestamp": {
+                            "t": 1,
+                            "i": 5
+                        }
+                    }
+                },
+                "clientOperationKey": {
+                    "$binary": {
+                        "base64": "zc+70kUAQ5m1zVRdJjwYxw==",
+                        "subType": "04"
+                    }
+                },
+                "lsid": {
+                    "id": {
+                        "$binary": {
+                            "base64": "zLd+DNpkQdqkWN1AZ828SA==",
+                            "subType": "04"
+                        }
+                    },
+                    "uid": {
+                        "$binary": {
+                            "base64": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+                            "subType": "00"
+                        }
+                    }
+                },
+                "$clusterTime": {
+                    "clusterTime": {
+                        "$timestamp": {
+                            "t": 1718311810,
+                            "i": 6
+                        }
+                    },
+                    "signature": {
+                        "hash": {
+                            "$binary": {
+                                "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                                "subType": "00"
+                            }
+                        },
+                        "keyId": 0
+                    }
+                },
+                "$configTime": {
+                    "$timestamp": {
+                        "t": 1718311809,
+                        "i": 1
+                    }
+                },
+                "$topologyTime": {
+                    "$timestamp": {
+                        "t": 1716428552,
+                        "i": 3
+                    }
+                },
+                "$audit": {
+                    "$impersonatedUser": {
+                        "user": "shopper_4",
+                        "db": "admin"
+                    },
+                    "$impersonatedRoles": [
+                        {
+                            "role": "readWrite",
+                            "db": "dbmorders"
+                        },
+                        {
+                            "role": "readWrite",
+                            "db": "integration"
+                        }
+                    ]
+                },
+                "$client": {
+                    "application": {
+                        "name": "orders-mongo"
+                    },
+                    "driver": {
+                        "name": "mongo-go-driver",
+                        "version": "v1.15.0"
+                    },
+                    "os": {
+                        "type": "linux",
+                        "architecture": "amd64"
+                    },
+                    "platform": "go1.22.1",
+                    "env": {
+                        "container": {
+                            "runtime": "docker"
+                        }
+                    },
+                    "mongos": {
+                        "host": "ip-172-29-203-167:27017",
+                        "client": "127.0.0.1:50388",
+                        "version": "7.0.9"
+                    }
+                },
+                "mayBypassWriteBlocking": true,
+                "$db": "integration"
+            },
+            "planSummary": "COLLSCAN",
+            "operationUsingCursorId": 155914227
+        },
+        "numYields": 1,
+        "locks": {
+            "FeatureCompatibilityVersion": "r",
+            "Global": "r"
+        },
+        "waitingForLock": false,
+        "lockStats": {
+            "FeatureCompatibilityVersion": {
+                "acquireCount": {
+                    "r": 178
+                }
+            },
+            "Global": {
+                "acquireCount": {
+                    "r": 178
+                }
+            },
+            "Mutex": {
+                "acquireCount": {
+                    "r": 441
+                }
+            }
+        },
+        "waitingForFlowControl": false,
+        "flowControlStats": {}
+    },
+    {
+        "type": "op",
+        "host": "b46ac05daa79:27017",
+        "desc": "conn493074",
+        "connectionId": 493074,
+        "client": "10.135.127.234:56374",
+        "appName": "orders-mongo",
+        "clientMetadata": {
+            "application": {
+                "name": "orders-mongo"
+            },
+            "driver": {
+                "name": "mongo-go-driver",
+                "version": "v1.15.0"
+            },
+            "os": {
+                "type": "linux",
+                "architecture": "amd64"
+            },
+            "platform": "go1.22.1",
+            "env": {
+                "container": {
+                    "orchestrator": "kubernetes"
+                }
+            }
+        },
+        "active": true,
+        "currentOpTime": "2024-08-06T20:54:59.567+00:00",
+        "threaded": true,
+        "opid": 1399118984,
+        "secs_running": 0,
+        "microsecs_running": 954999,
+        "op": "command",
+        "ns": "admin.$cmd",
+        "redacted": false,
+        "command": {
+            "hello": 1,
+            "helloOk": true,
+            "topologyVersion": {
+                "processId": {
+                    "$oid": "668471e4899e050207948408"
+                },
+                "counter": 7
+            },
+            "maxAwaitTimeMS": 10000,
+            "$db": "admin",
+            "$readPreference": {
+                "mode": "primaryPreferred"
+            }
+        },
+        "numYields": 0,
+        "locks": {},
+        "waitingForLock": false,
+        "lockStats": {},
+        "waitingForFlowControl": false,
+        "flowControlStats": {}
+    },
+    {
+        "type": "op",
+        "host": "b46ac05daa79:27017",
+        "desc": "OplogApplier-0",
+        "active": true,
+        "currentOpTime": "2024-08-06T20:54:59.567+00:00",
+        "effectiveUsers": [
+            {
+                "user": "__system",
+                "db": "local"
+            }
+        ],
+        "opid": 1399119188,
+        "op": "none",
+        "ns": "",
+        "redacted": false,
+        "command": {},
+        "numYields": 0,
+        "locks": {},
+        "waitingForLock": false,
+        "lockStats": {},
+        "waitingForFlowControl": false,
+        "flowControlStats": {}
+    },
+    {
+        "type": "op",
+        "host": "b46ac05daa79:27017",
+        "desc": "conn1392",
+        "connectionId": 1392,
+        "client": "10.131.62.131:45658",
+        "appName": "OplogFetcher",
+        "clientMetadata": {
+            "application": {
+                "name": "OplogFetcher"
+            },
+            "driver": {
+                "name": "MongoDB Internal Client",
+                "version": "7.0.12"
+            },
+            "os": {
+                "type": "Linux",
+                "name": "Ubuntu",
+                "architecture": "x86_64",
+                "version": "22.04"
+            }
+        },
+        "active": true,
+        "currentOpTime": "2024-08-06T20:59:35.394+00:00",
+        "threaded": true,
+        "opid": 1399253104,
+        "secs_running": 0,
+        "microsecs_running": 13134,
+        "op": "getmore",
+        "ns": "local.oplog.rs",
+        "redacted": false,
+        "command": {
+            "getMore": 7156629711810917986,
+            "collection": "oplog.rs",
+            "batchSize": 13981010,
+            "maxTimeMS": 5000,
+            "term": 2,
+            "lastKnownCommittedOpTime": {
+                "ts": {
+                    "$timestamp": {
+                        "t": 1720208938,
+                        "i": 17
+                    }
+                },
+                "t": 2
+            },
+            "$replData": 1,
+            "$oplogQueryData": 1,
+            "$readPreference": {
+                "mode": "secondaryPreferred"
+            },
+            "$clusterTime": {
+                "clusterTime": {
+                    "$timestamp": {
+                        "t": 1720208938,
+                        "i": 18
+                    }
+                },
+                "signature": {
+                    "hash": {
+                        "$binary": {
+                            "base64": "fAxz3pScinFgqdNkVCRZGX3goGY=",
+                            "subType": "00"
+                        }
+                    },
+                    "keyId": 7387155612372566021
+                }
+            },
+            "$db": "local"
+        },
+        "queryFramework": "classic",
+        "planSummary": "COLLSCAN",
+        "cursor": {
+            "cursorId": 7156629711810917986,
+            "createdDate": {
+                "$date": "2024-07-05T19:48:58.627Z"
+            },
+            "lastAccessDate": {
+                "$date": "2024-08-06T20:59:35.381Z"
+            },
+            "nDocsReturned": 88758072,
+            "nBatchesReturned": 101420266,
+            "noCursorTimeout": false,
+            "tailable": true,
+            "awaitData": true,
+            "originatingCommand": {
+                "find": "oplog.rs",
+                "filter": {
+                    "ts": {
+                        "$gte": {
+                            "$timestamp": {
+                                "t": 1720208938,
+                                "i": 17
+                            }
+                        }
+                    }
+                },
+                "batchSize": 13981010,
+                "tailable": true,
+                "awaitData": true,
+                "term": 2,
+                "maxTimeMS": 60000,
+                "readConcern": {
+                    "level": "local",
+                    "afterClusterTime": {
+                        "$timestamp": {
+                            "t": 0,
+                            "i": 1
+                        }
+                    }
+                },
+                "$replData": 1,
+                "$oplogQueryData": 1,
+                "$readPreference": {
+                    "mode": "secondaryPreferred"
+                },
+                "$clusterTime": {
+                    "clusterTime": {
+                        "$timestamp": {
+                            "t": 1720208938,
+                            "i": 18
+                        }
+                    },
+                    "signature": {
+                        "hash": {
+                            "$binary": {
+                                "base64": "fAxz3pScinFgqdNkVCRZGX3goGY=",
+                                "subType": "00"
+                            }
+                        },
+                        "keyId": 7387155612372566021
+                    }
+                },
+                "$db": "local"
+            },
+            "operationUsingCursorId": 1399253104,
+            "lastKnownCommittedOpTime": {
+                "ts": {
+                    "$timestamp": {
+                        "t": 1722977975,
+                        "i": 14
+                    }
+                },
+                "t": 2
+            }
+        },
+        "numYields": 2,
+        "locks": {},
+        "waitingForLock": false,
+        "lockStats": {
+            "FeatureCompatibilityVersion": {
+                "acquireCount": {
+                    "r": 2
+                }
+            },
+            "Global": {
+                "acquireCount": {
+                    "r": 2
+                }
+            }
+        },
+        "waitingForFlowControl": false,
+        "flowControlStats": {}
+    }
+]

@@ -49,6 +49,8 @@ METRIC_MAP = {
     'karpenter_cloudprovider_errors': 'cloudprovider.errors',
     'karpenter_cloudprovider_instance_type_cpu_cores': 'cloudprovider.instance.type.cpu_cores',
     'karpenter_cloudprovider_instance_type_memory_bytes': 'cloudprovider.instance.type.memory_bytes',
+    'karpenter_cloudprovider_instance_type_offering_available': 'cloudprovider.instance.type.offering_available',
+    'karpenter_cloudprovider_instance_type_offering_price_estimate': 'cloudprovider.instance.type.offering_price_estimate',
     'karpenter_cloudprovider_instance_type_price_estimate': 'cloudprovider.instance.type.price_estimate',
     'karpenter_consistency_errors': 'consistency.errors',
     'karpenter_deprovisioning_actions_performed': 'deprovisioning.actions_performed',
@@ -108,6 +110,7 @@ METRIC_MAP = {
     'karpenter_provisioner_usage_pct': 'provisioner.usage.pct',
     'karpenter_cluster_state_synced': 'cluster_state.synced',
     'karpenter_cluster_state_node_count': 'cluster_state.node_count',
+    'leader_election_master_status': 'leader_election.master_status',
     'process_cpu_seconds': 'process.cpu_seconds',
     'process_max_fds': 'process.max_fds',
     'process_open_fds': 'process.open_fds',
@@ -123,6 +126,20 @@ METRIC_MAP = {
     'workqueue_retries': 'workqueue_retries',
     'workqueue_unfinished_work_seconds': 'workqueue.unfinished.work_seconds',
     'workqueue_work_duration_seconds': 'workqueue.work.duration_seconds',
+    # new Karpenter V1 metric names
+    'karpenter_nodes_termination_duration_seconds': 'nodes.termination.time_seconds',
+    'karpenter_pods_startup_duration_seconds': 'pods.startup.time_seconds',
+    'karpenter_voluntary_disruption_queue_failures': 'disruption.replacement.nodeclaim.failures',
+    'karpenter_voluntary_disruption_decision_evaluation_duration_seconds': 'disruption.evaluation.duration_seconds',
+    'karpenter_voluntary_disruption_eligible_nodes': 'disruption.eligible_nodes',
+    'karpenter_voluntary_disruption_consolidation_timeouts': 'disruption.consolidation_timeouts',
+    'karpenter_nodepools_allowed_disruptions': 'disruption.budgets.allowed_disruptions',
+    'karpenter_voluntary_disruption_decisions': 'disruption.actions_performed',
+    'karpenter_scheduler_scheduling_duration_seconds': 'provisioner.scheduling.simulation.duration_seconds',
+    'karpenter_scheduler_queue_depth': 'provisioner.scheduling.queue_depth',
+    'karpenter_interruption_message_queue_duration_seconds': 'interruption.message.latency.time_seconds',
+    'karpenter_nodepools_usage': 'nodepool_usage',
+    'karpenter_nodepools_limit': 'nodepool_limit',
 }
 
 RENAME_LABELS_MAP = {

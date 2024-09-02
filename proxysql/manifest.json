@@ -17,7 +17,8 @@
       "Supported OS::Windows",
       "Category::Data Stores",
       "Category::Log Collection",
-      "Category::Caching"
+      "Category::Caching",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -48,9 +49,6 @@
     },
     "dashboards": {
       "ProxySQL Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "proxysql"
     }
   }
 }

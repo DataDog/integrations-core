@@ -7,7 +7,10 @@ import re
 
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.sqlserver.const import DEFAULT_AUTODISCOVERY_INTERVAL, PROC_CHAR_LIMIT
+from datadog_checks.sqlserver.const import (
+    DEFAULT_AUTODISCOVERY_INTERVAL,
+    PROC_CHAR_LIMIT,
+)
 
 
 class SQLServerConfig:
@@ -42,9 +45,11 @@ class SQLServerConfig:
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
         self.statement_metrics_config: dict = instance.get('query_metrics', {}) or {}
+        self.agent_jobs_config: dict = instance.get('agent_jobs', {}) or {}
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
         self.settings_config: dict = instance.get('collect_settings', {}) or {}
         self.activity_config: dict = instance.get('query_activity', {}) or {}
+        self.schema_config: dict = instance.get('schemas_collection', {}) or {}
         self.cloud_metadata: dict = {}
         aws: dict = instance.get('aws', {}) or {}
         gcp: dict = instance.get('gcp', {}) or {}
@@ -98,7 +103,7 @@ class SQLServerConfig:
         )
         self.log_unobfuscated_queries: bool = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans: bool = is_affirmative(instance.get('log_unobfuscated_plans', False))
-        self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', 1800)
+        self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', 300)
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
 

@@ -13,21 +13,24 @@ from .common import (
     ALL_VCSIM_VM_METRICS_WITH_VALS,
     FLAKEY_HOST_METRICS,
     FLAKEY_VM_METRICS,
+    USE_VSPHERE_LAB,
     VCSIM_HOST_METRICS,
     VCSIM_VM_METRICS,
 )
 
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.usefixtures("dd_environment"),
+    pytest.mark.skipif(USE_VSPHERE_LAB, reason='Do not run tests on lab environment'),
+]
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
+
 def test_esxi_metric_up(vcsim_instance, dd_run_check, aggregator):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
     dd_run_check(check)
-    aggregator.assert_metric('esxi.host.can_connect', 1, count=1, tags=["esxi_url:127.0.0.1:8989"])
+    aggregator.assert_metric('esxi.host.can_connect', 1, count=2, tags=["esxi_url:127.0.0.1:8989"])
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
     caplog.set_level(logging.DEBUG)
@@ -70,13 +73,11 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
 
     aggregator.assert_metric("esxi.host.count")
     aggregator.assert_metric("esxi.vm.count")
-    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2, tags=base_tags)
 
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_vcsim_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
     dd_run_check(check)
@@ -112,8 +113,6 @@ def test_vcsim_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
     )
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_esxi_resource_count_metrics(vcsim_instance, dd_run_check, aggregator):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
     dd_run_check(check)
@@ -133,8 +132,6 @@ def test_esxi_resource_count_metrics(vcsim_instance, dd_run_check, aggregator):
     aggregator.assert_metric("esxi.vm.count", 2, tags=vm_tags, hostname=None)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_ssl_verify(vcsim_instance, dd_run_check, aggregator):
     instance = copy.deepcopy(vcsim_instance)
     instance['ssl_verify'] = True
@@ -148,8 +145,6 @@ def test_ssl_verify(vcsim_instance, dd_run_check, aggregator):
     aggregator.assert_metric('esxi.host.can_connect', 0, count=1, tags=["esxi_url:127.0.0.1:8989"])
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_ssl_verify_cafile(vcsim_instance, dd_run_check, aggregator):
     instance = copy.deepcopy(vcsim_instance)
     instance['ssl_verify'] = True

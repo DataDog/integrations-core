@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   sqlserver:
     # https://hub.docker.com/_/microsoft-mssql-server

@@ -3,10 +3,22 @@
 init_config:
 
     ## @param propagate_agent_tags - boolean - optional - default: false
-    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
-    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.        
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
     #
     # propagate_agent_tags: false
+
+    ## @param global_custom_queries - list of mappings - optional
+    ## See `custom_queries` defined below.
+    ##
+    ## Global custom queries can be applied to all instances using the
+    ## `use_global_custom_queries` setting at the instance level.
+    #
+    # global_custom_queries:
+    #   - query: <QUERY>
+    #     columns: <COLUMNS>
+    #     tags: <TAGS>
+    #     collection_interval: <COLLECTION_INTERVAL>
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -61,7 +73,8 @@ instances:
 
     ## @param ignore_databases - list of strings - optional
     ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
-    ## Each value can be a plain string or a Postgres pattern.
+    ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
+    ## set collect_default_database to false in addition to adding it to this array.
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
     #
     # ignore_databases:
@@ -197,6 +210,12 @@ instances:
     # activity_metrics_excluded_aggregations:
     #   - application_name
 
+    ## @param collect_buffercache_metrics - boolean - optional - default: false
+    ## If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
+    ## pg_buffercache extension must be installed.
+    #
+    # collect_buffercache_metrics: false
+
     ## @param collect_database_size_metrics - boolean - optional - default: true
     ## Collect database size metrics.
     #
@@ -214,7 +233,7 @@ instances:
 
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
-    ## NOTE: 
+    ## NOTE:
     ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
     ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
     #
@@ -236,21 +255,83 @@ instances:
     #
     # table_count_limit: 200
 
+    ## @param only_custom_queries - boolean - optional - default: false
+    ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
+    ## Only metrics specified in `custom_queries` will be collected.
+    #
+    # only_custom_queries: false
+
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: 'true'
+
     ## @param custom_queries - list of mappings - optional
-    ## Define custom queries to collect custom metrics from your PostgreSQL
-    ## See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
-    ## https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
+    ## Each query must have 2 fields, and can have a third optional field:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ##            Use the pipe `|` if you require a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
+    ##                          the full metric name. If `type` is a `tag` type, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          This can also be set to the following `tag` types to
+    ##                          tag each metric in the row with the name and value
+    ##                          of the item in this column:
+    ##                           i. tag           - This is the default tag type
+    ##                           ii. tag_list     - This allows multiple values to be attached
+    ##                                             to the tag name. For example: 
+    ##
+    ##                                             query = {
+    ##                                               "name": "example",
+    ##                                               "query": "...",
+    ##                                               "columns": [
+    ##                                                 {"name": "server_tag", "type": "tag_list"},
+    ##                                                 {"name": "foo", "type": "gauge"},
+    ##                                               ]
+    ##                                             }
+    ##
+    ##                                             May result in:
+    ##                                             gauge("foo", tags=[
+    ##                                                                 "server_tag:us",
+    ##                                                                 "server_tag:primary",
+    ##                                                                 "server_tag:default"
+    ##                                                               ])
+    ##                                             gauge("foo", tags=["server_tag:eu"])
+    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
+    ##                          You can use the `count` type to perform aggregation
+    ##                          for queries that return multiple rows with the same or no tags.
+    ##              Columns without a name are ignored. To skip a column, enter:
+    ##                - {}
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
+    ##     If collection_interval is not set, the query will be run every check run.
+    ##     If the collection interval is less than check collection interval, 
+    ##     the query will be run every check run.
+    ##     If the collection interval is greater than check collection interval, 
+    ##     the query will NOT BE RUN exactly at the collection interval.
+    ##     The query will be run at the next check run after the collection interval has passed.
+    ## 5. metric_prefix (optional) - The prefix to apply to each metric.
     #
     # custom_queries:
-    #   - metric_prefix: postgresql
-    #     query: <QUERY>
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
     #     columns:
-    #     - name: <COLUNMS_1_NAME>
-    #       type: <COLUMNS_1_TYPE>
-    #     - name: <COLUNMS_2_NAME>
-    #       type: <COLUMNS_2_TYPE>
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
     #     tags:
-    #     - <TAG_KEY>:<TAG_VALUE>
+    #     - test:postgresql
+    #     metric_prefix: postgresql
 
     ## Define the configuration for database autodiscovery.
     ## Complete this section if you want to auto-discover databases on this host
@@ -262,6 +343,11 @@ instances:
         ## Enable database autodiscovery.
         #
         # enabled: false
+
+        ## @param global_view_db - string - optional - default: postgres
+        ## Database the agent connects to perform autodiscovery operations
+        #
+        # global_view_db: postgres
 
         ## @param max_databases - integer - optional - default: 100
         ## The maximum number of databases this host should monitor.
@@ -405,7 +491,7 @@ instances:
         #
         # payload_row_limit: 3500
 
-    ## Configure collection of pg_settings. This is an alpha feature.
+    ## Configure collection of pg_settings.
     #
     # collect_settings:
 
@@ -421,7 +507,7 @@ instances:
         # collection_interval: 600
 
         ## @param ignored_settings_patterns - list of strings - optional
-        ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+        ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will
         ## not be collected. This uses the traditional LIKE pattern-matching approach.
         #
         # ignored_settings_patterns:
@@ -434,7 +520,7 @@ instances:
     # collect_schemas:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+        ## Enable collection of database schemas. Requires `dbm: true`.
         #
         # enabled: false
 
@@ -452,6 +538,54 @@ instances:
         ## The database schema collection interval (in seconds).
         #
         # collection_interval: 600
+
+        ## @param include_databases - list of strings - optional
+        ## A list of regex patterns to include databases. 
+        ## Any database whose name matches any one of these patterns will be included. 
+        ## If empty, all databases matching other filters are included.
+        #
+        # include_databases:
+        #   - mydb
+
+        ## @param exclude_databases - list of strings - optional
+        ## A list of regex patterns to exclude databases. 
+        ## Any database whose name matches any one of these patterns will be excluded.
+        ## If empty, all databases matching other filters are included.
+        #
+        # exclude_databases:
+        #   - privatedb.*
+
+        ## @param include_schemas - list of strings - optional
+        ## A list of regex patterns to include schemas. 
+        ## Any schema whose name matches any one of these patterns will be included.
+        ## If empty, all schemas matching other filters are included.
+        #
+        # include_schemas:
+        #   - myschema
+
+        ## @param exclude_schemas - list of strings - optional
+        ## A list of regex patterns to exclude schemas. 
+        ## Any schema whose name matches any one of these patterns will be excluded.
+        ## If empty, all schemas matching other filters are included.
+        #
+        # exclude_schemas:
+        #   - privateschema.*
+
+        ## @param include_tables - list of strings - optional
+        ## A list of regex patterns to include tables. 
+        ## Any table whose name matches any one of these patterns will be included.
+        ## If empty, all tables matching other filters are included.
+        #
+        # include_tables:
+        #   - users.*
+
+        ## @param exclude_tables - list of strings - optional
+        ## A list of regex patterns to exclude tables. 
+        ## Any table whose name matches any one of these patterns will be excluded.
+        ## If empty, all tables matching other filters are included.
+        #
+        # exclude_tables:
+        #   - customer.*
 
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
@@ -492,6 +626,9 @@ instances:
         ## To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
         ## If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
         ## `aws.region` is required to enable IAM Authentication.
+        ##
+        ## Optionally, you can set `aws.managed_authentication.role_arn` to specify the IAM role ARN.
+        ## This can be used to perform cross-account authentication.
         #
         # managed_authentication: {}
 
@@ -686,8 +823,8 @@ instances:
         # keep_identifier_quotation: false
 
     ## @param propagate_agent_tags - boolean - optional - default: false
-    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
-    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags.
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
     ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
     #
     # propagate_agent_tags: false

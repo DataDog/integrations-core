@@ -1,0 +1,29 @@
+{
+    "version": 2,
+    "created_at": "2024-05-28",
+    "last_updated_at": "2024-05-28",
+    "title": "Messages are ready in RabbitMQ queue",
+    "tags": [
+        "integration:rabbitmq"
+    ],
+    "description": "Notify your team when messages are ready in your RabbitMQ queue.",
+    "definition":{
+        "message": "Messages are ready in {{rabbitmq_queue.name}} on {{host.name}}. With messages ready in your queue, ensure you have consumers to consume these messages.",
+        "name": "[RabbitMQ] Queue message(s) ready in {{rabbitmq_queue.name}} ",
+        "options": {
+            "thresholds": {
+                "critical": 1
+            },
+            "notify_audit": false,
+            "notify_no_data": false,
+            "include_tags": true,
+            "new_group_delay": 60
+        },
+        "priority": null,
+        "query": "avg(last_5m):rabbitmq.queue.messages_ready{*} by {host,rabbitmq_queue} > 1",
+        "tags": [
+            "integration:rabbitmq"
+        ],
+        "type": "query alert"
+    }
+}

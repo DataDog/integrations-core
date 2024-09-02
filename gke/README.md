@@ -47,42 +47,7 @@ Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes clus
 
 #### Autopilot
 
-1. Install Helm.
-
-2. Add the Datadog repository to your Helm repositories:
-
-  ```bash
-  helm repo add datadog https://helm.datadoghq.com
-  helm repo update
-  ```
-
-3. Deploy the Datadog Agent and Cluster Agent on Autopilot with the following command:
-
-  ```bash
-  helm install <RELEASE_NAME> \
-      --set datadog.apiKey=<DATADOG_API_KEY> \
-      --set datadog.appKey=<DATADOG_APP_KEY> \
-      --set clusterAgent.enabled=true \
-      --set clusterAgent.metricsProvider.enabled=true \
-      --set providers.gke.autopilot=true \
-      datadog/datadog
-  ```
-
-  **Note**: If you also wish to enable logs or traces, add lines to this command setting `datadog.logs.enabled` (for logs) and `datadog.apm.portEnabled` (for traces) to `true`. For example:
-
-  ```bash
-  helm install --name <RELEASE_NAME> \
-      --set datadog.apiKey=<DATADOG_API_KEY> \
-      --set datadog.appKey=<DATADOG_APP_KEY> \
-      --set clusterAgent.enabled=true \
-      --set clusterAgent.metricsProvider.enabled=true \
-      --set providers.gke.autopilot=true \
-      --set datadog.logs.enabled=true \
-      --set datadog.apm.portEnabled=true \
-      datadog/datadog
-  ```
-
-  See the [Datadog `helm-charts` repository][101] for a full list of configurable values.
+Follow the instructions in the GKE [Autopilot section][14] of the Kubernetes distributions page.
 
 #### Admission Controller
  
@@ -118,3 +83,4 @@ Because Autopilot does not allow `socket` mode, Datadog recommends using `servic
 [11]: https://www.datadoghq.com/blog/monitor-google-kubernetes-engine/
 [12]: https://www.datadoghq.com/blog/monitor-tau-t2a-gke-workloads-with-datadog-arm-support/
 [13]: https://www.datadoghq.com/blog/gke-dashboards-integration-improvements/
+[14]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=helm#autopilot

@@ -16,7 +16,14 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::OS & System",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor"
+      }
     ]
   },
   "author": {
@@ -51,9 +58,6 @@
     },
     "saved_views": {
       "supervisord_processes": "assets/saved_views/supervisord_processes.json"
-    },
-    "logs": {
-      "source": "supervisord"
     }
   }
 }

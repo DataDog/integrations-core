@@ -42,7 +42,7 @@ SELECT {cols}
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE query != '<insufficient privilege>'
-  AND query NOT LIKE 'EXPLAIN %%'
+  AND query NOT LIKE '/* DDIGNORE */%%'
   {queryid_filter}
   {filters}
   {extra_clauses}
@@ -240,6 +240,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     len(self._query_calls_cache.called_queryids),
                     tags=self.tags,
                     hostname=self._check.resolved_hostname,
+                    raw=True,
                 )
 
                 return self._query_calls_cache.called_queryids
@@ -300,6 +301,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     ]
                     + self._check._get_debug_tags(),
                     hostname=self._check.resolved_hostname,
+                    raw=True,
                 )
                 return []
 
@@ -308,7 +310,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
-            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
+            pg_stat_statements_max_setting = self._check.pg_settings.get("pg_stat_statements.max")
+            pg_stat_statements_max = int(
+                pg_stat_statements_max_setting if pg_stat_statements_max_setting is not None else 0
+            )
             if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
                 self._check.record_warning(
                     DatabaseConfigurationError.high_pg_stat_statements_max,
@@ -422,6 +427,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 1,
                 tags=self.tags + [error_tag] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
+                raw=True,
             )
 
             return []
@@ -439,7 +445,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 if rows:
                     dealloc = rows[0][0]
                     self._check.monotonic_count(
-                        "postgresql.pg_stat_statements.dealloc",
+                        "pg_stat_statements.dealloc",
                         dealloc,
                         tags=self.tags,
                         hostname=self._check.resolved_hostname,
@@ -461,13 +467,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if rows:
                 count = rows[0][0]
             self._check.gauge(
-                "postgresql.pg_stat_statements.max",
+                "pg_stat_statements.max",
                 self._check.pg_settings.get("pg_stat_statements.max", 0),
                 tags=self.tags,
                 hostname=self._check.resolved_hostname,
             )
             self._check.count(
-                "postgresql.pg_stat_statements.count",
+                "pg_stat_statements.count",
                 count,
                 tags=self.tags,
                 hostname=self._check.resolved_hostname,
@@ -523,6 +529,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 1,
                 tags=self.tags + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
+                raw=True,
             )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -563,6 +570,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             len(rows),
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
+            raw=True,
         )
 
         return rows

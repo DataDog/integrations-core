@@ -86,7 +86,8 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
-    autodiscovery_dbs = ['master', 'msdb', 'datadog_test']
+    instance_docker['agent_jobs'] = {'enabled': False}
+    autodiscovery_dbs = ['master', 'msdb', 'datadog_test-1']
     if database_autodiscovery:
         instance_docker['autodiscovery_include'] = autodiscovery_dbs
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
@@ -336,13 +337,13 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
 @pytest.mark.usefixtures('dd_environment')
 @always_on
 def test_autodiscovery_perf_counters_ao(aggregator, dd_run_check, instance_autodiscovery):
-    instance_autodiscovery['autodiscovery_include'] = ['datadog_test']
+    instance_autodiscovery['autodiscovery_include'] = ['datadog_test-1']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
     instance_tags = instance_autodiscovery.get('tags', [])
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
-    tags = ['database:datadog_test'] + instance_tags
+    tags = ['database:datadog_test-1'] + instance_tags
     for metric in expected_metrics:
         print(aggregator.metrics(metric))
         aggregator.assert_metric(metric, tags=tags, hostname=check.resolved_hostname)
@@ -483,7 +484,7 @@ def test_index_fragmentation_metrics(aggregator, dd_run_check, instance_docker, 
 
     assert 'master' in seen_databases
     if database_autodiscovery:
-        assert 'datadog_test' in seen_databases
+        assert 'datadog_test-1' in seen_databases
 
 
 @pytest.mark.integration
@@ -595,7 +596,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
         ),
         (
             True,
-            'datadog_test',
+            'datadog_test-1',
             'forced_hostname',
             ENGINE_EDITION_SQL_DATABASE,
             'forced_hostname',
@@ -612,10 +613,10 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
         ),
         (
             True,
-            'datadog_test',
+            'datadog_test-1',
             None,
             ENGINE_EDITION_SQL_DATABASE,
-            'localhost/datadog_test',
+            'localhost/datadog_test-1',
             {
                 'azure': {
                     'deployment_type': 'sql_database',
@@ -623,7 +624,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 },
             },
             [
-                "dd.internal.resource:azure_sql_server_database:localhost/datadog_test",
+                "dd.internal.resource:azure_sql_server_database:localhost/datadog_test-1",
                 "dd.internal.resource:azure_sql_server:my-instance",
             ],
         ),
@@ -758,7 +759,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert event['dbms'] == "sqlserver"
     assert event['tags'] == ['optional:tag1']
     assert event['integration_version'] == __version__
-    assert event['collection_interval'] == 1800
+    assert event['collection_interval'] == 300
     assert event['metadata'] == {
         'dbm': dbm_enabled,
         'connection_host': instance_docker['host'],
@@ -779,11 +780,11 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
 def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, database_autodiscovery):
     instance_docker['database_autodiscovery'] = database_autodiscovery
     if not database_autodiscovery:
-        instance_docker['database'] = "datadog_test"
+        instance_docker['database'] = "datadog_test-1"
     # currently the `thingsindex` index on the `name` column in the ϑings table
     # in order to generate user seeks, scans, updates and lookups we can run a variety
     # of queries against this table
-    conn_str = 'DRIVER={};Server={};Database=datadog_test;UID={};PWD={};TrustServerCertificate=yes;'.format(
+    conn_str = 'DRIVER={};Server={};Database=datadog_test-1;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
     conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
@@ -804,7 +805,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(check)
     expected_tags = instance_docker.get('tags', []) + [
-        'db:datadog_test',
+        'db:datadog_test-1',
         'table:ϑings',
         'index_name:thingsindex',
     ]

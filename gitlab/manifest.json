@@ -21,7 +21,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -60,9 +61,6 @@
     },
     "dashboards": {
       "Gitlab Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "gitlab"
     }
   }
 }

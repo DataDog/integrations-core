@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 2.4.3 / 2024-08-09
+
+***Fixed***:
+
+* Fix collection of 2 appset counters ([#18018](https://github.com/DataDog/integrations-core/pull/18018))
+
+## 2.4.2 / 2024-07-05 / Agent 7.55.0
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+## 2.4.1 / 2024-05-31
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
 ## 2.4.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:

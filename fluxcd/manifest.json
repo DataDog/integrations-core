@@ -18,7 +18,14 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux"
+      }
     ]
   },
   "author": {
@@ -61,8 +68,8 @@
       "Error Count": "assets/monitors/error_count.json"
     },
     "saved_views": {
-        "flux_overview": "assets/saved_views/overview.json",
-        "flux_errors": "assets/saved_views/errors.json"
+      "flux_overview": "assets/saved_views/overview.json",
+      "flux_errors": "assets/saved_views/errors.json"
     }
   }
 }

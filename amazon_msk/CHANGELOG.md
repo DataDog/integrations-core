@@ -2,7 +2,33 @@
 
 <!-- towncrier release notes start -->
 
-## 4.7.0 / 2024-04-26
+## 4.10.0 / 2024-08-09
+
+***Added***:
+
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 4.9.0 / 2024-07-05 / Agent 7.56.0
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+## 4.8.0 / 2024-05-31
+
+***Added***:
+
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424)), ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 4.7.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:
 

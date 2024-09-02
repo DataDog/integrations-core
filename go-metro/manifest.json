@@ -13,7 +13,8 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Category::Languages"
+      "Category::Languages",
+      "Offering::Integration"
     ]
   },
   "author": {

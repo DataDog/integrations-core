@@ -53,7 +53,7 @@ Query OK, 0 rows affected, 1 warning (0.00 sec)
 For MySQL 8.0 or greater, grant `replication client` and set `max_user_connections` with the following commands:
 
 ```shell
-mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%'
+mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
@@ -567,7 +567,7 @@ Additional helpful documentation, links, and articles:
 
 - [Monitoring MySQL performance metrics][31]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd-2.png
 [4]: https://app.datadoghq.com/account/settings/agent/latest
 [5]: https://dev.mysql.com/doc/refman/8.0/en/creating-accounts.html
 [6]: https://docs.datadoghq.com/integrations/faq/mysql-localhost-error-localhost-vs-127-0-0-1/

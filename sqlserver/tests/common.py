@@ -143,6 +143,12 @@ EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = (
     + EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON
 )
 
+EXPECTED_AGENT_JOBS_METRICS_COMMON = [
+    'sqlserver.agent.active_jobs.duration',
+    'sqlserver.agent.active_jobs.step_info',
+    'sqlserver.agent.active_session.duration',
+]
+
 # Our test environment does not have failover clustering enabled, so these metrics are not expected.
 # To test them follow this guide:
 # https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
@@ -283,7 +289,7 @@ def assert_metrics(
             tags = check_tags + ['database:{}'.format(dbname)]
             for mname in DB_PERF_COUNT_METRICS_NAMES_SINGLE:
                 aggregator.assert_metric(mname, hostname=hostname, tags=tags)
-            if dbname == 'datadog_test' and is_always_on():
+            if dbname == 'datadog_test-1' and is_always_on():
                 for mname in DB_PERF_COUNT_METRICS_NAMES_AO:
                     aggregator.assert_metric(mname, hostname=hostname, tags=tags)
     else:

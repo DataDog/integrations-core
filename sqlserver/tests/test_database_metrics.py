@@ -24,7 +24,7 @@ from .common import (
     SQLSERVER_MAJOR_VERSION,
 )
 
-AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test']
+AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test-1']
 
 STATIC_SERVER_INFO = {
     STATIC_INFO_MAJOR_VERSION: SQLSERVER_MAJOR_VERSION,
@@ -61,8 +61,8 @@ def test_sqlserver_index_usage_metrics(
             ('msdb', 'PK__backupse__21F79AAB9439648C', 'backupset', 0, 1, 0, 0),
         ],
         [
-            ('datadog_test', 'idx_something', 'some_table', 10, 60, 12, 18),
-            ('datadog_test', 'idx_something_else', 'some_table', 20, 30, 40, 50),
+            ('datadog_test-1', 'idx_something', 'some_table', 10, 60, 12, 18),
+            ('datadog_test-1', 'idx_something_else', 'some_table', 20, 30, 40, 50),
         ],
     ]
     mocked_results_tempdb = [
@@ -153,7 +153,7 @@ def test_sqlserver_db_fragmentation_metrics(
             ('msdb', 'syscachedcredentials', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
             ('msdb', 'syscollector_blobs_internal', 1, 'PK_syscollector_blobs_internal_paremeter_name', 0, 0.0, 0, 0.0),
         ],
-        [('datadog_test', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
+        [('datadog_test-1', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
     ]
     mocked_results_tempdb = [
         [('tempdb', '#TempExample__000000000008', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
@@ -250,7 +250,7 @@ def test_sqlserver_database_backup_metrics(
         ('model', 'model', 2),
         ('msdb', 'msdb', 0),
         ('tempdb', 'tempdb', 0),
-        ('datadog_test', 'datadog_test', 10),
+        ('datadog_test-1', 'datadog_test-1', 10),
     ]
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])

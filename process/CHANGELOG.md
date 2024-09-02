@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.4.0 / 2024-07-05 / Agent 7.56.0
+
+***Added***:
+
+* Add `use_oneshot` parameter to speed up check runs with `psutil.Process().oneshot()` ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
 ## 3.3.0 / 2024-03-08 / Agent 7.52.0
 
 ***Added***:

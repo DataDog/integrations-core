@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import os
 import re
+import time
 from collections import namedtuple
 
 import mock
@@ -13,6 +15,7 @@ from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
+from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
@@ -22,7 +25,12 @@ from datadog_checks.sqlserver.utils import (
 )
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
-from .utils import windows_ci
+from .utils import deep_compare, windows_ci
+
+try:
+    import pyodbc
+except ImportError:
+    pyodbc = None
 
 # mark the whole module
 pytestmark = pytest.mark.unit
@@ -432,13 +440,27 @@ def test_set_default_driver_conf():
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'] == 'ABC'
 
-    with EnvVars({}, ignore=['ODBCSYSINI']):
-        set_default_driver_conf()
-        assert 'ODBCSYSINI' not in os.environ
+    with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
+        with EnvVars({}):
+            set_default_driver_conf()
+            assert 'ODBCSYSINI' in os.environ
+            assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
 
-    with EnvVars({'ODBCSYSINI': 'ABC'}):
-        set_default_driver_conf()
-        assert os.environ['ODBCSYSINI'] == 'ABC'
+        with EnvVars({}, ignore=['ODBCSYSINI']):
+            with mock.patch("os.path.exists", return_value=True):
+                # odbcinst.ini or odbc.ini exists in agent embedded directory
+                set_default_driver_conf()
+                assert 'ODBCSYSINI' not in os.environ
+
+        with EnvVars({}, ignore=['ODBCSYSINI']):
+            set_default_driver_conf()
+            assert 'ODBCSYSINI' in os.environ  # ODBCSYSINI is set by the integration
+            if pyodbc is not None:
+                assert pyodbc.drivers() is not None
+
+        with EnvVars({'ODBCSYSINI': 'ABC'}):
+            set_default_driver_conf()
+            assert os.environ['ODBCSYSINI'] == 'ABC'
 
 
 @windows_ci
@@ -735,3 +757,112 @@ def test_extract_sql_comments_and_procedure_name(query, expected_comments, is_pr
     assert comments == expected_comments
     assert p == is_proc
     assert re.match(name, expected_name, re.IGNORECASE) if expected_name else expected_name == name
+
+
+class DummyLogger:
+    def debug(*args):
+        pass
+
+    def error(*args):
+        pass
+
+
+def set_up_submitter_unit_test():
+    submitted_data = []
+    base_event = {
+        "host": "some",
+        "agent_version": 0,
+        "dbms": "sqlserver",
+        "kind": "sqlserver_databases",
+        "collection_interval": 1200,
+        "dbms_version": "some",
+        "tags": "some",
+        "cloud_metadata": "some",
+    }
+
+    def submitData(data):
+        submitted_data.append(data)
+
+    dataSubmitter = SubmitData(submitData, base_event, DummyLogger())
+    return dataSubmitter, submitted_data
+
+
+def test_submit_data():
+
+    dataSubmitter, submitted_data = set_up_submitter_unit_test()
+
+    dataSubmitter.store_db_infos([{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}])
+    schema1 = {"id": "1"}
+    schema2 = {"id": "2"}
+    schema3 = {"id": "3"}
+
+    dataSubmitter.store("test_db1", schema1, [1, 2], 5)
+    dataSubmitter.store("test_db2", schema3, [1, 2], 5)
+    assert dataSubmitter.columns_since_last_submit() == 10
+    dataSubmitter.store("test_db1", schema2, [1, 2], 10)
+
+    dataSubmitter.submit()
+
+    assert dataSubmitter.columns_since_last_submit() == 0
+
+    expected_data = {
+        "host": "some",
+        "agent_version": 0,
+        "dbms": "sqlserver",
+        "kind": "sqlserver_databases",
+        "collection_interval": 1200,
+        "dbms_version": "some",
+        "tags": "some",
+        "cloud_metadata": "some",
+        "metadata": [
+            {"id": 3, "name": "test_db1", "schemas": [{"id": "1", "tables": [1, 2]}, {"id": "2", "tables": [1, 2]}]},
+            {"id": 4, "name": "test_db2", "schemas": [{"id": "3", "tables": [1, 2]}]},
+        ],
+    }
+    data = json.loads(submitted_data[0])
+    data.pop("timestamp")
+    assert deep_compare(data, expected_data)
+
+
+def test_fetch_throws(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    schemas = Schemas(check, check._config)
+    with mock.patch('time.time', side_effect=[0, 9999999]), mock.patch(
+        'datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}
+    ), mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]):
+        with pytest.raises(StopIteration):
+            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
+
+
+def test_submit_is_called_if_too_many_columns(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    schemas = Schemas(check, check._config)
+    with mock.patch('time.time', side_effect=[0, 0]), mock.patch(
+        'datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}
+    ), mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]), mock.patch(
+        'datadog_checks.sqlserver.schemas.SubmitData.submit'
+    ) as mocked_submit, mock.patch(
+        'datadog_checks.sqlserver.schemas.Schemas._get_tables_data', return_value=(1000_000, {"id": 1})
+    ):
+        with pytest.raises(StopIteration):
+            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
+            mocked_submit.called_once()
+
+
+def test_exception_handling_by_do_for_dbs(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
+    schemas = Schemas(check, check._config)
+    mock_cursor = mock.MagicMock()
+    with mock.patch(
+        'datadog_checks.sqlserver.schemas.Schemas._fetch_schema_data', side_effect=Exception("Can't connect to DB")
+    ), mock.patch('datadog_checks.sqlserver.sqlserver.SQLServer.get_databases', return_value=["db1"]), mock.patch(
+        'cachetools.TTLCache.get', return_value="dummy"
+    ), mock.patch(
+        'datadog_checks.sqlserver.connection.Connection.open_managed_default_connection'
+    ), mock.patch(
+        'datadog_checks.sqlserver.connection.Connection.get_managed_cursor', return_value=mock_cursor
+    ), mock.patch(
+        'datadog_checks.sqlserver.utils.is_azure_sql_database', return_value={}
+    ):
+        schemas._fetch_for_databases()

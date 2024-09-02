@@ -2,11 +2,7 @@
 base-package-features = ["deps", "db", "json"]
 
 check-types = false
-mypy-args = [
-  "--py2",
-  "datadog_checks/",
-  "tests/",
-]
+
 mypy-deps = [
   "types-mock==0.1.5",
   "types-cachetools==0.1.10",

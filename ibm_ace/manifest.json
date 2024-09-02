@@ -15,7 +15,8 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -46,9 +47,6 @@
     },
     "dashboards": {
       "IBM ACE Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "ibm_ace"
     }
   }
 }

@@ -40,7 +40,8 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -61,9 +62,6 @@
       "Cisco Duo - Administrator Logs": "assets/dashboards/cisco_duo_administrator_logs.json",
       "Cisco Duo - Telephony Logs": "assets/dashboards/cisco_duo_telephony_logs.json",
       "Cisco Duo - Offline Enrollment Logs": "assets/dashboards/cisco_duo_offline_enrollment_logs.json"
-    },
-    "logs": {
-      "source": "cisco-duo"
     }
   },
   "author": {

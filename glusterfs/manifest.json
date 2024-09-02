@@ -14,7 +14,8 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -55,9 +56,6 @@
     },
     "saved_views": {
       "glusterfs_processes": "assets/saved_views/glusterfs_processes.json"
-    },
-    "logs": {
-      "source": "glusterfs"
     }
   }
 }

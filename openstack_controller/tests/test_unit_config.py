@@ -195,6 +195,7 @@ def test_config_exceptions(check, dd_run_check, exception_msg):
         ),
     ],
 )
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_config_warnings(check, dd_run_check, caplog, warning_msg):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)

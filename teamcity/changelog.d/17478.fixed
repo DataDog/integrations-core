@@ -1,1 +1,0 @@
-check for auth_token key and skip adding guestAuth or httpAuth to url if present

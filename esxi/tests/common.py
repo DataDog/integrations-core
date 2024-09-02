@@ -1,10 +1,14 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 from pyVmomi import vim, vmodl
 
 HOST = "127.0.0.1"
 PORT = 8989
+USE_VSPHERE_LAB = os.environ.get('USE_VSPHERE_LAB')
+
 VCSIM_INSTANCE = {
     'host': f"{HOST}:{str(PORT)}",
     'username': 'test',

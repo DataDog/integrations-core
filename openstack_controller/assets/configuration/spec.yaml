@@ -278,6 +278,13 @@ files:
            The region_id that will be used to filter the endpoints to use for each component.
           value:
             type: string
+        - name: all_projects
+          description: |
+           List compute servers across all projects (admin only).
+          value:
+            example: false
+            display_default: false
+            type: boolean
         - name: components
           description: |
             General configuration that we want to apply to each of the components and their different metric blocks.
@@ -661,6 +668,13 @@ files:
                   - type: object
                     properties:
                       - name: stacks
+                        type: boolean
+              - name: swift
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: containers
                         type: boolean
             example:
               compute: false

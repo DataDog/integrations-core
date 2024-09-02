@@ -19,7 +19,8 @@
       "Supported OS::macOS",
       "Category::AI/ML",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -50,9 +51,6 @@
     },
     "monitors": {
       "error_ratio": "assets/monitors/error_ratio.json"
-    },
-    "logs": {
-      "source": "torchserve"
     },
     "dashboards": {
       "torchserve_overview": "assets/dashboards/overview.json"
