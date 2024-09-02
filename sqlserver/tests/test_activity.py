@@ -909,18 +909,18 @@ def test_sanitize_activity_row(dbm_instance, row):
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
 
-def run_check_and_return_deadlocks(dd_run_check, check, aggregator):
+def run_check_and_return_deadlock_payloads(dd_run_check, check, aggregator):
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     if not dbm_activity:
         return None
-    matched_event = []
+    matched = []
     for event in dbm_activity:
         if "sqlserver_deadlocks" in event:
-            matched_event.append(event)
-    if not matched_event:
+            matched.append(event)
+    if not matched:
         return None
-    return matched_event
+    return matched
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -933,8 +933,8 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
     dbm_instance['query_activity']['enabled'] = False
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
     
-    deadlocks = run_check_and_return_deadlocks(dd_run_check, sqlserver_check, aggregator)
-    assert not deadlocks, "shouldn't have sent a deadlock payload without a deadlock"
+    deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check, aggregator)
+    assert not deadlock_payloads, "shouldn't have sent a deadlock payload without a deadlock"
     
     created_deadlock = False
     # Rarely instead of creating a deadlock one of the transactions time outs
@@ -951,8 +951,8 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
     except AssertionError as e:
         raise e
     
-    deadlocks = run_check_and_return_deadlocks(dd_run_check, sqlserver_check, aggregator)
-    assert len(deadlocks) == 1, "Should have collected one deadlock payload, but collected: {}.".format(len(deadlocks))
+    deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check, aggregator)
+    assert len(deadlock_payloads) == 1, "Should have collected one deadlock payload, but collected: {}.".format(len(deadlocks))
     
     
 
