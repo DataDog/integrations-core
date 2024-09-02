@@ -952,10 +952,25 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
         raise e
     
     deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check, aggregator)
-    assert len(deadlock_payloads) == 1, "Should have collected one deadlock payload, but collected: {}.".format(len(deadlocks))
-    
-    
+    try:
+        assert len(deadlock_payloads) == 1, "Should have collected one deadlock payload, but collected: {}.".format(len(deadlocks))
+    except AssertionError as e:
+        raise e
 
+    found = 0
+    deadlocks = deadlock_payloads[0]
+    assert not "ERROR" in deadlocks, "Shouldn't have generated an error"
+    
+    for d in deadlocks:
+        root = ET.fromstring(d)
+        process_list = root.find(".//process-list")
+        for process in process_list.findall('process'):
+            if (
+                process.find('inputbuf').text
+                == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;"
+            ):
+                found += 1
+    assert found == 1, "Should haveve collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
