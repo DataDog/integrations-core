@@ -94,7 +94,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -146,7 +146,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "service",
-                                                    "limit": 10,
+                                                    "limit": 15,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
@@ -235,7 +235,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "service",
-                                                    "limit": 10,
+                                                    "limit": 15,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
