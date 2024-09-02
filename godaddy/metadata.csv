@@ -1,9 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 godaddy.certificate.canceled_certificates,count,,,,The total number of canceled certificates,0,godaddy,Canceled Certificates,,
 godaddy.certificate.certificate_expiration_days,count,,day,,Count of expiration days by certificate,0,godaddy,Certificate Expiration Days,,
-godaddy.certificate.certificate_status,count,,,,Contains the certificate with status,0,godaddy,Certificate Status,,
+godaddy.certificate.certificate_status,count,,,,Contains the certificate and it's current status,0,godaddy,Certificate Status,,
 godaddy.certificate.denied_certificates,count,,,,The total number of denied certificates,0,godaddy,Denied Certificates,,
-godaddy.certificate.domain_status,count,,,,The domain with status by certificate,0,godaddy,Domain Status,,
+godaddy.certificate.domain_status,count,,,,Contains the domain and it's current status by certificate,0,godaddy,Domain Status,,
 godaddy.certificate.domains_count,count,,,,The total number of domains by certificate,0,godaddy,Domains Count,,
 godaddy.certificate.expired_certificates,count,,,,The total number of expired certificates,0,godaddy,Expired Certificates,,
 godaddy.certificate.issued_certificates,count,,,,The total number of issued certificates,0,godaddy,Issued Certificates,,

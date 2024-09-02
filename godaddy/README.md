@@ -32,12 +32,9 @@ Configure the Datadog endpoint to forward GoDaddy metrics to Datadog.
 
 1. Navigate to `GoDaddy`.
 2. Add your GoDaddy credentials.
-
-| GoDaddy parameters               | Description                            |
-|----------------------------------|----------------------------------------|
-| GoDaddy API key                  | The API key of GoDaddy.                |
-| GoDaddy secret key               | The secret key of GoDaddy              |
-| GoDaddy customer number          | The GoDaddy customer number (or shopper ID) |
+   - GoDaddy API key
+   - GoDaddy secret key
+   - GoDaddy customer number (or shopper ID)
 
 ## Data Collected
 
