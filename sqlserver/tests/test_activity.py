@@ -909,6 +909,19 @@ def test_sanitize_activity_row(dbm_instance, row):
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
 
+def run_check_and_return_deadlocks(dd_run_check, check, aggregator):
+    dd_run_check(check)
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    if not dbm_activity:
+        return None
+    matched_event = []
+    for event in dbm_activity:
+        if "sqlserver_deadlocks" in event:
+            matched_event.append(event)
+    if not matched_event:
+        return None
+    return matched_event
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
@@ -920,14 +933,34 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
     dbm_instance['query_activity']['enabled'] = False
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
     
-    dd_run_check(sqlserver_check)
-    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
-    deadlock_event_found = False
+    deadlocks = run_check_and_return_deadlocks(dd_run_check, sqlserver_check, aggregator)
+    assert not deadlocks, "shouldn't have sent a deadlock payload without a deadlock"
+    
+    created_deadlock = False
+    # Rarely instead of creating a deadlock one of the transactions time outs
+    for _ in range(0, 3):
+        bob_conn = _get_conn_for_user(dbm_instance, 'bob', 3)
+        fred_conn = _get_conn_for_user(dbm_instance, 'fred', 3)
+        created_deadlock = create_deadlock(bob_conn, fred_conn)
+        bob_conn.close()
+        fred_conn.close()
+        if created_deadlock:
+            break
+    try:
+        assert created_deadlock, "Couldn't create a deadlock, exiting"
+    except AssertionError as e:
+        raise e
+    
+    '''
+    collected_deadlocks = []
     for event in dbm_activity:
         if "sqlserver_deadlocks" in event:
-            deadlock_event_found = True
-            logging.error("Deadlock event found: %s", event)
-    assert not deadlock_event_found, "shouldn't have collected a deadlock event"
+            collected_deadlocks.append(event)
+    assert len(collected_deadlocks) == 1, "Should have collected one deadlock payload, but collected: {}. Events {}".format(len(collected_deadlocks), collected_deadlocks)
+    '''
+    
+    
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
