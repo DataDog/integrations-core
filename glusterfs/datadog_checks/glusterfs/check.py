@@ -50,7 +50,7 @@ class GlusterfsCheck(AgentCheck):
         self.log.debug("Using gstatus path `%s`", self.gstatus_cmd)
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
-    def _get_gstatus_output(self, cmd):
+    def get_gstatus_output(self, cmd):
 
         res = subprocess.run(cmd.split(), capture_output=True, text=True)
         return res.stdout, res.stderr, res.returncode
@@ -58,7 +58,7 @@ class GlusterfsCheck(AgentCheck):
     def check(self, _):
         if self.use_sudo:
             cmd = [f'sudo -ln {self.gstatus_cmd}']
-            stdout, stderr, returncode = self._get_gstatus_output(cmd)
+            stdout, stderr, returncode = self.get_gstatus_output(cmd)
             if returncode != 0 or not stdout:
                 raise Exception('The dd-agent user does not have sudo access: {!r}'.format(stderr or stdout))
             gluster_cmd = 'sudo {}'.format(self.gstatus_cmd)
@@ -71,7 +71,7 @@ class GlusterfsCheck(AgentCheck):
             # In testing I saw that even though we request the json, sometimes there's a line that appears at the top
             # and thus will break the json loading. A line like:
             # 'Note: Unable to get self-heal status for one or more volumes \n'
-            stdout, stderr, returncode = self._get_gstatus_output(gluster_cmd)
+            stdout, stderr, returncode = self.get_gstatus_output(gluster_cmd)
             if stdout.lstrip().startswith('{'):
                 json_data = stdout
             else:

@@ -51,7 +51,7 @@ def mock_gstatus_data():
     with open(f_name) as f:
         data = f.read()
 
-    with mock.patch('datadog_checks.glusterfs.check.GlusterfsCheck._get_gstatus_output', return_value=(data, "", 0)):
+    with mock.patch('datadog_checks.glusterfs.check.GlusterfsCheck.get_gstatus_output', return_value=(data, "", 0)):
         yield
 
 
