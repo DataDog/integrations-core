@@ -951,13 +951,8 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
     except AssertionError as e:
         raise e
     
-    '''
-    collected_deadlocks = []
-    for event in dbm_activity:
-        if "sqlserver_deadlocks" in event:
-            collected_deadlocks.append(event)
-    assert len(collected_deadlocks) == 1, "Should have collected one deadlock payload, but collected: {}. Events {}".format(len(collected_deadlocks), collected_deadlocks)
-    '''
+    deadlocks = run_check_and_return_deadlocks(dd_run_check, sqlserver_check, aggregator)
+    assert len(deadlocks) == 1, "Should have collected one deadlock payload, but collected: {}.".format(len(deadlocks))
     
     
 
