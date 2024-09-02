@@ -924,7 +924,7 @@ def run_check_and_return_deadlock_payloads(dd_run_check, check, aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
+def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     dbm_instance['deadlocks'] = {
         'enabled': True,
         'run_sync': True,
@@ -957,11 +957,10 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
     except AssertionError as e:
         raise e
 
-    found = 0
     deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
-    assert not "ERROR" in deadlocks, "Shouldn't have generated an error"
-    
+    found = 0    
     for d in deadlocks:
+        assert not "ERROR" in d, "Shouldn't have generated an error"
         try:
             root = ET.fromstring(d)
         except ET.ParseError as e:
@@ -974,82 +973,8 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
                 == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;"
             ):
                 found += 1
-    assert found == 1, "Should haveve collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
-    dbm_instance['deadlocks'] = {
-        'enabled': True,
-        'run_sync': True,
-        'collection_interval': 0.1,
-    }
-    dbm_instance['query_activity']['enabled'] = False
-
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
-
-    created_deadlock = False
-    # Rarely instead of creating a deadlock one of the transactions time outs
-    for _ in range(0, 3):
-        bob_conn = _get_conn_for_user(dbm_instance, 'bob', 3)
-        fred_conn = _get_conn_for_user(dbm_instance, 'fred', 3)
-        created_deadlock = create_deadlock(bob_conn, fred_conn)
-        bob_conn.close()
-        fred_conn.close()
-        if created_deadlock:
-            break
-    assert created_deadlock, "Couldn't create a deadlock, exiting"
-
-    def execute_test():
-        dd_run_check(sqlserver_check)
-
-        dbm_activity = aggregator.get_event_platform_events("dbm-activity")
-        if not dbm_activity:
-            return False, "should have collected at least one activity event"
-        matched_event = []
-
-        for event in dbm_activity:
-            if "sqlserver_deadlocks" in event:
-                matched_event.append(event)
-        
-        collected_deadlocks = len(matched_event)
-        if collected_deadlocks != 1:
-            with open("/tmp/output.csv", "w", newline="") as file:
-                for row in matched_event:
-                    file.write(str(row) + "\n")            
-            return False, "Should have collected one deadlock payload, but collected: {}. Events {}".format(collected_deadlocks, matched_event)
-        
-        deadlocks = matched_event[0]["sqlserver_deadlocks"]
-        if len(deadlocks) < 1:
-            return False, "should have collected one or more deadlock in the payload"
-        found = 0
-        for d in deadlocks:
-            root = ET.fromstring(d)
-            process_list = root.find(".//process-list")
-            for process in process_list.findall('process'):
-                if (
-                    process.find('inputbuf').text
-                    == "UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;"
-                ):
-                    found += 1
-        err = ""
-        if not found:
-            err = "Should've collected produced deadlock"
-        return found, err
-
-    # Sometimes deadlock takes a bit longer to arrive to the ring buffer.
-    # We give it 3 tries
-    err = ""
-    success = False
-    for _ in range(0, 3):
-        time.sleep(3)
-        res, err = execute_test()
-        if res == 1:
-            success = True
-            break
-    assert success, err
-
-    # After a deadlock has been collected, we need to ensure that the agent
-    # does not collect the same deadlock again.
-    res, err = execute_test()
-    assert res == 1, "Produced deadlock should be collected only once"
+    try:
+        assert found == 1, "Should have collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
+    except AssertionError as e:
+        logging.error("deadlock XML: %s", str(d))
+        raise e
