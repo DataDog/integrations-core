@@ -958,11 +958,15 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
         raise e
 
     found = 0
-    deadlocks = deadlock_payloads[0]
+    deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
     assert not "ERROR" in deadlocks, "Shouldn't have generated an error"
     
     for d in deadlocks:
-        root = ET.fromstring(d)
+        try:
+            root = ET.fromstring(d)
+        except ET.ParseError as e:
+            logging.error("deadlock events: %s", str(deadlocks))
+            raise e
         process_list = root.find(".//process-list")
         for process in process_list.findall('process'):
             if (
