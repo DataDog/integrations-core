@@ -248,9 +248,12 @@ class SqlserverActivity(DBMAsyncJob):
                 break
             else:
                 deadlock_xmls.append(deadlock)
-        deadlocks_event = self._create_deadlock_event(deadlock_xmls, errors)
-        payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
-        self._check.database_monitoring_query_activity(payload)
+        
+        # Send payload only if deadlocks found
+        if deadlock_xmls:
+            deadlocks_event = self._create_deadlock_event(deadlock_xmls, errors)
+            payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
+            self._check.database_monitoring_query_activity(payload)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):

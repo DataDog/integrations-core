@@ -7,9 +7,9 @@ from __future__ import unicode_literals
 import concurrent
 import datetime
 import json
+import logging
 import os
 import re
-import csv
 import threading
 import time
 import xml.etree.ElementTree as ET
@@ -919,12 +919,14 @@ def test_deadlocks_2(aggregator, dd_run_check, init_config, dbm_instance):
     }
     dbm_instance['query_activity']['enabled'] = False
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
+    
     dd_run_check(sqlserver_check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     deadlock_event_found = False
     for event in dbm_activity:
         if "sqlserver_deadlocks" in event:
             deadlock_event_found = True
+            logging.error("Deadlock event found: %s", event)
     assert not deadlock_event_found, "shouldn't have collected a deadlock event"
 
 @pytest.mark.integration
