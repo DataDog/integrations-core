@@ -54,7 +54,7 @@ deps = [
     "prometheus-client==0.12.0; python_version < '3.0'",
     "prometheus-client==0.20.0; python_version > '3.0'",
     "protobuf==3.17.3; python_version < '3.0'",
-    "protobuf==5.28.0; python_version > '3.0'",
+    "protobuf==5.27.3; python_version > '3.0'",
     "pydantic==2.8.2; python_version > '3.0'",
     "python-dateutil==2.9.0.post0",
     "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
