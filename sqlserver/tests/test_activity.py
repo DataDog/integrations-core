@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import concurrent
+import copy
 import datetime
 import json
 import logging
@@ -14,7 +15,6 @@ import threading
 import time
 import xml.etree.ElementTree as ET
 from concurrent.futures.thread import ThreadPoolExecutor
-from copy import copy
 
 import mock
 import pytest
@@ -56,7 +56,7 @@ def dbm_instance(instance_docker):
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
-    return copy(instance_docker)
+    return copy.copy(instance_docker)
 
 
 @pytest.mark.integration
@@ -912,14 +912,10 @@ def test_sanitize_activity_row(dbm_instance, row):
 def run_check_and_return_deadlock_payloads(dd_run_check, check, aggregator):
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
-    if not dbm_activity:
-        return None
     matched = []
     for event in dbm_activity:
         if "sqlserver_deadlocks" in event:
             matched.append(event)
-    if not matched:
-        return None
     return matched
 
 @pytest.mark.integration
@@ -931,10 +927,11 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
         'collection_interval': 0.1,
     }
     dbm_instance['query_activity']['enabled'] = False
+    
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
     
     deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check, aggregator)
-    assert not deadlock_payloads, "shouldn't have sent a deadlock payload without a deadlock"
+    assert not deadlock_payloads, "shouldn't have sent an empty payload"
     
     created_deadlock = False
     # Rarely instead of creating a deadlock one of the transactions time outs
@@ -951,9 +948,16 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     except AssertionError as e:
         raise e
     
+    dbm_instance_no_dbm = copy.deepcopy(dbm_instance)
+    dbm_instance_no_dbm['dbm'] = False
+    sqlserver_check_no_dbm = SQLServer(CHECK_NAME, init_config, [dbm_instance_no_dbm])
+    deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check_no_dbm, aggregator)
+    assert len(deadlock_payloads) == 0, "deadlock should be behind dbm"
+    
+    dbm_instance['dbm_enabled'] = True
     deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check, aggregator)
     try:
-        assert len(deadlock_payloads) == 1, "Should have collected one deadlock payload, but collected: {}.".format(len(deadlocks))
+        assert len(deadlock_payloads) == 1, "Should have collected one deadlock payload, but collected: {}.".format(len(deadlock_payloads))
     except AssertionError as e:
         raise e
 
