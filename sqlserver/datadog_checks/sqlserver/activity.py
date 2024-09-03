@@ -233,13 +233,7 @@ class SqlserverActivity(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_deadlocks(self):
-        deadlock_xmls_collected, errors = self._deadlocks.collect_deadlocks()
-        if errors:
-            print(
-                """An error occurred while parsing SQLServer deadlocks. The error - {}""".format(
-                    errors
-                )
-            )
+        deadlock_xmls_collected = self._deadlocks.collect_deadlocks()
         deadlock_xmls = []
         total_number_of_characters = 0
         for i, deadlock in enumerate(deadlock_xmls_collected):
@@ -257,7 +251,7 @@ class SqlserverActivity(DBMAsyncJob):
         
         # Send payload only if deadlocks found
         if deadlock_xmls:
-            deadlocks_event = self._create_deadlock_event(deadlock_xmls, errors)
+            deadlocks_event = self._create_deadlock_event(deadlock_xmls)
             payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
             self._check.database_monitoring_query_activity(payload)
 
@@ -439,7 +433,7 @@ class SqlserverActivity(DBMAsyncJob):
         }
         return event
 
-    def _create_deadlock_event(self, deadlock_xmls, errors):
+    def _create_deadlock_event(self, deadlock_xmls):
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -452,7 +446,6 @@ class SqlserverActivity(DBMAsyncJob):
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_deadlocks": deadlock_xmls,
-            "sqlserver_deadlock_errors": errors,
         }
         return event
 

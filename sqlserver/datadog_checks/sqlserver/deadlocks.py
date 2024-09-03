@@ -39,7 +39,7 @@ class Deadlocks:
     def obfuscate_xml(self, root):
         process_list = root.find(".//process-list")
         if process_list is None:
-            return "process-list element not found. The deadlock XML is in an unexpected format."
+            raise Exception("process-list element not found. The deadlock XML is in an unexpected format.")
         for process in process_list.findall('process'):
             for inputbuf in process.findall('.//inputbuf'):
                 if inputbuf.text is not None:
@@ -47,7 +47,7 @@ class Deadlocks:
             for frame in process.findall('.//frame'):
                 if frame.text is not None:
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
-        return None
+        return
 
     def collect_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
@@ -61,7 +61,6 @@ class Deadlocks:
                 )
                 cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time())))
                 results = cursor.fetchall()
-                last_deadlock_datetime = time()
                 converted_xmls = []
                 errors = []
                 for result in results:
@@ -70,16 +69,18 @@ class Deadlocks:
                     except Exception as e:
                         self._log.error(
                             """An error occurred while collecting SQLServer deadlocks.
-                             One of the deadlock XMLs couldn't be parsed. The error: {}""".format(
-                                e
+                             One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(
+                                e, result
                             )
                         )
-                        errors.append("Truncated deadlock xml - {}".format(result[:50]))
                         continue
-                    error = self.obfuscate_xml(root)
-                    if not error:
-                        converted_xmls.append(ET.tostring(root, encoding='unicode'))
-                    else:
-                        errors.append(error)
+                    try:
+                        self.obfuscate_xml(root)
+                    except Exception as e:
+                        error = "An error occurred while obfuscating SQLServer deadlocks. The error: {}".format(e)
+                        self._log.error(error)
+                        continue
+
+                    converted_xmls.append(ET.tostring(root, encoding='unicode'))
                 self._last_deadlock_timestamp = time()
-                return converted_xmls, errors
+                return converted_xmls
