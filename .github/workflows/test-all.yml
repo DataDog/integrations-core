@@ -3497,7 +3497,7 @@ jobs:
   jb4a6940:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: tibco_ems
+      job-name: Tibco EMS
       target: tibco_ems
       platform: linux
       runner: '["ubuntu-22.04"]'
