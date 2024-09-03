@@ -7,7 +7,7 @@ Re-export PyASN1/PySNMP types and classes that we use, so that we can access the
 from pyasn1.type.base import Asn1Type
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
-from pysnmp.hlapi.asyncio import (
+from pysnmp.hlapi.asyncore import (
     CommunityData,
     ContextData,
     ObjectIdentity,
@@ -18,7 +18,7 @@ from pysnmp.hlapi.asyncio import (
     usmDESPrivProtocol,
     usmHMACMD5AuthProtocol,
 )
-from pysnmp.hlapi.asyncio.cmdgen import lcd
+from pysnmp.hlapi.asyncore.cmdgen import lcd
 from pysnmp.hlapi.transport import AbstractTransportTarget
 from pysnmp.proto.rfc1902 import ObjectName, Opaque
 from pysnmp.proto.rfc3412 import MsgAndPduDispatcher
