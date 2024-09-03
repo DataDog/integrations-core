@@ -35,7 +35,7 @@
       },
       "metrics": {
         "prefix": "octopus_deploy.",
-        "check": "",
+        "check": "octopus_deploy.api.can_connect",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
