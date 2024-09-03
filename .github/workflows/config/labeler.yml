@@ -331,6 +331,8 @@ integration/nvidia_jetson:
 - nvidia_jetson/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/octopus_deploy:
+- octopus_deploy/**/*
 integration/oke:
 - oke/**/*
 integration/oom_kill:
