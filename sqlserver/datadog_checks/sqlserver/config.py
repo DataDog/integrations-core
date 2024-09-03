@@ -26,7 +26,7 @@ class SQLServerConfig:
             custom_tags=instance.get('tags', []),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
-        print("hereee", tags)
+        print("hereee", test)
         print("hereee", self._should_propagate_agent_tags(instance, init_config))
         print("hereee instance", self.tags)
         self.reported_hostname: str = instance.get('reported_hostname')
