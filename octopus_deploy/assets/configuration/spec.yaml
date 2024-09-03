@@ -10,6 +10,7 @@ files:
     - name: octopus_endpoint
       description: |
         Octopus API endpoint.
+        See https://octopus.com/docs/octopus-rest-api/getting-started#authentication for more details.
       value:
         example: http://localhost:80/api
         type: string

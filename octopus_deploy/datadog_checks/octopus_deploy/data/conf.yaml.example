@@ -15,8 +15,9 @@ instances:
 
     ## @param octopus_endpoint - string - required
     ## Octopus API endpoint.
+    ## See https://octopus.com/docs/octopus-rest-api/getting-started#authentication for more details.
     #
-  - octopus_endpoint: localhost:80/api
+  - octopus_endpoint: http://localhost:80/api
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
