@@ -2010,7 +2010,7 @@
                     {
                         "id": 6209686566212662,
                         "definition": {
-                            "title": "Avg. Threat Probability over time",
+                            "title": "Threat Probability over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
