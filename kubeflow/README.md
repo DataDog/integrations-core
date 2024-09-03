@@ -4,10 +4,6 @@
 
 This check monitors [Kubeflow][1] through the Datadog Agent. 
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
 
 ## Setup
 
@@ -23,6 +19,42 @@ No additional installation is needed on your server.
 1. Edit the `kubeflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kubeflow performance data. See the [sample kubeflow.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+#### Metric collection
+
+Make sure that the Prometheus-formatted metrics are exposed for your `kubeflow` componenet. 
+For the Agent to start collecting metrics, the `kubeflow` pods need to be annotated.
+
+Kubeflow has metrics endpoints that can be accessed on port `9090`. 
+
+**Note**: The listed metrics can only be collected if they are available(depending on the version). Some metrics are generated only when certain actions are performed. 
+
+The only parameter required for configuring the `kubeflow` check is `openmetrics_endpoint`. This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `9090`. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+
+```yaml
+apiVersion: v1
+kind: Pod
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/controller.checks: |
+      {
+        "kubeflow": {
+          "init_config": {},
+          "instances": [
+            {
+              "openmetrics_endpoint": "http://%%host%%:9090/metrics"
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'controller'
+# (...)
+```
 
 ### Validation
 

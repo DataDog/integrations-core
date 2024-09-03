@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard provides insights into your Kubeflow.\nYou can use this dashbaord to check the Kubeflow componenets stats.\n",
+    "description": "This dashboard provides an overview of your Kubeflow metrics describing its own operations as well as some metrics related to general state of the different componenets. \n\n**Useful Links\n\n[Kubeflow documentation](https://www.kubeflow.org/docs/)\n\n[Katib Github](https://github.com/kubeflow/katib)\n\n[Pipelines Github](https://github.com/kubeflow/pipelines)\n\n\n",
     "layout_type": "ordered",
     "template_variables": [],
     "title": "Kubeflow Overview",
@@ -34,7 +34,28 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "# Kubeflow\n\nThis dashboard provides an overview of your Kubeflow metrics describing its own operations as well as some metrics related to general state of the different componenets.\n\n\n**Useful Links**\n\n[kubeflow documentation](https://www.kubeflow.org/docs/)",
+                            "content": "# Kubeflow\n\nThis dashboard provides an overview of your Kubeflow metrics describing its own operations as well as some metrics related to general state of the different componenets.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4610707819074916,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "# Useful Links\n\n[Kubeflow documentation](https://www.kubeflow.org/docs/)\n\n[Katib Github](https://github.com/kubeflow/katib)\n\n[Pipelines Github](https://github.com/kubeflow/pipelines)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -46,9 +67,9 @@
                         },
                         "id": 8366490141273904,
                         "layout": {
-                            "height": 4,
-                            "width": 5,
-                            "x": 0,
+                            "height": 3,
+                            "width": 2,
+                            "x": 3,
                             "y": 3
                         }
                     }
@@ -56,7 +77,7 @@
             },
             "id": 3375620455700908,
             "layout": {
-                "height": 8,
+                "height": 7,
                 "width": 5,
                 "x": 0,
                 "y": 0
@@ -120,7 +141,7 @@
             },
             "id": 3510698085005998,
             "layout": {
-                "height": 8,
+                "height": 7,
                 "width": 7,
                 "x": 5,
                 "y": 0
@@ -249,10 +270,10 @@
             },
             "id": 1140994815971286,
             "layout": {
-                "height": 1,
+                "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 8
+                "y": 7
             }
         },
         {
@@ -963,11 +984,11 @@
             },
             "id": 4692872262677082,
             "layout": {
-                "height": 1,
+                "height": 16,
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 9
+                "y": 12
             }
         },
         {
@@ -1200,10 +1221,10 @@
             },
             "id": 5580063079033594,
             "layout": {
-                "height": 1,
+                "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 10
+                "y": 28
             }
         },
         {
@@ -1400,10 +1421,10 @@
             },
             "id": 5013331516652710,
             "layout": {
-                "height": 1,
+                "height": 7,
                 "width": 12,
                 "x": 0,
-                "y": 11
+                "y": 36
             }
         }
     ]

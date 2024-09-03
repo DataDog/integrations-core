@@ -18,6 +18,7 @@
       "Category::Metrics",
       "Category::Kubernetes",
       "Submitted Data Type::Metrics",
+      "Category::AI/ML",
       "Offering::Integration"
     ]
   },
