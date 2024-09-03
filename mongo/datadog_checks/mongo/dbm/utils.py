@@ -11,6 +11,12 @@ from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+
 MONGODB_SYSTEM_DATABASES = frozenset(["admin", "config", "local"])
 
 # exclude keys in sampled operation that cause issues with the explain command
@@ -36,6 +42,18 @@ COMMAND_COLLECTION_KEY = frozenset(
         "findAndModify",
         "distinct",
         "count",
+    ]
+)
+
+UNEXPLAINABLE_COMMANDS = frozenset(
+    [
+        "getMore",
+        "insert",
+        "update",
+        "delete",
+        "explain",
+        "profile",  # command to get profile level
+        "listCollections",
     ]
 )
 
@@ -70,12 +88,8 @@ def should_explain_operation(
         # Skip operations that are not queries
         return False
 
-    if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
-        # Skip operations as they are not queries
-        return False
-
-    if "explain" in command:
-        # Skip operations that are explain commands (cannot explain itself)
+    # if UNEXPLAINABLE_COMMANDS in command, skip
+    if any(command.get(key) for key in UNEXPLAINABLE_COMMANDS):
         return False
 
     db, _ = namespace.split(".", 1)
@@ -142,3 +156,15 @@ def get_command_collection(command: dict, ns: str) -> Optional[str]:
         if collection and isinstance(collection, str):  # edge case like {"aggregate": 1}
             return collection
     return None
+
+
+def obfuscate_command(command: dict):
+    # Obfuscate the command to remove sensitive information
+    # Remove the following keys from the command before obfuscating
+    # - comment: The comment field should not contribute to the query signature
+    # - lsid: The lsid field is a unique identifier for the session
+    # - $clusterTime: The $clusterTime field is a logical time used for ordering of operations
+    obfuscated_command = command.copy()
+    for key in ("comment", "lsid", "$clusterTime"):
+        obfuscated_command.pop(key, None)
+    return datadog_agent.obfuscate_mongodb_string(json_util.dumps(obfuscated_command))

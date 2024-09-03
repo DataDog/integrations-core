@@ -8,7 +8,7 @@
 		"name": "The Neuron Runtime has high vCPU usage on {{instance_id.name}}",
 		"type": "query alert",
 		"query": "avg(last_5m):avg:aws_neuron.neuron_runtime.vcpu_usage_ratio{*} by {instance_id} > 0.8",
-		"message": "",
+		"message": "{{#is_alert}}The average vCPU usage on {{instance_id.name}} has been {{value}} over the past 5 minutes.{{/is_alert}}\n{{#is_recovery}}The average vCPU usage of {{instance_id.name}} has recovered below the threshold of {{threshold}}.{{/is_recovery}}",
 		"tags": [
 			"integration:aws_neuron"
 		],
