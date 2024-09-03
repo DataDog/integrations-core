@@ -45,7 +45,7 @@ deps = [
     "pyasn1==0.4.8",
     "pycryptodomex==3.20.0",
     "pysmi==0.3.4; python_version < '3.0'",
-    "pysmi==1.2.0; python_version > '3.0'",
+    "pysmi==1.2.1; python_version > '3.0'",
     "pysnmp-mibs==0.1.6",
     "pysnmp==5.1.0",
 ]

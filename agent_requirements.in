@@ -71,7 +71,7 @@ pymysql==1.1.1; python_version > '3.0'
 pyodbc==5.1.0; (sys_platform != 'darwin' or platform_machine != 'arm64') and python_version > '3.0'
 pyopenssl==24.2.1; python_version > '3.0'
 pysmi==0.3.4; python_version < '3.0'
-pysmi==1.2.0; python_version > '3.0'
+pysmi==1.2.1; python_version > '3.0'
 pysnmp-mibs==0.1.6
 pysnmp==5.1.0
 pysocks==1.7.1
