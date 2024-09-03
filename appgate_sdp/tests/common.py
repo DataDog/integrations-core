@@ -18,10 +18,6 @@ MOCKED_INSTANCE = {
 
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
-METRICS_MOCK = [ 
-    'appliance.cpu.usage.percent', 
-    'appliance.disk',
-    'controller.client.authentication'
-]
+METRICS_MOCK = ['appliance.cpu.usage.percent', 'appliance.disk', 'controller.client.authentication']
 
 METRICS_MOCK = [f'appgate.{m}' for m in METRICS_MOCK]

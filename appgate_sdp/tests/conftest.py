@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+
 import pytest
 
 from datadog_checks.dev import docker_run
