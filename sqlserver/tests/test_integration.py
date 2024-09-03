@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import mock
 from copy import copy, deepcopy
 
+import mock
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
