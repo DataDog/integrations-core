@@ -4,7 +4,8 @@
   "last_updated_at": "2021-03-17",
   "title": "Replication delay is high",
   "tags": [
-    "integration:postgres"
+    "integration:postgres",
+    "product:database-monitoring"
   ],
   "description": "Replication lag is the delay between the time when data is written to the primary database and the time when it is replicated to the standby databases. This monitor tracks the replication lag of the postgres database.",
   "definition": {
@@ -31,10 +32,21 @@
       "timeout_h": 0
     },
     "priority": null,
-    "query": "avg(last_1h):anomalies(avg:postgresql.replication_delay{*}, 'basic', 2, direction='above', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
+    "query": "avg(last_1h):anomalies(avg:postgresql.replication_delay{$host}, 'basic', 2, direction='above', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
     "tags": [
       "integration:postgres"
     ],
     "type": "query alert"
+  },
+  "template_variables": [
+    {
+      "name": "host", 
+      "prefix": "host", 
+      "available_values": [], 
+      "defaults": ["*"]
+    }
+  ],
+  "recommended_monitor_metadata": {
+    "matcher": "/postgresql\\.replication_delay/"
   }
 }
