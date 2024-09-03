@@ -22,7 +22,7 @@ class SQLServerConfig:
         #     custom_tags=instance.get('tags', []),
         #     propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         # )
-        test = list[str] = self._build_tags(
+        test = self._build_tags(
             custom_tags=instance.get('tags', []),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
