@@ -460,7 +460,7 @@
                     {
                         "id": 3308865475683380,
                         "definition": {
-                            "title": "File Size Over Time",
+                            "title": "File Size over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
