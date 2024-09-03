@@ -14,19 +14,19 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = [
   "5.7",  # EOL October 21, 2023
   "8.0.36",  # EOL April, 2026
 ]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = ["8.0"]
 replication = ["group"]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 flavor = ["mariadb"]
 version = [
   "10.2",  # EOL 23 May 2022 (ended)
