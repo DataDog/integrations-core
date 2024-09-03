@@ -42,7 +42,6 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
     "monitors": {},
     "saved_views": {}
   },
