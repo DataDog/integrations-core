@@ -598,6 +598,10 @@ coverage:
         target: 75
         flags:
         - teradata
+      Tibco_EMS:
+        target: 75
+        flags:
+        - tibco_ems
       TokuMX:
         target: 50
         flags:
@@ -690,10 +694,6 @@ coverage:
         target: 75
         flags:
         - kyverno
-      tibco_ems:
-        target: 75
-        flags:
-        - tibco_ems
       vLLM:
         target: 75
         flags:

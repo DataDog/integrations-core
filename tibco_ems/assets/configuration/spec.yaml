@@ -1,4 +1,4 @@
-name: tibco_ems
+name: Tibco EMS
 files:
 - name: tibco_ems.yaml
   options:
