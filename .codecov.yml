@@ -422,6 +422,10 @@ coverage:
         target: 75
         flags:
         - nvidia_triton
+      Octopus_Deploy:
+        target: 75
+        flags:
+        - octopus_deploy
       OpenLDAP:
         target: 75
         flags:
@@ -1249,6 +1253,11 @@ flags:
     paths:
     - nvidia_triton/datadog_checks/nvidia_triton
     - nvidia_triton/tests
+  octopus_deploy:
+    carryforward: true
+    paths:
+    - octopus_deploy/datadog_checks/octopus_deploy
+    - octopus_deploy/tests
   openldap:
     carryforward: true
     paths:
