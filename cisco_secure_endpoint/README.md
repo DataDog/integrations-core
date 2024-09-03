@@ -16,7 +16,7 @@ The Cisco Secure Endpoint integration provides out-of-the-box dashboards so you 
 #### Get API Credentials for Cisco Secure Endpoint 
 
 
---> Refer the below Steps to create Client ID and API Key:
+Follow the steps below to create a Client ID and an API key:
 1. Log in to your Cisco Secure Endpoint Console and navigate to the Menu Panel on the left side.
 2. Select `Administration`, then select `Organization Settings`.
 3. Click `Configure API Credentials` under the `Features` section to generate new API credentials.
