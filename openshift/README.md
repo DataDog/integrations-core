@@ -8,31 +8,48 @@ Red Hat OpenShift is an open source container application platform based on the 
 
 ### Installation
 
-To install the Agent, see the [Agent installation instructions][2] for Kubernetes. The default configuration targets OpenShift 3.7.0+ and OpenShift 4.0+, as it relies on features and endpoints introduced in this version.
+This core configuration supports OpenShift 3.11 and OpenShift 4, but it works best with OpenShift 4.
+
+To install the Agent, see the [Agent installation instructions][2] for general Kubernetes instructions and the [Kubernetes Distributions page][15] for OpenShift configuration examples.
 
 Alternatively, the [Datadog Operator][3] can be used to install and manage the Datadog Agent. The Datadog Operator can be installed using OpenShift's [OperatorHub][4].
 
 ### Security Context Constraints configuration
 
-
-If you are deploying the Datadog Agent using any of the methods linked in the installation instructions above, you must include Security Context Constraints (SCCs) for the Agent to collect data. Follow the instructions below as they relate to your deployment.
+If you are deploying the Datadog Agent using any of the methods linked in the installation instructions above, you must include Security Context Constraints (SCCs) for the Agent and Cluster Agent to collect data. Follow the instructions below as they relate to your deployment.
 
 <!-- xxx tabs xxx -->
+<!-- xxx tab "Operator" xxx -->
+
+For instructions on how to install the Datadog Operator and `DatadogAgent` resource in OpenShift, see the [OpenShift installation guide][6].
+
+If you deploy the Operator with Operator Lifecycle Manager (OLM), then the necessary default SCCs present in OpenShift are automatically associated with the `datadog-agent-scc` Service Account. You can then deploy the Datadog components with the `DatadogAgent` CustomResourceDefinition, referencing this Service Account on the Node Agent and Cluster Agent pods.
+
+See the [Distributions][15] page and the [Operator repo][17]  for more examples.
+
+<!-- xxz tab xxx -->
 <!-- xxx tab "Helm" xxx -->
 
-The SCC can be applied directly within your Datadog agent's `values.yaml`. Add the following block underneath the `agents:` section in the file. 
+You can create the SCC directly within your Datadog Agent's `values.yaml`. Add the following block parameters under the `agents` and `clusterAgent` section to create their respective SCCs.
 
 ```yaml
-...
+datadog:
+  #(...)
+
 agents:
-...
   podSecurity:
     securityContextConstraints:
       create: true
-...
+
+clusterAgent:
+  podSecurity:
+    securityContextConstraints:
+      create: true
 ```
 
-You can apply this when you initially deploy the Agent. Or, you can execute a `helm upgrade` after making this change to apply the SCC. 
+You can apply this when you initially deploy the Agent, or you can execute a `helm upgrade` after making this change to apply the SCC. 
+
+See the [Distributions][15] page and the [Helm repo][16] for more examples.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Daemonset" xxx -->
@@ -56,26 +73,11 @@ Depending on your needs and the [security constraints][5] of your cluster, three
 | Live Container monitoring      | Not supported                            | Not supported         | Supported                                             |
 | Live Process monitoring        | Not supported                            | Not supported         | Supported                                             |
 
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "Operator" xxx -->
-
-For instructions on how to install the Datadog Operator and `DatadogAgent` resource in OpenShift, see the [OpenShift installation guide][6].
-
-If the Operator has been deployed with Operator Lifecycle Manager (OLM), then the necessary default SCCs present in OpenShift are automatically associated with the `datadog-agent-scc` `ServiceAccount` The Agent can then be deployed with the `DatadogAgent` CustomResourceDefinition, referencing this Service Account on the Node Agent and Cluster Agent pods.
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx --> 
-
-#### Log collection
-
-See [Kubernetes Log Collection][7] for further information.
-
 #### Restricted SCC operations
 
-This mode does not require granting special permissions to the [`datadog-agent` daemonset][8], other than the [RBAC][9] permissions needed to access the kubelet and the APIserver. You can get started with this [kubelet-only template][10].
+This mode does not require granting special permissions to the [`datadog-agent` DaemonSet][8], other than the [RBAC][9] permissions needed to access the kubelet and the APIserver. You can get started with this [kubelet-only template][10].
 
-The recommended ingestion method for Dogstatsd, APM, and logs is to bind the Datadog Agent to a host port. This way, the target IP is constant and easily discoverable by your applications. The default restricted OpenShift SCC does not allow binding to the host port. You can set the Agent to listen on it's own IP, but you need to handle the discovery of that IP from your application.
+The recommended ingestion method for Dogstatsd, APM, and logs is to bind the Datadog Agent to a host port. This way, the target IP is constant and easily discoverable by your applications. The default restricted OpenShift SCC does not allow binding to the host port. You can set the Agent to listen on its own IP, but you need to handle the discovery of that IP from your application.
 
 The Agent supports working on a `sidecar` run mode, to enable running the Agent in your application's pod for easier discoverability.
 
@@ -93,7 +95,12 @@ ports:
     protocol: TCP
 ```
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 #### Custom Datadog SCC for all features
+
+The Helm Chart and Datadog Operator manage the SCC for you by default. To manage it yourself instead, make sure to include the correct configurations based on the features you have enabled.
 
 If SELinux is in permissive mode or disabled, enable the `hostaccess` SCC to benefit from all features.
 If SELinux is in enforcing mode, it is recommended to grant [the `spc_t` type][11] to the datadog-agent pod. In order to deploy the agent you can use the following [datadog-agent SCC][12] that can be applied after [creating the datadog-agent service account][9]. It grants the following permissions:
@@ -118,6 +125,20 @@ runAsUser:
   type: RunAsAny
 ```
 
+### Log collection
+
+The Datadog Agent's log collection is set up in OpenShift largely the same as other Kubernetes clusters. The Datadog Operator and Helm Chart mount in the `/var/log/pods` directory, which the Datadog Agent pod uses to monitor the logs of the pods and containers on its respective host. However, with the Datadog Operator, you need to apply additional SELinux options to give the Agent permissions to read these log files.
+
+See [Kubernetes Log Collection][7] for further general information and the [Distributions][15] page for configuration examples.
+
+### APM
+
+In Kubernetes, there are three main options to route the data from the application pod to the Datadog Agent pod: the Unix Domain Socket (UDS), the HostIP:HostPort option (TCP/IP), and the Kubernetes Service. The Datadog Operator and Helm Chart default to the UDS option as this is the most resource efficient. However, this option doesn't work well in OpenShift, as it requires elevated SCC and SELinux options in both the Agent pod and application pod.
+
+Datadog recommends disabling the UDS option explicitly to avoid this, and to avoid the Admission Controller injecting this configuration.
+
+See [Kubernetes APM - Trace Collection][18] for further general information and the [Distributions][15] page for configuration examples.
+
 ### Validation
 
 See [kubernetes_apiserver][1]
@@ -141,7 +162,7 @@ The OpenShift check does not include any Service Checks.
 Need help? Contact [Datadog support][14].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
-[2]: https://docs.datadoghq.com/agent/kubernetes/
+[2]: https://docs.datadoghq.com/containers/kubernetes/installation
 [3]: https://github.com/DataDog/datadog-operator/
 [4]: https://docs.openshift.com/container-platform/4.10/operators/understanding/olm-understanding-operatorhub.html
 [5]: https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html
@@ -154,3 +175,7 @@ Need help? Contact [Datadog support][14].
 [12]: https://github.com/DataDog/datadog-agent/blob/master/Dockerfiles/manifests/openshift/scc.yaml
 [13]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
 [14]: https://docs.datadoghq.com/help/
+[15]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=datadogoperator#Openshift
+[16]: https://github.com/DataDog/helm-charts/blob/main/examples/datadog/agent_on_openshift_values.yaml
+[17]: https://github.com/DataDog/datadog-operator/blob/main/examples/datadogagent/datadog-agent-on-openshift.yaml
+[18]: https://docs.datadoghq.com/containers/kubernetes/apm

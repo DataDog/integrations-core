@@ -1,0 +1,1 @@
+Add `query_framework` to operation samples. `query_framework` is a string that specifies the query framework used to process an operation. The field is available starting mongodb version 6.2.

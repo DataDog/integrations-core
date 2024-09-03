@@ -8,7 +8,6 @@ from collections import OrderedDict
 
 import mock
 import pytest
-from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.http_check import HTTPCheck
@@ -77,11 +76,6 @@ def test_cert_expiration_no_cert(http_check):
         status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
         assert status == AgentCheck.UNKNOWN
         expected_msg = 'Empty or no certificate found.'
-        if PY2:
-            expected_msg = (
-                'ValueError(\'empty or no certificate, match_hostname needs a SSL socket '
-                'or SSL context with either CERT_OPTIONAL or CERT_REQUIRED\',)'
-            )
         assert msg == expected_msg
 
 
@@ -172,10 +166,7 @@ def test_check_cert_expiration_self_signed(http_check):
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
 
     assert status == AgentCheck.UNKNOWN
-    if PY2:
-        assert "certificate verify failed" in msg
-    else:
-        assert re.search("certificate verify failed: self[- ]signed certificate", msg)
+    assert re.search("certificate verify failed: self[- ]signed certificate", msg)
 
 
 @pytest.mark.usefixtures("dd_environment")

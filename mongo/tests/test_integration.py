@@ -67,6 +67,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     instance_integration_cluster['dbm'] = dbm
     instance_integration_cluster['operation_samples'] = {'enabled': False}
     instance_integration_cluster['slow_operations'] = {'enabled': False}
+    instance_integration_cluster['schemas'] = {'enabled': False}
     mongos_check = check(instance_integration_cluster)
     mongos_check._last_states_by_server = {0: 1, 1: 2, 2: 2}
 
@@ -87,6 +88,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'jumbo',
             'sessions',
             'hostinfo',
+            'sharded-data-distribution',
         ],
         ['sharding_cluster_role:mongos', 'clustername:my_cluster', 'hosting_type:self-hosted'],
     )
@@ -525,6 +527,8 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -627,6 +631,8 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -1103,6 +1109,8 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
