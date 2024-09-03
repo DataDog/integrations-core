@@ -167,7 +167,7 @@ exclude = [
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'foundationdb',  # Breaking datadog_checks_base tests
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
-    'pysmi' # pysnmp dependent on pysmi version > 0.4.8; < 0.5.0
+    'pysmi', # pysnmp dependent on pysmi version > 0.4.8; < 0.5.0
     'pysnmp',  # Breaking snmp tests
     'aerospike',  # v8+ breaks agent build.
     # https://github.com/DataDog/integrations-core/pull/16080
