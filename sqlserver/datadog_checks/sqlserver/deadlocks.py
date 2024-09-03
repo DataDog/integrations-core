@@ -6,10 +6,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
-from datadog_checks.sqlserver.queries import (
-    CREATE_DEADLOCK_TEMP_TABLE_QUERY,
-    DETECT_DEADLOCK_QUERY,
-)
+from datadog_checks.sqlserver.queries import DETECT_DEADLOCK_QUERY
+
 
 MAX_DEADLOCKS = 100
 
@@ -54,8 +52,6 @@ class Deadlocks:
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 self._log.debug("collecting sql server deadlocks")
-                self._log.debug("Running query [%s]", CREATE_DEADLOCK_TEMP_TABLE_QUERY)
-                cursor.execute(CREATE_DEADLOCK_TEMP_TABLE_QUERY)
                 self._log.debug(
                     "Running query [%s] with max deadlocks %s and timestamp %s",
                     DETECT_DEADLOCK_QUERY,
