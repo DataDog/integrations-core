@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+octopus_deploy.api.can_connect,gauge,,,,Whether or not the check can connect to the Octopus Deploy API.,-1,octopus_deploy,octopus_deploy api,,

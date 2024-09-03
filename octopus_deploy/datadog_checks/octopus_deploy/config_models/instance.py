@@ -38,6 +38,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    octopus_endpoint: str
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 

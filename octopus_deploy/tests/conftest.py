@@ -11,4 +11,4 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return {'octopus_endpoint': 'http://localhost:80/api'}

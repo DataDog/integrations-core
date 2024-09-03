@@ -7,4 +7,11 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: octopus_endpoint
+      description: |
+        Octopus API endpoint.
+      value:
+        example: http://localhost:80/api
+        type: string
+      required: true
     - template: instances/default

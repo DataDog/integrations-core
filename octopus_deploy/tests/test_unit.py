@@ -4,6 +4,8 @@
 
 from typing import Any, Callable, Dict  # noqa: F401
 
+import pytest
+
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -13,8 +15,10 @@ from datadog_checks.octopus_deploy import OctopusDeployCheck
 def test_check(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
-    dd_run_check(check)
+    with pytest.raises(Exception, match=r'Max retries exceeded with url: /api'):
+        dd_run_check(check)
 
+    aggregator.assert_metric('octopus_deploy.api.can_connect', 0)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
@@ -22,5 +26,7 @@ def test_check(dd_run_check, aggregator, instance):
 def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('octopus_deploy.can_connect', OctopusDeployCheck.CRITICAL)
+    with pytest.raises(Exception, match=r'Max retries exceeded with url: /api'):
+        dd_run_check(check)
+
+    aggregator.assert_metric('octopus_deploy.api.can_connect', 0)
