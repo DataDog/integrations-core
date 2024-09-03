@@ -4,6 +4,7 @@
 
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from time import time
 
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
 from datadog_checks.sqlserver.queries import DETECT_DEADLOCK_QUERY
@@ -19,7 +20,7 @@ class Deadlocks:
         self._log = self._check.log
         self._conn_key_prefix = conn_prefix
         self._config = config
-        self._last_deadlock_timestamp = '1900-01-01 01:01:01.111'
+        self._last_deadlock_timestamp = time()
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
 
     def obfuscate_no_except_wrapper(self, sql_text):
@@ -58,9 +59,9 @@ class Deadlocks:
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
-                cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, self._last_deadlock_timestamp))
+                cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time())))
                 results = cursor.fetchall()
-                last_deadlock_datetime = datetime.strptime(self._last_deadlock_timestamp, '%Y-%m-%d %H:%M:%S.%f')
+                last_deadlock_datetime = time()
                 converted_xmls = []
                 errors = []
                 for result in results:
@@ -75,13 +76,10 @@ class Deadlocks:
                         )
                         errors.append("Truncated deadlock xml - {}".format(result[:50]))
                         continue
-                    datetime_obj = datetime.strptime(root.get('timestamp'), '%Y-%m-%dT%H:%M:%S.%fZ')
-                    if last_deadlock_datetime < datetime_obj:
-                        last_deadlock_datetime = datetime_obj
                     error = self.obfuscate_xml(root)
                     if not error:
                         converted_xmls.append(ET.tostring(root, encoding='unicode'))
                     else:
                         errors.append(error)
-                self._last_deadlock_timestamp = last_deadlock_datetime.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                self._last_deadlock_timestamp = time()
                 return converted_xmls, errors
