@@ -7,7 +7,7 @@ mypy-deps = [
 
 [[envs.default.matrix]]
 python = ["3.12"]
-version = ["7.9"]
+version = ["7.1"]
 
 [envs.default.env-vars]
-GLUSTER_VERSION = "{matrix:version:7.9}"
+GLUSTER_VERSION = "{matrix:version:7.1}"

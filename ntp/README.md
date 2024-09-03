@@ -29,6 +29,8 @@ The NTP check is included in the [Datadog Agent][1] package, so you don't need t
 
 The Agent enables the NTP check by default. To configure the check yourself, edit the file `ntp.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample ntp.d/conf.yaml][3] for all available configuration options.
 
+Outgoing UDP traffic over the port `123` should be allowed so the Agent can confirm that the local server time is reasonably accurate according to the Datadog NTP servers.
+
 **Note**: If you edit the Datadog-NTP check configuration file, [restart the Agent][4] to effect any configuration changes.
 
 ### Validation
@@ -50,7 +52,6 @@ The NTP check does not include any events.
 See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
-
 Need help? Contact [Datadog support][8].
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
