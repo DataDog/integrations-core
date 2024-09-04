@@ -19,7 +19,6 @@ def test_integration(aggregator, dd_run_check, check, instance, global_tags, use
 
     check = check(instance)
     dd_run_check(check)
-
     assert_collection(aggregator, global_tags, use_openmetrics)
 
 
