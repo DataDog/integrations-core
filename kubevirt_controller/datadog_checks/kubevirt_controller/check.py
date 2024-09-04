@@ -52,13 +52,9 @@ class KubeVirtControllerCheck(OpenMetricsBaseCheckV2):
             "kube_namespace:{}".format(self.kube_namespace),
         ]
 
-        if self.kube_cluster_name:
-            self.base_tags.append("kube_cluster_name:{}".format(self.kube_cluster_name))
-
     def _parse_config(self):
         self.kubevirt_controller_metrics_endpoint = self.instance.get("kubevirt_controller_metrics_endpoint")
         self.kubevirt_controller_healthz_endpoint = self.instance.get("kubevirt_controller_healthz_endpoint")
-        self.kube_cluster_name = self.instance.get("kube_cluster_name")
         self.kube_namespace = self.instance.get("kube_namespace")
         self.pod_name = self.instance.get("kube_pod_name")
 
