@@ -59,7 +59,7 @@ prometheus-client,PyPI,Apache-2.0,Copyright 2015 Brian Brazil
 prometheus-client,PyPI,Apache-2.0,Copyright 2015 The Prometheus Authors
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.
 protobuf,PyPI,BSD-3-Clause,Copyright 2008 Google Inc.  All rights reserved.
-psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola'"
+psutil,PyPI,BSD-3-Clause,"Copyright (c) 2009, Jay Loden, Dave Daeschler, Giampaolo Rodola"
 psycopg2-binary,PyPI,BSD-3-Clause,Copyright 2013 Federico Di Gregorio
 psycopg2-binary,PyPI,LGPL-3.0-only,Copyright (C) 2013 Federico Di Gregorio
 pyOpenSSL,PyPI,Apache-2.0,Copyright The pyOpenSSL developers
