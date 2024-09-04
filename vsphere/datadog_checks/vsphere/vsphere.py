@@ -618,7 +618,7 @@ class VSphereCheck(AgentCheck):
                 id_to_tags[cluster_uuid] = {1: cluster, 0: 'cluster'}
                 for host in cluster.host:
                     host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
-                    if cluster_uuid not in cluster_nested_elts.keys():
+                    if cluster not in cluster_nested_elts.keys():
                         cluster_nested_elts[cluster] = [cluster_uuid]
                     cluster_nested_elts[cluster].append(host_uuid)
                     id_to_tags[host_uuid] = {1: cluster.name, 2: host.name, 0: 'host'}
