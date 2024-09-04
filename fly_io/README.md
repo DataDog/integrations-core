@@ -28,7 +28,6 @@ The Fly.io check is included in the [Datadog Agent][2] package. We recommend run
     ```
     instances:
     - empty_default_hostname: true
-      min_collection_interval: 10
       headers:
           Authorization: Bearer <YOUR_FLY_TOKEN>
       machines_api_endpoint: http://_api.internal:4280
