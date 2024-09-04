@@ -20,10 +20,10 @@ class SQLServerConfig:
         print("natasha testing hereeeeeeeee")
         print(str(instance))
         print(str(init_config))
-        print(str(_should_propagate_agent_tags(instance, init_config)))
+        print(str(self._should_propagate_agent_tags(instance, init_config)))
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
-            propagate_agent_tags=_should_propagate_agent_tags(instance, init_config),
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
@@ -154,19 +154,19 @@ class SQLServerConfig:
                 )
         return tags
 
+    @staticmethod
+    def _should_propagate_agent_tags(instance, init_config) -> bool:
+        '''
+        return True if the agent tags should be propagated to the check
+        '''
+        # instance_propagate_agent_tags = instance.get('propagate_agent_tags')
+        # init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
 
-def _should_propagate_agent_tags(instance, init_config) -> bool:
-    '''
-    return True if the agent tags should be propagated to the check
-    '''
-    # instance_propagate_agent_tags = instance.get('propagate_agent_tags')
-    # init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
-
-    # if instance_propagate_agent_tags is not None:
-    #     # if the instance has explicitly set the value, return the boolean
-    #     return instance_propagate_agent_tags
-    # if init_config_propagate_agent_tags is not None:
-    #     # if the init_config has explicitly set the value, return the boolean
-    #     return init_config_propagate_agent_tags
-    # if neither the instance nor the init_config has set the value, return False
-    return False
+        # if instance_propagate_agent_tags is not None:
+        #     # if the instance has explicitly set the value, return the boolean
+        #     return instance_propagate_agent_tags
+        # if init_config_propagate_agent_tags is not None:
+        #     # if the init_config has explicitly set the value, return the boolean
+        #     return init_config_propagate_agent_tags
+        # if neither the instance nor the init_config has set the value, return False
+        return False
