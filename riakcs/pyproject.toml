@@ -39,7 +39,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "boto==2.49.0",
+    "boto3==1.34.153",
 ]
 
 [project.urls]
