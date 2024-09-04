@@ -9,6 +9,7 @@ from collections import defaultdict
 
 from bson import json_util
 
+from datadog_checks.mongo.common import HostingType
 from datadog_checks.mongo.dbm.utils import MONGODB_SYSTEM_DATABASES
 
 try:
@@ -100,6 +101,7 @@ class MongoSchemas(DBMAsyncJob):
     def _discover_collection(self, dbname, collname):
         schema = self._discover_collection_schema(dbname, collname)
         indexes = self._discover_collection_indexes(dbname, collname)
+        search_indexes = self._discover_collection_search_indexes(dbname, collname)
         is_sharded = self._check.api_client.is_collection_sharded(dbname, collname)
         return {
             "name": collname,
@@ -107,6 +109,7 @@ class MongoSchemas(DBMAsyncJob):
             "sharded": is_sharded,
             "docs": schema,
             "indexes": indexes,
+            "search_indexes": search_indexes,
         }
 
     def _discover_collection_schema(self, dbname, collname):
@@ -204,6 +207,40 @@ class MongoSchemas(DBMAsyncJob):
             if value == "2d":
                 return "geospatial"
         return "regular"
+
+    def _discover_collection_search_indexes(self, dbname, collname):
+        if not self._check.deployment_type.hosting_type == HostingType.ATLAS:
+            self._check.log.debug("Search indexes are only supported for Atlas deployments")
+            return []
+
+        try:
+            search_indexes = self._check.api_client.list_search_indexes(dbname, collname)
+            return [self._create_search_index_payload(search_index) for search_index in search_indexes]
+        except Exception as e:
+            self._check.log.error("Error collecting search indexes for %s.%s: %s", dbname, collname, e)
+            return []
+
+    def _create_search_index_payload(self, search_index):
+        definition_mappings = search_index.get("latestDefinition", {}).get("mappings", {})
+        definition_mappings_fields = definition_mappings.get("fields", {})
+        payload = {
+            "name": search_index["name"],
+            "type": search_index["type"],
+            "status": search_index["status"],
+            "queryable": search_index["queryable"],
+            "version": str(search_index.get("latestDefinitionVersion", {}).get("version", "")),
+            "mappings": {
+                "dynamic": definition_mappings.get("dynamic"),
+                "fields": [
+                    {
+                        "field": field_name,
+                        "type": field_details["type"],
+                    }
+                    for field_name, field_details in definition_mappings_fields.items()
+                ],
+            },
+        }
+        return payload
 
     def _submit_schema_payload(self, base_payload, dbname, collections):
         payload = {
