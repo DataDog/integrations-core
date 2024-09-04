@@ -95,6 +95,7 @@ class MongoDb(AgentCheck):
 
         self.deployment_type = None
         self._mongo_version = None
+        self._mongo_modules = None
         self._resolved_hostname = None
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -276,16 +277,22 @@ class MongoDb(AgentCheck):
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
     def _refresh_metadata(self):
-        if self._mongo_version is None:
-            self.log.debug('No mongo_version metadata present, refreshing it.')
-            self._mongo_version = self.api_client.server_info().get('version', '0.0')
+        if self._mongo_version is None or self._mongo_modules is None:
+            self.log.debug('No mongo_version or mongo_module metadata present, refreshing it.')
+            server_info = self.api_client.server_info()
+            self._mongo_version = server_info.get('version', '0.0')
             self._mongo_version_parsed = Version(self._mongo_version.split("-")[0])
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
+            self._mongo_modules = server_info.get('modules', [])
+            self.set_metadata('modules', ','.join(self._mongo_modules))
+            self.log.debug('modules: %s', self._mongo_modules)
         if self._resolved_hostname is None:
             self._resolved_hostname = self._config.reported_database_hostname or self.api_client.hostname
             self.set_metadata('resolved_hostname', self._resolved_hostname)
             self.log.debug('resolved_hostname: %s', self._resolved_hostname)
+        if self._config.cluster_name:
+            self.set_metadata('cluster_name', self._config.cluster_name)
 
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
@@ -353,7 +360,10 @@ class MongoDb(AgentCheck):
         if self._resolved_hostname not in self._database_instance_emitted:
             # DO NOT emit with internal resource tags, as the metadata event is used to CREATE the databse instance
             tags = self._get_tags()
-            mongodb_instance_metadata = {"cluster_name": self._config.cluster_name} | deployment.instance_metadata
+            mongodb_instance_metadata = {
+                "cluster_name": self._config.cluster_name,
+                "modules": self._mongo_modules,
+            } | deployment.instance_metadata
             database_instance = {
                 "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
