@@ -615,7 +615,7 @@ class VSphereCheck(AgentCheck):
                 self.log.debug("Collecting vsan metrics for cluster %s", cluster.name)
                 cluster_uuid = cluster_vsan_config.defaultConfig.uuid
                 cluster_nested_elts[cluster] = [cluster_uuid]
-                id_to_tags[cluster_uuid] = {1: cluster, 0: 'cluster'}
+                id_to_tags[cluster_uuid] = {1: cluster.name, 0: 'cluster'}
                 for host in cluster.host:
                     host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
                     if cluster not in cluster_nested_elts.keys():
