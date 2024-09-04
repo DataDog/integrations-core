@@ -151,7 +151,7 @@ class SQLServerConfig:
         return tags
 
     @staticmethod
-    def _should_propagate_agent_tags(self, instance, init_config) -> bool:
+    def _should_propagate_agent_tags(instance, init_config) -> bool:
         '''
         return True if the agent tags should be propagated to the check
         '''
@@ -161,8 +161,8 @@ class SQLServerConfig:
         if instance_propagate_agent_tags is not None:
             # if the instance has explicitly set the value, return the boolean
             return instance_propagate_agent_tags
-        if init_config_propagate_agent_tags is not None:
-            # if the init_config has explicitly set the value, return the boolean
-            return init_config_propagate_agent_tags
+        # if init_config_propagate_agent_tags is not None:
+        #     # if the init_config has explicitly set the value, return the boolean
+        #     return init_config_propagate_agent_tags
         # if neither the instance nor the init_config has set the value, return False
         return False
