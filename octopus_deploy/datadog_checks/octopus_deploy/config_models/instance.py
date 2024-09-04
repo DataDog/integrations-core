@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -28,6 +29,17 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class Spaces(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of spaces to be processed.\n')
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -40,6 +52,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     octopus_endpoint: str
     service: Optional[str] = None
+    spaces: Optional[Spaces] = None
     tags: Optional[tuple[str, ...]] = None
 
     @model_validator(mode='before')

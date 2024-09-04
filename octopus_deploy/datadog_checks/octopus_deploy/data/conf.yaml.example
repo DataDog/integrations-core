@@ -19,6 +19,11 @@ instances:
     #
   - octopus_endpoint: http://localhost:80/api
 
+    ## @param spaces - mapping - optional
+    ## filter your integration by spaces, project groups, and projects.
+    #
+    # spaces: {}
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
