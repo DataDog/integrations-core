@@ -14,7 +14,7 @@ The Datadog Cluster Agent check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
-The Datadog Cluster Agent check will use [Autodiscovery][3] to automatically configure itself in most scenarios. This check will run in the Datadog Agent pod on the same node as the Cluster Agent pod. It will not run in the Cluster Agent itself.
+The Datadog Cluster Agent check uses [Autodiscovery][3] to automatically configure itself in most scenarios. The check runs in the Datadog Agent pod on the same node as the Cluster Agent pod. It will not run in the Cluster Agent itself.
 
 If you need to further configure the check:
 
