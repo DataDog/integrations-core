@@ -4,10 +4,10 @@
 
 This integration ingests the following logs:
 
-- Workbench Alerts
-- Observed Attack Techniques
+- Workbench Alerts: This endpoint contains information about all the standalone alerts triggered by detection models.
+- Observed Attack Techniques: This endpoint contains information about observed attack techniques from Detections, Endpoint Activity, Cloud Activity, Email Activity, Mobile Activity, Network Activity, Container Activity, and Identity Activity data sources.
 
-This integration collects all the above listed logs and sends them to Datadog for analysis. Datadog uses the built-in logs pipeline to parse and enrich these logs, enabling effortless search and analysis. The integration provides insight into workbench alerts and observed attack techniques through the out-of-the-box dashboards.
+This integration collects all the above listed logs and sends them to Datadog for analysis. Datadog uses the built-in logs pipeline to parse and enrich these logs, enabling effortless search and analysis. The integration provides insight into workbench alerts and observed attack techniques through the out-of-the-box dashboards. Also, This integration provides out of the box detection rules.
 
 ## Setup
 
