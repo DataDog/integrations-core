@@ -4,6 +4,7 @@
 import logging
 from copy import copy, deepcopy
 
+import mock
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
