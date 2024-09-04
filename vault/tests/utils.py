@@ -26,6 +26,7 @@ def assert_collection(aggregator, tags, use_openmetrics, runs=1):
     metrics = set(METRICS)
     metrics.update(METRICS_OPTIONAL)
     metrics.add('is_leader')
+    metrics.add('has_leader')
 
     # Summaries
     summaries = {'go.gc.duration.seconds'}
