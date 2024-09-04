@@ -19,8 +19,17 @@ class SQLServerConfig:
         self.log = log
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
+            propagate_agent_tags=False,
+        )
+        
+        test = self._build_tags(
+            custom_tags=instance.get('tags', []),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
+        if self.tags != test:
+            print("natasha testing error hereeeeee")
+            print(self.tags)
+            print(test)
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*']) or ['.*']
