@@ -19,7 +19,7 @@ class SQLServerConfig:
         self.log = log
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
-            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+            propagate_agent_tags=False, # self._should_propagate_agent_tags(instance, init_config),
         )
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
