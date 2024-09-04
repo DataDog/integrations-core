@@ -1,17 +1,5 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-    "--py2",
-    "--disallow-untyped-defs",
-    "--follow-imports silent",
-    "--install-types",
-    "--non-interactive",
-    "datadog_checks/snmp",
-]
-
-[[envs.default.matrix]]
-python = ["2.7"]
-snmplistener = ["false"]
 
 [[envs.default.matrix]]
 python = ["3.11"]

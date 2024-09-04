@@ -68,8 +68,6 @@ only-py2 = true
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
 aerospike = ['Apache-2.0']
-# https://github.com/baztian/jaydebeapi/blob/master/COPYING
-JayDeBeApi = ['LGPL-3.0-only']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
@@ -84,8 +82,6 @@ oauthlib = ['BSD-3-Clause']
 mmh3 = ['CC0-1.0']
 # https://github.com/paramiko/paramiko/blob/master/LICENSE
 paramiko = ['LGPL-2.1-only']
-# https://github.com/oracle/python-oracledb/blob/main/LICENSE.txt
-oracledb = ['Apache-2.0']
 # https://github.com/psycopg/psycopg2/blob/master/LICENSE
 # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
 psycopg2-binary = ['LGPL-3.0-only', 'BSD-3-Clause']
@@ -119,7 +115,6 @@ dnspython = 'https://github.com/rthalley/dnspython'
 foundationdb = 'https://github.com/apple/foundationdb'
 in-toto = 'https://github.com/in-toto/in-toto'
 lxml = 'https://github.com/lxml/lxml'
-oracledb = 'https://github.com/oracle/python-oracledb'
 packaging = 'https://github.com/pypa/packaging'
 paramiko = 'https://github.com/paramiko/paramiko'
 protobuf = 'https://github.com/protocolbuffers/protobuf'
@@ -172,14 +167,11 @@ exclude = [
     'ddtrace',  # https://github.com/DataDog/integrations-core/pull/9132
     'foundationdb',  # Breaking datadog_checks_base tests
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
+    'pysmi', # pysnmp dependent on pysmi version 1.2.1
     'pysnmp',  # Breaking snmp tests
     'aerospike',  # v8+ breaks agent build.
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
-    # We need to keep an `oracledb` version that uses the same version of odpi that is used in godror in the agent repo.
-    # Somehow we do not load the right version. Until we find out how and why, we need to keep both
-    # libs in sync with the same version of odpi.
-    'oracledb',
     # We're not ready to switch to v3 of the postgres library, see:
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',

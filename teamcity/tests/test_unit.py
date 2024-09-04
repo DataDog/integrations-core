@@ -4,7 +4,6 @@
 from collections import OrderedDict
 
 import pytest
-from six import PY2, iteritems
 
 from datadog_checks.teamcity.common import filter_build_configs, filter_items, filter_projects, normalize_server_url
 
@@ -25,7 +24,6 @@ from .common import (
 
 pytestmark = [
     pytest.mark.skipif(USE_OPENMETRICS, reason='Not available in OpenMetrics version of check'),
-    pytest.mark.skipif(PY2, reason='Not available in Python 2'),
     pytest.mark.unit,
 ]
 
@@ -35,7 +33,7 @@ def test_server_normalization():
     Make sure server URLs are being normalized correctly
     """
 
-    for server, expected_server in iteritems(TEAMCITY_SERVER_VALUES):
+    for server, expected_server in TEAMCITY_SERVER_VALUES.items():
         normalized_server = normalize_server_url(server)
 
         assert expected_server == normalized_server
