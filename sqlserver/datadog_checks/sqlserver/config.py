@@ -17,16 +17,10 @@ from datadog_checks.sqlserver.const import (
 class SQLServerConfig:
     def __init__(self, init_config, instance, log):
         self.log = log
-        print("natasha testing hereeeeeeeee")
-        print(str(instance))
-        print(str(init_config))
-        print(str(self._should_propagate_agent_tags(instance, init_config)))
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
-            propagate_agent_tags=False,
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
-        print(self.tags)
-        print(instance.get('tags', []))
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*']) or ['.*']
