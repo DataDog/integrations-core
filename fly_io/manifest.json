@@ -47,6 +47,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
+    "monitors": {
+      "app_suspended": "assets/monitors/app_suspended.json"
+    },
     "dashboards": {
       "Fly.io Overview ": "assets/dashboards/overview.json"
     }

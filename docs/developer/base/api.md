@@ -21,6 +21,7 @@
         - send_log
         - get_log_cursor
         - warning
+        - http
 
 ## Stubs
 
