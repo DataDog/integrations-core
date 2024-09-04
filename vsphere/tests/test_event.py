@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import datetime as dt
-import sys
 
 import pytest
 from mock import mock, patch
@@ -17,8 +16,6 @@ from .mocked_api import MockedAPI
 
 @pytest.fixture(autouse=True)
 def mock_vsan_stub():
-    if sys.version_info[0] < 3:
-        pytest.skip("This test requires Python 3 or higher.")
     with patch('vsanapiutils.GetVsanVcStub') as GetStub:
         GetStub._stub.host = '0.0.0.0'
         yield GetStub
@@ -62,6 +59,7 @@ def test_allowed_event_list():
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
 def test_events_collection_no_events(aggregator, realtime_instance, dd_run_check, mock_api):
+    realtime_instance['collect_vsan_data'] = False
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     time_initial = check.latest_event_query
     mock_api.side_effect = mock_api_with_events([])
@@ -513,10 +511,27 @@ def test_include_events_empty_event_resource_filters(aggregator, realtime_instan
     assert len(aggregator.events) == 0
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="vSAN API is only available in Python 3")
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
 def test_vsan_event(aggregator, realtime_instance, dd_run_check, mock_api):
-    realtime_instance['get_vsan'] = True
+    realtime_instance['collect_vsan_data'] = True
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    event1 = vim.event.EventEx()
+    event1.createdTime = dt.datetime.now()
+    event1.userName = "vSAN Health"
+    event1.eventTypeId = "vsan.health.test.overallsummary.event"
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "A vsan event was registered"
+    mock_api.side_effect = mock_api_with_events([event1])
+
+    dd_run_check(check)
+    assert len(aggregator.events) == 1
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
+def test_vsan_event_include_events_filter_set(aggregator, realtime_instance, dd_run_check, mock_api):
+    realtime_instance['include_events'] = [{"event": "AlarmAcknowledgedEvent", "excluded_messages": ["Remove Alarm"]}]
+    realtime_instance['collect_vsan_data'] = True
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     event1 = vim.event.EventEx()
     event1.createdTime = dt.datetime.now()

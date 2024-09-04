@@ -146,6 +146,7 @@ class InstanceConfig(BaseModel):
     collect_per_instance_filters: Optional[CollectPerInstanceFilters] = None
     collect_property_metrics: Optional[bool] = None
     collect_tags: Optional[bool] = None
+    collect_vsan_data: Optional[bool] = None
     collection_level: Optional[int] = None
     collection_type: Optional[str] = None
     connection_reset_timeout: Optional[int] = None
@@ -153,7 +154,6 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: bool
     event_resource_filters: Optional[tuple[str, ...]] = None
     excluded_host_tags: Optional[tuple[str, ...]] = None
-    get_vsan: Optional[bool] = None
     host: str
     include_datastore_cluster_folder_tag: Optional[bool] = None
     include_events: Optional[tuple[IncludeEvent, ...]] = None

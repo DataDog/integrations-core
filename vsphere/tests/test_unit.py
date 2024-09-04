@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
 import logging
-import sys
 
 import pytest
 from mock import mock, patch
@@ -31,8 +30,6 @@ def does_not_raise(enter_result=None):
 
 @pytest.fixture(autouse=True)
 def mock_vsan_stub():
-    if sys.version_info[0] < 3:
-        pytest.skip("This test requires Python 3 or higher.")
     with patch('vsanapiutils.GetVsanVcStub') as GetStub:
         GetStub._stub.host = '0.0.0.0'
         yield GetStub

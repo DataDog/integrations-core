@@ -65,10 +65,11 @@ PERCENT_METRICS = {
 }
 
 VSAN_PERCENT_METRICS = {
-    'congestion',
-    'coreUtilPct',
-    'pcpuUsedPct',
-    'pcpuUtilPct',
+    'vsan.cluster.congestion',
+    'vsan.host.congestion',
+    'vsan.host.coreUtilPct',
+    'vsan.host.pcpuUsedPct',
+    'vsan.host.pcpuUtilPct',
 }
 
 # All metrics that can be collected from VirtualMachines.
@@ -410,10 +411,9 @@ HOST_METRICS = {
     HISTORICAL: [],
 }
 
-VSAN_METRICS = {
+VSAN_CLUSTER_METRICS = {
     'vsan.cluster.congestion',
     'vsan.cluster.dedupRatio',
-    'vsan.cluster.example_cluster_metric',
     'vsan.cluster.free',
     'vsan.cluster.health.count',
     'vsan.cluster.health.statsdb.count',
@@ -431,7 +431,9 @@ VSAN_METRICS = {
     'vsan.cluster.throughputWrite',
     'vsan.cluster.total',
     'vsan.cluster.used',
-    'vsan.disk.example_disk_metric',
+}
+
+VSAN_DISK_METRICS = {
     'vsan.disk.ioCountDevRead',
     'vsan.disk.ioCountDevWrite',
     'vsan.disk.ioCountRead',
@@ -448,11 +450,13 @@ VSAN_METRICS = {
     'vsan.disk.latencyWrite',
     'vsan.disk.throughputDevRead',
     'vsan.disk.throughputDevWrite',
+}
+
+VSAN_HOST_METRICS = {
     'vsan.host.clientCacheHitRate',
     'vsan.host.clientCacheHits',
     'vsan.host.congestion',
     'vsan.host.coreUtilPct',
-    'vsan.host.example_host_metric',
     'vsan.host.iopsRead',
     'vsan.host.iopsUnmap',
     'vsan.host.iopsWrite',

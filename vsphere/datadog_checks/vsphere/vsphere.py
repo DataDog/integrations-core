@@ -29,9 +29,19 @@ from datadog_checks.vsphere.constants import (
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
     UNLIMITED_HIST_METRICS_PER_QUERY,
+    VSAN_CLUSTER_PREFIX,
+    VSAN_DISK_PREFIX,
+    VSAN_HOST_PREFIX,
 )
 from datadog_checks.vsphere.event import VSphereEvent
-from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS, VSAN_METRICS, VSAN_PERCENT_METRICS
+from datadog_checks.vsphere.metrics import (
+    ALLOWED_METRICS_FOR_MOR,
+    PERCENT_METRICS,
+    VSAN_CLUSTER_METRICS,
+    VSAN_DISK_METRICS,
+    VSAN_HOST_METRICS,
+    VSAN_PERCENT_METRICS,
+)
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
     CounterId,  # noqa: F401
@@ -514,19 +524,22 @@ class VSphereCheck(AgentCheck):
                             )
                             latest_value = given_metric.values.split(',')[-1]
                             if latest_value != 'None':
-                                if given_metric.metricId.label in VSAN_PERCENT_METRICS:
+                                if (
+                                    VSAN_CLUSTER_PREFIX + given_metric.metricId.label in VSAN_PERCENT_METRICS
+                                    or VSAN_DISK_PREFIX + given_metric.metricId.label in VSAN_PERCENT_METRICS
+                                    or VSAN_HOST_PREFIX + given_metric.metricId.label in VSAN_PERCENT_METRICS
+                                ):
                                     latest_value = float(latest_value) / 100.0
                                 if resource_type == 'cluster':
-                                    if 'vsan.cluster.{}'.format(given_metric.metricId.label) in VSAN_METRICS:
+                                    if 'vsan.cluster.{}'.format(given_metric.metricId.label) in VSAN_CLUSTER_METRICS:
                                         self.gauge(
-                                            'vsphere.vsan.cluster.{}'.format(given_metric.metricId.label),
+                                            'vsan.cluster.{}'.format(given_metric.metricId.label),
                                             # for now we only collect the latest value
                                             float(latest_value),
                                             tags=[
                                                 'vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])
                                             ]
                                             + self._config.base_tags,
-                                            raw=True,
                                             hostname=self._hostname,
                                         )
                                     else:
@@ -535,9 +548,9 @@ class VSphereCheck(AgentCheck):
                                             given_metric.metricId.label,
                                         )
                                 elif resource_type == 'host':
-                                    if 'vsan.host.{}'.format(given_metric.metricId.label) in VSAN_METRICS:
+                                    if 'vsan.host.{}'.format(given_metric.metricId.label) in VSAN_HOST_METRICS:
                                         self.gauge(
-                                            'vsphere.vsan.host.{}'.format(given_metric.metricId.label),
+                                            'vsan.host.{}'.format(given_metric.metricId.label),
                                             # for now we only collect the latest value
                                             float(latest_value),
                                             tags=[
@@ -545,7 +558,6 @@ class VSphereCheck(AgentCheck):
                                             ]
                                             + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
                                             + self._config.base_tags,
-                                            raw=True,
                                             hostname=self._hostname,
                                         )
                                     else:
@@ -554,9 +566,9 @@ class VSphereCheck(AgentCheck):
                                             given_metric.metricId.label,
                                         )
                                 elif resource_type == 'disk':
-                                    if 'vsan.disk.{}'.format(given_metric.metricId.label) in VSAN_METRICS:
+                                    if 'vsan.disk.{}'.format(given_metric.metricId.label) in VSAN_DISK_METRICS:
                                         self.gauge(
-                                            'vsphere.vsan.disk.{}'.format(given_metric.metricId.label),
+                                            'vsan.disk.{}'.format(given_metric.metricId.label),
                                             # for now we only collect the latest value
                                             float(latest_value),
                                             tags=[
@@ -565,7 +577,6 @@ class VSphereCheck(AgentCheck):
                                             + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
                                             + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
                                             + self._config.base_tags,
-                                            raw=True,
                                             hostname=self._hostname,
                                         )
                                     else:
@@ -604,24 +615,16 @@ class VSphereCheck(AgentCheck):
                 self.log.debug("Collecting vsan metrics for cluster %s", cluster.name)
                 cluster_uuid = cluster_vsan_config.defaultConfig.uuid
                 cluster_nested_elts[cluster] = [cluster_uuid]
-                id_to_tags[cluster_uuid] = {1: cluster.name, 0: 'cluster'}
+                id_to_tags[cluster_uuid] = {1: cluster, 0: 'cluster'}
                 for host in cluster.host:
                     host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
                     if cluster_uuid not in cluster_nested_elts.keys():
                         cluster_nested_elts[cluster] = [cluster_uuid]
                     cluster_nested_elts[cluster].append(host_uuid)
                     id_to_tags[host_uuid] = {1: cluster.name, 2: host.name, 0: 'host'}
-                    host_disks = host.configManager.vsanSystem.QueryDisksForVsan()
-                    for disk in host_disks:
-                        disk_uuid = disk.vsanUuid
-                        if disk_uuid:
-                            cluster_nested_elts[cluster].append(disk_uuid)
-                            id_to_tags[disk_uuid] = {
-                                1: cluster.name,
-                                2: host.name,
-                                3: disk_uuid,
-                                0: 'disk',
-                            }
+                    new_id_to_tags, new_cluster_nested_elts = self.api.get_vsan_disk_metrics(host, cluster)
+                    id_to_tags.update(new_id_to_tags)
+                    cluster_nested_elts[cluster].extend(new_cluster_nested_elts[cluster])
             else:
                 self.log.debug("Skipping vsan metrics for cluster %s because it is not a vsan cluster", cluster.name)
         return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)

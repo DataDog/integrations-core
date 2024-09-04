@@ -4,14 +4,11 @@
 import datetime as dt  # noqa: F401
 import functools
 import ssl
-import sys
 from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
 
-if sys.version_info[0] >= 3:
-    import vsanapiutils
-    from pyVmomi import SoapStubAdapter
+import vsanapiutils
 from pyVim import connect
-from pyVmomi import vim, vmodl
+from pyVmomi import SoapStubAdapter, vim, vmodl
 from six import itervalues
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
@@ -104,8 +101,7 @@ class VSphereAPI(object):
         self.log = log
 
         self._conn = cast(vim.ServiceInstance, None)
-        if sys.version_info[0] >= 3:
-            self._vsan_stub = cast(SoapStubAdapter, None)
+        self._vsan_stub = cast(SoapStubAdapter, None)
         self.smart_connect()
 
     def smart_connect(self):
@@ -158,8 +154,7 @@ class VSphereAPI(object):
             connect.Disconnect(self._conn)
 
         self._conn = conn
-        if sys.version_info[0] >= 3:
-            self._vsan_stub = vsanapiutils.GetVsanVcStub(conn._stub, context=context)
+        self._vsan_stub = vsanapiutils.GetVsanVcStub(conn._stub, context=context)
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
@@ -454,3 +449,23 @@ class VSphereAPI(object):
                     )
             performance_metrics.append(discovered_metrics)
         return [health_metrics, performance_metrics]
+
+    @smart_retry
+    def get_vsan_disk_metrics(self, host_reference, cluster_reference):
+        new_cluster_nested_elts = {}
+        new_id_to_tags = {}
+        host_disks = host_reference.configManager.vsanSystem.QueryDisksForVsan()
+        for disk in host_disks:
+            disk_uuid = disk.vsanUuid
+            if disk_uuid:
+                if cluster_reference not in new_cluster_nested_elts:
+                    new_cluster_nested_elts[cluster_reference] = []
+                new_cluster_nested_elts[cluster_reference].append(disk_uuid)
+                new_id_to_tags[disk_uuid] = {
+                    1: cluster_reference.name,
+                    2: host_reference.name,
+                    3: disk_uuid,
+                    0: 'disk',
+                }
+
+        return new_id_to_tags, new_cluster_nested_elts

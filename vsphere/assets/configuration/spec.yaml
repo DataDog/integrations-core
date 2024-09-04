@@ -387,10 +387,9 @@ files:
         value:
           type: boolean
           example: false
-      - name: get_vsan
+      - name: collect_vsan_data
         description: |
-          If true, the vSphere integration will collect additional metrics about vSAN cluster, host, and disk
-          metrics/events. These metrics/events are collected at a frequency of `refresh_infrastructure_cache_interval`.
+          If true, the integration will collect additional metrics and events about vSAN clusters, hosts, and disks.
         value:
           type: boolean
           example: false

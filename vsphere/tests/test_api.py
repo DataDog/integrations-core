@@ -3,20 +3,18 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
 import ssl
-import sys
 
 import pytest
 from mock import ANY, MagicMock, patch
 from pyVmomi import vim, vmodl
 
+from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.config import VSphereConfig
 
 
 @pytest.fixture(autouse=True)
 def mock_vsan_stub():
-    if sys.version_info[0] < 3:
-        pytest.skip("This test requires Python 3 or higher.")
     with patch('vsanapiutils.GetVsanVcStub') as GetStub:
         GetStub._stub.host = '0.0.0.0'
         yield GetStub
@@ -267,9 +265,9 @@ def test_get_new_events_with_fallback(realtime_instance):
         assert events == [event1, event3]
 
 
-@pytest.mark.skipif(sys.version_info < (3, 0), reason="vSAN API is only available in Python 3")
-def test_vsan_metrics_api(realtime_instance):
-    realtime_instance['get_vsan'] = True
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
+    realtime_instance['collect_vsan_data'] = True
 
     with patch('datadog_checks.vsphere.api.connect'):
         with patch('pyVmomi.vim.cluster.VsanPerformanceManager') as MockVsanPerformanceManager:
@@ -310,3 +308,10 @@ def test_vsan_metrics_api(realtime_instance):
             assert 'vsphere.vsan.cluster.health.2.count' in health_metrics[0]
             assert len(performance_metrics) == 1
             assert len(performance_metrics[0]) == 1
+
+            check = VSphereCheck('vsphere', {}, [realtime_instance])
+            dd_run_check(check)
+
+            aggregator.assert_metric('vsphere.vsan.cluster.health.count', value=1)
+            aggregator.assert_metric('vsphere.vsan.cluster.health.1.count', count=0)
+            aggregator.assert_metric('vsphere.vsan.cluster.health.2.count', count=0)

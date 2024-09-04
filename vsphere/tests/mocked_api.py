@@ -135,11 +135,12 @@ class MockedAPI(object):
         mock_performance_data = [
             [
                 MagicMock(
+                    value=[MagicMock(metricId=MagicMock(label='oio', dynamicProperty=[{0: 'cluster', 1: 'hello'}]))]
+                ),
+                MagicMock(
                     value=[
                         MagicMock(
-                            metricId=MagicMock(
-                                label='example_cluster_metric', dynamicProperty=[{0: 'cluster', 1: 'hello'}]
-                            )
+                            metricId=MagicMock(label='oio', dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}])
                         )
                     ]
                 ),
@@ -147,16 +148,7 @@ class MockedAPI(object):
                     value=[
                         MagicMock(
                             metricId=MagicMock(
-                                label='example_host_metric', dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}]
-                            )
-                        )
-                    ]
-                ),
-                MagicMock(
-                    value=[
-                        MagicMock(
-                            metricId=MagicMock(
-                                label='example_disk_metric',
+                                label='iopsRead',
                                 dynamicProperty=[{0: 'disk', 1: 'hello', 2: 'world', 3: 'disk'}],
                             )
                         )
@@ -166,6 +158,9 @@ class MockedAPI(object):
         ]
         self.vsan_metrics_data = [mock_health_data, mock_performance_data]
         return self.vsan_metrics_data
+
+    def get_vsan_disk_metrics(self, host_reference, cluster_reference):
+        return {'disk': {0: 'disk', 1: 'hello', 2: 'world', 3: 'disk'}}, {cluster_reference: ['disk']}
 
 
 class MockResponse(Response):

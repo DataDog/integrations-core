@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
-import sys
 from typing import Any, Dict, List  # noqa: F401
 
 from pyVmomi import vim
@@ -95,12 +94,7 @@ class VSphereConfig(object):
         self.tags_prefix = instance.get("tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
         self.should_collect_attributes = is_affirmative(instance.get("collect_attributes", False))
         self.collect_property_metrics = is_affirmative(instance.get("collect_property_metrics", False))
-        if sys.version_info[0] >= 3:
-            self.collect_vsan = is_affirmative(instance.get("get_vsan", False))
-        else:
-            if is_affirmative(instance.get("get_vsan", False)):
-                raise ConfigurationError("VSAN collection is not supported in Python 2")
-            self.collect_vsan = False
+        self.collect_vsan = is_affirmative(instance.get("collect_vsan_data", False))
         self.attr_prefix = instance.get("attributes_prefix", DEFAULT_VSPHERE_ATTR_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
