@@ -8,12 +8,28 @@ import pytest
 from ddev.utils.git import GitRepository
 
 NO_CONFIRMATION_SO_ABORT = 'Did not get confirmation, aborting. Did not create or push the tag.'
+RC_NUMBER_PROMPT = 'What RC number are we tagging? (hit ENTER to accept suggestion) [{}]'
+
+EXAMPLE_TAGS = [
+    '7.56.0-rc.1',
+    # Random RC tag from DBM. We should make sure we ignore it.
+    '7.56.0-rc.1-dbm-agent-jobs',
+    # Icluding RC 11 is interesting because it makes sure we we parse the versions before we sort them.
+    # The naive sort will think RC 11 is earlier than RC 2.
+    '7.56.0-rc.11',
+    '7.56.0-rc.2',
+    # Skipping RCs, we go from 2 to 5.
+    '7.56.0-rc.5',
+    '7.56.0-rc.6',
+    '7.56.0-rc.7',
+    '7.56.0-rc.8',
+]
 
 
 @pytest.fixture
 def basic_git(mocker):
     mock_git = mocker.create_autospec(GitRepository)
-    # We're patching the constructor (__new__) method of GitRepository class.
+    # We're patching the creation of the GitRepository class.
     # That's why we need a function that returns the mock.
     mocker.patch('ddev.repo.core.GitRepository', lambda _: mock_git)
     return mock_git
@@ -22,21 +38,7 @@ def basic_git(mocker):
 @pytest.fixture
 def git(basic_git):
     basic_git.current_branch.return_value = '7.56.x'
-    basic_git.tags.return_value = [
-        # interesting phenomena:
-        # - skipping RCs
-        # - rc 11 naively would be sorted as less than rc 2
-        # - an rc tag from dbm
-        # '7.56.0',
-        '7.56.0-rc.1',
-        '7.56.0-rc.1-dbm-agent-jobs',
-        '7.56.0-rc.11',
-        '7.56.0-rc.2',
-        '7.56.0-rc.5',
-        '7.56.0-rc.6',
-        '7.56.0-rc.7',
-        '7.56.0-rc.8',
-    ]
+    basic_git.tags.return_value = EXAMPLE_TAGS[:]
     yield basic_git
     assert basic_git.method_calls[:4] == [
         c.current_branch(),
@@ -76,7 +78,7 @@ def test_middle_of_release_next_rc(ddev, git):
     result = ddev('release', 'branch', 'tag', input='\ny\n')
 
     _assert_tag_pushed(git, result, '7.56.0-rc.12')
-    assert 'Which RC number are we tagging? (hit ENTER to accept suggestion) [12]' in result.output
+    assert RC_NUMBER_PROMPT.format('12') in result.output
 
 
 @pytest.mark.parametrize(
@@ -88,7 +90,8 @@ def test_middle_of_release_next_rc(ddev, git):
     ],
 )
 @pytest.mark.parametrize('rc_num', ['3', '10'])
-def test_do_not_confirm_non_sequential_rc(ddev, git, rc_num, no_confirm):
+@pytest.mark.parametrize('last_rc', [11, 12])
+def test_do_not_confirm_non_sequential_rc(ddev, git, rc_num, no_confirm, last_rc):
     """
     We're in the middle of a release, some RCs are already done. User wants to create the next RC.
 
@@ -98,14 +101,16 @@ def test_do_not_confirm_non_sequential_rc(ddev, git, rc_num, no_confirm):
     Important: we are not overwriting an existing RC tag.
     """
 
+    git.tags.return_value.append(f'7.56.0-rc.{last_rc}')
     result = ddev('release', 'branch', 'tag', input=f'{rc_num}\n{no_confirm}\n')
 
-    assert result.exit_code == 1, result.output
-    assert 'Which RC number are we tagging? (hit ENTER to accept suggestion) [12]' in result.output
+    assert RC_NUMBER_PROMPT.format(str(last_rc + 1)) in result.output
     assert (
         '!!! WARNING !!!\n'
-        'You are about to create an RC with a number less than the latest RC number (12). Are you sure? [y/N]'
+        f'The latest RC is {last_rc}. You are about to go back in time by creating an RC with a number less than that. '
+        'Are you sure? [y/N]'
     ) in result.output
+    assert result.exit_code == 1, result.output
     assert NO_CONFIRMATION_SO_ABORT in result.output
 
 
@@ -121,10 +126,11 @@ def test_confirm_non_sequential_rc(ddev, git, rc_num):
     """
     result = ddev('release', 'branch', 'tag', input=f'{rc_num}\ny\ny\n')
 
-    assert 'Which RC number are we tagging? (hit ENTER to accept suggestion) [12]' in result.output
+    assert RC_NUMBER_PROMPT.format('12') in result.output
     assert (
         '!!! WARNING !!!\n'
-        'You are about to create an RC with a number less than the latest RC number (12). Are you sure? [y/N]'
+        'The latest RC is 11. You are about to go back in time by creating an RC with a number less than that. '
+        'Are you sure? [y/N]'
     ) in result.output
     _assert_tag_pushed(git, result, f'7.56.0-rc.{rc_num}')
 
@@ -141,8 +147,19 @@ def test_abort_if_rc_tag_exists(ddev, git, rc_num):
     result = ddev('release', 'branch', 'tag', input=f'{rc_num}\ny\n')
 
     assert result.exit_code == 1, result.output
-    assert 'Which RC number are we tagging? (hit ENTER to accept suggestion) [12]' in result.output
-    assert (f'Tag 7.56.0-rc.{rc_num} already exists. Switch to git to overwrite it.') in result.output
+    assert RC_NUMBER_PROMPT.format('12') in result.output
+    assert f'Tag 7.56.0-rc.{rc_num} already exists. Switch to git to overwrite it.' in result.output
+
+
+def test_abort_if_tag_less_than_one(ddev, git):
+    """
+    RC numbers less than 1 don't make any sense, so we abort if we get one.
+    """
+    result = ddev('release', 'branch', 'tag', input='0\ny\n')
+
+    assert RC_NUMBER_PROMPT.format('12') in result.output
+    assert result.exit_code == 1, result.output
+    assert 'RC number must be at least 1.' in result.output
 
 
 @pytest.mark.parametrize(
@@ -161,31 +178,49 @@ def test_abort_valid_rc(ddev, git, no_confirm):
 
     result = ddev('release', 'branch', 'tag', input='\n{no_confirm}\n')
 
-    assert 'Which RC number are we tagging? (hit ENTER to accept suggestion) [1]' in result.output
+    assert RC_NUMBER_PROMPT.format('1') in result.output
     assert result.exit_code == 1, result.output
     assert NO_CONFIRMATION_SO_ABORT in result.output
 
 
-def test_first_rc(ddev, git):
+@pytest.mark.parametrize(
+    'rc_num_input, rc_num',
+    [
+        pytest.param('', '1', id='implicit sequential'),
+        pytest.param('', '1', id='explicit sequential'),
+        pytest.param('2', '2', id='explicit non-sequential'),
+    ],
+)
+@pytest.mark.parametrize('tags, patch', [([], '0'), (EXAMPLE_TAGS + ['7.56.0'], '1')])
+def test_first_rc(ddev, git, rc_num_input, rc_num, tags, patch):
     """
     First RC for a new release.
-    add some more examples?
-    should be ok to specify a number other than 1
+
+    We support starting with a number other than 1, though that's very unlikely to happen in practice.
     """
-    git.tags.return_value = []
+    git.tags.return_value = tags
 
-    result = ddev('release', 'branch', 'tag', input='\ny\n')
+    result = ddev('release', 'branch', 'tag', input=f'{rc_num_input}\ny\n')
 
-    _assert_tag_pushed(git, result, '7.56.0-rc.1')
-    assert 'Which RC number are we tagging? (hit ENTER to accept suggestion) [1]' in result.output
+    _assert_tag_pushed(git, result, f'7.56.{patch}-rc.{rc_num}')
+    assert RC_NUMBER_PROMPT.format('1') in result.output
 
 
-def test_final(ddev, git):
+@pytest.mark.parametrize(
+    'latest_final_tag, expected_new_final_tag',
+    [
+        pytest.param('', '7.56.0', id='no final tag yet'),
+        pytest.param('7.56.0', '7.56.1', id='final tag present, so we are making a bugfix release'),
+    ],
+)
+def test_final(ddev, git, latest_final_tag, expected_new_final_tag):
     """
     Create final release tag.
-
-    We should handle the case of bugfix releases here too
     """
+    git.tags.return_value.append(latest_final_tag)
     result = ddev('release', 'branch', 'tag', '--final', input='y\n')
 
-    _assert_tag_pushed(git, result, '7.56.0')
+    _assert_tag_pushed(git, result, expected_new_final_tag)
+
+
+# TODO: test for adding RCs for a bugfix release

@@ -32,32 +32,44 @@ def tag(app, final):
             Version(t)
             for t in set(app.repo.git.tags(glob_pattern=major_minor_version + '.*'))
             # We take 'major.minor.x' as the branch name pattern and replace 'x' with 'patch-rc.number'.
-            if re.match(BRANCH_NAME_REGEX.pattern.replace('x', r'\d+\-rc\.\d+'), t)
+            # We make the RC component optional so that final tags also match our filter.
+            if re.match(BRANCH_NAME_REGEX.pattern.replace('x', r'\d+(\-rc\.\d+)?'), t)
         ),
         reverse=True,
     )
-    patch_version, next_rc_guess = (
-        # The first item in this_release_tags is the latest tag parsed as a Version object.
-        (this_release_tags[0].micro, this_release_tags[0].pre[1] + 1)
-        if this_release_tags
-        else (0, 1)
-    )
+    last_patch, last_rc = _extract_patch_and_rc(this_release_tags)
+    last_tag_was_final = last_rc is None
+    new_patch = last_patch + 1 if last_tag_was_final else last_patch
     if final:
-        new_tag = f'{major_minor_version}.{patch_version}'
+        new_tag = f'{major_minor_version}.{new_patch}'
     else:
+        new_rc_guess = 1 if last_tag_was_final else last_rc + 1
         next_rc = click.prompt(
-            'What RC number should be tagged? (hit ENTER to accept suggestion)', type=int, default=next_rc_guess
+            'What RC number are we tagging? (hit ENTER to accept suggestion)', type=int, default=new_rc_guess
         )
-        new_tag = f'{major_minor_version}.{patch_version}-rc.{next_rc}'
+        if next_rc < 1:
+            app.abort('RC number must be at least 1.')
+        new_tag = f'{major_minor_version}.{new_patch}-rc.{next_rc}'
         if Version(new_tag) in this_release_tags:
             app.abort(f'Tag {new_tag} already exists. Switch to git to overwrite it.')
-        if next_rc < next_rc_guess:
+        if not last_tag_was_final and next_rc < last_rc:
             click.secho('!!! WARNING !!!')
             if not click.confirm(
-                'You are about to create an RC with a number less than the latest RC number (12). Are you sure?'
+                f'The latest RC is {last_rc}. '
+                'You are about to go back in time by creating an RC with a number less than that. Are you sure? [y/N]'
             ):
                 app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
     if not click.confirm(f'Create and push this tag: {new_tag}?'):
         app.abort('Did not get confirmation, aborting. Did not create or push the tag.')
     click.echo(app.repo.git.tag(new_tag, message=new_tag))
     click.echo(app.repo.git.push(new_tag))
+
+
+def _extract_patch_and_rc(version_tags):
+    if not version_tags:
+        return 0, 0
+    latest = version_tags[0]
+    patch = latest.micro
+    # latest.pre is None for final releases and a tuple ('rc', <NUM>) for RC.
+    rc = latest.pre if latest.pre is None else latest.pre[1]
+    return patch, rc
