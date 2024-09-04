@@ -19,7 +19,7 @@ class SQLServerConfig:
         self.log = log
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
-            propagate_agent_tags=False,
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
@@ -151,7 +151,7 @@ class SQLServerConfig:
         return tags
 
     @staticmethod
-    def _should_propagate_agent_tags(instance, init_config) -> bool:
+    def _should_propagate_agent_tags(self, instance, init_config) -> bool:
         '''
         return True if the agent tags should be propagated to the check
         '''
