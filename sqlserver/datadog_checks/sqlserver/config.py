@@ -17,10 +17,7 @@ from datadog_checks.sqlserver.const import (
 class SQLServerConfig:
     def __init__(self, init_config, instance, log):
         self.log = log
-        self.tags: list[str] = self._build_tags(
-            custom_tags=instance.get('tags', []),
-            propagate_agent_tags=False,
-        )
+        self.tags: list[str] = instance.get('tags', [])
         test = self._build_tags(
             custom_tags=instance.get('tags', []),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
