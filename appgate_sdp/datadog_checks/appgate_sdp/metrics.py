@@ -1,4 +1,3 @@
-
 # these metrics are from Appgate v.6.3.3 as documented here: https://sdphelp.appgate.com/adminguide/v6.3/prometheus-metrics.html
 
 METRIC_MAP = {
