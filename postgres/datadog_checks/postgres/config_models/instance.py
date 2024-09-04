@@ -105,6 +105,7 @@ class DatabaseAutodiscovery(BaseModel):
     )
     enabled: Optional[bool] = None
     exclude: Optional[tuple[str, ...]] = None
+    global_view_db: Optional[str] = None
     include: Optional[tuple[str, ...]] = None
     max_databases: Optional[int] = None
     refresh: Optional[int] = None

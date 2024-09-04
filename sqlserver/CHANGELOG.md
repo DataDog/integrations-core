@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 17.5.2 / 2024-08-28
+
+***Fixed***:
+
+* Bump lxml to 4.9.4 ([#18244](https://github.com/DataDog/integrations-core/pull/18244))
+
 ## 17.5.1 / 2024-08-13
 
 ***Fixed***:
@@ -18,7 +24,7 @@
 
 * Fix password obfuscation in OLE DB driver error message when one or more backslashes exist in the password. ([#18203](https://github.com/DataDog/integrations-core/pull/18203))
 
-## 17.4.1 / 2024-08-08
+## 17.4.1 / 2024-08-08 / Agent 7.56.0
 
 ***Fixed***:
 
