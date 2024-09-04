@@ -34,13 +34,13 @@
                             "$and": [
                                 {
                                     "data": {
-                                        "$gt": 0.6283678507530881
+                                        "$gt": "?"
                                     }
                                 },
                                 {
                                     "message": {
                                         "$regularExpression": {
-                                            "pattern": "log",
+                                            "pattern": "?",
                                             "options": ""
                                         }
                                     }
@@ -58,13 +58,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -87,13 +87,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -115,7 +115,7 @@
                         "allPlansExecution": []
                     }
                 },
-                "signature": "466d69277a94ff1f"
+                "signature": "6f93ef1b4ea189ab"
             },
             "query_signature": "a5c9a4483fa9bcdf",
             "application": null,
