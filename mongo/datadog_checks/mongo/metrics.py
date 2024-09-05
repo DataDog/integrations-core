@@ -353,8 +353,8 @@ COLLECTION_METRICS = {
     'collection.transactions.ops': RATE,
     'collection.transactions.latency_avg': (GAUGE, 'collection.transactions.latency.avg'),
     # collection query exec stats
-    'collection.collectionScans.total': GAUGE,
-    'collection.collectionScans.nonTailable': GAUGE,
+    'collection.collectionScans.total': RATE,
+    'collection.collectionScans.nonTailable': RATE,
 }
 
 SHARDED_DATA_DISTRIBUTION_METRICS = {
