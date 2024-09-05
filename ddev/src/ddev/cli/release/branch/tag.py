@@ -40,16 +40,15 @@ def tag(app, final):
     last_patch, last_rc = _extract_patch_and_rc(this_release_tags)
     last_tag_was_final = last_rc is None
     new_patch = last_patch + 1 if last_tag_was_final else last_patch
-    if final:
-        new_tag = f'{major_minor_version}.{new_patch}'
-    else:
+    new_tag = f'{major_minor_version}.{new_patch}'
+    if not final:
         new_rc_guess = 1 if last_tag_was_final else last_rc + 1
         next_rc = click.prompt(
             'What RC number are we tagging? (hit ENTER to accept suggestion)', type=int, default=new_rc_guess
         )
         if next_rc < 1:
             app.abort('RC number must be at least 1.')
-        new_tag = f'{major_minor_version}.{new_patch}-rc.{next_rc}'
+        new_tag += f'-rc.{next_rc}'
         if Version(new_tag) in this_release_tags:
             app.abort(f'Tag {new_tag} already exists. Switch to git to overwrite it.')
         if not last_tag_was_final and next_rc < last_rc:
