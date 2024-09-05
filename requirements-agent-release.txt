@@ -33,7 +33,7 @@ datadog-cilium==3.6.0
 datadog-cisco-aci==2.11.0
 datadog-cisco-secure-firewall==1.0.0
 datadog-citrix-hypervisor==3.2.1
-datadog-clickhouse==3.6.0
+datadog-clickhouse==3.7.0
 datadog-cloud-foundry-api==3.3.1
 datadog-cloudera==2.2.0
 datadog-cockroachdb==3.3.2
