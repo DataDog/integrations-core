@@ -45,7 +45,7 @@ class CollStatsCollector(MongoCollector):
             return api.coll_stats(self.db_name, coll_name)
         except OperationFailure as e:
             if e.code == 13:
-                # Unauthorized to run $collStats, raise the exception
+                # Unauthorized to run $collStats, do not try use the compatible mode, raise the exception
                 raise e
             # Failed to get collection stats using $collStats aggregation
             self.log.debug(
@@ -64,7 +64,10 @@ class CollStatsCollector(MongoCollector):
                 collection_stats = self._get_collection_stats(api, coll_name)
             except OperationFailure as e:
                 # Atlas restricts $collStats on system collections
-                self.log.warning("Could not collect stats for collection %s: %s", coll_name, e.details)
+                if e.code == 13:
+                    self.log.warning("Unauthorized to run $collStats on collection %s", coll_name)
+                else:
+                    self.log.warning("Could not collect stats for collection %s: %s", coll_name, e.details)
                 continue
 
             for coll_stats in collection_stats:
