@@ -1,1 +1,0 @@
-Add command to tag the Agent release branch. It supports both RC and final tags, see `ddev release branch tag --help` for more details.
