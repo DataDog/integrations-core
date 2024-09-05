@@ -40,24 +40,28 @@ def test_fabric_mocked(aggregator):
         'device_id:{}:{}'.format(namespace, node101),
         'device_ip:{}'.format(node101),
         'device_namespace:{}'.format(namespace),
+        'dd.internal.resource:ndm_device_user_tags:default:10.0.200.0',
     ]
     device_tags_102 = [
         'device_hostname:{}'.format(hn102),
         'device_id:{}:{}'.format(namespace, node102),
         'device_ip:{}'.format(node102),
         'device_namespace:{}'.format(namespace),
+        'dd.internal.resource:ndm_device_user_tags:default:10.0.200.1',
     ]
     device_tags_201 = [
         'device_hostname:{}'.format(hn201),
         'device_id:{}:{}'.format(namespace, node201),
         'device_ip:{}'.format(node201),
         'device_namespace:{}'.format(namespace),
+        'dd.internal.resource:ndm_device_user_tags:default:10.0.200.5',
     ]
     device_tags_202 = [
         'device_hostname:{}'.format(hn202),
         'device_id:{}:{}'.format(namespace, node202),
         'device_ip:{}'.format(node202),
         'device_namespace:{}'.format(namespace),
+        'dd.internal.resource:ndm_device_user_tags:default:10.0.200.2',
     ]
 
     tags000 = ['cisco', 'project:cisco_aci', 'medium:broadcast', 'snmpTrapSt:enable', 'fabric_pod_id:1']
@@ -104,6 +108,8 @@ def test_fabric_mocked(aggregator):
                     'device_hostname:{}'.format(hn),
                     'device_id:{}'.format(interface.device_id),
                     'port.status:{}'.format(interface.status),
+                    'dd.internal.resource:ndm_device_user_tags:{}'.format(interface.device_id),
+                    'dd.internal.resource:ndm_interface_user_tags:{}:{}'.format(interface.device_id, interface.index),
                 ]
                 aggregator.assert_metric('cisco_aci.fabric.port.status', value=1.0, tags=interface_tags, hostname=hn)
 
@@ -946,6 +952,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.3',
         ],
         hostname='pod-1-node-3',
     )
@@ -963,6 +970,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
         ],
         hostname='pod-1-node-1',
     )
@@ -992,6 +1000,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.6',
         ],
         hostname='pod-1-node-2',
     )
@@ -1225,6 +1234,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.3',
         ],
         hostname='pod-1-node-3',
     )
@@ -1242,6 +1252,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
         ],
         hostname='pod-1-node-1',
     )
@@ -1271,6 +1282,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.6',
         ],
         hostname='pod-1-node-2',
     )
@@ -1293,6 +1305,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.3',
         ],
         hostname='pod-1-node-3',
     )
@@ -1310,6 +1323,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
         ],
         hostname='pod-1-node-1',
     )
@@ -1328,6 +1342,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.6',
         ],
         hostname='pod-1-node-2',
     )
@@ -2130,6 +2145,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.3',
         ],
         hostname='pod-1-node-3',
     )
@@ -2147,6 +2163,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
         ],
         hostname='pod-1-node-1',
     )
@@ -2165,6 +2182,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.6',
         ],
         hostname='pod-1-node-2',
     )
@@ -2411,6 +2429,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.3',
         ],
         hostname='pod-1-node-3',
     )
@@ -2428,6 +2447,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
         ],
         hostname='pod-1-node-1',
     )
@@ -2457,6 +2477,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.6',
         ],
         hostname='pod-1-node-2',
     )
@@ -2658,6 +2679,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.3',
         ],
         hostname='pod-1-node-3',
     )
@@ -2675,6 +2697,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
         ],
         hostname='pod-1-node-1',
     )
@@ -2693,6 +2716,7 @@ def test_fabric_mocked(aggregator):
             'fabric_pod_id:1',
             'cisco',
             'project:cisco_aci',
+            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.6',
         ],
         hostname='pod-1-node-2',
     )
