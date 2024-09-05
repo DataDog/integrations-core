@@ -138,15 +138,14 @@ class Fabric:
                 interfaces.append(interface_metadata)
                 device_id = '{}:{}'.format(self.namespace, node.get('address', ''))
                 tags.append('{}:{}'.format(DEVICE_USER_TAGS_PREFIX, device_id))
-
+                tags.append(
+                    "{}:{}:{}".format(
+                        INTERFACE_USER_TAGS_PREFIX, interface_metadata.device_id, str(interface_metadata.index)
+                    ),
+                )
                 self.submit_interface_status_metric(
                     interface_metadata.status,
-                    tags
-                    + [
-                        "{}:{}:{}".format(
-                            INTERFACE_USER_TAGS_PREFIX, interface_metadata.device_id, str(interface_metadata.index)
-                        ),
-                    ],
+                    tags,
                     hostname,
                 )
             try:
