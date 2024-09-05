@@ -1,0 +1,72 @@
+[
+    {
+        "_id": {
+            "$oid": "5f620f9d52024f4dcab4718f"
+        },
+        "name": "abc1",
+        "status": "A",
+        "amount": 300,
+        "elements": 10,
+        "rating": 1.2,
+        "address": {
+            "street": "123 Main St",
+            "city": "Springfield",
+            "state": "IL",
+            "zip": 62701
+        },
+        "reviews": [
+            {
+                "rating": 5.0,
+                "comment": "Great service!",
+                "date": {
+                    "$date": "2020-09-16T00:00:00.000Z"
+                }
+            },
+            {
+                "rating": 4.3,
+                "comment": "Good food!",
+                "date": {
+                    "$date": "2020-09-17T00:00:00.000Z"
+                }
+            }
+        ],
+        "reviewed": true,
+        "tests": [
+            "A",
+            "B"
+        ]
+    },
+    {
+        "_id": {
+            "$oid": "5f620f9d52024f4dcab4718b"
+        },
+        "name": "abc1",
+        "amount": 300,
+        "rating": 1.2,
+        "address": {
+            "street": "123 Main St",
+            "city": "Springfield",
+            "state": "IL",
+            "zip": 62701
+        },
+        "reviews": [
+            {
+                "rating": 5.1,
+                "comment": "Great service!",
+                "date": {
+                    "$date": "2020-09-16T00:00:00.000Z"
+                }
+            },
+            {
+                "rating": 4.2,
+                "comment": "Good food!",
+                "date": {
+                    "$date": "2020-09-17T00:00:00.000Z"
+                }
+            }
+        ],
+        "reviewed": false,
+        "tests": [],
+        "dummy": null
+    }
+]

@@ -108,8 +108,18 @@ class MongoApi(object):
             session=session,
         )
 
+    def coll_stats_compatable(self, db_name, coll_name, session=None):
+        # collStats is deprecated in MongoDB 6.2. Use the $collStats aggregation stage instead.
+        return self[db_name].command({'collStats': coll_name}, session=session)
+
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
+
+    def index_information(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].index_information(session=session)
+
+    def list_search_indexes(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].list_search_indexes(session=session)
 
     def sharded_data_distribution_stats(self, session=None):
         return self["admin"].aggregate([{"$shardedDataDistribution": {}}], session=session)
@@ -138,6 +148,9 @@ class MongoApi(object):
     def get_log_data(self, session=None):
         return self['admin'].command("getLog", "global", session=session)
 
+    def sample(self, db_name, coll_name, sample_size, session=None):
+        return self[db_name][coll_name].aggregate([{"$sample": {"size": sample_size}}], session=session)
+
     def get_cmdline_opts(self):
         return self["admin"].command("getCmdLineOpts")["parsed"]
 
@@ -161,24 +174,38 @@ class MongoApi(object):
         db_name,
         limit=None,
     ):
+        coll_names = []
         try:
             coll_names = self[db_name].list_collection_names(
                 filter={"type": "collection"},  # Only return collections, not views
                 authorizedCollections=True,
             )
-            if limit:
-                return coll_names[:limit]
-            return coll_names
-        except OperationFailure:
-            # The user is not authorized to run listCollections on this database.
-            # This is NOT a critical error, so we log it as a warning.
-            self._log.warning(
-                "Not authorized to run 'listCollections' on db %s, "
-                "please make sure the user has read access on the database or "
-                "add the database to the `database_autodiscovery.exclude` list in the configuration file",
-                db_name,
-            )
-            return []
+        except OperationFailure as e:
+            if e.code == 303 and e.details.get("errmsg") == "Field 'type' is currently not supported":
+                # Filter by type is not supported on AWS DocumentDB
+                coll_names = self[db_name].list_collection_names(authorizedCollections=True)
+            else:
+                # The user is not authorized to run listCollections on this database.
+                # This is NOT a critical error, so we log it as a warning.
+                self._log.warning(
+                    "Not authorized to run 'listCollections' on db %s, "
+                    "please make sure the user has read access on the database or "
+                    "add the database to the `database_autodiscovery.exclude` list in the configuration file",
+                    db_name,
+                )
+        if limit:
+            return coll_names[:limit]
+        return coll_names
+
+    def is_collection_sharded(self, db_name, coll_name):
+        try:
+            # Check if the collection is sharded by looking for the collection config
+            # in the config.collections collection.
+            collection_config = self["config"]["collections"].find_one({"_id": f"{db_name}.{coll_name}"})
+            return collection_config is not None
+        except OperationFailure as e:
+            self._log.warning("Could not determine if collection %s.%s is sharded: %s", db_name, coll_name, e)
+            return False
 
     @property
     def hostname(self):

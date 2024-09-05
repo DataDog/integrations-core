@@ -5,7 +5,6 @@ import os
 
 import pytest
 import requests_mock
-from six import PY2
 
 from datadog_checks.linkerd import LinkerdCheck
 
@@ -69,7 +68,6 @@ def test_linkerd_v2(aggregator, dd_run_check):
     )
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_linkerd_v2_new(aggregator, dd_run_check, mock_http_response):
     mock_http_response(file_path=get_fixture_path('linkerd_v2.txt'))
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE_NEW])

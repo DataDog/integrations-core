@@ -1,0 +1,8 @@
+Add new metrics for MongoDB query plan cache (requires MongoDB 7.0+) and sort stages (requires MongoDB 6.2+):
+- mongodb.metrics.query.plancache.classic.hitsps
+- mongodb.metrics.query.plancache.classic.missesps
+- mongodb.metrics.query.plancache.sbe.hitsps
+- mongodb.metrics.query.plancache.sbe.missesps
+- mongodb.metrics.query.sort.spilltodiskps
+- mongodb.metrics.query.sort.totalbytessortedps
+- mongodb.metrics.query.sort.totalkeyssortedps
