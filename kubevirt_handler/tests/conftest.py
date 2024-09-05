@@ -62,7 +62,6 @@ def dd_environment():
 
         instance["kubevirt_handler_metrics_endpoint"] = f"https://{host}:{port}/metrics"
         instance["kubevirt_handler_healthz_endpoint"] = f"https://{host}:{port}/healthz"
-        instance["kube_cluster_name"] = "test-cluster-e2e"
         instance["kube_namespace"] = "kubevirt"
         instance["kube_pod_name"] = "virt-handler-98cf864cc-zkgcd"
         instance["tls_verify"] = "false"
@@ -75,7 +74,6 @@ def instance():
     return {
         "kubevirt_handler_healthz_endpoint": "https://127.0.0.1:8443/healthz",
         "kubevirt_handler_metrics_endpoint": "https://127.0.0.1:8443/metrics",
-        "kube_cluster_name": "test-cluster",
         "kube_namespace": "kubevirt",
         "kube_pod_name": "virt-handler-some-id",
     }

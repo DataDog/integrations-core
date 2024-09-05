@@ -16,12 +16,10 @@ from .conftest import mock_http_responses
 base_tags = [
     "pod_name:virt-handler-some-id",
     "kube_namespace:kubevirt",
-    "kube_cluster_name:test-cluster",
 ]
 
 
 def test_check_collects_metrics(dd_run_check, aggregator, instance, mocker):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     mocker.patch("requests.get", wraps=mock_http_responses)
     check = KubeVirtHandlerCheck("kubevirt_handler", {}, [instance])
     dd_run_check(check)
@@ -33,7 +31,6 @@ def test_check_collects_metrics(dd_run_check, aggregator, instance, mocker):
     )
 
     metric_tags = [
-        "kube_cluster_name:test-cluster",
         "kube_namespace:kubevirt",
         "pod_name:virt-handler-some-id",
     ]
@@ -128,7 +125,6 @@ def test_check_collects_metrics(dd_run_check, aggregator, instance, mocker):
 
 
 def test_logs_warning_when_healthz_endpoint_is_missing(dd_run_check, aggregator, instance, mocker, caplog):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     mocker.patch("requests.get", wraps=mock_http_responses)
     del instance["kubevirt_handler_healthz_endpoint"]
     check = KubeVirtHandlerCheck("kubevirt_handler", {}, [instance])
@@ -141,7 +137,6 @@ def test_logs_warning_when_healthz_endpoint_is_missing(dd_run_check, aggregator,
 
 
 def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, instance, mocker):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     mocker.patch("requests.get", wraps=mock_http_responses)
     check = KubeVirtHandlerCheck("kubevirt_handler", {}, [instance])
     dd_run_check(check)
@@ -153,7 +148,6 @@ def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, inst
 
 
 def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     check = KubeVirtHandlerCheck("kubevirt_handler", {}, [instance])
     with pytest.raises(Exception):
         dd_run_check(check)

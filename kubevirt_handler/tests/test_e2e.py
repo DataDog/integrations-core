@@ -9,7 +9,6 @@ pytestmark = [pytest.mark.e2e]
 healthz_tags = [
     "pod_name:virt-handler-98cf864cc-zkgcd",
     "kube_namespace:kubevirt",
-    "kube_cluster_name:test-cluster-e2e",
 ]
 
 

@@ -116,7 +116,6 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
-    kube_cluster_name: Optional[str] = None
     kube_namespace: Optional[str] = None
     kube_pod_name: Optional[str] = None
     kubevirt_handler_healthz_endpoint: Optional[str] = None
