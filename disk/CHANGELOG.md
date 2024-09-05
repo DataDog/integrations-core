@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.4.0 / 2024-09-05
+
+***Added***:
+
+* Bump psutil version for python 3.12 support ([#18491](https://github.com/DataDog/integrations-core/pull/18491))
+
 ## 5.3.0 / 2024-03-08 / Agent 7.52.0
 
 ***Added***:
