@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import time
 from contextlib import ExitStack
 
 import pytest
@@ -37,7 +36,6 @@ def setup_kubevirt():
             '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true}}}}',
         ]
     )
-    time.sleep(30)
 
     # wait for kubevirt deployment
     run_command(
