@@ -42,9 +42,13 @@ class IndexStatsCollector(MongoCollector):
             except OperationFailure as e:
                 # Atlas restricts $indexStats on system collections
                 if e.code == 13:
-                    self.log.warning("Unauthorized to run $indexStats on collection %s", coll_name)
+                    self.log.warning("Unauthorized to run $indexStats on collection %s.%s", self.db_name, coll_name)
                 else:
-                    self.log.warning("Could not collect index stats for collection %s: %s", coll_name, e.details)
+                    self.log.warning(
+                        "Could not collect index stats for collection %s.%s: %s", self.db_name, coll_name, e.details
+                    )
             except Exception as e:
-                self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
+                self.log.error(
+                    "Unexpected error when fetch indexes stats for collection %s.%s: %s", self.db_name, coll_name, e
+                )
                 raise e

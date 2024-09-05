@@ -65,9 +65,14 @@ class CollStatsCollector(MongoCollector):
             except OperationFailure as e:
                 # Atlas restricts $collStats on system collections
                 if e.code == 13:
-                    self.log.warning("Unauthorized to run $collStats on collection %s", coll_name)
+                    self.log.warning("Unauthorized to run $collStats on collection %s.%s", self.db_name, coll_name)
                 else:
-                    self.log.warning("Could not collect stats for collection %s: %s", coll_name, e.details)
+                    self.log.warning(
+                        "Could not collect stats for collection %s.%s: %s", self.db_name, coll_name, e.details
+                    )
+                continue
+            except Exception as e:
+                self.log.error("Unexpected error when fetch stats for collection %s.%s: %s", self.db_name, coll_name, e)
                 continue
 
             for coll_stats in collection_stats:
