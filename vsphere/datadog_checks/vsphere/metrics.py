@@ -65,11 +65,10 @@ PERCENT_METRICS = {
 }
 
 VSAN_PERCENT_METRICS = {
-    'vsan.cluster.congestion',
-    'vsan.host.congestion',
-    'vsan.host.coreUtilPct',
-    'vsan.host.pcpuUsedPct',
-    'vsan.host.pcpuUtilPct',
+    'congestion',
+    'coreUtilPct',
+    'pcpuUsedPct',
+    'pcpuUtilPct',
 }
 
 # All metrics that can be collected from VirtualMachines.

@@ -29,9 +29,6 @@ from datadog_checks.vsphere.constants import (
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
     UNLIMITED_HIST_METRICS_PER_QUERY,
-    VSAN_CLUSTER_PREFIX,
-    VSAN_DISK_PREFIX,
-    VSAN_HOST_PREFIX,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import (
@@ -524,11 +521,7 @@ class VSphereCheck(AgentCheck):
                             )
                             latest_value = given_metric.values.split(',')[-1]
                             if latest_value != 'None':
-                                if (
-                                    VSAN_CLUSTER_PREFIX + given_metric.metricId.label in VSAN_PERCENT_METRICS
-                                    or VSAN_DISK_PREFIX + given_metric.metricId.label in VSAN_PERCENT_METRICS
-                                    or VSAN_HOST_PREFIX + given_metric.metricId.label in VSAN_PERCENT_METRICS
-                                ):
+                                if given_metric.metricId.label in VSAN_PERCENT_METRICS:
                                     latest_value = float(latest_value) / 100.0
                                 if resource_type == 'cluster':
                                     if 'vsan.cluster.{}'.format(given_metric.metricId.label) in VSAN_CLUSTER_METRICS:
@@ -553,11 +546,7 @@ class VSphereCheck(AgentCheck):
                                             'vsan.host.{}'.format(given_metric.metricId.label),
                                             # for now we only collect the latest value
                                             float(latest_value),
-                                            tags=[
-                                                'vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])
-                                            ]
-                                            + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
-                                            + self._config.base_tags,
+                                            tags=self._config.base_tags,
                                             hostname=self._hostname,
                                         )
                                     else:

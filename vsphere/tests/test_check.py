@@ -771,7 +771,7 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
     aggregator.assert_metric('vsphere.vsan.cluster.oio', count=1, tags=['vcenter_server:FAKE', 'vsphere_cluster:hello'])
     aggregator.assert_metric(
         'vsphere.vsan.host.oio',
-        count=1,
+        count=0,
         tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world'],
     )
     aggregator.assert_metric(

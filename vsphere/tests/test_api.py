@@ -276,10 +276,14 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             folder = api._conn.content.rootFolder
             folder.name = 'root-folder'
             cluster = folder.CreateClusterEx(name='a')
+            host = MagicMock(name='b')
+            cluster.host = [host]
             cluster_nested_elts = {cluster: ['nested-id-1', 'nested-id-2']}
             entity_ref_ids = {'type1': ['entity-1'], 'type2': ['entity-2']}
             id_to_tags = {'nested-id-1': ['type1'], 'nested-id-2': ['type2']}
             starting_time = dt.datetime(2024, 1, 1)
+            mock_vsan_events = api.get_vsan_events(starting_time)
+            assert len(mock_vsan_events) == 0
 
             mock_vsan_perf_manager = MockVsanPerformanceManager.return_value
             mock_vsan_perf_manager.QueryClusterHealth.return_value = [
@@ -298,6 +302,12 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
                     value=[MagicMock(metricId=MagicMock(dynamicProperty=[]))],
                 )
             ]
+            disk = MagicMock(disk_uuid='disk-1')
+            host.configManager.vsanSystem.QueryDisksForVsan.return_value = [disk]
+            new_cluster_nested_elts, new_id_to_tags = api.get_vsan_disk_metrics(host, cluster)
+            assert len(new_cluster_nested_elts) == 1
+            assert len(new_id_to_tags) == 1
+
             health_metrics, performance_metrics = api.get_vsan_metrics(
                 cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
             )
