@@ -171,7 +171,7 @@ datadog-system-swap==1.19.0
 datadog-tcp-check==4.9.0
 datadog-teamcity==4.3.1
 datadog-tekton==1.0.2
-datadog-teleport==1.0.0
+datadog-teleport==1.1.0
 datadog-temporal==2.3.0
 datadog-tenable==1.5.0
 datadog-teradata==2.2.1; sys_platform != 'darwin'
