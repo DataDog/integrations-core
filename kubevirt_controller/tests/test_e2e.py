@@ -11,7 +11,6 @@ healthz_tags = [
     "endpoint:https://10.244.0.38:443/healthz",
     "pod_name:virt-controller-some-id",
     "kube_namespace:kubevirt",
-    "kube_cluster_name:test-cluster",
 ]
 
 

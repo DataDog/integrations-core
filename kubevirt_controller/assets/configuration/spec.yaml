@@ -21,13 +21,6 @@ files:
               display_default: null
               example: https://10.244.0.38:443/healthz
               type: string
-          - name: kube_cluster_name
-            description: |
-              The name of the Kubernetes cluster.
-            value:
-              display_default: null
-              example: dev-cluster
-              type: string
           - name: kube_namespace
             description: |
               The namespace where the KubeVirt Controller is running. (Provided by autodiscovery template variables)

@@ -12,7 +12,6 @@ from .conftest import mock_http_responses
 base_tags = [
     "pod_name:virt-controller-some-id",
     "kube_namespace:kubevirt",
-    "kube_cluster_name:test-cluster",
 ]
 
 
