@@ -116,7 +116,7 @@ datadog-mcache==4.1.0; sys_platform != 'win32'
 datadog-mesos-master==3.3.1; sys_platform != 'win32'
 datadog-mesos-slave==3.3.1; sys_platform != 'win32'
 datadog-mongo==6.10.0
-datadog-mysql==12.7.0
+datadog-mysql==12.8.0
 datadog-nagios==1.13.0
 datadog-network==3.3.0
 datadog-nfsstat==1.13.0; sys_platform == 'linux2'
