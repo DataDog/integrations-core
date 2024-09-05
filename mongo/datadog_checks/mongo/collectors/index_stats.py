@@ -41,7 +41,7 @@ class IndexStatsCollector(MongoCollector):
                     self._submit_payload({"indexes": stats}, additional_tags, INDEX_METRICS, "collection")
             except OperationFailure as e:
                 # Atlas restricts $indexStats on system collections
-                self.log.warning("Could not collect index stats for collection %s: %s", coll_name, e)
+                self.log.warning("Could not collect index stats for collection %s: %s", coll_name, e.details)
             except Exception as e:
                 self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
                 raise e

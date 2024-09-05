@@ -44,11 +44,14 @@ class CollStatsCollector(MongoCollector):
         try:
             return api.coll_stats(self.db_name, coll_name)
         except OperationFailure as e:
+            if e.code == 13:
+                # Unauthorized to run $collStats, raise the exception
+                raise e
             # Failed to get collection stats using $collStats aggregation
             self.log.debug(
                 "Failed not collect stats for collection %s with $collStats, fallback to collStats command",
                 coll_name,
-                e,
+                e.details,
             )
             self.coll_stats_pipeline_supported = False
             return [api.coll_stats_compatable(self.db_name, coll_name)]
@@ -61,7 +64,7 @@ class CollStatsCollector(MongoCollector):
                 collection_stats = self._get_collection_stats(api, coll_name)
             except OperationFailure as e:
                 # Atlas restricts $collStats on system collections
-                self.log.warning("Could not collect stats for collection %s: %s", coll_name, e)
+                self.log.warning("Could not collect stats for collection %s: %s", coll_name, e.details)
                 continue
 
             for coll_stats in collection_stats:
