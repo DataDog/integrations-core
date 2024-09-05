@@ -52,6 +52,10 @@ class MockedCollection(object):
         with open(os.path.join(HERE, "fixtures", "index_information"), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
 
+    def list_search_indexes(self, session=None, **kwargs):
+        with open(os.path.join(HERE, "fixtures", "list_search_indexes"), 'r') as f:
+            return json.load(f, object_hook=json_util.object_hook)
+
     def aggregate(self, pipeline, session=None, **kwargs):
         if '$indexStats' in pipeline[0]:
             with open(os.path.join(HERE, "fixtures", f"$indexStats-{self._coll_name}"), 'r') as f:

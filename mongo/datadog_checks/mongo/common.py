@@ -36,6 +36,14 @@ ALLOWED_CUSTOM_METRICS_TYPES = ['gauge', 'rate', 'count', 'monotonic_count']
 ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
 
 
+class HostingType:
+    ATLAS = "mongodb-atlas"
+    ALIBABA_APSARADB = "alibaba-apsaradb"
+    DOCUMENTDB = "amazon-documentdb"
+    SELF_HOSTED = "self-hosted"
+    UNKNOWN = "unknown"
+
+
 def get_state_name(state):
     """Maps a mongod node state id to a human readable string."""
     if state in REPLSET_MEMBER_STATES:
