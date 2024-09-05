@@ -39,7 +39,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "psutil==5.9.0",
+    "psutil==5.9.6",
 ]
 
 [project.urls]
