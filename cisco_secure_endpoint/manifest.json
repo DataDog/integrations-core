@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Cisco Secure Endpoint Audit and Event logs.",
-    "title": "cisco-secure-endpoint",
+    "title": "Cisco Secure Endpoint",
     "media": [
       {
         "caption": "Cisco Secure Endpoint - Audit",
