@@ -1,1 +1,0 @@
-Add modules to mongodb instance metadata. `modules` are a list of add-on modules that mongod was built with. Possible values currently include "enterprise" and "rocksdb".

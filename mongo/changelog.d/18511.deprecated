@@ -1,1 +1,0 @@
-Deprecate metrics `mongodb.collection.collectionscans.nontailable` & `mongodb.collection.collectionscans.total`.
