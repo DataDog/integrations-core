@@ -62,7 +62,7 @@ To find the Client ID and Client Secret, you need to register a new application:
 | Issue refresh tokens | **Yes** |
 | Application scopes | Select the following:<br><ul><li>Analytics</li><li>Read Audit Trail</li><li>Read Call Log</li><li>A2P SMS</li></ul>
 |
-1. Click on create App.
+1. Click **create App**.
 1. After creating the application, find the `clientId` and `clientSecret` in the application settings. 
 1. Copy these credentials. 
 - **Note**: Ensure these credentials are stored securely and not exposed in public repositories or insecure locations.
