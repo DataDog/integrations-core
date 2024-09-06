@@ -235,4 +235,4 @@ def test_metadata(check, instance, datadog_agent, reported_database_hostname):
         assert check._resolved_hostname == reported_database_hostname
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata('test:123', {'resolved_hostname': check._resolved_hostname})
-    datadog_agent.assert_metadata_count(len(version_metadata) + 3)
+    datadog_agent.assert_metadata_count(len(version_metadata) + 4)

@@ -71,6 +71,13 @@ BASE_METRICS = {
     "metrics.operation.idhack": RATE,
     "metrics.operation.scanAndOrder": RATE,
     "metrics.operation.writeConflicts": RATE,
+    "metrics.query.sort.spillToDisk": RATE,
+    "metrics.query.sort.totalBytesSorted": RATE,
+    "metrics.query.sort.totalKeysSorted": RATE,
+    "metrics.query.planCache.classic.hits": RATE,
+    "metrics.query.planCache.classic.misses": RATE,
+    "metrics.query.planCache.sbe.hits": RATE,
+    "metrics.query.planCache.sbe.misses": RATE,
     "metrics.queryExecutor.scanned": RATE,
     "metrics.queryExecutor.scannedObjects": RATE,
     "metrics.record.moves": RATE,
@@ -353,8 +360,8 @@ COLLECTION_METRICS = {
     'collection.transactions.ops': RATE,
     'collection.transactions.latency_avg': (GAUGE, 'collection.transactions.latency.avg'),
     # collection query exec stats
-    'collection.collectionScans.total': GAUGE,
-    'collection.collectionScans.nonTailable': GAUGE,
+    'collection.collectionScans.total': RATE,
+    'collection.collectionScans.nonTailable': RATE,
 }
 
 SHARDED_DATA_DISTRIBUTION_METRICS = {

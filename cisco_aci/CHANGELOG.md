@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 2.11.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Use name instead of node ID as device hostname ([#18375](https://github.com/DataDog/integrations-core/pull/18375))
+
+## 2.10.2 / 2024-09-02
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Use actual int for interface index ([#18414](https://github.com/DataDog/integrations-core/pull/18414))
+
 ## 2.10.1 / 2024-08-20
 
 ***Fixed***:
