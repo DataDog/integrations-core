@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.12.0 / 2024-09-06
+
+***Added***:
+
+* Add the ability to tag cisco-aci device and interface metrics with user-defined tags. ([#18496](https://github.com/DataDog/integrations-core/pull/18496))
+
 ## 2.11.0 / 2024-09-05
 
 ***Added***:
