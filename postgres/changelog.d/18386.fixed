@@ -1,1 +1,0 @@
-Set the default port to 5432 when user don't provide one, this corrects the issue where the generated IAM authentication token is invalid when a port isn't provided.
