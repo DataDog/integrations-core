@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2024-09-06
+
+***Added***:
+
+* Bump hazalcast-python-client version for python 3.12 support ([#18520](https://github.com/DataDog/integrations-core/pull/18520))
+
 ## 4.0.0 / 2024-09-05
 
 ***Changed***:
