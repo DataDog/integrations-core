@@ -71,7 +71,7 @@ datadog-go-expvar==2.5.1
 datadog-gunicorn==2.8.0; sys_platform != 'win32'
 datadog-haproxy==5.2.2
 datadog-harbor==3.2.2
-datadog-hazelcast==4.0.0
+datadog-hazelcast==4.1.0
 datadog-hdfs-datanode==4.2.1; sys_platform != 'win32'
 datadog-hdfs-namenode==4.2.1; sys_platform != 'win32'
 datadog-hive==1.10.0
