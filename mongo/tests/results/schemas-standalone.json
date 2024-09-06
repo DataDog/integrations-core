@@ -312,7 +312,8 @@
                                 "type": "regular",
                                 "case_insensitive": true
                             }
-                        ]
+                        ],
+                        "search_indexes": []
                     },
                     {
                         "name": "bar",
@@ -580,7 +581,8 @@
                                 "type": "regular",
                                 "case_insensitive": true
                             }
-                        ]
+                        ],
+                        "search_indexes": []
                     }
                 ]
             }
@@ -899,7 +901,8 @@
                                 "type": "regular",
                                 "case_insensitive": true
                             }
-                        ]
+                        ],
+                        "search_indexes": []
                     },
                     {
                         "name": "bar",
@@ -1167,7 +1170,8 @@
                                 "type": "regular",
                                 "case_insensitive": true
                             }
-                        ]
+                        ],
+                        "search_indexes": []
                     }
                 ]
             }

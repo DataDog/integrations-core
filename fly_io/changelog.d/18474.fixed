@@ -1,0 +1,1 @@
+Request `/v1/apps` for health check instead of the base URL.
