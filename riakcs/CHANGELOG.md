@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.12.0 / 2024-09-05
+
+***Added***:
+
+* Switch to boto3 for communicating with AWS S3. ([#18495](https://github.com/DataDog/integrations-core/pull/18495))
+
 ## 2.11.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

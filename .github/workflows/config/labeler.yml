@@ -156,7 +156,9 @@ integration/disk:
 integration/dns_check:
   - dns_check/**/*
 integration/docker_daemon:
-  - docker_daemon/**/*
+- docker_daemon/**/*
+integration/docusign:
+- docusign/**/*
 integration/dotnetclr:
   - dotnetclr/**/*
 integration/druid:
@@ -198,7 +200,9 @@ integration/gitlab_runner:
 integration/gke:
   - gke/**/*
 integration/glusterfs:
-  - glusterfs/**/*
+- glusterfs/**/*
+integration/godaddy:
+- godaddy/**/*
 integration/go-metro:
   - go-metro/**/*
 integration/go_expvar:
@@ -288,13 +292,17 @@ integration/kyototycoon:
 integration/kyverno:
   - kyverno/**/*
 integration/langchain:
-  - langchain/**/*
+- langchain/**/*
+integration/lastpass:
+- lastpass/**/*
 integration/lighttpd:
   - lighttpd/**/*
 integration/linkerd:
   - linkerd/**/*
 integration/linux_proc_extras:
-  - linux_proc_extras/**/*
+- linux_proc_extras/**/*
+integration/mailchimp:
+- mailchimp/**/*
 integration/mapr:
   - mapr/**/*
 integration/mapreduce:
@@ -402,7 +410,9 @@ integration/rethinkdb:
 integration/riak:
   - riak/**/*
 integration/riakcs:
-  - riakcs/**/*
+- riakcs/**/*
+integration/ringcentral:
+- ringcentral/**/*
 integration/sap_hana:
   - sap_hana/**/*
 integration/scylla:

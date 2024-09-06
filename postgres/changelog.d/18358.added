@@ -1,1 +1,0 @@
-Update the propagate_agent_tags setting. When set to `true`, the tags from the agent host are now added to the check's tags for all instances.

@@ -44,6 +44,37 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
               datadog/agent:latest
 ```
 
+#### Helm
+
+For Helm configurations, you can set up the Datadog Agent to monitor systemd units (such as: `kubelet.service` and `ssh.service`) by defining volume mounts and volumes for accessing systemd-related files and directories within containers. For example:
+
+```bash
+datadog:
+  #(...)
+  confd:      
+    # Custom config file for SystemD
+    # Example: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/systemd.d/conf.yaml.example
+    
+    systemd.yaml: |-
+      init_config:
+      instances:
+        - unit_names:
+            - kubelet.service
+            - ssh.service
+  
+agents:
+  # Custom Mounts for SystemD socket (/run/systemd/private)
+  volumeMounts:
+    - name: systemd
+      mountPath: /host/run/systemd/ # the path within the container where the volume will be mounted
+    
+  volumes:
+    - name: systemd
+      hostPath:
+        path: /run/systemd/ # the path on the host machine that will be mounted into the container.
+```
+
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 

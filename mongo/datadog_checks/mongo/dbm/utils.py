@@ -5,11 +5,17 @@
 
 from typing import Optional, Tuple
 
-from bson import json_util
+from bson import json_util, regex
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 
 MONGODB_SYSTEM_DATABASES = frozenset(["admin", "config", "local"])
 
@@ -48,6 +54,22 @@ UNEXPLAINABLE_COMMANDS = frozenset(
         "explain",
         "profile",  # command to get profile level
         "listCollections",
+    ]
+)
+
+COMMAND_KEYS_TO_REMOVE = frozenset(["comment", "lsid", "$clusterTime"])
+
+EXPLAIN_PLAN_KEYS_TO_REMOVE = frozenset(
+    [
+        "serverInfo",
+        "serverParameters",
+        "command",
+        "ok",
+        "$clusterTime",
+        "operationTime",
+        "$configServerState",
+        "lastCommittedOpTime",
+        "$gleStats",
     ]
 )
 
@@ -119,15 +141,13 @@ def format_explain_plan(explain_plan: dict) -> dict:
     if not explain_plan:
         return None
 
-    plan = {
-        key: value
-        for key, value in explain_plan.items()
-        if key not in ("serverInfo", "serverParameters", "command", "ok", "$clusterTime", "operationTime")
-    }
+    plan = {key: value for key, value in explain_plan.items() if key not in EXPLAIN_PLAN_KEYS_TO_REMOVE}
+
+    obfuscated_plan = obfuscate_explain_plan(plan)
 
     return {
-        "definition": plan,
-        "signature": compute_exec_plan_signature(json_util.dumps(plan)),
+        "definition": obfuscated_plan,
+        "signature": compute_exec_plan_signature(json_util.dumps(obfuscated_plan)),
     }
 
 
@@ -150,3 +170,43 @@ def get_command_collection(command: dict, ns: str) -> Optional[str]:
         if collection and isinstance(collection, str):  # edge case like {"aggregate": 1}
             return collection
     return None
+
+
+def obfuscate_command(command: dict):
+    # Obfuscate the command to remove sensitive information
+    # Remove the following keys from the command before obfuscating
+    # - comment: The comment field should not contribute to the query signature
+    # - lsid: The lsid field is a unique identifier for the session
+    # - $clusterTime: The $clusterTime field is a logical time used for ordering of operations
+    obfuscated_command = command.copy()
+    for key in COMMAND_KEYS_TO_REMOVE:
+        obfuscated_command.pop(key, None)
+    return datadog_agent.obfuscate_mongodb_string(json_util.dumps(obfuscated_command))
+
+
+def obfuscate_explain_plan(plan):
+    if isinstance(plan, dict):
+        obfuscated_plan = {}
+        for key, value in plan.items():
+            if key in ["filter", "parsedQuery", "indexBounds"]:
+                obfuscated_plan[key] = obfuscate_literals(value)
+            else:
+                obfuscated_plan[key] = obfuscate_explain_plan(value)
+        return obfuscated_plan
+    elif isinstance(plan, list):
+        return [obfuscate_explain_plan(item) for item in plan]
+    else:
+        return plan
+
+
+def obfuscate_literals(value):
+    if isinstance(value, dict):
+        return {k: obfuscate_literals(v) for k, v in value.items()}
+    elif isinstance(value, list):
+        return [obfuscate_literals(v) for v in value]
+    elif isinstance(value, (str, int, float, bool)):
+        return "?"
+    elif isinstance(value, regex.Regex):
+        return regex.Regex("?", value.flags)
+    else:
+        return value

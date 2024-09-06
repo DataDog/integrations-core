@@ -14,8 +14,8 @@
         "mongodb_activity": [
             {
                 "now": 1715911398.1112723,
-                "query_signature": "4dbd60784e36b560",
-                "statement": "{\"find\": \"products\", \"filter\": {\"$and\": [{\"data\": {\"$gt\": 0.6283678507530881}}, {\"message\": {\"$regularExpression\": {\"pattern\": \"log\", \"options\": \"\"}}}]}, \"comment\": \"find\", \"lsid\": {\"id\": {\"$binary\": {\"base64\": \"/n9kUpUhR1ymJjEwvCySbg==\", \"subType\": \"04\"}}}, \"$clusterTime\": {\"clusterTime\": {\"$timestamp\": {\"t\": 1715882797, \"i\": 5}}, \"signature\": {\"hash\": {\"$binary\": {\"base64\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAA=\", \"subType\": \"00\"}}, \"keyId\": 0}}, \"$db\": \"integration\", \"$readPreference\": {\"mode\": \"primaryPreferred\"}}",
+                "query_signature": "a5c9a4483fa9bcdf",
+                "statement": "{\"find\": \"products\", \"filter\": {\"$and\": [{\"data\": {\"$gt\": 0.6283678507530881}}, {\"message\": {\"$regularExpression\": {\"pattern\": \"log\", \"options\": \"\"}}}]}, \"$db\": \"integration\", \"$readPreference\": {\"mode\": \"primaryPreferred\"}}",
                 "active": true,
                 "desc": "conn104",
                 "opid": 1538838,
@@ -85,8 +85,8 @@
             },
             {
                 "now": 1715911398.1112723,
-                "query_signature": "8e567c5655c884d0",
-                "statement": "{\"getMore\": 7156629711810917986, \"collection\": \"oplog.rs\", \"batchSize\": 13981010, \"maxTimeMS\": 5000, \"term\": 2, \"lastKnownCommittedOpTime\": {\"ts\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 17}}, \"t\": 2}, \"$replData\": 1, \"$oplogQueryData\": 1, \"$readPreference\": {\"mode\": \"secondaryPreferred\"}, \"$clusterTime\": {\"clusterTime\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 18}}, \"signature\": {\"hash\": {\"$binary\": {\"base64\": \"fAxz3pScinFgqdNkVCRZGX3goGY=\", \"subType\": \"00\"}}, \"keyId\": 7387155612372566021}}, \"$db\": \"local\"}",
+                "query_signature": "2098271ac4fceefe",
+                "statement": "{\"getMore\": 7156629711810917986, \"collection\": \"oplog.rs\", \"batchSize\": 13981010, \"maxTimeMS\": 5000, \"term\": 2, \"lastKnownCommittedOpTime\": {\"ts\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 17}}, \"t\": 2}, \"$replData\": 1, \"$oplogQueryData\": 1, \"$readPreference\": {\"mode\": \"secondaryPreferred\"}, \"$db\": \"local\"}",
                 "active": true,
                 "desc": "conn1392",
                 "opid": 1399253104,
@@ -125,9 +125,10 @@
                     "no_cursor_timeout": false,
                     "tailable": true,
                     "await_data": true,
-                    "originating_command": "{\"find\": \"oplog.rs\", \"filter\": {\"ts\": {\"$gte\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 17}}}}, \"batchSize\": 13981010, \"tailable\": true, \"awaitData\": true, \"term\": 2, \"maxTimeMS\": 60000, \"readConcern\": {\"level\": \"local\", \"afterClusterTime\": {\"$timestamp\": {\"t\": 0, \"i\": 1}}}, \"$replData\": 1, \"$oplogQueryData\": 1, \"$readPreference\": {\"mode\": \"secondaryPreferred\"}, \"$clusterTime\": {\"clusterTime\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 18}}, \"signature\": {\"hash\": {\"$binary\": {\"base64\": \"fAxz3pScinFgqdNkVCRZGX3goGY=\", \"subType\": \"00\"}}, \"keyId\": 7387155612372566021}}, \"$db\": \"local\"}",
+                    "originating_command": "{\"find\": \"oplog.rs\", \"filter\": {\"ts\": {\"$gte\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 17}}}}, \"batchSize\": 13981010, \"tailable\": true, \"awaitData\": true, \"term\": 2, \"maxTimeMS\": 60000, \"readConcern\": {\"level\": \"local\", \"afterClusterTime\": {\"$timestamp\": {\"t\": 0, \"i\": 1}}}, \"$replData\": 1, \"$oplogQueryData\": 1, \"$readPreference\": {\"mode\": \"secondaryPreferred\"}, \"$db\": \"local\"}",
                     "plan_summary": null,
-                    "operation_using_cursor_id": 1399253104
+                    "operation_using_cursor_id": 1399253104,
+                    "comment": "oplogReplay"
                 },
                 "type": "op",
                 "op": "getmore",

@@ -10,7 +10,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into palo alto cortex xdr logs",
     "title": "Palo Alto Cortex XDR",
-    "media": [],
+    "media": [
+      {
+        "caption": "Palo Alto Cortex XDR - Incidents",
+        "image_url": "images/palo_alto_cortex_xdr_incidents.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Cortex XDR - Alerts",
+        "image_url": "images/palo_alto_cortex_xdr_alerts.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -29,6 +40,13 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Palo Alto Cortex XDR - Incidents" : "assets/dashboards/palo_alto_cortex_xdr_incidents.json",
+      "Palo Alto Cortex XDR - Alerts" : "assets/dashboards/palo_alto_cortex_xdr_alerts.json"
+    },
+    "logs": {
+      "source": "palo-alto-cortex-xdr"
     }
   },
   "author": {
@@ -36,6 +54,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

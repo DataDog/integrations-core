@@ -34,13 +34,13 @@
                             "$and": [
                                 {
                                     "data": {
-                                        "$gt": 0.6283678507530881
+                                        "$gt": "?"
                                     }
                                 },
                                 {
                                     "message": {
                                         "$regularExpression": {
-                                            "pattern": "log",
+                                            "pattern": "?",
                                             "options": ""
                                         }
                                     }
@@ -58,13 +58,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -87,13 +87,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -115,12 +115,12 @@
                         "allPlansExecution": []
                     }
                 },
-                "signature": "466d69277a94ff1f"
+                "signature": "6f93ef1b4ea189ab"
             },
-            "query_signature": "4dbd60784e36b560",
+            "query_signature": "a5c9a4483fa9bcdf",
             "application": null,
             "user": "test",
-            "statement": "{\"find\": \"products\", \"filter\": {\"$and\": [{\"data\": {\"$gt\": 0.6283678507530881}}, {\"message\": {\"$regularExpression\": {\"pattern\": \"log\", \"options\": \"\"}}}]}, \"comment\": \"find\", \"lsid\": {\"id\": {\"$binary\": {\"base64\": \"/n9kUpUhR1ymJjEwvCySbg==\", \"subType\": \"04\"}}}, \"$clusterTime\": {\"clusterTime\": {\"$timestamp\": {\"t\": 1715882797, \"i\": 5}}, \"signature\": {\"hash\": {\"$binary\": {\"base64\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAA=\", \"subType\": \"00\"}}, \"keyId\": 0}}, \"$db\": \"integration\", \"$readPreference\": {\"mode\": \"primaryPreferred\"}}",
+            "statement": "{\"find\": \"products\", \"filter\": {\"$and\": [{\"data\": {\"$gt\": 0.6283678507530881}}, {\"message\": {\"$regularExpression\": {\"pattern\": \"log\", \"options\": \"\"}}}]}, \"$db\": \"integration\", \"$readPreference\": {\"mode\": \"primaryPreferred\"}}",
             "operation_metadata": {
                 "op": "query",
                 "shard": null,
@@ -133,7 +133,7 @@
         },
         "mongodb": {
             "now": 1715911398.1112723,
-            "query_signature": "4dbd60784e36b560",
+            "query_signature": "a5c9a4483fa9bcdf",
             "active": true,
             "desc": "conn104",
             "opid": 1538838,
