@@ -45,9 +45,13 @@
       }
     },
     "monitors": {
-	"Execution latency": "assets/monitors/execution_latency.json",
-	"Execution errors":  "assets/monitors/execution_errors.json",
-	"Neuron Runtime vCPU usage":  "assets/monitors/neuron_runtime_vcpu.json"
+      "Execution latency": "assets/monitors/execution_latency.json",
+      "Execution errors": "assets/monitors/execution_errors.json",
+      "Neuron Runtime vCPU usage": "assets/monitors/neuron_runtime_vcpu.json"
+    },
+    "saved_views": {
+      "AWS Neuron Logs Overview": "assets/saved_views/logs_overview.json",
+      "AWS Neuron Error Logs Overview": "assets/saved_views/error_logs_overview.json"
     }
   },
   "author": {

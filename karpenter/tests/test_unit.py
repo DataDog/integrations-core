@@ -8,7 +8,7 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.karpenter import KarpenterCheck
 
-from .common import RENAMED_LABELS, TEST_METRICS, get_fixture_path
+from .common import RENAMED_LABELS, TEST_METRICS, TEST_V1_METRICS, get_fixture_path
 
 
 def test_check_mock_karpenter_openmetrics(dd_run_check, instance, aggregator, mock_http_response):
@@ -21,6 +21,19 @@ def test_check_mock_karpenter_openmetrics(dd_run_check, instance, aggregator, mo
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check('karpenter.openmetrics.health', ServiceCheck.OK)
+
+
+def test_check_mock_karpenter_v1_openmetrics(dd_run_check, instance, aggregator, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('karpenter_metrics_v1.txt'))
+    check = KarpenterCheck('karpenter', {}, [instance])
+    dd_run_check(check)
+
+    for metric in TEST_V1_METRICS:
+        aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, 'test:tag')
+
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('karpenter.openmetrics.health', ServiceCheck.OK)
 

@@ -1,0 +1,1 @@
+Emit new metrics `mongodb.collection.collectionscans.totalps` & `mongodb.collection.collectionscans.nontailableps`. The new metrics measure the total number of queries that performed a collection scans or collection scans without tailable cursor per second.
