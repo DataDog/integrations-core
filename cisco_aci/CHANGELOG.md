@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Add the ability to tag cisco-aci device and interface metrics with user-defined tags. ([#18496](https://github.com/DataDog/integrations-core/pull/18496))
+* Add the ability to tag Cisco ACI device and interface metrics with user-defined tags. ([#18496](https://github.com/DataDog/integrations-core/pull/18496))
 
 ## 2.11.0 / 2024-09-05
 
