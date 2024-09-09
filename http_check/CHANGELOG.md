@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 9.9.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
 ## 9.8.0 / 2024-08-09
 
 ***Added***:
 
 * Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
 
-## 9.7.0 / 2024-07-05
+## 9.7.0 / 2024-07-05 / Agent 7.56.0
 
 ***Added***:
 

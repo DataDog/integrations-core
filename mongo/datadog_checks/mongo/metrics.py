@@ -71,6 +71,13 @@ BASE_METRICS = {
     "metrics.operation.idhack": RATE,
     "metrics.operation.scanAndOrder": RATE,
     "metrics.operation.writeConflicts": RATE,
+    "metrics.query.sort.spillToDisk": RATE,
+    "metrics.query.sort.totalBytesSorted": RATE,
+    "metrics.query.sort.totalKeysSorted": RATE,
+    "metrics.query.planCache.classic.hits": RATE,
+    "metrics.query.planCache.classic.misses": RATE,
+    "metrics.query.planCache.sbe.hits": RATE,
+    "metrics.query.planCache.sbe.misses": RATE,
     "metrics.queryExecutor.scanned": RATE,
     "metrics.queryExecutor.scannedObjects": RATE,
     "metrics.record.moves": RATE,
@@ -142,6 +149,7 @@ BASE_METRICS = {
     "stats.totalFreeStorageSize": GAUGE,
     "stats.fsUsedSize": GAUGE,
     "stats.fsTotalSize": GAUGE,
+    "stats.views": GAUGE,
     "sessions.count": GAUGE,
     "uptime": GAUGE,
     "system.memSizeMB": (GAUGE, "system.mem.total"),  # total amount of system memory
@@ -352,8 +360,19 @@ COLLECTION_METRICS = {
     'collection.transactions.ops': RATE,
     'collection.transactions.latency_avg': (GAUGE, 'collection.transactions.latency.avg'),
     # collection query exec stats
-    'collection.collectionScans.total': GAUGE,
-    'collection.collectionScans.nonTailable': GAUGE,
+    'collection.collectionScans.total': RATE,
+    'collection.collectionScans.nonTailable': RATE,
+}
+
+SHARDED_DATA_DISTRIBUTION_METRICS = {
+    'numOrphanedDocs': (GAUGE, 'sharded_data_distribution.num_orphaned_docs'),
+    'numOwnedDocuments': (GAUGE, 'sharded_data_distribution.num_owned_documents'),
+    'ownedSizeBytes': (GAUGE, 'sharded_data_distribution.owned_size_bytes'),
+    'orphanedSizeBytes': (GAUGE, 'sharded_data_distribution.orphaned_size_bytes'),
+}
+
+INDEX_METRICS = {
+    'indexes.accesses.ops': RATE,
 }
 
 """
@@ -387,4 +406,5 @@ AVAILABLE_METRICS = {
     'top': TOP_METRICS,
     'collection': COLLECTION_METRICS,
     'jumbo_chunks': {},
+    'sharded_data_distribution': SHARDED_DATA_DISTRIBUTION_METRICS,
 }

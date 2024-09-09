@@ -10,7 +10,7 @@ This integration provides enrichment and visualization for Alert, Anomaly, HTTP,
 
 To install the Suricata integration, run the following Agent installation command and follow the steps below. For more information, see the [Integration Management][5] documentation.
 
-**Note**: This step is not necessary for Agent versions >= 7.54.0.
+**Note**: This step is not necessary for Agent versions >= 7.57.0.
 
 For Linux, run:
   ```shell

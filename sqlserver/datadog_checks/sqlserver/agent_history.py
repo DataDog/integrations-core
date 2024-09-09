@@ -33,16 +33,15 @@ WITH HISTORY_ENTRIES AS (
             AND sjh2.instance_id >= sjh1.instance_id
         ) AS completion_instance_id,
         (
-            SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
-                DATEDIFF(SECOND, '19700101',
-                    DATEADD(HOUR, sjh1.run_time / 10000,
-                        DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
-                            DATEADD(SECOND, sjh1.run_time % 100,
-                                CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
-                            )
+            SELECT DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh1.run_time / 10000,
+                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh1.run_time % 100,
+                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
                         )
                     )
                 )
+            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
         ) AS run_epoch_time,
         (
             (sjh1.run_duration / 10000) * 3600
@@ -70,17 +69,16 @@ WHERE
         SELECT 1
         FROM msdb.dbo.sysjobhistory AS sjh2
         WHERE sjh2.instance_id = HISTORY_ENTRIES.completion_instance_id
-        AND (DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
-                    DATEDIFF(SECOND, '19700101',
-                        DATEADD(HOUR, sjh2.run_time / 10000,
-                            DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
-                                DATEADD(SECOND, sjh2.run_time % 100,
-                                    CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
-                                )
-                            )
+        AND (DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh2.run_time / 10000,
+                    DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh2.run_time % 100,
+                            CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
                         )
                     )
-                + (sjh2.run_duration / 10000) * 3600
+                )
+            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
+        + (sjh2.run_duration / 10000) * 3600
         + ((sjh2.run_duration % 10000) / 100) * 60
         + (sjh2.run_duration % 100)) > 0 + {last_collection_time_filter}
     )
@@ -114,11 +112,9 @@ class SqlserverAgentHistory(DBMAsyncJob):
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
-            # is this used as identification information? if so where. is there a convention to follow
             job_name="agent-jobs-history",
             shutdown_callback=self._close_db_conn,
         )
-        # same questions as job_name
         self._conn_key_prefix = "dbm-agent-jobs-"
 
     def _close_db_conn(self):
@@ -175,5 +171,5 @@ class SqlserverAgentHistory(DBMAsyncJob):
                 history_rows = self._get_new_agent_job_history(cursor)
                 history_event = self._create_agent_jobs_history_event(history_rows)
                 payload = json.dumps(history_event, default=default_json_event_encoding)
-                self.log.info(payload)
+                self.log.debug(payload)
                 self._check.database_monitoring_query_activity(payload)

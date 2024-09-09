@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 17.5.2 / 2024-08-28
+
+***Fixed***:
+
+* Bump lxml to 4.9.4 ([#18244](https://github.com/DataDog/integrations-core/pull/18244))
+
+## 17.5.1 / 2024-08-13
+
+***Fixed***:
+
+* Directly collect the time offset for converting times in SQL Server Agent tables to epoch timestamp through a single, deterministic function. This method avoids calculating the offset as a difference between the server time and UTC time, which led to inaccurate offsets in some cases. ([#18292](https://github.com/DataDog/integrations-core/pull/18292))
+
 ## 17.5.0 / 2024-08-09
 
 ***Added***:
@@ -12,7 +24,7 @@
 
 * Fix password obfuscation in OLE DB driver error message when one or more backslashes exist in the password. ([#18203](https://github.com/DataDog/integrations-core/pull/18203))
 
-## 17.4.1 / 2024-08-08
+## 17.4.1 / 2024-08-08 / Agent 7.56.0
 
 ***Fixed***:
 

@@ -19,13 +19,14 @@ from .metrics import (
     MACHINE_GUEST_METRICS,
     MACHINE_INIT_METRICS,
     MOCKED_PROMETHEUS_METRICS,
+    PROMETHEUS_METRICS_NO_HOST,
+    PROMETHEUS_METRICS_ONE_HOST,
     VOLUME_METRICS,
 )
 
 
 @pytest.mark.usefixtures('mock_http_get')
 def test_check(dd_run_check, aggregator, instance):
-
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
 
@@ -33,6 +34,12 @@ def test_check(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
         aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
         aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
+
+    for metric in PROMETHEUS_METRICS_ONE_HOST:
+        aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
+
+    for metric in PROMETHEUS_METRICS_NO_HOST:
+        aggregator.assert_metric(metric, at_least=1, hostname=None)
 
     for metric in ALL_REST_METRICS:
         aggregator.assert_metric(metric)
@@ -56,6 +63,12 @@ def test_no_machines_endpoint(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
         aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
         aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
+
+    for metric in PROMETHEUS_METRICS_ONE_HOST:
+        aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
+
+    for metric in PROMETHEUS_METRICS_NO_HOST:
+        aggregator.assert_metric(metric, at_least=1, hostname=None)
 
     for metric in ALL_REST_METRICS:
         aggregator.assert_metric(metric, count=0)
@@ -82,11 +95,11 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/': MockResponse(status_code=500)}},
+            {'http_error': {'/v1/apps': MockResponse(status_code=500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/': MockResponse(status_code=404)}},
+            {'http_error': {'/v1/apps': MockResponse(status_code=404)}},
             id='404',
         ),
     ],
@@ -94,7 +107,6 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
 )
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_exception(dd_run_check, instance, aggregator):
-
     check = FlyIoCheck('fly_io', {}, [instance])
     with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
         dd_run_check(check)
@@ -105,6 +117,70 @@ def test_rest_api_exception(dd_run_check, instance, aggregator):
         aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
         aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
         aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/v1/apps/example-app-1/machines': MockResponse(json_data=[{'state': 'started', 'config': None}])
+                }
+            },
+            id='malformed response',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_bad_response_exception(dd_run_check, instance, aggregator, caplog):
+    caplog.set_level(logging.ERROR)
+    check = FlyIoCheck('fly_io', {}, [instance])
+    dd_run_check(check)
+
+    assert (
+        "Encountered an Exception in '_collect_machines_for_app' [<class 'AttributeError'>]: "
+        "'NoneType' object has no attribute 'get'" in caplog.text
+    )
+
+    for metric in MOCKED_PROMETHEUS_METRICS:
+        aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
+        aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
+        aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
+
+    for metric in VOLUME_METRICS:
+        aggregator.assert_metric(metric['name'], metric['value'], count=metric['count'], tags=metric['tags'])
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {'http_error': {'/v1/apps/example-app-1/volumes': MockResponse(status_code=404)}},
+            id='http error',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
+    caplog.set_level(logging.DEBUG)
+    check = FlyIoCheck('fly_io', {}, [instance])
+    dd_run_check(check)
+
+    assert (
+        "Encountered a RequestException in '_collect_volumes_for_app' [<class 'requests.exceptions.HTTPError'>]: "
+        "404 Client Error: None for url: None" in caplog.text
+    )
+
+    for metric in MOCKED_PROMETHEUS_METRICS:
+        aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
+        aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
+        aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
+
+    for metric in MACHINE_INIT_METRICS:
+        aggregator.assert_metric(metric['name'], metric['value'], count=metric['count'], tags=metric['tags'])
 
 
 @pytest.mark.usefixtures("mock_http_get")
@@ -144,19 +220,19 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
     [
         pytest.param(
             {'http_error': {'/v1/apps/example-app-2': MockResponse(status_code=404)}},
-            ['Failed to collect app status for app example-app-2'],
+            ['RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 404'],
             id='one app',
         ),
         pytest.param(
             {
                 'http_error': {
                     '/v1/apps/example-app-1': MockResponse(status_code=404),
-                    '/v1/apps/example-app-2': MockResponse(status_code=404),
+                    '/v1/apps/example-app-2': MockResponse(status_code=500),
                 }
             },
             [
-                'Failed to collect app status for app example-app-2',
-                'Failed to collect app status for app example-app-1',
+                'RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 404',
+                'RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 500',
             ],
             id='two apps',
         ),

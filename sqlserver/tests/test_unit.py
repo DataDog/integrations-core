@@ -10,7 +10,6 @@ from collections import namedtuple
 
 import mock
 import pytest
-from deepdiff import DeepDiff
 
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
@@ -26,7 +25,7 @@ from datadog_checks.sqlserver.utils import (
 )
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
-from .utils import windows_ci
+from .utils import deep_compare, windows_ci
 
 try:
     import pyodbc
@@ -819,12 +818,10 @@ def test_submit_data():
             {"id": 3, "name": "test_db1", "schemas": [{"id": "1", "tables": [1, 2]}, {"id": "2", "tables": [1, 2]}]},
             {"id": 4, "name": "test_db2", "schemas": [{"id": "3", "tables": [1, 2]}]},
         ],
-        "timestamp": 1.1,
     }
-    difference = DeepDiff(
-        json.loads(submitted_data[0]), expected_data, exclude_paths="root['timestamp']", ignore_order=True
-    )
-    assert len(difference) == 0
+    data = json.loads(submitted_data[0])
+    data.pop("timestamp")
+    assert deep_compare(data, expected_data)
 
 
 def test_fetch_throws(instance_docker):
