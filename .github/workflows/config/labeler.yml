@@ -286,7 +286,9 @@ integration/kubernetes_cluster_autoscaler:
 integration/kubernetes_state:
   - kubernetes_state/**/*
 integration/kubernetes_state_core:
-  - kubernetes_state_core/**/*
+- kubernetes_state_core/**/*
+integration/kubevirt_api:
+- kubevirt_api/**/*
 integration/kyototycoon:
   - kyototycoon/**/*
 integration/kyverno:
