@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "confluent-kafka==2.5.0; python_version > '3.0'",
+    "confluent-kafka==2.5.3; python_version > '3.0'",
 ]
 
 [project.urls]
