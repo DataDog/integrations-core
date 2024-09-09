@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "355886f0-31ae-44a9-9638-6951ad0f3039",
   "app_id": "vllm",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -50,6 +50,9 @@
     },
     "dashboards": {
       "vLLM Overview": "assets/dashboards/overview.json"
+    },
+    "saved_views": {
+      "errors": "assets/saved_views/errors.json"
     }
   },
   "author": {

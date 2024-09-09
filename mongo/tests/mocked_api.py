@@ -13,9 +13,10 @@ from .common import HERE
 
 
 class MockedCollection(object):
-    def __init__(self, db_name, coll_name):
+    def __init__(self, db_name, coll_name, deployment):
         self._coll_name = coll_name
         self._db_name = db_name
+        self.deployment = deployment
         if coll_name in ("oplog.rs", "oplog.$main"):
             with open(os.path.join(HERE, "fixtures", "oplog_rs_options"), 'r') as f:
                 self.options = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
@@ -43,6 +44,17 @@ class MockedCollection(object):
                     return content
 
                 self.find = MagicMock(return_value=MagicMock(sort=mocked_sort))
+        elif db_name == "config" and coll_name == "collections":
+            with open(os.path.join(HERE, "fixtures", f"config-collections-{self.deployment}"), 'r') as f:
+                self.find_one = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
+
+    def index_information(self, session=None, **kwargs):
+        with open(os.path.join(HERE, "fixtures", "index_information"), 'r') as f:
+            return json.load(f, object_hook=json_util.object_hook)
+
+    def list_search_indexes(self, session=None, **kwargs):
+        with open(os.path.join(HERE, "fixtures", "list_search_indexes"), 'r') as f:
+            return json.load(f, object_hook=json_util.object_hook)
 
     def aggregate(self, pipeline, session=None, **kwargs):
         if '$indexStats' in pipeline[0]:
@@ -50,6 +62,9 @@ class MockedCollection(object):
                 return json.load(f, object_hook=json_util.object_hook)
         elif '$collStats' in pipeline[0]:
             with open(os.path.join(HERE, "fixtures", f"$collStats-{self._coll_name}"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
+        elif '$sample' in pipeline[0]:
+            with open(os.path.join(HERE, "fixtures", f"$sample-{self._coll_name}"), 'r') as f:
                 return json.load(f, object_hook=json_util.object_hook)
 
 
@@ -59,12 +74,12 @@ class MockedDB(object):
         self.deployment = deployment
 
     def __getitem__(self, coll_name):
-        return MockedCollection(self._db_name, coll_name)
+        return MockedCollection(self._db_name, coll_name, self.deployment)
 
     def command(self, command, *args, **_):
         filename = command
-        if command == "dbstats":
-            filename += f"-{self._db_name}"
+        if "dbStats" in command:
+            filename = f"dbstats-{self._db_name}"
         elif command == "collstats":
             coll_name = args[0]
             filename += f"-{coll_name}"
@@ -90,6 +105,9 @@ class MockedDB(object):
         if pipeline[0] == {'$currentOp': {'allUsers': True}}:
             # mock the $currentOp aggregation used for operation sampling
             with open(os.path.join(HERE, "fixtures", f"$currentOp-{self.deployment}"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
+        elif pipeline[0] == {"$shardedDataDistribution": {}}:
+            with open(os.path.join(HERE, "fixtures", "$shardedDataDistribution"), 'r') as f:
                 return json.load(f, object_hook=json_util.object_hook)
         return []
 

@@ -1,0 +1,12 @@
+Command: show queues
+                                                              All Msgs            Persistent Msgs
+  Queue Name                        SNFGXIBCT  Pre  Rcvrs     Msgs    Size        Msgs    Size
+  >                                 ---------    5*     0        0     0.0 Kb        0     0.0 Kb
+  !hash_queue#                      ---------    5*     0        0     0.0 Kb        0     0.0 Kb
+  $sys.admin                        +--------    5*     0        0     0.0 Kb        0     0.0 Kb
+  $sys.lookup                       ---------    5*     0        0     0.0 Kb        0     0.0 Kb
+  $sys.redelivery.delay             +--------    5*     0        0     0.0 Kb        0     0.0 Kb
+  $sys.undelivered                  +--------    5*     0        0     0.0 Kb        0     0.0 Kb
+* $TMP$.tibemsd.1669EC51B3.1        ---------    5      1        0     0.0 Kb        0     0.0 Kb
+  queue.sample                      -------+-    5*     0        0     0.0 Kb        0     0.0 Kb
+  sample                            -------+-    5*     0        0     0.0 Kb        0     0.0 Kb

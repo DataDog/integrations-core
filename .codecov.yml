@@ -18,6 +18,10 @@ coverage:
         target: 75
         flags:
         - aspdotnet
+      AWS_Neuron:
+        target: 75
+        flags:
+        - aws_neuron
       ActiveMQ_XML:
         target: 75
         flags:
@@ -206,6 +210,10 @@ coverage:
         target: 75
         flags:
         - fluentd
+      Fly.io:
+        target: 75
+        flags:
+        - fly_io
       FoundationDB:
         target: 75
         flags:
@@ -302,6 +310,10 @@ coverage:
         target: 75
         flags:
         - kong
+      KubeVirt_API:
+        target: 75
+        flags:
+        - kubevirt_api
       Kube_DNS:
         target: 75
         flags:
@@ -678,14 +690,18 @@ coverage:
         target: 75
         flags:
         - fluxcd
-      vLLM:
-        target: 75
-        flags:
-        - vllm
       kyverno:
         target: 75
         flags:
         - kyverno
+      tibco_ems:
+        target: 75
+        flags:
+        - tibco_ems
+      vLLM:
+        target: 75
+        flags:
+        - vllm
       vSphere:
         target: 75
         flags:
@@ -757,6 +773,11 @@ flags:
     paths:
     - avi_vantage/datadog_checks/avi_vantage
     - avi_vantage/tests
+  aws_neuron:
+    carryforward: true
+    paths:
+    - aws_neuron/datadog_checks/aws_neuron
+    - aws_neuron/tests
   azure_iot_edge:
     carryforward: true
     paths:
@@ -962,6 +983,11 @@ flags:
     paths:
     - fluxcd/datadog_checks/fluxcd
     - fluxcd/tests
+  fly_io:
+    carryforward: true
+    paths:
+    - fly_io/datadog_checks/fly_io
+    - fly_io/tests
   foundationdb:
     carryforward: true
     paths:
@@ -1127,6 +1153,11 @@ flags:
     paths:
     - kubernetes_state/datadog_checks/kubernetes_state
     - kubernetes_state/tests
+  kubevirt_api:
+    carryforward: true
+    paths:
+    - kubevirt_api/datadog_checks/kubevirt_api
+    - kubevirt_api/tests
   kyototycoon:
     carryforward: true
     paths:
@@ -1442,6 +1473,11 @@ flags:
     paths:
     - teradata/datadog_checks/teradata
     - teradata/tests
+  tibco_ems:
+    carryforward: true
+    paths:
+    - tibco_ems/datadog_checks/tibco_ems
+    - tibco_ems/tests
   tls:
     carryforward: true
     paths:

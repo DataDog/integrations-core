@@ -2,7 +2,38 @@
 
 <!-- towncrier release notes start -->
 
-## 2.9.0 / 2024-07-05
+## 2.11.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Use name instead of node ID as device hostname ([#18375](https://github.com/DataDog/integrations-core/pull/18375))
+
+## 2.10.2 / 2024-09-02
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Use actual int for interface index ([#18414](https://github.com/DataDog/integrations-core/pull/18414))
+
+## 2.10.1 / 2024-08-20
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Refactor batched payloads to fix incorrect status + use interface ID if name not available ([#18360](https://github.com/DataDog/integrations-core/pull/18360))
+
+## 2.10.0 / 2024-08-09
+
+***Added***:
+
+* [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
+* [NDM] [Cisco ACI] Add common NDM tags to metrics ([#18017](https://github.com/DataDog/integrations-core/pull/18017))
+* [NDM] [Cisco ACI] Add config flag for enabling sending metadata to NDM ([#18099](https://github.com/DataDog/integrations-core/pull/18099))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 2.9.0 / 2024-07-05 / Agent 7.56.0
 
 ***Added***:
 

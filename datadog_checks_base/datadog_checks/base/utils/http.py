@@ -156,7 +156,7 @@ class RequestsWrapper(object):
         'tls_protocols_allowed',
     )
 
-    def __init__(self, instance, init_config, remapper=None, logger=None):
+    def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
         self.logger = logger or LOGGER
         default_fields = dict(STANDARD_FIELDS)
 
@@ -329,7 +329,7 @@ class RequestsWrapper(object):
         # https://requests.readthedocs.io/en/latest/user/advanced/#session-objects
         # https://requests.readthedocs.io/en/latest/user/advanced/#keep-alive
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
-        self._session = None
+        self._session = session
 
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
@@ -591,11 +591,16 @@ def handle_kerberos_cache(cache_file_path):
 def should_bypass_proxy(url, no_proxy_uris):
     # Accepts a URL and a list of no_proxy URIs
     # Returns True if URL should bypass the proxy.
-    parsed_uri = urlparse(url).hostname
+    parsed_uri_parts = urlparse(url)
+    parsed_uri = parsed_uri_parts.hostname
 
     if '*' in no_proxy_uris:
         # A single * character is supported, which matches all hosts, and effectively disables the proxy.
         # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
+        return True
+
+    if parsed_uri_parts.scheme == "unix":
+        # Unix domain sockets semantically do not make sense to proxy
         return True
 
     for no_proxy_uri in no_proxy_uris:

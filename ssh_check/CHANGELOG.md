@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 2.10.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+## 2.9.0 / 2024-08-09
+
+***Added***:
+
+* Allow forcing SHA1 encryption for older SSH servers. Set `force_sha1: true` in conf.yaml. ([#18086](https://github.com/DataDog/integrations-core/pull/18086))
+
 ## 2.8.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

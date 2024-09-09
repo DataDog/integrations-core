@@ -1,0 +1,29 @@
+{
+	"version": 2,
+	"created_at": "2024-08-02",
+	"last_updated_at": "2024-08-02",
+	"title": "Execution latency",
+	"description": "This monitor tracks the execution latency, measuring the time taken for executions to complete. High execution latency can indicate performance bottlenecks, such as inefficient code, resource contention, or hardware limitations. Monitoring execution latency helps identify these issues.",
+	"definition": {
+		"name": "Latency is high on {{instance_id.name}} ",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:aws_neuron.execution.latency_seconds{*} by {instance_id} > 2",
+		"message": "{{#is_alert}}The average execution latency on {{instance_id.name}} has been {{value}} over the past 5 minutes.{{/is_alert}}\n{{#is_recovery}}The execution latency of {{instance_id.name}} has recovered below the threshold of {{threshold}}.{{/is_recovery}}",
+		"tags": [
+			"integration:aws_neuron"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 2,
+				"warning": 1 
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60
+		},
+		"priority": 3
+	},
+	"tags": [
+		"integration:aws-neuron"
+	]
+}

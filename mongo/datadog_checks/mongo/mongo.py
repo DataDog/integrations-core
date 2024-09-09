@@ -6,7 +6,6 @@ from __future__ import division
 import json
 import time
 from copy import deepcopy
-from functools import cached_property
 
 from cachetools import TTLCache
 from packaging.version import Version
@@ -20,18 +19,27 @@ from datadog_checks.mongo.collectors import (
     CustomQueriesCollector,
     DbStatCollector,
     FsyncLockCollector,
+    HostInfoCollector,
     IndexStatsCollector,
     ReplicaCollector,
     ReplicationOpLogCollector,
     ServerStatusCollector,
+    ShardedDataDistributionStatsCollector,
     TopCollector,
 )
 from datadog_checks.mongo.collectors.conn_pool_stats import ConnPoolStatsCollector
 from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
 from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
-from datadog_checks.mongo.common import SERVICE_CHECK_NAME, MongosDeployment, ReplicaSetDeployment
+from datadog_checks.mongo.common import (
+    SERVICE_CHECK_NAME,
+    HostingType,
+    MongosDeployment,
+    ReplicaSetDeployment,
+    StandaloneDeployment,
+)
 from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
+from datadog_checks.mongo.dbm.schemas import MongoSchemas
 from datadog_checks.mongo.dbm.slow_operations import MongoSlowOperations
 from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
 
@@ -85,8 +93,9 @@ class MongoDb(AgentCheck):
         self.collectors = []
         self.last_states_by_server = {}
 
-        self._api_client = None
+        self.deployment_type = None
         self._mongo_version = None
+        self._mongo_modules = None
         self._resolved_hostname = None
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -97,17 +106,25 @@ class MongoDb(AgentCheck):
 
         self.diagnosis.register(self._diagnose_tls)
 
-        # DBM
-        self._operation_samples = MongoOperationSamples(check=self)
-        self._slow_operations = MongoSlowOperations(check=self)
-
         # Database autodiscovery
         self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
 
-    @cached_property
+        # DBM
+        self._operation_samples = MongoOperationSamples(check=self)
+        self._slow_operations = MongoSlowOperations(check=self)
+        self._schemas = MongoSchemas(check=self)
+
+        self._api = None
+
+    @property
     def api_client(self):
-        # This needs to be a property for our unit test mocks to work.
-        return MongoApi(self._config, self.log)
+        if self._api is None:
+            self._api = MongoApi(self._config, self.log)
+        return self._api
+
+    @api_client.setter
+    def api_client(self, value):
+        self._api = value
 
     def refresh_collectors(self, deployment_type, all_dbs, tags):
         collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
@@ -116,6 +133,7 @@ class MongoDb(AgentCheck):
             ReplicationOpLogCollector(self, tags),
             FsyncLockCollector(self, tags),
             ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
+            HostInfoCollector(self, tags),
         ]
         if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
@@ -123,6 +141,8 @@ class MongoDb(AgentCheck):
             potential_collectors.append(JumboStatsCollector(self, tags))
         if 'top' in self._config.additional_metrics:
             potential_collectors.append(TopCollector(self, tags))
+        if 'sharded_data_distribution' in self._config.additional_metrics:
+            potential_collectors.append(ShardedDataDistributionStatsCollector(self, tags))
         assert self._mongo_version is not None, "No MongoDB version is set, make sure you refreshed the metadata."
         if self._mongo_version_parsed >= Version("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
@@ -134,14 +154,14 @@ class MongoDb(AgentCheck):
             # regardless of the auto-discovery settings.
             potential_collectors.append(DbStatCollector(self, db_name, dbstats_tag_dbname, tags))
 
-        monitored_dbs = all_dbs if self._database_autodiscovery.autodiscovery_enabled else [self._config.db_name]
         # When autodiscovery is enabled, we collect collstats and indexstats for all auto-discovered databases
         # Otherwise, we collect collstats and indexstats for the database specified in the configuration
-        for db_name in monitored_dbs:
+        for db_name in self.databases_monitored:
             # For backward compatibility, coll_names is ONLY applied when autodiscovery is not enabled
             # Otherwise, we collect collstats & indexstats for all auto-discovered databases and authorized collections
             coll_names = None if self._database_autodiscovery.autodiscovery_enabled else self._config.coll_names
-            potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
+            if 'collection' in self._config.additional_metrics:
+                potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
             if self._config.collections_indexes_stats:
                 if self._mongo_version_parsed >= Version("3.2"):
                     potential_collectors.append(IndexStatsCollector(self, db_name, tags, coll_names=coll_names))
@@ -203,18 +223,16 @@ class MongoDb(AgentCheck):
 
     def _refresh_deployment(self):
         if (
-            self.api_client.deployment_type is None  # First run
-            or isinstance(
-                self.api_client.deployment_type, ReplicaSetDeployment
-            )  # Replica set members and state can change
-            or isinstance(self.api_client.deployment_type, MongosDeployment)  # Mongos shard map can change
+            self.deployment_type is None  # First run
+            or isinstance(self.deployment_type, ReplicaSetDeployment)  # Replica set members and state can change
+            or isinstance(self.deployment_type, MongosDeployment)  # Mongos shard map can change
         ):
-            deployment_type_before = self.api_client.deployment_type
+            deployment_type_before = self.deployment_type
             self.log.debug("Refreshing deployment type")
-            self.api_client.refresh_deployment_type()
-            if self.api_client.deployment_type != deployment_type_before:
+            self.refresh_deployment_type()
+            if self.deployment_type != deployment_type_before:
                 self.log.debug(
-                    "Deployment type has changed from %s to %s", deployment_type_before, self.api_client.deployment_type
+                    "Deployment type has changed from %s to %s", deployment_type_before, self.deployment_type
                 )
                 # database_instance metadata is tied to the deployment type
                 # so we need to reset it when the deployment type changes
@@ -230,12 +248,13 @@ class MongoDb(AgentCheck):
             return []
         return [f"dd.internal.resource:database_instance:{self._resolved_hostname}"]
 
-    def _get_tags(self, include_deployment_tags=False, include_internal_resource_tags=False):
+    def _get_tags(self, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)
-        if include_deployment_tags:
-            tags.extend(self.api_client.deployment_type.deployment_tags)
+        tags.extend(self.deployment_type.deployment_tags)
         if include_internal_resource_tags:
             tags.extend(self.internal_resource_tags)
+        if isinstance(self.deployment_type, ReplicaSetDeployment):
+            tags.extend(self.deployment_type.replset_tags)
         return tags
 
     def check(self, _):
@@ -247,8 +266,9 @@ class MongoDb(AgentCheck):
             # DBM
             if self._config.dbm_enabled:
                 self._send_database_instance_metadata()
-                self._operation_samples.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
-                self._slow_operations.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
+                self._operation_samples.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
+                self._slow_operations.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
+                self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
@@ -257,16 +277,22 @@ class MongoDb(AgentCheck):
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
     def _refresh_metadata(self):
-        if self._mongo_version is None:
-            self.log.debug('No mongo_version metadata present, refreshing it.')
-            self._mongo_version = self.api_client.server_info().get('version', '0.0')
+        if self._mongo_version is None or self._mongo_modules is None:
+            self.log.debug('No mongo_version or mongo_module metadata present, refreshing it.')
+            server_info = self.api_client.server_info()
+            self._mongo_version = server_info.get('version', '0.0')
             self._mongo_version_parsed = Version(self._mongo_version.split("-")[0])
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
+            self._mongo_modules = server_info.get('modules', [])
+            self.set_metadata('modules', ','.join(self._mongo_modules))
+            self.log.debug('modules: %s', self._mongo_modules)
         if self._resolved_hostname is None:
             self._resolved_hostname = self._config.reported_database_hostname or self.api_client.hostname
             self.set_metadata('resolved_hostname', self._resolved_hostname)
             self.log.debug('resolved_hostname: %s', self._resolved_hostname)
+        if self._config.cluster_name:
+            self.set_metadata('cluster_name', self._config.cluster_name)
 
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
@@ -274,8 +300,8 @@ class MongoDb(AgentCheck):
         self._resolved_hostname = None
 
     def _collect_metrics(self):
-        deployment = self.api_client.deployment_type
-        tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
+        deployment = self.deployment_type
+        tags = self._get_tags(include_internal_resource_tags=True)
 
         dbnames = self._get_db_names(tags)
         self.refresh_collectors(deployment, dbnames, tags)
@@ -297,6 +323,12 @@ class MongoDb(AgentCheck):
         if database_count:
             self.gauge('mongodb.dbs', database_count, tags=tags)
         return dbnames
+
+    @property
+    def databases_monitored(self):
+        if self._database_autodiscovery.autodiscovery_enabled:
+            return self._database_autodiscovery.databases
+        return [self._config.db_name]
 
     def _diagnose_tls(self):
         # Check TLS config. Specifically, we might want to check that if `tls` is
@@ -324,11 +356,14 @@ class MongoDb(AgentCheck):
             )
 
     def _send_database_instance_metadata(self):
-        deployment = self.api_client.deployment_type
+        deployment = self.deployment_type
         if self._resolved_hostname not in self._database_instance_emitted:
             # DO NOT emit with internal resource tags, as the metadata event is used to CREATE the databse instance
-            tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=False)
-            mongodb_instance_metadata = {"cluster_name": self._config.cluster_name} | deployment.instance_metadata
+            tags = self._get_tags()
+            mongodb_instance_metadata = {
+                "cluster_name": self._config.cluster_name,
+                "modules": self._mongo_modules,
+            } | deployment.instance_metadata
             database_instance = {
                 "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
@@ -353,3 +388,112 @@ class MongoDb(AgentCheck):
         if self._config.dbm_enabled:
             self._operation_samples.cancel()
             self._slow_operations.cancel()
+
+    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role, hosting_type):
+        replset_name = repl_set_payload["set"]
+        replset_state = repl_set_payload["myState"]
+        hosts = [m['name'] for m in repl_set_payload.get("members", [])]
+        replset_me = is_master_payload.get('me')
+        replset_tags = is_master_payload.get('tags')
+        return ReplicaSetDeployment(
+            hosting_type,
+            replset_name,
+            replset_state,
+            hosts,
+            replset_me,
+            cluster_role=cluster_role,
+            replset_tags=replset_tags,
+        )
+
+    def refresh_deployment_type(self):
+        # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
+        # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
+        try:
+            self.deployment_type = self._get_default_deployment_type()
+        except Exception as e:
+            self.log.debug(
+                "Unable to run `getCmdLineOpts`, got: %s. Treating this as an Alibaba ApsaraDB instance.", str(e)
+            )
+            try:
+                self.deployment_type = self._get_alibaba_deployment_type()
+            except Exception as e:
+                self.log.debug("Unable to run `shardingState`, so switching to AWS DocumentDB, got error %s", str(e))
+                self.deployment_type = self._get_documentdb_deployment_type()
+
+    def _get_default_deployment_type(self):
+        options = self.api_client.get_cmdline_opts()
+        cluster_role = None
+        hosting_type = HostingType.ATLAS if self._is_hosting_type_atlas() else HostingType.SELF_HOSTED
+        if 'sharding' in options:
+            if 'configDB' in options['sharding']:
+                self.log.debug("Detected MongosDeployment. Node is principal.")
+                return MongosDeployment(hosting_type=hosting_type, shard_map=self.refresh_shards())
+            elif 'clusterRole' in options['sharding']:
+                cluster_role = options['sharding']['clusterRole']
+
+        replication_options = options.get('replication', {})
+        if 'replSetName' in replication_options or 'replSet' in replication_options:
+            repl_set_payload = self.api_client.replset_get_status()
+            is_master_payload = self.api_client.is_master()
+            replica_set_deployment = self._get_rs_deployment_from_status_payload(
+                repl_set_payload,
+                is_master_payload,
+                cluster_role,
+                hosting_type,
+            )
+            is_principal = replica_set_deployment.is_principal()
+            is_principal_log = "" if is_principal else "not "
+            self.log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
+            return replica_set_deployment
+
+        self.log.debug("Detected StandaloneDeployment. Node is principal.")
+        return StandaloneDeployment(hosting_type=hosting_type)
+
+    def _get_alibaba_deployment_type(self):
+        hosting_type = HostingType.ALIBABA_APSARADB
+        is_master_payload = self.api_client.is_master()
+        if is_master_payload.get('msg') == 'isdbgrid':
+            return MongosDeployment(hosting_type=hosting_type, shard_map=self.refresh_shards())
+
+        # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
+        repl_set_payload = self.api_client.replset_get_status()
+        if repl_set_payload.get('configsvr') is True:
+            cluster_role = 'configsvr'
+        elif self.api_client.sharding_state_is_enabled() is True:
+            # Use `shardingState` command to know whether or not the replicaset
+            # is a shard or not.
+            cluster_role = 'shardsvr'
+        else:
+            cluster_role = None
+        return self._get_rs_deployment_from_status_payload(
+            repl_set_payload, is_master_payload, cluster_role, hosting_type
+        )
+
+    def _get_documentdb_deployment_type(self):
+        """
+        Deployment type for AWS DocumentDB.
+
+        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
+        """
+        repl_set_payload = self.api_client.replset_get_status()
+        is_master_payload = self.api_client.is_master()
+        return self._get_rs_deployment_from_status_payload(
+            repl_set_payload, is_master_payload, cluster_role=None, hosting_type=HostingType.DOCUMENTDB
+        )
+
+    def _is_hosting_type_atlas(self):
+        # Atlas deployments have mongodb.net in the internal hostname
+        # DO NOT use the connection host because this can be a load balancer or proxy
+        # TODO: Is there a better way to detect MongoDB Atlas deployment?
+        if self.api_client.hostname and "mongodb.net" in self.api_client.hostname:
+            return True
+        return False
+
+    def refresh_shards(self):
+        try:
+            shard_map = self.api_client.get_shard_map()
+            self.log.debug('Get shard map: %s', shard_map)
+            return shard_map
+        except Exception as e:
+            self.log.error('Unable to get shard map for mongos: %s', e)
+            return {}
