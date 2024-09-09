@@ -19,8 +19,6 @@ class KubeVirtControllerCheck(OpenMetricsBaseCheckV2):
         self.check_initializations.append(self._configure_additional_transformers)
 
     def check(self, _):
-        self.kubevirt_controller_healthz_endpoint = self.instance.get("kubevirt_controller_healthz_endpoint")
-
         if self.kubevirt_controller_healthz_endpoint:
             self._report_health_check(self.kubevirt_controller_healthz_endpoint)
         else:
