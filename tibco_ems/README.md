@@ -22,10 +22,10 @@ The TIBCO EMS check is included in the [Datadog Agent][2] package. No additional
 
 ##### Create your Tibco EMS command script
 
-1. The Tibco EMS integration utilizes the `tibemsadmin` CLI tool provided by Tibco EMS. In order to reduce the number of calls to `$sys.admin` queue, we batch the queries we make to Tibco in the form of a script. This script path, as well the absolute path of the `tibemsadmin` binary, need to be passed to the integration configuration in order to collect your Tibco EMS metrics.
+The Tibco EMS integration utilizes the `tibemsadmin` CLI tool provided by Tibco EMS. To reduce the number of calls to the `$sys.admin` queue, Datadog uses a script to batch the queries made to Tibco. To collect your Tibco EMS metrics, pass the the script path and the absolute path of the `tibemsadmin` binary to the integration configuration.
 
-*Note*: The `datadog-agent` user needs execute permissions on the `tibemsadmin` binary.
-
+*Note*: The `dd-agent` user needs execute permissions on the `tibemsadmin` binary.
+1. Create a file named `show_commands` with the following contents:
 ```text
     show server
     show queues
@@ -62,7 +62,7 @@ instances:
 
 _Available for Agent versions >6.0_
 
-1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable logs in your `datadog.yaml` file:
 
    ```yaml
    logs_enabled: true
