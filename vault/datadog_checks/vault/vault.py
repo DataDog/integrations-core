@@ -156,10 +156,10 @@ class Vault(OpenMetricsBaseCheck):
         has_leader = any(current_leader)  # At least one address is set
 
         if self._previous_leader is not None:
-            has_leader_tags = list(self._tags)
-            has_leader_tags.extend(dynamic_tags)
-            has_leader_tags.append('current_leader:{}'.format(current_leader))
-            submission_queue.append(lambda tags: self.gauge('vault.has_leader', int(has_leader), tags=has_leader_tags))
+            has_leader_tags = ['current_leader:{}'.format(current_leader)]
+            submission_queue.append(
+                lambda tags: self.gauge('vault.has_leader', int(has_leader), tags=tags + has_leader_tags)
+            )
 
         if self._detect_leader and has_leader:
             if self._previous_leader is None:
