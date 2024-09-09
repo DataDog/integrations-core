@@ -140,7 +140,9 @@ class MockedAPI(object):
                 MagicMock(
                     value=[
                         MagicMock(
-                            metricId=MagicMock(label='congestion', value=3, dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}])
+                            metricId=MagicMock(
+                                label='congestion', value=3, dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}]
+                            )
                         )
                     ]
                 ),
@@ -155,12 +157,18 @@ class MockedAPI(object):
                     ]
                 ),
                 MagicMock(
-                    value=[MagicMock(metricId=MagicMock(label='unmapCongestion', dynamicProperty=[{0: 'cluster', 1: 'hello'}]))]
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(label='unmapCongestion', dynamicProperty=[{0: 'cluster', 1: 'hello'}])
+                        )
+                    ]
                 ),
                 MagicMock(
                     value=[
                         MagicMock(
-                            metricId=MagicMock(label='latencyStddev', dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}])
+                            metricId=MagicMock(
+                                label='latencyStddev', dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}]
+                            )
                         )
                     ]
                 ),
