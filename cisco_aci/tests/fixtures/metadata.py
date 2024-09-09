@@ -3194,7 +3194,52 @@ INTERFACE_METADATA = [
     },
 ]
 
-EXPECTED_DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
+EXPORTER_IP_ADDRESS_METADATA = [
+    {
+        'device_id': 'default:10.0.200.0',
+        'integration': 'cisco-aci',
+        'exporter_ip_address': '1.1.0.101',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.1',
+        'integration': 'cisco-aci',
+        'exporter_ip_address': '1.1.0.102',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.2',
+        'integration': 'cisco-aci',
+        'exporter_ip_address': '1.1.0.202',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.3',
+        'integration': 'cisco-aci',
+        'exporter_ip_address': '1.1.0.3',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.4',
+        'integration': 'cisco-aci',
+        'exporter_ip_address': '1.1.0.1',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.5',
+        'integration': 'cisco-aci',
+        'exporter_ip_address': '1.1.0.201',
+        'prefixlen': '24',
+    },
+    {
+        'device_id': 'default:10.0.200.6',
+        'integration': 'cisco-aci',
+        'exporter_ip_address': '1.1.0.2',
+        'prefixlen': '24',
+    },
+]
+
+DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
 
 # "2012-01-14 03:21:34" in seconds
 MOCK_TIME_EPOCH = 1326511294
@@ -3214,6 +3259,7 @@ EXPECTED_METADATA_EVENTS = [
     NetworkDevicesMetadata(
         namespace='default',
         interfaces=INTERFACE_METADATA[193::],
+        exporter_ip_addresses=EXPORTER_IP_ADDRESS_METADATA,
         collect_timestamp=MOCK_TIME_EPOCH,
     ),
 ]

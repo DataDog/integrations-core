@@ -40,6 +40,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_netflow():
+    return False
+
+
 def instance_kerberos_auth():
     return 'disabled'
 
