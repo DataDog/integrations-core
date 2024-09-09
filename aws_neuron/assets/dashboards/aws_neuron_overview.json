@@ -1017,7 +1017,7 @@
             "id": 2270740140504733,
             "definition": {
               "type": "note",
-              "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream configured to filter erroneous logs for your perusal.",
+              "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. If you notice an increase in the ratio of error logs, you can refer to the log stream, which is configured to filter erroneous logs.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "center",
