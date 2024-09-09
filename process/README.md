@@ -50,6 +50,7 @@ The following metrics are not available on Windows:
 - `system.processes.mem.page_faults.children_minor_faults`
 - `system.processes.mem.page_faults.major_faults`
 - `system.processes.mem.page_faults.children_major_faults`
+- `system.processes.mem.real`
 
 **Note**: Use a [WMI check][11] to gather page fault metrics on Windows.
 
