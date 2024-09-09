@@ -36,7 +36,7 @@
             "id": 4721541429420236,
             "definition": {
               "type": "note",
-              "content": "# Useful Links\n\n[AWS Neuron Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\\\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
+              "content": "# Useful Links\n\n[AWS Neuron Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
