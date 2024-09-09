@@ -80,9 +80,9 @@ def test_collect_metadata(datadog_agent, fixture_path, mock_http_response, check
     version_metadata = {
         'version.scheme': 'semver',
         'version.major': "1",
-        'version.minor': "29",
+        'version.minor': "31",
         'version.patch': "0",
-        'version.raw': '1.29.0',
+        'version.raw': '1.31.0',
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
