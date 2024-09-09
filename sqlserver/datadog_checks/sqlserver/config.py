@@ -140,9 +140,11 @@ class SQLServerConfig:
         else:
             tags = custom_tags
             if len(list(set(custom_tags))) != len(custom_tags):
-                print('natasha hereeeeeeeee')
-                print(custom_tags)
-                print(list(set(custom_tags)))
+                raise ConfigurationError(
+                    'natasha hereeee custom tags before: {} custom tags after: {}'.format(
+                        custom_tags, list(set(custom_tags))
+                    )
+                )
 
         if propagate_agent_tags:
             try:
