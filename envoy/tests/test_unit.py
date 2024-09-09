@@ -18,6 +18,7 @@ from .common import (
     LOCAL_RATE_LIMIT_METRICS,
     MOCKED_PROMETHEUS_METRICS,
     RATE_LIMIT_STAT_PREFIX_TAG,
+    TLS_INSPECTOR_METRICS,
     get_fixture_path,
 )
 
@@ -48,7 +49,9 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
 
     dd_run_check(c)
 
-    for metric in MOCKED_PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CLUSTER_AND_LISTENER_SSL_METRICS:
+    for metric in (
+        MOCKED_PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CLUSTER_AND_LISTENER_SSL_METRICS + TLS_INSPECTOR_METRICS
+    ):
         aggregator.assert_metric("envoy.{}".format(metric))
 
     for metric in CONNECT_STATE_METRIC:
