@@ -21,7 +21,7 @@
   Clarified documentation on ignore_databases ([#18287](https://github.com/DataDog/integrations-core/pull/18287))
 * Set the default port to 5432 when user don't provide one, this corrects the issue where the generated IAM authentication token is invalid when a port isn't provided. ([#18386](https://github.com/DataDog/integrations-core/pull/18386))
 
-## 19.1.0 / 2024-08-09
+## 19.1.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
