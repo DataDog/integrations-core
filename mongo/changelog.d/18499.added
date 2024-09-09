@@ -1,1 +1,0 @@
-Obfuscate literal values within the `parsedQuery`, `filter`, and `indexBounds` fields in MongoDB explain plans.

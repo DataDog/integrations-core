@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 36.15.0 / 2024-09-05
+
+***Added***:
+
+* `utils.http.RequestsWrapper` accepts a session at initialization, useful for testing and controlling sessions in general. ([#18438](https://github.com/DataDog/integrations-core/pull/18438))
+* Bump ddtrace version to fix CouchDB tests ([#18451](https://github.com/DataDog/integrations-core/pull/18451))
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
 ## 36.14.0 / 2024-08-19
 
 ***Added***:
