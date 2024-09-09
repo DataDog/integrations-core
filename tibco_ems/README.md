@@ -24,6 +24,8 @@ The TIBCO EMS check is included in the [Datadog Agent][2] package. No additional
 
 1. The Tibco EMS integration utilizes the `tibemsadmin` CLI tool provided by Tibco EMS. In order to reduce the number of calls to `$sys.admin` queue, we batch the queries we make to Tibco in the form of a script. This script path, as well the absolute path of the `tibemsadmin` binary, need to be passed to the integration configuration in order to collect your Tibco EMS metrics.
 
+*Note*: The `datadog-agent` user needs execute permissions on the `tibemsadmin` binary.
+
 ```text
     show server
     show queues
