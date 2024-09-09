@@ -1,4 +1,4 @@
-# Agent Check: tibco_ems
+# Agent Check: Tibco EMS
 
 ## Overview
 
@@ -10,14 +10,75 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The TIBCO EMS check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+The TIBCO EMS check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
 1. Edit the `tibco_ems.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your TIBCO EMS performance data. See the [sample tibco_ems.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+#### Metric collection
+
+##### Create your Tibco EMS command script
+
+1. The Tibco EMS integration utilizes the `tibemsadmin` CLI tool provided by Tibco EMS. In order to reduce the number of calls to `$sys.admin` queue, we batch the queries we make to Tibco in the form of a script. This script path, as well the absolute path of the `tibemsadmin` binary, need to be passed to the integration configuration in order to collect your Tibco EMS metrics.
+
+```text
+    show server
+    show queues
+    show topics
+    show stat consumers
+    show stat producers
+    show connections full
+```
+
+
+2. Add this configuration block to your `tibco_ems.d/conf.yaml` file to start gathering [Tibco EMS metrics](#metrics):
+
+```yaml
+init_config:
+instances:
+    ## @param script_path - string - optional
+    ## The path to the script that will be executed to collect metrics. Since the script is executed by a subprocess,
+    ## we need to know the path to the script. This must be the absolute path to the script.
+    #
+    script_path: <SCRIPT_PATH>
+
+    ## @param tibemsadmin - string - optional
+    ## The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
+    ## , which can be overwritten on an instance.
+    ##
+    ## This overrides `tibemsadmin` defined in `init_config`.
+    #
+    tibemsadmin: <TIBEMSADMIN>
+```
+
+3. [Restart the Agent][5] to begin sending Tibco EMS metrics to Datadog.
+
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `tibco_ems.d/conf.yaml` file to start collecting your Tibco EMS logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: <PATH_TO_LOG_FILE>
+       service: <MY_SERVICE>
+       source: tibco_ems
+   ```
+
+    Change the `service` and `path` parameter values and configure them for your environment. See the [sample tibco_ems.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
 
 ### Validation
 
