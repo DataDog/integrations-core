@@ -62,7 +62,6 @@ class Deadlocks:
                 cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time())))
                 results = cursor.fetchall()
                 converted_xmls = []
-                errors = []
                 for result in results:
                     try:
                         root = ET.fromstring(result[1])

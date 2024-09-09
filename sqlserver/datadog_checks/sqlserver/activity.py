@@ -162,7 +162,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._last_deadlocks_collection_time = 0
         self._last_activity_collection_time = 0
 
-        self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", False))
+        self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", True))
         self._deadlocks_collection_interval = config.deadlocks_config.get(
             "collection_interval", DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
         )
@@ -253,6 +253,7 @@ class SqlserverActivity(DBMAsyncJob):
         if deadlock_xmls:
             deadlocks_event = self._create_deadlock_event(deadlock_xmls)
             payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
+            self.log.debug("Deadlocks payload: %s", str(payload))
             self._check.database_monitoring_query_activity(payload)
 
     @tracked_method(agent_check_getter=agent_check_getter)
