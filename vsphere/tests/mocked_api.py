@@ -140,7 +140,7 @@ class MockedAPI(object):
                 MagicMock(
                     value=[
                         MagicMock(
-                            metricId=MagicMock(label='oio', dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}])
+                            metricId=MagicMock(label='congestion', value=3, dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}])
                         )
                     ]
                 ),
@@ -149,6 +149,26 @@ class MockedAPI(object):
                         MagicMock(
                             metricId=MagicMock(
                                 label='iopsRead',
+                                dynamicProperty=[{0: 'disk', 1: 'hello', 2: 'world', 3: 'disk'}],
+                            )
+                        )
+                    ]
+                ),
+                MagicMock(
+                    value=[MagicMock(metricId=MagicMock(label='unmapCongestion', dynamicProperty=[{0: 'cluster', 1: 'hello'}]))]
+                ),
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(label='latencyStddev', dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}])
+                        )
+                    ]
+                ),
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(
+                                label='llogLogSpace',
                                 dynamicProperty=[{0: 'disk', 1: 'hello', 2: 'world', 3: 'disk'}],
                             )
                         )

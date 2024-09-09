@@ -746,8 +746,9 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
-def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_check):
+def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_check, caplog):
     realtime_instance['collect_vsan_data'] = True
+    caplog.set_level(logging.DEBUG)
     check = VSphereCheck('vsphere', {}, [realtime_instance])
 
     mock_cluster = MagicMock()
@@ -770,8 +771,9 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
     aggregator.assert_metric('vsphere.vsan.cluster.health.count', count=1)
     aggregator.assert_metric('vsphere.vsan.cluster.oio', count=1, tags=['vcenter_server:FAKE', 'vsphere_cluster:hello'])
     aggregator.assert_metric(
-        'vsphere.vsan.host.oio',
+        'vsphere.vsan.host.congestion',
         count=0,
+        value=0.03,
         tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world'],
     )
     aggregator.assert_metric(
@@ -779,6 +781,13 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
         count=1,
         tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world', 'vsphere_disk:disk'],
     )
+
+    assert "Skipping metric unmapCongestion because it is not in the list of metrics to collect" in caplog.text
+    assert "Skipping metric latencyStddev because it is not in the list of metrics to collect" in caplog.text
+    assert "Skipping metric llogLogSpace because it is not in the list of metrics to collect" in caplog.text
+    aggregator.assert_metric('vsphere.vsan.cluster.unmapCongestion', count=0)
+    aggregator.assert_metric('vsphere.vsan.host.latencyStddev', count=0)
+    aggregator.assert_metric('vsphere.vsan.disk.llogLogSpace', count=0)
     aggregator.assert_metric('vsphere.vsan.cluster.example_cluster_metric', count=0)
     aggregator.assert_metric(
         'vsphere.vsan.host.example_host_metric',
