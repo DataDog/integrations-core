@@ -8,4 +8,11 @@ class Space:
         self.id = space_json.get("Id")
         self.name = space_json.get("Name")
         self.slug = space_json.get("Slug")
+        self.project_groups = None
+
+
+class ProjectGroup:
+    def __init__(self, project_group_json):
+        self.id = project_group_json.get("Id")
+        self.name = project_group_json.get("Name")
         self.projects = None
