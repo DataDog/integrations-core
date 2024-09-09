@@ -155,14 +155,14 @@ class SQLServerConfig:
         '''
         return True if the agent tags should be propagated to the check
         '''
-        # instance_propagate_agent_tags = instance.get('propagate_agent_tags')
-        # init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
+        instance_propagate_agent_tags = instance.get('propagate_agent_tags')
+        init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
 
-        # if instance_propagate_agent_tags is not None:
-        #     # if the instance has explicitly set the value, return the boolean
-        #     return instance_propagate_agent_tags
-        # if init_config_propagate_agent_tags is not None:
-        #     # if the init_config has explicitly set the value, return the boolean
-        #     return init_config_propagate_agent_tags
+        if instance_propagate_agent_tags is not None:
+            # if the instance has explicitly set the value, return the boolean
+            return instance_propagate_agent_tags
+        if init_config_propagate_agent_tags is not None:
+            # if the init_config has explicitly set the value, return the boolean
+            return init_config_propagate_agent_tags
         # if neither the instance nor the init_config has set the value, return False
         return False
