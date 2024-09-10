@@ -856,8 +856,15 @@ def test_propagate_agent_tags(
         + agent_tags
     )
 
+    print("natasha hereeeeee")
+    print(check.tags)
+    print(agent_tags)
+    print(instance_docker.get('tags', []))
+    print(expected_tags)
+
     with mock.patch('datadog_checks.sqlserver.config.get_agent_host_tags', return_value=agent_tags):
         assert check._config._should_propagate_agent_tags(instance_docker, init_config) == should_propagate_agent_tags
+        print(check.tags)
         if should_propagate_agent_tags:
             assert all(tag in check.tags for tag in agent_tags)
             dd_run_check(check)
