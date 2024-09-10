@@ -119,6 +119,7 @@ def ci(app: Application, sync: bool):
     # Enforce proper string types
     for field in (
         'repo',
+        'checkout_ref',
         'python-version',
         'setup-env-vars',
         'agent-image',
