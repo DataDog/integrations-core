@@ -850,11 +850,20 @@ def test_propagate_agent_tags(
         check = SQLServer(CHECK_NAME, {}, [instance_docker])
         assert check._config._should_propagate_agent_tags(instance_docker, init_config) == should_propagate_agent_tags
         if should_propagate_agent_tags:
+            # tags = instance_docker.get('tags', []) + [
+            #     'connection_host:{}'.format(instance_docker.get('host')),
+            #     'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
+            #     'db:master',
+            # ]
+            print("natasha hereeeeeee")
+            print(instance_docker.get('tags', []))
+            print(agent_tags)
+            print(check.tags)
             assert all(tag in check.tags for tag in agent_tags)
             dd_run_check(check)
             aggregator.assert_service_check(
                 'sqlserver.can_connect',
                 count=1,
                 status=SQLServer.OK,
-                tags=instance_docker["tags"] + agent_tags,
+                tags=instance_docker.get('tags', []) + agent_tags,
             )
