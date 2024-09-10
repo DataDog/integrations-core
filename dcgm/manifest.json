@@ -46,9 +46,9 @@
       "DCGM Exporter (Nvidia GPU Monitoring) Overview": "assets/dashboards/dcgm_overview.json"
     },
     "monitors": {
-      "gpu_temperature": "assets/monitors/gpu_temperature.json",
-      "memory_usage": "assets/monitors/memory_usage.json",
-      "xid_errors": "assets/monitors/xid_errors.json"
+      "GPU temperature is high": "assets/monitors/gpu_temperature.json",
+      "GPU memory usage is high": "assets/monitors/memory_usage.json",
+      "XID errors detected": "assets/monitors/xid_errors.json"
     }
   },
   "author": {

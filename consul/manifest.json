@@ -85,7 +85,7 @@
       "consul": "assets/dashboards/consul_overview.json"
     },
     "monitors": {
-      "consul": "assets/monitors/consul_status.json"
+      "consul service status": "assets/monitors/consul_status.json"
     },
     "saved_views": {
       "consul_processes": "assets/saved_views/consul_processes.json",
