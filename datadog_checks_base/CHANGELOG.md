@@ -20,7 +20,7 @@
 
 * Fix ddtrace import issues ([#18324](https://github.com/DataDog/integrations-core/pull/18324))
 
-## 36.13.0 / 2024-08-09
+## 36.13.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
