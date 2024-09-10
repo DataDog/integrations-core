@@ -806,7 +806,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     dd_run_check(check)
     expected_tags = instance_docker.get('tags', []) + [
         'db:datadog_test-1',
-        'table:ϑings',
+    'table:ϑings',
         'index_name:thingsindex',
     ]
     for m in DATABASE_INDEX_METRICS:
