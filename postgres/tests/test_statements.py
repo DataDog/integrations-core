@@ -417,6 +417,7 @@ def test_statement_metrics_cloud_metadata(
 
     _run_queries()
     run_one_check(check)
+    time.sleep(0.2)
     _run_queries()
     run_one_check(check)
 
@@ -502,7 +503,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
                 check.check(dbm_instance)
-
+                time.sleep(0.2)
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
                 run_one_check(check)
