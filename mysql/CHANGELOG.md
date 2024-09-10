@@ -12,7 +12,7 @@
 
 * Handles mysql azure flexible server warning bug ([#18450](https://github.com/DataDog/integrations-core/pull/18450))
 
-## 12.7.0 / 2024-08-09
+## 12.7.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
