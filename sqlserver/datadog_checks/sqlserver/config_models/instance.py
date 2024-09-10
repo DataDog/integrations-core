@@ -217,6 +217,7 @@ class InstanceConfig(BaseModel):
     proc_only_if: Optional[str] = None
     proc_only_if_database: Optional[str] = None
     procedure_metrics: Optional[ProcedureMetrics] = None
+    propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     reported_hostname: Optional[str] = None

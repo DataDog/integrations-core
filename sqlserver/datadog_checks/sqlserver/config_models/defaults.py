@@ -136,6 +136,10 @@ def instance_proc_only_if_database():
     return 'master'
 
 
+def instance_propagate_agent_tags():
+    return False
+
+
 def instance_server_version():
     return '2014'
 
