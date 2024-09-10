@@ -4,6 +4,7 @@
 import logging
 from copy import copy, deepcopy
 
+import mock
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
@@ -811,3 +812,60 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     ]
     for m in DATABASE_INDEX_METRICS:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
+
+
+@pytest.mark.parametrize(
+    'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
+    [
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+    ],
+)
+@pytest.mark.integration
+def test_propagate_agent_tags(
+    aggregator,
+    dd_run_check,
+    instance_docker,
+    instance_propagate_agent_tags,
+    init_config_propagate_agent_tags,
+    should_propagate_agent_tags,
+):
+    init_config = {}
+    if instance_propagate_agent_tags is not None:
+        instance_docker['propagate_agent_tags'] = instance_propagate_agent_tags
+    if init_config_propagate_agent_tags is not None:
+        init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
+
+    agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
+    expected_tags = (
+        instance_docker.get('tags', [])
+        + [
+            'connection_host:{}'.format(instance_docker.get('host')),
+            'sqlserver_host:None',
+            'db:master',
+        ]
+        + agent_tags
+    )
+
+    with mock.patch('datadog_checks.sqlserver.config.get_agent_host_tags', return_value=agent_tags):
+        check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+        check.check_id = ''
+        assert check._config._should_propagate_agent_tags(instance_docker, init_config) == should_propagate_agent_tags
+        if should_propagate_agent_tags:
+            assert all(tag in check.tags for tag in agent_tags)
+            dd_run_check(check)
+            aggregator.assert_service_check(
+                'sqlserver.can_connect',
+                count=1,
+                status=SQLServer.OK,
+                tags=expected_tags,
+                hostname='',
+                message='',
+            )
