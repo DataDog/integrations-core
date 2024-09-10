@@ -55,6 +55,9 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `aws_neuron` under the Checks section.

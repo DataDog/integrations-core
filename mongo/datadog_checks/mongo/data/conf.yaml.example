@@ -186,10 +186,10 @@ instances:
     #
     # schemas:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of schemas. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the schemas collection interval in seconds. Each collection involves sampling documents

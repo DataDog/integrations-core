@@ -2,7 +2,26 @@
 
 <!-- towncrier release notes start -->
 
-## 19.1.0 / 2024-08-09
+## 20.0.0 / 2024-09-05
+
+***Changed***:
+
+* When password and `aws.region` are set and `aws.managed_authentication` is not set, password authentication will be used. IAM Token authentication used to be prioritized. ([#18331](https://github.com/DataDog/integrations-core/pull/18331))
+
+***Added***:
+
+* Added an option to specify default db agent uses to perform autodiscovery operations ([#18037](https://github.com/DataDog/integrations-core/pull/18037))
+* Update the propagate_agent_tags setting. When set to `true`, the tags from the agent host are now added to the check's tags for all instances. ([#18358](https://github.com/DataDog/integrations-core/pull/18358))
+* Add cluster_name as tag to PG metrics ([#18402](https://github.com/DataDog/integrations-core/pull/18402))
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+***Fixed***:
+
+* Fix errors resulting from certain ignore_databases settings
+  Clarified documentation on ignore_databases ([#18287](https://github.com/DataDog/integrations-core/pull/18287))
+* Set the default port to 5432 when user don't provide one, this corrects the issue where the generated IAM authentication token is invalid when a port isn't provided. ([#18386](https://github.com/DataDog/integrations-core/pull/18386))
+
+## 19.1.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
