@@ -1,1 +1,0 @@
-Collect mongodb inferred document schema with documents sample (DBM only). By default, 10 documents per collection are sampled to generate inferred schema with fields and types.

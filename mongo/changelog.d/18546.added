@@ -1,0 +1,1 @@
+Add `index` tag to `mongodb.collection.indexes.accesses.opsps` metric for consistency with `mongodb.collection.indexsizes`.
