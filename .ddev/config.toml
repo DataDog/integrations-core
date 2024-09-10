@@ -63,7 +63,7 @@ runners = { windows = ["windows-2019"] }
 platforms = ["linux", "windows"]
 
 [overrides.ci.tokumx]
-only-py2 = true
+exclude = true
 
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
