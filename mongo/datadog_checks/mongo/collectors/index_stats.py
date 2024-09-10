@@ -31,13 +31,15 @@ class IndexStatsCollector(MongoCollector):
         for coll_name in coll_names:
             try:
                 for stats in api.index_stats(self.db_name, coll_name):
+                    idx_name = stats.get('name', 'unknown')
                     additional_tags = [
-                        "name:{0}".format(stats.get('name', 'unknown')),
-                        "collection:{0}".format(coll_name),
-                        "db:{0}".format(self.db_name),
+                        f"name:{idx_name}",  # deprecated but kept for backward compatability, use index instead
+                        f"index:{idx_name}",
+                        f"collection:{coll_name}",
+                        f"db:{self.db_name}",
                     ]
                     if stats.get('shard'):
-                        additional_tags.append("shard:{0}".format(stats['shard']))
+                        additional_tags.append(f"shard:{stats['shard']}")
                     self._submit_payload({"indexes": stats}, additional_tags, INDEX_METRICS, "collection")
             except OperationFailure as e:
                 # Atlas restricts $indexStats on system collections
