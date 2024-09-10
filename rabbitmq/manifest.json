@@ -70,12 +70,12 @@
       "rabbitmq": "assets/dashboards/rabbitmq_dashboard.json"
     },
     "monitors": {
-      "disk_usage": "assets/monitors/disk_usage.json",
-      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json",
-      "disk_usage_prometheus": "assets/monitors/disk_usage_prometheus.json",
-      "message_unack_prometheus": "assets/monitors/message_unack_prometheus.json",
-      "consumers_at_zero": "assets/monitors/consumers_at_zero.json",
-      "message_ready": "assets/monitors/message_ready.json"
+      "Level of disk usage is too high for host": "assets/monitors/disk_usage.json",
+      "Messages unacknowledged rate is higher than usual": "assets/monitors/message_unacknowledge_rate_anomaly.json",
+      "Disk space is low": "assets/monitors/disk_usage_prometheus.json",
+      "Unacknowledged Messages are higher than usual": "assets/monitors/message_unack_prometheus.json",
+      "RabbitMQ queue has 0 consumers": "assets/monitors/consumers_at_zero.json",
+      "Messages are ready in RabbitMQ queue": "assets/monitors/message_ready.json"
     },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",

@@ -49,9 +49,9 @@
       "IIS-Overview": "assets/dashboards/iis_overview.json"
     },
     "monitors": {
-      "[IIS] Anomalous amount of requests for site: {{site.name}}": "assets/monitors/req.json",
-      "[IIS] Increase of not found error per second for site: {{site.name}}": "assets/monitors/err.json",
-      "[IIS] Increase of locked error per second for site: {{site.name}}": "assets/monitors/lock.json"
+      "Request number is high": "assets/monitors/req.json",
+      "404 errors is high": "assets/monitors/err.json",
+      "Locked errors is high": "assets/monitors/lock.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
