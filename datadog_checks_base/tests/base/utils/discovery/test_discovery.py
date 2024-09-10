@@ -16,6 +16,20 @@ def test_include_empty():
     assert mock_get_items.call_count == 1
 
 
+def test_include_empty_exclude_non_empty():
+    mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+    d = Discovery(mock_get_items, exclude=['b.*'])
+    assert list(d.get_items()) == []
+    assert mock_get_items.call_count == 1
+
+
+def test_include_empty_limit():
+    mock_get_items = mock.Mock(return_value=['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+    d = Discovery(mock_get_items, limit=1)
+    assert list(d.get_items()) == []
+    assert mock_get_items.call_count == 1
+
+
 @pytest.mark.parametrize(
     'pattern',
     [
