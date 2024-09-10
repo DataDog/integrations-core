@@ -5,8 +5,9 @@
 import json
 import re
 
-from datadog_checks.base.config import is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     PROC_CHAR_LIMIT,
@@ -16,7 +17,10 @@ from datadog_checks.sqlserver.const import (
 class SQLServerConfig:
     def __init__(self, init_config, instance, log):
         self.log = log
-        self.tags: list[str] = instance.get("tags", [])
+        self.tags: list[str] = self._build_tags(
+            custom_tags=instance.get('tags', []),
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+        )
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*']) or ['.*']
@@ -127,3 +131,38 @@ class SQLServerConfig:
         else:
             # create unmatchable regex - https://stackoverflow.com/a/1845097/2157429
             return re.compile(r'(?!x)x')
+
+    def _build_tags(self, custom_tags, propagate_agent_tags):
+        # Clean up tags in case there was a None entry in the instance
+        # e.g. if the yaml contains tags: but no actual tags
+        if custom_tags is None:
+            tags = []
+        else:
+            tags = custom_tags  # list(set(custom_tags))
+
+        if propagate_agent_tags:
+            try:
+                agent_tags = get_agent_host_tags()
+                tags.extend(agent_tags)
+            except Exception as e:
+                raise ConfigurationError(
+                    'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
+                )
+        return tags
+
+    @staticmethod
+    def _should_propagate_agent_tags(instance, init_config) -> bool:
+        '''
+        return True if the agent tags should be propagated to the check
+        '''
+        instance_propagate_agent_tags = instance.get('propagate_agent_tags')
+        init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
+
+        if instance_propagate_agent_tags is not None:
+            # if the instance has explicitly set the value, return the boolean
+            return instance_propagate_agent_tags
+        if init_config_propagate_agent_tags is not None:
+            # if the init_config has explicitly set the value, return the boolean
+            return init_config_propagate_agent_tags
+        # if neither the instance nor the init_config has set the value, return False
+        return False
