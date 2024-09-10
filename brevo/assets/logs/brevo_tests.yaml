@@ -304,6 +304,7 @@ tests:
         "date": "2020-10-09 00:00:00",
         "ts":1604933619,
         "message-id": "201798300811.5787683@abs.domain.com",
+        "service": "transactional-events"
         "ts_event": 1604933654,
         "subject": "My first Transactional",
         "X-Mailin-custom": "some_custom_header",
