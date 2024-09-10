@@ -138,7 +138,10 @@ class SQLServerConfig:
         if custom_tags is None:
             tags = []
         else:
+            print("natasha hereeeeee")
+            print(custom_tags)
             tags = list(set(custom_tags))
+            print(tags)
 
         if propagate_agent_tags:
             try:
