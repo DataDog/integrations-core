@@ -42,8 +42,9 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
 SAMPLE_QUERIES = [
-    # (username, password, dbname, query, arg)
-    ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello"),
+    # (username, password, dbname, query, arg, charset)
+    ("bob", "bob", "datadog_test", "select /* é */ %s", "a", "LATIN1"),
+    ("bob", "bob", "datadog_test", "SELECT city FROM persons WHERE city = %s", "hello", None),
     (
         "bob",
         "bob",
@@ -52,9 +53,10 @@ SAMPLE_QUERIES = [
         "hello_how_is_it_going_this_is_a_very_long_table_alias_name.lastname "
         "FROM persons hello_how_is_it_going_this_is_a_very_long_table_alias_name JOIN persons B "
         "ON hello_how_is_it_going_this_is_a_very_long_table_alias_name.personid = B.personid WHERE B.city = %s",
-        "hello",
+        "hello", 
+        None
     ),
-    ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
+    ("dd_admin", "dd_admin", "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador", None),
 ]
 
 dbm_enabled_keys = ["dbm", "deep_database_monitoring"]
@@ -229,10 +231,13 @@ def test_statement_metrics(
     connections = {}
 
     def _run_queries():
-        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+        for user, password, dbname, query, arg, charset in SAMPLE_QUERIES:
             if dbname not in connections:
                 connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
-            connections[dbname].cursor().execute(query, (arg,))
+            connection = connections[dbname]
+            if charset:
+                connection.cursor().execute("SET client_encoding = %s", (charset,))
+            connection.cursor().execute(query, (arg,))
 
     check = integration_check(dbm_instance)
     check._connect()
@@ -276,7 +281,7 @@ def test_statement_metrics(
     assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
-    for username, _, dbname, query, _ in SAMPLE_QUERIES:
+    for username, _, dbname, query, _, _ in SAMPLE_QUERIES:
         expected_query = query % obfuscated_param
         query_signature = compute_sql_signature(expected_query)
         matching_rows = [r for r in event['postgres_rows'] if r['query_signature'] == query_signature]
@@ -407,7 +412,7 @@ def test_statement_metrics_cloud_metadata(
     connections = {}
 
     def _run_queries():
-        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+        for user, password, dbname, query, arg, _ in SAMPLE_QUERIES:
             if dbname not in connections:
                 connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
             connections[dbname].cursor().execute(query, (arg,))
@@ -448,7 +453,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     connections = {}
 
     def _run_queries():
-        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+        for user, password, dbname, query, arg, _ in SAMPLE_QUERIES:
             if dbname not in connections:
                 connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
             connections[dbname].cursor().execute(query, (arg,))
@@ -1471,7 +1476,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
     check._connect()
 
     connections = []
-    for user, password, dbname, query, arg in SAMPLE_QUERIES:
+    for user, password, dbname, query, arg, _ in SAMPLE_QUERIES:
         conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
         conn.cursor().execute(query, (arg,))
         connections.append(conn)
@@ -1479,7 +1484,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
     run_one_check(check)
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
-    for _, _, dbname, query, arg in SAMPLE_QUERIES:
+    for _, _, dbname, query, arg, _ in SAMPLE_QUERIES:
         expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
         matching = [e for e in dbm_samples if e['db']['statement'] == expected_query]
         if not dbstrict or dbname == dbm_instance['dbname']:
@@ -1995,7 +2000,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     connections = {}
 
     def _run_queries():
-        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+        for user, password, dbname, query, arg, _ in SAMPLE_QUERIES:
             if dbname not in connections:
                 connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
             connections[dbname].cursor().execute(query, (arg,))
