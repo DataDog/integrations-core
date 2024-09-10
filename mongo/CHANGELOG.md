@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.11.0 / 2024-09-10
+
+***Added***:
+
+* Add `index` tag to `mongodb.collection.indexes.accesses.opsps` metric for consistency with `mongodb.collection.indexsizes`. ([#18546](https://github.com/DataDog/integrations-core/pull/18546))
+
 ## 6.10.0 / 2024-09-05
 
 ***Deprecated***:
@@ -48,7 +54,7 @@
 * Remove `comment` from obfuscate command and send it as a separate field in operation samples and slow operations payload. ([#18404](https://github.com/DataDog/integrations-core/pull/18404))
 * Cache database profiling level to avoid repeated queries in slow operations sampling. ([#18461](https://github.com/DataDog/integrations-core/pull/18461))
 
-## 6.9.0 / 2024-08-27
+## 6.9.0 / 2024-08-27 / Agent 7.57.0
 
 ***Added***:
 

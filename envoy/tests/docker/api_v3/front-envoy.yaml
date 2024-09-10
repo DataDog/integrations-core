@@ -22,6 +22,10 @@ static_resources:
   listeners:
   - address:
       socket_address: {address: 0.0.0.0, port_value: 80}
+    listener_filters:
+      - name: envoy.filters.listeners.tls_inspector
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.listener.tls_inspector.v3.TlsInspector
     filter_chains:
     - filters:
       - name: envoy.filters.network.connection_limit

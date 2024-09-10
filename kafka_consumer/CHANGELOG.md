@@ -8,7 +8,7 @@
 
 * Fix a typo when writing to persistent cache to calculate the estimated consumer lag. ([#18307](https://github.com/DataDog/integrations-core/pull/18307))
 
-## 4.6.0 / 2024-08-09
+## 4.6.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
