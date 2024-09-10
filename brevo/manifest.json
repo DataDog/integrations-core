@@ -2,18 +2,28 @@
   "manifest_version": "2.0.0",
   "app_uuid": "df939a65-33b7-4bc8-848f-bfe65c022332",
   "app_id": "brevo",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Brevo marketing campaign emails and track its performance based on events and other transactional events.",
+    "description": "Gain insights into Brevo marketing and transactional events.",
     "title": "Brevo",
-    "media": [],
+    "media": [
+      {
+        "caption": "Brevo - Transactional Events",
+        "image_url": "images/brevo_transactional_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Brevo - Marketing Events",
+        "image_url": "images/brevo_marketing_events.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
-      "Category::Developer Tools",
       "Submitted Data Type::Logs",
       "Offering::Integration"
     ]
@@ -31,11 +41,17 @@
       }
     },
     "dashboards": {
+      "Brevo - Transactional Events" : "assets/dashboards/brevo_transactional_events.json",
+      "Brevo - Marketing Events" : "assets/dashboards/brevo_marketing_events.json"
     },
     "logs": {
       "source": "brevo"
     },
-    "monitors": {}
+    "monitors": {
+      "[Brevo] High Block Rate by Subject" : "assets/monitors/brevo_high_block_rate_by_subject.json",
+      "[Brevo] High Bounce Rate by Subject" : "assets/monitors/brevo_high_bounce_rate_by_subject.json",
+      "[Brevo] High Error Rate by Subject" : "assets/monitors/brevo_high_error_rate_by_subject.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

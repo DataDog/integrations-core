@@ -1,0 +1,283 @@
+id: brevo
+tests:
+  - sample: |-
+      {
+        "id": xxxxxx,
+        "camp_id": xx,
+        "email": "example@domain.com",
+        "campaign name": "My First Campaign",
+        "date_sent": "2020-10-09 00:00:00",
+        "date_event": "2020-10-09 00:00:00",
+        "event": "opened",
+        "tag": "",
+        "segment_ids": [
+                       1,
+           10,
+        ],
+        "ts_sent": 1604933619,
+        "ts_event": 1604933737,
+        "ts": 1604937337
+      }
+    result: null
+  - sample: |-
+      {
+        "id": xxxxxx,
+        "camp_id": xx,
+        "email": "example@domain.com",
+        "campaign name": "My First Campaign",
+        "date_sent": "2020-10-09 00:00:00",
+        "date_event": "2020-10-09 00:00:00",
+        "event": "click",
+        "tag": "",
+        "segment_ids": [
+                       1,
+           10,
+        ],
+        "ts_sent": 1604933619,
+        "ts_event": 1604933737,
+        "ts": 1604937337,
+        "URL": "https://myCampaignUrl.net"
+      }
+    result: null
+  - sample: |-
+      {
+        "id": xxxxxx,
+        "camp_id": xx,
+        "email": "example@domain.com",
+        "campaign name": "My First Campaign",
+        "date_sent": "2020-10-09 00:00:00",
+        "date_event": "2020-10-09 00:00:00",
+        "reason": "deferred",  
+        "event": "hard_bounce",
+        "tag": "",  
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "ts_sent": 1604933619,
+        "ts_event": 1604933737,
+        "ts": 1604937337,
+      }
+    result: null
+  - sample: |-
+      {
+        "id": xxxxxx,
+        "camp_id": xx,
+        "email": "example@domain.com",
+        "campaign name": "My First Campaign",
+        "date_sent": "2020-10-09 00:00:00",
+        "date_event": "2020-10-09 00:00:00",
+        "reason": "deferred",  
+        "event": "soft_bounce",
+        "tag": "",
+        "sending_ip": "xxx.xxx.xxx.xxx"
+        "ts_sent": 1604933619,
+        "ts_event": 1604933737,
+        "ts": 1604937337,
+      }
+    result: null
+  - sample: |-
+      {
+        "id": xxxxxx,
+        "camp_id": xx,
+        "email": "example@domain.com",
+        "campaign name": "My First Campaign",
+        "date_sent": "2020-10-09 00:00:00",
+        "date_event": "2020-10-09 00:00:00",
+        "event": "delivered",
+        "tag": "",
+        "sending_ip": "xxx.xxx.xxx.xxx"
+        "ts_sent": 1604933619,
+        "ts_event": 1604933737,
+        "ts": 1604937337,
+      }
+    result: null
+  - sample: |-
+      {
+        "id": xxxxxx,
+        "camp_id": xx,
+        "email": "example@domain.com",
+        "campaign name": "My First Campaign",
+        "date_sent": "2020-10-09 00:00:00",
+        "date_event": "2020-10-09 00:00:00",
+        "event": "unsubscribe",
+        "tag": "",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+         "list_id": [
+          3,
+          42,
+        ],
+        "segment_ids": [
+                       1,
+           10,
+        ],
+        "ts_sent": 1604933619,
+        "ts_event": 1604933737,
+        "ts": 1604937337,
+      }
+    result: null
+  - sample: >-
+      {
+         "event":"request",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "2022283@abx.abc.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "ts_epoch": 1604933654,
+        "template_id": 22,
+        "mirror_link": "https://app-smtp.brevo.com/log/preview/22-ab68-900dxxx9152c",
+        "contact_id": 8,
+        "tags": ["transac_messages"]
+      }
+    result: null
+  - sample: >-
+      {
+        "event":"click",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "2022283@abx.abc.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "ts_epoch": 1604933654,
+        "template_id": 22,
+        "tags": ["transac_messages"],
+        "user_agent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
+        "device_used": "DESKTOP",
+        "mirror_link": "https://app-smtp.brevo.com/log/preview/jj",
+        "contact_id": 8,
+        "link": "https://abdomain.com/product"
+      }
+    result: null
+  - sample: |-
+      {
+        "event":"deferred",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "2022283@abx.abc.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "ts_epoch": 1604933654,
+        "template_id": 22,
+        "tags": ["transac_messages"],
+        "reason": "spam"
+      }
+    result: null
+  - sample: |-
+      {
+        "event":"delivered",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "2022283@abx.abc.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "template_id": 22,
+        "tags": ["transac_messages"],
+      }
+    result: null
+  - sample: |-
+      {
+        "event":"soft_bounce",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "2022283@abx.abc.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "template_id": 22,
+        "tags": ["transac_messages"],
+        "reason": "server is down"
+      }
+    result: null
+  - sample: >-
+      {
+        "event":"unique_opened",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "2022283@abx.abc.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "template_id": 22,
+        "tags": ["transac_messages"],
+        "user_agent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
+        "device_used": "DESKTOP",
+        "mirror_link": "https://app-smtp.brevo.com/log/preview/1a2000f4-4e33-23aa-ab68-900dxxx9152c",
+        "contact_id": 8,
+        "ts_epoch": 1604933623
+      }
+    result: null
+  - sample: |-
+      {
+        "event":"blocked",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "2022283@abx.abc.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "template_id": 22,
+        "tags": ["transac_messages"],
+        "ts_epoch": 1604933623
+      }
+    result: null
+  - sample: >-
+      {
+        "event":"opened",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "2022283@abx.abc.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "template_id": 22,
+        "user_agent": "Mozilla/5.0 (Windows NT 5.1; rv:11.0) Gecko Firefox/11.0 (via ggpht.com GoogleImageProxy)",
+        "device_used": "DESKTOP",
+        "mirror_link": "https://app-smtp.brevo.com/log",
+        "contact_id": 8,
+        "tags": ["transac_messages"],
+        "ts_epoch": 1604933623
+      }
+    result: null
+  - sample: |-
+      {
+       "event":"hard_bounce",
+        "email": "example@domain.com",
+        "id": xxxxx,
+        "date": "2020-10-09 00:00:00",
+        "ts":1604933619,
+        "message-id": "12.5787683@abc.domain.com",
+        "ts_event": 1604933654,
+        "subject": "My first Transactional",
+        "X-Mailin-custom": "some_custom_header",
+        "sending_ip": "xxx.xxx.xxx.xxx",
+        "template_id": 22,
+        "tags": ["transac_messages"],
+        "reason": "server is down",
+        "ts_epoch":1604933653 
+      }
+    result: null
