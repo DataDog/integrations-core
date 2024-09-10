@@ -829,7 +829,6 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     ],
 )
 @pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
 def test_propagate_agent_tags(
     aggregator,
     dd_run_check,
@@ -857,7 +856,6 @@ def test_propagate_agent_tags(
 
     with mock.patch('datadog_checks.sqlserver.config.get_agent_host_tags', return_value=agent_tags):
         check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-        check.check_id = ''
         assert check._config._should_propagate_agent_tags(instance_docker, init_config) == should_propagate_agent_tags
         if should_propagate_agent_tags:
             assert all(tag in check.tags for tag in agent_tags)
