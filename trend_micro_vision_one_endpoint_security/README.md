@@ -4,21 +4,21 @@
 
 This integration ingests the following logs:
 
-- Application Control
-- Attack Discovery
-- Behavior Monitoring
-- C&C Callback
-- Content Violation
-- Data Loss Prevention
-- Device Control
-- Intrusion Prevention
-- Network Content Inspection
-- Predictive Machine Learning
-- Spyware/Grayware
-- Suspicious File Information
-- Virtual Analyzer Detections
-- Virus/Malware
-- Web Violation
+- Application Control: Application Control logs provides information about application control violations on your network, such as the violated Security Agent policy and criteria
+- Attack Discovery: Attack discovery logs provides information about threats detected by Attack Discovery
+- Behavior Monitoring: Behavior monitoring logs provide information about Behavior Monitoring events on your network
+- C&C Callback: C&C callback logs provides information about C&C callback events detected on your network
+- Content Violation: Content violation logs provides information about the email messages with content violations, such as the managed product that detected the content violation, the sender(s) and recipients(s) of the email message, the name of the content violation policy, and the total number of violations detected
+- Data Loss Prevention: Data loss prevention logs provides information about incidents detected by Data Loss Prevention
+- Device Control: Device control logs provides information about Device Access Control events on your network
+- Intrusion Prevention: Intrusion prevention logs provides information to help you achieve timely protection against known and zero-day attacks, defend against web application vulnerabilities, and identify malicious software accessing the network
+- Network Content Inspection: Network content inspection logs provides information about network content violations on your network
+- Predictive Machine Learning: Predictive machine learning logs provides information about advanced unknown threats detected by Predictive Machine Learning
+- Spyware/Grayware: Spyware/Grayware logs provides information about the spyware/grayware detections on your network, such as the managed product that detected the spyware/grayware, the name of the spyware/grayware, and the name of the infected endpoint
+- Suspicious File Information: Suspicious file information logs provides information about suspicious files detected on your network
+- Virtual Analyzer Detections: Virtual analyzer logs provides information about advanced unknown threats detected by Virtual Analyzer
+- Virus/Malware: Virus/Malware logs provides information about the virus/malware detections on your network, such as the managed product that detected the viruses/malware, the name of the virus/malware, and the infected endpoint
+- Web Violation: Web violation logs provides information about web violations on your network
 
 Use out-of-the-box dashboards to gain detailed insights into system events, network events, and data loss prevention events, security detection and observation, and compliance monitoring.
 
