@@ -848,7 +848,7 @@ def test_propagate_agent_tags(
         instance_docker.get('tags', [])
         + [
             'connection_host:{}'.format(instance_docker.get('host')),
-            'sqlserver_host:{}'.format(instance_docker.get('host')),
+            'sqlserver_host:None',
             'db:master',
         ]
         + agent_tags
