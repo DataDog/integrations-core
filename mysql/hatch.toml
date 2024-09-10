@@ -18,11 +18,12 @@ python = ["3.11"]
 version = [
   "5.7",  # EOL October 21, 2023
   "8.0.36",  # EOL April, 2026
+  "8.4.0",
 ]
 
 [[envs.default.matrix]]
 python = ["3.11"]
-version = ["8.0"]
+version = ["8.0", "8.4"]
 replication = ["group"]
 
 [[envs.default.matrix]]
@@ -40,10 +41,15 @@ version = [
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.36"] },
+  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
 ]
 name."8.0-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
 ]
+name."8.4-group".env-vars = [
+  { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
+]
+
 
 [envs.default.env-vars]
 COMPOSE_FILE = "{matrix:flavor:mysql}.yaml"
