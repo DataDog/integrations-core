@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_propagate_agent_tags():
+    return False
+
+
 def instance_adoprovider():
     return 'SQLOLEDB'
 
