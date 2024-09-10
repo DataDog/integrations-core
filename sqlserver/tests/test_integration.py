@@ -865,6 +865,4 @@ def test_propagate_agent_tags(
                 count=1,
                 status=SQLServer.OK,
                 tags=expected_tags,
-                hostname='',
-                message='',
             )
