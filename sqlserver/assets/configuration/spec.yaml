@@ -17,6 +17,13 @@ files:
         example:
           - name: sqlserver.clr.execution
             counter_name: CLR Execution
+    - name: propagate_agent_tags
+      description: |
+        Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+        When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+      value:
+        example: false
+        type: boolean
     - template: init_config/db
     - template: init_config/default
   - template: instances
