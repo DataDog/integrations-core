@@ -1,7 +1,7 @@
 # Agent Check: Fly.io
 
 <div class="alert alert-warning">
-This integration is in public beta and should be enabled on production workloads with caution.
+This integration is in public beta. Use caution if enabling it on production workloads.
 </div>
 
 ## Overview
