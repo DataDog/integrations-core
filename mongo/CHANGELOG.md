@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.11.0 / 2024-09-10
+
+***Added***:
+
+* Add `index` tag to `mongodb.collection.indexes.accesses.opsps` metric for consistency with `mongodb.collection.indexsizes`. ([#18546](https://github.com/DataDog/integrations-core/pull/18546))
+
 ## 6.10.0 / 2024-09-05
 
 ***Deprecated***:
