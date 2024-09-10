@@ -18,6 +18,7 @@ from .common import (
     LOCAL_RATE_LIMIT_METRICS,
     MOCKED_PROMETHEUS_METRICS,
     RATE_LIMIT_STAT_PREFIX_TAG,
+    TLS_INSPECTOR_METRICS,
     get_fixture_path,
 )
 
@@ -48,7 +49,9 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
 
     dd_run_check(c)
 
-    for metric in MOCKED_PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CLUSTER_AND_LISTENER_SSL_METRICS:
+    for metric in (
+        MOCKED_PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CLUSTER_AND_LISTENER_SSL_METRICS + TLS_INSPECTOR_METRICS
+    ):
         aggregator.assert_metric("envoy.{}".format(metric))
 
     for metric in CONNECT_STATE_METRIC:
@@ -80,9 +83,9 @@ def test_collect_metadata(datadog_agent, fixture_path, mock_http_response, check
     version_metadata = {
         'version.scheme': 'semver',
         'version.major': "1",
-        'version.minor': "29",
+        'version.minor': "31",
         'version.patch': "0",
-        'version.raw': '1.29.0',
+        'version.raw': '1.31.0',
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
