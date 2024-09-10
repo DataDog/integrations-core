@@ -851,7 +851,7 @@ def test_propagate_agent_tags(
         assert check._config._should_propagate_agent_tags(instance_docker, init_config) == should_propagate_agent_tags
         if should_propagate_agent_tags:
             assert all(tag in check.tags for tag in agent_tags)
-            dd_run_check(instance_docker, init_config)
+            dd_run_check(check)
             aggregator.assert_service_check(
                 'sqlserver.database.can_connect',
                 count=1,
