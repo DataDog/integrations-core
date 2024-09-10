@@ -21,6 +21,11 @@ on:
         required: true
         type: string
 
+      checkout_ref:
+        description: "Which git branch or tag to checkout for testing."
+        required: false
+        type: string
+        default: ''
       python-version:
         required: false
         default: ""
@@ -121,6 +126,8 @@ jobs:
         diskperf -y
 
     - uses: actions/checkout@v4
+      with:
+        ref: "${{ inputs.checkout_ref }}"
 
     - name: Set up Python 2.7
       if: inputs.test-py2

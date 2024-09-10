@@ -7,6 +7,11 @@ on:
         required: true
         type: string
 
+      checkout_ref:
+        description: "Which git branch or tag to checkout for testing."
+        required: false
+        type: string
+        default: ''
       python-version:
         required: false
         default: ""
@@ -62,6 +67,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -82,6 +88,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -102,6 +109,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -122,6 +130,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -142,6 +151,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -162,6 +172,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -182,6 +193,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -202,6 +214,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -222,6 +235,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -242,6 +256,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -262,6 +277,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -282,6 +298,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -302,6 +319,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -322,6 +340,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -342,6 +361,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -362,6 +382,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -382,6 +403,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -402,6 +424,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -422,6 +445,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -442,6 +466,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -462,6 +487,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -482,6 +508,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -502,6 +529,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -522,6 +550,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -542,6 +571,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -562,6 +592,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -582,6 +613,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -602,6 +634,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -622,6 +655,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -642,6 +676,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -662,6 +697,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -682,6 +718,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -702,6 +739,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -722,6 +760,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -742,6 +781,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -762,6 +802,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -782,6 +823,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -802,6 +844,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -822,6 +865,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -842,6 +886,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -862,6 +907,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -882,6 +928,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -902,6 +949,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -922,6 +970,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -942,6 +991,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -962,6 +1012,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -982,6 +1033,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1002,6 +1054,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1022,6 +1075,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1042,6 +1096,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1062,6 +1117,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1082,6 +1138,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1102,6 +1159,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1122,6 +1180,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1142,6 +1201,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1162,6 +1222,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1182,6 +1243,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1202,6 +1264,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1222,6 +1285,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1242,6 +1306,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1262,6 +1327,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1282,6 +1348,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1302,6 +1369,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1322,6 +1390,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1342,6 +1411,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1362,6 +1432,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1382,6 +1453,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1402,6 +1474,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1422,6 +1495,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1442,6 +1516,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-20.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1462,6 +1537,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1482,6 +1558,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1502,6 +1579,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1522,6 +1600,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1542,6 +1621,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1562,6 +1642,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1582,6 +1663,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1602,6 +1684,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1622,6 +1705,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1642,6 +1726,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1662,6 +1747,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1682,6 +1768,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1702,6 +1789,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1722,6 +1810,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1742,6 +1831,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1762,6 +1852,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1782,6 +1873,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1802,6 +1894,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1822,6 +1915,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1842,6 +1936,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1862,6 +1957,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1882,6 +1978,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1902,6 +1999,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1922,6 +2020,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1942,6 +2041,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1962,6 +2062,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -1982,6 +2083,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2002,6 +2104,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2022,6 +2125,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2042,6 +2146,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2062,6 +2167,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2082,6 +2188,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2102,6 +2209,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2122,6 +2230,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2142,6 +2251,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2162,6 +2272,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2182,6 +2293,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2202,6 +2314,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2222,6 +2335,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2242,6 +2356,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2262,6 +2377,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2282,6 +2398,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2302,6 +2419,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2322,6 +2440,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2342,6 +2461,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2362,6 +2482,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2382,6 +2503,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2402,6 +2524,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-20.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2422,6 +2545,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2442,6 +2566,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-20.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2462,6 +2587,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2482,6 +2608,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2502,6 +2629,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2522,6 +2650,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2542,6 +2671,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2562,6 +2692,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2582,6 +2713,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2602,6 +2734,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2622,6 +2755,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2642,6 +2776,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2662,6 +2797,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2682,6 +2818,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2702,6 +2839,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2722,6 +2860,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2742,6 +2881,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2762,6 +2902,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2782,6 +2923,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2802,6 +2944,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2822,6 +2965,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2842,6 +2986,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2862,6 +3007,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2882,6 +3028,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2902,6 +3049,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2922,6 +3070,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2942,6 +3091,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2962,6 +3112,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -2982,6 +3133,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3002,6 +3154,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3022,6 +3175,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3042,6 +3196,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3062,6 +3217,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3082,6 +3238,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3102,6 +3259,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3122,6 +3280,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3142,6 +3301,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3162,6 +3322,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3182,6 +3343,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-20.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3202,6 +3364,7 @@ jobs:
       platform: windows
       runner: '["windows-2019"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3222,6 +3385,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3242,6 +3406,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3262,6 +3427,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3282,6 +3448,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3302,6 +3469,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3322,6 +3490,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3342,6 +3511,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3362,6 +3532,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3382,6 +3553,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3402,6 +3574,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3422,6 +3595,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3442,6 +3616,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3462,6 +3637,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3482,6 +3658,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3502,6 +3679,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3522,6 +3700,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3542,6 +3721,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3562,6 +3742,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3582,6 +3763,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3602,6 +3784,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3622,6 +3805,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3642,6 +3826,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3662,6 +3847,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3682,6 +3868,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3702,6 +3889,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3722,6 +3910,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3742,6 +3931,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3762,6 +3952,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3782,6 +3973,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3802,6 +3994,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3822,6 +4015,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3842,6 +4036,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3862,6 +4057,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3882,6 +4078,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3902,6 +4099,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3922,6 +4120,7 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3942,6 +4141,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}
@@ -3962,6 +4162,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      checkout_ref: "${{ inputs.checkout_ref }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
       latest: ${{ inputs.latest }}

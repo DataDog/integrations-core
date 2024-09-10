@@ -72,6 +72,7 @@ def ci(app: Application, sync: bool):
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
+            'checkout_ref': '${{ inputs.checkout_ref }}',
             # Options
             'python-version': '${{ inputs.python-version }}',
             'standard': '${{ inputs.standard }}',

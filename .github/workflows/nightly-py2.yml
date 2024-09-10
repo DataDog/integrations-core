@@ -7,20 +7,13 @@ on:
 
 jobs:
   test:
-    uses: ./.github/workflows/test-all.yml@agent-v6
+    uses: ./.github/workflows/test-all.yml
     with:
       repo: core
 
       # Options
+      checkout_ref: agent-v6
       standard: true
       test-py2: true
       test-py3: false
-    secrets: inherit
-
-  submit-traces:
-    needs:
-    - test
-    if: success() || failure()
-
-    uses: ./.github/workflows/submit-traces.yml@agent-v6
     secrets: inherit
