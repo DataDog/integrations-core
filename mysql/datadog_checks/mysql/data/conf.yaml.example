@@ -246,11 +246,12 @@ instances:
     #
     # options:
 
-        ## @param replication - boolean - optional - default: false
+        ## @param replication - boolean - optional
         ## Set to `true` to collect replication metrics or group replication metrics.
         ## These metrics are only collected from the specified `host`. If you want to collect replication metrics
         ## from the source or primary node and the replica or secondary nodes you need to set separate check
         ## instances to collect them.
+        ## Defaults to `true` when `dbm` is enabled.
         #
         # replication: false
 
@@ -269,8 +270,9 @@ instances:
         #
         # galera_cluster: false
 
-        ## @param extra_status_metrics - boolean - optional - default: false
+        ## @param extra_status_metrics - boolean - optional
         ## Set to `true` to enable extra status metrics.
+        ## Defaults to `true` when `dbm` is enabled.
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #

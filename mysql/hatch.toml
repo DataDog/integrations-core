@@ -53,8 +53,7 @@ MYSQL_VERSION = "{matrix:version}"
 
 [envs.default]
 dependencies = [
-  "psutil",
-  "deepdiff"
+  "psutil"
 ]
 
 [envs.latest.env-vars]
