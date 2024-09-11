@@ -705,7 +705,7 @@ class SQLServer(AgentCheck):
 
         cfg_inst["hostname"] = self.resolved_hostname
 
-        return cls(cfg_inst, base_name, metric_type, column, self.log)
+        return cls(cfg_inst, base_name, metric_type, column, self.log, self.tags)
 
     def _check_connections_by_connecting_to_db(self):
         for db in self.databases:
