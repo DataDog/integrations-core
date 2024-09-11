@@ -1,0 +1,26 @@
+[
+    {
+        "name": "mongodb.system.mem.total",
+        "type": 0,
+        "value": 32046,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.system.mem.limit",
+        "type": 0,
+        "value": 16023,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.system.cpu.cores",
+        "type": 0,
+        "value": 10,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    }
+]

@@ -1,3 +1,42 @@
+## Datadog Agent version [7.56.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7562)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.56.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7561)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.56.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7560)
+
+* Amazon Kafka [4.9.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Datadog Checks Base [36.9.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Cisco ACI [2.9.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* ClickHouse [3.6.0](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* Cloudera [2.2.0](https://github.com/DataDog/integrations-core/blob/master/cloudera/CHANGELOG.md)
+* ESXi [1.2.0](https://github.com/DataDog/integrations-core/blob/master/esxi/CHANGELOG.md)
+* etcd [6.2.2](https://github.com/DataDog/integrations-core/blob/master/etcd/CHANGELOG.md)
+* HTTP [9.7.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* Kafka Consumer [4.5.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* kyverno [1.0.2](https://github.com/DataDog/integrations-core/blob/master/kyverno/CHANGELOG.md)
+* MongoDB [6.7.2](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [12.6.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* OpenStack Controller [6.8.1](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
+* Postgres [19.0.1](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md) **BREAKING CHANGE**
+* Process [3.4.0](https://github.com/DataDog/integrations-core/blob/master/process/CHANGELOG.md)
+* Redis [5.6.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+* Snowflake [5.7.0](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+* SQL Server [17.4.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* TCP [4.9.0](https://github.com/DataDog/integrations-core/blob/master/tcp_check/CHANGELOG.md)
+* TeamCity [4.3.0](https://github.com/DataDog/integrations-core/blob/master/teamcity/CHANGELOG.md)
+* TLS [2.18.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+* vLLM [1.0.0](https://github.com/DataDog/integrations-core/blob/master/vllm/CHANGELOG.md)
+* vSphere [7.6.0](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
+* Windows Service [4.9.1](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md)
+
+## Datadog Agent version [7.55.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7553)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.55.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7552)
 
 * There were no integration updates for this version of the Agent.

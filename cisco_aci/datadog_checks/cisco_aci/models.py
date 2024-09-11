@@ -2,19 +2,26 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
 import six
 
 if six.PY3:
     from enum import IntEnum, StrEnum
     from typing import Optional
 
-    from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+    from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
+
+    """
+    Cisco ACI Response Models
+    """
 
     class NodeAttributes(BaseModel):
         address: Optional[str] = None
         fabric_st: Optional[str] = Field(default=None, alias="fabricSt")
         role: Optional[str] = None
         dn: Optional[str] = None
+        name: Optional[str] = None
         model: Optional[str] = None
         version: Optional[str] = None
         serial: Optional[str] = None
@@ -45,6 +52,16 @@ if six.PY3:
         desc: Optional[str] = None
         router_mac: Optional[str] = Field(default=None, alias="routerMac")
 
+        @model_validator(mode='before')
+        @classmethod
+        def validate_name(cls, data: dict) -> dict:
+            if isinstance(data, dict):
+                name = data.get('name')
+                id = data.get('id')
+                if not name or name == '':
+                    data['name'] = id
+            return data
+
     class PhysIf(BaseModel):
         attributes: L1PhysIfAttributes
         children: Optional[list] = Field(default_factory=list)
@@ -56,6 +73,10 @@ if six.PY3:
                 if 'ethpmPhysIf' in child:
                     return EthpmPhysIf(**child['ethpmPhysIf'])
             return None
+
+    """
+    NDM Models
+    """
 
     class DeviceMetadata(BaseModel):
         id: Optional[str] = Field(default=None)
@@ -105,7 +126,7 @@ if six.PY3:
     class InterfaceMetadata(BaseModel):
         device_id: Optional[str] = Field(default=None)
         id_tags: list = Field(default_factory=list)
-        index: Optional[str] = Field(default=None)
+        index: Optional[int] = Field(default=None)
         name: Optional[str] = Field(default=None)
         description: Optional[str] = Field(default=None)
         mac_address: Optional[str] = Field(default=None)
@@ -133,6 +154,16 @@ if six.PY3:
                 return OperStatus.UP
             return OperStatus.DOWN
 
+        @field_validator("index", mode="before")
+        @classmethod
+        def parse_index(cls, index: str | int | None) -> int | None:
+            if type(index) == str:
+                split = re.split('eth|/', index)
+                return int(split[-1])
+            if type(index) == int:
+                return index
+            return None
+
         @computed_field
         @property
         def status(self) -> Status:
@@ -158,3 +189,13 @@ if six.PY3:
         devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
         interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
         collect_timestamp: Optional[int] = None
+        size: Optional[int] = Field(default=0, exclude=True)
+
+        model_config = ConfigDict(validate_assignment=True, use_enum_values=True)
+
+        def append_metadata(self, metadata: DeviceMetadata | InterfaceMetadata):
+            if isinstance(metadata, DeviceMetadata):
+                self.devices.append(metadata)
+            if isinstance(metadata, InterfaceMetadata):
+                self.interfaces.append(metadata)
+            self.size += 1

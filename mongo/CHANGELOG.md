@@ -2,7 +2,113 @@
 
 <!-- towncrier release notes start -->
 
-## 6.7.2 / 2024-07-19
+## 6.10.0 / 2024-09-05
+
+***Deprecated***:
+
+* Deprecate metrics `mongodb.collection.collectionscans.nontailable` & `mongodb.collection.collectionscans.total`. ([#18511](https://github.com/DataDog/integrations-core/pull/18511))
+
+***Added***:
+
+* Collecting Explain Plans for Slow Operations:
+  - For slow operations captured by the database profiler, the `execStats` from the profiler documents are directly used and emitted.
+  - For slow operations identified in the logs, the integration now explicitly explains the operation and emits the resulting explain plan. ([#18309](https://github.com/DataDog/integrations-core/pull/18309))
+* Add metric `mongodb.stats.views` to report number of views in the database. ([#18334](https://github.com/DataDog/integrations-core/pull/18334))
+* Collect mongodb inferred document schema with documents sample (DBM only). By default, 10 documents per collection are sampled to generate inferred schema with fields and types. ([#18374](https://github.com/DataDog/integrations-core/pull/18374))
+* Add `query_framework` to operation samples. `query_framework` is a string that specifies the query framework used to process an operation. The field is available starting mongodb version 6.2. ([#18388](https://github.com/DataDog/integrations-core/pull/18388))
+* Add metric `mongodb.collection.indexes.accesses.opsps` to measure number of times the index was used per second. ([#18405](https://github.com/DataDog/integrations-core/pull/18405))
+* Add sharded data distribution metrics (only collected on mongos)
+  - `mongodb.sharded_data_distribution.num_orphaned_docs`, - Number of orphaned documents in the shard
+  - `mongodb.sharded_data_distribution.num_owned_documents` - Number of owned documents in the shard
+  - `mongodb.sharded_data_distribution.orphaned_size_bytes` - Size of orphaned documents in the shard
+  - `mongodb.sharded_data_distribution.owned_size_bytes` - Size of owned documents in the shard ([#18407](https://github.com/DataDog/integrations-core/pull/18407))
+* Improve MongoDB integration compatibility with AWS DocumentDB
+  - fallback to `collStats` command when `$collStats` aggregation pipeline is not available
+  - fix NoneType error with replication metrics collection
+  - fix `list_collection_names` error on unsupported filter `Type` ([#18430](https://github.com/DataDog/integrations-core/pull/18430))
+* Include replica set tags in metrics. ([#18463](https://github.com/DataDog/integrations-core/pull/18463))
+* Add modules to mongodb instance metadata. `modules` are a list of add-on modules that mongod was built with. Possible values currently include "enterprise" and "rocksdb". ([#18473](https://github.com/DataDog/integrations-core/pull/18473))
+* Collect MongoDB Atlas search indexes in schema collection (DBM only). ([#18476](https://github.com/DataDog/integrations-core/pull/18476))
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+* Obfuscate literal values within the `parsedQuery`, `filter`, and `indexBounds` fields in MongoDB explain plans. ([#18499](https://github.com/DataDog/integrations-core/pull/18499))
+* Enables MongoDB inferred schema collection by default (DBM only). ([#18502](https://github.com/DataDog/integrations-core/pull/18502))
+* Add warning logs when agent user is not authorized to run $collStats and $indexStats on collections. ([#18506](https://github.com/DataDog/integrations-core/pull/18506))
+* Emit new metrics `mongodb.collection.collectionscans.totalps` & `mongodb.collection.collectionscans.nontailableps`. The new metrics measure the total number of queries that performed a collection scans or collection scans without tailable cursor per second. ([#18511](https://github.com/DataDog/integrations-core/pull/18511))
+* Add new metrics for MongoDB query plan cache (requires MongoDB 7.0+) and sort stages (requires MongoDB 6.2+):
+  - mongodb.metrics.query.plancache.classic.hitsps
+  - mongodb.metrics.query.plancache.classic.missesps
+  - mongodb.metrics.query.plancache.sbe.hitsps
+  - mongodb.metrics.query.plancache.sbe.missesps
+  - mongodb.metrics.query.sort.spilltodiskps
+  - mongodb.metrics.query.sort.totalbytessortedps
+  - mongodb.metrics.query.sort.totalkeyssortedps ([#18513](https://github.com/DataDog/integrations-core/pull/18513))
+
+***Fixed***:
+
+* Remove `comment` from obfuscate command and send it as a separate field in operation samples and slow operations payload. ([#18404](https://github.com/DataDog/integrations-core/pull/18404))
+* Cache database profiling level to avoid repeated queries in slow operations sampling. ([#18461](https://github.com/DataDog/integrations-core/pull/18461))
+
+## 6.9.0 / 2024-08-27
+
+***Added***:
+
+* Add config option `database_autodiscovery.max_collections_per_database` to limit max number of collections to be monitored per autodiscoverd database. This option is applied to collection stats metrics and collection indexes stats metrics. ([#18416](https://github.com/DataDog/integrations-core/pull/18416))
+
+***Fixed***:
+
+* Skip collect explain plan for get profile level & listCollections command. ([#18408](https://github.com/DataDog/integrations-core/pull/18408))
+
+## 6.8.2 / 2024-08-16
+
+***Fixed***:
+
+* Fixed a bug where optional MongoDB collection stats metrics were always collected, regardless of configuration. ([#18342](https://github.com/DataDog/integrations-core/pull/18342))
+
+## 6.8.1 / 2024-08-13
+
+***Fixed***:
+
+* Fix missing metrics `num_yields` and `response_length` for slow operations collected from logs. ([#18305](https://github.com/DataDog/integrations-core/pull/18305))
+
+## 6.8.0 / 2024-08-09
+
+***Added***:
+
+* Collects 3 additional WiredTiger cache metrics from serverStatus
+  - wiredtiger.cache.bytes_read_into_cache
+  - wiredtiger.cache.bytes_written_from_cache
+  - wiredtiger.cache.pages_requested_from_cache ([#18052](https://github.com/DataDog/integrations-core/pull/18052))
+* Collect MongoDB slow operations for auto-discovered databases when DBM is enabled. The slow operations are collected from
+  - `system.profile` collection when database profiler is enabled
+  - MongoDB slow query logs when database profiler is not enabled ([#18140](https://github.com/DataDog/integrations-core/pull/18140))
+* Add `hosting_type` tag to the Mongo metrics. This tag indicates where the MongoDB instance is hosted. ([#18167](https://github.com/DataDog/integrations-core/pull/18167))
+* Add database and collection level average latency metrics by operation type
+  - mongodb.oplatencies.commands.latency.avg
+  - mongodb.oplatencies.reads.latency.avg
+  - mongodb.oplatencies.writes.latency.avg
+  - mongodb.collection.commands.latency.avg
+  - mongodb.collection.reads.latency.avg
+  - mongodb.collection.transactions.latency.avg
+  - mongodb.collection.writes.latency.avg ([#18177](https://github.com/DataDog/integrations-core/pull/18177))
+* Introduced a new `HostInfo` metrics collector to gather system-level metrics for the host running the `mongod` or `mongos` process. The following metrics are now collected by default across all deployment types:
+  - `mongodb.system.cpu.cores`
+  - `mongodb.system.mem.limit`
+  - `mongodb.system.mem.total` ([#18196](https://github.com/DataDog/integrations-core/pull/18196))
+* Add new database storage metrics collected from `dbStats`. The new metrics include
+  - mongodb.stats.freestoragesize
+  - mongodb.stats.fstotalsize
+  - mongodb.stats.fsusedsize
+  - mongodb.stats.indexfreestoragesize
+  - mongodb.stats.totalfreestoragesize
+  - mongodb.stats.totalsize ([#18200](https://github.com/DataDog/integrations-core/pull/18200))
+* Collect operation samples (DBM only) for operations that run on system databases (e.g. admin, local, config). ([#18224](https://github.com/DataDog/integrations-core/pull/18224))
+
+***Fixed***:
+
+* Fix the default null value for waiting_for_latch in operation sampling. When an operation is not waiting for latch, waiting_for_latch should be an empty dict instead of boolean False. ([#17997](https://github.com/DataDog/integrations-core/pull/17997))
+* Fix connection error `SCRAM-SHA-256 requires a username` when connection option authMechanism is provided ([#18156](https://github.com/DataDog/integrations-core/pull/18156))
+
+## 6.7.2 / 2024-07-19 / Agent 7.56.0
 
 ***Fixed***:
 

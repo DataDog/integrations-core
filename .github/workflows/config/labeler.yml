@@ -69,6 +69,8 @@ integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
+integration/aws_neuron:
+- aws_neuron/**/*
 integration/azure_active_directory:
 - azure_active_directory/**/*
 integration/azure_iot_edge:
@@ -127,6 +129,8 @@ integration/container:
 - container/**/*
 integration/containerd:
 - containerd/**/*
+integration/contentful:
+- contentful/**/*
 integration/coredns:
 - coredns/**/*
 integration/couch:
@@ -155,6 +159,8 @@ integration/dns_check:
 - dns_check/**/*
 integration/docker_daemon:
 - docker_daemon/**/*
+integration/docusign:
+- docusign/**/*
 integration/dotnetclr:
 - dotnetclr/**/*
 integration/druid:
@@ -183,6 +189,8 @@ integration/fluentd:
 - fluentd/**/*
 integration/fluxcd:
 - fluxcd/**/*
+integration/fly_io:
+- fly_io/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/gearmand:
@@ -195,6 +203,8 @@ integration/gke:
 - gke/**/*
 integration/glusterfs:
 - glusterfs/**/*
+integration/godaddy:
+- godaddy/**/*
 integration/go-metro:
 - go-metro/**/*
 integration/go_expvar:
@@ -279,18 +289,24 @@ integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
+integration/kubevirt_api:
+- kubevirt_api/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/lastpass:
+- lastpass/**/*
 integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
 - linkerd/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
+integration/mailchimp:
+- mailchimp/**/*
 integration/mapr:
 - mapr/**/*
 integration/mapreduce:
@@ -347,6 +363,8 @@ integration/openstack_controller:
 - openstack_controller/**/*
 integration/oracle:
 - oracle/**/*
+integration/ossec_security:
+- ossec_security/**/*
 integration/otel:
 - otel/**/*
 integration/palo_alto_cortex_xdr:
@@ -361,6 +379,8 @@ integration/pgbouncer:
 - pgbouncer/**/*
 integration/php_fpm:
 - php_fpm/**/*
+integration/ping_federate:
+- ping_federate/**/*
 integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
@@ -395,6 +415,8 @@ integration/riak:
 - riak/**/*
 integration/riakcs:
 - riakcs/**/*
+integration/ringcentral:
+- ringcentral/**/*
 integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
@@ -453,6 +475,8 @@ integration/strimzi:
 - strimzi/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/suricata:
+- suricata/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
@@ -477,6 +501,8 @@ integration/teradata:
 - teradata/**/*
 integration/terraform:
 - terraform/**/*
+integration/tibco_ems:
+- tibco_ems/**/*
 integration/tls:
 - tls/**/*
 integration/tokumx:
@@ -489,6 +515,10 @@ integration/traefik_mesh:
 - traefik_mesh/**/*
 integration/traffic_server:
 - traffic_server/**/*
+integration/trend_micro_email_security:
+- trend_micro_email_security/**/*
+integration/trend_micro_vision_one_xdr:
+- trend_micro_vision_one_xdr/**/*
 integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:

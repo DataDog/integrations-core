@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-from six import PY2
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.elastic import ESCheck
@@ -160,7 +159,6 @@ def test_from_instance():
     ],
 )
 @pytest.mark.integration
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_custom_query_invalid_config(dd_environment, dd_run_check, instance, aggregator, invalid_custom_queries):
     instance = deepcopy(instance)
     instance['custom_queries'] = invalid_custom_queries

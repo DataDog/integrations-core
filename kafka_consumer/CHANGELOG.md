@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 4.5.0 / 2024-07-05
+## 4.6.1 / 2024-09-05
+
+***Fixed***:
+
+* Fix a typo when writing to persistent cache to calculate the estimated consumer lag. ([#18307](https://github.com/DataDog/integrations-core/pull/18307))
+
+## 4.6.0 / 2024-08-09
+
+***Added***:
+
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 4.5.0 / 2024-07-05 / Agent 7.56.0
 
 ***Added***:
 

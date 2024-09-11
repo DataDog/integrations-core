@@ -119,7 +119,14 @@ def instance_custom_queries():
 @pytest.fixture
 def instance_integration(instance_custom_queries):
     instance = copy.deepcopy(instance_custom_queries)
-    instance["additional_metrics"] = ["metrics.commands", "tcmalloc", "collection", "top", "jumbo_chunks"]
+    instance["additional_metrics"] = [
+        "metrics.commands",
+        "tcmalloc",
+        "collection",
+        "top",
+        "jumbo_chunks",
+        "sharded_data_distribution",
+    ]
     instance["collections"] = ["foo", "bar"]
     instance["collections_indexes_stats"] = True
     instance["add_node_tag_to_events"] = False
@@ -147,6 +154,7 @@ def instance_integration_cluster_autodiscovery(instance_integration_cluster):
     instance = copy.deepcopy(instance_integration_cluster)
     instance["database_autodiscovery"] = {
         "enabled": True,
+        "max_collections_per_database": 5,
     }
     return instance
 
