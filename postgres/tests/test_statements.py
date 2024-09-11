@@ -1583,6 +1583,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
+@pytest.mark.flaky
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.2

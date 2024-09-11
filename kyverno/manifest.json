@@ -49,7 +49,7 @@
       }
     },
     "monitors": {
-      "metadata_path": "assets/monitors/controller_drops.json"
+      "Controller element is dropped": "assets/monitors/controller_drops.json"
     },
     "saved_views": {
       "Kyverno Logs Overview": "assets/saved_views/logs_overview.json",

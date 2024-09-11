@@ -50,7 +50,7 @@
       "auto_install": true
     },
     "monitors": {
-      "error_ratio": "assets/monitors/error_ratio.json"
+      "Request error ratio is high": "assets/monitors/error_ratio.json"
     },
     "dashboards": {
       "torchserve_overview": "assets/dashboards/overview.json"

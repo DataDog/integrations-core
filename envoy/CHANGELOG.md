@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.6.0 / 2024-09-10
+
+***Added***:
+
+* Add support for tls_inspector metrics ([#18536](https://github.com/DataDog/integrations-core/pull/18536))
+
 ## 3.5.1 / 2024-07-05 / Agent 7.55.0
 
 ***Fixed***:
