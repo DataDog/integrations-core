@@ -64,10 +64,10 @@
       "[calico] dashboard overview": "./assets/dashboards/calico_overview.json"
     },
     "monitors": {
-      "[calico] monitor ipsets error": "assets/monitors/ipset_error.json",
-      "[calico] monitor iptables save errors": "assets/monitors/iptables_save_errors.json",
-      "[calico] monitor iptables restore errors": "assets/monitors/iptables_restore_errors.json",
-      "[calico] monitor dataplane failures": "assets/monitors/dataplane_failures.json"
+      "IPset is failing": "assets/monitors/ipset_error.json",
+      "IPtables save is failing": "assets/monitors/iptables_save_errors.json",
+      "IPtables restore is failing": "assets/monitors/iptables_restore_errors.json",
+      "Dataplane is failing": "assets/monitors/dataplane_failures.json"
     }
   }
 }

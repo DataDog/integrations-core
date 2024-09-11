@@ -52,7 +52,7 @@
       "Red Hat Gluster Storage": "assets/dashboards/red_hat_gluster_storage.json"
     },
     "monitors": {
-      "brick status": "assets/monitors/brick_status.json"
+      "Number of offline bricks is high": "assets/monitors/brick_status.json"
     },
     "saved_views": {
       "glusterfs_processes": "assets/saved_views/glusterfs_processes.json"

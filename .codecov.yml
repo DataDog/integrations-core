@@ -310,6 +310,10 @@ coverage:
         target: 75
         flags:
         - kong
+      KubeVirt_API:
+        target: 75
+        flags:
+        - kubevirt_api
       Kube_DNS:
         target: 75
         flags:
@@ -322,6 +326,10 @@ coverage:
         target: 75
         flags:
         - kube_metrics_server
+      Kubeflow:
+        target: 75
+        flags:
+        - kubeflow
       Kubelet:
         target: 75
         flags:
@@ -1134,6 +1142,11 @@ flags:
     paths:
     - kube_scheduler/datadog_checks/kube_scheduler
     - kube_scheduler/tests
+  kubeflow:
+    carryforward: true
+    paths:
+    - kubeflow/datadog_checks/kubeflow
+    - kubeflow/tests
   kubelet:
     carryforward: true
     paths:
@@ -1149,6 +1162,11 @@ flags:
     paths:
     - kubernetes_state/datadog_checks/kubernetes_state
     - kubernetes_state/tests
+  kubevirt_api:
+    carryforward: true
+    paths:
+    - kubevirt_api/datadog_checks/kubevirt_api
+    - kubevirt_api/tests
   kyototycoon:
     carryforward: true
     paths:

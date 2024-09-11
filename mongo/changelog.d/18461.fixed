@@ -1,1 +1,0 @@
-Cache database profiling level to avoid repeated queries in slow operations sampling.
