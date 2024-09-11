@@ -1,23 +1,9 @@
 id: brevo
 tests:
-  - sample: |-
-      {
-              "id": 11111,
-              "camp_id": 1,
-              "email": "example@domain.com",
-              "campaign name": "My First Campaign",
-              "date_sent": "2020-10-09 00:00:00",
-              "date_event": "2020-10-09 00:00:00",
-              "event": "opened",
-              "tag": "",
-              "segment_ids": [
-                             1,
-                 10,
-              ],
-              "ts_sent": 1604933619,
-              "ts_event": 1604933737,
-              "ts": 1604937337
-            }
+  - sample: '{"id":11111,"camp_id":1,"email":"example@domain.com","campaign
+      name":"My First Campaign","date_sent":"2020-10-09
+      00:00:00","date_event":"2020-10-09
+      00:00:00","event":"opened","tag":"","segment_ids":[1,10],"ts_sent":1604933619,"ts_event":1604933737,"ts":1604937337}'
     service: "marketing-events"
     result: null
   - sample: |-
