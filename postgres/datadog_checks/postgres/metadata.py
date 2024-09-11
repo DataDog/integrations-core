@@ -297,7 +297,6 @@ class PostgresMetadata(DBMAsyncJob):
 
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
             chunk_size = 50
-            start_time = time.time()
 
             for database in schema_metadata:
                 dbname = database["name"]
@@ -330,7 +329,6 @@ class PostgresMetadata(DBMAsyncJob):
 
                             if len(tables_buffer) > 0:
                                 self._flush_schema(base_event, database, schema, tables_buffer)
-            datadog_agent.emit_agent_telemetry("postgres", "schema_collection_elapsed", (time.time() - start_time) * 1000)
             self._is_schemas_collection_in_progress = False
 
     def _should_collect_metadata(self, name, metadata_type):
