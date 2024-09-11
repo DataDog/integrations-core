@@ -278,9 +278,9 @@ integration/kube_metrics_server:
 integration/kube_proxy:
   - kube_proxy/**/*
 integration/kube_scheduler:
-- kube_scheduler/**/*
+  - kube_scheduler/**/*
 integration/kubeflow:
-- kubeflow/**/*
+  - kubeflow/**/*
 integration/kubelet:
   - kubelet/**/*
 integration/kubernetes:
