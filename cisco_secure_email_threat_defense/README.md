@@ -7,6 +7,8 @@ This integration ingests the following logs:
 
 The Cisco Secure Email Threat Defense integration provides out-of-the-box dashboards so you can gain insights into Cisco Secure Email Threat Defense's message logs, enabling you to take necessary action. Additionally, out-of-the-box detection rules are available to help you monitor and respond to potential security threats effectively.
 
+**Disclaimer**: Your use of this integration, which may collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security or integrity of any end-user information, including personal data, transmitted through your use of the integration.
+
 ## Setup
 
 ### Configuration
