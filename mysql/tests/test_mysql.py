@@ -791,13 +791,14 @@ def test_propagate_agent_tags(
         init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
 
     agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
-    expected_tags = 
+    expected_tags = (
         instance_basic.get('tags', []) 
         + [
             'server:{}'.format(HOST),
             'port:{}'.format(PORT),
         ]
         + agent_tags
+    )
 
     with mock.patch('datadog_checks.mysql.config.get_agent_host_tags', return_value=agent_tags):
         check = MySql(common.CHECK_NAME, init_config, [instance_basic])
