@@ -2199,6 +2199,11 @@ jobs:
     with:
       job-name: KubeVirt Handler
       target: kubevirt_handler
+  jc4c1032:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: KubeVirt Controller
+      target: kubevirt_controller
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
