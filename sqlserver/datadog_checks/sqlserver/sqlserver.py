@@ -454,7 +454,7 @@ class SQLServer(AgentCheck):
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         metrics_to_collect = []
-        tags = self.instance.get("tags", [])
+        tags = self.tags
 
         # Load instance-level (previously Performance metrics)
         # If several check instances are querying the same server host, it can be wise to turn these off
