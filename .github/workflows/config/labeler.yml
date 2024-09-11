@@ -77,6 +77,8 @@ integration/azure_iot_edge:
   - azure_iot_edge/**/*
 integration/boundary:
   - boundary/**/*
+integration/brevo:
+  - brevo/**/*
 integration/btrfs:
   - btrfs/**/*
 integration/cacti:

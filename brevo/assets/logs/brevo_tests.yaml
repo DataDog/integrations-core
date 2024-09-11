@@ -6,7 +6,6 @@ tests:
               "camp_id": 1,
               "email": "example@domain.com",
               "campaign name": "My First Campaign",
-              "service": "marketing-events"
               "date_sent": "2020-10-09 00:00:00",
               "date_event": "2020-10-09 00:00:00",
               "event": "opened",
@@ -19,6 +18,7 @@ tests:
               "ts_event": 1604933737,
               "ts": 1604937337
             }
+    service: "marketing-events"
     result: null
   - sample: |-
       {
@@ -26,7 +26,6 @@ tests:
               "camp_id": 1,
               "email": "example@domain.com",
               "campaign name": "My First Campaign",
-              "service": "marketing-events"
               "date_sent": "2020-10-09 00:00:00",
               "date_event": "2020-10-09 00:00:00",
               "event": "click",
@@ -40,6 +39,7 @@ tests:
               "ts": 1604937337,
               "URL": "https://myCampaignUrl.net"
             }
+    service: "marketing-events"
     result: null
   - sample: |-
       {
@@ -47,7 +47,6 @@ tests:
               "camp_id": 1,
               "email": "example@domain.com",
               "campaign name": "My First Campaign",
-              "service": "marketing-events"
               "date_sent": "2020-10-09 00:00:00",
               "date_event": "2020-10-09 00:00:00",
               "reason": "deferred",  
@@ -58,6 +57,7 @@ tests:
               "ts_event": 1604933737,
               "ts": 1604937337,
             }
+    service: "marketing-events"
     result: null
   - sample: |-
       {
@@ -83,7 +83,6 @@ tests:
               "camp_id": 1,
               "email": "example@domain.com",
               "campaign name": "My First Campaign",
-              "service": "marketing-events"
               "date_sent": "2020-10-09 00:00:00",
               "date_event": "2020-10-09 00:00:00",
               "event": "delivered",
@@ -93,6 +92,7 @@ tests:
               "ts_event": 1604933737,
               "ts": 1604937337,
             }
+    service: "marketing-events"
     result: null
   - sample: |-
       {
@@ -100,7 +100,6 @@ tests:
               "camp_id": 1,
               "email": "example@domain.com",
               "campaign name": "My First Campaign",
-              "service": "marketing-events"
               "date_sent": "2020-10-09 00:00:00",
               "date_event": "2020-10-09 00:00:00",
               "event": "unsubscribe",
@@ -118,6 +117,7 @@ tests:
               "ts_event": 1604933737,
               "ts": 1604937337,
             }
+    service: "marketing-events"
     result: null
   - sample: >-
       {
@@ -127,7 +127,6 @@ tests:
               "date": "2020-10-09 00:00:00",
               "ts":1604933619,
               "message-id": "2022283@abx.abc.com",
-              "service": "transactional-events"
               "ts_event": 1604933654,
               "subject": "My first Transactional",
               "X-Mailin-custom": "some_custom_header",
@@ -138,6 +137,7 @@ tests:
               "contact_id": 8,
               "tags": ["transac_messages"]
             }
+    service: "transactional-events"
     result: null
   - sample: >-
       {
@@ -147,7 +147,6 @@ tests:
               "date": "2020-10-09 00:00:00",
               "ts":1604933619,
               "message-id": "2022283@abx.abc.com",
-              "service": "transactional-events"
               "ts_event": 1604933654,
               "subject": "My first Transactional",
               "X-Mailin-custom": "some_custom_header",
@@ -161,6 +160,7 @@ tests:
               "contact_id": 8,
               "link": "https://abdomain.com/product"
             }
+    service: "transactional-events"
     result: null
   - sample: |-
       {
@@ -170,7 +170,6 @@ tests:
               "date": "2020-10-09 00:00:00",
               "ts":1604933619,
               "message-id": "2022283@abx.abc.com",
-              "service": "transactional-events"
               "ts_event": 1604933654,
               "subject": "My first Transactional",
               "X-Mailin-custom": "some_custom_header",
@@ -180,6 +179,7 @@ tests:
               "tags": ["transac_messages"],
               "reason": "spam"
             }
+    service: "transactional-events"
     result: null
   - sample: |-
       {
@@ -189,7 +189,6 @@ tests:
               "date": "2020-10-09 00:00:00",
               "ts":1604933619,
               "message-id": "2022283@abx.abc.com",
-              "service": "transactional-events"
               "ts_event": 1604933654,
               "subject": "My first Transactional",
               "X-Mailin-custom": "some_custom_header",
@@ -197,6 +196,7 @@ tests:
               "template_id": 22,
               "tags": ["transac_messages"],
             }
+    service: "transactional-events"
     result: null
   - sample: |-
       {
@@ -206,7 +206,6 @@ tests:
               "date": "2020-10-09 00:00:00",
               "ts":1604933619,
               "message-id": "2022283@abx.abc.com",
-              "service": "transactional-events"
               "ts_event": 1604933654,
               "subject": "My first Transactional",
               "X-Mailin-custom": "some_custom_header",
@@ -215,6 +214,7 @@ tests:
               "tags": ["transac_messages"],
               "reason": "server is down"
             }
+    service: "transactional-events"
     result: null
   - sample: >-
       {
@@ -224,7 +224,6 @@ tests:
               "date": "2020-10-09 00:00:00",
               "ts":1604933619,
               "message-id": "2022283@abx.abc.com",
-              "service": "transactional-events"
               "ts_event": 1604933654,
               "subject": "My first Transactional",
               "X-Mailin-custom": "some_custom_header",
@@ -237,6 +236,7 @@ tests:
               "contact_id": 8,
               "ts_epoch": 1604933623
             }
+    service: "transactional-events"
     result: null
   - sample: |-
       {
@@ -246,7 +246,6 @@ tests:
               "date": "2020-10-09 00:00:00",
               "ts":1604933619,
               "message-id": "2022283@abx.abc.com",
-              "service": "transactional-events"
               "ts_event": 1604933654,
               "subject": "My first Transactional",
               "X-Mailin-custom": "some_custom_header",
@@ -254,6 +253,7 @@ tests:
               "tags": ["transac_messages"],
               "ts_epoch": 1604933623
             }
+    service: "transactional-events"
     result: null
   - sample: >-
       {
@@ -265,7 +265,6 @@ tests:
               "message-id": "2022283@abx.abc.com",
               "ts_event": 1604933654,
               "subject": "My first Transactional",
-              "service": "transactional-events"
               "X-Mailin-custom": "some_custom_header",
               "sending_ip": "10.10.10.10",
               "template_id": 22,
@@ -276,6 +275,7 @@ tests:
               "tags": ["transac_messages"],
               "ts_epoch": 1604933623
             }
+    service: "transactional-events"
     result: null
   - sample: |-
       {
@@ -286,7 +286,6 @@ tests:
               "ts":1604933619,
               "message-id": "12.5787683@abc.domain.com",
               "ts_event": 1604933654,
-              "service": "transactional-events"
               "subject": "My first Transactional",
               "X-Mailin-custom": "some_custom_header",
               "sending_ip": "10.10.10.10",
@@ -295,6 +294,7 @@ tests:
               "reason": "server is down",
               "ts_epoch":1604933653 
             }
+    service: "transactional-events"
     result: null
   - sample: >-
       {
@@ -304,7 +304,6 @@ tests:
               "date": "2020-10-09 00:00:00",
               "ts":1604933619,
               "message-id": "201798300811.5787683@abs.domain.com",
-              "service": "transactional-events"
               "ts_event": 1604933654,
               "subject": "My first transactional",
               "X-Mailin-custom": "some_custom_header",
@@ -317,4 +316,5 @@ tests:
               "ts_epoch": 1604933623,
               "sending_ip": "10.10.10.10"
             }
+    service: "transactional-events"
     result: null

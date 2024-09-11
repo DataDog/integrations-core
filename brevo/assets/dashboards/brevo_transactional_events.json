@@ -1,6 +1,6 @@
 {
     "title": "Brevo - Transactional Events",
-    "description": "",
+    "description": "This Dashboard provides a comprehensive analysis of the Brevo transactional events",
     "widgets": [
         {
             "id": 7622028875118342,
@@ -1121,70 +1121,6 @@
             }
         },
         {
-            "id": 6836248737505238,
-            "definition": {
-                "title": "Most Clicked URLs",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_table",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@http.url",
-                                        "limit": 10,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "count"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:brevo service:transactional-events @evt.name:click $event_name $recipient_email $subject $sender_email"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 10,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        },
-                        "formulas": [
-                            {
-                                "cell_display_mode": "number",
-                                "alias": "count",
-                                "formula": "query1"
-                            }
-                        ]
-                    }
-                ],
-                "has_search_bar": "auto"
-            },
-            "layout": {
-                "x": 0,
-                "y": 25,
-                "width": 7,
-                "height": 4
-            }
-        },
-        {
             "id": 6281401150190870,
             "definition": {
                 "title": "Top Reasons for Soft Bounce Events",
@@ -1245,9 +1181,9 @@
                 }
             },
             "layout": {
-                "x": 7,
+                "x": 0,
                 "y": 25,
-                "width": 5,
+                "width": 6,
                 "height": 4
             }
         },
@@ -1310,6 +1246,70 @@
                         "legend": "automatic"
                     }
                 }
+            },
+            "layout": {
+                "x": 6,
+                "y": 25,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6836248737505238,
+            "definition": {
+                "title": "Most Clicked URLs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@http.url",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:brevo service:transactional-events @evt.name:click $event_name $recipient_email $subject $sender_email"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "number",
+                                "alias": "count",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
             },
             "layout": {
                 "x": 0,
