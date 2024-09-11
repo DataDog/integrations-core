@@ -306,7 +306,7 @@ tests:
         "message-id": "201798300811.5787683@abs.domain.com",
         "service": "transactional-events"
         "ts_event": 1604933654,
-        "subject": "My first Transactional",
+        "subject": "My first transactional",
         "X-Mailin-custom": "some_custom_header",
         "template_id": 22,
         "tag":"[\"transactionalTag\"]",
