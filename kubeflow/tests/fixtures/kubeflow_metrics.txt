@@ -1,0 +1,116 @@
+# HELP pipeline_run_duration_seconds Duration of pipeline runs
+# TYPE pipeline_run_duration_seconds histogram
+pipeline_run_duration_seconds_bucket{pipeline="example-pipeline", status="success",le="0.1"} 0
+pipeline_run_duration_seconds_count{pipeline="example-pipeline", status="success"} 1
+pipeline_run_duration_seconds_sum{pipeline="example-pipeline", status="success"} 123.45
+# HELP pipeline_run_status Status of pipeline runs
+# TYPE pipeline_run_status gauge
+pipeline_run_status{pipeline="example-pipeline", status="running"} 1
+pipeline_run_status{pipeline="example-pipeline", status="failed"} 0
+pipeline_run_status{pipeline="example-pipeline", status="succeeded"} 0
+# HELP katib_experiment_created_total Total number of experiments created
+# TYPE katib_experiment_created_total counter
+katib_experiment_created_total 10
+# HELP katib_experiment_running_total Number of experiments currently running
+# TYPE katib_experiment_running_total gauge
+katib_experiment_running_total 2
+# HELP katib_experiment_succeeded_total Number of experiments that have successfully completed
+# TYPE katib_experiment_succeeded_total counter
+katib_experiment_succeeded_total 5
+# HELP katib_experiment_failed_total Number of experiments that have failed
+# TYPE katib_experiment_failed_total counter
+katib_experiment_failed_total 3
+# HELP katib_experiment_duration_seconds Duration of experiments from start to completion
+# TYPE katib_experiment_duration_seconds histogram
+katib_experiment_duration_seconds_bucket{le="60"} 1
+katib_experiment_duration_seconds_bucket{le="300"} 3
+katib_experiment_duration_seconds_count 5
+katib_experiment_duration_seconds_sum 1500
+# HELP katib_trial_created_total Total number of trials created
+# TYPE katib_trial_created_total counter
+katib_trial_created_total 50
+# HELP katib_trial_running_total Number of trials currently running
+# TYPE katib_trial_running_total gauge
+katib_trial_running_total 10
+# HELP katib_trial_succeeded_total Number of trials that have successfully completed
+# TYPE katib_trial_succeeded_total counter
+katib_trial_succeeded_total 30
+# HELP katib_trial_failed_total Number of trials that have failed
+# TYPE katib_trial_failed_total counter
+katib_trial_failed_total 10
+# HELP katib_trial_duration_seconds Duration of trials from start to completion
+# TYPE katib_trial_duration_seconds histogram
+katib_trial_duration_seconds_bucket{le="60"} 5
+katib_trial_duration_seconds_bucket{le="300"} 20
+katib_trial_duration_seconds_count 30
+katib_trial_duration_seconds_sum 6000
+# HELP katib_suggestion_created_total Total number of suggestions made
+# TYPE katib_suggestion_created_total counter
+katib_suggestion_created_total 20
+# HELP katib_suggestion_running_total Number of suggestions currently being processed
+# TYPE katib_suggestion_running_total gauge
+katib_suggestion_running_total 5
+# HELP katib_suggestion_succeeded_total Number of suggestions that have successfully completed
+# TYPE katib_suggestion_succeeded_total counter
+katib_suggestion_succeeded_total 15
+# HELP katib_suggestion_failed_total Number of suggestions that have failed
+# TYPE katib_suggestion_failed_total counter
+katib_suggestion_failed_total 5
+# HELP katib_suggestion_duration_seconds Duration of suggestion processes from start to completion
+# TYPE katib_suggestion_duration_seconds histogram
+katib_suggestion_duration_seconds_bucket{le="60"} 3
+katib_suggestion_duration_seconds_bucket{le="300"} 17
+katib_suggestion_duration_seconds_count 20
+katib_suggestion_duration_seconds_sum 5000
+# HELP katib_controller_reconcile_count Number of reconcile loops executed by the Katib controller
+# TYPE katib_controller_reconcile_count counter
+katib_controller_reconcile_count 200
+# HELP katib_controller_reconcile_duration_seconds Duration of reconcile loops executed by the Katib controller
+# TYPE katib_controller_reconcile_duration_seconds histogram
+katib_controller_reconcile_duration_seconds_bucket{le="0.1"} 150
+katib_controller_reconcile_duration_seconds_bucket{le="1"} 200
+katib_controller_reconcile_duration_seconds_count 200
+katib_controller_reconcile_duration_seconds_sum 100
+# HELP kserve_inferences_total Total number of inferences made
+# TYPE kserve_inferences_total counter
+kserve_inferences_total{model="example-model"} 1000
+# HELP kserve_inference_duration_seconds Duration of inference requests
+# TYPE kserve_inference_duration_seconds histogram
+kserve_inference_duration_seconds_bucket{model="example-model",le="0.1"} 800
+kserve_inference_duration_seconds_bucket{model="example-model",le="1"} 1000
+kserve_inference_duration_seconds_count{model="example-model"} 1000
+kserve_inference_duration_seconds_sum{model="example-model"} 500
+# HELP kserve_inference_request_bytes Size of inference request payloads
+# TYPE kserve_inference_request_bytes histogram
+kserve_inference_request_bytes_bucket{model="example-model",le="1000"} 950
+kserve_inference_request_bytes_count{model="example-model"} 1000
+kserve_inference_request_bytes_sum{model="example-model"} 95000
+# HELP kserve_inference_response_bytes Size of inference response payloads
+# TYPE kserve_inference_response_bytes histogram
+kserve_inference_response_bytes_bucket{model="example-model",le="1000"} 980
+kserve_inference_response_bytes_count{model="example-model"} 1000
+kserve_inference_response_bytes_sum{model="example-model"} 98000
+# HELP notebook_server_created_total Total number of notebook servers created
+# TYPE notebook_server_created_total counter
+notebook_server_created_total 5
+# HELP notebook_server_running_total Number of notebook servers currently running
+# TYPE notebook_server_running_total gauge
+notebook_server_running_total 2
+# HELP notebook_server_succeeded_total Number of notebook servers that have successfully completed
+# TYPE notebook_server_succeeded_total counter
+notebook_server_succeeded_total 3
+# HELP notebook_server_failed_total Number of notebook servers that have failed
+# TYPE notebook_server_failed_total counter
+notebook_server_failed_total 1
+# HELP notebook_server_reconcile_count Number of reconcile loops executed by the notebook controller
+# TYPE notebook_server_reconcile_count counter
+notebook_server_reconcile_count 40
+# HELP notebook_server_reconcile_duration_seconds Duration of reconcile loops executed by the notebook controller
+# TYPE notebook_server_reconcile_duration_seconds histogram
+notebook_server_reconcile_duration_seconds_bucket{le="0.1"} 30
+notebook_server_reconcile_duration_seconds_bucket{le="1"} 40
+notebook_server_reconcile_duration_seconds_count 40
+notebook_server_reconcile_duration_seconds_sum 20
+# HELP kserve_inference_errors Number of errors encountered during inference
+# TYPE kserve_inference_errors counter
+kserve_inference_errors{model="example-model"} 5
