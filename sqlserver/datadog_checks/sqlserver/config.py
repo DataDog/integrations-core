@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import json
 import re
 
@@ -138,7 +139,7 @@ class SQLServerConfig:
         if custom_tags is None:
             tags = []
         else:
-            tags = custom_tags
+            tags = copy.deepcopy(custom_tags)
 
         if propagate_agent_tags:
             try:
