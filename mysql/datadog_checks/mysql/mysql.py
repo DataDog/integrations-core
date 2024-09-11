@@ -1075,7 +1075,7 @@ class MySql(AgentCheck):
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                if self.version.version_compatible((8, 4, 0)):
+                if not self.is_mariadb and self.version.version_compatible((8, 4, 0)):
                     cursor.execute("SHOW BINARY LOG STATUS;")
                 else:
                     cursor.execute("SHOW MASTER STATUS;")
