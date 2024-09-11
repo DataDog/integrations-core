@@ -1,6 +1,6 @@
 {
   "title": "AWS Neuron Dashboard",
-  "description": "This dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency and memory usage.",
+  "description": "# Description\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency and memory usage.\n\n# Useful Links\n[AWS Neuron Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
   "widgets": [
     {
       "id": 6979231130018708,
@@ -29,7 +29,7 @@
               "x": 0,
               "y": 0,
               "width": 3,
-              "height": 3
+              "height": 4
             }
           },
           {
@@ -50,7 +50,7 @@
               "x": 3,
               "y": 0,
               "width": 2,
-              "height": 3
+              "height": 4
             }
           }
         ]
@@ -793,7 +793,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 17,
+        "y": 0,
         "width": 12,
         "height": 5,
         "is_column_break": true
@@ -999,7 +999,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 22,
+        "y": 5,
         "width": 12,
         "height": 5
       }
@@ -1144,7 +1144,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 27,
+        "y": 10,
         "width": 12,
         "height": 6
       }
