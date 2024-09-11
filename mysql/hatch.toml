@@ -23,7 +23,7 @@ version = [
 
 [[envs.default.matrix]]
 python = ["3.11"]
-version = ["8.0", "8.4"]
+version = ["8.0"]
 replication = ["group"]
 
 [[envs.default.matrix]]
@@ -44,9 +44,6 @@ matrix.version.env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
 ]
 name."8.0-group".env-vars = [
-  { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
-]
-name."8.4-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
 ]
 
