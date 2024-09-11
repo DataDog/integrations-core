@@ -79,7 +79,7 @@ pipeline:
       target: network.client.geoip
       ip_processing_behavior: do-nothing
     - type: pipeline
-      name: Remap attributes for transactional events
+      name: Processing for transactional events
       enabled: true
       filter:
         query: "service:transactional-events "
@@ -143,7 +143,7 @@ pipeline:
           encoded: false
           combineVersionDetails: false
     - type: pipeline
-      name: Remap attributes for marketing events
+      name: Processing for marketing events
       enabled: true
       filter:
         query: "service:marketing-events "
