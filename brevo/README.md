@@ -2,7 +2,7 @@
 
 [Brevo][1] is a cloud-based digital marketing platform designed for creating, sending, tracking email campaigns, transactional emails, and more. It offers tools for automation and analytics, helping businesses optimize their email marketing strategies and monitor performance.
 
-Integrate with Datadog to gain insights into Brevo marketing campaign emails and track its performance based on events and other transactional events using [webhooks][2].
+Integrate Brevo with Datadog to gain insights into Brevo marketing campaign emails and track its performance based on events and other transactional events using [webhooks][2].
 
 ## Setup
 
@@ -11,7 +11,7 @@ Follow the instructions below to configure this integration for Brevo account.
 ### Configuration
 
 #### Webhook Configuration for Marketing Events
-Configure the Datadog endpoint to forward  Brevo marketing events as logs to Datadog. See [Marketing webhook overview][3] for more details.
+Configure the Datadog endpoint to forward Brevo marketing events as logs to Datadog. See [Marketing webhook overview][3] for more details.
 
 1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
 2. Log in to your [Brevo account][4].
@@ -24,7 +24,7 @@ Configure the Datadog endpoint to forward  Brevo marketing events as logs to Dat
 9. Click **Add**.
 
 #### Webhook Configuration for Transactional Events
-Configure the Datadog endpoint to forward  Brevo transactional events as logs to Datadog. See [Transactional webhook overview][5] for more details.
+Configure the Datadog endpoint to forward Brevo transactional events as logs to Datadog. See [Transactional webhook overview][5] for more details.
 
 1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
 2. Log in to your [Brevo account][4]. If you are already logged in, you will be automatically redirected to [Brevo homepage][6].
@@ -38,7 +38,7 @@ Configure the Datadog endpoint to forward  Brevo transactional events as logs to
 ## Data Collected
 
 ### Logs
-The Brevo integration forwards the Marketing and Transactional event logs to Datadog.
+The Brevo integration forwards the marketing and transactional event logs to Datadog.
 
 ### Metrics
 Brevo does not include any metrics.

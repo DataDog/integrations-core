@@ -1,44 +1,24 @@
 {
     "title": "Brevo - Marketing Events",
-    "description": "",
+    "description": "[[suggested_dashboards]]",
     "widgets": [
         {
-            "id": 2741923598488842,
+            "id": 2074004104711888,
             "definition": {
-                "title": "New group",
-                "banner_img": "https://www.brevo.com/_next/image/?url=https%3A%2F%2Fcorp-backend.brevo.com%2Fwp-content%2Fuploads%2F2023%2F04%2FLight-logo-cover-1.jpg&w=640&q=75",
-                "show_title": false,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 2529091744976674,
-                        "definition": {
-                            "type": "note",
-                            "content": "Gain better visibility into your email marketing performance by monitoring Brevo Marketing events with this dashboard.\n\nFor more information, see the [Brevo Integration Documentation](https://docs.datadoghq.com/integrations/brevo).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
-                            "background_color": "white",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "top",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 3
-                        }
-                    }
-                ]
+                "type": "image",
+                "url": "https://www.brevo.com/_next/image/?url=https%3A%2F%2Fcorp-backend.brevo.com%2Fwp-content%2Fuploads%2F2023%2F12%2Fcover.webp&w=640&q=75",
+                "url_dark_theme": "https://www.brevo.com/_next/image/?url=https%3A%2F%2Fcorp-backend.brevo.com%2Fwp-content%2Fuploads%2F2023%2F04%2FLight-logo-cover-1.jpg&w=640&q=75",
+                "sizing": "cover",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
             },
             "layout": {
                 "x": 0,
                 "y": 0,
                 "width": 6,
-                "height": 6
+                "height": 3
             }
         },
         {
@@ -95,6 +75,27 @@
             "layout": {
                 "x": 6,
                 "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 8917290706883810,
+            "definition": {
+                "type": "note",
+                "content": "Gain better visibility into your email marketing performance by monitoring Brevo Marketing events with this dashboard.\n\nFor more information, see the [Brevo Integration Documentation](https://docs.datadoghq.com/integrations/brevo).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
+                "background_color": "green",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
                 "width": 6,
                 "height": 3
             }
@@ -283,10 +284,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 0,
+                "y": 6,
                 "width": 12,
-                "height": 5,
-                "is_column_break": true
+                "height": 5
             }
         },
         {
@@ -296,6 +296,11 @@
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": false,
+                "time": {
+                    "type": "live",
+                    "unit": "day",
+                    "value": 1
+                },
                 "type": "heatmap",
                 "yaxis": {
                     "include_zero": true,
@@ -336,7 +341,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 5,
+                "y": 11,
                 "width": 7,
                 "height": 5
             }
@@ -408,7 +413,7 @@
             },
             "layout": {
                 "x": 7,
-                "y": 5,
+                "y": 11,
                 "width": 5,
                 "height": 5
             }
@@ -646,7 +651,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 16,
                 "width": 12,
                 "height": 4
             }
@@ -713,7 +718,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 20,
                 "width": 6,
                 "height": 4
             }
@@ -780,7 +785,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 14,
+                "y": 20,
                 "width": 6,
                 "height": 4
             }
@@ -847,7 +852,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 18,
+                "y": 24,
                 "width": 4,
                 "height": 4
             }
@@ -914,7 +919,7 @@
             },
             "layout": {
                 "x": 4,
-                "y": 18,
+                "y": 24,
                 "width": 4,
                 "height": 4
             }
@@ -981,7 +986,7 @@
             },
             "layout": {
                 "x": 8,
-                "y": 18,
+                "y": 24,
                 "width": 4,
                 "height": 4
             }
@@ -1045,7 +1050,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 22,
+                "y": 28,
                 "width": 12,
                 "height": 4
             }
