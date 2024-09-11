@@ -799,6 +799,7 @@ def test_propagate_agent_tags(
             'dd.internal.resource:database_instance:forced_hostname',
             "dd.internal.resource:aws_rds_instance:foo.aws.com",
             "dd.internal.resource:azure_mysql_server:my-instance",
+            'dd.internal.resource:gcp_sql_database_instance:foo-project:bar'
         ]
         + agent_tags
     )
