@@ -227,7 +227,7 @@ def test_statement_metrics(
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
     connections = {}
-    latin_connection = None
+    non_utf_connection = None
 
     def _run_queries():
         for user, password, dbname, query, arg in SAMPLE_QUERIES:
@@ -236,11 +236,13 @@ def test_statement_metrics(
             connection = connections[dbname]
             connection.cursor().execute(query, (arg,))
         
-        nonlocal latin_connection
-        if latin_connection is None:
-            latin_connection = psycopg2.connect(host=HOST, dbname='datadog_test', user = "bob", password = "bob")
-            latin_connection.cursor().execute("SET client_encoding = 'LATIN1'")
-        latin_connection.cursor().execute("SELECT /* èéêëeeeeeeeeeee */ 1")   
+        nonlocal non_utf_connection
+        if non_utf_connection is None:
+            non_utf_connection = psycopg2.connect(host=HOST, dbname='datadog_test', user = "bob", password = "bob")
+            non_utf_connection.cursor().execute("SET client_encoding = 'WIN932'")
+            #non_utf_connection.cursor().execute("SET client_encoding = 'LATIN1'")
+        #non_utf_connection.cursor().execute("SELECT /* èéêëeeeeeeeeeee ,�D^BlVr, 안녕하세요 */ 1")   
+        non_utf_connection.cursor().execute("SELECT /* eeeeeeeeeee ,�D^BlVr, 안녕하세요 */ 1")   
 
     check = integration_check(dbm_instance)
     check._connect()
@@ -326,7 +328,7 @@ def test_statement_metrics(
 
     for conn in connections.values():
         conn.close()
-    latin_connection.close()
+    non_utf_connection.close()
 
 
 @pytest.mark.parametrize(
