@@ -8,7 +8,7 @@ tests:
         "log": {
           "reason": "Hang Up",
           "extension": {
-            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000",
+            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/12345678",
             "id": 12345678
           },
           "reasonDescription": "The caller hung up before the call was answered.",
@@ -29,8 +29,8 @@ tests:
             {
               "reason": "Hang Up",
               "extension": {
-                "id": 123456789,
-                "uri": "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/000000000"
+                "id": 12345678,
+                "uri": "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/12345678"
               },
               "reasonDescription": "The caller hung up before the call was answered.",
               "legType": "SipToPstnUnmetered",
@@ -46,7 +46,7 @@ tests:
               "from": {
                 "phoneNumber": "+00000000000",
                 "name": "xxxxxxxxxxx",
-                "extensionId": "123456789",
+                "extensionId": "12345678",
                 "device": {
                   "id": "1234567890",
                   "uri": "https://platform.ringcentral.com/restapi/v1.0/account/000000000/device/000000000"
@@ -65,10 +65,10 @@ tests:
           "from": {
             "phoneNumber": "+000000000",
             "name": "xxxxxxx",
-            "extensionId": "00000000",
+            "extensionId": "12345678",
             "device": {
               "id": "0000000000",
-              "uri": "https://platform.ringcentral.com/restapi/v1.0/account/0000000/device/00000000"
+              "uri": "https://platform.ringcentral.com/restapi/v1.0/account/000000000/device/00000000"
             }
           },
           "id": "000000000",
@@ -95,12 +95,12 @@ tests:
           duration: 16
           durationMs: 1607
           extension:
-            uri: "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000"
+            uri: "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/12345678"
           from:
             device:
               id: "0000000000"
-              uri: "https://platform.ringcentral.com/restapi/v1.0/account/0000000/device/00000000"
-            extensionId: "00000000"
+              uri: "https://platform.ringcentral.com/restapi/v1.0/account/000000000/device/00000000"
+            extensionId: "12345678"
             name: "xxxxxxx"
             phoneNumber: "+000000000"
           id: "000000000"
@@ -110,8 +110,8 @@ tests:
           -
             reason: "Hang Up"
             extension:
-              id: 123456789
-              uri: "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/000000000"
+              id: 12345678
+              uri: "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/12345678"
             reasonDescription: "The caller hung up before the call was answered."
             legType: "SipToPstnUnmetered"
             internalType: "International"
@@ -126,7 +126,7 @@ tests:
             from:
               phoneNumber: "+00000000000"
               name: "xxxxxxxxxxx"
-              extensionId: "123456789"
+              extensionId: "12345678"
               device:
                 id: "1234567890"
                 uri: "https://platform.ringcentral.com/restapi/v1.0/account/000000000/device/000000000"
@@ -156,7 +156,7 @@ tests:
             "reason" : "Hang Up",
             "extension" : {
               "id" : 12345678,
-              "uri" : "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000"
+              "uri" : "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/12345678"
             },
             "reasonDescription" : "The caller hung up before the call was answered.",
             "lastModifiedTime" : "2024-07-23T11:48:10.032Z",
@@ -175,8 +175,8 @@ tests:
             "legs" : [ {
               "reason" : "Hang Up",
               "extension" : {
-                "id" : 123456789,
-                "uri" : "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/000000000"
+                "id" : 12345678,
+                "uri" : "https://platform.ringcentral.com/restapi/v1.0/account/000000000/extension/12345678"
               },
               "reasonDescription" : "The caller hung up before the call was answered.",
               "legType" : "SipToPstnUnmetered",
@@ -192,7 +192,7 @@ tests:
               "from" : {
                 "phoneNumber" : "+00000000000",
                 "name" : "xxxxxxxxxxx",
-                "extensionId" : "123456789",
+                "extensionId" : "12345678",
                 "device" : {
                   "id" : "1234567890",
                   "uri" : "https://platform.ringcentral.com/restapi/v1.0/account/000000000/device/000000000"
@@ -210,10 +210,10 @@ tests:
             "from" : {
               "phoneNumber" : "+000000000",
               "name" : "xxxxxxx",
-              "extensionId" : "00000000",
+              "extensionId" : "12345678",
               "device" : {
                 "id" : "0000000000",
-                "uri" : "https://platform.ringcentral.com/restapi/v1.0/account/0000000/device/00000000"
+                "uri" : "https://platform.ringcentral.com/restapi/v1.0/account/000000000/device/00000000"
               }
             },
             "id" : "000000000",
@@ -234,7 +234,7 @@ tests:
   -
     sample: |-
       {
-        "accountId" : "12345678",
+        "accountId" : "000000000",
         "clientIp" : "218.57.154.108",
         "initiator" : {
           "role" : "Standard (International)",
@@ -265,7 +265,7 @@ tests:
     service: "audit"
     result:
       custom:
-        accountId: "12345678"
+        accountId: "000000000"
         actionId: "CHANGE_USER_ROLE"
         details:
           parameters:
@@ -295,7 +295,7 @@ tests:
           name: "xxxxxx"
       message: |-
         {
-          "accountId" : "12345678",
+          "accountId" : "000000000",
           "clientIp" : "218.57.154.108",
           "initiator" : {
             "role" : "Standard (International)",
