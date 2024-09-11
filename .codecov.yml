@@ -326,6 +326,10 @@ coverage:
         target: 75
         flags:
         - kube_metrics_server
+      Kubeflow:
+        target: 75
+        flags:
+        - kubeflow
       Kubelet:
         target: 75
         flags:
@@ -1138,6 +1142,11 @@ flags:
     paths:
     - kube_scheduler/datadog_checks/kube_scheduler
     - kube_scheduler/tests
+  kubeflow:
+    carryforward: true
+    paths:
+    - kubeflow/datadog_checks/kubeflow
+    - kubeflow/tests
   kubelet:
     carryforward: true
     paths:
