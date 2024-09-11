@@ -383,6 +383,19 @@ CONNECTION_LIMIT_METRICS = [
 
 CONNECTION_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:ingress_http'
 
+TLS_INSPECTOR_METRICS = [
+    "tls_inspector.client_hello_too_large.count",
+    "tls_inspector.tls.found.count",
+    "tls_inspector.tls.not_found.count",
+    "tls_inspector.alpn.found.count",
+    "tls_inspector.alpn.not_found.count",
+    "tls_inspector.sni.found.count",
+    "tls_inspector.sni.not_found.count",
+    "tls_inspector.bytes_processed.bucket",
+    "tls_inspector.bytes_processed.count",
+    "tls_inspector.bytes_processed.sum",
+]
+
 LOCAL_RATE_LIMIT_METRICS = [
     "http.local_rate_limit_enabled.count",
     "http.local_rate_limit_enforced.count",
