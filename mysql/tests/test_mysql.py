@@ -775,6 +775,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
         pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
     ],
 )
+@pytest.mark.integration
 def test_propagate_agent_tags(
     aggregator,
     dd_run_check,
@@ -783,25 +784,34 @@ def test_propagate_agent_tags(
     init_config_propagate_agent_tags,
     should_propagate_agent_tags,
 ):
+    instance_basic['propagate_agent_tags'] = instance_propagate_agent_tags
     init_config = {}
-    if instance_propagate_agent_tags is not None:
-        instance_basic['propagate_agent_tags'] = instance_propagate_agent_tags
     if init_config_propagate_agent_tags is not None:
         init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
 
-    agent_tags = ["my-env:test-env", "random:tag", "bar:foo"]
+    agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
+    expected_tags = (
+        instance_basic.get('tags', [])
+        + [
+            'server:{}'.format(HOST),
+            'port:{}'.format(PORT),
+            'dd.internal.resource:database_instance:forced_hostname',
+            "dd.internal.resource:aws_rds_instance:foo.aws.com",
+            "dd.internal.resource:azure_mysql_server:my-instance",
+            'dd.internal.resource:gcp_sql_database_instance:foo-project:bar',
+        ]
+        + agent_tags
+    )
 
     with mock.patch('datadog_checks.mysql.config.get_agent_host_tags', return_value=agent_tags):
-        mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
-        check = dd_run_check(mysql_check)
+        check = MySql(common.CHECK_NAME, init_config, [instance_basic])
         assert check._config._should_propagate_agent_tags(instance_basic, init_config) == should_propagate_agent_tags
         if should_propagate_agent_tags:
             assert all(tag in check.tags for tag in agent_tags)
-            check.check(instance_basic)
-            expected_tags = [
-                'server:{}'.format(HOST),
-                'port:{}'.format(PORT),
-            ]
+            dd_run_check(check)
             aggregator.assert_service_check(
-                'mysql.can_connect', count=1, status=MySql.OK, tags=expected_tags + agent_tags
+                'mysql.can_connect',
+                count=1,
+                status=MySql.OK,
+                tags=expected_tags,
             )
