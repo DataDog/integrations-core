@@ -376,7 +376,7 @@ class SQLServer(AgentCheck):
             self.log.exception("Initialization exception %s", e)
 
     def handle_service_check(self, status, connection_host, database, message=None, is_default=True):
-        custom_tags = self.instance.get("tags", [])
+        custom_tags = self.tags
         disable_generic_tags = self.instance.get("disable_generic_tags", False)
         service_check_tags = [
             "sqlserver_host:{}".format(self.resolved_hostname),
@@ -986,7 +986,7 @@ class SQLServer(AgentCheck):
 
         proc = self._config.proc
         guardSql = self.instance.get("proc_only_if")
-        custom_tags = self.instance.get("tags", [])
+        custom_tags = self.tags
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
             self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
