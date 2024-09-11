@@ -1079,7 +1079,7 @@ class MySql(AgentCheck):
                     cursor.execute("SHOW BINARY LOG STATUS;")
                 else:
                     cursor.execute("SHOW MASTER STATUS;")
-                    
+
                 binlog_results = cursor.fetchone()
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
