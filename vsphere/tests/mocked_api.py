@@ -182,6 +182,13 @@ class MockedAPI(object):
                         )
                     ]
                 ),
+                MagicMock(value=[]),
+                MagicMock(value=[MagicMock(values='None')]),
+                MagicMock(
+                    value=[
+                        MagicMock(metricId=MagicMock(label='oio', dynamicProperty=[{0: 'wrong_resource', 1: 'hello'}]))
+                    ]
+                ),
             ]
         ]
         self.vsan_metrics_data = [mock_health_data, mock_performance_data]

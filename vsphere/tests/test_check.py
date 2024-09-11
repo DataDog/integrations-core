@@ -767,6 +767,7 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
 
     dd_run_check(check)
 
+    assert "No information returned for entity type" in caplog.text
     aggregator.assert_metric('vsphere.vsan.cluster.time', metric_type=aggregator.GAUGE, count=1)
     aggregator.assert_metric('vsphere.vsan.cluster.health.count', count=1)
     aggregator.assert_metric('vsphere.vsan.cluster.oio', count=1, tags=['vcenter_server:FAKE', 'vsphere_cluster:hello'])
@@ -797,3 +798,30 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
         'vsphere.vsan.disk.example_disk_metric',
         count=0,
     )
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_vsan_metrics_exception(realtime_instance, dd_run_check, caplog):
+    with mock.patch('datadog_checks.vsphere.VSphereCheck.query_vsan_metrics', side_effect=Exception):
+        realtime_instance['collect_vsan_data'] = True
+        caplog.set_level(logging.WARNING)
+        check = VSphereCheck('vsphere', {}, [realtime_instance])
+        dd_run_check(check)
+        assert "Unable to fetch vSAN metrics" in caplog.text
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_non_vsan_cluster(aggregator, realtime_instance, dd_run_check, caplog):
+    realtime_instance['collect_vsan_data'] = True
+    caplog.set_level(logging.DEBUG)
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    mock_cluster = MagicMock()
+    mock_infrastructure_cache = MagicMock()
+    check.infrastructure_cache = mock_infrastructure_cache
+    mock_infrastructure_cache.get_mors.return_value = [mock_cluster]
+    mock_cluster.name = 'hello'
+    mock_cluster.configurationEx.vsanConfigInfo.enabled = False
+
+    dd_run_check(check)
+    assert "Skipping vsan metrics for cluster hello because it is not a vsan cluster" in caplog.text

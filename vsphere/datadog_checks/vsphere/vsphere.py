@@ -575,10 +575,12 @@ class VSphereCheck(AgentCheck):
                                         )
                         if latest_metric_time is None:
                             latest_metric_time = collect_start_time
+                    else:
+                        self.log.debug("No information returned for entity type %s", entity_type)
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass
-            self.log.warning("Unable to fetch Vsan metrics %s", e)
+            self.log.warning("Unable to fetch vSAN metrics %s", e)
 
         if latest_metric_time is not None:
             self.latest_metric_query = latest_metric_time + dt.timedelta(seconds=1)
@@ -607,8 +609,6 @@ class VSphereCheck(AgentCheck):
                 id_to_tags[cluster_uuid] = {1: cluster.name, 0: 'cluster'}
                 for host in cluster.host:
                     host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
-                    if cluster not in cluster_nested_elts.keys():
-                        cluster_nested_elts[cluster] = [cluster_uuid]
                     cluster_nested_elts[cluster].append(host_uuid)
                     id_to_tags[host_uuid] = {1: cluster.name, 2: host.name, 0: 'host'}
                     new_id_to_tags, new_cluster_nested_elts = self.api.get_vsan_disk_metrics(host, cluster)

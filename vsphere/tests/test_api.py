@@ -302,11 +302,13 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
                     value=[MagicMock(metricId=MagicMock(dynamicProperty=[]))],
                 )
             ]
-            disk = MagicMock(disk_uuid='disk-1')
-            host.configManager.vsanSystem.QueryDisksForVsan.return_value = [disk]
-            new_cluster_nested_elts, new_id_to_tags = api.get_vsan_disk_metrics(host, cluster)
+            disk = MagicMock(vsanUuid='disk-1')
+            another_disk = MagicMock(vsanUuid='disk-2')
+            bad_disk = MagicMock(vsanUuid=None)
+            host.configManager.vsanSystem.QueryDisksForVsan.return_value = [disk, another_disk, bad_disk]
+            new_id_to_tags, new_cluster_nested_elts = api.get_vsan_disk_metrics(host, cluster)
             assert len(new_cluster_nested_elts) == 1
-            assert len(new_id_to_tags) == 1
+            assert len(new_id_to_tags) == 2
 
             health_metrics, performance_metrics = api.get_vsan_metrics(
                 cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
