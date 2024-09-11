@@ -191,6 +191,8 @@ integration/fly_io:
 - fly_io/**/*
 integration/foundationdb:
 - foundationdb/**/*
+integration/freshservice:
+- freshservice/**/*
 integration/gearmand:
 - gearmand/**/*
 integration/gitlab:
