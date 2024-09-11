@@ -297,12 +297,6 @@ class Api:
         response = self.make_request(path)
         return self._parse_response(response)
 
-    def get_netflow_exporter_policies(self):
-        query = 'query-target-filter=and(eq(netflowExporterPol.sourceIpType,"oob-mgmt-ip"))'
-        path = '/api/node/class/netflowExporterPol.json?{}'.format(query)
-        response = self.make_request(path)
-        return self._parse_response(response)
-
     def get_oob_mgmt_ips(self):
         # query filtered for valid oob mgmt IP addresses, not default IP for devices that have not been setup
         query = 'query-target-filter=and(ne(topSystem.oobMgmtAddr,"0.0.0.0"))'
