@@ -792,7 +792,7 @@ def test_propagate_agent_tags(
 
     agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
     expected_tags = (
-        instance_basic.get('tags', []) 
+        instance_basic.get('tags', [])
         + [
             'server:{}'.format(HOST),
             'port:{}'.format(PORT),
