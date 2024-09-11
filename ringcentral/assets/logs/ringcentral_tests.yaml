@@ -9,7 +9,7 @@ tests:
           "reason": "Hang Up",
           "extension": {
             "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000",
-            "id": 00000000
+            "id": 12345678
           },
           "reasonDescription": "The caller hung up before the call was answered.",
           "lastModifiedTime": "2024-07-23T11:48:10.032Z",
@@ -80,6 +80,7 @@ tests:
           "direction": "Outbound"
         }
       }
+    service: "voice"
     result:
       custom: {}
       message: |-
@@ -198,6 +199,7 @@ tests:
               "extensionNumber": "000"
           }
       }
+    service: "audit"
     result:
       custom:
         accountId: "12345678"
