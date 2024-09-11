@@ -8,7 +8,8 @@ tests:
         "log": {
           "reason": "Hang Up",
           "extension": {
-            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000"
+            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/00000000/extension/0000000",
+            "id": 00000000
           },
           "reasonDescription": "The caller hung up before the call was answered.",
           "lastModifiedTime": "2024-07-23T11:48:10.032Z",
@@ -77,9 +78,7 @@ tests:
           "partyId": "p-a7280be05beffz190df6b11d4z296c790000-2",
           "durationMs": 1607,
           "direction": "Outbound"
-        },
-        "service": "voice",
-        "extensionId": 00000000
+        }
       }
     result:
       custom: {}
