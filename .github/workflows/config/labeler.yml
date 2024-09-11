@@ -381,6 +381,8 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
+integration/plivo:
+- plivo/**/*
 integration/podman:
 - podman/**/*
 integration/postfix:
