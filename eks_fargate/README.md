@@ -112,7 +112,7 @@ With manual configuration, you must modify every workload manifest when adding o
 <!-- xxx tab "Datadog Operator" xxx -->
 ##### Admission Controller using Datadog Operator
 
-<div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+ and Datadog Operator v1.7.0+.
+<div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+, Datadog Operator v1.7.0+, and the <a href="https://docs.datadoghq.com/integrations/eks_fargate">EKS Fargate integration</a>.
 </div>
 
 The setup below configures the Cluster Agent to communicate with the Agent sidecars, allowing access to features such as [events collection][29], [Kubernetes resources view][30], and [cluster checks][31].

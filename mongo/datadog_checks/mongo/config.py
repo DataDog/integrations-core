@@ -196,9 +196,8 @@ class MongoConfig(object):
     @property
     def schemas(self):
         enabled = False
-        if self.dbm_enabled is True and self._schemas_config.get('enabled') is True:
-            # if DBM is enabled and the schemas config is enabled, then it is enabled
-            # By default, schemas collection is disabled
+        if self.dbm_enabled is True and self._schemas_config.get('enabled') is not False:
+            # if DBM is enabled and the schemas config is not explicitly disabled, then it is enabled
             enabled = True
         max_collections = self._schemas_config.get('max_collections')
         return {

@@ -14,7 +14,7 @@
     "classifier_tags": [
       "Supported OS::Windows",
       "Category::IoT",
-      "Category::OS & System",
+      "Category::Windows",
       "Offering::Integration"
     ],
     "resources": [

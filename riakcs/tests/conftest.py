@@ -17,8 +17,8 @@ def mocked_check():
     check = RiakCs(common.CHECK_NAME, None, {}, [{}])
 
     file_contents = common.read_fixture('riakcs_in.json')
+    check.connect_stats_getter = mock.Mock(return_value=mock.Mock(return_value=file_contents))
 
-    check._get_stats = mock.Mock(return_value=check.load_json(file_contents))
     return check
 
 
@@ -42,6 +42,6 @@ def mocked_check21():
     check = RiakCs(common.CHECK_NAME, None, {}, [{}])
 
     file_contents = common.read_fixture('riakcs21_in.json')
+    check.connect_stats_getter = mock.Mock(return_value=mock.Mock(return_value=file_contents))
 
-    check._get_stats = mock.Mock(return_value=check.load_json(file_contents))
     return check
