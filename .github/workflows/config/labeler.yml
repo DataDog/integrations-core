@@ -281,6 +281,8 @@ integration/kube_proxy:
   - kube_proxy/**/*
 integration/kube_scheduler:
   - kube_scheduler/**/*
+integration/kubeflow:
+  - kubeflow/**/*
 integration/kubelet:
   - kubelet/**/*
 integration/kubernetes:
