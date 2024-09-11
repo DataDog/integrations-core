@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.3.0 / 2024-08-09 / Agent 7.57.0
+
+***Added***:
+
+* Properly collect `temporal.add_search_attributes.workflow_failure` as a gauge ([#18050](https://github.com/DataDog/integrations-core/pull/18050))
+
 ## 2.2.2 / 2024-07-05 / Agent 7.55.0
 
 ***Fixed***:

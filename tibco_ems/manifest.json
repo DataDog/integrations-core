@@ -1,0 +1,64 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "32445b00-582f-4e56-9c4d-87944d5c347b",
+  "app_id": "tibco-ems",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track queue size, consumer count, unacknowledged messages, and more.",
+    "title": "Tibco EMS",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Category::Message Queues"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 19354115,
+      "source_type_name": "tibco_ems",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "tibco_ems.",
+        "check": "tibco_ems.server.uptime",
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "tibemsd"
+      ],
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Tibco EMS Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "Tibco EMS server uptime": "assets/monitors/server_uptime.json"
+    },
+    "saved_views": {
+      "Tibco EMS Error Logs Overview": "assets/saved_views/error_logs_overview.json",
+      "Tibco EMS Logs Overview": "assets/saved_views/logs_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

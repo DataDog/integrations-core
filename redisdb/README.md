@@ -145,7 +145,13 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][14] as pod annotations on your application container. Aside from this, templates can also be configured using a [file, configmap, or key-value store][15].
+To collect metrics, set the following parameters and values in an [Autodiscovery template][14]. You can do this with Kubernetes Annotations (shown below) on your Redis pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][15].
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `["redisdb"]`                                                              |
+| `<INIT_CONFIG>`      | `[{}]`                                                                     |
+| `<INSTANCE_CONFIG>`  | `[{"host": "%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}]` |
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -214,7 +220,11 @@ _Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
 
-Then, set [Log Integrations][12] as pod annotations. This can also be configure using a [file, configmap, or key-value store][17].
+Then, set the following parameter in an [Autodiscovery template][14]. You can do this with Kubernetes Annotations (shown below) on your Redis pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][15].
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<LOG_CONFIG>`       | `[{"source":"redis","service":"<YOUR_APP_NAME>"}]`                         |
 
 **Annotations v1/v2**
 

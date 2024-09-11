@@ -3,15 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from six import PY2
 
 from datadog_checks.openmetrics import OpenMetricsCheck
 
 from .common import CHECK_NAME
-
-pytestmark = [
-    pytest.mark.skipif(PY2, reason='Test only available on Python 3'),
-]
 
 instance_new = {
     'openmetrics_endpoint': 'http://localhost:10249/metrics',

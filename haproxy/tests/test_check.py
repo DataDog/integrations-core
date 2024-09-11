@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY2
 
 from .common import requires_new_environment
 
@@ -18,7 +17,6 @@ def test_check(aggregator, dd_run_check, instancev1, check, prometheus_metrics):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_checkv2(aggregator, dd_run_check, check, instancev2, prometheus_metricsv2):
     dd_run_check(check(instancev2))
 

@@ -54,9 +54,9 @@
       "Singlestore Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[SingleStore] License expiration": "assets/monitors/license_expiration.json",
-      "[SingleStore] Read failures rate": "assets/monitors/read_failures.json",
-      "[SingleStore] Write failures rate": "assets/monitors/write_failures.json"
+      "License will expire soon": "assets/monitors/license_expiration.json",
+      "Read queries failure rate is high": "assets/monitors/read_failures.json",
+      "Write queries failure rate is high": "assets/monitors/write_failures.json"
     }
   }
 }

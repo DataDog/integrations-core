@@ -486,9 +486,9 @@ class PostgresMetadata(DBMAsyncJob):
                 # if we don't have metrics in our cache for this table, return 0
                 table_data = cache.get(dbname, {}).get(
                     info["name"],
-                    {"postgresql.index_scans": 0, "postgresql.seq_scans": 0},
+                    {"index_scans": 0, "seq_scans": 0},
                 )
-                return table_data.get("postgresql.index_scans", 0) + table_data.get("postgresql.seq_scans", 0)
+                return table_data.get("index_scans", 0) + table_data.get("seq_scans", 0)
             else:
                 # get activity
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))

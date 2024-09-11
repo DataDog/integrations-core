@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.3.2 / 2024-08-28 / Agent 7.57.0
+
+***Fixed***:
+
+* Bump lxml version to 4.9.4 ([#18244](https://github.com/DataDog/integrations-core/pull/18244))
+
 ## 3.3.1 / 2024-05-31 / Agent 7.55.0
 
 ***Fixed***:

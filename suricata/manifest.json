@@ -1,0 +1,101 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "d5d0689e-8684-4663-b31b-d1947b7ccefd",
+  "app_id": "suricata",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Suricata logs.",
+    "title": "suricata",
+    "media": [
+      {
+        "caption": "Suricata - Overview",
+        "image_url": "images/suricata_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - Alert",
+        "image_url": "images/suricata_alert.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - Anomaly",
+        "image_url": "images/suricata_anomaly.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - Flow",
+        "image_url": "images/suricata_flow.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - DNS",
+        "image_url": "images/suricata_dns.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - DHCP",
+        "image_url": "images/suricata_dhcp.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - Network Protocols",
+        "image_url": "images/suricata_network_protocols.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - SMB (DCERPC, NTLMSSP, Kerberos)",
+        "image_url": "images/suricata_smb.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 17124993,
+      "source_type_name": "suricata",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Suricata - Overview": "assets/dashboards/suricata_overview.json",
+      "Suricata - Alert": "assets/dashboards/suricata_alert.json",
+      "Suricata - Anomaly": "assets/dashboards/suricata_anomaly.json",
+      "Suricata - Flow": "assets/dashboards/suricata_flow.json",
+      "Suricata - DNs": "assets/dashboards/suricata_dns.json",
+      "Suricata - DHCP": "assets/dashboards/suricata_dhcp.json",
+      "Suricata - SMB (DCERPC, NTLMSSP, Kerberos)": "assets/dashboards/suricata_smb.json",
+      "Suricata - Network Protocols": "assets/dashboards/suricata_network_protocols.json"
+    },
+    "logs": {
+      "source": "suricata"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
