@@ -784,9 +784,8 @@ def test_propagate_agent_tags(
     init_config_propagate_agent_tags,
     should_propagate_agent_tags,
 ):
+    instance_basic['propagate_agent_tags'] = instance_propagate_agent_tags
     init_config = {}
-    if instance_propagate_agent_tags is not None:
-        instance_basic['propagate_agent_tags'] = instance_propagate_agent_tags
     if init_config_propagate_agent_tags is not None:
         init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
 

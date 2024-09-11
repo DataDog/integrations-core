@@ -146,10 +146,6 @@ class MySQLConfig(object):
         instance_propagate_agent_tags = instance.get('propagate_agent_tags')
         init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
 
-        print("natasha hereeeee 1")
-        print(instance_propagate_agent_tags)
-        print(init_config_propagate_agent_tags)
-
         if instance_propagate_agent_tags is not None:
             # if the instance has explicitly set the value, return the boolean
             return instance_propagate_agent_tags
