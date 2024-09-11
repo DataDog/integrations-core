@@ -844,18 +844,18 @@ def test_propagate_agent_tags(
         init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
 
     agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
-    expected_tags = (
-        instance_docker.get('tags', [])
-        + [
-            'connection_host:{}'.format(instance_docker.get('host')),
-            'sqlserver_host:None',
-            'db:master',
-        ]
-        + agent_tags
-    )
 
     with mock.patch('datadog_checks.sqlserver.config.get_agent_host_tags', return_value=agent_tags):
         check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+        expected_tags = (
+            instance_docker.get('tags', [])
+            + [
+                'connection_host:{}'.format(instance_docker.get('host')),
+                'sqlserver_host:{}'.format(check.resolved_hostname),
+                'db:master',
+            ]
+            + agent_tags
+        )
         assert check._config._should_propagate_agent_tags(instance_docker, init_config) == should_propagate_agent_tags
         if should_propagate_agent_tags:
             assert all(tag in check.tags for tag in agent_tags)
