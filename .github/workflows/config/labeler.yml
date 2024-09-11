@@ -293,6 +293,8 @@ integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
 integration/kubevirt_api:
 - kubevirt_api/**/*
+integration/kubevirt_handler:
+- kubevirt_handler/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
