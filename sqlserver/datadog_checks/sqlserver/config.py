@@ -138,7 +138,7 @@ class SQLServerConfig:
         if custom_tags is None:
             tags = []
         else:
-            tags = list(set(custom_tags))
+            tags = custom_tags
 
         if propagate_agent_tags:
             try:
@@ -148,7 +148,7 @@ class SQLServerConfig:
                 raise ConfigurationError(
                     'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
                 )
-        return tags
+        return list(set(tags))
 
     @staticmethod
     def _should_propagate_agent_tags(instance, init_config) -> bool:
