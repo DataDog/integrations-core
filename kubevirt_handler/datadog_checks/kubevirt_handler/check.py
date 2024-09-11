@@ -12,6 +12,7 @@ from .metrics import METRICS_MAP
 class KubeVirtHandlerCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "kubevirt_handler"
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
         super(KubeVirtHandlerCheck, self).__init__(name, init_config, instances)
