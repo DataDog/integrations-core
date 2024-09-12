@@ -8,15 +8,15 @@
 		"id": 152860279,
 		"name": "[Brevo] High Block Rate by Subject",
 		"type": "log alert",
-		"query": "formula(\"(query / query1) * 100\").last(\"1d\") > 3",
+		"query": "formula(\"(query / query1) * 100\").last(\"1d\") > 10",
 		"message": "{{#is_warning}}  \nThe block rate for subject '{{log.attributes.subject}}' has exceeded the threshold.  \nCurrent error Rate: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe block rate for subject '{{log.attributes.subject}}' has exceeded the threshold.    \nCurrent Unsubscribe Rate: {{value}}%  \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n@example@abc.com",
 		"tags": [
 			"brevo"
 		],
 		"options": {
 			"thresholds": {
-				"critical": 3,
-				"warning": 1
+				"critical": 10,
+				"warning": 5
 			},
 			"enable_logs_sample": false,
 			"notify_audit": false,

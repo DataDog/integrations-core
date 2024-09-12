@@ -8,15 +8,15 @@
 		"id": 152943106,
 		"name": "[Brevo] High Error Rate by Subject",
 		"type": "log alert",
-		"query": "formula(\"(query / query1) * 100\").last(\"1d\") > 7",
+		"query": "formula(\"(query / query1) * 100\").last(\"1d\") > 10",
 		"message": "{{#is_warning}}  \nThe error rate for subject '{{log.attributes.subject}}' has exceeded the threshold.  \nCurrent error Rate: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe error rate for subject '{{log.attributes.subject}}' has exceeded the threshold.    \nCurrent Unsubscribe Rate: {{value}}%  \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n@example@abc.com",
 		"tags": [
 			"brevo"
 		],
 		"options": {
 			"thresholds": {
-				"critical": 7,
-				"warning": 3
+				"critical": 10,
+				"warning": 5
 			},
 			"enable_logs_sample": false,
 			"notify_audit": false,
@@ -78,7 +78,6 @@
 			"new_group_delay": 0,
 			"renotify_interval": 0,
 			"escalation_message": "",
-			"groupby_simple_monitor": false,
 			"silenced": {}
 		},
 		"priority": null,
@@ -87,6 +86,6 @@
 		}
 	},
 	"tags": [
-		"integration:brevo"
+		"integration:<REPLACE_WITH_APP_ID>"
 	]
 }

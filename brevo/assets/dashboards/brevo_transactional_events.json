@@ -1,6 +1,6 @@
 {
     "title": "Brevo - Transactional Events",
-    "description": "This Dashboard provides a comprehensive analysis of the Brevo transactional events",
+    "description": "",
     "widgets": [
         {
             "id": 7622028875118342,
@@ -848,17 +848,17 @@
             "layout": {
                 "x": 0,
                 "y": 17,
-                "width": 9,
+                "width": 6,
                 "height": 4
             }
         },
         {
-            "id": 2801939040387200,
+            "id": 6836248737505238,
             "definition": {
-                "title": "Most Used Templates",
+                "title": "Most Clicked URLs",
                 "title_size": "16",
                 "title_align": "left",
-                "type": "toplist",
+                "type": "query_table",
                 "requests": [
                     {
                         "queries": [
@@ -873,7 +873,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@template_id",
+                                        "facet": "@http.url",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -882,17 +882,12 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:brevo service:transactional-events $event_name $recipient_email $subject $sender_email"
+                                    "query": "source:brevo service:transactional-events @evt.name:click $event_name $recipient_email $subject $sender_email"
                                 },
                                 "storage": "hot"
                             }
                         ],
                         "response_format": "scalar",
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
                         "sort": {
                             "count": 10,
                             "order_by": [
@@ -902,20 +897,22 @@
                                     "order": "desc"
                                 }
                             ]
-                        }
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "number",
+                                "alias": "count",
+                                "formula": "query1"
+                            }
+                        ]
                     }
                 ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
+                "has_search_bar": "auto"
             },
             "layout": {
-                "x": 9,
+                "x": 6,
                 "y": 17,
-                "width": 3,
+                "width": 6,
                 "height": 4
             }
         },
@@ -982,7 +979,7 @@
             "layout": {
                 "x": 0,
                 "y": 21,
-                "width": 4,
+                "width": 6,
                 "height": 4
             }
         },
@@ -1047,76 +1044,9 @@
                 }
             },
             "layout": {
-                "x": 4,
+                "x": 6,
                 "y": 21,
-                "width": 4,
-                "height": 4
-            }
-        },
-        {
-            "id": 5154411203269646,
-            "definition": {
-                "title": "Most Used Subjects",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@subject",
-                                        "limit": 10,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "count"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:brevo service:transactional-events @evt.name:opened $event_name $recipient_email $subject $sender_email"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "sort": {
-                            "count": 10,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
-            },
-            "layout": {
-                "x": 8,
-                "y": 21,
-                "width": 4,
+                "width": 6,
                 "height": 4
             }
         },
@@ -1255,12 +1185,12 @@
             }
         },
         {
-            "id": 6836248737505238,
+            "id": 5154411203269646,
             "definition": {
-                "title": "Most Clicked URLs",
+                "title": "Most Used Subjects",
                 "title_size": "16",
                 "title_align": "left",
-                "type": "query_table",
+                "type": "toplist",
                 "requests": [
                     {
                         "queries": [
@@ -1275,7 +1205,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@http.url",
+                                        "facet": "@subject",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1284,12 +1214,17 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:brevo service:transactional-events @evt.name:click $event_name $recipient_email $subject $sender_email"
+                                    "query": "source:brevo service:transactional-events @evt.name:opened $event_name $recipient_email $subject $sender_email"
                                 },
                                 "storage": "hot"
                             }
                         ],
                         "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
                         "sort": {
                             "count": 10,
                             "order_by": [
@@ -1299,17 +1234,15 @@
                                     "order": "desc"
                                 }
                             ]
-                        },
-                        "formulas": [
-                            {
-                                "cell_display_mode": "number",
-                                "alias": "count",
-                                "formula": "query1"
-                            }
-                        ]
+                        }
                     }
                 ],
-                "has_search_bar": "auto"
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
             },
             "layout": {
                 "x": 0,

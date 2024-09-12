@@ -992,7 +992,7 @@
             }
         },
         {
-            "id": 71369030612047,
+            "id": 3725343105146853,
             "definition": {
                 "title": "Marketing Event List",
                 "title_size": "16",
@@ -1002,7 +1002,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:brevo service:marketing-events $campaign_id $event_name $recipient_email",
+                            "query_string": "source:brevo service:marketing-events ",
                             "indexes": [],
                             "storage": "hot",
                             "sort": {
@@ -1024,7 +1024,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "@camp_id",
+                                "field": "@brevo.camp_id",
                                 "width": "auto"
                             },
                             {
@@ -1032,11 +1032,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "@usr.email",
+                                "field": "@network.client.ip",
                                 "width": "auto"
                             },
                             {
-                                "field": "@network.client.ip",
+                                "field": "@usr.email",
                                 "width": "auto"
                             },
                             {
@@ -1071,7 +1071,7 @@
         },
         {
             "name": "campaign_id",
-            "prefix": "@camp_id",
+            "prefix": "@brevo.camp_id",
             "available_values": [],
             "default": "*"
         }
