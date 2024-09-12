@@ -229,6 +229,8 @@ integration/hivemq:
   - hivemq/**/*
 integration/http_check:
   - http_check/**/*
+integration/hubspot_content_hub:
+  - hubspot_content_hub/**/*
 integration/hudi:
   - hudi/**/*
 integration/hyperv:
