@@ -86,6 +86,6 @@
 		}
 	},
 	"tags": [
-		"integration:<REPLACE_WITH_APP_ID>"
+		"integration:brevo"
 	]
 }

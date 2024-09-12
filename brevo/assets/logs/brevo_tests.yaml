@@ -18,7 +18,8 @@ tests:
     service: "marketing-events"
     result:
       custom:
-        camp_id: 1
+        brevo:
+          camp_id: 1
         campaign name: "My First Campaign"
         date_event: "2020-10-09 00:00:00"
         date_sent: "2020-10-09 00:00:00"
@@ -75,7 +76,8 @@ tests:
     service: "marketing-events"
     result:
       custom:
-        camp_id: 1
+        brevo:
+          camp_id: 1
         campaign name: "My First Campaign"
         date_event: "2020-10-09 00:00:00"
         date_sent: "2020-10-09 00:00:00"
@@ -139,7 +141,8 @@ tests:
     service: "marketing-events"
     result:
       custom:
-        camp_id: 1
+        brevo:
+          camp_id: 1
         campaign name: "My First Campaign"
         date_event: "2020-10-09 00:00:00"
         date_sent: "2020-10-09 00:00:00"
@@ -199,7 +202,8 @@ tests:
     service: "marketing-events"
     result:
       custom:
-        camp_id: 1
+        brevo:
+          camp_id: 1
         campaign name: "My First Campaign"
         date_event: "2020-10-09 00:00:00"
         date_sent: "2020-10-09 00:00:00"
@@ -256,7 +260,8 @@ tests:
     service: "marketing-events"
     result:
       custom:
-        camp_id: 1
+        brevo:
+          camp_id: 1
         campaign name: "My First Campaign"
         date_event: "2020-10-09 00:00:00"
         date_sent: "2020-10-09 00:00:00"
@@ -315,7 +320,8 @@ tests:
     service: "marketing-events"
     result:
       custom:
-        camp_id: 1
+        brevo:
+          camp_id: 1
         campaign name: "My First Campaign"
         date_event: "2020-10-09 00:00:00"
         date_sent: "2020-10-09 00:00:00"
