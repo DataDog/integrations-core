@@ -1,8 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -35,10 +33,10 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "in-toto==2.0.0; python_version > '3.0'",
-    "packaging==24.1; python_version > '3.0'",
-    "securesystemslib[crypto,pynacl]==0.28.0; python_version > '3.0'",
-    "tuf==4.0.0; python_version > '3.0'",
+    "in-toto==2.0.0",
+    "packaging==24.1",
+    "securesystemslib[crypto,pynacl]==0.28.0",
+    "tuf==4.0.0",
 ]
 
 [project.urls]
