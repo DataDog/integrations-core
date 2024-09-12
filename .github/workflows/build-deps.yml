@@ -218,7 +218,7 @@ jobs:
     - name: Set up Python
       env:
         # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
-        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.12.4/python-3.12.4-macos11.pkg"
+        PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.12.6/python-3.12.6-macos11.pkg"
         PYTHON2_DOWNLOAD_URL: "https://www.python.org/ftp/python/2.7.18/python-2.7.18-macosx10.9.pkg"
       run: |-
         curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
@@ -267,7 +267,7 @@ jobs:
 
   publish:
     name: Publish artifacts
-    # if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref == github.event.repository.default_branch || startsWith(github.ref, '7.')))
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.ref == github.event.repository.default_branch || startsWith(github.ref, '7.')))
     needs:
     - build
     - build-macos
