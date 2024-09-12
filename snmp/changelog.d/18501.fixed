@@ -1,1 +1,0 @@
-Use forced metric type of gauge for nasuni-filer filerCacheTotal, filerCacheUsed, and filerCacheFree so they are not incorrectly inferred to be rate types.

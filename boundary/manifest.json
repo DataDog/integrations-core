@@ -47,7 +47,7 @@
       "auto_install": true
     },
     "monitors": {
-      "[Boundary] High active connections": "assets/monitors/active_connections.json"
+      "Number of active connections is too high": "assets/monitors/active_connections.json"
     },
     "dashboards": {
       "Boundary Overview": "assets/dashboards/boundary_overview.json"

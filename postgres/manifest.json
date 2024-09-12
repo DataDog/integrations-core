@@ -83,8 +83,8 @@
       "postgresql_screenboard": "assets/dashboards/postgresql_screenboard_dashboard.json"
     },
     "monitors": {
-      "percent_usage_connections": "assets/monitors/percent_usage_connections.json",
-      "replication_delay": "assets/monitors/replication_delay.json"
+      "Connection pool is reaching saturation point": "assets/monitors/percent_usage_connections.json",
+      "Replication delay is high": "assets/monitors/replication_delay.json"
     },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
