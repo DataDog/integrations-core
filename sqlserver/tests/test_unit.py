@@ -20,6 +20,7 @@ from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
     extract_sql_comments_and_procedure_name,
+    get_unixodbc_sysconfig,
     parse_sqlserver_major_version,
     set_default_driver_conf,
 )
@@ -866,3 +867,6 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
         'datadog_checks.sqlserver.utils.is_azure_sql_database', return_value={}
     ):
         schemas._fetch_for_databases()
+        
+def test_get_unixodbc_sysconfig():
+    assert get_unixodbc_sysconfig("/opt/datadog-agent/embedded/bin/python") == "/opt/datadog-agent/embedded/etc", "incorrect unix odbc config dir"
