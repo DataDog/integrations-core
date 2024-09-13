@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 from datetime import datetime
 from operator import attrgetter
@@ -52,6 +53,18 @@ def get_valid_templates():
     return sorted(templates, key=attrgetter('name'))
 
 
+def prefill_template_fields_for_check_only(manifest: dict, normalized_integration_name: str) -> dict:
+    author = manifest.get("author", {}).get("name")
+    check_name = normalize_package_name(f"{author}_{normalized_integration_name}")
+    return {
+        'author_name': author,
+        'check_name': check_name,
+        'email': manifest.get("author", {}).get("support_email"),
+        'homepage': manifest.get("author", {}).get("homepage"),
+        'sales_email': manifest.get("author", {}).get("sales_email"),
+    }
+
+
 def construct_template_fields(integration_name, repo_choice, integration_type, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
     check_name_kebab = kebab_case_name(integration_name)
@@ -71,7 +84,17 @@ To install the {integration_name} check on your host:
 4. Upload the build artifact to any host with an Agent and
  run `datadog-agent integration install -w
  path/to/{normalized_integration_name}/dist/<ARTIFACT_NAME>.whl`."""
-
+    if integration_type == 'check_only':
+        # check_name, author, email come from kwargs due to prefill
+        check_name = ''
+        author = ''
+        email = ''
+        email_packages = ''
+        install_info = third_party_install_info
+        # Static fields
+        license_header = ''
+        support_type = 'partner'
+        integration_links = ''
     if repo_choice == 'core':
         check_name = normalized_integration_name
         author = 'Datadog'
