@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+import shutil
 import sys
 from typing import Dict
 
@@ -11,6 +12,7 @@ from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
+ODBC_INST_INI = 'odbcinst.ini'
 
 
 # Database is used to store both the name and physical_database_name
@@ -56,16 +58,16 @@ def set_default_driver_conf():
         # linux_unixodbc_sysconfig is set to the agent embedded /etc directory
         # this is a hacky way to get the path to the etc directory
         # by getting the path to the python executable and get the directory above /bin/python
-        linux_unixodbc_sysconfig = os.path.dirname(os.path.dirname(sys.executable))
-        if os.path.exists(os.path.join(linux_unixodbc_sysconfig, 'odbcinst.ini')) or os.path.exists(
-            os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
-        ):
+        linux_unixodbc_sysconfig = get_unixodbc_sysconfig(sys.executable)
+        odbc_ini = os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
+        if os.path.exists(odbc_ini) and os.path.getsize(odbc_ini) > 0:
+            os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
+            odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
+            if not os.path.exists(odbc_inst_ini_sysconfig) or os.path.getsize(odbc_inst_ini_sysconfig) == 0:
+                shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
             # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
             # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
             return
-
-        # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
-        os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
 
         # required when using pyodbc with FreeTDS on Ubuntu 18.04
         # see https://stackoverflow.com/a/22988748/1258743
