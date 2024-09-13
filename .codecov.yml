@@ -310,14 +310,14 @@ coverage:
         target: 75
         flags:
         - kong
-      KubeVirt_Controller:
-        target: 75
-        flags:
-        - kubevirt_controller
       KubeVirt_API:
         target: 75
         flags:
         - kubevirt_api
+      KubeVirt_Controller:
+        target: 75
+        flags:
+        - kubevirt_controller
       Kube_DNS:
         target: 75
         flags:
@@ -698,6 +698,10 @@ coverage:
         target: 75
         flags:
         - fluxcd
+      jte_test:
+        target: 75
+        flags:
+        - jte_test
       kyverno:
         target: 75
         flags:
@@ -1101,6 +1105,11 @@ flags:
     paths:
     - istio/datadog_checks/istio
     - istio/tests
+  jte_test:
+    carryforward: true
+    paths:
+    - jte_test/datadog_checks/jte_test
+    - jte_test/tests
   kafka_consumer:
     carryforward: true
     paths:
@@ -1166,16 +1175,16 @@ flags:
     paths:
     - kubernetes_state/datadog_checks/kubernetes_state
     - kubernetes_state/tests
-  kubevirt_controller:
-    carryforward: true
-    paths:
-    - kubevirt_controller/datadog_checks/kubevirt_controller
-    - kubevirt_controller/tests
   kubevirt_api:
     carryforward: true
     paths:
     - kubevirt_api/datadog_checks/kubevirt_api
     - kubevirt_api/tests
+  kubevirt_controller:
+    carryforward: true
+    paths:
+    - kubevirt_controller/datadog_checks/kubevirt_controller
+    - kubevirt_controller/tests
   kyototycoon:
     carryforward: true
     paths:
