@@ -492,7 +492,7 @@ class VSphereCheck(AgentCheck):
                 collect_start_time - dt.timedelta(hours=2)
             )
             self.gauge(
-                'vsphere.vsan.cluster.time',
+                'datadog.vsphere.vsan.cluster.time',
                 t0.total(),
                 tags=self._config.base_tags,
                 raw=True,
@@ -515,25 +515,41 @@ class VSphereCheck(AgentCheck):
                     if len(entity_type.value) > 0:
                         resource_type = entity_type.value[0].metricId.dynamicProperty[0][0]
                         for given_metric in entity_type.value:
-                            self.log.debug(
-                                "Processing metric with type:%s",
-                                type(given_metric),
-                            )
+                            if self.log.isEnabledFor(logging.DEBUG):
+                                self.log.debug(
+                                    "Processing metric `%s`: resource_type=`%s`, result=`%s`",
+                                    given_metric.metricId.label,
+                                    type(given_metric),
+                                    str(given_metric).replace("\n", "\\n"),
+                                )
                             latest_value = given_metric.values.split(',')[-1]
                             if latest_value != 'None':
                                 if given_metric.metricId.label in VSAN_PERCENT_METRICS:
                                     latest_value = float(latest_value) / 100.0
                                 if resource_type == 'cluster':
                                     if 'vsan.cluster.{}'.format(given_metric.metricId.label) in VSAN_CLUSTER_METRICS:
+                                        tags = self.infrastructure_cache.get_mor_tags(
+                                            given_metric.metricId.dynamicProperty[0][1]
+                                        )
+                                        tags.extend(
+                                            self.infrastructure_cache.get_mor_props(
+                                                given_metric.metricId.dynamicProperty[0][1]
+                                            )['tags']
+                                        )
+                                        tags.extend(self._config.base_tags)
                                         self.gauge(
                                             'vsan.cluster.{}'.format(given_metric.metricId.label),
                                             # for now we only collect the latest value
                                             float(latest_value),
-                                            tags=[
-                                                'vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])
-                                            ]
-                                            + self._config.base_tags,
-                                            hostname=self._hostname,
+                                            tags=tags,
+                                            hostname=None,
+                                        )
+                                        self.log.debug(
+                                            "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                                            given_metric.metricId.label,
+                                            float(latest_value),
+                                            self._hostname,
+                                            tags,
                                         )
                                     else:
                                         self.log.debug(
@@ -542,12 +558,36 @@ class VSphereCheck(AgentCheck):
                                         )
                                 elif resource_type == 'host':
                                     if 'vsan.host.{}'.format(given_metric.metricId.label) in VSAN_HOST_METRICS:
+                                        tags = (
+                                            [
+                                                t
+                                                for t in self.infrastructure_cache.get_mor_tags(
+                                                    given_metric.metricId.dynamicProperty[0][1]
+                                                )
+                                                if t.split(":", 1)[0] in self._config.excluded_host_tags
+                                            ]
+                                            if self._config.excluded_host_tags
+                                            else []
+                                        )
+                                        tags.extend(
+                                            self.infrastructure_cache.get_mor_props(
+                                                given_metric.metricId.dynamicProperty[0][1]
+                                            )['tags']
+                                        )
+                                        tags.extend(self._config.base_tags)
                                         self.gauge(
                                             'vsan.host.{}'.format(given_metric.metricId.label),
                                             # for now we only collect the latest value
                                             float(latest_value),
-                                            tags=self._config.base_tags,
-                                            hostname=self._hostname,
+                                            tags=tags,
+                                            hostname=given_metric.metricId.dynamicProperty[0][2],
+                                        )
+                                        self.log.debug(
+                                            "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                                            given_metric.metricId.label,
+                                            float(latest_value),
+                                            given_metric.metricId.dynamicProperty[0][2],
+                                            tags,
                                         )
                                     else:
                                         self.log.debug(
@@ -566,7 +606,17 @@ class VSphereCheck(AgentCheck):
                                             + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
                                             + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
                                             + self._config.base_tags,
-                                            hostname=self._hostname,
+                                            hostname=None,
+                                        )
+                                        self.log.debug(
+                                            "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                                            given_metric.metricId.label,
+                                            float(latest_value),
+                                            'None',
+                                            ['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
+                                            + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
+                                            + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
+                                            + self._config.base_tags,
                                         )
                                     else:
                                         self.log.debug(
@@ -576,7 +626,11 @@ class VSphereCheck(AgentCheck):
                         if latest_metric_time is None:
                             latest_metric_time = collect_start_time
                     else:
-                        self.log.debug("No information returned for entity type %s", entity_type)
+                        if self.log.isEnabledFor(logging.DEBUG):
+                            self.log.debug(
+                                "No information returned for entity type %s",
+                                str(entity_type).replace("\n", "\\n"),
+                            )
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass
@@ -606,16 +660,22 @@ class VSphereCheck(AgentCheck):
                 self.log.debug("Collecting vsan metrics for cluster %s", cluster.name)
                 cluster_uuid = cluster_vsan_config.defaultConfig.uuid
                 cluster_nested_elts[cluster] = [cluster_uuid]
-                id_to_tags[cluster_uuid] = {1: cluster.name, 0: 'cluster'}
+                id_to_tags[cluster_uuid] = {1: cluster, 0: 'cluster'}
                 for host in cluster.host:
-                    host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
-                    cluster_nested_elts[cluster].append(host_uuid)
-                    id_to_tags[host_uuid] = {1: cluster.name, 2: host.name, 0: 'host'}
-                    new_id_to_tags, new_cluster_nested_elts = self.api.get_vsan_disk_metrics(host, cluster)
-                    id_to_tags.update(new_id_to_tags)
-                    cluster_nested_elts[cluster].extend(new_cluster_nested_elts[cluster])
+                    if host in self.infrastructure_cache.get_mors(vim.HostSystem):
+                        host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
+                        cluster_nested_elts[cluster].append(host_uuid)
+                        id_to_tags[host_uuid] = {1: host, 2: host.name, 0: 'host'}
+                        new_id_to_tags, new_cluster_nested_elts = self.api.get_vsan_disk_metrics(host, cluster)
+                        id_to_tags.update(new_id_to_tags)
+                        cluster_nested_elts[cluster].extend(new_cluster_nested_elts[cluster])
+                    else:
+                        self.log.debug("Skipping host %s because it was filtered", host.name)
             else:
                 self.log.debug("Skipping vsan metrics for cluster %s because it is not a vsan cluster", cluster.name)
+        if not cluster_nested_elts:
+            self.log.debug("There are no vsan clusters to collect metrics from, skipping vsan collection")
+            return [], []
         return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
 
     def make_query_specs(self):

@@ -10,6 +10,7 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
+from datadog_checks.vsphere.cache import InfrastructureCache
 from datadog_checks.vsphere.config import VSphereConfig
 
 
@@ -273,9 +274,7 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
         with patch('pyVmomi.vim.cluster.VsanPerformanceManager') as MockVsanPerformanceManager:
             config = VSphereConfig(realtime_instance, {}, MagicMock())
             api = VSphereAPI(config, MagicMock())
-            folder = api._conn.content.rootFolder
-            folder.name = 'root-folder'
-            cluster = folder.CreateClusterEx(name='a')
+            cluster = MagicMock(name='a', spec=vim.ClusterComputeResource)
             host = MagicMock(name='b')
             cluster.host = [host]
             cluster_nested_elts = {cluster: ['nested-id-1', 'nested-id-2']}
@@ -321,7 +320,14 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             assert len(performance_metrics) == 1
             assert len(performance_metrics[0]) == 1
 
+            vsan_config = MagicMock()
+            vsan_config.enabled = True
+            cluster.configurationEx.vsanConfigInfo = vsan_config
+            cache = InfrastructureCache(float('inf'))
+            cache.set_mor_props(cluster, {})
+            cache.set_mor_props(host, {})
             check = VSphereCheck('vsphere', {}, [realtime_instance])
+            check.infrastructure_cache = cache
             dd_run_check(check)
 
             aggregator.assert_metric('vsphere.vsan.cluster.health.count', value=1)

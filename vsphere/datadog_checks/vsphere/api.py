@@ -399,7 +399,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_vsan_metrics(self, cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time):
-        self.log.debug("Querying vSAN metrics: %s", self._vsan_stub)
+        self.log.debug('Querying vSAN metrics')
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         health_metrics = []
         performance_metrics = []
@@ -412,7 +412,7 @@ class VSphereAPI(object):
             processed_health_metrics.update(
                 {
                     'vsphere.vsan.cluster.health.count': {
-                        'id': group_id,
+                        'group_id': group_id,
                         'status': group_health,
                         'vsphere_cluster': cluster_reference.name,
                     }
@@ -423,7 +423,7 @@ class VSphereAPI(object):
                 processed_health_metrics.update(
                     {
                         'vsphere.vsan.cluster.health.{}.count'.format(test_name): {
-                            'id': group_id,
+                            'group_id': group_id,
                             'status': group_health,
                             'test_id': health_test.testId,
                             'test_status': health_test.testHealth,
