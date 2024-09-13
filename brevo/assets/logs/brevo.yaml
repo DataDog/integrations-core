@@ -205,7 +205,7 @@ pipeline:
             unique_proxy_open,info
           type: lookup-processor
         - type: user-agent-parser
-          name: :Extracting user-agent information from the user-agent
+          name: Extracting user-agent information from the user-agent
           enabled: true
           sources:
             - http.useragent
@@ -220,7 +220,7 @@ pipeline:
       processors:
         - type: arithmetic-processor
           name: Convert `ts_event` from second to millisecond EPOCH UNIX format and map to
-            'timestamp'
+            `timestamp`
           enabled: true
           expression: ts_event * 1000
           target: timestamp
