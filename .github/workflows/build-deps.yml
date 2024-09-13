@@ -232,7 +232,7 @@ jobs:
       with:
         path: |
           ~/builder_root
-        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py') }}
+        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/build-deps.yml') }}
 
     - name: Run the build
       env:
