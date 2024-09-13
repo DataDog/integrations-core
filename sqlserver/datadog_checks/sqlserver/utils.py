@@ -37,16 +37,18 @@ class Database:
 def get_unixodbc_sysconfig(python_executable):
     return os.path.join(os.path.dirname(os.path.dirname(python_executable)), "etc")
 
+
 def is_non_empty_file(path):
     if not os.path.exists(path):
         return
     try:
         if os.path.getsize(path) > 0:
             return True
-    # exists and getsize aren't atomic 
-    except FileNotFoundError as e:
+    # exists and getsize aren't atomic
+    except FileNotFoundError:
         return
     return
+
 
 def set_default_driver_conf():
     if Platform.is_containerized():
@@ -74,7 +76,7 @@ def set_default_driver_conf():
         odbc_ini = os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
         if not is_non_empty_file(odbc_ini):
             return
-            
+
         os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
         odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
         if not is_non_empty_file(odbc_inst_ini_sysconfig):
