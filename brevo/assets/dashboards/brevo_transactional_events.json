@@ -1214,7 +1214,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:brevo service:transactional-events @evt.name:opened $event_name $recipient_email $subject $sender_email"
+                                    "query": "source:brevo service:transactional-events $event_name $recipient_email $subject $sender_email"
                                 },
                                 "storage": "hot"
                             }
