@@ -12,7 +12,7 @@ import mock
 import pytest
 
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import running_on_linux_ci
+from datadog_checks.dev.ci import running_on_linux_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
