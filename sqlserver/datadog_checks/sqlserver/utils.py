@@ -62,7 +62,17 @@ def set_default_driver_conf():
         # by getting the path to the python executable and get the directory above /bin/python
         linux_unixodbc_sysconfig = get_unixodbc_sysconfig(sys.executable)
         odbc_ini = os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
-        if os.path.exists(odbc_ini) and os.path.getsize(odbc_ini) > 0:
+        if os.path.exists(odbc_ini):
+            exists = False
+            try:
+                if os.path.getsize(odbc_ini) > 0:
+                    exists = True
+            # exists and getsize aren't atomic 
+            except FileNotFoundError as e:
+                exists = False
+            if not exists:
+                return
+            
             os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
             odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
             if not os.path.exists(odbc_inst_ini_sysconfig) or os.path.getsize(odbc_inst_ini_sysconfig) == 0:
