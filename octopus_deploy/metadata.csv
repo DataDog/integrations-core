@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 octopus_deploy.api.can_connect,gauge,,,,Whether or not the check can connect to the Octopus Deploy API.,-1,octopus_deploy,octopus_deploy api,,
+octopus_deploy.project.count,gauge,,,,Number of projects discovered.,-1,octopus_deploy,octopus_deploy projects count,,
 octopus_deploy.project_group.count,gauge,,,,Number of project groups discovered.,-1,octopus_deploy,octopus_deploy project group count,,
 octopus_deploy.space.count,gauge,,,,Number of spaces discovered.,-1,octopus_deploy,octopus_deploy space count,,

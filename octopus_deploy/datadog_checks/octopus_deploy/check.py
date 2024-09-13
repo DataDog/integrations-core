@@ -8,8 +8,8 @@ from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.models.types import copy_raw
 from datadog_checks.octopus_deploy.config_models import ConfigMixin
 
-from .constants import API_UP_METRIC, PROJECT_GROUP_COUNT_METRIC, SPACE_COUNT_METRIC
-from .spaces import ProjectGroup, Space
+from .constants import API_UP_METRIC, PROJECT_COUNT_METRIC, PROJECT_GROUP_COUNT_METRIC, SPACE_COUNT_METRIC
+from .spaces import Project, ProjectGroup, Space
 
 
 class OctopusDeployCheck(AgentCheck, ConfigMixin):
@@ -19,11 +19,47 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super(OctopusDeployCheck, self).__init__(name, init_config, instances)
         self._project_groups_discovery = {}
+        self._projects_discovery = {}
 
     def _initialize_caches(self):
         self._initialize_spaces()
         for _, space_name, space, space_config in self.spaces():
             self._initialize_project_groups(space_name, space.id, space_config)
+            for _, project_group_name, project_group, project_group_config in self.project_groups(space.id, space_name):
+                self._initialize_projects(
+                    space_name, space.id, project_group_name, project_group.id, project_group_config
+                )
+                self.projects(space_name, space.id, project_group.id, project_group_name)
+
+    def _initialize_projects(self, space_name, space_id, project_group_name, project_group_id, project_group_config):
+        if not self._projects_discovery.get(space_name, {}).get(project_group_name):
+            normalized_projects = normalize_discover_config_include(
+                self.log, project_group_config.get("projects") if project_group_config else None
+            )
+            self.log.debug(
+                "Projects discovery for space %s project_group %s: %s",
+                space_name,
+                project_group_name,
+                normalized_projects,
+            )
+            if normalized_projects:
+                if not self._projects_discovery.get(space_name):
+                    self._projects_discovery[space_name] = {}
+                self._projects_discovery[space_name][project_group_name] = Discovery(
+                    lambda: self._get_new_projects(space_id, project_group_id),
+                    limit=project_group_config.get('projects').get('limit') if project_group_config else None,
+                    include=normalized_projects,
+                    exclude=project_group_config.get('projects').get('exclude') if project_group_config else None,
+                    interval=(project_group_config.get('projects').get('interval') if project_group_config else None),
+                    key=lambda project: project.name,
+                )
+            else:
+                if not self._projects_discovery.get(space_name):
+                    self._projects_discovery[space_name] = {}
+
+                self._projects_discovery[space_name][project_group_name] = None
+
+        self.log.debug("Discovered projects: %s", self._projects_discovery)
 
     def _initialize_project_groups(self, space_name, space_id, space_config):
         if space_name not in self._project_groups_discovery:
@@ -42,23 +78,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 )
             else:
                 self._project_groups_discovery[space_name] = None
-        if self._project_groups_discovery[space_name]:
-            discovered_project_groups = list(self._project_groups_discovery[space_name].get_items())
-        else:
-            discovered_project_groups = [
-                (None, project_group.name, project_group, None)
-                for project_group in self._get_new_project_groups(space_id)
-            ]
 
-        for _, project_group_name, project_group, _ in discovered_project_groups:
-            tags = [
-                f"project_group_id:{project_group.id}",
-                f"project_group_name:{project_group_name}",
-                f"space_name:{space_name}",
-            ]
-            self.gauge(PROJECT_GROUP_COUNT_METRIC, 1, tags=tags)
-
-        self.log.debug("Discovered project groups: %s", discovered_project_groups)
+        self.log.debug("Discovered project groups: %s", self._project_groups_discovery)
 
     def _initialize_spaces(self):
         self.spaces_discovery = None
@@ -74,6 +95,50 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                     interval=self.config.spaces.interval,
                     key=lambda space: space.name,
                 )
+
+    def projects(self, space_name, space_id, project_group_id, project_group_name):
+        if self._projects_discovery.get(space_name, {}).get(project_group_name):
+            projects = list(self._projects_discovery[space_name][project_group_name].get_items())
+        else:
+            projects = [
+                (None, project.name, project, None) for project in self._get_new_projects(space_id, project_group_id)
+            ]
+
+        for _, _, project, _ in projects:
+            tags = [
+                f"project_id:{project.id}",
+                f"project_name:{project.name}",
+                f"project_group_id:{project_group_id}",
+                f"project_group_name:{project_group_name}",
+                f"space_name:{space_name}",
+            ]
+            self.gauge(PROJECT_COUNT_METRIC, 1, tags=tags)
+
+        all_project_names = [project.name for _, _, project, _ in projects]
+        self.log.info("Collecting data from projects: %s", ",".join(all_project_names))
+        return projects
+
+    def report_project_metrics(self, project_list, project_group_id, project_group_name, space_name):
+        for _, _, project, _ in project_list:
+            tags = [
+                f"project_id:{project.id}",
+                f"project_name:{project.name}",
+                f"project_group_id:{project_group_id}",
+                f"project_group_name:{project_group_name}",
+                f"space_name:{space_name}",
+            ]
+            self.gauge(PROJECT_COUNT_METRIC, 1, tags=tags)
+
+    def _get_new_projects(self, space_id, project_group_id):
+        projects_endpoint = f"{self.config.octopus_endpoint}/{space_id}/projectgroups/{project_group_id}/projects"
+        response = self.http.get(projects_endpoint)
+        response.raise_for_status()
+        projects_json = response.json().get('Items', [])
+        projects = []
+        for project in projects_json:
+            new_project = Project(project)
+            projects.append(new_project)
+        return projects
 
     def _get_new_project_groups(self, space_id):
         project_groups_endpoint = f"{self.config.octopus_endpoint}/{space_id}/projectgroups"
@@ -111,6 +176,27 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.info("Collecting data from spaces: %s", ",".join(all_space_names))
         return spaces
 
+    def project_groups(self, space_id, space_name):
+        if self._project_groups_discovery.get(space_name):
+            project_groups = list(self._project_groups_discovery[space_name].get_items())
+        else:
+            project_groups = [
+                (None, project_groups.name, project_groups, None)
+                for project_groups in self._get_new_project_groups(space_id)
+            ]
+
+        for _, project_group_name, project_group, _ in project_groups:
+            tags = [
+                f"project_group_id:{project_group.id}",
+                f"project_group_name:{project_group_name}",
+                f"space_name:{space_name}",
+            ]
+            self.gauge(PROJECT_GROUP_COUNT_METRIC, 1, tags=tags)
+
+        all_project_group_names = [space.name for _, _, space, _ in project_groups]
+        self.log.info("Collecting data from project_groups: %s", ",".join(all_project_group_names))
+        return project_groups
+
     def check(self, _):
         try:
             response = self.http.get(self.config.octopus_endpoint)
@@ -132,6 +218,10 @@ def normalize_discover_config_include(log, config):
     log.debug("normalize_discover_config_include config: %s", config)
     include_list = config.get('include') if isinstance(config, dict) else copy_raw(config.include) if config else []
     log.debug("normalize_discover_config_include include_list: %s", include_list)
+    if not isinstance(include_list, list):
+        raise TypeError('Setting `include` must be an array')
+    if len(include_list) == 0:
+        return {}
     for entry in include_list:
         if isinstance(entry, str):
             normalized_config[entry] = None

@@ -16,3 +16,11 @@ class ProjectGroup:
         self.id = project_group_json.get("Id")
         self.name = project_group_json.get("Name")
         self.projects = None
+
+
+class Project:
+    def __init__(self, project_json):
+        self.id = project_json.get("Id")
+        self.name = project_json.get("Name")
+        self.last_task_id = None
+        self.last_task_time = None

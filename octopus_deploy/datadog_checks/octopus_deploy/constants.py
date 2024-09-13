@@ -5,3 +5,4 @@
 API_UP_METRIC = "api.can_connect"
 SPACE_COUNT_METRIC = "space.count"
 PROJECT_GROUP_COUNT_METRIC = "project_group.count"
+PROJECT_COUNT_METRIC = "project.count"
