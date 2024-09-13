@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-ALL_METRICS = ["octopus_deploy.project_group.count", "octopus_deploy.project.count", "octopus_deploy.space.count"]
+ALL_METRICS = ["octopus_deploy.project_group.count", "octopus_deploy.project.count"]
 
 PROJECT_GROUP_ALL_METRICS = [
     {

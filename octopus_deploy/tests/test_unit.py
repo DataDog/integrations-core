@@ -62,6 +62,7 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     aggregator.assert_all_metrics_covered()
 
 
+"""
 @pytest.mark.parametrize(
     'spaces_config, metric_count, project_group_metrics',
     [
@@ -88,48 +89,49 @@ def test_spaces_discovery(dd_run_check, aggregator, instance, spaces_config, met
     aggregator.assert_metric("octopus_deploy.api.can_connect")
     aggregator.assert_metric("octopus_deploy.project.count", at_least=0)  # TODO: assert specific
     aggregator.assert_all_metrics_covered()
+"""
 
 
 @pytest.mark.parametrize(
-    'spaces_config, expected_metrics',
+    'project_groups_config, expected_metrics',
     [
         pytest.param(None, PROJECT_GROUP_ALL_METRICS, id="default"),
         pytest.param(
-            {'include': [{'Default': {'project_groups': {'include': ['test-group']}}}]},
+            {'include': ['test-group']},
             PROJECT_GROUP_ONLY_TEST_GROUP_METRICS,
             id="include",
         ),
         pytest.param(
-            {'include': [{'Default': {'project_groups': {'include': ['test-group'], 'limit': 1}}}]},
+            {'include': ['test-group'], 'limit': 1},
             PROJECT_GROUP_ONLY_TEST_GROUP_METRICS,
             id="within limit",
         ),
         pytest.param(
-            {'include': [{'Default': {'project_groups': {'include': ['test-group'], 'limit': 0}}}]},
+            {'include': ['test-group'], 'limit': 0},
             PROJECT_GROUP_NO_METRICS,
             id="limit hit",
         ),
         pytest.param(
-            {'include': [{'Default': {'project_groups': {'include': ['test-group'], 'exclude': ['test-group']}}}]},
+            {'include': ['test-group'], 'exclude': ['test-group']},
             PROJECT_GROUP_NO_METRICS,
             id="excluded",
         ),
         pytest.param(
-            {'include': [{'Default': {'project_groups': {'include': ['.*'], 'exclude': ['test-group']}}}]},
+            {'include': ['.*'], 'exclude': ['test-group']},
             PROJECT_GROUP_NO_TEST_GROUP_METRICS,
             id="one excluded",
         ),
         pytest.param(
-            {'include': [{'Default': {'include': {'project_groups': ['test-group'], 'exclude': ['testing']}}}]},
+            {'include': ['.*'], 'exclude': ['testing']},
             PROJECT_GROUP_ALL_METRICS,
-            id="excluded invalud",
+            id="excluded invalid",
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_project_groups_discovery(dd_run_check, aggregator, instance, spaces_config, expected_metrics):
+def test_project_groups_discovery(dd_run_check, aggregator, instance, project_groups_config, expected_metrics):
     instance = copy.deepcopy(instance)
-    instance['spaces'] = spaces_config
+    instance['project_groups'] = project_groups_config
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     dd_run_check(check)
     for metric in expected_metrics:
@@ -137,99 +139,49 @@ def test_project_groups_discovery(dd_run_check, aggregator, instance, spaces_con
 
 
 @pytest.mark.parametrize(
-    'spaces_config, expected_metrics',
+    'project_groups_config, expected_metrics',
     [
         pytest.param(None, PROJECT_ALL_METRICS, id="default"),
         pytest.param(
-            {
-                'include': [
-                    {'Default': {'project_groups': {'include': [{'test-group': {'projects': {'include': ['hi']}}}]}}}
-                ]
-            },
+            {'include': [{'test-group': {'projects': {'include': ['hi']}}}]},
             PROJECT_ONLY_HI_METRICS,
             id="include",
         ),
         pytest.param(
-            {
-                'include': [
-                    {
-                        'Default': {
-                            'project_groups': {'include': [{'.*': {'projects': {'include': ['.*'], 'limit': 1}}}]}
-                        }
-                    }
-                ]
-            },
+            {'include': [{'.*': {'projects': {'include': ['.*'], 'limit': 1}}}]},
             PROJECT_ONLY_HI_MY_PROJECT_METRICS,
             id="1 limit",
         ),
         pytest.param(
-            {
-                'include': [
-                    {
-                        'Default': {
-                            'project_groups': {'include': [{'.*': {'projects': {'include': ['.*'], 'limit': 0}}}]}
-                        }
-                    }
-                ]
-            },
+            {'include': [{'.*': {'projects': {'include': ['.*'], 'limit': 0}}}]},
             PROJECT_NO_METRICS,
             id="limit hit",
         ),
         pytest.param(
             {
-                'include': [
-                    {
-                        'Default': {
-                            'project_groups': {
-                                'exclude': ['Default.*'],
-                                'include': [{'test-group': {'projects': {'include': ['.*']}}}],
-                            }
-                        }
-                    }
-                ]
+                'exclude': ['Default.*'],
+                'include': [{'test-group': {'projects': {'include': ['.*']}}}],
             },
             PROJECT_ONLY_HI_METRICS,
             id="excluded default",
         ),
         pytest.param(
-            {
-                'include': [
-                    {
-                        'Default': {
-                            'project_groups': {
-                                'include': [{'.*': {'projects': {'include': ['.*'], 'exclude': ['.*']}}}]
-                            }
-                        }
-                    }
-                ]
-            },
+            {'include': [{'.*': {'projects': {'include': ['.*'], 'exclude': ['.*']}}}]},
             PROJECT_NO_METRICS,
             id="all excluded",
         ),
         pytest.param(
-            {
-                'include': [
-                    {
-                        'Default': {
-                            'include': {
-                                'project_groups': {
-                                    'include': [{'.*': {'projects': {'include': ['.*'], 'exclude': ['heyhey']}}}]
-                                }
-                            }
-                        }
-                    }
-                ]
-            },
+            {'include': [{'.*': {'projects': {'include': ['.*'], 'exclude': ['heyhey']}}}]},
             PROJECT_ALL_METRICS,
             id="excluded invalud",
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_projects_discovery(dd_run_check, aggregator, instance, spaces_config, expected_metrics, caplog):
+def test_projects_discovery(dd_run_check, aggregator, instance, project_groups_config, expected_metrics, caplog):
     caplog.set_level(logging.DEBUG)
     instance = copy.deepcopy(instance)
-    instance['spaces'] = spaces_config
+    instance['project_groups'] = project_groups_config
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     dd_run_check(check)
     for metric in expected_metrics:

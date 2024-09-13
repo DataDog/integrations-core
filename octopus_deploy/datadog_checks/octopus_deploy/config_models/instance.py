@@ -29,7 +29,7 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
-class Spaces(BaseModel):
+class ProjectGroups(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -37,7 +37,7 @@ class Spaces(BaseModel):
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
     interval: Optional[int] = None
-    limit: Optional[int] = Field(None, description='Maximum number of spaces to be processed.\n')
+    limit: Optional[int] = Field(None, description='Maximum number of project groups to be processed.\n')
 
 
 class InstanceConfig(BaseModel):
@@ -51,8 +51,9 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     octopus_endpoint: str
+    project_groups: Optional[ProjectGroups] = None
     service: Optional[str] = None
-    spaces: Optional[Spaces] = None
+    space: str
     tags: Optional[tuple[str, ...]] = None
 
     @model_validator(mode='before')

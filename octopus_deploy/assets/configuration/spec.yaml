@@ -15,15 +15,23 @@ files:
         example: http://localhost:80/api
         type: string
       required: true
-    - name: spaces
+    - name: space
       description: |
-        filter your integration by spaces, project groups, and projects.
+        Space to monitor
+      value:
+        example: Default
+        type: string
+        enabled: true
+      required: true
+    - name: project_groups
+      description: |
+        filter your integration by project groups and projects.
       value:
         type: object
         properties:
           - name: limit
             description: |
-              Maximum number of spaces to be processed.
+              Maximum number of project groups to be processed.
             type: integer
           - name: include
             type: array
