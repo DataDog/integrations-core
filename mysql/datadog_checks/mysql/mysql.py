@@ -115,7 +115,7 @@ class MySql(AgentCheck):
         self._resolved_hostname = None
         self._agent_hostname = None
         self._is_aurora = None
-        self._config = MySQLConfig(self.instance)
+        self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
         self.cloud_metadata = self._config.cloud_metadata
 
