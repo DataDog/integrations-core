@@ -124,4 +124,4 @@ vertica-python @ https://agent-int-packages.datadoghq.com/external/vertica-pytho
 websocket-client @ https://agent-int-packages.datadoghq.com/external/websocket-client/websocket_client-1.8.0-py3-none-any.whl#sha256=17b44cc997f5c498e809b22cdf2d9c7a9e71c02c8cc2b6c56e7c2d1239bfa526
 wrapt @ https://agent-int-packages.datadoghq.com/external/wrapt/wrapt-1.16.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=a452f9ca3e3267cd4d0fcf2edd0d035b1934ac2bd7e0e57ac91ad6b95c0c6389
 xmltodict @ https://agent-int-packages.datadoghq.com/external/xmltodict/xmltodict-0.13.0-py2.py3-none-any.whl#sha256=aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852
-zipp @ https://agent-int-packages.datadoghq.com/external/zipp/zipp-3.20.1-py3-none-any.whl#sha256=9960cd8967c8f85a56f920d5d507274e74f9ff813a0ab8889a5b5be2daf44064
+zipp @ https://agent-int-packages.datadoghq.com/external/zipp/zipp-3.20.2-py3-none-any.whl#sha256=a817ac80d6cf4b23bf7f2828b7cabf326f15a001bea8b1f9b49631780ba28350
