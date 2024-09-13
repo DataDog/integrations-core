@@ -5,6 +5,7 @@
 import copy
 import logging
 
+import mock
 import pytest
 
 from datadog_checks.dev.http import MockResponse
@@ -62,40 +63,38 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     aggregator.assert_all_metrics_covered()
 
 
-"""
-@pytest.mark.parametrize(
-    'spaces_config, metric_count, project_group_metrics',
-    [
-        pytest.param(None, 1, PROJECT_GROUP_ALL_METRICS, id="default"),
-        pytest.param({'include': ['Default']}, 1, PROJECT_GROUP_ALL_METRICS, id="include"),
-        pytest.param({'include': ['Default'], 'limit': 1}, 1, PROJECT_GROUP_ALL_METRICS, id="within limit"),
-        pytest.param({'include': ['Default'], 'limit': 0}, 0, PROJECT_GROUP_NO_METRICS, id="limit hit"),
-        pytest.param({'include': ['Default'], 'exclude': ['Default']}, 0, PROJECT_GROUP_NO_METRICS, id="excluded"),
-        pytest.param(
-            {'include': ['Default'], 'exclude': ['test']}, 1, PROJECT_GROUP_ALL_METRICS, id="excluded invalid"
-        ),
-    ],
-)
 @pytest.mark.usefixtures('mock_http_get')
-def test_spaces_discovery(dd_run_check, aggregator, instance, spaces_config, metric_count, project_group_metrics):
-    instance = copy.deepcopy(instance)
-    instance['spaces'] = spaces_config
-    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
-    dd_run_check(check)
-    tags = ["space_name:Default", "space_id:Spaces-1", "space_slug:default"]
-    aggregator.assert_metric("octopus_deploy.space.count", count=metric_count, tags=tags)
-    for metric in project_group_metrics:
-        aggregator.assert_metric(metric["name"], count=metric["count"], tags=metric["tags"])
-    aggregator.assert_metric("octopus_deploy.api.can_connect")
-    aggregator.assert_metric("octopus_deploy.project.count", at_least=0)  # TODO: assert specific
+def test_space_invalid(dd_run_check, aggregator, instance):
+    invalid_space_instance = copy.deepcopy(instance)
+    invalid_space_instance['space'] = 'test'
+    check = OctopusDeployCheck('octopus_deploy', {}, [invalid_space_instance])
+    with pytest.raises(Exception, match=r'Space ID not found for provided space name test, does it exist'):
+        dd_run_check(check)
+
+    aggregator.assert_metric('octopus_deploy.api.can_connect', 1)
     aggregator.assert_all_metrics_covered()
-"""
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_space_cached(dd_run_check, aggregator, instance):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    check._get_space_id = mock.MagicMock()
+    check.space_id = "Spaces-1"
+    dd_run_check(check)
+
+    assert check._get_space_id.call_count == 0
+    aggregator.assert_metric('octopus_deploy.api.can_connect', 1)
 
 
 @pytest.mark.parametrize(
     'project_groups_config, expected_metrics',
     [
         pytest.param(None, PROJECT_GROUP_ALL_METRICS, id="default"),
+        pytest.param(
+            {'include': []},
+            PROJECT_GROUP_ALL_METRICS,
+            id="empty include",
+        ),
         pytest.param(
             {'include': ['test-group']},
             PROJECT_GROUP_ONLY_TEST_GROUP_METRICS,
@@ -136,6 +135,15 @@ def test_project_groups_discovery(dd_run_check, aggregator, instance, project_gr
     dd_run_check(check)
     for metric in expected_metrics:
         aggregator.assert_metric(metric["name"], count=metric["count"], tags=metric["tags"])
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_project_groups_discovery_error(dd_run_check, instance):
+    instance = copy.deepcopy(instance)
+    instance['project_groups'] = {'include': None}
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    with pytest.raises(Exception, match=r'Setting `include` must be an array'):
+        dd_run_check(check)
 
 
 @pytest.mark.parametrize(

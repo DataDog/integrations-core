@@ -4,6 +4,7 @@
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.models.types import copy_raw
 from datadog_checks.octopus_deploy.config_models import ConfigMixin
@@ -88,16 +89,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.info("Collecting data from projects: %s", ",".join(all_project_names))
         return projects
 
-    def report_project_metrics(self, project_list, project_group_id, project_group_name):
-        for _, _, project, _ in project_list:
-            tags = [
-                f"project_id:{project.id}",
-                f"project_name:{project.name}",
-                f"project_group_id:{project_group_id}",
-                f"project_group_name:{project_group_name}",
-            ]
-            self.gauge(PROJECT_COUNT_METRIC, 1, tags=self.base_tags + tags)
-
     def _get_new_projects(self, project_group_id):
         projects_endpoint = f"{self.config.octopus_endpoint}/{self.space_id}/projectgroups/{project_group_id}/projects"
         response = self.http.get(projects_endpoint)
@@ -132,8 +123,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 self.log.debug("Space id for %s found: %s ", self.config.space, self.space_id)
 
         if self.space_id is None:
-            self.error("Space ID not found for provided space name %s, does it exist?", self.config.space)
-            raise
+            raise CheckException(f"Space ID not found for provided space name {self.config.space}, does it exist?")
 
     def project_groups(self):
         if self._project_groups_discovery:
