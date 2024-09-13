@@ -1,1 +1,0 @@
-Add warning logs when agent user is not authorized to run $collStats and $indexStats on collections.

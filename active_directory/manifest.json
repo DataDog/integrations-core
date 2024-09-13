@@ -47,9 +47,9 @@
       "Active Directory": "assets/dashboards/active_directory.json"
     },
     "monitors": {
-      "[Active Directory] Elevated LDAP binding duration for host {{host.name}}": "assets/monitors/ldap_binding.json",
-      "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}": "assets/monitors/ldap_client_sessions.json",
-      "[Active Directory] Anomalous number of successful LDAP bindings for host: {{host.name}}": "assets/monitors/ldap_binding_successful.json"
+      "LDAP binding duration is high": "assets/monitors/ldap_binding.json",
+      "Number of sessions for LDAP clients is anomalous": "assets/monitors/ldap_client_sessions.json",
+      "Number of LDAP bindings is anomalous": "assets/monitors/ldap_binding_successful.json"
     }
   }
 }

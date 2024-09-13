@@ -48,10 +48,10 @@
       "auto_install": true
     },
     "monitors": {
-      "high cpu utilization": "assets/monitors/cpu_utilization.json",
-      "low GPU utilization": "assets/monitors/gpu_utilization.json",
-      "high memory utilization": "assets/monitors/mem_utilization.json",
-      "high failed tasks": "assets/monitors/failed_task.json"
+      "High CPU Utilization on Ray.io node": "assets/monitors/cpu_utilization.json",
+      "Low GPU Utilization low on Ray.io Node": "assets/monitors/gpu_utilization.json",
+      "High Memory Usage": "assets/monitors/mem_utilization.json",
+      "High Number of Failed Tasks on Ray.io Node": "assets/monitors/failed_task.json"
     },
     "dashboards": {
       "Ray Overview Dashboard": "assets/dashboards/overview_dashboard.json"

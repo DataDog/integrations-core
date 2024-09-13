@@ -1075,7 +1075,11 @@ class MySql(AgentCheck):
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                cursor.execute("SHOW MASTER STATUS;")
+                if not self.is_mariadb and self.version.version_compatible((8, 4, 0)):
+                    cursor.execute("SHOW BINARY LOG STATUS;")
+                else:
+                    cursor.execute("SHOW MASTER STATUS;")
+
                 binlog_results = cursor.fetchone()
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
