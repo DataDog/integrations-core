@@ -37,6 +37,16 @@ class Database:
 def get_unixodbc_sysconfig(python_executable):
     return os.path.join(os.path.dirname(os.path.dirname(python_executable)), "etc")
 
+def is_non_empty_file(path):
+    if not os.path.exists(path):
+        return
+    try:
+        if os.path.getsize(path) > 0:
+            return True
+    # exists and getsize aren't atomic 
+    except FileNotFoundError as e:
+        return
+    return
 
 def set_default_driver_conf():
     if Platform.is_containerized():
@@ -62,21 +72,13 @@ def set_default_driver_conf():
         # by getting the path to the python executable and get the directory above /bin/python
         linux_unixodbc_sysconfig = get_unixodbc_sysconfig(sys.executable)
         odbc_ini = os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
-        if os.path.exists(odbc_ini):
-            exists = False
-            try:
-                if os.path.getsize(odbc_ini) > 0:
-                    exists = True
-            # exists and getsize aren't atomic 
-            except FileNotFoundError as e:
-                exists = False
-            if not exists:
-                return
+        if not is_non_empty_file(odbc_ini):
+            return
             
-            os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
-            odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
-            if not os.path.exists(odbc_inst_ini_sysconfig) or os.path.getsize(odbc_inst_ini_sysconfig) == 0:
-                shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
+        os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
+        odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
+        if not is_non_empty_file(odbc_inst_ini_sysconfig):
+            shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
             # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
             # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
             return
