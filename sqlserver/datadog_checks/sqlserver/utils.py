@@ -33,8 +33,10 @@ class Database:
     def __str__(self):
         return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
 
+
 def get_unixodbc_sysconfig(python_executable):
-    return os.path.join(os.path.dirname(os.path.dirname(python_executable)),"etc")
+    return os.path.join(os.path.dirname(os.path.dirname(python_executable)), "etc")
+
 
 def set_default_driver_conf():
     if Platform.is_containerized():
