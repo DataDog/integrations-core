@@ -308,6 +308,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /ping_federate/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/cisco_secure_email_threat_defense/                                 @DataDog/saas-integrations
+/cisco_secure_email_threat_defense/*.md                             @DataDog/saas-integrations @DataDog/documentation
+/cisco_secure_email_threat_defense/manifest.json                    @DataDog/saas-integrations @DataDog/documentation
+/cisco_secure_email_threat_defense/assets/logs/                     @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /ringcentral/                                                        @DataDog/saas-integrations
 /ringcentral/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
 /ringcentral/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
@@ -324,10 +329,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /docusign/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /docusign/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/docusign/                                                          @DataDog/saas-integrations
-/docusign/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
-/docusign/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
-/docusign/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+/trend_micro_vision_one_endpoint_security/                          @DataDog/saas-integrations
+/trend_micro_vision_one_endpoint_security/*.md                      @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_vision_one_endpoint_security/manifest.json             @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_vision_one_endpoint_security/assets/logs/              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations

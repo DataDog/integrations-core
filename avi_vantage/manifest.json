@@ -55,7 +55,7 @@
       "Avi Vantage - Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Avi Vantage - Error Rate Monitor": "assets/monitors/error_rate_monitor.json"
+      "Virtual service has a high number of errors": "assets/monitors/error_rate_monitor.json"
     }
   }
 }

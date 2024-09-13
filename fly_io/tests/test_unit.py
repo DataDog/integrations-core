@@ -95,11 +95,11 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/': MockResponse(status_code=500)}},
+            {'http_error': {'/v1/apps': MockResponse(status_code=500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/': MockResponse(status_code=404)}},
+            {'http_error': {'/v1/apps': MockResponse(status_code=404)}},
             id='404',
         ),
     ],

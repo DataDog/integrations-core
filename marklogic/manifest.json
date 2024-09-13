@@ -53,9 +53,9 @@
       "MarkLogic - Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Marklogic low cache": "assets/monitors/marklogic_low_cache.json",
-      "Marklogic high load": "assets/monitors/marklogic_high_load.json",
-      "Marklogic long requests": "assets/monitors/marklogic_long_requests.json"
+      "Cache is not large enough": "assets/monitors/marklogic_low_cache.json",
+      "Forest processing load is high": "assets/monitors/marklogic_high_load.json",
+      "Active requests are taking too long": "assets/monitors/marklogic_long_requests.json"
     },
     "saved_views": {
       "marklogic_processes": "assets/saved_views/marklogic_processes.json"

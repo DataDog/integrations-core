@@ -31,17 +31,26 @@ class IndexStatsCollector(MongoCollector):
         for coll_name in coll_names:
             try:
                 for stats in api.index_stats(self.db_name, coll_name):
+                    idx_name = stats.get('name', 'unknown')
                     additional_tags = [
-                        "name:{0}".format(stats.get('name', 'unknown')),
-                        "collection:{0}".format(coll_name),
-                        "db:{0}".format(self.db_name),
+                        f"name:{idx_name}",  # deprecated but kept for backward compatability, use index instead
+                        f"index:{idx_name}",
+                        f"collection:{coll_name}",
+                        f"db:{self.db_name}",
                     ]
                     if stats.get('shard'):
-                        additional_tags.append("shard:{0}".format(stats['shard']))
+                        additional_tags.append(f"shard:{stats['shard']}")
                     self._submit_payload({"indexes": stats}, additional_tags, INDEX_METRICS, "collection")
             except OperationFailure as e:
                 # Atlas restricts $indexStats on system collections
-                self.log.warning("Could not collect index stats for collection %s: %s", coll_name, e)
+                if e.code == 13:
+                    self.log.warning("Unauthorized to run $indexStats on collection %s.%s", self.db_name, coll_name)
+                else:
+                    self.log.warning(
+                        "Could not collect index stats for collection %s.%s: %s", self.db_name, coll_name, e.details
+                    )
             except Exception as e:
-                self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
+                self.log.error(
+                    "Unexpected error when fetch indexes stats for collection %s.%s: %s", self.db_name, coll_name, e
+                )
                 raise e
