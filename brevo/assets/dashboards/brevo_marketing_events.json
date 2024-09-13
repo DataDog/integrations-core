@@ -1002,7 +1002,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:brevo service:marketing-events $campaign_id",
+                            "query_string": "source:brevo service:marketing-events $campaign_id $recipient_email $event_name",
                             "indexes": [],
                             "storage": "hot",
                             "sort": {
