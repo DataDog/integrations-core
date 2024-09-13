@@ -12,7 +12,7 @@ import mock
 import pytest
 
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.ci import running_on_linux_ci
+from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
@@ -870,7 +870,7 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
         schemas._fetch_for_databases()
 
 
-@pytest.mark.skipif(running_on_linux_ci(), reason='Relevant only for Linux')
+@pytest.mark.skipif(running_on_windows_ci(), reason='Relevant only for Linux')
 def test_get_unixodbc_sysconfig():
     assert (
         get_unixodbc_sysconfig("/opt/datadog-agent/embedded/bin/python") == "/opt/datadog-agent/embedded/etc"
