@@ -37,7 +37,8 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Offering::Integration"
+      "Offering::Integration",
+      "Product::LLM Observability"
     ],
     "resources": [
       {
@@ -76,9 +77,9 @@
       "OpenAI Usage Overview": "assets/dashboards/usage_overview_dashboard.json"
     },
     "monitors": {
-      "Request Limits": "assets/monitors/request_limits.json",
-      "Token per min Limits": "assets/monitors/tokens_limits.json",
-      "Abnormally High Token Usage": "assets/monitors/api_token_usage.json"
+      "OpenAI API usage is approaching rate limit": "assets/monitors/request_limits.json",
+      "OpenAI tokens usage is approaching rate limit": "assets/monitors/tokens_limits.json",
+      "Token usage is abnormally high": "assets/monitors/api_token_usage.json"
     }
   },
   "author": {

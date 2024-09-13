@@ -34,6 +34,7 @@ def _assert_mongodb_instance_event(
     shards,
     cluster_type,
     cluster_name,
+    modules,
 ):
     mongodb_instance_event = _get_mongodb_instance_event(aggregator)
     if not dbm:
@@ -54,6 +55,7 @@ def _assert_mongodb_instance_event(
         "shards": shards,
         "cluster_type": cluster_type,
         "cluster_name": cluster_name,
+        "modules": modules,
     }
     assert mongodb_instance_event['metadata'] == {
         'dbm': dbm,
@@ -136,6 +138,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
         ],
         cluster_type='sharded_cluster',
         cluster_name='my_cluster',
+        modules=['enterprise'],
     )
 
 
@@ -237,6 +240,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -298,6 +302,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -353,6 +358,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -452,6 +458,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -512,6 +519,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -527,6 +535,8 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -613,6 +623,7 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         shards=None,
         cluster_type='replica_set',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -629,6 +640,8 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -718,6 +731,7 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         shards=None,
         cluster_type='replica_set',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -786,6 +800,7 @@ def test_integration_replicaset_secondary(
         shards=None,
         cluster_type='replica_set',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -840,6 +855,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         shards=None,
         cluster_type='replica_set',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -890,6 +906,7 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
         shards=None,
         cluster_type=None,
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -1080,6 +1097,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name='my_cluster',
+        modules=['enterprise'],
     )
     aggregator.reset()
 
@@ -1105,6 +1123,8 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',

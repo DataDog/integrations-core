@@ -51,7 +51,7 @@
       "Traefik Mesh Overview": "assets/dashboards/traefik_mesh_overview.json"
     },
     "monitors": {
-      "High Request Count": "assets/monitors/high_request_count.json"
+      "Traefik Mesh entrypoint request count failures are high.": "assets/monitors/high_request_count.json"
     },
     "saved_views": {
       "Traefik Mesh Logs Overview": "assets/saved_views/traefik_mesh_log_overview.json",

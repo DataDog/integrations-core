@@ -977,7 +977,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Nodes Overview Dashboard](https://app.datadoghq.com/screen/integration/30340/kubernetes-nodes-overview?tpl_var_cluster=$cluster.value)",
+                            "content": "View more in the [Kubernetes Nodes Overview Dashboard](https://app.datadoghq.com/dash/integration/30340/kubernetes-nodes-overview?tpl_var_cluster=$cluster.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -1428,7 +1428,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Deployments Overview Dashboard](https://app.datadoghq.com/screen/integration/30341/kubernetes-deployments-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)\n",
+                            "content": "View more in the [Kubernetes Deployments Overview Dashboard](https://app.datadoghq.com/dash/integration/30341/kubernetes-deployments-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
