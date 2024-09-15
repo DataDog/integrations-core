@@ -39,7 +39,7 @@ class BaseSqlServerMetric(object):
     # Flag to indicate if this subclass/table is available for custom queries
     CUSTOM_QUERIES_AVAILABLE = True
 
-    def __init__(self, cfg_instance, base_name, report_function, column, logger):
+    def __init__(self, cfg_instance, base_name, report_function, column, logger, tags):
         self.cfg_instance = cfg_instance
         self.metric_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
@@ -51,7 +51,7 @@ class BaseSqlServerMetric(object):
         self.instance = cfg_instance.get('instance_name', '')
         self.physical_db_name = cfg_instance.get('physical_db_name', '')
         self.object_name = cfg_instance.get('object_name', '')
-        self.tags = cfg_instance.get('tags', []) or []
+        self.tags = tags
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
