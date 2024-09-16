@@ -878,7 +878,10 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
 
 
 def test_get_unixodbc_sysconfig():
-    assert get_unixodbc_sysconfig("/opt/datadog-agent/embedded/bin/python").split(os.path.sep) == [
+    etc_dir = "/opt"
+    for dir in ["datadog-agent", "embedded", "bin", "python"]:
+        etc_dir = os.path.join(etc_dir, dir)
+    assert get_unixodbc_sysconfig(etc_dir).split(os.path.sep) == [
         "",
         "opt",
         "datadog-agent",
