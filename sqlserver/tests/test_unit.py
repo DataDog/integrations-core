@@ -10,9 +10,9 @@ from collections import namedtuple
 
 import mock
 import pytest
+import sys
 
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.ci import running_on_linux_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
@@ -22,6 +22,7 @@ from datadog_checks.sqlserver.utils import (
     Database,
     extract_sql_comments_and_procedure_name,
     get_unixodbc_sysconfig,
+    is_non_empty_file,
     parse_sqlserver_major_version,
     set_default_driver_conf,
 )
@@ -457,7 +458,20 @@ def test_set_default_driver_conf():
         with EnvVars({'ODBCSYSINI': 'ABC'}):
             set_default_driver_conf()
             assert os.environ['ODBCSYSINI'] == 'ABC'
-
+    
+    odbc_config_dir = os.path.expanduser('~')
+    with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=odbc_config_dir):
+        with EnvVars({}, ignore=['ODBCSYSINI']):
+            odbc_inst = os.path.join(odbc_config_dir, "odbcinst.ini")
+            odbc_ini = os.path.join(odbc_config_dir, "odbc.ini")
+            for file in [odbc_inst, odbc_ini]:
+                if os.path.exists(file):
+                    os.remove(file)
+            with open(odbc_ini, "x") as file:
+                file.write("dummy-content")
+            set_default_driver_conf()
+            assert is_non_empty_file(odbc_inst), "odbc_inst should have been created"
+        
 
 @windows_ci
 def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
@@ -864,8 +878,13 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
         schemas._fetch_for_databases()
 
 
-@pytest.mark.skipif(not running_on_linux_ci(), reason='Relevant only for Linux')
 def test_get_unixodbc_sysconfig():
-    assert (
-        get_unixodbc_sysconfig("/opt/datadog-agent/embedded/bin/python") == "/opt/datadog-agent/embedded/etc"
-    ), "incorrect unix odbc config dir"
+    assert get_unixodbc_sysconfig("/opt/datadog-agent/embedded/bin/python").split(os.path.sep) == [
+        "",
+        "opt",
+        "datadog-agent",
+        "embedded",
+        "etc",
+    ], "incorrect unix odbc config dir"
+
+    
