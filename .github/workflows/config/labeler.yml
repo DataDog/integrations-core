@@ -101,6 +101,8 @@ integration/cisco_duo:
 - cisco_duo/**/*
 integration/cisco_sdwan:
 - cisco_sdwan/**/*
+integration/cisco_secure_email_threat_defense:
+- cisco_secure_email_threat_defense/**/*
 integration/cisco_secure_endpoint:
 - cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
@@ -157,6 +159,8 @@ integration/dns_check:
 - dns_check/**/*
 integration/docker_daemon:
 - docker_daemon/**/*
+integration/docusign:
+- docusign/**/*
 integration/dotnetclr:
 - dotnetclr/**/*
 integration/druid:
@@ -203,6 +207,8 @@ integration/go-metro:
 - go-metro/**/*
 integration/go_expvar:
 - go_expvar/**/*
+integration/godaddy:
+- godaddy/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:
@@ -273,6 +279,8 @@ integration/kube_proxy:
 - kube_proxy/**/*
 integration/kube_scheduler:
 - kube_scheduler/**/*
+integration/kubeflow:
+- kubeflow/**/*
 integration/kubelet:
 - kubelet/**/*
 integration/kubernetes:
@@ -283,18 +291,26 @@ integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
+integration/kubevirt_controller:
+- kubevirt_controller/**/*
+integration/kubevirt_api:
+- kubevirt_api/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/lastpass:
+- lastpass/**/*
 integration/lighttpd:
 - lighttpd/**/*
 integration/linkerd:
 - linkerd/**/*
 integration/linux_proc_extras:
 - linux_proc_extras/**/*
+integration/mailchimp:
+- mailchimp/**/*
 integration/mapr:
 - mapr/**/*
 integration/mapreduce:
@@ -403,6 +419,8 @@ integration/riak:
 - riak/**/*
 integration/riakcs:
 - riakcs/**/*
+integration/ringcentral:
+- ringcentral/**/*
 integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
@@ -503,6 +521,8 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
+integration/trend_micro_vision_one_endpoint_security:
+- trend_micro_vision_one_endpoint_security/**/*
 integration/trend_micro_vision_one_xdr:
 - trend_micro_vision_one_xdr/**/*
 integration/twemproxy:

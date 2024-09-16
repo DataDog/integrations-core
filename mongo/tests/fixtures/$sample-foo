@@ -1,0 +1,92 @@
+[
+    {
+        "_id": {
+            "$oid": "5f620f9d52024f4dcab471ab"
+        },
+        "date": {
+            "$date": "2020-09-16T00:00:00.000Z"
+        },
+        "data": "A",
+        "available": true,
+        "max": 1.2,
+        "min": 0.5,
+        "count": 12,
+        "geo": {
+            "type": "Point",
+            "coordinates": [
+                40.7128,
+                -74.0060
+            ]
+        },
+        "tags": [
+            "A",
+            "B"
+        ],
+        "nested": {
+            "a": {
+                "b": {
+                    "c": {
+                        "d": {
+                            "e": 1
+                        }
+                    }
+                }
+            }
+        },
+        "occurrences": [
+            {
+                "date": {
+                    "$date": "2020-09-16T00:00:00.000Z"
+                },
+                "count": 12,
+                "exists": true
+            },
+            {
+                "date": {
+                    "$date": "2020-09-17T00:00:00.000Z"
+                },
+                "count": 10
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$oid": "5f620f9d52024f4dcab471ab"
+        },
+        "date": {
+            "$date": "2020-09-16T00:00:00.000Z"
+        },
+        "data": null,
+        "max": 1.2,
+        "min": 0.5,
+        "sum": 12,
+        "count": 12,
+        "geo": {
+            "type": "Point",
+            "coordinates": [
+                40.7128,
+                -74.0060
+            ],
+            "test": false
+        },
+        "tags": [
+            "A"
+        ],
+        "occurrences": [
+            {
+                "date": {
+                    "$date": "2020-09-16T00:00:00.000Z"
+                },
+                "count": 12,
+                "exists": true
+            },
+            {
+                "date": {
+                    "$date": "2020-09-17T00:00:00.000Z"
+                },
+                "count": 10,
+                "test": "12"
+            }
+        ]
+    }
+]

@@ -13,7 +13,7 @@ DEVICE_METADATA = [
         'id_tags': [
             'device_ip:10.0.200.0',
             'device_namespace:default',
-            'device_hostname:pod-1-node-101',
+            'device_hostname:leaf101',
             'device_id:default:10.0.200.0',
         ],
         'integration': 'cisco-aci',
@@ -28,13 +28,13 @@ DEVICE_METADATA = [
             'fabric_pod_id:1',
             'device_ip:10.0.200.0',
             'device_namespace:default',
-            'device_hostname:pod-1-node-101',
+            'device_hostname:leaf101',
             'device_id:default:10.0.200.0',
         ],
         'ip_address': '10.0.200.0',
         'model': 'N9K-C93180YC-FX',
         'fabric_st': 'active',
-        'name': 'pod-1-node-101',
+        'name': 'leaf101',
         'serial_number': 'FDO20440TS1',
         'status': 1,
         'vendor': 'cisco',
@@ -45,7 +45,7 @@ DEVICE_METADATA = [
         'id_tags': [
             'device_ip:10.0.200.1',
             'device_namespace:default',
-            'device_hostname:pod-1-node-102',
+            'device_hostname:leaf102',
             'device_id:default:10.0.200.1',
         ],
         'integration': 'cisco-aci',
@@ -60,13 +60,13 @@ DEVICE_METADATA = [
             'fabric_pod_id:1',
             'device_ip:10.0.200.1',
             'device_namespace:default',
-            'device_hostname:pod-1-node-102',
+            'device_hostname:leaf102',
             'device_id:default:10.0.200.1',
         ],
         'ip_address': '10.0.200.1',
         'model': 'N9K-C93180YC-FX',
         'fabric_st': 'active',
-        'name': 'pod-1-node-102',
+        'name': 'leaf102',
         'serial_number': 'FDO20510HCA',
         'status': 1,
         'vendor': 'cisco',
@@ -77,7 +77,7 @@ DEVICE_METADATA = [
         'id_tags': [
             'device_ip:10.0.200.2',
             'device_namespace:default',
-            'device_hostname:pod-1-node-202',
+            'device_hostname:spine202',
             'device_id:default:10.0.200.2',
         ],
         'integration': 'cisco-aci',
@@ -92,13 +92,13 @@ DEVICE_METADATA = [
             'fabric_pod_id:1',
             'device_ip:10.0.200.2',
             'device_namespace:default',
-            'device_hostname:pod-1-node-202',
+            'device_hostname:spine202',
             'device_id:default:10.0.200.2',
         ],
         'ip_address': '10.0.200.2',
         'model': 'N9K-C9336PQ',
         'fabric_st': 'active',
-        'name': 'pod-1-node-202',
+        'name': 'spine202',
         'serial_number': 'SAL2014N5T7',
         'status': 1,
         'vendor': 'cisco',
@@ -109,7 +109,7 @@ DEVICE_METADATA = [
         'id_tags': [
             'device_ip:10.0.200.3',
             'device_namespace:default',
-            'device_hostname:pod-1-node-3',
+            'device_hostname:apic3',
             'device_id:default:10.0.200.3',
         ],
         'integration': 'cisco-aci',
@@ -123,13 +123,13 @@ DEVICE_METADATA = [
             'fabric_pod_id:1',
             'device_ip:10.0.200.3',
             'device_namespace:default',
-            'device_hostname:pod-1-node-3',
+            'device_hostname:apic3',
             'device_id:default:10.0.200.3',
         ],
         'ip_address': '10.0.200.3',
         'model': 'APIC-SERVER-M1',
         'fabric_st': 'unknown',
-        'name': 'pod-1-node-3',
+        'name': 'apic3',
         'serial_number': 'FCH1927V11T',
         'status': 2,
         'vendor': 'cisco',
@@ -140,7 +140,7 @@ DEVICE_METADATA = [
         'id_tags': [
             'device_ip:10.0.200.4',
             'device_namespace:default',
-            'device_hostname:pod-1-node-1',
+            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
         ],
         'integration': 'cisco-aci',
@@ -154,13 +154,13 @@ DEVICE_METADATA = [
             'fabric_pod_id:1',
             'device_ip:10.0.200.4',
             'device_namespace:default',
-            'device_hostname:pod-1-node-1',
+            'device_hostname:apic1',
             'device_id:default:10.0.200.4',
         ],
         'ip_address': '10.0.200.4',
         'model': 'APIC-SERVER-M1',
         'fabric_st': 'unknown',
-        'name': 'pod-1-node-1',
+        'name': 'apic1',
         'serial_number': 'FCH1928V0SL',
         'status': 2,
         'vendor': 'cisco',
@@ -171,7 +171,7 @@ DEVICE_METADATA = [
         'id_tags': [
             'device_ip:10.0.200.5',
             'device_namespace:default',
-            'device_hostname:pod-1-node-201',
+            'device_hostname:spine201',
             'device_id:default:10.0.200.5',
         ],
         'integration': 'cisco-aci',
@@ -186,13 +186,13 @@ DEVICE_METADATA = [
             'fabric_pod_id:1',
             'device_ip:10.0.200.5',
             'device_namespace:default',
-            'device_hostname:pod-1-node-201',
+            'device_hostname:spine201',
             'device_id:default:10.0.200.5',
         ],
         'ip_address': '10.0.200.5',
         'model': 'N9K-C9336PQ',
         'fabric_st': 'active',
-        'name': 'pod-1-node-201',
+        'name': 'spine201',
         'serial_number': 'SAL2014N5U4',
         'status': 1,
         'vendor': 'cisco',
@@ -203,7 +203,7 @@ DEVICE_METADATA = [
         'id_tags': [
             'device_ip:10.0.200.6',
             'device_namespace:default',
-            'device_hostname:pod-1-node-2',
+            'device_hostname:apic2',
             'device_id:default:10.0.200.6',
         ],
         'integration': 'cisco-aci',
@@ -217,13 +217,13 @@ DEVICE_METADATA = [
             'fabric_pod_id:1',
             'device_ip:10.0.200.6',
             'device_namespace:default',
-            'device_hostname:pod-1-node-2',
+            'device_hostname:apic2',
             'device_id:default:10.0.200.6',
         ],
         'ip_address': '10.0.200.6',
         'model': 'APIC-SERVER-M1',
         'fabric_st': 'unknown',
-        'name': 'pod-1-node-2',
+        'name': 'apic2',
         'serial_number': 'FCH1928V06Q',
         'status': 2,
         'vendor': 'cisco',
@@ -238,7 +238,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/43',
         ],
-        'index': 'eth101/1/43',
+        'index': 43,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/43',
@@ -251,7 +251,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/44',
         ],
-        'index': 'eth101/1/44',
+        'index': 44,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/44',
@@ -264,7 +264,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/45',
         ],
-        'index': 'eth101/1/45',
+        'index': 45,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/45',
@@ -277,7 +277,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/46',
         ],
-        'index': 'eth101/1/46',
+        'index': 46,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/46',
@@ -290,7 +290,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/47',
         ],
-        'index': 'eth101/1/47',
+        'index': 47,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/47',
@@ -303,7 +303,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/48',
         ],
-        'index': 'eth101/1/48',
+        'index': 48,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/48',
@@ -316,7 +316,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/1',
         ],
-        'index': 'eth1/1',
+        'index': 1,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/1',
@@ -329,7 +329,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/2',
         ],
-        'index': 'eth1/2',
+        'index': 2,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/2',
@@ -342,7 +342,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/3',
         ],
-        'index': 'eth1/3',
+        'index': 3,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/3',
@@ -355,7 +355,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/4',
         ],
-        'index': 'eth1/4',
+        'index': 4,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/4',
@@ -368,7 +368,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/5',
         ],
-        'index': 'eth1/5',
+        'index': 5,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/5',
@@ -381,7 +381,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/6',
         ],
-        'index': 'eth1/6',
+        'index': 6,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/6',
@@ -394,7 +394,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/7',
         ],
-        'index': 'eth1/7',
+        'index': 7,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/7',
@@ -407,7 +407,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/9',
         ],
-        'index': 'eth1/9',
+        'index': 9,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/9',
@@ -420,7 +420,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/8',
         ],
-        'index': 'eth1/8',
+        'index': 8,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/8',
@@ -433,7 +433,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/10',
         ],
-        'index': 'eth1/10',
+        'index': 10,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/10',
@@ -446,7 +446,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/11',
         ],
-        'index': 'eth1/11',
+        'index': 11,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/11',
@@ -459,7 +459,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/12',
         ],
-        'index': 'eth1/12',
+        'index': 12,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/12',
@@ -472,7 +472,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/13',
         ],
-        'index': 'eth1/13',
+        'index': 13,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/13',
@@ -485,7 +485,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/14',
         ],
-        'index': 'eth1/14',
+        'index': 14,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/14',
@@ -498,7 +498,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/15',
         ],
-        'index': 'eth1/15',
+        'index': 15,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/15',
@@ -511,7 +511,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/16',
         ],
-        'index': 'eth1/16',
+        'index': 16,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/16',
@@ -524,7 +524,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/17',
         ],
-        'index': 'eth1/17',
+        'index': 17,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/17',
@@ -537,7 +537,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/18',
         ],
-        'index': 'eth1/18',
+        'index': 18,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/18',
@@ -550,7 +550,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/19',
         ],
-        'index': 'eth1/19',
+        'index': 19,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/19',
@@ -563,7 +563,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/20',
         ],
-        'index': 'eth1/20',
+        'index': 20,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/20',
@@ -576,7 +576,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/21',
         ],
-        'index': 'eth1/21',
+        'index': 21,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/21',
@@ -589,7 +589,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/22',
         ],
-        'index': 'eth1/22',
+        'index': 22,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/22',
@@ -602,7 +602,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/23',
         ],
-        'index': 'eth1/23',
+        'index': 23,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/23',
@@ -615,7 +615,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/24',
         ],
-        'index': 'eth1/24',
+        'index': 24,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/24',
@@ -628,7 +628,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/25',
         ],
-        'index': 'eth1/25',
+        'index': 25,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/25',
@@ -641,7 +641,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/26',
         ],
-        'index': 'eth1/26',
+        'index': 26,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/26',
@@ -654,7 +654,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/27',
         ],
-        'index': 'eth1/27',
+        'index': 27,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/27',
@@ -667,7 +667,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/28',
         ],
-        'index': 'eth1/28',
+        'index': 28,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/28',
@@ -680,7 +680,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/29',
         ],
-        'index': 'eth1/29',
+        'index': 29,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/29',
@@ -693,7 +693,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/30',
         ],
-        'index': 'eth1/30',
+        'index': 30,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/30',
@@ -706,7 +706,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/31',
         ],
-        'index': 'eth1/31',
+        'index': 31,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/31',
@@ -719,7 +719,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/32',
         ],
-        'index': 'eth1/32',
+        'index': 32,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/32',
@@ -732,7 +732,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/33',
         ],
-        'index': 'eth1/33',
+        'index': 33,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/33',
@@ -745,7 +745,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/34',
         ],
-        'index': 'eth1/34',
+        'index': 34,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/34',
@@ -758,7 +758,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/35',
         ],
-        'index': 'eth1/35',
+        'index': 35,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/35',
@@ -771,7 +771,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/36',
         ],
-        'index': 'eth1/36',
+        'index': 36,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/36',
@@ -784,7 +784,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/37',
         ],
-        'index': 'eth1/37',
+        'index': 37,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/37',
@@ -797,7 +797,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/38',
         ],
-        'index': 'eth1/38',
+        'index': 38,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/38',
@@ -810,7 +810,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/39',
         ],
-        'index': 'eth1/39',
+        'index': 39,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/39',
@@ -823,7 +823,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/40',
         ],
-        'index': 'eth1/40',
+        'index': 40,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/40',
@@ -836,7 +836,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/41',
         ],
-        'index': 'eth1/41',
+        'index': 41,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/41',
@@ -849,7 +849,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/42',
         ],
-        'index': 'eth1/42',
+        'index': 42,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/42',
@@ -862,7 +862,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/43',
         ],
-        'index': 'eth1/43',
+        'index': 43,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/43',
@@ -875,7 +875,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/44',
         ],
-        'index': 'eth1/44',
+        'index': 44,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/44',
@@ -888,7 +888,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/45',
         ],
-        'index': 'eth1/45',
+        'index': 45,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/45',
@@ -901,7 +901,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/46',
         ],
-        'index': 'eth1/46',
+        'index': 46,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/46',
@@ -914,7 +914,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/47',
         ],
-        'index': 'eth1/47',
+        'index': 47,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/47',
@@ -927,7 +927,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/48',
         ],
-        'index': 'eth1/48',
+        'index': 48,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/48',
@@ -940,7 +940,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/49',
         ],
-        'index': 'eth1/49',
+        'index': 49,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/49',
@@ -953,7 +953,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/50',
         ],
-        'index': 'eth1/50',
+        'index': 50,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/50',
@@ -966,7 +966,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/51',
         ],
-        'index': 'eth1/51',
+        'index': 51,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/51',
@@ -979,7 +979,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/52',
         ],
-        'index': 'eth1/52',
+        'index': 52,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/52',
@@ -992,7 +992,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/53',
         ],
-        'index': 'eth1/53',
+        'index': 53,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/53',
@@ -1005,7 +1005,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/54',
         ],
-        'index': 'eth1/54',
+        'index': 54,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/54',
@@ -1018,7 +1018,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/1',
         ],
-        'index': 'eth101/1/1',
+        'index': 1,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/1',
@@ -1031,7 +1031,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/2',
         ],
-        'index': 'eth101/1/2',
+        'index': 2,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/2',
@@ -1044,7 +1044,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/3',
         ],
-        'index': 'eth101/1/3',
+        'index': 3,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/3',
@@ -1057,7 +1057,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/4',
         ],
-        'index': 'eth101/1/4',
+        'index': 4,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/4',
@@ -1070,7 +1070,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/5',
         ],
-        'index': 'eth101/1/5',
+        'index': 5,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/5',
@@ -1083,7 +1083,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/6',
         ],
-        'index': 'eth101/1/6',
+        'index': 6,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/6',
@@ -1096,7 +1096,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/7',
         ],
-        'index': 'eth101/1/7',
+        'index': 7,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/7',
@@ -1109,7 +1109,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/8',
         ],
-        'index': 'eth101/1/8',
+        'index': 8,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/8',
@@ -1122,7 +1122,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/9',
         ],
-        'index': 'eth101/1/9',
+        'index': 9,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/9',
@@ -1135,7 +1135,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/10',
         ],
-        'index': 'eth101/1/10',
+        'index': 10,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/10',
@@ -1148,7 +1148,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/11',
         ],
-        'index': 'eth101/1/11',
+        'index': 11,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/11',
@@ -1161,7 +1161,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/12',
         ],
-        'index': 'eth101/1/12',
+        'index': 12,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/12',
@@ -1174,7 +1174,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/13',
         ],
-        'index': 'eth101/1/13',
+        'index': 13,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/13',
@@ -1187,7 +1187,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/14',
         ],
-        'index': 'eth101/1/14',
+        'index': 14,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/14',
@@ -1200,7 +1200,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/15',
         ],
-        'index': 'eth101/1/15',
+        'index': 15,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/15',
@@ -1213,7 +1213,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/16',
         ],
-        'index': 'eth101/1/16',
+        'index': 16,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/16',
@@ -1226,7 +1226,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/17',
         ],
-        'index': 'eth101/1/17',
+        'index': 17,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/17',
@@ -1239,7 +1239,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/18',
         ],
-        'index': 'eth101/1/18',
+        'index': 18,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/18',
@@ -1252,7 +1252,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/19',
         ],
-        'index': 'eth101/1/19',
+        'index': 19,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/19',
@@ -1265,7 +1265,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/20',
         ],
-        'index': 'eth101/1/20',
+        'index': 20,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/20',
@@ -1278,7 +1278,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/21',
         ],
-        'index': 'eth101/1/21',
+        'index': 21,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/21',
@@ -1291,7 +1291,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/22',
         ],
-        'index': 'eth101/1/22',
+        'index': 22,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/22',
@@ -1304,7 +1304,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/23',
         ],
-        'index': 'eth101/1/23',
+        'index': 23,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/23',
@@ -1317,7 +1317,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/24',
         ],
-        'index': 'eth101/1/24',
+        'index': 24,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/24',
@@ -1330,7 +1330,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/25',
         ],
-        'index': 'eth101/1/25',
+        'index': 25,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/25',
@@ -1343,7 +1343,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/26',
         ],
-        'index': 'eth101/1/26',
+        'index': 26,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/26',
@@ -1356,7 +1356,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/27',
         ],
-        'index': 'eth101/1/27',
+        'index': 27,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/27',
@@ -1369,7 +1369,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/28',
         ],
-        'index': 'eth101/1/28',
+        'index': 28,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/28',
@@ -1382,7 +1382,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/29',
         ],
-        'index': 'eth101/1/29',
+        'index': 29,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/29',
@@ -1395,7 +1395,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/30',
         ],
-        'index': 'eth101/1/30',
+        'index': 30,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/30',
@@ -1408,7 +1408,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/31',
         ],
-        'index': 'eth101/1/31',
+        'index': 31,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/31',
@@ -1421,7 +1421,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/32',
         ],
-        'index': 'eth101/1/32',
+        'index': 32,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/32',
@@ -1434,7 +1434,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/33',
         ],
-        'index': 'eth101/1/33',
+        'index': 33,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/33',
@@ -1447,7 +1447,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/34',
         ],
-        'index': 'eth101/1/34',
+        'index': 34,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/34',
@@ -1460,7 +1460,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/35',
         ],
-        'index': 'eth101/1/35',
+        'index': 35,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/35',
@@ -1473,7 +1473,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/36',
         ],
-        'index': 'eth101/1/36',
+        'index': 36,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/36',
@@ -1486,7 +1486,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/37',
         ],
-        'index': 'eth101/1/37',
+        'index': 37,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/37',
@@ -1499,7 +1499,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/38',
         ],
-        'index': 'eth101/1/38',
+        'index': 38,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/38',
@@ -1512,7 +1512,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/39',
         ],
-        'index': 'eth101/1/39',
+        'index': 39,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/39',
@@ -1525,7 +1525,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/40',
         ],
-        'index': 'eth101/1/40',
+        'index': 40,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/40',
@@ -1538,7 +1538,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/41',
         ],
-        'index': 'eth101/1/41',
+        'index': 41,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/41',
@@ -1551,7 +1551,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth101/1/42',
         ],
-        'index': 'eth101/1/42',
+        'index': 42,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth101/1/42',
@@ -1563,7 +1563,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/33',
         ],
-        'index': 'eth1/33',
+        'index': 33,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/33',
@@ -1576,7 +1576,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/34',
         ],
-        'index': 'eth1/34',
+        'index': 34,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/34',
@@ -1589,7 +1589,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/35',
         ],
-        'index': 'eth1/35',
+        'index': 35,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/35',
@@ -1602,7 +1602,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/36',
         ],
-        'index': 'eth1/36',
+        'index': 36,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/36',
@@ -1615,7 +1615,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/37',
         ],
-        'index': 'eth1/37',
+        'index': 37,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/37',
@@ -1628,7 +1628,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/38',
         ],
-        'index': 'eth1/38',
+        'index': 38,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/38',
@@ -1641,7 +1641,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/39',
         ],
-        'index': 'eth1/39',
+        'index': 39,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/39',
@@ -1654,7 +1654,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/40',
         ],
-        'index': 'eth1/40',
+        'index': 40,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/40',
@@ -1667,7 +1667,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/41',
         ],
-        'index': 'eth1/41',
+        'index': 41,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/41',
@@ -1680,7 +1680,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/42',
         ],
-        'index': 'eth1/42',
+        'index': 42,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/42',
@@ -1693,7 +1693,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/43',
         ],
-        'index': 'eth1/43',
+        'index': 43,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/43',
@@ -1706,7 +1706,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/44',
         ],
-        'index': 'eth1/44',
+        'index': 44,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/44',
@@ -1719,7 +1719,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/45',
         ],
-        'index': 'eth1/45',
+        'index': 45,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/45',
@@ -1732,7 +1732,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/46',
         ],
-        'index': 'eth1/46',
+        'index': 46,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/46',
@@ -1745,7 +1745,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/47',
         ],
-        'index': 'eth1/47',
+        'index': 47,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/47',
@@ -1758,7 +1758,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/48',
         ],
-        'index': 'eth1/48',
+        'index': 48,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/48',
@@ -1771,7 +1771,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/49',
         ],
-        'index': 'eth1/49',
+        'index': 49,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/49',
@@ -1784,7 +1784,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/50',
         ],
-        'index': 'eth1/50',
+        'index': 50,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/50',
@@ -1797,7 +1797,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/51',
         ],
-        'index': 'eth1/51',
+        'index': 51,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/51',
@@ -1810,7 +1810,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/52',
         ],
-        'index': 'eth1/52',
+        'index': 52,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/52',
@@ -1823,7 +1823,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/53',
         ],
-        'index': 'eth1/53',
+        'index': 53,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/53',
@@ -1836,7 +1836,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/54',
         ],
-        'index': 'eth1/54',
+        'index': 54,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/54',
@@ -1849,7 +1849,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/1',
         ],
-        'index': 'eth1/1',
+        'index': 1,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/1',
@@ -1862,7 +1862,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/2',
         ],
-        'index': 'eth1/2',
+        'index': 2,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/2',
@@ -1875,7 +1875,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/3',
         ],
-        'index': 'eth1/3',
+        'index': 3,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/3',
@@ -1888,7 +1888,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/4',
         ],
-        'index': 'eth1/4',
+        'index': 4,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/4',
@@ -1901,7 +1901,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/15',
         ],
-        'index': 'eth1/15',
+        'index': 15,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/15',
@@ -1914,7 +1914,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/16',
         ],
-        'index': 'eth1/16',
+        'index': 16,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/16',
@@ -1927,7 +1927,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/17',
         ],
-        'index': 'eth1/17',
+        'index': 17,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/17',
@@ -1940,7 +1940,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/18',
         ],
-        'index': 'eth1/18',
+        'index': 18,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/18',
@@ -1953,7 +1953,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/5',
         ],
-        'index': 'eth1/5',
+        'index': 5,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/5',
@@ -1966,7 +1966,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/6',
         ],
-        'index': 'eth1/6',
+        'index': 6,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/6',
@@ -1979,7 +1979,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/7',
         ],
-        'index': 'eth1/7',
+        'index': 7,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/7',
@@ -1992,7 +1992,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/8',
         ],
-        'index': 'eth1/8',
+        'index': 8,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/8',
@@ -2005,7 +2005,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/9',
         ],
-        'index': 'eth1/9',
+        'index': 9,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/9',
@@ -2018,7 +2018,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/10',
         ],
-        'index': 'eth1/10',
+        'index': 10,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/10',
@@ -2031,7 +2031,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/11',
         ],
-        'index': 'eth1/11',
+        'index': 11,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/11',
@@ -2044,7 +2044,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/12',
         ],
-        'index': 'eth1/12',
+        'index': 12,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/12',
@@ -2057,7 +2057,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/13',
         ],
-        'index': 'eth1/13',
+        'index': 13,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/13',
@@ -2070,7 +2070,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/14',
         ],
-        'index': 'eth1/14',
+        'index': 14,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/14',
@@ -2083,7 +2083,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/20',
         ],
-        'index': 'eth1/20',
+        'index': 20,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/20',
@@ -2096,7 +2096,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/19',
         ],
-        'index': 'eth1/19',
+        'index': 19,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/19',
@@ -2109,7 +2109,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/21',
         ],
-        'index': 'eth1/21',
+        'index': 21,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/21',
@@ -2122,7 +2122,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/22',
         ],
-        'index': 'eth1/22',
+        'index': 22,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/22',
@@ -2135,7 +2135,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/23',
         ],
-        'index': 'eth1/23',
+        'index': 23,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/23',
@@ -2148,7 +2148,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/24',
         ],
-        'index': 'eth1/24',
+        'index': 24,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/24',
@@ -2161,7 +2161,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/25',
         ],
-        'index': 'eth1/25',
+        'index': 25,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/25',
@@ -2174,7 +2174,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/26',
         ],
-        'index': 'eth1/26',
+        'index': 26,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/26',
@@ -2187,7 +2187,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/27',
         ],
-        'index': 'eth1/27',
+        'index': 27,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/27',
@@ -2200,7 +2200,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/28',
         ],
-        'index': 'eth1/28',
+        'index': 28,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/28',
@@ -2213,7 +2213,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/29',
         ],
-        'index': 'eth1/29',
+        'index': 29,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/29',
@@ -2226,7 +2226,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/30',
         ],
-        'index': 'eth1/30',
+        'index': 30,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/30',
@@ -2239,7 +2239,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/31',
         ],
-        'index': 'eth1/31',
+        'index': 31,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/31',
@@ -2252,7 +2252,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/32',
         ],
-        'index': 'eth1/32',
+        'index': 32,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/32',
@@ -2264,7 +2264,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/33',
         ],
-        'index': 'eth1/33',
+        'index': 33,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/33',
@@ -2277,7 +2277,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/34',
         ],
-        'index': 'eth1/34',
+        'index': 34,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/34',
@@ -2290,7 +2290,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/35',
         ],
-        'index': 'eth1/35',
+        'index': 35,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/35',
@@ -2303,7 +2303,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/36',
         ],
-        'index': 'eth1/36',
+        'index': 36,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/36',
@@ -2316,7 +2316,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/1',
         ],
-        'index': 'eth1/1',
+        'index': 1,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/1',
@@ -2329,7 +2329,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/2',
         ],
-        'index': 'eth1/2',
+        'index': 2,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/2',
@@ -2342,7 +2342,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/3',
         ],
-        'index': 'eth1/3',
+        'index': 3,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/3',
@@ -2355,7 +2355,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/4',
         ],
-        'index': 'eth1/4',
+        'index': 4,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/4',
@@ -2368,7 +2368,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/5',
         ],
-        'index': 'eth1/5',
+        'index': 5,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/5',
@@ -2381,7 +2381,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/6',
         ],
-        'index': 'eth1/6',
+        'index': 6,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/6',
@@ -2394,7 +2394,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/7',
         ],
-        'index': 'eth1/7',
+        'index': 7,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/7',
@@ -2407,7 +2407,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/8',
         ],
-        'index': 'eth1/8',
+        'index': 8,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/8',
@@ -2420,7 +2420,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/9',
         ],
-        'index': 'eth1/9',
+        'index': 9,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/9',
@@ -2433,7 +2433,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/10',
         ],
-        'index': 'eth1/10',
+        'index': 10,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/10',
@@ -2446,7 +2446,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/11',
         ],
-        'index': 'eth1/11',
+        'index': 11,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/11',
@@ -2459,7 +2459,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/12',
         ],
-        'index': 'eth1/12',
+        'index': 12,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/12',
@@ -2472,7 +2472,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/13',
         ],
-        'index': 'eth1/13',
+        'index': 13,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/13',
@@ -2485,7 +2485,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/14',
         ],
-        'index': 'eth1/14',
+        'index': 14,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/14',
@@ -2498,7 +2498,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/15',
         ],
-        'index': 'eth1/15',
+        'index': 15,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/15',
@@ -2511,7 +2511,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/16',
         ],
-        'index': 'eth1/16',
+        'index': 16,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/16',
@@ -2524,7 +2524,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/17',
         ],
-        'index': 'eth1/17',
+        'index': 17,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/17',
@@ -2537,7 +2537,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/18',
         ],
-        'index': 'eth1/18',
+        'index': 18,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/18',
@@ -2550,7 +2550,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/19',
         ],
-        'index': 'eth1/19',
+        'index': 19,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/19',
@@ -2563,7 +2563,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/20',
         ],
-        'index': 'eth1/20',
+        'index': 20,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/20',
@@ -2576,7 +2576,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/21',
         ],
-        'index': 'eth1/21',
+        'index': 21,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/21',
@@ -2589,7 +2589,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/22',
         ],
-        'index': 'eth1/22',
+        'index': 22,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/22',
@@ -2602,7 +2602,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/23',
         ],
-        'index': 'eth1/23',
+        'index': 23,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/23',
@@ -2615,7 +2615,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/24',
         ],
-        'index': 'eth1/24',
+        'index': 24,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/24',
@@ -2628,7 +2628,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/25',
         ],
-        'index': 'eth1/25',
+        'index': 25,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/25',
@@ -2641,7 +2641,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/26',
         ],
-        'index': 'eth1/26',
+        'index': 26,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/26',
@@ -2654,7 +2654,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/27',
         ],
-        'index': 'eth1/27',
+        'index': 27,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/27',
@@ -2667,7 +2667,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/28',
         ],
-        'index': 'eth1/28',
+        'index': 28,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/28',
@@ -2680,7 +2680,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/29',
         ],
-        'index': 'eth1/29',
+        'index': 29,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/29',
@@ -2693,7 +2693,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/30',
         ],
-        'index': 'eth1/30',
+        'index': 30,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/30',
@@ -2706,7 +2706,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/31',
         ],
-        'index': 'eth1/31',
+        'index': 31,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/31',
@@ -2719,7 +2719,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/32',
         ],
-        'index': 'eth1/32',
+        'index': 32,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/32',
@@ -2731,7 +2731,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/33',
         ],
-        'index': 'eth1/33',
+        'index': 33,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/33',
@@ -2744,7 +2744,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/34',
         ],
-        'index': 'eth1/34',
+        'index': 34,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/34',
@@ -2757,7 +2757,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/35',
         ],
-        'index': 'eth1/35',
+        'index': 35,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/35',
@@ -2770,7 +2770,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/36',
         ],
-        'index': 'eth1/36',
+        'index': 36,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/36',
@@ -2783,7 +2783,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/1',
         ],
-        'index': 'eth1/1',
+        'index': 1,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/1',
@@ -2796,7 +2796,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/2',
         ],
-        'index': 'eth1/2',
+        'index': 2,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/2',
@@ -2809,7 +2809,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/3',
         ],
-        'index': 'eth1/3',
+        'index': 3,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/3',
@@ -2822,7 +2822,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/4',
         ],
-        'index': 'eth1/4',
+        'index': 4,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/4',
@@ -2835,7 +2835,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/5',
         ],
-        'index': 'eth1/5',
+        'index': 5,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/5',
@@ -2848,7 +2848,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/6',
         ],
-        'index': 'eth1/6',
+        'index': 6,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/6',
@@ -2861,7 +2861,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/7',
         ],
-        'index': 'eth1/7',
+        'index': 7,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/7',
@@ -2874,7 +2874,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/8',
         ],
-        'index': 'eth1/8',
+        'index': 8,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/8',
@@ -2887,7 +2887,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/9',
         ],
-        'index': 'eth1/9',
+        'index': 9,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/9',
@@ -2900,7 +2900,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/10',
         ],
-        'index': 'eth1/10',
+        'index': 10,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/10',
@@ -2913,7 +2913,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/11',
         ],
-        'index': 'eth1/11',
+        'index': 11,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/11',
@@ -2926,7 +2926,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/12',
         ],
-        'index': 'eth1/12',
+        'index': 12,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/12',
@@ -2939,7 +2939,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/13',
         ],
-        'index': 'eth1/13',
+        'index': 13,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/13',
@@ -2952,7 +2952,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/14',
         ],
-        'index': 'eth1/14',
+        'index': 14,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/14',
@@ -2965,7 +2965,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/15',
         ],
-        'index': 'eth1/15',
+        'index': 15,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/15',
@@ -2978,7 +2978,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/16',
         ],
-        'index': 'eth1/16',
+        'index': 16,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/16',
@@ -2991,7 +2991,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/17',
         ],
-        'index': 'eth1/17',
+        'index': 17,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/17',
@@ -3004,7 +3004,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/18',
         ],
-        'index': 'eth1/18',
+        'index': 18,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/18',
@@ -3017,7 +3017,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/19',
         ],
-        'index': 'eth1/19',
+        'index': 19,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/19',
@@ -3030,7 +3030,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/20',
         ],
-        'index': 'eth1/20',
+        'index': 20,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/20',
@@ -3043,7 +3043,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/21',
         ],
-        'index': 'eth1/21',
+        'index': 21,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/21',
@@ -3056,7 +3056,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/22',
         ],
-        'index': 'eth1/22',
+        'index': 22,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/22',
@@ -3069,7 +3069,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/23',
         ],
-        'index': 'eth1/23',
+        'index': 23,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/23',
@@ -3082,7 +3082,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/24',
         ],
-        'index': 'eth1/24',
+        'index': 24,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/24',
@@ -3095,7 +3095,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/25',
         ],
-        'index': 'eth1/25',
+        'index': 25,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/25',
@@ -3108,7 +3108,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/26',
         ],
-        'index': 'eth1/26',
+        'index': 26,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/26',
@@ -3121,7 +3121,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/27',
         ],
-        'index': 'eth1/27',
+        'index': 27,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/27',
@@ -3134,7 +3134,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/28',
         ],
-        'index': 'eth1/28',
+        'index': 28,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/28',
@@ -3147,7 +3147,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/29',
         ],
-        'index': 'eth1/29',
+        'index': 29,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/29',
@@ -3160,7 +3160,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/30',
         ],
-        'index': 'eth1/30',
+        'index': 30,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/30',
@@ -3173,7 +3173,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/31',
         ],
-        'index': 'eth1/31',
+        'index': 31,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/31',
@@ -3186,7 +3186,7 @@ INTERFACE_METADATA = [
         'id_tags': [
             'interface:eth1/32',
         ],
-        'index': 'eth1/32',
+        'index': 32,
         'integration': 'cisco-aci',
         'mac_address': 'not-applicable',
         'name': 'eth1/32',

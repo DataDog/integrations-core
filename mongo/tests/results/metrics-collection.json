@@ -440,5 +440,45 @@
             "db:test",
             "collection:bar"
         ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailableps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailableps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.totalps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.totalps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
     }
 ]

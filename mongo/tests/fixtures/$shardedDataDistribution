@@ -1,0 +1,40 @@
+[
+    {
+      "ns": "integration.foo",
+      "shards": [
+        {
+          "shardName": "shard0",
+          "numOrphanedDocs": 1,
+          "numOwnedDocuments": 4996,
+          "ownedSizeBytes": 544564,
+          "orphanedSizeBytes": 1
+        },
+        {
+          "shardName": "shard1",
+          "numOrphanedDocs": 1,
+          "numOwnedDocuments": 5097,
+          "ownedSizeBytes": 555573,
+          "orphanedSizeBytes": 1
+        }
+      ]
+    },
+    {
+        "ns": "integration.bar",
+        "shards": [
+          {
+            "shardName": "shard0",
+            "numOrphanedDocs": 1,
+            "numOwnedDocuments": 4996,
+            "ownedSizeBytes": 544564,
+            "orphanedSizeBytes": 1
+          },
+          {
+            "shardName": "shard1",
+            "numOrphanedDocs": 1,
+            "numOwnedDocuments": 5097,
+            "ownedSizeBytes": 555573,
+            "orphanedSizeBytes": 1
+          }
+        ]
+      }
+  ]

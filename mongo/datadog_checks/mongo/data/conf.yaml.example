@@ -132,6 +132,12 @@ instances:
         #   - config$
         #   - local$
 
+        ## @param max_collection_per_database - integer - optional - default: 100
+        ## The maximum number of collections to collect metrics from per database.
+        ## Defaults to 100.
+        #
+        # max_collection_per_database: 100
+
         ## @param refresh_interval - integer - optional - default: 600
         ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.
         #
@@ -175,6 +181,41 @@ instances:
         ## current operations with $currentOp aggregation pipeline and explain plans for each operation.
         #
         # collection_interval: 10
+
+    ## Configure collection of MongoDB schemas (inferred) by sampling documents.
+    #
+    # schemas:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of schemas. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the schemas collection interval in seconds. Each collection involves sampling documents
+        ## from collections and inferring schemas.
+        #
+        # collection_interval: 600
+
+        ## @param sample_size - number - optional - default: 10
+        ## Set the sample size for each collection. The sample size is the number of documents to sample
+        ## from each collection.
+        ## NOTE: Increasing the sample size for better schema inference accuracy may impact performance.
+        #
+        # sample_size: 10
+
+        ## @param max_collections - number - optional
+        ## Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
+        ## per database is bounded by `database_autodiscovery.max_collection_per_database`. By setting this option, you
+        ## are adding an additional limit to the total number of collections across all monitored databases that schemas
+        ## will be collected from. By default, this option is not set.
+        #
+        # max_collections: 300
+
+        ## @param max_depth - number - optional - default: 5
+        ## Set the maximum depth of nested documents to sample.
+        #
+        # max_depth: 5
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
@@ -233,6 +274,7 @@ instances:
     ##   * `top` - Usage statistics for each collection
     ##   * `collection` - Metrics of the specified collections
     ##   * `jumbo_chunks` - Count and percentage of jumbo chunks. Ignored on mongod instances.
+    ##   * `sharded_data_distribution` - Distribution of data in sharded collections.
     #
     # additional_metrics:
     #   - metrics.commands
@@ -240,6 +282,7 @@ instances:
     #   - top
     #   - collection
     #   - jumbo_chunks
+    #   - sharded_data_distribution
 
     ## @param collections - list of strings - optional
     ## Collect metrics on specific collections from the database specified

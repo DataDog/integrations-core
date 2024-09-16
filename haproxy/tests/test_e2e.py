@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY2
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -32,7 +31,6 @@ def test_check(dd_agent_check, instancev1, prometheus_metrics):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude_metrics)
 
 
-@pytest.mark.skipif(PY2, reason='Test only available on Python 3')
 def test_checkv2(dd_agent_check, instancev2, prometheus_metricsv2):
     aggregator = dd_agent_check(instancev2, rate=True)
 

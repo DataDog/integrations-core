@@ -124,6 +124,12 @@ class MongoCollector(object):
 
             metric_name_alias = self._normalize(metric_name_alias, submit_method, prefix)
             submit_method(self.check, metric_name_alias, value, tags=tags)
-            if metric_name_alias.endswith("countps"):
-                # Keep old incorrect metric name (only 'top' metrics are affected)
+            if (
+                metric_name_alias.endswith("countps")
+                or metric_name_alias.endswith("accesses.opsps")
+                or metric_name_alias.endswith("collectionscans.totalps")
+                or metric_name_alias.endswith("collectionscans.nontailableps")
+            ):
+                # Keep old incorrect metric name
+                # 'top' and 'index', 'collectionscans' metrics are affected
                 self.gauge(metric_name_alias[:-2], value, tags=tags)

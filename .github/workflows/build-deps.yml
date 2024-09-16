@@ -15,6 +15,7 @@ on:
     - master
     - 7.*.*
     paths:
+    - .github/workflows/build-deps.yml
     - .builders/**
     - agent_requirements.in
 
@@ -145,7 +146,6 @@ jobs:
       if: steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image == 'linux-aarch64'
       run: |-
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
-        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
         # Give ownership of the output back to the user
         sudo chown ${USER} ${{ env.OUT_DIR }}
 
@@ -154,20 +154,17 @@ jobs:
       run: |-
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
-        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
     - name: Build image and wheels
       if: steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image != 'linux-aarch64'
       run: |-
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
-        python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
 
     - name: Pull image and build wheels
       if: steps.changed-files.outputs.builders_any_changed != 'true' && matrix.job.image != 'linux-aarch64'
       run: |-
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
-        python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
     - name: Change permissions
       if: matrix.job.image == 'linux-aarch64'
@@ -205,7 +202,6 @@ jobs:
       TARGET_NAME: macos-x86_64
       OUT_DIR: output/macos-x86_64
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.11/bin/python"
-      DD_PYTHON2: "/Library/Frameworks/Python.framework/Versions/2.7/bin/python"
 
     steps:
     - name: Set up environment
@@ -219,13 +215,9 @@ jobs:
       env:
         # Despite the name, this is built for the macOS 11 SDK on arm64 and 10.9+ on intel
         PYTHON3_DOWNLOAD_URL: "https://www.python.org/ftp/python/3.11.5/python-3.11.5-macos11.pkg"
-        PYTHON2_DOWNLOAD_URL: "https://www.python.org/ftp/python/2.7.18/python-2.7.18-macosx10.9.pkg"
       run: |-
         curl "$PYTHON3_DOWNLOAD_URL" -o python3.pkg
         sudo installer -pkg python3.pkg -target /
-
-        curl "$PYTHON2_DOWNLOAD_URL" -o python2.pkg
-        sudo installer -pkg python2.pkg -target /
 
     - name: Checkout code
       uses: actions/checkout@v4
@@ -241,7 +233,7 @@ jobs:
       with:
         path: |
           ~/builder_root
-        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py') }}
+        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/build-deps.yml') }}
 
     - name: Run the build
       env:
@@ -256,8 +248,6 @@ jobs:
           mkdir ~/builder_root
           ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
         fi
-        # At this point we can always skip builder setup since it's equivalent for python versions
-        ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 2 ${{ env.OUT_DIR }}/py2 --skip-setup
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

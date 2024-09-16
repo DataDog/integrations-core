@@ -24,7 +24,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
@@ -39,15 +38,12 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "futures==3.4.0; python_version < '3.0'",
-    "ipaddress==1.0.23; python_version < '3.0'",
     "ply==3.11",
-    "pyasn1==0.4.6",
+    "pyasn1==0.4.8",
     "pycryptodomex==3.20.0",
-    "pysmi==0.3.4; python_version < '3.0'",
-    "pysmi==1.4.4; python_version > '3.0'",
+    "pysmi==1.2.1",
     "pysnmp-mibs==0.1.6",
-    "pysnmp==4.4.10",
+    "pysnmp==5.1.0"
 ]
 
 [project.urls]

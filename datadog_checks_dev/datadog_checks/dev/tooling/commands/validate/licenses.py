@@ -31,8 +31,6 @@ from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, ech
 EXPLICIT_LICENSES = {
     # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
     'aerospike': ['Apache-2.0'],
-    # https://github.com/baztian/jaydebeapi/blob/master/COPYING
-    'JayDeBeApi': ['LGPL-3.0-only'],
     # https://github.com/pyca/cryptography/blob/main/LICENSE
     'cryptography': ['Apache-2.0', 'BSD-3-Clause', 'PSF'],
     # https://github.com/rthalley/dnspython/blob/master/LICENSE
@@ -47,8 +45,6 @@ EXPLICIT_LICENSES = {
     'mmh3': ['CC0-1.0'],
     # https://github.com/paramiko/paramiko/blob/master/LICENSE
     'paramiko': ['LGPL-2.1-only'],
-    # https://github.com/oracle/python-oracledb/blob/main/LICENSE.txt
-    'oracledb': ['Apache-2.0'],
     # https://github.com/psycopg/psycopg2/blob/master/LICENSE
     # https://github.com/psycopg/psycopg2/blob/master/doc/COPYING.LESSER
     'psycopg2-binary': ['LGPL-3.0-only', 'BSD-3-Clause'],
@@ -160,7 +156,6 @@ PACKAGE_REPO_OVERRIDES = {
     'foundationdb': 'https://github.com/apple/foundationdb',
     'in-toto': 'https://github.com/in-toto/in-toto',
     'lxml': 'https://github.com/lxml/lxml',
-    'oracledb': 'https://github.com/oracle/python-oracledb',
     'packaging': 'https://github.com/pypa/packaging',
     'paramiko': 'https://github.com/paramiko/paramiko',
     'protobuf': 'https://github.com/protocolbuffers/protobuf',
