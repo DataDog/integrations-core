@@ -4,7 +4,6 @@
 from collections import defaultdict
 
 import mock
-from six import iteritems
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.system_core import SystemCore
@@ -57,7 +56,7 @@ def fake_cpu_times(percpu=False):
         sum_dict = defaultdict(float)
 
         for cputimes in common.MOCK_PSUTIL_CPU_TIMES:
-            for key, value in iteritems(cputimes._asdict()):
+            for key, value in cputimes._asdict().items():
                 sum_dict[key] += value / len(common.MOCK_PSUTIL_CPU_TIMES)
 
         return common.MOCK_PSUTIL_CPU_TIMES[0].__class__(**sum_dict)

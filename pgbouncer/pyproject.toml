@@ -25,7 +25,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.12",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
@@ -40,7 +39,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "psycopg2-binary==2.9.9; python_version > '3.0'",
+    "psycopg2-binary==2.9.9",
 ]
 
 [project.urls]

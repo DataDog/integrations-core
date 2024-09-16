@@ -28,7 +28,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=36.5.0",
+    "datadog-checks-base>=36.14.0",
 ]
 dynamic = [
     "version",
@@ -37,12 +37,9 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "cachetools==3.1.1; python_version < '3.0'",
-    "cachetools==5.5.0; python_version > '3.0'",
-    "cryptography==3.3.2; python_version < '3.0'",
-    "cryptography==43.0.0; python_version > '3.0'",
-    "pymysql==0.10.1; python_version < '3.0'",
-    "pymysql==1.1.1; python_version > '3.0'",
+    "cachetools==5.5.0",
+    "cryptography==43.0.0",
+    "pymysql==1.1.1",
 ]
 
 [project.urls]

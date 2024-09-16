@@ -7,7 +7,6 @@ import time
 
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.testing import requires_py3
@@ -139,7 +138,7 @@ def test_unscoped_from_config():
 
                 assert scope.auth_token == 'fake_token'
                 assert len(scope.project_scope_map) == 1
-                for _, project_scope in iteritems(scope.project_scope_map):
+                for project_scope in scope.project_scope_map.values():
                     assert isinstance(project_scope, OpenStackProjectScope)
                     assert project_scope.auth_token == 'fake_token'
                     assert project_scope.tenant_id == '263fd9'

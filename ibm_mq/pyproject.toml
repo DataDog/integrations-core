@@ -38,7 +38,7 @@ requires-python = ">=3.9"
 [project.optional-dependencies]
 deps = [
     "psutil==5.9.6",
-    "pymqi==1.12.10; (sys_platform != 'darwin' or platform_machine != 'arm64') and python_version > '3.0'",
+    "pymqi==1.12.10; (sys_platform != 'darwin' or platform_machine != 'arm64')",
 ]
 
 [project.urls]
