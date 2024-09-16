@@ -40,14 +40,14 @@ def get_unixodbc_sysconfig(python_executable):
 
 def is_non_empty_file(path):
     if not os.path.exists(path):
-        return
+        return False
     try:
         if os.path.getsize(path) > 0:
             return True
     # exists and getsize aren't atomic
     except FileNotFoundError:
-        return
-    return
+        return False
+    return False
 
 
 def set_default_driver_conf():
