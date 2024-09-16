@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from urllib import error
+from urllib.request import urlopen
 
 import pytest
-from six.moves.urllib import error
-from six.moves.urllib.request import urlopen
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.lighttpd import Lighttpd

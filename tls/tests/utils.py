@@ -6,8 +6,7 @@ import socket
 import ssl
 import time
 from contextlib import contextmanager
-
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from datadog_checks.dev import TempDir
 from datadog_checks.tls.utils import closing
