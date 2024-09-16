@@ -56,8 +56,7 @@
       "[incident.io] Critical public incident": "assets/monitors/critical_public_incident.json",
       "[incident.io] High number of public incidents": "assets/monitors/high_number_of_public_incidents.json",
       "[incident.io] Public incident reopened": "assets/monitors/public_incident_reopened.json"
-    },
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
