@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import importlib
 import os
 import re
 
@@ -9,9 +8,7 @@ import mock
 import pyodbc
 import pytest
 
-import datadog_checks.sqlserver
 from datadog_checks.base import ConfigurationError
-from datadog_checks.dev import EnvVars
 from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import (
