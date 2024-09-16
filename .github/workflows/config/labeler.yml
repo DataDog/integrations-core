@@ -251,6 +251,8 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
+integration/incident_io:
+- incident_io/**/*
 integration/istio:
 - istio/**/*
 integration/jboss_wildfly:
