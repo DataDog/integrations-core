@@ -5,12 +5,12 @@ import copy
 import json
 import os
 import re
+import sys
 import time
 from collections import namedtuple
 
 import mock
 import pytest
-import sys
 
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
@@ -458,7 +458,7 @@ def test_set_default_driver_conf():
         with EnvVars({'ODBCSYSINI': 'ABC'}):
             set_default_driver_conf()
             assert os.environ['ODBCSYSINI'] == 'ABC'
-    
+
     odbc_config_dir = os.path.expanduser('~')
     with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=odbc_config_dir):
         with EnvVars({}, ignore=['ODBCSYSINI']):
@@ -471,7 +471,7 @@ def test_set_default_driver_conf():
                 file.write("dummy-content")
             set_default_driver_conf()
             assert is_non_empty_file(odbc_inst), "odbc_inst should have been created"
-        
+
 
 @windows_ci
 def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
@@ -886,5 +886,3 @@ def test_get_unixodbc_sysconfig():
         "embedded",
         "etc",
     ], "incorrect unix odbc config dir"
-
-    
