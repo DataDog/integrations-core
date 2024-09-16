@@ -437,6 +437,12 @@ def test_set_default_driver_conf():
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
 
+    with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
+        with EnvVars({}, ignore=['ODBCSYSINI']):
+            set_default_driver_conf()
+            assert 'ODBCSYSINI' in os.environ, "ODBCSYSINI should be set"
+            assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
+
     # `set_default_driver_conf` have no effect on the cases below
     with EnvVars({'ODBCSYSINI': 'ABC', 'DOCKER_DD_AGENT': 'true'}):
         set_default_driver_conf()
@@ -447,12 +453,6 @@ def test_set_default_driver_conf():
             set_default_driver_conf()
             assert 'ODBCSYSINI' in os.environ
             assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
-
-        with EnvVars({}, ignore=['ODBCSYSINI']):
-            with mock.patch("os.path.exists", return_value=True):
-                # odbcinst.ini or odbc.ini exists in agent embedded directory
-                set_default_driver_conf()
-                assert 'ODBCSYSINI' not in os.environ
 
         with EnvVars({'ODBCSYSINI': 'ABC'}):
             set_default_driver_conf()
@@ -469,7 +469,7 @@ def test_set_default_driver_conf():
             with open(odbc_ini, "x") as file:
                 file.write("dummy-content")
             set_default_driver_conf()
-            assert is_non_empty_file(odbc_inst), "odbc_inst should have been created"
+            assert is_non_empty_file(odbc_inst), "odbc_inst should have been created when a non empty odbc.ini exists"
 
 
 @windows_ci
@@ -878,8 +878,8 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
 
 
 def test_get_unixodbc_sysconfig():
-    etc_dir = "/opt"
-    for dir in ["datadog-agent", "embedded", "bin", "python"]:
+    etc_dir = os.path.sep
+    for dir in ["opt", "datadog-agent", "embedded", "bin", "python"]:
         etc_dir = os.path.join(etc_dir, dir)
     assert get_unixodbc_sysconfig(etc_dir).split(os.path.sep) == [
         "",

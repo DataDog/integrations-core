@@ -74,16 +74,17 @@ def set_default_driver_conf():
         # by getting the path to the python executable and get the directory above /bin/python
         linux_unixodbc_sysconfig = get_unixodbc_sysconfig(sys.executable)
         odbc_ini = os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
-        if not is_non_empty_file(odbc_ini):
-            return
+        if is_non_empty_file(odbc_ini):
+            os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
+            odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
+            if not is_non_empty_file(odbc_inst_ini_sysconfig):
+                shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
+                # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
+                # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
+                return
 
-        os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
-        odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
-        if not is_non_empty_file(odbc_inst_ini_sysconfig):
-            shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
-            # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
-            # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
-            return
+        # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
+        os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
 
         # required when using pyodbc with FreeTDS on Ubuntu 18.04
         # see https://stackoverflow.com/a/22988748/1258743

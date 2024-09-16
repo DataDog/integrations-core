@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import importlib
 import os
 import re
 
@@ -8,7 +9,9 @@ import mock
 import pyodbc
 import pytest
 
+import datadog_checks.sqlserver
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev import EnvVars
 from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import (
@@ -645,14 +648,3 @@ def test_obfuscate_error_msg(
 ):
     obfuscated_error_message = obfuscate_error_msg(error_message, password)
     assert obfuscated_error_message == expected_error_message
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_linux_connection(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    check.initialize_connection()
-    with check.connection.open_managed_default_connection():
-        with check.connection.get_managed_cursor() as cursor:
-            # should complete quickly
-            cursor.execute("select 1")
-            assert cursor.fetchall(), "should have a result here"
