@@ -27,7 +27,7 @@ from datadog_checks.sqlserver.utils import (
 )
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
-from .utils import deep_compare, windows_ci
+from .utils import deep_compare, not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -458,6 +458,9 @@ def test_set_default_driver_conf():
             set_default_driver_conf()
             assert os.environ['ODBCSYSINI'] == 'ABC'
 
+
+@not_windows_ci
+def test_set_default_driver_conf_linux():
     odbc_config_dir = os.path.expanduser('~')
     with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=odbc_config_dir):
         with EnvVars({}, ignore=['ODBCSYSINI']):
