@@ -21,18 +21,18 @@ def test__get_conn(check, redis_instance):
 
     # create a connection
     check._get_conn(instance)
-    key1, conn1 = next(check.connections.items())
+    key1, conn1 = next(iter(check.connections.items()))
 
     # assert connection is cached
     check._get_conn(instance)
-    key2, conn2 = next(check.connections.items())
+    key2, conn2 = next(iter(check.connections.items()))
     assert key2 == key1
     assert conn2 == conn1
 
     # disable cache and assert connection has changed
     instance['disable_connection_cache'] = True
     check._get_conn(instance)
-    key2, conn2 = next(check.connections.items())
+    key2, conn2 = next(iter(check.connections.items()))
     assert key2 == key1
     assert conn2 != conn1
 
