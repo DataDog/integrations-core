@@ -38,7 +38,8 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "pywin32==306; sys_platform == 'win32'",
+    "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
+    "pywin32==306; sys_platform == 'win32' and python_version > '3.0'",
     "uptime==3.0.1",
 ]
 
