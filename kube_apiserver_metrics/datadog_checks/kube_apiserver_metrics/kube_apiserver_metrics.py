@@ -74,8 +74,6 @@ METRICS = {
     'apiserver_storage_list_returned_objects_total': 'storage_list_returned_objects_total',
     'apiserver_flowcontrol_current_inqueue_requests': 'flowcontrol_current_inqueue_requests',
     'apiserver_flowcontrol_dispatched_requests_total': 'flowcontrol_dispatched_requests_total',
-    # https://github.com/kubernetes/kubernetes/pull/103162
-    'apiserver_admission_webhook_request_total': 'admission_webhook_request_total',
     # For Kubernetes >= 1.26
     # https://github.com/kubernetes/kubernetes/pull/112690
     'kubernetes_feature_enabled': 'kubernetes_feature_enabled',
