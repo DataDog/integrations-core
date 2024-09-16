@@ -4,20 +4,15 @@
 from __future__ import absolute_import
 
 import os
+import subprocess
 from contextlib import contextmanager
 
 import psutil
-from six import PY3
 
 from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.dev.env import environment_run
 from datadog_checks.dev.structures import LazyFunction, TempDir
 from datadog_checks.dev.utils import ON_WINDOWS, find_free_port, get_ip
-
-if PY3:
-    import subprocess
-else:
-    import subprocess32 as subprocess
 
 PID_FILE = 'ssh.pid'
 
