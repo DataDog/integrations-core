@@ -645,3 +645,14 @@ def test_obfuscate_error_msg(
 ):
     obfuscated_error_message = obfuscate_error_msg(error_message, password)
     assert obfuscated_error_message == expected_error_message
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_linux_connection(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
+    with check.connection.open_managed_default_connection():
+        with check.connection.get_managed_cursor() as cursor:
+            # should complete quickly
+            cursor.execute("select 1")
+            assert cursor.fetchall(), "should have a result here"
