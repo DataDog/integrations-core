@@ -93,21 +93,3 @@ RELATIVE_PATH="curl-{{version}}" \
 # Remove the binary installed so that we consistenly use the same original `curl` binary
 rm "${DD_PREFIX_PATH}/bin/curl"
 
-# Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
-DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
-VERSION="0.9.29" \
-SHA256="22054926b426c66d8f2bc22071365df6e35f3aacf19ad943bc6167d4cae3bebb" \
-RELATIVE_PATH="lmdb-LMDB_{{version}}/libraries/liblmdb" \
-CONFIGURE_SCRIPT="true" \
-INSTALL_COMMAND="make prefix=${DD_PREFIX_PATH} install" \
-XCFLAGS=${CFLAGS} \
-  install-from-source
-# CFLAGS and LDFLAGS add compiler and linker flags to make static compilation work
-CFLAGS="${CFLAGS} -fPIC" \
-LDFLAGS="${LDFLAGS} -L${DD_PREFIX_PATH}/lib -lgssapi_krb5" \
-DOWNLOAD_URL="https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-{{version}}/cyrus-sasl-{{version}}.tar.gz" \
-VERSION="2.1.28" \
-SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
-RELATIVE_PATH="cyrus-sasl-{{version}}" \
-  install-from-source --with-dblib=lmdb --enable-gssapi="${DD_PREFIX_PATH}" --disable-macos-framework \
-    --enable-static --disable-shared
