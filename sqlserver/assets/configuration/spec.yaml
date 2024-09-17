@@ -760,7 +760,7 @@ files:
           value:
             type: number
             example: 10
-    - name: deadlocks
+    - name: deadlocks_collection
       hidden: True
       description: |
         Configure the collection of deadlock data.
