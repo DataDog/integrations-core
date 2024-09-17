@@ -25,7 +25,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `data` for each event type
+      name: Map `private_incident.action_created_v1`, `private_incident.action_updated_v1`, `private_incident.follow_up_created_v1`, `private_incident.follow_up_updated_v1`, `private_incident.incident_created_v2`, `private_incident.incident_updated_v2`, `private_incident.membership_granted_v1`, `private_incident.membership_revoked_v1`, `public_incident.action_created_v1`, `public_incident.action_updated_v1`, `public_incident.follow_up_created_v1`, `public_incident.follow_up_updated_v1`, `public_incident.incident_created_v2`, `public_incident.incident_status_updated_v2`, `public_incident.incident_updated_v2` to `data`
       enabled: true
       sources:
         - private_incident.action_created_v1
@@ -56,7 +56,7 @@ pipeline:
           public_incident.follow_up_created_v1)"
       processors:
         - type: date-remapper
-          name: Map `data.created_at`
+          name: Define `data.created_at` as the official date of the log
           enabled: true
           sources:
             - data.created_at
@@ -68,7 +68,7 @@ pipeline:
           public_incident.follow_up_updated_v1)"
       processors:
         - type: date-remapper
-          name: Map `data.updated_at`
+          name: Define `data.updated_at` as the official date of the log
           enabled: true
           sources:
             - data.updated_at
@@ -79,7 +79,7 @@ pipeline:
         query: "@evt.name:public_incident.incident_created_v2"
       processors:
         - type: date-remapper
-          name: Map `data.created_at`
+          name: Define `data.created_at` as the official date of the log
           enabled: true
           sources:
             - data.created_at
@@ -100,7 +100,7 @@ pipeline:
         query: "@evt.name:public_incident.incident_updated_v2"
       processors:
         - type: date-remapper
-          name: Map `data.updated_at`
+          name: Define `data.updated_at` as the official date of the log
           enabled: true
           sources:
             - data.updated_at
@@ -121,7 +121,7 @@ pipeline:
         query: "@evt.name:public_incident.incident_status_updated_v2"
       processors:
         - type: date-remapper
-          name: Map `data.incident.updated_at`
+          name: Define `data.incident.updated_at` as the official date of the log
           enabled: true
           sources:
             - data.incident.updated_at
