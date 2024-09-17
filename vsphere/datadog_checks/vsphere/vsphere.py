@@ -902,7 +902,12 @@ class VSphereCheck(AgentCheck):
             )
             return
 
-        base_tags = self._config.base_tags + resource_tags
+        base_tags = []
+        for tag in resource_tags:
+            if self._config.excluded_host_tags and tag.split(':', 1)[0] not in self._config.excluded_host_tags:
+                continue
+            base_tags.append(tag)
+        base_tags.extend(self._config.base_tags)
 
         if resource_type == vim.VirtualMachine:
             object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])
