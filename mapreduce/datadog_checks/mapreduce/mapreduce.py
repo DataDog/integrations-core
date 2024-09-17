@@ -1,12 +1,10 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
+from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
-from six import iteritems, itervalues
-from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.mapreduce.metrics import (
@@ -93,7 +91,7 @@ class MapReduceCheck(AgentCheck):
 
         # Report success after gathering all metrics from Application Master
         if running_jobs:
-            job_id, metrics = next(iteritems(running_jobs))
+            job_id, metrics = next(running_jobs.items())
             am_address = self._get_url_base(metrics['tracking_url'])
 
             self.service_check(
@@ -249,7 +247,7 @@ class MapReduceCheck(AgentCheck):
         """
         running_jobs = {}
 
-        for app_name, tracking_url in itervalues(running_apps):
+        for app_name, tracking_url in running_apps.items():
 
             metrics_json = self._rest_request_to_json(
                 tracking_url, self.MAPREDUCE_JOBS_PATH, self.MAPREDUCE_SERVICE_CHECK
@@ -289,7 +287,7 @@ class MapReduceCheck(AgentCheck):
         """
         Get custom metrics specified for each counter
         """
-        for job_metrics in itervalues(running_jobs):
+        for job_metrics in running_jobs.items():
             job_name = job_metrics['job_name']
 
             # Check if the job_name exist in the custom metrics
@@ -344,7 +342,7 @@ class MapReduceCheck(AgentCheck):
         Get metrics for each MapReduce task
         Return a dictionary of {task_id: 'tracking_url'} for each MapReduce task
         """
-        for job_stats in itervalues(running_jobs):
+        for job_stats in running_jobs.values():
 
             metrics_json = self._rest_request_to_json(
                 job_stats['tracking_url'], 'tasks', self.MAPREDUCE_SERVICE_CHECK, tags=addl_tags
@@ -376,7 +374,7 @@ class MapReduceCheck(AgentCheck):
         """
         Parse the JSON response and set the metrics
         """
-        for status, (metric_name, metric_type) in iteritems(metrics):
+        for status, (metric_name, metric_type) in metrics.items():
             metric_status = metrics_json.get(status)
 
             if metric_status is not None:
@@ -415,7 +413,7 @@ class MapReduceCheck(AgentCheck):
 
         # Add kwargs as arguments
         if kwargs:
-            query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(kwargs)])
+            query = '&'.join(['{}={}'.format(key, value) for key, value in kwargs.items()])
             url = urljoin(url, '?' + query)
 
         try:
