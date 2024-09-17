@@ -5,8 +5,10 @@ import pytest
 
 from ddev.repo.core import Repository
 
-OLD_PYTHON_VERSION = "3.11"
-NEW_PYTHON_VERSION = "3.12"
+# Whenenever we bump python version, we also need to bump the python
+# version in the conftest.py.
+OLD_PYTHON_VERSION = "3.12" 
+NEW_PYTHON_VERSION = "3.13"
 
 
 @pytest.fixture
@@ -43,7 +45,7 @@ PYTHON_VERSION = '{OLD_PYTHON_VERSION}'
         f"""[env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "{OLD_PYTHON_VERSION}"]
+python = ["{OLD_PYTHON_VERSION}"]
 
 """,
     )
@@ -68,7 +70,6 @@ dummy.metric,gauge,,,,description,0,dummy,,""",
         "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
     ]
     """,
@@ -86,7 +87,6 @@ dummy.metric,gauge,,,,description,0,dummy,,""",
         "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
     ]
     """,
@@ -134,7 +134,6 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
 ]
 """,
