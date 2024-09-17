@@ -20,11 +20,12 @@ MAX_DEADLOCKS = 100
 MAX_PAYLOAD_BYTES = 19e6
 DEFAULT_COLLECTION_INTERVAL = 600
 
+
 def agent_check_getter(self):
     return self._check
 
-class Deadlocks(DBMAsyncJob):
 
+class Deadlocks(DBMAsyncJob):
     def __init__(self, check, conn_prefix, config):
         self._check = check
         self._log = self._check.log
@@ -33,9 +34,7 @@ class Deadlocks(DBMAsyncJob):
         self._last_deadlock_timestamp = time()
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
         self._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
-        self.collection_interval = config.deadlocks_config.get(
-            "collection_interval", DEFAULT_COLLECTION_INTERVAL
-        )
+        self.collection_interval = config.deadlocks_config.get("collection_interval", DEFAULT_COLLECTION_INTERVAL)
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
@@ -47,7 +46,6 @@ class Deadlocks(DBMAsyncJob):
             job_name="deadlocks",
             shutdown_callback=self._close_db_conn,
         )
-
 
     def obfuscate_no_except_wrapper(self, sql_text):
         try:
@@ -85,7 +83,9 @@ class Deadlocks(DBMAsyncJob):
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
-                cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time())))
+                cursor.execute(
+                    DETECT_DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time()))
+                )
                 results = cursor.fetchall()
                 converted_xmls = []
                 for result in results:
@@ -127,14 +127,14 @@ class Deadlocks(DBMAsyncJob):
                 break
             else:
                 deadlock_xmls.append(deadlock)
-        
+
         # Send payload only if deadlocks found
         if deadlock_xmls:
             deadlocks_event = self._create_deadlock_event(deadlock_xmls)
             payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
             self.log.debug("Deadlocks payload: %s", str(payload))
             self._check.database_monitoring_query_activity(payload)
-            
+
     def _create_deadlock_event(self, deadlock_xmls):
         event = {
             "host": self._check.resolved_hostname,
@@ -150,5 +150,3 @@ class Deadlocks(DBMAsyncJob):
             "sqlserver_deadlocks": deadlock_xmls,
         }
         return event
-
-
