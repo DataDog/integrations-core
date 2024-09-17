@@ -45,9 +45,7 @@
         "katib-controller",
         "katib-db-manager",
         "katib-ui",
-        "katib",
         "kserve-controller-manager",
-        "kserve-ingress",
         "ml-pipeline-api-server",
         "ml-pipeline-scheduledworkflow",
         "ml-pipeline-persistenceagent"
