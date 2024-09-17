@@ -711,191 +711,172 @@ tests:
       timestamp: 1725603657746
   - sample: |-
       {
-        "event_type": "public_incident.incident_updated_v2",
-        "public_incident.incident_updated_v2": {
-          "created_at": "2024-08-30T12:06:32.349Z",
-          "creator": {
-            "user": {
-              "email": "abc@xyz.com",
-              "id": "01J3YKXNGGK7WRP6GC8HCS7HDE",
-              "name": "Abc Xyz",
-              "role": "responder",
-              "slack_user_id": "U07EU73H42D"
+        "event_type" : "public_incident.incident_updated_v2",
+        "public_incident.incident_updated_v2" : {
+          "severity" : {
+            "updated_at" : "2024-07-29T06:36:10.953Z",
+            "name" : "Major",
+            "created_at" : "2024-07-29T06:36:10.953Z",
+            "description" : "Issues causing significant impact. Immediate response is usually required. We might have some workarounds that mitigate the impact on customers. Examples include an important sub-system failing.",
+            "rank" : 1,
+            "id" : "01J3YK88SMQD2Z5H6KQQYNADD6"
+          },
+          "incident_type" : {
+            "create_in_triage" : "optional",
+            "private_incidents_only" : false,
+            "updated_at" : "2024-07-29T06:36:11.526Z",
+            "name" : "Default",
+            "created_at" : "2024-07-29T06:36:11.526Z",
+            "description" : "",
+            "id" : "01J3YK88SMGP1QGH1DGMPWC588",
+            "is_default" : true
+          },
+          "creator" : {
+            "user" : {
+              "slack_user_id" : "U07EU73H42D",
+              "role" : "responder",
+              "name" : "Abc Xyz",
+              "id" : "01J3YKXNGGK7WRP6GC8HCS7HDE",
+              "email" : "abc@xyz.com"
             }
           },
-          "custom_field_entries": [],
-          "duration_metrics": [
-            {
-              "duration_metric": {
-                "id": "01J3YK88SMZXRBCKNP1VZCW5QJ",
-                "name": "Incident duration"
-              }
+          "visibility" : "public",
+          "duration_metrics" : [ {
+            "duration_metric" : {
+              "name" : "Incident duration",
+              "id" : "01J3YK88SMZXRBCKNP1VZCW5QJ"
             }
-          ],
-          "id": "01J6HJW5MX1B9RXQNYWXFSNPKE",
-          "incident_role_assignments": [
-            {
-              "role": {
-                "created_at": "2024-07-29T06:36:11.05Z",
-                "description": "The person currently coordinating the incident, tasked with driving it to resolution and ensuring clear internal and external communication with stakeholders and customers.",
-                "id": "01J3YK88SM4ZPEFD7DBD99AZMH",
-                "instructions": "- Make sure it’s clear who is doing what, and that people are working together effectively\n- Ensure everybody has what they need, and any blockers are flagged quickly\n- Provide regular, clear updates for stakeholders to let them know what’s happening",
-                "name": "Incident Lead",
-                "required": false,
-                "role_type": "lead",
-                "shortform": "lead",
-                "updated_at": "2024-07-29T06:36:11.05Z"
-              }
-            },
-            {
-              "assignee": {
-                "email": "abc@xyz.com",
-                "id": "01J3YKXNGGK7WRP6GC8HCS7HDE",
-                "name": "Abc Xyz",
-                "role": "responder",
-                "slack_user_id": "U07EU73H42D"
-              },
-              "role": {
-                "created_at": "2024-07-29T06:36:11.059Z",
-                "description": "The person who reported the incident",
-                "id": "01J3YK88SMCYF5EZTZXEWR10SY",
-                "instructions": "",
-                "name": "Reporter",
-                "required": false,
-                "role_type": "reporter",
-                "shortform": "",
-                "updated_at": "2024-07-29T06:36:11.059Z"
-              }
+          } ],
+          "incident_role_assignments" : [ {
+            "role" : {
+              "instructions" : "- Make sure it’s clear who is doing what, and that people are working together effectively\n- Ensure everybody has what they need, and any blockers are flagged quickly\n- Provide regular, clear updates for stakeholders to let them know what’s happening",
+              "role_type" : "lead",
+              "updated_at" : "2024-07-29T06:36:11.05Z",
+              "shortform" : "lead",
+              "name" : "Incident Lead",
+              "created_at" : "2024-07-29T06:36:11.05Z",
+              "description" : "The person currently coordinating the incident, tasked with driving it to resolution and ensuring clear internal and external communication with stakeholders and customers.",
+              "id" : "01J3YK88SM4ZPEFD7DBD99AZMH",
+              "required" : false
             }
-          ],
-          "incident_status": {
-            "category": "live",
-            "created_at": "2024-07-29T06:36:11.006Z",
-            "description": "Something has gone wrong, and we know why. We're in the process of fixing it.",
-            "id": "01J3YK88SMZVKMS4QJWEC5K202",
-            "name": "Fixing",
-            "rank": 2,
-            "updated_at": "2024-07-29T06:36:11.006Z"
-          },
-          "incident_timestamp_values": [
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMHCZP2N61X3CKXXHC",
-                "name": "Reported at",
-                "rank": 0
-              },
-              "value": {
-                "value": "2024-08-30T12:06:32.349Z"
-              }
+          }, {
+            "role" : {
+              "instructions" : "",
+              "role_type" : "reporter",
+              "updated_at" : "2024-07-29T06:36:11.059Z",
+              "shortform" : "",
+              "name" : "Reporter",
+              "created_at" : "2024-07-29T06:36:11.059Z",
+              "description" : "The person who reported the incident",
+              "id" : "01J3YK88SMCYF5EZTZXEWR10SY",
+              "required" : false
             },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMBY1C64HY6GC1K31G",
-                "name": "Accepted at",
-                "rank": 1
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SM30DMPH20BWC2ED7Z",
-                "name": "Declined at",
-                "rank": 2
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMP82Y4N3ETRBB8E7Q",
-                "name": "Merged at",
-                "rank": 3
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMRYPJGRRT198M1CW8",
-                "name": "Canceled at",
-                "rank": 4
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMXEVDXW99KWD0WJXD",
-                "name": "Resolved at",
-                "rank": 5
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMF68KZ9S8GPRS4KVK",
-                "name": "Impact started at",
-                "rank": 6
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMZSGBVHSJHZTGQM8W",
-                "name": "Identified at",
-                "rank": 7
-              },
-              "value": {
-                "value": "2024-08-30T12:14:00.126Z"
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMM4NEQ5ZYBRRJA6SN",
-                "name": "Fixed at",
-                "rank": 8
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMKST7DFV9PK1492GX",
-                "name": "Documented at",
-                "rank": 9
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SM7NKF2WEKXSN4SSKV",
-                "name": "Reviewed at",
-                "rank": 10
-              }
-            },
-            {
-              "incident_timestamp": {
-                "id": "01J3YK88SMRJAD2NGEXAMHARNA",
-                "name": "Closed at",
-                "rank": 11
-              }
+            "assignee" : {
+              "slack_user_id" : "U07EU73H42D",
+              "role" : "responder",
+              "name" : "Abc Xyz",
+              "id" : "01J3YKXNGGK7WRP6GC8HCS7HDE",
+              "email" : "abc@xyz.com"
             }
-          ],
-          "incident_type": {
-            "create_in_triage": "optional",
-            "created_at": "2024-07-29T06:36:11.526Z",
-            "description": "",
-            "id": "01J3YK88SMGP1QGH1DGMPWC588",
-            "is_default": true,
-            "name": "Default",
-            "private_incidents_only": false,
-            "updated_at": "2024-07-29T06:36:11.526Z"
+          } ],
+          "created_at" : "2024-08-30T12:06:32.349Z",
+          "incident_status" : {
+            "updated_at" : "2024-07-29T06:36:11.006Z",
+            "name" : "Fixing",
+            "created_at" : "2024-07-29T06:36:11.006Z",
+            "description" : "Something has gone wrong, and we know why. We're in the process of fixing it.",
+            "rank" : 2,
+            "id" : "01J3YK88SMZVKMS4QJWEC5K202",
+            "category" : "live"
           },
-          "mode": "standard",
-          "name": "TestIncidentPublic1",
-          "permalink": "https://app.incident.io/org-name/incidents/01J6HJW5MX1B9RXQNYWXFSNPKE",
-          "reference": "INC-8",
-          "severity": {
-            "created_at": "2024-07-29T06:36:10.953Z",
-            "description": "Issues causing significant impact. Immediate response is usually required. We might have some workarounds that mitigate the impact on customers. Examples include an important sub-system failing.",
-            "id": "01J3YK88SMQD2Z5H6KQQYNADD6",
-            "name": "Major",
-            "rank": 1,
-            "updated_at": "2024-07-29T06:36:10.953Z"
-          },
-          "slack_channel_id": "C07KBP28WP6",
-          "slack_channel_name": "inc-2024-08-30-testincidentpublic1",
-          "slack_team_id": "T07E0UV0N4F",
-          "updated_at": "2024-08-30T12:14:00.209Z",
-          "visibility": "public"
+          "mode" : "standard",
+          "reference" : "INC-8",
+          "slack_team_id" : "T07E0UV0N4F",
+          "slack_channel_id" : "C07KBP28WP6",
+          "incident_timestamp_values" : [ {
+            "incident_timestamp" : {
+              "name" : "Reported at",
+              "rank" : 0,
+              "id" : "01J3YK88SMHCZP2N61X3CKXXHC"
+            },
+            "value" : {
+              "value" : "2024-08-30T12:06:32.349Z"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Accepted at",
+              "rank" : 1,
+              "id" : "01J3YK88SMBY1C64HY6GC1K31G"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Declined at",
+              "rank" : 2,
+              "id" : "01J3YK88SM30DMPH20BWC2ED7Z"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Merged at",
+              "rank" : 3,
+              "id" : "01J3YK88SMP82Y4N3ETRBB8E7Q"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Canceled at",
+              "rank" : 4,
+              "id" : "01J3YK88SMRYPJGRRT198M1CW8"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Resolved at",
+              "rank" : 5,
+              "id" : "01J3YK88SMXEVDXW99KWD0WJXD"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Impact started at",
+              "rank" : 6,
+              "id" : "01J3YK88SMF68KZ9S8GPRS4KVK"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Identified at",
+              "rank" : 7,
+              "id" : "01J3YK88SMZSGBVHSJHZTGQM8W"
+            },
+            "value" : {
+              "value" : "2024-08-30T12:14:00.126Z"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Fixed at",
+              "rank" : 8,
+              "id" : "01J3YK88SMM4NEQ5ZYBRRJA6SN"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Documented at",
+              "rank" : 9,
+              "id" : "01J3YK88SMKST7DFV9PK1492GX"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Reviewed at",
+              "rank" : 10,
+              "id" : "01J3YK88SM7NKF2WEKXSN4SSKV"
+            }
+          }, {
+            "incident_timestamp" : {
+              "name" : "Closed at",
+              "rank" : 11,
+              "id" : "01J3YK88SMRJAD2NGEXAMHARNA"
+            }
+          } ],
+          "updated_at" : "2024-08-30T12:14:00.209Z",
+          "name" : "TestIncidentPublic1",
+          "id" : "01J6HJW5MX1B9RXQNYWXFSNPKE",
+          "permalink" : "https://app.incident.io/org-name/incidents/01J6HJW5MX1B9RXQNYWXFSNPKE",
+          "slack_channel_name" : "inc-2024-08-30-testincidentpublic1"
         }
       }
     result:
@@ -910,43 +891,43 @@ tests:
               role: "responder"
               slack_user_id: "U07EU73H42D"
           duration_metrics:
-            -
-              duration_metric:
-                name: "Incident duration"
-                id: "01J3YK88SMZXRBCKNP1VZCW5QJ"
+           -
+            duration_metric:
+              name: "Incident duration"
+              id: "01J3YK88SMZXRBCKNP1VZCW5QJ"
           incident_id: "01J6HJW5MX1B9RXQNYWXFSNPKE"
           incident_role_assignments:
-            - 
-              role:
-                instructions: |-
-                  - Make sure it’s clear who is doing what, and that people are working together effectively
-                  - Ensure everybody has what they need, and any blockers are flagged quickly
-                  - Provide regular, clear updates for stakeholders to let them know what’s happening
-                role_type: "lead"
-                updated_at: "2024-07-29T06:36:11.05Z"
-                shortform: "lead"
-                name: "Incident Lead"
-                created_at: "2024-07-29T06:36:11.05Z"
-                description: "The person currently coordinating the incident, tasked with driving it to resolution and ensuring clear internal and external communication with stakeholders and customers."
-                id: "01J3YK88SM4ZPEFD7DBD99AZMH"
-                required: false
-            - 
-              role:
-                instructions: ""
-                role_type: "reporter"
-                updated_at: "2024-07-29T06:36:11.059Z"
-                shortform: ""
-                name: "Reporter"
-                created_at: "2024-07-29T06:36:11.059Z"
-                description: "The person who reported the incident"
-                id: "01J3YK88SMCYF5EZTZXEWR10SY"
-                required: false
-              assignee:
-                slack_user_id: "U07EU73H42D"
-                role: "responder"
-                name: "Abc Xyz"
-                id: "01J3YKXNGGK7WRP6GC8HCS7HDE"
-                email: "abc@xyz.com"
+           -
+            role:
+              instructions: |-
+                - Make sure it’s clear who is doing what, and that people are working together effectively
+                - Ensure everybody has what they need, and any blockers are flagged quickly
+                - Provide regular, clear updates for stakeholders to let them know what’s happening
+              role_type: "lead"
+              updated_at: "2024-07-29T06:36:11.05Z"
+              shortform: "lead"
+              name: "Incident Lead"
+              created_at: "2024-07-29T06:36:11.05Z"
+              description: "The person currently coordinating the incident, tasked with driving it to resolution and ensuring clear internal and external communication with stakeholders and customers."
+              id: "01J3YK88SM4ZPEFD7DBD99AZMH"
+              required: false
+           -
+            role:
+              instructions: ""
+              role_type: "reporter"
+              updated_at: "2024-07-29T06:36:11.059Z"
+              shortform: ""
+              name: "Reporter"
+              created_at: "2024-07-29T06:36:11.059Z"
+              description: "The person who reported the incident"
+              id: "01J3YK88SMCYF5EZTZXEWR10SY"
+              required: false
+            assignee:
+              slack_user_id: "U07EU73H42D"
+              role: "responder"
+              name: "Abc Xyz"
+              id: "01J3YKXNGGK7WRP6GC8HCS7HDE"
+              email: "abc@xyz.com"
           incident_status:
             category: "live"
             created_at: "2024-07-29T06:36:11.006Z"
@@ -956,70 +937,70 @@ tests:
             rank: 2
             updated_at: "2024-07-29T06:36:11.006Z"
           incident_timestamp_values:
-            - 
-              incident_timestamp:
-                name: "Reported at"
-                rank: 0
-                id: "01J3YK88SMHCZP2N61X3CKXXHC"
-              value:
-                value: "2024-08-30T12:06:32.349Z"
-            - 
-              incident_timestamp:
-                name: "Accepted at"
-                rank: 1
-                id: "01J3YK88SMBY1C64HY6GC1K31G"
-            - 
-              incident_timestamp:
-                name: "Declined at"
-                rank: 2
-                id: "01J3YK88SM30DMPH20BWC2ED7Z"
-            - 
-              incident_timestamp:
-                name: "Merged at"
-                rank: 3
-                id: "01J3YK88SMP82Y4N3ETRBB8E7Q"
-            - 
-              incident_timestamp:
-                name: "Canceled at"
-                rank: 4
-                id: "01J3YK88SMRYPJGRRT198M1CW8"
-            - 
-              incident_timestamp:
-                name: "Resolved at"
-                rank: 5
-                id: "01J3YK88SMXEVDXW99KWD0WJXD"
-            - 
-              incident_timestamp:
-                name: "Impact started at"
-                rank: 6
-                id: "01J3YK88SMF68KZ9S8GPRS4KVK"
-            - 
-              incident_timestamp:
-                name: "Identified at"
-                rank: 7
-                id: "01J3YK88SMZSGBVHSJHZTGQM8W"
-              value:
-                value: "2024-08-30T12:14:00.126Z"
-            - 
-              incident_timestamp:
-                name: "Fixed at"
-                rank: 8
-                id: "01J3YK88SMM4NEQ5ZYBRRJA6SN"
-            - 
-              incident_timestamp:
-                name: "Documented at"
-                rank: 9
-                id: "01J3YK88SMKST7DFV9PK1492GX"
-            - 
-              incident_timestamp:
-                name: "Reviewed at"
-                rank: 10
-                id: "01J3YK88SM7NKF2WEKXSN4SSKV"
-            - 
-              incident_timestamp:
-                name: "Closed at"
-                rank: 11
-                id: "01J3YK88SMRJAD2NGEXAMHARNA"
+           -
+            incident_timestamp:
+              name: "Reported at"
+              rank: 0
+              id: "01J3YK88SMHCZP2N61X3CKXXHC"
+            value:
+              value: "2024-08-30T12:06:32.349Z"
+           -
+            incident_timestamp:
+              name: "Accepted at"
+              rank: 1
+              id: "01J3YK88SMBY1C64HY6GC1K31G"
+           -
+            incident_timestamp:
+              name: "Declined at"
+              rank: 2
+              id: "01J3YK88SM30DMPH20BWC2ED7Z"
+           -
+            incident_timestamp:
+              name: "Merged at"
+              rank: 3
+              id: "01J3YK88SMP82Y4N3ETRBB8E7Q"
+           -
+            incident_timestamp:
+              name: "Canceled at"
+              rank: 4
+              id: "01J3YK88SMRYPJGRRT198M1CW8"
+           -
+            incident_timestamp:
+              name: "Resolved at"
+              rank: 5
+              id: "01J3YK88SMXEVDXW99KWD0WJXD"
+           -
+            incident_timestamp:
+              name: "Impact started at"
+              rank: 6
+              id: "01J3YK88SMF68KZ9S8GPRS4KVK"
+           -
+            incident_timestamp:
+              name: "Identified at"
+              rank: 7
+              id: "01J3YK88SMZSGBVHSJHZTGQM8W"
+            value:
+              value: "2024-08-30T12:14:00.126Z"
+           -
+            incident_timestamp:
+              name: "Fixed at"
+              rank: 8
+              id: "01J3YK88SMM4NEQ5ZYBRRJA6SN"
+           -
+            incident_timestamp:
+              name: "Documented at"
+              rank: 9
+              id: "01J3YK88SMKST7DFV9PK1492GX"
+           -
+            incident_timestamp:
+              name: "Reviewed at"
+              rank: 10
+              id: "01J3YK88SM7NKF2WEKXSN4SSKV"
+           -
+            incident_timestamp:
+              name: "Closed at"
+              rank: 11
+              id: "01J3YK88SMRJAD2NGEXAMHARNA"
           incident_type:
             create_in_triage: "optional"
             created_at: "2024-07-29T06:36:11.526Z"
@@ -1133,83 +1114,83 @@ tests:
               "slack_team_id" : "T07E0UV0N4F",
               "slack_channel_id" : "C07KBP28WP6",
               "incident_timestamp_values" : [ {
-                  "incident_timestamp" : {
-                    "name" : "Reported at",
-                    "rank" : 0,
-                    "id" : "01J3YK88SMHCZP2N61X3CKXXHC"
-                  },
-                  "value" : {
-                    "value" : "2024-08-30T12:06:32.349Z"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Accepted at",
-                    "rank" : 1,
-                    "id" : "01J3YK88SMBY1C64HY6GC1K31G"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Declined at",
-                    "rank" : 2,
-                    "id" : "01J3YK88SM30DMPH20BWC2ED7Z"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Merged at",
-                    "rank" : 3,
-                    "id" : "01J3YK88SMP82Y4N3ETRBB8E7Q"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Canceled at",
-                    "rank" : 4,
-                    "id" : "01J3YK88SMRYPJGRRT198M1CW8"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Resolved at",
-                    "rank" : 5,
-                    "id" : "01J3YK88SMXEVDXW99KWD0WJXD"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Impact started at",
-                    "rank" : 6,
-                    "id" : "01J3YK88SMF68KZ9S8GPRS4KVK"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Identified at",
-                    "rank" : 7,
-                    "id" : "01J3YK88SMZSGBVHSJHZTGQM8W"
-                  },
-                  "value" : {
-                    "value" : "2024-08-30T12:14:00.126Z"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Fixed at",
-                    "rank" : 8,
-                    "id" : "01J3YK88SMM4NEQ5ZYBRRJA6SN"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Documented at",
-                    "rank" : 9,
-                    "id" : "01J3YK88SMKST7DFV9PK1492GX"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Reviewed at",
-                    "rank" : 10,
-                    "id" : "01J3YK88SM7NKF2WEKXSN4SSKV"
-                  }
-                }, {
-                  "incident_timestamp" : {
-                    "name" : "Closed at",
-                    "rank" : 11,
-                    "id" : "01J3YK88SMRJAD2NGEXAMHARNA"
-                  }
+                "incident_timestamp" : {
+                  "name" : "Reported at",
+                  "rank" : 0,
+                  "id" : "01J3YK88SMHCZP2N61X3CKXXHC"
+                },
+                "value" : {
+                  "value" : "2024-08-30T12:06:32.349Z"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Accepted at",
+                  "rank" : 1,
+                  "id" : "01J3YK88SMBY1C64HY6GC1K31G"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Declined at",
+                  "rank" : 2,
+                  "id" : "01J3YK88SM30DMPH20BWC2ED7Z"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Merged at",
+                  "rank" : 3,
+                  "id" : "01J3YK88SMP82Y4N3ETRBB8E7Q"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Canceled at",
+                  "rank" : 4,
+                  "id" : "01J3YK88SMRYPJGRRT198M1CW8"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Resolved at",
+                  "rank" : 5,
+                  "id" : "01J3YK88SMXEVDXW99KWD0WJXD"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Impact started at",
+                  "rank" : 6,
+                  "id" : "01J3YK88SMF68KZ9S8GPRS4KVK"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Identified at",
+                  "rank" : 7,
+                  "id" : "01J3YK88SMZSGBVHSJHZTGQM8W"
+                },
+                "value" : {
+                  "value" : "2024-08-30T12:14:00.126Z"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Fixed at",
+                  "rank" : 8,
+                  "id" : "01J3YK88SMM4NEQ5ZYBRRJA6SN"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Documented at",
+                  "rank" : 9,
+                  "id" : "01J3YK88SMKST7DFV9PK1492GX"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Reviewed at",
+                  "rank" : 10,
+                  "id" : "01J3YK88SM7NKF2WEKXSN4SSKV"
+                }
+              }, {
+                "incident_timestamp" : {
+                  "name" : "Closed at",
+                  "rank" : 11,
+                  "id" : "01J3YK88SMRJAD2NGEXAMHARNA"
+                }
               } ],
               "updated_at" : "2024-08-30T12:14:00.209Z",
               "name" : "TestIncidentPublic1",
@@ -1220,7 +1201,7 @@ tests:
           }
         }
       tags:
-        - "source:LOGS_SOURCE"
+       - "source:LOGS_SOURCE"
       timestamp: 1725020040209
   - sample: |-
       {
