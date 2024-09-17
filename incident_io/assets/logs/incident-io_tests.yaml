@@ -1717,11 +1717,11 @@ tests:
             created_at: "2024-09-03T09:09:35.405Z"
             creator:
               user:
-              email: "abc@xyz.com"
-              id: "01J3YKTARC4X290M9C6DMH5SXQ"
-              name: "Abc Xyz"
-              role: "responder"
-              slack_user_id: "U07EFGXB0RG"
+                email: "abc@xyz.com"
+                id: "01J3YKTARC4X290M9C6DMH5SXQ"
+                name: "Abc Xyz"
+                role: "responder"
+                slack_user_id: "U07EFGXB0RG"
             duration_metrics:
               - 
                 duration_metric:
