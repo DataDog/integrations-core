@@ -6,17 +6,24 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from time import time
 
-from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
+from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.queries import DETECT_DEADLOCK_QUERY
 
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 MAX_DEADLOCKS = 100
+MAX_PAYLOAD_BYTES = 19e6
+DEFAULT_COLLECTION_INTERVAL = 600
 
 def agent_check_getter(self):
     return self._check
 
-class Deadlocks:
+class Deadlocks(DBMAsyncJob):
 
     def __init__(self, check, conn_prefix, config):
         self._check = check
@@ -25,6 +32,22 @@ class Deadlocks:
         self._config = config
         self._last_deadlock_timestamp = time()
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
+        self._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
+        self.collection_interval = config.deadlocks_config.get(
+            "collection_interval", DEFAULT_COLLECTION_INTERVAL
+        )
+        super(Deadlocks, self).__init__(
+            check,
+            run_sync=True,
+            enabled=self._config.deadlocks_config.get('enabled', True),
+            expected_db_exceptions=(),
+            min_collection_interval=self._config.min_collection_interval,
+            dbms="sqlserver",
+            rate_limit=1 / float(self.collection_interval),
+            job_name="deadlocks",
+            shutdown_callback=self._close_db_conn,
+        )
+
 
     def obfuscate_no_except_wrapper(self, sql_text):
         try:

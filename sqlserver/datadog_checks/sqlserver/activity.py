@@ -14,7 +14,6 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 
 try:
@@ -22,8 +21,7 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
-DEFAULT_DEADLOCKS_COLLECTION_INTERVAL = 600
+DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
 
 CONNECTIONS_QUERY = """\
@@ -158,78 +156,32 @@ class SqlserverActivity(DBMAsyncJob):
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
-
-        self._last_deadlocks_collection_time = 0
-        self._last_activity_collection_time = 0
-
-        self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", True))
-        self._deadlocks_collection_interval = config.deadlocks_config.get(
-            "collection_interval", DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
+        collection_interval = float(
+            self._config.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
-        if self._deadlocks_collection_interval <= 0:
-            self._deadlocks_collection_interval = DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
-
-        self._activity_collection_enabled = is_affirmative(config.activity_config.get("enabled", True))
-        self._activity_collection_interval = config.activity_config.get(
-            "collection_interval", DEFAULT_ACTIVITY_COLLECTION_INTERVAL
-        )
-        if self._activity_collection_enabled <= 0:
-            self._activity_collection_enabled = DEFAULT_ACTIVITY_COLLECTION_INTERVAL
-
-        if self._deadlocks_collection_enabled and not self._activity_collection_enabled:
-            self.collection_interval = self._deadlocks_collection_interval
-        elif not self._deadlocks_collection_enabled and self._activity_collection_enabled:
-            self.collection_interval = self._activity_collection_interval
-        else:
-            self.collection_interval = min(self._deadlocks_collection_interval, self._activity_collection_interval)
-
-        self.enabled = self._deadlocks_collection_enabled or self._activity_collection_enabled
-
+        if collection_interval <= 0:
+            collection_interval = DEFAULT_COLLECTION_INTERVAL
+        self.collection_interval = collection_interval
         super(SqlserverActivity, self).__init__(
             check,
             run_sync=is_affirmative(self._config.activity_config.get('run_sync', False)),
-            enabled=self.enabled,
+            enabled=is_affirmative(self._config.activity_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
-            rate_limit=1 / float(self.collection_interval),
+            rate_limit=1 / float(collection_interval),
             job_name="query-activity",
             shutdown_callback=self._close_db_conn,
         )
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
-        self._deadlocks = Deadlocks(check, self._conn_key_prefix, self._config)
-        self._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
 
     def _close_db_conn(self):
         pass
 
     def run_job(self):
-        elapsed_time_activity = time.time() - self._last_activity_collection_time
-        if self._activity_collection_enabled and elapsed_time_activity >= self._activity_collection_interval:
-            self._last_activity_collection_time = time.time()
-            try:
-                self.collect_activity()
-            except Exception as e:
-                self._log.error(
-                    """An error occurred while collecting SQLServer activity.
-                                This may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
-                )
-        elapsed_time_deadlocks = time.time() - self._last_deadlocks_collection_time
-        if self._deadlocks_collection_enabled and elapsed_time_deadlocks >= self._deadlocks_collection_interval:
-            self._last_deadlocks_collection_time = time.time()
-            try:
-                self._deadlocks.collect_deadlocks()
-            except Exception as e:
-                self._log.error(
-                    """An error occurred while collecting SQLServer deadlocks.
-                                This may be unavailable until the error is resolved. The error - {}""".format(
-                        e
-                    )
-                )
+        self.collect_activity()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
@@ -398,7 +350,7 @@ class SqlserverActivity(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "activity",
-            "collection_interval": self._activity_collection_interval,
+            "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),

@@ -21,6 +21,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAgentMetrics,
     SqlserverDatabaseBackupMetrics,
@@ -139,6 +140,7 @@ class SQLServer(AgentCheck):
         self.sql_metadata = SqlserverMetadata(self, self._config)
         self.activity = SqlserverActivity(self, self._config)
         self.agent_history = SqlserverAgentHistory(self, self._config)
+        self.deadlocks = Deadlocks(self, self._config)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
