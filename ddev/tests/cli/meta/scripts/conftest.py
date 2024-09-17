@@ -7,7 +7,7 @@ from ddev.repo.core import Repository
 
 # Whenenever we bump python version, we also need to bump the python
 # version in the conftest.py.
-OLD_PYTHON_VERSION = "3.12" 
+OLD_PYTHON_VERSION = "3.12"
 NEW_PYTHON_VERSION = "3.13"
 
 
