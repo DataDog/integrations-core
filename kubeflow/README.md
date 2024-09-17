@@ -72,7 +72,6 @@ spec:
 
 Where `<kubeflow-component>` is to be replaced by `pipelines`, `kserve` or `katib` and `<kubeflow-component-name>` is to be replaced by `ml-pipeline`, `kserve` or `katib`.
 
-For kserve monitoring, you can check this [link][10].
 
 **Note**: The listed metrics can only be collected if they are available(depending on the version). Some metrics are generated only when certain actions are performed. 
 
@@ -137,4 +136,3 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubeflow/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/kubeflow/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
-[10]: https://github.com/kserve/kserve/tree/master/docs/samples/metrics-and-monitoring
