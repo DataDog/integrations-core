@@ -6,8 +6,6 @@
 
 View Kafka broker metrics collected for a 360-view of the health and performance of your Kafka clusters in real time. With this integration, you can collect metrics and logs from your Kafka deployment to visualize telemetry and alert on the performance of your Kafka stack. 
 
-If you would benefit from visualizing the topology of your streaming data pipelines and identifying the root cause of bottlenecks, learn more about [Data Streams Monitoring][24].
-
 **Note**: 
 - This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the Agent status output. Specify the metrics you are interested in by editing the configuration below. For more detailed instructions on customizing the metrics to collect, see the [JMX Checks documentation][2].
 - This integration attached sample configuration works only for Kafka >= 0.8.2.
