@@ -25,7 +25,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
@@ -39,8 +38,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'",
-    "python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'",
+    "python3-gearman==0.1.0; sys_platform != 'win32'",
 ]
 
 [project.urls]

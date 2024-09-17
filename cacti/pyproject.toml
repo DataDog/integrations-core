@@ -25,7 +25,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3.11",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
@@ -39,8 +38,7 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "pymysql==0.10.1; python_version < '3.0'",
-    "pymysql==1.1.1; python_version > '3.0'",
+    "pymysql==1.1.1",
 ]
 
 [project.urls]
