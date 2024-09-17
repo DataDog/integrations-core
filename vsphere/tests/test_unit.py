@@ -3181,7 +3181,9 @@ def test_property_metrics_invalid_ip_route_config_gateway(
     )
 
 
-def test_property_metrics_excluded_host_tags(aggregator, realtime_instance, dd_run_check, caplog, service_instance, vm_properties_ex):
+def test_property_metrics_excluded_host_tags(
+    aggregator, realtime_instance, dd_run_check, caplog, service_instance, vm_properties_ex
+):
     realtime_instance['collect_property_metrics'] = True
 
     service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
