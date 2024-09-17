@@ -1,0 +1,1899 @@
+{
+    "title": "Yarn Clusters",
+    "description": "Proposition for OOTB dashboard to be linked to Yarn clusters (Dataproc & EMR)",
+    "widgets": [
+        {
+            "id": 7986081179091420,
+            "definition": {
+                "title": "New group",
+                "banner_img": "/static/images/logos/yarn_large.svg",
+                "show_title": false,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2088480862142846,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard tracks the status of your EMR clusters. It allows you to track the resources utilization, as well as spark applications running on them.\n\nIt shows clusters that are under/over utilized to point to possible areas for optimization.\n\nThis dashboard works best when filtering on a specific **job_flow_id** or **cluster_name** from the cluster list",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 7
+            }
+        },
+        {
+            "id": 696856316767128,
+            "definition": {
+                "title": "Overview",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 908912502631126,
+                        "definition": {
+                            "title": "Currently active clusters",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "hostmap",
+                            "requests": {
+                                "fill": {
+                                    "q": "avg:system.cpu.idle{$env,$cluster_name,$cluster_id} by {host}"
+                                }
+                            },
+                            "node_type": "host",
+                            "no_metric_hosts": false,
+                            "no_group_hosts": false,
+                            "group": [
+                                "cluster_name",
+                                "is_master_node"
+                            ],
+                            "scope": [
+                                "$env",
+                                "$cluster_name",
+                                "$cluster_id"
+                            ],
+                            "style": {
+                                "palette": "green_to_orange",
+                                "palette_flip": false,
+                                "fill_min": "auto",
+                                "fill_max": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 8,
+                            "height": 6
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 7
+            }
+        },
+        {
+            "id": 3740656414431136,
+            "definition": {
+                "title": "Clusters List",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2519283390108434,
+                        "definition": {
+                            "title": "Clusters (click to set template variable)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.cpu.num_cores{job_flow_id:* OR dataproc_cluster_id:* AND $env AND $cluster_id AND $cluster_name} by {cluster_name,job_flow_id}.rollup(avg, 60)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "name": "query4",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{job_flow_id:* AND $env OR dataproc_cluster_id:* AND is_master_node:true AND $env AND $cluster_id AND $cluster_name} by {cluster_name,job_flow_id}.fill(null)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name,job_flow_id}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "alias": "Core-Hours",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1 / 60"
+                                        },
+                                        {
+                                            "alias": "Avg Driver CPU Usage",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "value": 5,
+                                                    "palette": "black_on_light_red"
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "value": 15,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "100 - query4"
+                                        },
+                                        {
+                                            "alias": "Driver CPU Usage",
+                                            "cell_display_mode": "trend",
+                                            "formula": "100 - (query4 * 1)"
+                                        },
+                                        {
+                                            "alias": "Avg Worker CPU Usage",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "value": 10,
+                                                    "palette": "black_on_light_red"
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "value": 40,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "100 - query2"
+                                        },
+                                        {
+                                            "alias": "Worker CPU Usage",
+                                            "cell_display_mode": "trend",
+                                            "formula": "100 - (query2 * 1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 6
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 12,
+                "height": 7
+            }
+        },
+        {
+            "id": 7943943372509178,
+            "definition": {
+                "title": "YARN Metrics",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8853373132841730,
+                        "definition": {
+                            "title": "Avg YARN Cores Allocation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            },
+                                            "formula": "100 * query2 / query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:yarn.metrics.allocated_virtual_cores{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env}.fill(null)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:yarn.metrics.total_virtual_cores{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env}.fill(null)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "value": 40,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 734380341246364,
+                        "definition": {
+                            "title": "YARN Cores Allocation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "YARN Total Cores",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "YARN Allocated Cores",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.total_virtual_cores{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.allocated_virtual_cores{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5146273834622418,
+                        "definition": {
+                            "title": "YARN Containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "YARN Containers Allocated",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "YARN Containers Pending",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "YARN Containers Reserved",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.containers_allocated{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null).rollup(max, 15)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.containers_pending{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null).rollup(max, 15)"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.containers_reserved{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null).rollup(max, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5885270117793814,
+                        "definition": {
+                            "title": "Avg YARN Memory Allocation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            },
+                                            "formula": "100 * query2 / query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:yarn.metrics.allocated_mb{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env}.fill(null)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:yarn.metrics.total_mb{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env}.fill(null)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "value": 40,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5430720584119052,
+                        "definition": {
+                            "title": "YARN Memory Allocation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "YARN Total Memory",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "YARN Allocated Memory",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.total_mb{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.allocated_mb{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8568121062141928,
+                        "definition": {
+                            "title": "YARN Apps",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "YARN Apps Pending",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "YARN Apps Running",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.apps_pending{job_flow_id:* OR dataproc_cluster_id:* AND automatic-restart:true AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null).rollup(max, 15)"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.apps_running{job_flow_id:* OR dataproc_cluster_id:* AND $cluster_name AND $cluster_id AND $env} by {cluster_name}.fill(null).rollup(max, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 4267549119585796,
+            "definition": {
+                "title": "Workers Infra Metrics",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4302717802964760,
+                        "definition": {
+                            "title": "Avg Workers CPU Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "100 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "value": 10,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 40,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 95,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4408207578967238,
+                        "definition": {
+                            "title": "Workers Core Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Cores Total",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Cores Used",
+                                            "formula": "(100 - query2) / 100 * query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.cpu.num_cores{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(avg, 15)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4342739401280664,
+                        "definition": {
+                            "title": "Workers Network IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Network Received",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Network Sent",
+                                            "formula": "0 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.net.bytes_rcvd{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(avg, 15)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.net.bytes_sent{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8932299730586084,
+                        "definition": {
+                            "title": "Avg Workers Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            },
+                                            "formula": "query2 / query1 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.mem.used{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.mem.total{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4579711997928106,
+                        "definition": {
+                            "title": "Workers Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Used",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Memory Total",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.mem.used{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(avg, 15)"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.mem.total{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1808828575473100,
+                        "definition": {
+                            "title": "Workers Disk IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Disk Read",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Disk Write",
+                                            "formula": "0 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.io.rkb_s{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(avg, 15)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.io.wkb_s{job_flow_id:* OR dataproc_cluster_id:* AND is_master_node:false AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8753199573607550,
+                        "definition": {
+                            "title": "Worker Count by Cluster",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Worker Count",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "max:yarn.metrics.active_nodes{job_flow_id:* OR dataproc_cluster_id:* AND $env AND $cluster_id AND $cluster_name} by {cluster_name}.fill(null).rollup(max, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 7,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2102656673592240,
+                        "definition": {
+                            "type": "note",
+                            "content": "Monitor your workers resource usage. Metrics of workers are aggregated by cluster to have an overview of the full cluster\n\nThe agent has to be installed on the worker nodes to collect those metrics.\n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 4,
+                            "width": 5,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 19,
+                "width": 12,
+                "height": 7,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 6145985371833798,
+            "definition": {
+                "title": "Spark Performance",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7694220939331754,
+                        "definition": {
+                            "type": "note",
+                            "content": "##  Spark Performance\n\nSpark operations and metrics coming from the spark driver. \n\nSpark Applications are clickable to display a more detailed view of the computations.",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6952043600652888,
+                        "definition": {
+                            "title": "Spark Task Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark (job_flow_id:* OR dataproc_cluster_id:*) $env $cluster_id $cluster_name retained_by:retention_filter"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.executor_run_time"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1749374829297236,
+                        "definition": {
+                            "title": "Spark Input Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark (job_flow_id:* OR dataproc_cluster_id:*) $env $cluster_id $cluster_name retained_by:retention_filter"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.input_bytes"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6296211348550286,
+                        "definition": {
+                            "title": "Spark Output Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark $env $cluster_id $cluster_name retained_by:retention_filter (job_flow_id:* OR dataproc_cluster_id:*)"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.output_bytes"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2682399131601456,
+                        "definition": {
+                            "title": "Spark Shuffle Read Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark $env $cluster_id $cluster_name retained_by:retention_filter (job_flow_id:* OR dataproc_cluster_id:*)"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.shuffle_read_bytes"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6526189305692078,
+                        "definition": {
+                            "title": "Spark Shuffle Write Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark $env $cluster_id $cluster_name retained_by:retention_filter (job_flow_id:* OR dataproc_cluster_id:*)"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.shuffle_write_bytes"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 10,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1342992510754146,
+                        "definition": {
+                            "title": "Spark Efficiency (duration of Spark tasks divided by core uptime of Spark executors)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            },
+                                            "formula": "100 * query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark $env $cluster_id $cluster_name retained_by:retention_filter (job_flow_id:* OR dataproc_cluster_id:*)"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.executor_run_time"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark $env $cluster_id $cluster_name retained_by:retention_filter (job_flow_id:* OR dataproc_cluster_id:*)"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.available_executor_time"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 70,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 40,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 10,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 1
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7916441977076770,
+                        "definition": {
+                            "title": "Disk Spill",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark $env $cluster_id $cluster_name retained_by:retention_filter (job_flow_id:* OR dataproc_cluster_id:*)"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.disk_bytes_spilled"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5671942968235890,
+                        "definition": {
+                            "title": "Spark Applications Overtime",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "spans",
+                                            "search": {
+                                                "query": "operation_name:spark.application $env $cluster_id $cluster_name retained_by:retention_filter (job_flow_id:* OR dataproc_cluster_id:*) "
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "semantic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3798835960288668,
+                        "definition": {
+                            "title": "Spark Applications (click to view trace)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "trace_stream",
+                                        "query_string": "@_top_level:1 operation_name:spark.application $cluster_id $cluster_name (job_flow_id:* OR dataproc_cluster_id:*) $env",
+                                        "indexes": []
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "job_flow_id",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@duration",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.input_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.output_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.shuffle_read_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.shuffle_write_bytes",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 26,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 3099884101005090,
+            "definition": {
+                "title": "YARN ResourceManager Metrics",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6911774026162056,
+                        "definition": {
+                            "title": "Average ResourceManager CPU Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "100 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "value": 5,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 15,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 90,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3281409481807368,
+                        "definition": {
+                            "title": "ResourceManager Cores Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Cores Total",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "core"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Cores Used",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "core"
+                                                }
+                                            },
+                                            "formula": "(100 - query2) / 100 * query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:system.cpu.num_cores{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)} by {cluster_name}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)} by {cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7278341068977720,
+                        "definition": {
+                            "title": "ResourceManager Network IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Network Received",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Network Sent",
+                                            "formula": "0 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.net.bytes_rcvd{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)} by {databricks_cluster_name}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.net.bytes_sent{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)} by {databricks_cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5352425254965778,
+                        "definition": {
+                            "title": "Average ResourceManager Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            },
+                                            "formula": "query2 / query1 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.mem.used{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)}.fill(null)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.mem.total{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2572028652296372,
+                        "definition": {
+                            "title": "ResourceManager Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Total",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Memory Used",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:system.mem.total{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)} by {cluster_name}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.mem.used{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)} by {cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7495689945000702,
+                        "definition": {
+                            "title": "ResourceManager Disk IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Disk Read",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Disk Write",
+                                            "formula": "0 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.io.rkb_s{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)} by {cluster_name,job_flow_id}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.io.wkb_s{is_master_node:true AND $env AND $cluster_id AND $cluster_name AND (job_flow_id:* OR dataproc_cluster_id:*)} by {cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 2,
+                            "width": 5,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 35,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "env",
+            "prefix": "env",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster_id",
+            "prefix": "job_flow_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster_name",
+            "prefix": "cluster_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
