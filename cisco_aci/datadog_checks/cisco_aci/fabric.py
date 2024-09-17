@@ -32,6 +32,8 @@ class Fabric:
 
         # Config for submitting device/interface metadata to NDM
         self.send_ndm_metadata = self.instance.get('send_ndm_metadata', False)
+        # Config for submitting Netflow exporter IP metadata to NDM (to be able to resolve flows)
+        self.enable_netflow = self.instance.get('enable_netflow', False)
 
         # grab some functions from the check
         self.gauge = check.gauge
@@ -52,8 +54,13 @@ class Fabric:
         pods = self.submit_pod_health(fabric_pods)
         devices, interfaces = self.submit_nodes_health_and_metadata(fabric_nodes, pods)
         if self.ndm_enabled():
+            exporter_ip_addresses = []
+            if self.enable_netflow:
+                oob_mgmt_ips = self.api.get_oob_mgmt_ips()
+                exporter_ip_addresses = ndm.create_exporter_ip_address_metadata(self.namespace, oob_mgmt_ips)
+
             collect_timestamp = int(time.time())
-            batches = ndm.batch_payloads(self.namespace, devices, interfaces, collect_timestamp)
+            batches = ndm.batch_payloads(self.namespace, devices, interfaces, exporter_ip_addresses, collect_timestamp)
             for batch in batches:
                 self.event_platform_event(json.dumps(batch.model_dump(exclude_none=True)), "network-devices-metadata")
 

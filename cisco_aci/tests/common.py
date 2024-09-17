@@ -33,6 +33,7 @@ CONFIG_WITH_TAGS = {
     'tenant': ['DataDog'],
     "tags": ["project:cisco_aci"],
     "send_ndm_metadata": True,
+    "enable_netflow": True,
 }
 
 # list of fixture names
@@ -631,6 +632,8 @@ FIXTURE_LIST = [
     # 4efe80304d50330f5ed0f79252ef0a84 - Api.get_apps
     '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped',
     # c8e9a0dbceac67fb1149684f7fc7772c - Api.get_tenant_stats
+    '_api_node_class_topSystem_json_query_target_filter_and_ne_topSystem_oobMgmtAddr__0_0_0_0___',
+    # 05dd9da95231bc3375aea57cf83d74e9 - Api.get_oob_mgmt_ips
 ]
 
 # The map will contain the md5 hash to the fixture

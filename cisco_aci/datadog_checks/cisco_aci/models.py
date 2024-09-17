@@ -8,7 +8,7 @@ import six
 
 if six.PY3:
     from enum import IntEnum, StrEnum
-    from typing import Optional
+    from typing import Optional, Self
 
     from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
@@ -73,6 +73,49 @@ if six.PY3:
                 if 'ethpmPhysIf' in child:
                     return EthpmPhysIf(**child['ethpmPhysIf'])
             return None
+
+    class NetflowExporterPolAttributes(BaseModel):
+        dn: Optional[str] = None
+        src_address: Optional[str] = Field(default=None, alias="srcAddr")
+        ver: Optional[str] = None
+
+    class NetflowExporterPol(BaseModel):
+        attributes: NetflowExporterPolAttributes
+
+    class TopSystemAttributes(BaseModel):
+        address: Optional[str] = None
+        dn: Optional[str] = None
+        oob_mgmt_addr: Optional[str] = Field(default=None, alias="oobMgmtAddr")
+        oob_mgmt_addr_mask: Optional[int] = Field(default=None, alias="oobMgmtAddrMask")
+
+        @field_validator("oob_mgmt_addr_mask", mode="before")
+        @classmethod
+        def parse_oob_mgmt_addr_mask(cls, oob_mgmt_addr_mask: str | None) -> int | None:
+            if not oob_mgmt_addr_mask:
+                return None
+            return int(oob_mgmt_addr_mask)
+
+    class TopSystem(BaseModel):
+        attributes: TopSystemAttributes
+
+    class TopSystemList(BaseModel):
+        top_systems: list[TopSystem] = Field(default_factory=list)
+
+        @model_validator(mode='before')
+        def flatten_top_systems(self) -> Self:
+            top_systems = []
+            for top_system in self.get('top_systems'):
+                if 'topSystem' in top_system:
+                    top_systems.append(top_system['topSystem'])
+            self["top_systems"] = top_systems
+            return self
+
+    class MgmtRsOobStNodeAttributes(BaseModel):
+        addr: Optional[str] = None
+        tdn: Optional[str] = None
+
+    class MgmtRsOobStNode(BaseModel):
+        attributes: MgmtRsOobStNodeAttributes
 
     """
     NDM Models
@@ -184,10 +227,17 @@ if six.PY3:
     class InterfaceMetadataList(BaseModel):
         interface_metadata: list = Field(default_factory=list)
 
+    class ExporterIPAddressMetadata(BaseModel):
+        device_id: Optional[str] = Field(default=None)
+        exporter_ip_address: Optional[str] = Field(default=None)
+        integration: Optional[str] = Field(default='cisco-aci')
+        prefixlen: Optional[int] = Field(default=None)
+
     class NetworkDevicesMetadata(BaseModel):
         namespace: str = None
         devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
         interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
+        exporter_ip_addresses: Optional[list[ExporterIPAddressMetadata]] = Field(default_factory=list)
         collect_timestamp: Optional[int] = None
         size: Optional[int] = Field(default=0, exclude=True)
 
@@ -198,4 +248,6 @@ if six.PY3:
                 self.devices.append(metadata)
             if isinstance(metadata, InterfaceMetadata):
                 self.interfaces.append(metadata)
+            if isinstance(metadata, ExporterIPAddressMetadata):
+                self.exporter_ip_addresses.append(metadata)
             self.size += 1

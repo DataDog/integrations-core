@@ -8,10 +8,12 @@ from six import PY3
 if PY3:
     from datadog_checks.cisco_aci.models import (
         DeviceMetadata,
+        ExporterIPAddressMetadata,
         InterfaceMetadata,
         NetworkDevicesMetadata,
         Node,
         PhysIf,
+        TopSystemList,
     )
 
 VENDOR_CISCO = 'cisco'
@@ -65,6 +67,19 @@ def create_interface_metadata(phys_if, address, namespace):
     return interface
 
 
+def create_exporter_ip_address_metadata(namespace, top_systems):
+    """
+    Create an ExporterIPAddressMetadata object from a out-of-band mgmt IP that is available for every device
+    """
+    top_systems_list = TopSystemList(top_systems=top_systems)
+    for top_system in top_systems_list.top_systems:
+        yield ExporterIPAddressMetadata(
+            device_id=namespace + ":" + top_system.attributes.address,
+            exporter_ip_address=top_system.attributes.oob_mgmt_addr,
+            prefixlen=top_system.attributes.oob_mgmt_addr_mask,
+        )
+
+
 def get_device_info(device):
     """
     Get device ID and node ID from a device object
@@ -76,7 +91,7 @@ def get_device_info(device):
     return device.id, node_id
 
 
-def batch_payloads(namespace, devices, interfaces, collect_ts):
+def batch_payloads(namespace, devices, interfaces, exporter_ip_addresses, collect_ts):
     """
     Batch payloads into NetworkDevicesMetadata objects
     """
@@ -89,6 +104,14 @@ def batch_payloads(namespace, devices, interfaces, collect_ts):
 
     for interface in interfaces:
         current_payload, new_payload = append_to_payload(interface, network_devices_metadata, namespace, collect_ts)
+        if new_payload:
+            yield current_payload
+            network_devices_metadata = new_payload
+
+    for exporter_ip_address in exporter_ip_addresses:
+        current_payload, new_payload = append_to_payload(
+            exporter_ip_address, network_devices_metadata, namespace, collect_ts
+        )
         if new_payload:
             yield current_payload
             network_devices_metadata = new_payload
