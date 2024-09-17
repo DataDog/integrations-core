@@ -3,7 +3,7 @@
 	"created_at": "2024-09-11",
 	"last_updated_at": "2024-09-11",
 	"title": "[Brevo] High Bounce Rate by Subject",
-	"description": "Monitors high bounce rates by subject.",
+	"description": "Monitors bounce rates for emails by subject line in Brevo transactional events. A high bounce rate indicates delivery issues, such as invalid addresses or server problems. This monitor helps identify and resolve issues related to specific subject lines to improve overall deliverability.",
 	"definition": {
 		"id": 152853564,
 		"name": "[Brevo] High Bounce Rate by Subject",
