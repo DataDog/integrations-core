@@ -141,7 +141,6 @@ sudo service datadog-agent restart
 [13]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
-[16]: https://www.datadoghq.com/product/data-streams-monitoring/
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [18]: https://app.datadoghq.com/data-streams
 [19]: https://app.datadoghq.com/integrations/kafka?search=kafka
