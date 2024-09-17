@@ -7,8 +7,11 @@ from datetime import datetime
 from time import time
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.queries import DETECT_DEADLOCK_QUERY
 
 try:
@@ -26,10 +29,10 @@ def agent_check_getter(self):
 
 
 class Deadlocks(DBMAsyncJob):
-    def __init__(self, check, conn_prefix, config):
+    def __init__(self, check, config: SQLServerConfig):
+        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self._check = check
         self._log = self._check.log
-        self._conn_key_prefix = conn_prefix
         self._config = config
         self._last_deadlock_timestamp = time()
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
@@ -46,6 +49,11 @@ class Deadlocks(DBMAsyncJob):
             job_name="deadlocks",
             shutdown_callback=self._close_db_conn,
         )
+        self._conn_key_prefix = "dbm-deadlocks-"
+    
+    def _close_db_conn(self):
+        pass
+
 
     def obfuscate_no_except_wrapper(self, sql_text):
         try:
@@ -132,7 +140,7 @@ class Deadlocks(DBMAsyncJob):
         if deadlock_xmls:
             deadlocks_event = self._create_deadlock_event(deadlock_xmls)
             payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
-            self.log.debug("Deadlocks payload: %s", str(payload))
+            self._log.debug("Deadlocks payload: %s", str(payload))
             self._check.database_monitoring_query_activity(payload)
 
     def _create_deadlock_event(self, deadlock_xmls):
@@ -141,12 +149,16 @@ class Deadlocks(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "deadlocks",
-            "collection_interval": self._deadlocks_collection_interval,
+            "collection_interval": self.collection_interval,
             "ddtags": self.tags,
-            "timestamp": time.time() * 1000,
+            "timestamp": time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_deadlocks": deadlock_xmls,
         }
         return event
+    
+    def run_job(self):
+        self.collect_deadlocks()
+
