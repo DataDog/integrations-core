@@ -69,6 +69,7 @@
     },
     "dashboards": {
       "yarn": "assets/dashboards/yarn_dashboard.json",
+      "yarn-djm-clusters": "assets/dashboards/yarn_clusters.json",
       "hadoop": "assets/dashboards/hadoop_dashboard.json"
     }
   }
