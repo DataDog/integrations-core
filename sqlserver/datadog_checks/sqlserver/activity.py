@@ -222,7 +222,7 @@ class SqlserverActivity(DBMAsyncJob):
         if self._deadlocks_collection_enabled and elapsed_time_deadlocks >= self._deadlocks_collection_interval:
             self._last_deadlocks_collection_time = time.time()
             try:
-                self._deadlocks.collect_deadlocks_wrapper()
+                self._deadlocks.collect_deadlocks()
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting SQLServer deadlocks.
@@ -406,22 +406,6 @@ class SqlserverActivity(DBMAsyncJob):
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
-        }
-        return event
-
-    def _create_deadlock_event(self, deadlock_xmls):
-        event = {
-            "host": self._check.resolved_hostname,
-            "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "sqlserver",
-            "dbm_type": "deadlocks",
-            "collection_interval": self._deadlocks_collection_interval,
-            "ddtags": self.tags,
-            "timestamp": time.time() * 1000,
-            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            "cloud_metadata": self._config.cloud_metadata,
-            "sqlserver_deadlocks": deadlock_xmls,
         }
         return event
 

@@ -52,7 +52,7 @@ class Deadlocks:
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
         return
 
-    def collect_deadlocks(self):
+    def _collect_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 self._log.debug("collecting sql server deadlocks")
@@ -88,8 +88,8 @@ class Deadlocks:
                 return converted_xmls
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def collect_deadlocks_wrapper(self):
-        deadlock_xmls_collected = self._deadlocks.collect_deadlocks()
+    def collect_deadlocks(self):
+        deadlock_xmls_collected = self._collect_deadlocks()
         deadlock_xmls = []
         total_number_of_characters = 0
         for i, deadlock in enumerate(deadlock_xmls_collected):
@@ -111,3 +111,21 @@ class Deadlocks:
             payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
             self.log.debug("Deadlocks payload: %s", str(payload))
             self._check.database_monitoring_query_activity(payload)
+            
+    def _create_deadlock_event(self, deadlock_xmls):
+        event = {
+            "host": self._check.resolved_hostname,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "sqlserver",
+            "dbm_type": "deadlocks",
+            "collection_interval": self._deadlocks_collection_interval,
+            "ddtags": self.tags,
+            "timestamp": time.time() * 1000,
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+            "cloud_metadata": self._config.cloud_metadata,
+            "sqlserver_deadlocks": deadlock_xmls,
+        }
+        return event
+
+
