@@ -7,8 +7,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.models.types import copy_raw
-from datadog_checks.octopus_deploy.config_models import ConfigMixin
 
+from .config_models import ConfigMixin
 from .constants import API_UP_METRIC, PROJECT_COUNT_METRIC, PROJECT_GROUP_COUNT_METRIC
 from .project_groups import Project, ProjectGroup
 
@@ -24,6 +24,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.space_id = None
         space_name = self.instance.get("space")
         self.base_tags = self.instance.get("tags", []) + [f"space_name:{space_name}"]
+        self.check_initializations.append(self._get_space_id)
+        self.check_initializations.append(self._initialize_caches)
 
     def _initialize_caches(self):
         self._initialize_project_groups()
@@ -113,14 +115,21 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def _get_space_id(self):
         spaces_endpoint = f"{self.config.octopus_endpoint}/spaces"
-        response = self.http.get(spaces_endpoint)
-        response.raise_for_status()
-        spaces_json = response.json().get('Items', [])
-        for space in spaces_json:
-            space_name = space.get("Name")
-            if space_name == self.config.space:
-                self.space_id = space.get("Id")
-                self.log.debug("Space id for %s found: %s ", self.config.space, self.space_id)
+        try:
+            response = self.http.get(spaces_endpoint)
+            response.raise_for_status()
+            spaces_json = response.json().get('Items', [])
+            for space in spaces_json:
+                space_name = space.get("Name")
+                if space_name == self.config.space:
+                    self.space_id = space.get("Id")
+                    self.log.debug("Space id for %s found: %s ", self.config.space, self.space_id)
+        except (Timeout, HTTPError, InvalidURL, ConnectionError):
+            self.gauge(API_UP_METRIC, 0, tags=self.base_tags)
+
+            raise CheckException(f"Could not connect to octopus API {self.config.octopus_endpoint}octopus_endpoint")
+
+        self.gauge(API_UP_METRIC, 1, tags=self.base_tags)
 
         if self.space_id is None:
             raise CheckException(f"Space ID not found for provided space name {self.config.space}, does it exist?")
@@ -145,20 +154,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         return project_groups
 
     def check(self, _):
-        try:
-            response = self.http.get(self.config.octopus_endpoint)
-            response.raise_for_status()
-        except (Timeout, HTTPError, InvalidURL, ConnectionError) as e:
-            self.gauge(API_UP_METRIC, 0, tags=self.base_tags)
-            self.log.warning(
-                "Failed to connect to Octopus Deploy endpoint %s: %s", self.config.octopus_endpoint, str(e)
-            )
-            raise
-
-        self.gauge(API_UP_METRIC, 1, tags=self.base_tags)
-        if not self.space_id:
-            self._get_space_id()
-        self._initialize_caches()
+        pass
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config

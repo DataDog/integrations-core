@@ -41,12 +41,12 @@ def test_check(dd_run_check, aggregator, instance):
     ('mock_http_get, message'),
     [
         pytest.param(
-            {'http_error': {'/api': MockResponse(status_code=500)}},
+            {'http_error': {'/api/spaces': MockResponse(status_code=500)}},
             'HTTPError: 500 Server Error: None for url: None',
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/api': MockResponse(status_code=404)}},
+            {'http_error': {'/api/spaces': MockResponse(status_code=404)}},
             'HTTPError: 404 Client Error: None for url: None',
             id='404',
         ),
