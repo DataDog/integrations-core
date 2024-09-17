@@ -195,7 +195,7 @@ class InstanceConfig(BaseModel):
     database_instance_collection_interval: Optional[float] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
-    deadlocks: Optional[Deadlocks] = None
+    deadlocks_collection: Optional[Deadlocks] = None
     disable_generic_tags: Optional[bool] = None
     driver: Optional[str] = None
     dsn: Optional[str] = None

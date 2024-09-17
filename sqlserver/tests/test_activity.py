@@ -921,7 +921,7 @@ def run_check_and_return_deadlock_payloads(dd_run_check, check, aggregator):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
-    dbm_instance['deadlocks'] = {
+    dbm_instance['deadlocks_collection'] = {
         'enabled': True,
         'run_sync': True,
         'collection_interval': 0.1,
