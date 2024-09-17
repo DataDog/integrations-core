@@ -7,11 +7,14 @@ from datetime import datetime
 from time import time
 
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
+from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.queries import DETECT_DEADLOCK_QUERY
 
 
 MAX_DEADLOCKS = 100
 
+def agent_check_getter(self):
+    return self._check
 
 class Deadlocks:
 
@@ -83,3 +86,28 @@ class Deadlocks:
                     converted_xmls.append(ET.tostring(root, encoding='unicode'))
                 self._last_deadlock_timestamp = time()
                 return converted_xmls
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def collect_deadlocks_wrapper(self):
+        deadlock_xmls_collected = self._deadlocks.collect_deadlocks()
+        deadlock_xmls = []
+        total_number_of_characters = 0
+        for i, deadlock in enumerate(deadlock_xmls_collected):
+            total_number_of_characters += len(deadlock)
+            if total_number_of_characters > self._deadlock_payload_max_bytes:
+                self._log.warning(
+                    """We've dropped {} deadlocks from a total of {} deadlocks as the
+                     max deadlock payload of {} bytes was exceeded.""".format(
+                        len(deadlock_xmls) - i, len(deadlock_xmls), self._deadlock_payload_max_bytes
+                    )
+                )
+                break
+            else:
+                deadlock_xmls.append(deadlock)
+        
+        # Send payload only if deadlocks found
+        if deadlock_xmls:
+            deadlocks_event = self._create_deadlock_event(deadlock_xmls)
+            payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
+            self.log.debug("Deadlocks payload: %s", str(payload))
+            self._check.database_monitoring_query_activity(payload)

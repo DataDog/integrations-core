@@ -222,7 +222,7 @@ class SqlserverActivity(DBMAsyncJob):
         if self._deadlocks_collection_enabled and elapsed_time_deadlocks >= self._deadlocks_collection_interval:
             self._last_deadlocks_collection_time = time.time()
             try:
-                self._collect_deadlocks()
+                self._deadlocks.collect_deadlocks_wrapper()
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting SQLServer deadlocks.
@@ -230,31 +230,6 @@ class SqlserverActivity(DBMAsyncJob):
                         e
                     )
                 )
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_deadlocks(self):
-        deadlock_xmls_collected = self._deadlocks.collect_deadlocks()
-        deadlock_xmls = []
-        total_number_of_characters = 0
-        for i, deadlock in enumerate(deadlock_xmls_collected):
-            total_number_of_characters += len(deadlock)
-            if total_number_of_characters > self._deadlock_payload_max_bytes:
-                self._log.warning(
-                    """We've dropped {} deadlocks from a total of {} deadlocks as the
-                     max deadlock payload of {} bytes was exceeded.""".format(
-                        len(deadlock_xmls) - i, len(deadlock_xmls), self._deadlock_payload_max_bytes
-                    )
-                )
-                break
-            else:
-                deadlock_xmls.append(deadlock)
-        
-        # Send payload only if deadlocks found
-        if deadlock_xmls:
-            deadlocks_event = self._create_deadlock_event(deadlock_xmls)
-            payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
-            self.log.debug("Deadlocks payload: %s", str(payload))
-            self._check.database_monitoring_query_activity(payload)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):

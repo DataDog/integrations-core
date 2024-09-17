@@ -960,8 +960,9 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
         assert len(deadlock_payloads) == 1, "Should have collected one deadlock payload, but collected: {}.".format(len(deadlock_payloads))
     except AssertionError as e:
         raise e
-
-    deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
+    assert isinstance(deadlock_payloads, dict), "Should have collected a dictionary"
+    #deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
+    deadlocks = deadlock_payloads['sqlserver_deadlocks']
     found = 0    
     for d in deadlocks:
         assert not "ERROR" in d, "Shouldn't have generated an error"
