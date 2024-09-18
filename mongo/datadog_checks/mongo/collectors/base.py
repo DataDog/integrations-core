@@ -4,13 +4,8 @@
 
 import re
 
-from six import PY3, iteritems
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.mongo.metrics import CASE_SENSITIVE_METRIC_NAME_SUFFIXES
-
-if PY3:
-    long = int
 
 
 class MongoCollector(object):
@@ -46,7 +41,7 @@ class MongoCollector(object):
         metric_suffix = "ps" if submit_method == AgentCheck.rate else ""
 
         # Replace case-sensitive metric name characters
-        for pattern, repl in iteritems(CASE_SENSITIVE_METRIC_NAME_SUFFIXES):
+        for pattern, repl in CASE_SENSITIVE_METRIC_NAME_SUFFIXES.items():
             metric_name = re.compile(pattern).sub(repl, metric_name)
 
         # Normalize, and wrap
@@ -93,11 +88,9 @@ class MongoCollector(object):
                 continue
 
             # value is now status[x][y][z]
-            if not isinstance(value, (int, long, float)):
+            if not isinstance(value, (int, float)):
                 raise TypeError(
-                    u"{0} value is a {1}, it should be an int, a float or a long instead.".format(
-                        metric_name, type(value)
-                    )
+                    u"{0} value is a {1}, it should be an int, or a float instead.".format(metric_name, type(value))
                 )
 
             # Submit the metric
