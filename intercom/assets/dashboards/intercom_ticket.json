@@ -157,7 +157,7 @@
         {
             "id": 5252111996283722,
             "definition": {
-                "title": "Tickets by Type",
+                "title": "Ticket by Type",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -336,7 +336,7 @@
         {
             "id": 5686552018887696,
             "definition": {
-                "title": "Tickets by Category",
+                "title": "Ticket by Category",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -405,7 +405,7 @@
         {
             "id": 4793770661763816,
             "definition": {
-                "title": "Tickets by State",
+                "title": "Ticket by State",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -474,7 +474,7 @@
         {
             "id": 3960146065435968,
             "definition": {
-                "title": "Tickets by Teammate Assignee Id",
+                "title": "Ticket by Teammate Assignee Id",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_table",
@@ -555,7 +555,7 @@
         {
             "id": 1088341693647172,
             "definition": {
-                "title": "Tickets by Team Assignee Id",
+                "title": "Ticket by Team Assignee Id",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_table",
@@ -786,9 +786,9 @@
             }
         },
         {
-            "id": 7840987939262464,
+            "id": 1126880796734506,
             "definition": {
-                "title": "Tickets Logs",
+                "title": "Ticket Logs",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [

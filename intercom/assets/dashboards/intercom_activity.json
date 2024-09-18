@@ -121,7 +121,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@evt.name",
+                                        "facet": "@data.item.activity_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -184,7 +184,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@evt.name",
+                                        "facet": "@data.item.activity_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -251,7 +251,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@evt.name",
+                                        "facet": "@data.item.activity_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "asc",
@@ -545,7 +545,7 @@
         },
         {
             "name": "ActivityType",
-            "prefix": "@evt.name",
+            "prefix": "@data.item.activity_type",
             "available_values": [],
             "default": "*"
         },

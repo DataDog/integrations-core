@@ -134,7 +134,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:intercom service:conversation $AppId @data.item.source.delivered_as:customer_initiated"
+                                                "query": "source:intercom service:conversation @topic:conversation.user.created $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -263,7 +263,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:intercom service:conversation $AppId @data.item.source.delivered_as:customer_initiated"
+                                                "query": "source:intercom service:conversation @topic:conversation.user.created $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -318,7 +318,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:intercom service:conversation @topic:conversation.admin.closed $AppId"
+                                                "query": "source:intercom service:conversation @data.item.custom_attributes.copilot_used:true $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -391,7 +391,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:intercom service:conversation $AppId @data.item.source.delivered_as:admin_initiated"
+                                                "query": "source:intercom service:conversation @data.item.priority:priority $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -541,13 +541,6 @@
                             "title_align": "left",
                             "show_legend": true,
                             "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -573,7 +566,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:intercom service:conversation @topic:conversation.admin.closed $AppId"
+                                                "query": "source:intercom service:conversation @topic:conversation.admin.snoozed $AppId"
                                             },
                                             "storage": "hot"
                                         },
@@ -588,7 +581,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:intercom service:conversation @topic:conversation.user.created $AppId"
+                                                "query": "source:intercom service:conversation @topic:conversation.admin.unsnoozed $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -661,7 +654,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:intercom $AppId"
+                                                "query": "source:intercom service:conversation $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -781,7 +774,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:intercom @topic:conversation.rating.added $AppId"
+                                                "query": "source:intercom service:conversation @topic:conversation.rating.added $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -852,7 +845,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:intercom @topic:conversation.rating.added $AppId"
+                                                "query": "source:intercom service:conversation @topic:conversation.rating.added $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -881,7 +874,7 @@
                         }
                     },
                     {
-                        "id": 8548432972946364,
+                        "id": 2644610456165382,
                         "definition": {
                             "title": "Conversation Remarks",
                             "title_size": "16",
@@ -902,7 +895,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@data.item.source.author.email",
+                                                    "facet": "@usr.email",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -939,7 +932,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:intercom $AppId"
+                                                "query": "source:intercom service:conversation $AppId"
                                             },
                                             "storage": "hot"
                                         }
@@ -1031,7 +1024,7 @@
                             "x": 0,
                             "y": 3,
                             "width": 12,
-                            "height": 5
+                            "height": 4
                         }
                     }
                 ]
@@ -1040,7 +1033,7 @@
                 "x": 0,
                 "y": 16,
                 "width": 12,
-                "height": 9
+                "height": 8
             }
         },
         {
@@ -1262,7 +1255,7 @@
                             "x": 0,
                             "y": 4,
                             "width": 6,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
@@ -1328,7 +1321,7 @@
                             "x": 6,
                             "y": 4,
                             "width": 6,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
@@ -1395,8 +1388,8 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 7,
-                            "width": 6,
+                            "y": 8,
+                            "width": 5,
                             "height": 4
                         }
                     },
@@ -1426,7 +1419,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@data.item.source.author.email",
+                                                    "facet": "@usr.email",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1436,7 +1429,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:intercom service:conversation $AppId -@data.item.source.author.email:\"\""
+                                                "query": "source:intercom service:conversation $AppId -@usr.email:\"\""
                                             },
                                             "storage": "hot"
                                         }
@@ -1463,9 +1456,9 @@
                             }
                         },
                         "layout": {
-                            "x": 6,
-                            "y": 7,
-                            "width": 6,
+                            "x": 5,
+                            "y": 8,
+                            "width": 7,
                             "height": 4
                         }
                     }
@@ -1473,10 +1466,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 25,
+                "y": 24,
                 "width": 12,
-                "height": 12,
-                "is_column_break": true
+                "height": 13
             }
         },
         {
@@ -1598,6 +1590,49 @@
                 "y": 37,
                 "width": 12,
                 "height": 9
+            }
+        },
+        {
+            "id": 638964396789664,
+            "definition": {
+                "title": "Monitors Summary",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4113001593727152,
+                        "definition": {
+                            "title": "Conversation Monitors Summary",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(source:intercom AND service:conversation)",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 46,
+                "width": 12,
+                "height": 4
             }
         }
     ],

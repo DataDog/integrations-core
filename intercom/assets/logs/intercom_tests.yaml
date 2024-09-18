@@ -50,7 +50,7 @@ tests:
               "type" : "tag.list"
             },
             "custom_attributes" : {
-              "Copilot used" : false
+              "copilot_used" : false
             },
             "teammates" : {
               "type" : "admin.list"
@@ -133,7 +133,7 @@ tests:
               type: "conversation_part.list"
             created_at: 1726135184
             custom_attributes:
-              Copilot used: false
+              copilot_used: false
             first_contact_reply:
               created_at: 1726135184
               type: "conversation"
@@ -239,7 +239,7 @@ tests:
                 "type" : "tag.list"
               },
               "custom_attributes" : {
-                "Copilot used" : false
+                "copilot_used" : false
               },
               "teammates" : {
                 "type" : "admin.list"
@@ -412,8 +412,6 @@ tests:
         delivered_at: 0
         delivery_attempts: 1
         delivery_status: "pending"
-        evt:
-          name: "admin_away_mode_change"
         first_sent_at: 1726135744
         id: "notif_3a7c4d12-56e7-4b8d-9f4c-d8e6f1234567"
         network:
@@ -910,8 +908,6 @@ tests:
         delivered_at: 0
         delivery_attempts: 1
         delivery_status: "pending"
-        evt:
-          name: "updated-plan"
         first_sent_at: 1726136103
         id: "notif_7a2e8f3d-bc9c-4a7e-9bcd-6f1d2e8b3a4f"
         service: "data_event"

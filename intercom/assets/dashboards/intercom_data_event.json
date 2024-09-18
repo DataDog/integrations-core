@@ -114,7 +114,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@evt.name",
+                                        "facet": "@data.item.event_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -177,7 +177,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@evt.name",
+                                        "facet": "@data.item.event_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -244,7 +244,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@evt.name",
+                                        "facet": "@data.item.event_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "asc",
@@ -537,7 +537,7 @@
         },
         {
             "name": "EventName",
-            "prefix": "@evt.name",
+            "prefix": "@data.item.event_name",
             "available_values": [],
             "default": "*"
         },
