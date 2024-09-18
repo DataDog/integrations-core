@@ -134,7 +134,7 @@ class Deadlocks(DBMAsyncJob):
                 )
                 break
             else:
-                deadlock_xmls.append(deadlock)
+                deadlock_xmls.append({"xml": deadlock})
 
         # Send payload only if deadlocks found
         if deadlock_xmls:

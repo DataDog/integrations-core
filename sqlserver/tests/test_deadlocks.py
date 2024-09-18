@@ -92,14 +92,13 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
         )
     except AssertionError as e:
         raise e
-    assert isinstance(deadlock_payloads, dict), "Should have collected a dictionary"
-    # deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
-    deadlocks = deadlock_payloads['sqlserver_deadlocks']
+    deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
     found = 0
     for d in deadlocks:
         assert not "ERROR" in d, "Shouldn't have generated an error"
+        assert isinstance(d, dict), "sqlserver_deadlocks should be a dictionary"
         try:
-            root = ET.fromstring(d)
+            root = ET.fromstring(d["xml"])
         except ET.ParseError as e:
             logging.error("deadlock events: %s", str(deadlocks))
             raise e
