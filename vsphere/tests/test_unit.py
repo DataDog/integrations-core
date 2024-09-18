@@ -3182,25 +3182,37 @@ def test_property_metrics_invalid_ip_route_config_gateway(
 
 
 def test_property_metrics_excluded_host_tags(
-    aggregator, realtime_instance, dd_run_check, caplog, service_instance, vm_properties_ex
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_properties_ex, datadog_agent
 ):
     realtime_instance['collect_property_metrics'] = True
 
     service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
 
-    base_tags = ['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:host1']
-
     realtime_instance['excluded_host_tags'] = ['vsphere_host', 'vsphere_folder']
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    caplog.set_level(logging.DEBUG)
     dd_run_check(check)
 
     aggregator.assert_metric(
         'vsphere.vm.summary.quickStats.uptimeSeconds',
         count=1,
         value=12184573.0,
-        tags=base_tags,
+        tags=['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:host1'],
         hostname='vm1',
+    )
+    datadog_agent.assert_external_tags(
+        'vm1',
+        {'vsphere': ['vcenter_server:FAKE', 'vsphere_type:vm']},
+    )
+    aggregator.assert_metric(
+        'vsphere.host.hardware.cpuPowerManagementInfo.currentPolicy',
+        count=1,
+        value=1,
+        tags=['currentPolicy:Balanced', 'vcenter_server:FAKE'],
+        hostname='host1',
+    )
+    datadog_agent.assert_external_tags(
+        'host1',
+        {'vsphere': ['vcenter_server:FAKE', 'vsphere_type:host']},
     )
 
 
