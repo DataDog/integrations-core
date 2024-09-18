@@ -87,10 +87,10 @@ pipeline:
       sources:
         - service
     - type: pipeline
-      name: "Conversation "
+      name: "Conversation"
       enabled: true
       filter:
-        query: "service:conversation "
+        query: "service:conversation"
       processors:
         - type: arithmetic-processor
           name: Convert `data.item.updated_at` from second to millisecond EPOCH UNIX
@@ -138,7 +138,7 @@ pipeline:
       name: News Item
       enabled: true
       filter:
-        query: "service:news_item "
+        query: "service:news_item"
       processors:
         - type: date-remapper
           name: Define `data.item.contact.updated_at` as the official date of the log
@@ -159,7 +159,7 @@ pipeline:
       name: Data Event
       enabled: true
       filter:
-        query: "service:data_event "
+        query: "service:data_event"
       processors:
         - type: arithmetic-processor
           name: Convert `data.item.created_at` from second to millisecond EPOCH UNIX
@@ -207,7 +207,7 @@ pipeline:
       name: Activity
       enabled: true
       filter:
-        query: "service:activity "
+        query: "service:activity"
       processors:
         - type: arithmetic-processor
           name: Convert `data.item.created_at` from second to millisecond EPOCH UNIX
@@ -272,7 +272,7 @@ pipeline:
       name: Ticket
       enabled: true
       filter:
-        query: "service:ticket "
+        query: "service:ticket"
       processors:
         - type: arithmetic-processor
           name: Convert `data.item.ticket.updated_at` from second to millisecond EPOCH
