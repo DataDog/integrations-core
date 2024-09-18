@@ -73,7 +73,7 @@ tests:
                       "resolution_time_in_secs": 7200  # 2 hours
                   },
               "department_name": "Development",
-              "tasks_dependency_type": 0,
+              "tasks_dependency_type": 0
           }
     result: null
 
