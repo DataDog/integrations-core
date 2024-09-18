@@ -370,7 +370,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:aws_neuron.execution.status.count{not status_type:completed} by {instance_id}.as_rate()"
+                      "query": "avg:aws_neuron.execution.status.count{not status_type:completed and $instance_id AND $instance_type AND $availability_zone AND $region AND $subnet_id} by {instance_id}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -428,7 +428,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aws_neuron.execution.latency_seconds{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {percentile}"
+                      "query": "avg:aws_neuron.execution.latency_seconds{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {percentile,instance_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -624,7 +624,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
                 }
               ],
               "yaxis": {
@@ -712,7 +712,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aws_neuron.neuron_runtime.vcpu_usage_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {usage_type}"
+                      "query": "avg:aws_neuron.neuron_runtime.vcpu_usage_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {usage_type,instance_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -767,7 +767,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aws_neuron.system.vcpu.usage_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {usage_type}"
+                      "query": "avg:aws_neuron.system.vcpu.usage_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {usage_type,instance_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -859,7 +859,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aws_neuron.neuron_runtime.memory_used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {memory_location}"
+                      "query": "avg:aws_neuron.neuron_runtime.memory_used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {memory_location,instance_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -903,24 +903,23 @@
                   "formulas": [
                     {
                       "alias": "Memory Usage Bytes",
-                      "style": {
-                        "palette": "classic",
-                        "palette_index": 4
-                      },
-                      "formula": "query1",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
                           "unit_name": "byte"
                         }
-                      }
+                      },
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aws_neuron.system.memory.used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}"
+                      "query": "avg:aws_neuron.system.memory.used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {instance_id}"
                     },
                     {
                       "data_source": "metrics",
@@ -951,8 +950,7 @@
                         }
                       },
                       "style": {
-                        "palette": "classic",
-                        "palette_index": 3
+                        "palette": "purple"
                       },
                       "formula": "100 * query1 / query2"
                     }
@@ -961,12 +959,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:aws_neuron.system.memory.used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}"
+                      "query": "avg:aws_neuron.system.memory.used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {instance_id}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:aws_neuron.system.memory.total_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}"
+                      "query": "avg:aws_neuron.system.memory.total_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {instance_id}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -978,7 +976,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
                 }
               ],
               "yaxis": {
