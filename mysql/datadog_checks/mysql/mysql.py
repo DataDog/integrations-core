@@ -115,7 +115,7 @@ class MySql(AgentCheck):
         self._resolved_hostname = None
         self._agent_hostname = None
         self._is_aurora = None
-        self._config = MySQLConfig(self.instance)
+        self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
         self.cloud_metadata = self._config.cloud_metadata
 
@@ -1075,7 +1075,11 @@ class MySql(AgentCheck):
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                cursor.execute("SHOW MASTER STATUS;")
+                if not self.is_mariadb and self.version.version_compatible((8, 4, 0)):
+                    cursor.execute("SHOW BINARY LOG STATUS;")
+                else:
+                    cursor.execute("SHOW MASTER STATUS;")
+
                 binlog_results = cursor.fetchone()
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})

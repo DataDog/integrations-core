@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
@@ -280,7 +279,7 @@ def test_check_channel_count(aggregator, get_check, instance_queue_regex_tag, se
         'my_channel', pymqi.CMQCFC.MQCHS_RUNNING, ["channel:my_channel"]
     )
 
-    for status, expected_value in iteritems(metrics_to_assert):
+    for status, expected_value in metrics_to_assert.items():
         aggregator.assert_metric(
             'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
         )
@@ -305,7 +304,7 @@ def test_check_channel_count_status_unknown(aggregator, get_check, instance_queu
     check = get_check(instance_queue_regex_tag)
     check.channel_metric_collector._submit_channel_count('my_channel', 123, ["channel:my_channel"])
 
-    for status, expected_value in iteritems(metrics_to_assert):
+    for status, expected_value in metrics_to_assert.items():
         aggregator.assert_metric(
             'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
         )

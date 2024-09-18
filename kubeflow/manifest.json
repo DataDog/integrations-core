@@ -40,7 +40,16 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "katib-controller",
+        "katib-db-manager",
+        "katib-ui",
+        "kserve-controller-manager",
+        "ml-pipeline-api-server",
+        "ml-pipeline-scheduledworkflow",
+        "ml-pipeline-persistenceagent"
+      ]
     },
     "monitors": {
       "Kubeflow Monitor": "assets/monitors/kubeflow.json"
