@@ -1,6 +1,84 @@
-id: freshservice
+id: "freshservice"
 tests:
-  - sample: |-
+ -
+  sample: |-
+    {
+            "subject": "Test Ticket 1",
+            "group_id": "1",
+            "department_id": 29000238613,
+            "category": "Hardware",
+            "sub_category": "Computer",
+            "item_category": "PC",
+            "requester_id": 29001862388,
+            "responder_id": "None",
+            "due_by": "2024-09-12T21:00:00Z",
+            "fr_escalated": False,
+            "deleted": True,
+            "spam": True,
+            "email_config_id": "exampl10016@nowhere.com",
+            "fwd_emails": ["exampl10014@nowhere.com", "exampl10015@nowhere.com"],
+            "reply_cc_emails": ["exampl10011@nowhere.com", "example10012@nowhere.com"],
+            "cc_emails": ["exampl10011@nowhere.com", "example10012@nowhere.com"],
+            "is_escalated": True,
+            "fr_due_by": "2024-09-05T18:00:00Z",
+            "id": 1001,
+            "priority": 1,
+            "status": 2,
+            "source": 8,
+            "created_at": "2024-09-02T11:52:04Z",
+            "updated_at": "2024-09-02T11:52:04Z",
+            "workspace_id": 2,
+            "requested_for_id": 29001862388,
+            "to_emails": "exampl10013@nowhere.com",
+            "type": "Major Incident",
+            "description": "<div>This is a test submitted via API...</div>",
+            "description_text": "This is a test submitted via API...",
+            "custom_fields": {
+                    "major_incident_type": "Full outage",
+                    "business_impact": None,
+                    "impacted_locations": None,
+                    "no_of_customers_impacted": None
+                },
+                "requester": {
+                    "email": "test@example.com",
+                    "id": 29001862388,
+                    "mobile": None,
+                    "name": "Test User",
+                    "phone": None
+                },
+                "requested_for": {
+                    "email": "test@example.com",
+                    "id": 29001862388,
+                    "mobile": None,
+                    "name": "Test User",
+                    "phone": None
+                },
+                "stats": {
+                    "created_at": "2024-09-06T06:42:26Z",
+                    "updated_at": "2024-09-06T08:42:26Z",
+                    "ticket_id": 29003567814,
+                    "opened_at": "2024-09-06T06:42:26Z",
+                    "group_escalated": False,
+                    "inbound_count": 1,
+                    "status_updated_at": "2024-09-06T08:42:26Z",
+                    "outbound_count": 0,
+                    "pending_since": "2024-09-06T07:42:26Z",
+                    "resolved_at": "2024-09-06T08:42:26Z",
+                    "closed_at": "2024-09-06T08:42:26Z",
+                    "first_assigned_at": "2024-09-06T06:42:26Z",
+                    "assigned_at": "2024-09-06T07:42:26Z",
+                    "agent_responded_at": "2024-09-06T07:42:26Z",
+                    "requester_responded_at": "2024-09-06T07:50:26Z",
+                    "first_responded_at": "2024-09-06T07:42:26Z",
+                    "first_resp_time_in_secs": 3600,
+                    "resolution_time_in_secs": 7200
+                },
+            "department_name": "Development",
+            "tasks_dependency_type": 0
+        }
+  result:
+    custom: {}
+    message: |-
       {
               "subject": "Test Ticket 1",
               "group_id": "1",
@@ -69,15 +147,11 @@ tests:
                       "agent_responded_at": "2024-09-06T07:42:26Z",
                       "requester_responded_at": "2024-09-06T07:50:26Z",
                       "first_responded_at": "2024-09-06T07:42:26Z",
-                      "first_resp_time_in_secs": 3600,  # 1 hour
-                      "resolution_time_in_secs": 7200  # 2 hours
+                      "first_resp_time_in_secs": 3600,
+                      "resolution_time_in_secs": 7200
                   },
               "department_name": "Development",
               "tasks_dependency_type": 0
           }
-    result: null
-
-# The `result` field should be left blank to start. Once you submit your log asset files with
-# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
-# run your raw logs against your pipeline and return the result. If the result output in the
-# validation is accurate, take the output and add it to the `result` field in your test YAML file.
+    tags:
+     - "source:LOGS_SOURCE"
