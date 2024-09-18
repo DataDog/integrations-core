@@ -6,8 +6,6 @@ import re
 from math import isnan
 from typing import Any, Dict, List, Tuple  # noqa: F401
 
-from six.moves import range, zip
-
 from .errors import UnknownMetric, UnknownTags
 from .metrics import LEGACY_TAG_OVERWRITE, METRIC_PREFIX, METRIC_TREE, MOD_METRICS
 

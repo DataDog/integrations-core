@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any, Dict  # noqa: F401
 
 from dateutil import parser, tz
-from six.moves.urllib_parse import urljoin
+from urllib_parse import urljoin
 
 
 def get_next_url(payload, version):

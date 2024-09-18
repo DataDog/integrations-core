@@ -6,10 +6,9 @@ from __future__ import division
 import logging
 import numbers
 from fnmatch import fnmatch
+from urllib.parse import urlparse
 
 import requests
-from six import iteritems
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base.utils.tagging import tagger
 
@@ -118,7 +117,7 @@ class CadvisorScraper(object):
                 self.gauge(metric, float(dat), tags)
 
         elif isinstance(dat, dict):
-            for k, v in iteritems(dat):
+            for k, v in dat.items():
                 self._publish_raw_metrics(metric + '.%s' % k.lower(), v, tags, is_pod, depth + 1)
 
         elif isinstance(dat, list):

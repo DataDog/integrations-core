@@ -8,7 +8,7 @@ from typing import Any, Dict, Generator, Tuple  # noqa: F401
 
 from requests.exceptions import HTTPError, RequestException
 from semver import VersionInfo
-from six.moves.urllib_parse import urlparse
+from urllib_parse import urlparse
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
