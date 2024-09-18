@@ -215,6 +215,7 @@ tests:
             geoip: {}
             ip: "10.10.10.10"
         reason: "deferred"
+        status: "warning"
         tag: ""
         timestamp: 1.604933737E12
         ts: 1604937337
@@ -239,6 +240,7 @@ tests:
           "ts" : 1604937337
         }
       service: "marketing-events"
+      status: "warn"
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1604933737000

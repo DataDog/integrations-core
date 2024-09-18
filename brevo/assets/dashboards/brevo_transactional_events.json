@@ -477,6 +477,30 @@
                             },
                             {
                                 "data_source": "logs",
+                                "name": "query12",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@subject",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:brevo service:transactional-events @evt.name:unique_opened $event_name $recipient_email $subject $sender_email"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
                                 "name": "query2",
                                 "indexes": [
                                     "*"
@@ -718,7 +742,7 @@
                         ],
                         "response_format": "scalar",
                         "sort": {
-                            "count": 110,
+                            "count": 120,
                             "order_by": [
                                 {
                                     "type": "formula",
@@ -737,6 +761,11 @@
                                 "cell_display_mode": "number",
                                 "alias": "Delivered",
                                 "formula": "query2"
+                            },
+                            {
+                                "cell_display_mode": "number",
+                                "alias": "Uniquely Opened",
+                                "formula": "query12"
                             },
                             {
                                 "cell_display_mode": "number",
@@ -1391,6 +1420,7 @@
                 "title": "Transactional Event List",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "requests": [
                     {
                         "response_format": "event_list",

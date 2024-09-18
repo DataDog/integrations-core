@@ -254,7 +254,7 @@ pipeline:
             opened,info
             click,info
             hard_bounce,error
-            soft_bounced,error
+            soft_bounce,error
             delivered,Success
             unsubscribe,warning
           type: lookup-processor
