@@ -33,7 +33,7 @@ To find your application's details in Mimecast Email Security:
      - Application Name: Enter the application name of your choice
      - Category: Select **SIEM Integration**
      - Products: Click **Select all** option
-     - Application Role: Select **SIEM Admin Role**
+     - Application Role: Select **Basic Administrator**
      - Description: Enter the description of your choice
    - In **Notifications**, provide the contact details of your technical administrator and click on **Next**
    - After clicking on **Add and Generate Keys** there will be pop up window showing Client ID and Client Secret. Please copy those keys to a safe place as they won't be displayed again.
