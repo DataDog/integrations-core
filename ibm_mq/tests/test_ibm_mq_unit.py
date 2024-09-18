@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.dev.testing import requires_py3
@@ -37,7 +36,7 @@ def test_channel_status_service_check_default_mapping(aggregator, get_check, ins
             'my_channel', status, ["channel:my_channel_{}".format(status)]
         )
 
-    for status, service_check_status in iteritems(service_check_map):
+    for status, service_check_status in service_check_map.items():
         aggregator.assert_service_check(
             'ibm_mq.channel.status', service_check_status, tags=["channel:my_channel_{}".format(status)]
         )
@@ -80,7 +79,7 @@ def test_channel_status_service_check_custom_mapping(aggregator, get_check, inst
             'my_channel', status, ["channel:my_channel_{}".format(status)]
         )
 
-    for status, service_check_status in iteritems(service_check_map):
+    for status, service_check_status in service_check_map.items():
         aggregator.assert_service_check(
             'ibm_mq.channel.status', service_check_status, tags=["channel:my_channel_{}".format(status)]
         )

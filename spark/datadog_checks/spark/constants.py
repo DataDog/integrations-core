@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from six import iteritems
-
 # Identifier for cluster master address in `spark.yaml`
 MASTER_ADDRESS = 'spark_url'
 DEPRECATED_MASTER_ADDRESS = 'resourcemanager_uri'
@@ -137,15 +135,15 @@ SPARK_EXECUTOR_TEMPLATE_METRICS = {
 }
 
 SPARK_DRIVER_METRICS = {
-    key: (value[0].format('driver'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
+    key: (value[0].format('driver'), value[1]) for key, value in SPARK_EXECUTOR_TEMPLATE_METRICS.items()
 }
 
 SPARK_EXECUTOR_METRICS = {
-    key: (value[0].format('executor'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
+    key: (value[0].format('executor'), value[1]) for key, value in SPARK_EXECUTOR_TEMPLATE_METRICS.items()
 }
 
 SPARK_EXECUTOR_LEVEL_METRICS = {
-    key: (value[0].format('executor.id'), value[1]) for key, value in iteritems(SPARK_EXECUTOR_TEMPLATE_METRICS)
+    key: (value[0].format('executor.id'), value[1]) for key, value in SPARK_EXECUTOR_TEMPLATE_METRICS.items()
 }
 
 SPARK_RDD_METRICS = {

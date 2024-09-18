@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+from urllib.parse import urlparse
 
 import mock
 import pytest
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.http import MockResponse

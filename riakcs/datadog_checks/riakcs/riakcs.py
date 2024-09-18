@@ -8,7 +8,6 @@ from copy import deepcopy
 import boto3
 import simplejson as json
 from botocore.config import Config
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
@@ -22,7 +21,7 @@ def multidict(ordered_pairs):
         d[k].append(v)
     # unpack lists that have only 1 item
     dict_copy = deepcopy(d)
-    for k, v in iteritems(dict_copy):
+    for k, v in dict_copy.items():
         if len(v) == 1:
             d[k] = v[0]
     return dict(d)
@@ -62,7 +61,7 @@ class RiakCs(AgentCheck):
                 metrics.update(V21_DEFAULT_METRICS)
             else:
                 metrics = V21_DEFAULT_METRICS
-            for key, value in iteritems(stats):
+            for key, value in stats.items():
                 if key not in metrics:
                     continue
                 suffix = key.rsplit("_", 1)[-1]
@@ -72,7 +71,7 @@ class RiakCs(AgentCheck):
             # pre 2.1 stats format
             legends = {len(k): k for k in stats["legend"]}
             del stats["legend"]
-            for key, values in iteritems(stats):
+            for key, values in stats.items():
                 legend = legends[len(values)]
                 for i, value in enumerate(values):
                     metric_name = "riakcs.{0}.{1}".format(key, legend[i])

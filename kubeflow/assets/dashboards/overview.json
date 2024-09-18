@@ -46,7 +46,7 @@
                         },
                         "id": 4610707819074916,
                         "layout": {
-                            "height": 3,
+                            "height": 4,
                             "width": 3,
                             "x": 0,
                             "y": 3
@@ -67,7 +67,7 @@
                         },
                         "id": 8366490141273904,
                         "layout": {
-                            "height": 3,
+                            "height": 4,
                             "width": 2,
                             "x": 3,
                             "y": 3
@@ -77,7 +77,7 @@
             },
             "id": 3375620455700908,
             "layout": {
-                "height": 7,
+                "height": 8,
                 "width": 5,
                 "x": 0,
                 "y": 0
@@ -93,8 +93,8 @@
                 "widgets": [
                     {
                         "definition": {
-                            "background_color": "blue",
-                            "content": "The service checks show the Kubeflow OpenMetrics/Prometheus endpoint status.\n\nThe monitor summary shows you any active alerts for the most crucial Metrics. ",
+                            "background_color": "pink",
+                            "content": "If many widgets are empty, you are using a version of Kubeflow that does not expose certain metrics. Refer to the metadata.csv file for metrics list. \n\nReach out to support to indicate version incompatibilities.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
@@ -110,6 +110,27 @@
                             "width": 7,
                             "x": 0,
                             "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "The service checks show the Kubeflow OpenMetrics/Prometheus endpoint status.\n\nThe monitor summary shows you any active alerts for the most crucial Metrics. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6145599891700518,
+                        "layout": {
+                            "height": 1,
+                            "width": 7,
+                            "x": 0,
+                            "y": 2
                         }
                     },
                     {
@@ -134,14 +155,14 @@
                             "height": 4,
                             "width": 7,
                             "x": 0,
-                            "y": 2
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 3510698085005998,
             "layout": {
-                "height": 7,
+                "height": 8,
                 "width": 7,
                 "x": 5,
                 "y": 0
@@ -273,7 +294,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 7
+                "y": 8
             }
         },
         {
@@ -988,7 +1009,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 12
+                "y": 13
             }
         },
         {
@@ -1224,7 +1245,7 @@
                 "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 28
+                "y": 29
             }
         },
         {
@@ -1424,7 +1445,7 @@
                 "height": 7,
                 "width": 12,
                 "x": 0,
-                "y": 36
+                "y": 37
             }
         }
     ]
