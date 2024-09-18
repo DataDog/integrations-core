@@ -1276,7 +1276,7 @@
             "layout": {
                 "x": 0,
                 "y": 29,
-                "width": 4,
+                "width": 6,
                 "height": 4
             }
         },
@@ -1341,76 +1341,9 @@
                 }
             },
             "layout": {
-                "x": 4,
+                "x": 6,
                 "y": 29,
-                "width": 4,
-                "height": 4
-            }
-        },
-        {
-            "id": 1499029347730738,
-            "definition": {
-                "title": "Top Reasons for Spam Events",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@reason",
-                                        "limit": 10,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "count"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:brevo service:transactional-events @evt.name:spam $event_name $recipient_email $subject $sender_email"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "sort": {
-                            "count": 10,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
-            },
-            "layout": {
-                "x": 8,
-                "y": 29,
-                "width": 4,
+                "width": 6,
                 "height": 4
             }
         },
@@ -1420,7 +1353,6 @@
                 "title": "Transactional Event List",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {},
                 "requests": [
                     {
                         "response_format": "event_list",
