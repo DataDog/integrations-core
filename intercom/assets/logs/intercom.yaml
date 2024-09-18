@@ -67,7 +67,7 @@ pipeline:
   name: Intercom
   enabled: true
   filter:
-    query: "source:intercom "
+    query: "source:intercom"
   processors:
     - name: Lookup for `data.item.type` to `service`
       enabled: true
