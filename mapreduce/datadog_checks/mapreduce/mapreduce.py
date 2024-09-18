@@ -91,7 +91,7 @@ class MapReduceCheck(AgentCheck):
 
         # Report success after gathering all metrics from Application Master
         if running_jobs:
-            job_id, metrics = next(running_jobs.items())
+            job_id, metrics = next(iter(running_jobs.items()))
             am_address = self._get_url_base(metrics['tracking_url'])
 
             self.service_check(
@@ -247,7 +247,7 @@ class MapReduceCheck(AgentCheck):
         """
         running_jobs = {}
 
-        for app_name, tracking_url in running_apps.items():
+        for app_name, tracking_url in running_apps.values():
 
             metrics_json = self._rest_request_to_json(
                 tracking_url, self.MAPREDUCE_JOBS_PATH, self.MAPREDUCE_SERVICE_CHECK
@@ -287,7 +287,7 @@ class MapReduceCheck(AgentCheck):
         """
         Get custom metrics specified for each counter
         """
-        for job_metrics in running_jobs.items():
+        for job_metrics in running_jobs.values():
             job_name = job_metrics['job_name']
 
             # Check if the job_name exist in the custom metrics
