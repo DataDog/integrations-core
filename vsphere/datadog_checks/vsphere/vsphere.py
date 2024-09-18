@@ -903,10 +903,10 @@ class VSphereCheck(AgentCheck):
             return
 
         base_tags = []
-        for tag in resource_tags:
-            if self._config.excluded_host_tags and tag.split(':', 1)[0] not in self._config.excluded_host_tags:
-                continue
-            base_tags.append(tag)
+        if self._config.excluded_host_tags:
+            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
+        else:
+            base_tags.extend(resource_tags)
         base_tags.extend(self._config.base_tags)
 
         if resource_type == vim.VirtualMachine:
