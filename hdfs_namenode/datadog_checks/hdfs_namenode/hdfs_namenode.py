@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+from urllib.parse import urljoin
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
-from six import iteritems
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import compute_percent
@@ -113,7 +113,7 @@ class HDFSNameNode(AgentCheck):
         if bean_name != bean_name:
             raise Exception("Unexpected bean name {}".format(bean_name))
 
-        for metric, (metric_name, metric_type) in iteritems(metrics):
+        for metric, (metric_name, metric_type) in metrics.items():
             metric_value = bean.get(metric)
 
             if metric_value is not None:
@@ -146,7 +146,7 @@ class HDFSNameNode(AgentCheck):
 
         # Add query_params as arguments
         if query_params:
-            query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(query_params)])
+            query = '&'.join(['{}={}'.format(key, value) for key, value in query_params.items()])
             url = urljoin(url, '?' + query)
 
         self.log.debug('Attempting to connect to "%s"', url)

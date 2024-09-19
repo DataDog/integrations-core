@@ -8,15 +8,11 @@ from collections import defaultdict
 from os import geteuid
 
 from packaging.version import Version
-from six import PY3, iteritems
 from six.moves import filter
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-
-if PY3:
-    long = int
 
 
 class BackendStatus(object):
@@ -100,11 +96,11 @@ class Varnish(AgentCheck):
         if name == "stat":
             m_name = self.normalize(self._current_metric)
             if self._current_type in ("a", "c"):
-                self.rate(m_name, long(self._current_value), tags=self.tags)
+                self.rate(m_name, int(self._current_value), tags=self.tags)
             elif self._current_type in ("i", "g"):
-                self.gauge(m_name, long(self._current_value), tags=self.tags)
+                self.gauge(m_name, int(self._current_value), tags=self.tags)
                 if 'n_purges' in m_name:
-                    self.rate('varnish.n_purgesps', long(self._current_value), tags=self.tags)
+                    self.rate('varnish.n_purgesps', int(self._current_value), tags=self.tags)
             else:
                 # Unsupported data type, ignore
                 self._reset()
@@ -120,7 +116,7 @@ class Varnish(AgentCheck):
         data = data.strip()
         if len(data) > 0 and self._current_element != "":
             if self._current_element == "value":
-                self._current_value = long(data)
+                self._current_value = int(data)
             elif self._current_element == "flag":
                 self._current_type = data
             else:
@@ -243,7 +239,7 @@ class Varnish(AgentCheck):
             json_output = json.loads(output)
             if "counters" in json_output:
                 json_output = json_output["counters"]
-            for name, metric in iteritems(json_output):
+            for name, metric in json_output.items():
                 if not isinstance(metric, dict):  # skip 'timestamp' field
                     continue
 
@@ -254,11 +250,11 @@ class Varnish(AgentCheck):
                 value = metric.get("value", 0)
 
                 if metric.get("flag") in ("a", "c"):
-                    self.rate(metric_name, long(value), tags=self.tags)
+                    self.rate(metric_name, int(value), tags=self.tags)
                 elif metric.get("flag") in ("g", "i"):
-                    self.gauge(metric_name, long(value), tags=self.tags)
+                    self.gauge(metric_name, int(value), tags=self.tags)
                     if 'n_purges' in self.normalize(name, prefix="varnish"):
-                        self.rate('varnish.n_purgesps', long(value), tags=self.tags)
+                        self.rate('varnish.n_purgesps', int(value), tags=self.tags)
                 elif 'flag' not in metric:
                     self.log.warning("Could not determine the type of metric %s, skipping submission", metric_name)
                     self.log.debug("Raw metric %s is missing the `flag` field", str(metric))
@@ -367,7 +363,7 @@ class Varnish(AgentCheck):
         if backends_by_status is None:
             return
 
-        for status, backends in iteritems(backends_by_status):
+        for status, backends in backends_by_status.items():
             check_status = BackendStatus.to_check_status(status)
             for backend, message in backends:
                 service_checks_tags = ['backend:%s' % backend] + self.custom_tags

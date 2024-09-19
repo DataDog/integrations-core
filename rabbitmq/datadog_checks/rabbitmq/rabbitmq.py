@@ -5,10 +5,9 @@
 import re
 import time
 from collections import defaultdict
+from urllib.parse import quote_plus, urljoin, urlparse
 
 from requests.exceptions import RequestException
-from six import iteritems
-from six.moves.urllib.parse import quote_plus, urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 
@@ -88,8 +87,8 @@ class RabbitMQManagement(AgentCheck):
             NODE_TYPE: {'explicit': instance.get('nodes', []), 'regexes': instance.get('nodes_regexes', [])},
         }
 
-        for object_type, filters in iteritems(specified):
-            for _, filter_objects in iteritems(filters):
+        for object_type, filters in specified.items():
+            for _, filter_objects in filters.items():
                 if type(filter_objects) != list:
                     raise TypeError("{0} / {0}_regexes parameter must be a list".format(object_type))
 
@@ -499,10 +498,10 @@ class RabbitMQManagement(AgentCheck):
                 # 'state' does not exist for direct type connections.
                 connection_states[conn.get('state', 'direct')] += 1
 
-        for vhost, nb_conn in iteritems(stats):
+        for vhost, nb_conn in stats.items():
             self.gauge('rabbitmq.connections', nb_conn, tags=['{}_vhost:{}'.format(TAG_PREFIX, vhost)] + custom_tags)
 
-        for conn_state, nb_conn in iteritems(connection_states):
+        for conn_state, nb_conn in connection_states.items():
             self.gauge(
                 'rabbitmq.connections.state',
                 nb_conn,

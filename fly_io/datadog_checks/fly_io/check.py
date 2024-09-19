@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from six.moves.urllib.parse import quote_plus
+from urllib.parse import quote_plus
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 

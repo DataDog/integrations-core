@@ -9,7 +9,6 @@ from time import time
 
 import psycopg2
 from cachetools import TTLCache
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
@@ -595,7 +594,7 @@ class PostgreSql(AgentCheck):
                 tags = copy.copy(instance_tags)
 
             # Add tags from descriptors.
-            tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
+            tags += [("%s:%s" % (k, v)) for (k, v) in desc_map.items()]
 
             # Submit metrics to the Agent.
             for column, value in zip(cols, column_values):
