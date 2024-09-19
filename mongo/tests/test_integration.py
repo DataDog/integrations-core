@@ -1168,11 +1168,8 @@ def test_integration_localhost_process_stats(instance_integration, aggregator, c
         ) as mock_is_localhost:
             mock_is_localhost.return_value = True
             with mock.patch('psutil.Process') as mock_process:
+                mock_process.return_value.name.return_value = 'mongod'
                 mock_process.return_value.cpu_percent.return_value = 20.0
-                mocked_cpu_times_percent = mock.Mock()
-                mocked_cpu_times_percent.user = 10.0
-                mocked_cpu_times_percent.system = 10.0
-                mock_process.return_value.cpu_times_percent.return_value = mocked_cpu_times_percent
                 dd_run_check(mongo_check)
 
     metrics_categories = [
