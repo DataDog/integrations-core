@@ -81,6 +81,11 @@ class Deadlocks(DBMAsyncJob):
                     inputbuf.text = self.obfuscate_no_except_wrapper(inputbuf.text)
                     spid = process.get('spid')
                     if spid is not None:
+                        try:
+                            spid = int(spid)
+                        except ValueError:
+                            self._log.error("spid not an integer. Skipping query signature computation.")
+                            continue
                         if spid in query_signatures:
                             continue
                         query_signatures.append({"spid": spid, "signature": compute_sql_signature(inputbuf.text)})

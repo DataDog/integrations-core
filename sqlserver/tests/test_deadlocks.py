@@ -183,4 +183,6 @@ def test__create_deadlock_rows():
         row = rows[0]
         query_signatures = row["query_signatures"]
         assert len(query_signatures) == 2, "Should have two query signatures"
-        assert "spid" in query_signatures[0], "Should have spid in query signatures"
+        first_mapping = query_signatures[0]
+        assert "spid" in first_mapping, "Should have spid in query signatures"
+        assert isinstance(first_mapping["spid"], int), "spid should be an int"
