@@ -6,12 +6,13 @@ from __future__ import unicode_literals
 
 import logging
 import xml.etree.ElementTree as ET
-from concurrent.futures.thread import ThreadPoolExecutor
-
+import os
 import pytest
 
 from copy import copy, deepcopy
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.deadlocks import Deadlocks, MAX_PAYLOAD_BYTES
+from mock import patch, MagicMock
 
 from .common import CHECK_NAME
 from .utils import create_deadlock
@@ -112,3 +113,24 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     except AssertionError as e:
         logging.error("deadlock XML: %s", str(d))
         raise e
+
+DEADLOCKS_PLAN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deadlocks")
+
+def _load_test_deadlocks_xml(filename):
+    with open(os.path.join(DEADLOCKS_PLAN_DIR, filename), 'r') as f:
+        return f.read()
+
+def test__create_deadlock_rows():
+    deadlocks_obj = None
+    with patch.object(Deadlocks, '__init__', return_value=None):
+        deadlocks_obj = Deadlocks(None, None)
+        deadlocks_obj._check = MagicMock()
+        deadlocks_obj._log = MagicMock()
+        deadlocks_obj._config = MagicMock()
+        deadlocks_obj._config.obfuscator_options = {}
+        deadlocks_obj._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
+    xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
+    with patch.object(Deadlocks, '_query_deadlocks', return_value=[xml]):
+        rows = deadlocks_obj._create_deadlock_rows()
+        assert len(rows) == 1, "Should have created one deadlock row"
+        assert len(rows[0]["query_signatures"]) == 2, "Should have two query signatures"

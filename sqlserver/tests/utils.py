@@ -292,6 +292,7 @@ def create_deadlock(bob_conn, fred_conn):
     return "deadlock" in exception_1_text or "deadlock" in exception_2_text
 
 
+<<<<<<< HEAD
 def deep_compare(obj1, obj2):
     if isinstance(obj1, dict) and isinstance(obj2, dict):
         if set(obj1.keys()) != set(obj2.keys()):
@@ -303,3 +304,5 @@ def deep_compare(obj1, obj2):
         return all(any(deep_compare(item1, item2) for item2 in obj2) for item1 in obj1)
     else:
         return obj1 == obj2
+=======
+>>>>>>> dc91830ca1 (query signatures)

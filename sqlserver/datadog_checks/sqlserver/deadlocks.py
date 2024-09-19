@@ -7,6 +7,7 @@ from datetime import datetime
 from time import time
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
@@ -62,26 +63,35 @@ class Deadlocks(DBMAsyncJob):
             )['query']
         except Exception as e:
             sql_text = "ERROR: failed to obfuscate"
+            error_text = "Failed to obfuscate sql text within a deadlock"
             if self._config.log_unobfuscated_queries:
-                self._log.warning("Failed to obfuscate sql text within a deadlock=[%s] | err=[%s]", sql_text, e)
-            else:
-                self._log.warning("Failed to obfuscate sql text within a deadlock | err=[%s]", e)
+                error_text += "=[%s]" % sql_text
+            error_text += " | err=[%s]"
+            self._log.error(error_text, e)
         return sql_text
 
-    def obfuscate_xml(self, root):
+    def _obfuscate_xml(self, root):
         process_list = root.find(".//process-list")
         if process_list is None:
             raise Exception("process-list element not found. The deadlock XML is in an unexpected format.")
+        query_signatures = dict()
         for process in process_list.findall('process'):
             for inputbuf in process.findall('.//inputbuf'):
                 if inputbuf.text is not None:
                     inputbuf.text = self.obfuscate_no_except_wrapper(inputbuf.text)
+                    spid = process.get('spid')
+                    if spid is not None:
+                        if spid in query_signatures:
+                            continue
+                        query_signatures[spid] = compute_sql_signature(inputbuf.text)
+                    else:
+                        self._log.error("spid not found in process element. Skipping query signature computation.") 
             for frame in process.findall('.//frame'):
                 if frame.text is not None:
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
-        return
-
-    def _collect_deadlocks(self):
+        return query_signatures
+    
+    def _query_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 self._log.debug("collecting sql server deadlocks")
@@ -94,51 +104,52 @@ class Deadlocks(DBMAsyncJob):
                 cursor.execute(
                     DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time()))
                 )
-                results = cursor.fetchall()
-                converted_xmls = []
-                for result in results:
-                    try:
-                        root = ET.fromstring(result[1])
-                    except Exception as e:
-                        self._log.error(
-                            """An error occurred while collecting SQLServer deadlocks.
-                             One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(
-                                e, result
-                            )
-                        )
-                        continue
-                    try:
-                        self.obfuscate_xml(root)
-                    except Exception as e:
-                        error = "An error occurred while obfuscating SQLServer deadlocks. The error: {}".format(e)
-                        self._log.error(error)
-                        continue
+                return cursor.fetchall()
+        
 
-                    converted_xmls.append(ET.tostring(root, encoding='unicode'))
-                self._last_deadlock_timestamp = time()
-                return converted_xmls
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def collect_deadlocks(self):
-        deadlock_xmls_collected = self._collect_deadlocks()
-        deadlock_xmls = []
+    def _create_deadlock_rows(self):
+        results = self._query_deadlocks()
+        deadlock_events = []
         total_number_of_characters = 0
-        for i, deadlock in enumerate(deadlock_xmls_collected):
-            total_number_of_characters += len(deadlock)
+        for i, result in enumerate(results):
+            try:
+                root = ET.fromstring(result)
+            except Exception as e:
+                self._log.error(
+                    """An error occurred while collecting SQLServer deadlocks.
+                        One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(
+                        e, result
+                    )
+                )
+                continue
+            query_signatures = dict()
+            try:
+                query_signatures = self._obfuscate_xml(root)
+            except Exception as e:
+                error = "An error occurred while obfuscating SQLServer deadlocks. The error: {}".format(e)
+                self._log.error(error)
+                continue
+            
+            total_number_of_characters += len(result) + len(query_signatures)
             if total_number_of_characters > self._deadlock_payload_max_bytes:
                 self._log.warning(
                     """We've dropped {} deadlocks from a total of {} deadlocks as the
                      max deadlock payload of {} bytes was exceeded.""".format(
-                        len(deadlock_xmls) - i, len(deadlock_xmls), self._deadlock_payload_max_bytes
+                        len(results) - i, len(results), self._deadlock_payload_max_bytes
                     )
                 )
                 break
-            else:
-                deadlock_xmls.append({"xml": deadlock})
 
+            deadlock_events.append({"xml": ET.tostring(root, encoding='unicode'), "query_signatures": query_signatures})
+        self._last_deadlock_timestamp = time()
+        return deadlock_events
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def collect_deadlocks(self):
+        rows = self._create_deadlock_rows()
         # Send payload only if deadlocks found
-        if deadlock_xmls:
-            deadlocks_event = self._create_deadlock_event(deadlock_xmls)
+        if rows:
+            deadlocks_event = self._create_deadlock_event(rows)
             payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
             self._log.debug("Deadlocks payload: %s", str(payload))
             self._check.database_monitoring_query_activity(payload)
