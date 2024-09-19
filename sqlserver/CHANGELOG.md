@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 17.5.3 / 2024-09-17
+
+***Fixed***:
+
+* Fix ODBC config handling for Linux ([#18586](https://github.com/DataDog/integrations-core/pull/18586))
+
 ## 17.5.2 / 2024-08-28 / Agent 7.57.0
 
 ***Fixed***:

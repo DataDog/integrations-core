@@ -6,9 +6,9 @@
 
 Collects metrics from mesos master node, only the leader is sending metrics.
 """
+from urllib.parse import urlparse
+
 import requests
-from six import iteritems
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
@@ -305,7 +305,7 @@ class MesosMaster(AgentCheck):
                     framework_tags = ['framework_name:' + framework['name']] + tags
                     self.GAUGE('mesos.framework.total_tasks', len(framework['tasks']), tags=framework_tags)
                     resources = framework['used_resources']
-                    for key_name, (metric_name, metric_func) in iteritems(self.FRAMEWORK_METRICS):
+                    for key_name, (metric_name, metric_func) in self.FRAMEWORK_METRICS.items():
                         metric_func(self, metric_name, resources[key_name], tags=framework_tags)
 
                 role_metrics = self._get_master_roles(url, instance_tags)
@@ -314,7 +314,7 @@ class MesosMaster(AgentCheck):
                         role_tags = ['mesos_role:' + role['name']] + tags
                         self.GAUGE('mesos.role.frameworks.count', len(role['frameworks']), tags=role_tags)
                         self.GAUGE('mesos.role.weight', role['weight'], tags=role_tags)
-                        for key_name, (metric_name, metric_func) in iteritems(self.ROLE_RESOURCES_METRICS):
+                        for key_name, (metric_name, metric_func) in self.ROLE_RESOURCES_METRICS.items():
                             try:
                                 metric_func(self, metric_name, role['resources'][key_name], tags=role_tags)
                             except KeyError:
@@ -335,7 +335,7 @@ class MesosMaster(AgentCheck):
                         self.STATS_METRICS,
                     ]
                 for m in metrics:
-                    for key_name, (metric_name, metric_func) in iteritems(m):
+                    for key_name, (metric_name, metric_func) in m.items():
                         if key_name in stats_metrics:
                             metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
 

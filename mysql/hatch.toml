@@ -14,19 +14,20 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = [
   "5.7",  # EOL October 21, 2023
   "8.0.36",  # EOL April, 2026
+  "8.4.0",
 ]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = ["8.0"]
 replication = ["group"]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 flavor = ["mariadb"]
 version = [
   "10.2",  # EOL 23 May 2022 (ended)
@@ -40,10 +41,12 @@ version = [
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.36"] },
+  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
 ]
 name."8.0-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
 ]
+
 
 [envs.default.env-vars]
 COMPOSE_FILE = "{matrix:flavor:mysql}.yaml"

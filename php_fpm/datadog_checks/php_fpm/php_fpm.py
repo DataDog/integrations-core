@@ -5,36 +5,31 @@ import json
 import random
 import socket
 import time
-
-from six import PY3, StringIO, iteritems, string_types
-from six.moves.urllib.parse import urlparse
+from io import StringIO
+from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.time import get_precise_time
 
-if PY3:
-    # Flup package does not exist anymore so what's needed is vendored
-    # flup.client.fcgi_app.FCGIApp flup-py3 version 1.0.3
-    from .vendor.fcgi_app import FCGIApp
-
-    def get_connection(self):
-        if self._connect is not None:
-            if isinstance(self._connect, string_types):
-                sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                sock.connect(self._connect)
-            elif hasattr(socket, 'create_connection'):
-                sock = socket.create_connection(self._connect)
-            else:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.connect(self._connect)
-            return sock
-
-    FCGIApp._getConnection = get_connection
-else:
-    # flup version 1.0.3.dev-20110405
-    from .vendor.fcgi_app_py2 import FCGIApp
+# Flup package does not exist anymore so what's needed is vendored
+# flup.client.fcgi_app.FCGIApp flup-py3 version 1.0.3
+from .vendor.fcgi_app import FCGIApp
 
 
+def get_connection(self):
+    if self._connect is not None:
+        if isinstance(self._connect, str):
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.connect(self._connect)
+        elif hasattr(socket, 'create_connection'):
+            sock = socket.create_connection(self._connect)
+        else:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect(self._connect)
+        return sock
+
+
+FCGIApp._getConnection = get_connection
 # Relax param filtering
 FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))
 DEFAULT_TIMEOUT = 10
@@ -142,13 +137,13 @@ class PHPFPMCheck(AgentCheck):
 
         self.gauge(self.STATUS_DURATION_NAME, check_duration, tags=metric_tags)
 
-        for key, mname in iteritems(self.GAUGES):
+        for key, mname in self.GAUGES.items():
             if key not in data:
                 self.log.warning("Gauge metric %s is missing from FPM status", key)
                 continue
             self.gauge(mname, int(data[key]), tags=metric_tags)
 
-        for key, mname in iteritems(self.MONOTONIC_COUNTS):
+        for key, mname in self.MONOTONIC_COUNTS.items():
             if key not in data:
                 self.log.warning("Counter metric %s is missing from FPM status", key)
                 continue
