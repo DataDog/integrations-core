@@ -1,0 +1,44 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "9c1e5a09-836f-49c8-bbb2-2dd7f86ad0de",
+  "app_id": "mux",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "<FILL IN - A brief description of what this offering provides>",
+    "title": "Mux",
+    "media": [],
+    "classifier_tags": [
+      "Category::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 26205496,
+      "source_type_name": "Mux",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mux.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
