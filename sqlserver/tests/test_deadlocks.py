@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+import concurrent
 import logging
 import xml.etree.ElementTree as ET
 import os
@@ -13,9 +14,9 @@ from copy import copy, deepcopy
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.deadlocks import Deadlocks, MAX_PAYLOAD_BYTES
 from mock import patch, MagicMock
+from threading import Event
 
 from .common import CHECK_NAME
-from .utils import create_deadlock
 
 try:
     import pyodbc
@@ -55,6 +56,52 @@ def _get_conn_for_user(instance_docker, user, timeout=1, _autocommit=False):
     conn.timeout = timeout
     return conn
 
+def _run_first_deadlock_query(conn, event1, event2):
+    exception_text = ""
+    try:
+        conn.cursor().execute("BEGIN TRAN foo;")
+        conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 1;")
+        event1.set()
+        event2.wait()
+        conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;")
+    except Exception as e:
+        # Exception is expected due to a deadlock
+        exception_text = str(e)
+        pass
+    conn.commit()
+    return exception_text
+
+
+def _run_second_deadlock_query(conn, event1, event2):
+    exception_text = ""
+    try:
+        event1.wait()
+        conn.cursor().execute("BEGIN TRAN bar;")
+        conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 2;")
+        event2.set()
+        conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;")
+    except Exception as e:
+        # Exception is expected due to a deadlock
+        exception_text = str(e)
+        pass
+    conn.commit()
+    return exception_text
+
+
+def _create_deadlock(bob_conn, fred_conn):
+    executor = concurrent.futures.thread.ThreadPoolExecutor(2)
+    event1 = Event()
+    event2 = Event()
+
+    futures_first_query = executor.submit(_run_first_deadlock_query, bob_conn, event1, event2)
+    futures_second_query = executor.submit(_run_second_deadlock_query, fred_conn, event1, event2)
+    exception_1_text = futures_first_query.result()
+    exception_2_text = futures_second_query.result()
+    executor.shutdown()
+    return "deadlock" in exception_1_text or "deadlock" in exception_2_text
+
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
@@ -68,7 +115,7 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     for _ in range(0, 3):
         bob_conn = _get_conn_for_user(dbm_instance, 'bob', 3)
         fred_conn = _get_conn_for_user(dbm_instance, 'fred', 3)
-        created_deadlock = create_deadlock(bob_conn, fred_conn)
+        created_deadlock = _create_deadlock(bob_conn, fred_conn)
         bob_conn.close()
         fred_conn.close()
         if created_deadlock:
