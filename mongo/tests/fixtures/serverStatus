@@ -1,7 +1,7 @@
 {
     "host": "d4c6071697ea",
     "version": "4.1.13",
-    "process": "mongod",
+    "process": "mongos",
     "pid": 1,
     "uptime": 64054.0,
     "uptimeMillis": 64053998,
