@@ -180,4 +180,7 @@ def test__create_deadlock_rows():
     with patch.object(Deadlocks, '_query_deadlocks', return_value=[["date placeholder", xml]]):
         rows = deadlocks_obj._create_deadlock_rows()
         assert len(rows) == 1, "Should have created one deadlock row"
-        assert len(rows[0]["query_signatures"]) == 2, "Should have two query signatures"
+        row = rows[0]
+        query_signatures = row["query_signatures"]
+        assert len(query_signatures) == 2, "Should have two query signatures"
+        assert "spid" in query_signatures[0], "Should have spid in query signatures"
