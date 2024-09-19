@@ -130,7 +130,7 @@ def test__create_deadlock_rows():
         deadlocks_obj._config.obfuscator_options = {}
         deadlocks_obj._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
     xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
-    with patch.object(Deadlocks, '_query_deadlocks', return_value=[xml]):
+    with patch.object(Deadlocks, '_query_deadlocks', return_value=[["date placeholder", xml]]):
         rows = deadlocks_obj._create_deadlock_rows()
         assert len(rows) == 1, "Should have created one deadlock row"
         assert len(rows[0]["query_signatures"]) == 2, "Should have two query signatures"

@@ -113,7 +113,7 @@ class Deadlocks(DBMAsyncJob):
         total_number_of_characters = 0
         for i, result in enumerate(results):
             try:
-                root = ET.fromstring(result)
+                root = ET.fromstring(result[1])
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting SQLServer deadlocks.
@@ -154,7 +154,7 @@ class Deadlocks(DBMAsyncJob):
             self._log.debug("Deadlocks payload: %s", str(payload))
             self._check.database_monitoring_query_activity(payload)
 
-    def _create_deadlock_event(self, deadlock_xmls):
+    def _create_deadlock_event(self, deadlock_rows):
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -166,7 +166,7 @@ class Deadlocks(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
-            "sqlserver_deadlocks": deadlock_xmls,
+            "sqlserver_deadlocks": deadlock_rows,
         }
         return event
     
