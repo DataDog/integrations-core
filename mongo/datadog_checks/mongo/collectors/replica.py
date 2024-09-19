@@ -3,8 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import time
-
-from six.moves.urllib.parse import urlsplit
+from urllib.parse import urlsplit
 
 from datadog_checks.mongo.api import MongoApi
 from datadog_checks.mongo.collectors.base import MongoCollector

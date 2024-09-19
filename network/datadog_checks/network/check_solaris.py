@@ -2,15 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from six import PY3, iteritems
-
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
 from . import Network
 from .const import SOLARIS_TCP_METRICS
-
-if PY3:
-    long = int
 
 
 class SolarisNetwork(Network):
@@ -25,7 +20,7 @@ class SolarisNetwork(Network):
         try:
             netstat, _, _ = get_subprocess_output(["kstat", "-p", "link:0:"], self.log)
             metrics_by_interface = self._parse_solaris_netstat(netstat)
-            for interface, metrics in iteritems(metrics_by_interface):
+            for interface, metrics in metrics_by_interface.items():
                 self.submit_devicemetrics(interface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
             self.log.exception("Error collecting kstat stats.")
@@ -136,7 +131,7 @@ class SolarisNetwork(Network):
 
             # Add it to this interface's list of metrics.
             metrics = metrics_by_interface.get(iface, {})
-            metrics[ddname] = self.parse_long(cols[1])
+            metrics[ddname] = self.parse_int(cols[1])
             metrics_by_interface[iface] = metrics
 
         return metrics_by_interface
