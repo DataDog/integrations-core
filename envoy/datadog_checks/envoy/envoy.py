@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from collections import defaultdict
+from urllib.parse import urljoin
 
 import requests
 from six import PY2
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 

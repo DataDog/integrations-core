@@ -7,7 +7,6 @@ import os
 
 import requests
 from dateutil import parser
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
@@ -192,7 +191,7 @@ class FargateCheck(AgentCheck):
         ## Ephemeral Storage Metrics
         if 'EphemeralStorageMetrics' in metadata:
             es_metrics = metadata['EphemeralStorageMetrics']
-            for field_name, metric_value in iteritems(es_metrics):
+            for field_name, metric_value in es_metrics.items():
                 metric_name = EPHEMERAL_STORAGE_GAUGE_METRICS.get(field_name)
                 self.gauge(metric_name, metric_value, task_tags)
 
@@ -229,7 +228,7 @@ class FargateCheck(AgentCheck):
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
 
-        for container_id, container_stats in iteritems(stats):
+        for container_id, container_stats in stats.items():
             if container_id not in exlcuded_cid:
                 self.submit_perf_metrics(container_tags, container_id, container_stats)
 
@@ -337,7 +336,7 @@ class FargateCheck(AgentCheck):
                 self.gauge('ecs.fargate.mem.limit', value, tags)
 
             # I/O metrics
-            for blkio_cat, metric_name in iteritems(IO_METRICS):
+            for blkio_cat, metric_name in IO_METRICS.items():
                 read_counter = write_counter = 0
 
                 blkio_stats = container_stats.get("blkio_stats", {}).get(blkio_cat)
@@ -363,13 +362,13 @@ class FargateCheck(AgentCheck):
 
             # Network metrics
             networks = container_stats.get('networks', {})
-            for network_interface, network_stats in iteritems(networks):
+            for network_interface, network_stats in networks.items():
                 network_tags = tags + ["interface:{}".format(network_interface)]
-                for field_name, metric_name in iteritems(NETWORK_GAUGE_METRICS):
+                for field_name, metric_name in NETWORK_GAUGE_METRICS.items():
                     metric_value = network_stats.get(field_name)
                     if metric_value is not None:
                         self.gauge(metric_name, metric_value, network_tags)
-                for field_name, metric_name in iteritems(NETWORK_RATE_METRICS):
+                for field_name, metric_name in NETWORK_RATE_METRICS.items():
                     metric_value = network_stats.get(field_name)
                     if metric_value is not None:
                         self.rate(metric_name, metric_value, network_tags)

@@ -4,8 +4,6 @@
 from copy import deepcopy
 from re import match, search, sub
 
-from six import iteritems
-
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
 
@@ -200,7 +198,7 @@ class KubeAPIServerMetricsCheck(SliMetricsScraperMixin, OpenMetricsBaseCheck):
             # Explicit shallow copy of the instance tags
             _tags = list(scraper_config['custom_tags'])
 
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 _tags.append('{}:{}'.format(label_name, label_value))
             if gauge:
                 # submit raw metric

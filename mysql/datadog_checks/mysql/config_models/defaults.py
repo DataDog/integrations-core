@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_propagate_agent_tags():
+    return False
+
+
 def instance_connect_timeout():
     return 10
 
@@ -50,6 +54,10 @@ def instance_only_custom_queries():
 
 def instance_port():
     return 3306
+
+
+def instance_propagate_agent_tags():
+    return False
 
 
 def instance_use_global_custom_queries():

@@ -2,8 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
-
-from six.moves.urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_timestamp
