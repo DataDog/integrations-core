@@ -8,7 +8,6 @@ from collections import defaultdict
 from os import geteuid
 
 from packaging.version import Version
-from six.moves import filter
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.checks import AgentCheck
