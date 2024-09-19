@@ -12,7 +12,8 @@
     "title": "Mux",
     "media": [],
     "classifier_tags": [
-      "Category::Metrics"
+      "Category::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -31,8 +32,6 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {
     }
   },
   "author": {
