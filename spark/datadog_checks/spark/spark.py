@@ -533,7 +533,7 @@ class SparkCheck(AgentCheck):
                 self.log.debug('Structured streaming metrics: %s', response)
                 response = {
                     metric_name: v['value']
-                    for metric_name, v in response.get('gauges')
+                    for metric_name, v in response.get('gauges').items()
                     if 'streaming' in metric_name and 'value' in v
                 }
                 for gauge_name, value in response.items():
