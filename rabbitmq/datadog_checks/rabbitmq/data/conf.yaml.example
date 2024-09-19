@@ -667,6 +667,8 @@ instances:
     ## url of the RabbitMQ Management Plugin (http://www.rabbitmq.com/management.html).
     #
     # rabbitmq_api_url: http://localhost:15672/api/
+    # rabbitmq_user: datadog
+    # rabbitmq_pass: some_password
 
     ## @param tag_families - boolean - optional - default: false
     ## To tag queue "families" based off of regex matching.
@@ -779,6 +781,7 @@ instances:
 #   - type: file
 #     path: /var/log/rabbitmq/*.log
 #     source: rabbitmq
+#     service: rabbitmq
 #     log_processing_rules:
 #     - type: multi_line
 #       name: logs_starts_with_equal_sign
