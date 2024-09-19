@@ -214,7 +214,7 @@ GROUP BY
     FK.name, FK.parent_object_id, FK.referenced_object_id;
 """
 
-DETECT_DEADLOCK_QUERY = """
+DEADLOCK_QUERY = """
 SELECT TOP(?) xdr.value('@timestamp', 'datetime') AS [Date],
     xdr.query('.') AS [Event_Data]
 FROM (SELECT CAST([target_data] AS XML) AS Target_Data

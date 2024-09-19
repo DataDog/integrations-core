@@ -12,7 +12,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.queries import DETECT_DEADLOCK_QUERY
+from datadog_checks.sqlserver.queries import DEADLOCK_QUERY
 
 try:
     import datadog_agent
@@ -87,12 +87,12 @@ class Deadlocks(DBMAsyncJob):
                 self._log.debug("collecting sql server deadlocks")
                 self._log.debug(
                     "Running query [%s] with max deadlocks %s and timestamp %s",
-                    DETECT_DEADLOCK_QUERY,
+                    DEADLOCK_QUERY,
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
                 cursor.execute(
-                    DETECT_DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time()))
+                    DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time()))
                 )
                 results = cursor.fetchall()
                 converted_xmls = []
