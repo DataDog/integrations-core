@@ -168,11 +168,16 @@ def mock_local_tls_dns():
 @contextmanager
 def mock_pymongo(deployment):
     mocked_client = MockedPyMongoClient(deployment=deployment)
-    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
-        'pymongo.collection.Collection'
-    ), mock.patch('pymongo.command_cursor') as cur:
-        cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
-        yield mocked_client
+    with mock.patch(
+        'datadog_checks.mongo.collectors.process_stats.ProcessStatsCollector.is_localhost',
+        new_callable=mock.PropertyMock,
+    ) as mock_is_localhost:
+        mock_is_localhost.return_value = False
+        with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
+            'pymongo.collection.Collection'
+        ), mock.patch('pymongo.command_cursor') as cur:
+            cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
+            yield mocked_client
 
 
 @pytest.fixture
