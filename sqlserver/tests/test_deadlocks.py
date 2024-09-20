@@ -13,6 +13,7 @@ import pytest
 from copy import copy, deepcopy
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.deadlocks import Deadlocks, MAX_PAYLOAD_BYTES
+from datadog_checks.sqlserver.queries import DEADLOCK_XML_COL
 from mock import patch, MagicMock
 from threading import Event
 
@@ -177,7 +178,7 @@ def test__create_deadlock_rows():
         deadlocks_obj._config.obfuscator_options = {}
         deadlocks_obj._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
     xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
-    with patch.object(Deadlocks, '_query_deadlocks', return_value=[["date placeholder", xml]]):
+    with patch.object(Deadlocks, '_query_deadlocks', return_value=[{ DEADLOCK_XML_COL: xml }]):
         rows = deadlocks_obj._create_deadlock_rows()
         assert len(rows) == 1, "Should have created one deadlock row"
         row = rows[0]

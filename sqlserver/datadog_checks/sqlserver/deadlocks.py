@@ -13,17 +13,16 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.queries import DEADLOCK_QUERY
+from datadog_checks.sqlserver.queries import DEADLOCK_QUERY, DEADLOCK_XML_COL
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
 
+DEFAULT_COLLECTION_INTERVAL = 600
 MAX_DEADLOCKS = 100
 MAX_PAYLOAD_BYTES = 19e6
-DEFAULT_COLLECTION_INTERVAL = 600
-
 
 def agent_check_getter(self):
     return self._check
@@ -109,21 +108,22 @@ class Deadlocks(DBMAsyncJob):
                 cursor.execute(
                     DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time()))
                 )
-                return cursor.fetchall()
+                columns = [column[0] for column in cursor.description]
+                return [dict(zip(columns, row)) for row in cursor.fetchall()]
         
 
     def _create_deadlock_rows(self):
-        results = self._query_deadlocks()
+        db_rows = self._query_deadlocks()
         deadlock_events = []
         total_number_of_characters = 0
-        for i, result in enumerate(results):
+        for i, row in enumerate(db_rows):
             try:
-                root = ET.fromstring(result[1])
+                root = ET.fromstring(row[DEADLOCK_XML_COL])
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting SQLServer deadlocks.
                         One of the deadlock XMLs couldn't be parsed. The error: {}. XML: {}""".format(
-                        e, result
+                        e, row
                     )
                 )
                 continue
@@ -135,12 +135,12 @@ class Deadlocks(DBMAsyncJob):
                 self._log.error(error)
                 continue
             
-            total_number_of_characters += len(result) + len(query_signatures)
+            total_number_of_characters += len(row) + len(query_signatures)
             if total_number_of_characters > self._deadlock_payload_max_bytes:
                 self._log.warning(
                     """We've dropped {} deadlocks from a total of {} deadlocks as the
                      max deadlock payload of {} bytes was exceeded.""".format(
-                        len(results) - i, len(results), self._deadlock_payload_max_bytes
+                        len(db_rows) - i, len(db_rows), self._deadlock_payload_max_bytes
                     )
                 )
                 break
