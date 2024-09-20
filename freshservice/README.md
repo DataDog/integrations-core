@@ -21,7 +21,7 @@ Steps to get API Key
 1. Login to [Freshservice][2] platform with your credentials.
 2. Click on your profile picture on the top right corner of your portal.
 3. Go to Profile settings Page.
-4. Your API key will be available below the change password section to your right.
+4. API key will be displayed on the right side section of the page.
 
 #### Freshservice Integration Configuration
 
