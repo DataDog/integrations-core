@@ -273,7 +273,13 @@
                   ],
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
                     }
                   ]
                 }
@@ -381,7 +387,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
                 }
               ]
             },
@@ -793,7 +799,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 17,
         "width": 12,
         "height": 5,
         "is_column_break": true
@@ -997,7 +1003,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 22,
         "width": 12,
         "height": 5
       }
@@ -1142,7 +1148,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 10,
+        "y": 27,
         "width": 12,
         "height": 6
       }
