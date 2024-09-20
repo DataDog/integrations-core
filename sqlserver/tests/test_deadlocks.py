@@ -178,7 +178,7 @@ def test__create_deadlock_rows():
         deadlocks_obj._config.obfuscator_options = {}
         deadlocks_obj._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
     xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
-    with patch.object(Deadlocks, '_query_deadlocks', return_value=[{DEADLOCK_TIMESTAMP_ALIAS: "2024", DEADLOCK_XML_ALIAS: xml}]):
+    with patch.object(Deadlocks, '_query_deadlocks', return_value=[{DEADLOCK_TIMESTAMP_ALIAS: "2024-09-20T12:07:16.647000", DEADLOCK_XML_ALIAS: xml}]):
         rows = deadlocks_obj._create_deadlock_rows()
         assert len(rows) == 1, "Should have created one deadlock row"
         row = rows[0]
