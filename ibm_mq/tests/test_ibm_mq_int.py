@@ -10,7 +10,6 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
@@ -412,7 +411,6 @@ def test_channel_status_no_duplicates(aggregator, get_check, instance, dd_run_ch
     aggregator.assert_service_check("ibm_mq.channel.status", check.OK, tags=tags, count=1)
 
 
-@requires_py3
 def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run_check):
     class ProcessMock(object):
         @property
@@ -441,7 +439,6 @@ def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run
     aggregator.assert_all_metrics_covered()
 
 
-@requires_py3
 def test_queue_manager_process_found(aggregator, get_check, instance, dd_run_check):
     class ProcessMock(object):
         @property
@@ -468,7 +465,6 @@ def test_queue_manager_process_found(aggregator, get_check, instance, dd_run_che
     assert_all_metrics(aggregator)
 
 
-@requires_py3
 def test_queue_manager_process_found_cleanup(get_check, instance, dd_run_check):
     class ProcessMock(object):
         @property
