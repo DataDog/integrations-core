@@ -59,7 +59,7 @@ requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
 requests-unixsocket2==0.4.2
 requests==2.32.3
-rethinkdb==2.4.9
+rethinkdb==2.4.10
 scandir==1.10.0; python_version < '3.5'
 securesystemslib[crypto,pynacl]==0.28.0
 semver==3.0.2
