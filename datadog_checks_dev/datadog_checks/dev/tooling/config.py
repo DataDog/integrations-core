@@ -43,7 +43,7 @@ DEFAULT_CONFIG = {
         'integrations-internal-core': os.path.join('~', 'dd', 'integrations-internal-core'),
     },
     'agents': {
-        'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+        'master': {'docker': 'datadog/agent-dev:kyleneale-bump-python-312-py3', 'local': 'latest'},
         '7': {'docker': 'datadog/agent:7', 'local': '7'},
         '6': {'docker': 'datadog/agent:6', 'local': '6'},
     },

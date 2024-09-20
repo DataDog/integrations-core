@@ -109,7 +109,7 @@ class DockerAgent(AgentInterface):
         from ddev.e2e.agent.constants import AgentEnvVars
 
         if not agent_build:
-            agent_build = 'datadog/agent-dev:master'
+            agent_build = 'datadog/agent-dev:kyleneale-bump-python-312-py3'
 
         if agent_build.startswith("datadog/"):
             # Add a potentially missing `py` suffix for default non-RC builds
