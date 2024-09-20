@@ -12,8 +12,8 @@ import pytest
 
 from copy import copy, deepcopy
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.deadlocks import Deadlocks, MAX_PAYLOAD_BYTES
-from datadog_checks.sqlserver.queries import DEADLOCK_XML_COL
+from datadog_checks.sqlserver.deadlocks import Deadlocks, MAX_PAYLOAD_BYTES, PAYLOAD_QUERY_SIGNATURE, PAYLOAD_TIMESTAMP, PAYLOAD_XML
+from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
 from mock import patch, MagicMock
 from threading import Event
 
@@ -178,11 +178,12 @@ def test__create_deadlock_rows():
         deadlocks_obj._config.obfuscator_options = {}
         deadlocks_obj._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
     xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
-    with patch.object(Deadlocks, '_query_deadlocks', return_value=[{ DEADLOCK_XML_COL: xml }]):
+    with patch.object(Deadlocks, '_query_deadlocks', return_value=[{DEADLOCK_TIMESTAMP_ALIAS: "2024", DEADLOCK_XML_ALIAS: xml}]):
         rows = deadlocks_obj._create_deadlock_rows()
         assert len(rows) == 1, "Should have created one deadlock row"
         row = rows[0]
-        query_signatures = row["query_signatures"]
+        assert row[PAYLOAD_TIMESTAMP], "Should have a timestamp"
+        query_signatures = row[PAYLOAD_QUERY_SIGNATURE]
         assert len(query_signatures) == 2, "Should have two query signatures"
         first_mapping = query_signatures[0]
         assert "spid" in first_mapping, "Should have spid in query signatures"

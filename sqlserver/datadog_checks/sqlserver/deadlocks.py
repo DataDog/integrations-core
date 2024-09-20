@@ -13,7 +13,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.queries import DEADLOCK_QUERY, DEADLOCK_XML_COL
+from datadog_checks.sqlserver.queries import DEADLOCK_QUERY, DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
 
 try:
     import datadog_agent
@@ -23,6 +23,10 @@ except ImportError:
 DEFAULT_COLLECTION_INTERVAL = 600
 MAX_DEADLOCKS = 100
 MAX_PAYLOAD_BYTES = 19e6
+
+PAYLOAD_TIMESTAMP = "deadlock_timestamp"
+PAYLOAD_QUERY_SIGNATURE = "query_signatures"
+PAYLOAD_XML = "xml"
 
 def agent_check_getter(self):
     return self._check
@@ -118,7 +122,7 @@ class Deadlocks(DBMAsyncJob):
         total_number_of_characters = 0
         for i, row in enumerate(db_rows):
             try:
-                root = ET.fromstring(row[DEADLOCK_XML_COL])
+                root = ET.fromstring(row[DEADLOCK_XML_ALIAS])
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting SQLServer deadlocks.
@@ -145,7 +149,11 @@ class Deadlocks(DBMAsyncJob):
                 )
                 break
 
-            deadlock_events.append({"xml": ET.tostring(root, encoding='unicode'), "query_signatures": query_signatures})
+            deadlock_events.append({
+                PAYLOAD_TIMESTAMP: row[DEADLOCK_TIMESTAMP_ALIAS],
+                PAYLOAD_XML: ET.tostring(root, encoding='unicode'), 
+                PAYLOAD_QUERY_SIGNATURE: query_signatures
+                })
         self._last_deadlock_timestamp = time()
         return deadlock_events
 
