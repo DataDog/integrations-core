@@ -6,7 +6,6 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.cockroachdb import CockroachdbCheck
 from datadog_checks.cockroachdb.metrics import METRIC_MAP, OMV2_METRIC_MAP
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 from .common import (
@@ -22,8 +21,6 @@ from .common import (
     assert_metrics,
     get_fixture_path,
 )
-
-pytestmark = [requires_py3]
 
 
 # The test below is designed to collect metrics that are not exposed in our e2e environment.
