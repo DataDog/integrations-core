@@ -293,10 +293,10 @@ integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
-integration/kubevirt_controller:
-- kubevirt_controller/**/*
 integration/kubevirt_api:
 - kubevirt_api/**/*
+integration/kubevirt_controller:
+- kubevirt_controller/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
@@ -367,6 +367,8 @@ integration/openstack:
 - openstack/**/*
 integration/openstack_controller:
 - openstack_controller/**/*
+integration/oracle:
+- oracle/**/*
 integration/ossec_security:
 - ossec_security/**/*
 integration/otel:
