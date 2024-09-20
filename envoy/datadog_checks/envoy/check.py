@@ -3,8 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from collections import defaultdict
-
-from six.moves.urllib.parse import urljoin, urlparse, urlunparse
+from urllib.parse import urljoin, urlparse, urlunparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 
