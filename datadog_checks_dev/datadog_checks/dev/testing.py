@@ -5,13 +5,9 @@
 """ This module contains test annotations
 """
 import pytest
-from six import PY2
 
 from .utils import ON_MACOS, ON_WINDOWS
 
 requires_windows = pytest.mark.skipif(not ON_WINDOWS, reason='Requires Windows')
 requires_linux = pytest.mark.skipif(ON_MACOS or ON_WINDOWS, reason='Requires Linux')
 requires_unix = pytest.mark.skipif(ON_WINDOWS, reason='Requires Linux or macOS')
-
-requires_py2 = pytest.mark.skipif(not PY2, reason='Test only available on Python 2')
-requires_py3 = pytest.mark.skipif(PY2, reason='Test only available on Python 3')

@@ -29,7 +29,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=37.0.0",
 ]
 dynamic = [
     "version",
@@ -39,7 +39,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "rethinkdb==2.4.9",
+    "rethinkdb==2.4.10post1",
 ]
 
 [project.urls]

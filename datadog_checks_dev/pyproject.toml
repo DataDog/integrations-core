@@ -43,7 +43,6 @@ dependencies = [
     "pytest-mock",
     "pyyaml>=5.4.1",
     "requests>=2.22.0",
-    "six",
     "tenacity",
 ]
 dynamic = [
