@@ -17,7 +17,6 @@ import requests
 from mock import patch
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from prometheus_client.samples import Sample
-from six import iteritems
 
 from datadog_checks.base import ensure_bytes
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -2454,7 +2453,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
 
     # check that 15 pods are in phase:Running
     assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
-    for _, tags in iteritems(mocked_prometheus_scraper_config['_label_mapping']['pod']):
+    for _, tags in mocked_prometheus_scraper_config['_label_mapping']['pod'].items():
         assert tags.get('phase') == 'Running'
 
     text_data = mock_get.replace(

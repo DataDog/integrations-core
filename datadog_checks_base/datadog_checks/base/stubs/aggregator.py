@@ -8,8 +8,6 @@ import os
 import re
 from collections import OrderedDict, defaultdict
 
-from six import iteritems
-
 from ..constants import ServiceCheck
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
@@ -79,7 +77,7 @@ class AggregatorStub(object):
             ('historate', 6),
         )
     )
-    METRIC_ENUM_MAP_REV = {v: k for k, v in iteritems(METRIC_ENUM_MAP)}
+    METRIC_ENUM_MAP_REV = {v: k for k, v in METRIC_ENUM_MAP.items()}
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
     IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
@@ -256,7 +254,7 @@ class AggregatorStub(object):
                 continue
             if tags and set(tags) != set(e['tags']):
                 continue
-            for name, value in iteritems(kwargs):
+            for name, value in kwargs.items():
                 if e[name] != value:
                     break
             else:
@@ -444,7 +442,7 @@ class AggregatorStub(object):
 
         exclude = exclude or []
         errors = set()
-        for metric_name, metric_stubs in iteritems(self._metrics):
+        for metric_name, metric_stubs in self._metrics.items():
             if metric_name in exclude:
                 continue
             for metric_stub in metric_stubs:
@@ -493,14 +491,14 @@ class AggregatorStub(object):
 
         errors = set()
 
-        for service_check_name, service_check_stubs in iteritems(self._service_checks):
+        for service_check_name, service_check_stubs in self._service_checks.items():
             for service_check_stub in service_check_stubs:
                 # Checking the metric is in `service_checks.json`
                 if service_check_name not in [sc['check'] for sc in service_checks]:
                     errors.add("Expect `{}` to be in service_check.json.".format(service_check_name))
                     continue
 
-                status_string = {value: key for key, value in iteritems(ServiceCheck._asdict())}[
+                status_string = {value: key for key, value in ServiceCheck._asdict().items()}[
                     service_check_stub.status
                 ].lower()
                 service_check = [c for c in service_checks if c['check'] == service_check_name][0]
@@ -568,7 +566,7 @@ class AggregatorStub(object):
             all_contexts[context].append(metric)
 
         dup_contexts = defaultdict(list)
-        for context, metrics in iteritems(all_contexts):
+        for context, metrics in all_contexts.items():
             if len(metrics) > 1:
                 dup_contexts[context] = metrics
 

@@ -6,7 +6,6 @@ from itertools import tee
 
 from prometheus_client.metrics_core import Metric
 from prometheus_client.parser import _parse_sample, _replace_help_escaping
-from six.moves import zip
 
 
 def text_fd_to_metric_families(fd):

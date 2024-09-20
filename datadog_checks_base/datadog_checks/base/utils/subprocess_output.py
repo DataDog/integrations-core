@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-from six import string_types
-
 from .. import ensure_unicode
 
 try:
@@ -42,7 +40,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
     """
 
     cmd_args = []
-    if isinstance(command, string_types):
+    if isinstance(command, str):
         for arg in command.split():
             cmd_args.append(arg)
     elif hasattr(type(command), '__iter__'):

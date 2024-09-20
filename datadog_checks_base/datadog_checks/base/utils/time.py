@@ -8,23 +8,18 @@ from datetime import datetime
 from time import time as epoch_offset
 
 from dateutil.tz import UTC
-from six import PY3
 
 from .platform import Platform
 
 EPOCH = datetime.fromtimestamp(0, UTC)
 
-
-if PY3:
-    # use higher precision clock available in Python3
-    time_func = time.perf_counter
-elif Platform.is_win32():
+if Platform.is_win32():
     # for tiny time deltas, time.time on Windows reports the same value
     # of the clock more than once, causing the computation of response_time
     # to be often 0; let's use time.clock that is more precise.
     time_func = time.clock
 else:
-    time_func = epoch_offset
+    time_func = time.perf_counter
 
 
 def get_precise_time():

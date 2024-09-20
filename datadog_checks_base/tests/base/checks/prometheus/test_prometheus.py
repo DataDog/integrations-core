@@ -10,8 +10,6 @@ from collections import OrderedDict
 import mock
 import pytest
 import requests
-from six import iteritems, iterkeys
-from six.moves import range
 
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
@@ -242,11 +240,11 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
         _h = _histo.metric.add()
         _h.histogram.sample_count = _data['ct']
         _h.histogram.sample_sum = _data['sum']
-        for k, v in list(iteritems(_data['lbl'])):
+        for k, v in list(_data['lbl'].items()):
             _lh = _h.label.add()
             _lh.name = k
             _lh.value = v
-        for _b in sorted(iterkeys(_data['buckets'])):
+        for _b in sorted(_data['buckets']):
             _subh = _h.histogram.bucket.add()
             _subh.upper_bound = _b
             _subh.cumulative_count = _data['buckets'][_b]

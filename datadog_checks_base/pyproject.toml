@@ -52,7 +52,6 @@ deps = [
     "requests-unixsocket2==0.4.2",
     "requests==2.32.3",
     "simplejson==3.19.3",
-    "six==1.16.0",
     "uptime==3.0.1",
     "wrapt==1.16.0",
 ]

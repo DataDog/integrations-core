@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import OrderedDict
 
-from six import iteritems
-
 from datadog_checks.base.agent import datadog_agent
 
 
@@ -38,7 +36,7 @@ def get_default_headers():
 
 def update_headers(headers, extra_headers):
     # Ensure the values are strings
-    headers.update((key, str(value)) for key, value in iteritems(extra_headers))
+    headers.update((key, str(value)) for key, value in extra_headers.items())
 
 
 def headers(agentConfig, **kwargs):

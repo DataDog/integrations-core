@@ -5,7 +5,6 @@ import logging
 from os.path import realpath
 
 import yaml
-from six import string_types
 
 try:
     from yaml import CSafeDumper as yDumper
@@ -106,7 +105,7 @@ def safe_yaml_load_all(stream, Loader=yLoader):
 def get_stream_name(stream):
     """Using the same logic as pyyaml to handle both string types and file types. All file objects do not necessarily
     have a `name` attribute, in that case we can only say the stream is a file."""
-    if isinstance(stream, string_types):
+    if isinstance(stream, str):
         return "<string>"
     elif hasattr(stream, 'name'):
         return realpath(stream.name)

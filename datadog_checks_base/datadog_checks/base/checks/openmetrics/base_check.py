@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import requests
-from six import PY2
 
 from ...errors import CheckException
 from ...utils.tracing import traced_class
@@ -183,5 +182,4 @@ class StandardFields(object):
     pass
 
 
-if not PY2:
-    StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)
+StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)

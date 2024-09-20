@@ -27,7 +27,7 @@ from typing import (  # noqa: F401
 )
 
 import yaml
-from six import PY2, binary_type, iteritems, raise_from, text_type
+from pydantic import BaseModel, ValidationError
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 
@@ -83,9 +83,6 @@ if is_affirmative(datadog_agent.get_config('integration_profiling')):
 
     prof = Profiler(service='datadog-agent-integrations')
     prof.start()
-
-if not PY2:
-    from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     import ssl  # noqa: F401
@@ -305,8 +302,7 @@ class AgentCheck(object):
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
-        if not PY2:
-            self.check_initializations.append(self.load_configuration_models)
+        self.check_initializations.append(self.load_configuration_models)
 
         self.__formatted_tags = None
         self.__logs_enabled = None
@@ -506,11 +502,9 @@ class AgentCheck(object):
 
         known_options = {k for k, _ in models_config}  # type: Set[str]
 
-        if not PY2:
-
-            if isinstance(models_config, BaseModel):
-                # Also add aliases, if any
-                known_options.update(set(models_config.model_dump(by_alias=True)))
+        if isinstance(models_config, BaseModel):
+            # Also add aliases, if any
+            known_options.update(set(models_config.model_dump(by_alias=True)))
 
         unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
@@ -594,7 +588,7 @@ class AgentCheck(object):
                     )
                     message_lines.append('  {}'.format(error['msg']))
 
-                raise_from(ConfigurationError('\n'.join(message_lines)), None)
+                raise ConfigurationError('\n'.join(message_lines)) from None
             else:
                 return config_model
 
@@ -1123,7 +1117,7 @@ class AgentCheck(object):
             new_tags = []
             for hostname, source_map in external_tags:
                 new_tags.append((to_native_string(hostname), source_map))
-                for src_name, tags in iteritems(source_map):
+                for src_name, tags in source_map.items():
                     source_map[src_name] = self._normalize_tags_type(tags)
             datadog_agent.set_external_tags(new_tags)
         except IndexError:
@@ -1222,7 +1216,7 @@ class AgentCheck(object):
             prefix: A prefix to to add to the normalized name, default None
             fix_case: A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
         """
-        if isinstance(metric, text_type):
+        if isinstance(metric, str):
             metric = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
 
         if fix_case:
@@ -1247,7 +1241,7 @@ class AgentCheck(object):
         This happens for legacy reasons, when we cleaned up some characters (like '-')
         which are allowed in tags.
         """
-        if isinstance(tag, text_type):
+        if isinstance(tag, str):
             tag = tag.encode('utf-8', 'ignore')
         tag = self.TAG_REPLACEMENT.sub(br'_', tag)
         tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', tag)
@@ -1345,8 +1339,8 @@ class AgentCheck(object):
                 the event to be sent
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in iteritems(event):
-            if not isinstance(value, (text_type, binary_type)):
+        for key, value in event.items():
+            if not isinstance(value, (str, bytes)):
                 continue
 
             try:

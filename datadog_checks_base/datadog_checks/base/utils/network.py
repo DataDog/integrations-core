@@ -2,18 +2,6 @@ import socket
 import ssl
 
 from requests.adapters import HTTPAdapter, PoolManager
-from six import PY2
-
-if PY2:
-    from contextlib import closing as _closing
-
-    def closing(sock):
-        return _closing(sock)
-
-else:
-
-    def closing(sock):
-        return sock
 
 
 def create_socket_connection(hostname, port=443, sock_type=socket.SOCK_STREAM, timeout=10):

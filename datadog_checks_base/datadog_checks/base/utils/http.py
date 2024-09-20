@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from io import open
 from ipaddress import ip_address, ip_network
+from urllib.parse import quote, urlparse, urlunparse
 
 import requests
 import requests_unixsocket
@@ -19,8 +20,6 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 from requests import auth as requests_auth
 from requests.exceptions import SSLError
 from requests_toolbelt.adapters import host_header_ssl
-from six import PY2, iteritems, string_types
-from six.moves.urllib.parse import quote, urlparse, urlunparse
 from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
@@ -29,7 +28,7 @@ from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
-from .network import CertAdapter, closing, create_socket_connection
+from .network import CertAdapter, create_socket_connection
 from .time import get_timestamp
 
 try:
@@ -169,7 +168,7 @@ class RequestsWrapper(object):
         )
 
         # Populate with the default values
-        config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
+        config = {field: instance.get(field, value) for field, value in default_fields.items()}
 
         # Support non-standard (usually legacy) configurations, for example:
         # {
@@ -185,7 +184,7 @@ class RequestsWrapper(object):
 
         remapper.update(DEFAULT_REMAPPED_FIELDS)
 
-        for remapped_field, data in iteritems(remapper):
+        for remapped_field, data in remapper.items():
             field = data.get('name')
 
             # Ignore fields we don't recognize
@@ -257,15 +256,15 @@ class RequestsWrapper(object):
 
         # https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification
         verify = True
-        if isinstance(config['tls_ca_cert'], string_types):
+        if isinstance(config['tls_ca_cert'], str):
             verify = config['tls_ca_cert']
         elif not is_affirmative(config['tls_verify']):
             verify = False
 
         # https://requests.readthedocs.io/en/latest/user/advanced/#client-side-certificates
         cert = None
-        if isinstance(config['tls_cert'], string_types):
-            if isinstance(config['tls_private_key'], string_types):
+        if isinstance(config['tls_cert'], str):
+            if isinstance(config['tls_private_key'], str):
                 cert = (config['tls_cert'], config['tls_private_key'])
             else:
                 cert = config['tls_cert']
@@ -293,7 +292,7 @@ class RequestsWrapper(object):
                 if 'no_proxy' in proxies:
                     no_proxy_uris = proxies.pop('no_proxy')
 
-                    if isinstance(no_proxy_uris, string_types):
+                    if isinstance(no_proxy_uris, str):
                         no_proxy_uris = no_proxy_uris.replace(';', ',').split(',')
             else:
                 proxies = None
@@ -432,7 +431,7 @@ class RequestsWrapper(object):
             certadapter = CertAdapter(certs=certs)
             if not persist:
                 session = requests.Session()
-                for option, value in iteritems(self.options):
+                for option, value in self.options.items():
                     setattr(session, option, value)
             else:
                 session = self.session
@@ -446,7 +445,7 @@ class RequestsWrapper(object):
         if not options:
             return self.options
 
-        for option, value in iteritems(self.options):
+        for option, value in self.options.items():
             # Make explicitly set options take precedence
             options.setdefault(option, value)
 
@@ -462,12 +461,12 @@ class RequestsWrapper(object):
             self.logger.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
             return certs
 
-        with closing(sock):
+        with sock:
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
                 context.verify_mode = ssl.CERT_NONE
 
-                with closing(context.wrap_socket(sock, server_hostname=hostname)) as secure_sock:
+                with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     protocol_version = secure_sock.version()
                     if protocol_version and protocol_version not in self.tls_protocols_allowed:
@@ -535,7 +534,7 @@ class RequestsWrapper(object):
             self._session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
 
             # Attributes can't be passed to the constructor
-            for option, value in iteritems(self.options):
+            for option, value in self.options.items():
                 setattr(self._session, option, value)
 
         return self._session
@@ -998,5 +997,4 @@ class StandardFields(object):
     pass
 
 
-if not PY2:
-    StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)
+StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)

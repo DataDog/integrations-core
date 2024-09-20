@@ -5,8 +5,6 @@ import json
 import re
 from collections import defaultdict
 
-from six import iteritems
-
 from datadog_checks.base.utils.serialization import from_json, to_json
 
 
@@ -66,8 +64,8 @@ class DatadogAgentStub(object):
         for h, tags in self._external_tags:
             if h == hostname:
                 if not match_tags_order:
-                    external_tags = {k: sorted(v) for (k, v) in iteritems(external_tags)}
-                    tags = {k: sorted(v) for (k, v) in iteritems(tags)}
+                    external_tags = {k: sorted(v) for (k, v) in external_tags.items()}
+                    tags = {k: sorted(v) for (k, v) in tags.items()}
 
                 assert (
                     external_tags == tags
