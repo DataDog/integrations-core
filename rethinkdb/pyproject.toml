@@ -39,7 +39,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "rethinkdb==2.4.9",
+    "rethinkdb==2.4.10post1",
 ]
 
 [project.urls]
