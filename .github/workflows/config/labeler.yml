@@ -367,8 +367,6 @@ integration/openstack:
 - openstack/**/*
 integration/openstack_controller:
 - openstack_controller/**/*
-integration/oracle:
-- oracle/**/*
 integration/ossec_security:
 - ossec_security/**/*
 integration/otel:
