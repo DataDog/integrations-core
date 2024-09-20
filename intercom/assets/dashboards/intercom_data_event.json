@@ -1,6 +1,6 @@
 {
     "title": "Intercom Data Event",
-    "description": "This dashboard offers a detailed analysis of data events, tracking total data events, highlights patterns through frequent and infrequent activities and offers insights into trends with data events over time. Detailed data event logs offer an in-depth analysis of all recorded activities.",
+    "description": "This dashboard provides a detailed analysis of data events by tracking total data events, highlighting patterns through frequent and infrequent activities, and offering insights into trends with data events over time. Detailed data event logs offer an in-depth analysis of all recorded activities.",
     "widgets": [
         {
             "id": 7280427532172846,
@@ -25,7 +25,7 @@
             "id": 3618593347996828,
             "definition": {
                 "type": "note",
-                "content": "**Overview**\n\nThis dashboard offers a detailed analysis of data events, tracking total data events, highlights patterns through frequent and infrequent activities and offers insights into trends with data events over time.\n\nFor more information, see the [Intercom Integration Documentation](https://docs.datadoghq.com/integrations/intercom/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Overview**\n\nThis dashboard offers a detailed analysis of data events, tracking total data events, highlights patterns through frequent and infrequent activities and offers insights into trends with data events over time.\n\nFor more information, see the [Intercom Integration Documentation](https://docs.datadoghq.com/integrations/intercom/).\n\n**Tips**\n- Use the timeframe selector in the upper-right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

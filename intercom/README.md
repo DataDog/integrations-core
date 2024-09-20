@@ -3,7 +3,7 @@
 ## Overview
 [Intercom][1] is a customer communication platform that enables businesses to engage with their users through in-app messaging, email, and chat. It offers features like live chat, automated messaging, and customer support tools, making it easier for companies to provide personalized customer experiences.
 
-The Intercom integration seamlessly collects  admin activities, data events, conversations, news items and tickets data and ingests them into Datadog for comprehensive analysis using webhooks.
+The Intercom integration seamlessly collects admin activities, data events, conversations, news items, and ticket data, and ingests them into Datadog for comprehensive analysis using webhooks.
 
 ## Setup
 
@@ -17,26 +17,26 @@ Configure the Datadog endpoint to forward Intercom events as logs to Datadog. Se
 - #### Webhook URL generation
     - Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
 - #### Register a new application
-    - Sign in to your [Intercom][2] account with a user which has full access to Apps and Integrations.
-    - Go to **Settings**.
-    - Under the Integrations section, select **Developer Hub**.
-    - Click on **New app**
-    - Fill in the required details for your application, such as the name and associated workspace.
-    - Click **Create app**.
+    1. Sign in to your [Intercom][2] account using a user account with full access to Apps and Integrations.
+    2. Go to **Settings**.
+    3. In the Integrations section, select **Developer Hub**.
+    4. Click **New app**.
+    5. Fill in the required details for your application, such as the name and associated workspace.
+    6. Click **Create app**.
 - #### Configure webhook topics
-    - Select Required permissions
-        - After creating the app, go to the *Authentication* section in the left-hand menu and click on the **Edit** button in the top-right corner.
-        - By default, all permissions will be enabled, but ensure that the following permissions are specifically enabled:
+    1. Select Required permissions
+        1. After creating the app, navigate to the *Authentication* section using the left-side menu and click **Edit** button in the upper-right corner.
+        2. By default, all permissions are enabled. However, ensure that the following specific permissions are enabled:
             - Read admins
             - Read content data
             - Read conversations
             - Read events
             - Read tickets
-        - Click **Save**
-    - Select Webhook topics
-        - Now, go to the Webhooks section present in the left sidebar.
-        - Enter the endpoint URL that was generated [here](#webhook-url-generation).
-        - From the dropdown menu labeled **Select a topic**, select the below webhook topics:
+        3. Click **Save**.
+    2. Select Webhook topics
+        1. Next, navigate to the **Webhooks** section using the left-side menu.
+        2. Enter the endpoint URL that was generated [here](#webhook-url-generation).
+        3. On the **Select a topic** dropdown menu, select the following webhook topics:
             - admin.activity_log_event.created
             - content_stat.news_item
             - conversation.admin.closed
@@ -53,13 +53,13 @@ Configure the Datadog endpoint to forward Intercom events as logs to Datadog. Se
             - ticket.created
             - ticket.state.updated
             - ticket.team.assigned
-        - Click **Save**.
+        4. Click **Save**.
 
 ## Data Collected
 
 ### Logs
 
-The Intercom integration collects and forwards admin activities, tickets, data events, news items and conversation logs to Datadog.
+The Intercom integration collects and forwards admin activities, tickets, data events, news items, and conversation logs to Datadog.
 
 ### Metrics
 

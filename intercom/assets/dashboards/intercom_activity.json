@@ -1,6 +1,6 @@
 {
     "title": "Intercom Activity",
-    "description": "This dashboard provides a comprehensive overview of activities, highlights patterns through frequent and infrequent activities. Additionally, it offers insights into trends with activity logs over time. Detailed activity logs offer an in-depth analysis of all recorded activities.",
+    "description": "This dashboard provides a comprehensive overview of activities and highlights patterns through frequent and infrequent occurrences. Additionally, it offers insights into trends with activity logs over time. Detailed activity logs provide an in-depth analysis of all recorded activities.",
     "widgets": [
         {
             "id": 7729356934643914,
@@ -25,7 +25,7 @@
             "id": 8083967741378144,
             "definition": {
                 "type": "note",
-                "content": "**Overview**\n\nThis dashboard offers an overview of activities, highlighting patterns through frequent and infrequent activities. It includes panels for activity by type, email, and location. Trends are captured with activity logs over time, and detailed logs provide data for analysis.\n\nFor more information, see the [Intercom Integration Documentation](https://docs.datadoghq.com/integrations/intercom/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Overview**\n\nThis dashboard offers an overview of activities and highlights patterns through frequent and infrequent activities. It includes panels for activity by type, email, and location. Trends are captured with activity logs over time, and detailed logs provide data for analysis.\n\nFor more information, see the [Intercom Integration Documentation](https://docs.datadoghq.com/integrations/intercom/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
