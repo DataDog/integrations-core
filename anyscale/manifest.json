@@ -21,14 +21,17 @@
     ]
   },
   "assets": {
+    "integration": {
+      "source_type_name": "Anyscale"
+    },
     "dashboards": {
-        "Anyscale Overview": "assets/dashboards/anyscale_overview.json"
+      "Anyscale Overview": "assets/dashboards/anyscale_overview.json"
     },
     "monitors": {
-      "High CPU Utilization on Ray.io node": "assets/monitors/cpu_utilization.json",
-      "Low GPU Utilization low on Ray.io Node": "assets/monitors/gpu_utilization.json",
+      "High CPU Utilization on Anyscale node": "assets/monitors/cpu_utilization.json",
+      "Low GPU Utilization low on Anyscale Node": "assets/monitors/gpu_utilization.json",
       "High Memory Usage": "assets/monitors/mem_utilization.json",
-      "High Number of Failed Tasks on Ray.io Node": "assets/monitors/failed_task.json"
+      "High Number of Failed Tasks on Anyscale Node": "assets/monitors/failed_task.json"
     }
   },
   "author": {
