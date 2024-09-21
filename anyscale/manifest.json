@@ -17,8 +17,7 @@
       "Supported OS::macOS",
       "Category::AI/ML",
       "Offering::Integration",
-      "Queried Data Type::Metrics",
-      "Submitted Data Type::<FILL IN>"
+      "Queried Data Type::Metrics"
     ]
   },
   "assets": {
@@ -30,8 +29,7 @@
       "Low GPU Utilization low on Ray.io Node": "assets/monitors/gpu_utilization.json",
       "High Memory Usage": "assets/monitors/mem_utilization.json",
       "High Number of Failed Tasks on Ray.io Node": "assets/monitors/failed_task.json"
-    },
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
