@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from __future__ import division
 
 import copy
 import time
-from collections import defaultdict
 
+from collections import defaultdict
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck

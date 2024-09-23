@@ -15,13 +15,11 @@ from copy import copy, deepcopy
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.deadlocks import (
     Deadlocks,
-    MAX_PAYLOAD_BYTES,
     PAYLOAD_QUERY_SIGNATURE,
     PAYLOAD_TIMESTAMP,
-    PAYLOAD_XML,
 )
 from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
-from mock import patch, MagicMock
+from mock import patch
 from threading import Event
 
 from .common import CHECK_NAME
@@ -152,7 +150,7 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
     found = 0
     for d in deadlocks:
-        assert not "ERROR" in d, "Shouldn't have generated an error"
+        assert "ERROR" not in d, "Shouldn't have generated an error"
         assert isinstance(d, dict), "sqlserver_deadlocks should be a dictionary"
         try:
             root = ET.fromstring(d["xml"])
@@ -240,7 +238,7 @@ def test_deadlock_xml_bad_format(deadlocks_collection_instance):
         result = str(e)
         assert result == "process-list element not found. The deadlock XML is in an unexpected format."
     else:
-        assert False, "Should have raised an exception for bad XML format"
+        AssertionError("Should have raised an exception for bad XML format")
 
 
 def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
