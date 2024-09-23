@@ -1,8 +1,8 @@
 ## Overview
 
-[incident.io][1] helps companies declare, collaborate, communicate around and learn from events that disturb their normal course of business - from critical infrastructure being down, to data breaches and security incidents. It is a service that helps teams manage incidents and outages effectively. It typically provides features like incident reporting, tracking, and resolution workflows.
+[incident.io][1] helps companies declare, collaborate, communicate around, and learn from events that disturb their normal course of business-from critical infrastructure being down, to data breaches and security incidents. It is a service that helps teams manage incidents and outages effectively. It typically provides features like incident reporting, tracking, and resolution workflows.
 
-Integrate your incident.io account with Datadog to gain insights into incident related activities.
+Integrate your incident.io account with Datadog to gain insights into incident-related activities.
 
 ## Setup
 
