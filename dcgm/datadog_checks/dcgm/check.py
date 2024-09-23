@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from datadog_checks.dcgm.metrics import METRIC_MAP
+from datadog_checks.dcgm.metrics import METRIC_MAP, RENAME_LABELS_MAP, IGNORED_TAGS
 
 
 class DcgmCheck(OpenMetricsBaseCheckV2):
@@ -13,6 +13,9 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
     def get_default_config(self):
         return {
             "metrics": [METRIC_MAP],
+            "rename_labels": RENAME_LABELS_MAP,
+            "ignored_tags": IGNORED_TAGS,
+
         }
 
     def configure_scrapers(self):
