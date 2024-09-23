@@ -7,20 +7,21 @@ from __future__ import unicode_literals
 import concurrent
 import logging
 import os
-import pytest
 import re
 import xml.etree.ElementTree as ET
-
 from copy import copy, deepcopy
+from threading import Event
+
+import pytest
+from mock import patch
+
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.deadlocks import (
-    Deadlocks,
     PAYLOAD_QUERY_SIGNATURE,
     PAYLOAD_TIMESTAMP,
+    Deadlocks,
 )
 from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
-from mock import patch
-from threading import Event
 
 from .common import CHECK_NAME
 

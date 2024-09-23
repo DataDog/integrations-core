@@ -6,9 +6,9 @@ from __future__ import division
 
 import copy
 import time
+from collections import defaultdict
 
 from cachetools import TTLCache
-from collections import defaultdict
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
@@ -22,13 +22,13 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAgentMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverIndexUsageMetrics,
 )
+from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
