@@ -183,15 +183,9 @@ def deadlocks_collection_instance(instance_docker):
     instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
-def test__create_deadlock_rows():
-    deadlocks_obj = None
-    with patch.object(Deadlocks, '__init__', return_value=None):
-        deadlocks_obj = Deadlocks(None, None)
-        deadlocks_obj._check = MagicMock()
-        deadlocks_obj._log = MagicMock()
-        deadlocks_obj._config = MagicMock()
-        deadlocks_obj._config.obfuscator_options = {}
-        deadlocks_obj._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
+def test__create_deadlock_rows(deadlocks_collection_instance):
+    check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
+    deadlocks_obj = check.deadlocks
     xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
     with patch.object(Deadlocks, '_query_deadlocks', return_value=[{DEADLOCK_TIMESTAMP_ALIAS: "2024-09-20T12:07:16.647000", DEADLOCK_XML_ALIAS: xml}]):
         rows = deadlocks_obj._create_deadlock_rows()
@@ -220,10 +214,10 @@ def test_deadlock_xml_bad_format(deadlocks_collection_instance):
     </event>
     """
     check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
-    deadlocks = check.deadlocks
+    deadlocks_obj = check.deadlocks
     root = ET.fromstring(test_xml)
     try:
-        deadlocks._obfuscate_xml(root)
+        deadlocks_obj._obfuscate_xml(root)
     except Exception as e:
         result = str(e)
         assert result == "process-list element not found. The deadlock XML is in an unexpected format."
