@@ -138,7 +138,7 @@ def test_check_instance_metrics_autodiscovery(
         for metric_name, _, _, _ in INSTANCE_METRICS_DATABASE_SINGLE:
             aggregator.assert_metric(
                 metric_name,
-                tags=['database:{}'.format(db)] + tags,
+                tags=tags + ['database:{}'.format(db)],
                 hostname=sqlserver_check.resolved_hostname,
                 count=1,
             )
