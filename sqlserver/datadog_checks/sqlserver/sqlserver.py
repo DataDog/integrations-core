@@ -490,7 +490,7 @@ class SQLServer(AgentCheck):
                 self.instance.get("database", self.connection.DEFAULT_DATABASE)
             ]
             for db_name in db_names:
-                cfg = {"name": name, "table": table, "column": column, "instance_name": db_name, "tags": tags}
+                cfg = {"name": name, "table": table, "column": column, "instance_name": db_name, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load AlwaysOn metrics
@@ -502,7 +502,7 @@ class SQLServer(AgentCheck):
                     "table": table,
                     "column": column,
                     "instance_name": db_name,
-                    "tags": tags,
+                    "tags": self.tags,
                     "ao_database": self.instance.get("ao_database", None),
                     "availability_group": self.instance.get("availability_group", None),
                     "only_emit_local": is_affirmative(self.instance.get("only_emit_local", False)),
@@ -512,13 +512,13 @@ class SQLServer(AgentCheck):
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get("include_task_scheduler_metrics", False)):
             for name, table, column in TASK_SCHEDULER_METRICS:
-                cfg = {"name": name, "table": table, "column": column, "tags": tags}
+                cfg = {"name": name, "table": table, "column": column, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load sys.master_files metrics
         if is_affirmative(self.instance.get("include_master_files_metrics", False)):
             for name, table, column in DATABASE_MASTER_FILES:
-                cfg = {"name": name, "table": table, "column": column, "tags": tags}
+                cfg = {"name": name, "table": table, "column": column, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
@@ -526,7 +526,7 @@ class SQLServer(AgentCheck):
             self.instance.get("include_tempdb_file_space_usage_metrics", True)
         ) and not is_azure_sql_database(engine_edition):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
-                cfg = {"name": name, "table": table, "column": column, "instance_name": "tempdb", "tags": tags}
+                cfg = {"name": name, "table": table, "column": column, "instance_name": "tempdb", "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
