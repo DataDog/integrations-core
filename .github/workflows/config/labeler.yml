@@ -427,6 +427,8 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/shopify:
+- shopify/**/*
 integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
