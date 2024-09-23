@@ -61,14 +61,12 @@ class CustomQuery(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[int] = None
     columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
-    metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 
 
-class Deadlocks(BaseModel):
+class DeadlocksCollection(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -195,7 +193,7 @@ class InstanceConfig(BaseModel):
     database_instance_collection_interval: Optional[float] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
-    deadlocks_collection: Optional[Deadlocks] = None
+    deadlocks_collection: Optional[DeadlocksCollection] = None
     disable_generic_tags: Optional[bool] = None
     driver: Optional[str] = None
     dsn: Optional[str] = None
