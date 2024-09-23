@@ -509,6 +509,20 @@ files:
         value:
           type: boolean
           example: true
+      - name: hostname_to_upper
+        description: |
+          If true, the check will convert the hostname to uppercase.
+          This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
+        value:
+          type: boolean
+          example: false
+      - name: hostname_to_lower
+        description: |
+          If true, the check will convert the hostname to lowercase.
+          This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
+        value:
+          type: boolean
+          example: false
       - name: rest_api_options
         description: |
           REST API options

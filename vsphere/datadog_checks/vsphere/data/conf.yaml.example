@@ -445,6 +445,18 @@ instances:
     #
     # include_datastore_cluster_folder_tag: true
 
+    ## @param hostname_to_upper - boolean - optional - default: false
+    ## If true, the check will convert the hostname to uppercase.
+    ## This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
+    #
+    # hostname_to_upper: false
+
+    ## @param hostname_to_lower - boolean - optional - default: false
+    ## If true, the check will convert the hostname to lowercase.
+    ## This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
+    #
+    # hostname_to_lower: false
+
     ## REST API options
     ## The options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
