@@ -1,8 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -29,7 +27,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=37.0.0",
 ]
 dynamic = [
     "version",
@@ -39,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "rethinkdb==2.4.9",
+    "rethinkdb==2.4.10post1",
 ]
 
 [project.urls]

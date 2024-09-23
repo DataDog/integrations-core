@@ -8,17 +8,11 @@ import shutil
 from contextlib import contextmanager
 
 import pytest
-from six import PY3
 
 from .env import environment_run
 from .fs import chdir, copy_dir_contents, copy_path, get_here, path_join
 from .structures import LazyFunction, TempDir
 from .subprocess import run_command
-
-if PY3:
-    from shutil import which
-else:
-    from shutilwhich import which
 
 TEMPLATES_DIR = path_join(get_here(), 'tooling', 'templates', 'terraform')
 
@@ -57,7 +51,7 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
         wrappers (list[callable]):
             A list of context managers to use during execution
     """
-    if not which('terraform'):
+    if not shutil.which('terraform'):
         pytest.skip('Terraform not available')
 
     set_up = TerraformUp(directory)
