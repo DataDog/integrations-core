@@ -6,10 +6,9 @@
 
 Collects metrics from mesos slave node.
 """
+from urllib.parse import urlparse
 
 from requests.exceptions import Timeout
-from six import iteritems
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -157,7 +156,7 @@ class MesosSlave(AgentCheck):
                     self.STATS_METRICS,
                 ]
                 for m in metrics:
-                    for key_name, (metric_name, metric_func) in iteritems(m):
+                    for key_name, (metric_name, metric_func) in m.items():
                         if key_name in stats_metrics:
                             metric_func(self, metric_name, stats_metrics[key_name], tags=stats_tags)
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=stats_tags)
@@ -222,5 +221,5 @@ class MesosSlave(AgentCheck):
                             task_tags = ['task_name:' + t['name']]
                             task_tags.extend(tags)
                             self.service_check(t['name'] + '.ok', self.TASK_STATUS[t['state']], tags=task_tags)
-                            for key_name, (metric_name, metric_func) in iteritems(self.TASK_METRICS):
+                            for key_name, (metric_name, metric_func) in self.TASK_METRICS.items():
                                 metric_func(self, metric_name, t['resources'][key_name], tags=task_tags)

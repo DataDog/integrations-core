@@ -2,20 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
+from shutil import which
 
 import pytest
-from six import PY3
 
 from .env import environment_run
 from .fs import create_file, file_exists, path_join
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
 from .utils import get_active_env, get_current_check_name
-
-if PY3:
-    from shutil import which
-else:
-    from shutilwhich import which
 
 
 @contextmanager

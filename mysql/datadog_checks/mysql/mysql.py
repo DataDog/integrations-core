@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
 from cachetools import TTLCache
-from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
@@ -94,10 +93,6 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-
-
-if PY3:
-    long = int
 
 
 class MySql(AgentCheck):
@@ -726,9 +721,9 @@ class MySql(AgentCheck):
         if replica_sql_running is None:
             replica_sql_running = collect_type('Replica_SQL_Running', results, dict)
         if replica_io_running:
-            replica_io_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_io_running))
+            replica_io_running = any(v.lower().strip() == 'yes' for v in replica_io_running.values())
         if replica_sql_running:
-            replica_sql_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_sql_running))
+            replica_sql_running = any(v.lower().strip() == 'yes' for v in replica_sql_running.values())
         binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected if user has PROCESS privileges.
@@ -813,7 +808,7 @@ class MySql(AgentCheck):
         return False
 
     def _submit_metrics(self, variables, db_results, tags):
-        for variable, metric in iteritems(variables):
+        for variable, metric in variables.items():
             if isinstance(metric, list):
                 for m in metric:
                     metric_name, metric_type = m
@@ -856,7 +851,7 @@ class MySql(AgentCheck):
                 cursor.execute(query)
                 result = cursor.fetchone()
                 if result is not None:
-                    for field, metric in list(iteritems(field_metric_map)):
+                    for field, metric in field_metric_map.items():
                         # Find the column name in the cursor description to identify the column index
                         # http://www.python.org/dev/peps/pep-0249/
                         # cursor.description is a tuple of (column_name, ..., ...)
@@ -903,7 +898,7 @@ class MySql(AgentCheck):
     def _collect_system_metrics(self, host, db, tags):
         pid = None
         # The server needs to run locally, accessed by TCP or socket
-        if host in ["localhost", "127.0.0.1", "0.0.0.0"] or db.port == long(0):
+        if host in ["localhost", "127.0.0.1", "0.0.0.0"] or db.port == int(0):
             pid = self._get_server_pid(db)
 
         if pid:
@@ -1021,7 +1016,7 @@ class MySql(AgentCheck):
                 master_logs = {result[0]: result[1] for result in cursor_results}
 
                 binary_log_space = 0
-                for value in itervalues(master_logs):
+                for value in master_logs.values():
                     binary_log_space += value
 
                 return binary_log_space
@@ -1059,7 +1054,7 @@ class MySql(AgentCheck):
                     # MySQL <5.7 does not have Channel_Name.
                     # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
                     channel = replication_channel or replica_result.get('Channel_Name') or 'default'
-                    for key, value in iteritems(replica_result):
+                    for key, value in replica_result.items():
                         if value is not None:
                             replica_results[key]['channel:{0}'.format(channel)] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
@@ -1161,7 +1156,7 @@ class MySql(AgentCheck):
                 schema_query_avg_run_time = {}
                 for row in cursor.fetchall():
                     schema_name = str(row[0])
-                    avg_us = long(row[1])
+                    avg_us = int(row[1])
 
                     # set the tag as the dictionary key
                     schema_query_avg_run_time["schema:{0}".format(schema_name)] = avg_us
@@ -1216,7 +1211,7 @@ class MySql(AgentCheck):
                 schema_size = {}
                 for row in cursor.fetchall():
                     schema_name = str(row[0])
-                    size = long(row[1])
+                    size = int(row[1])
 
                     # set the tag as the dictionary key
                     schema_size["schema:{0}".format(schema_name)] = size
@@ -1241,8 +1236,8 @@ class MySql(AgentCheck):
                 for row in cursor.fetchall():
                     table_schema = str(row[0])
                     table_name = str(row[1])
-                    rows_read_total = long(row[2])
-                    rows_changed_total = long(row[3])
+                    rows_read_total = int(row[2])
+                    rows_changed_total = int(row[3])
 
                     # set the tag as the dictionary key
                     table_rows_read_total["schema:{},table:{}".format(table_schema, table_name)] = rows_read_total

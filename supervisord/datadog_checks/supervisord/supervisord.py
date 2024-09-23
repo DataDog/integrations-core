@@ -5,10 +5,10 @@
 import re
 import socket
 import time
+import xmlrpc.client as xmlrpclib
 from collections import defaultdict
 
 import supervisor.xmlrpc
-from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.base import AgentCheck
 
@@ -206,7 +206,7 @@ class SupervisordCheck(AgentCheck):
             host = instance.get('host', DEFAULT_HOST)
             port = instance.get('port', DEFAULT_PORT)
             auth = '{}:{}@'.format(user, password) if user and password else ''
-            server = xmlrpclib.Server('http://{}{}:{}/RPC2'.format(auth, host, port))
+            server = xmlrpclib.ServerProxy('http://{}{}:{}/RPC2'.format(auth, host, port))
         return server.supervisor
 
     @staticmethod

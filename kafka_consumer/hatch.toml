@@ -13,11 +13,11 @@ ZK_VERSION = "3.6.4"
 AUTHENTICATION = "noauth"
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = ["2.6", "3.3"]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = ["3.3"]
 auth = ["ssl", "kerberos"]
 
