@@ -296,8 +296,8 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
         cls.QUERY_BASE = cls.QUERY_BASE.format(custom_cols=extra_cols)
         return cls._fetch_generic_values(cursor, None, logger)
 
-    def __init__(self, cfg_instance, base_name, report_function, column, logger):
-        super(SqlIoVirtualFileStat, self).__init__(cfg_instance, base_name, report_function, column, logger)
+    def __init__(self, cfg_instance, base_name, report_function, column, logger, tags):
+        super(SqlIoVirtualFileStat, self).__init__(cfg_instance, base_name, report_function, column, logger, tags)
         self.dbid = self.cfg_instance.get('database_id', None)
         self.dbname = self.cfg_instance.get('database', None)
         self.fid = self.cfg_instance.get('file_id', None)
@@ -498,8 +498,8 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
 
     DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
 
-    def __init__(self, cfg_instance, base_name, report_function, column, logger):
-        super(SqlDatabaseFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
+    def __init__(self, cfg_instance, base_name, report_function, column, logger, tags):
+        super(SqlDatabaseFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger, tags)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
@@ -702,8 +702,8 @@ class SqlDbFragmentation(BaseSqlServerMetric):
     )
     OPERATION_NAME = 'db_fragmentation_metrics'
 
-    def __init__(self, cfg_instance, base_name, report_function, column, logger):
-        super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
+    def __init__(self, cfg_instance, base_name, report_function, column, logger, tags):
+        super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger, tags)
 
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
