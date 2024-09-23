@@ -87,11 +87,11 @@ class SubmitData:
         }
         db_info = self.db_info[db_name]
         event["metadata"] = [{**(db_info)}]
-        event["collection_errors"][0][
-            "message"
-        ] = "Truncated after fetching {} columns, elapsed time is {}s, database is {}".format(
-            self._total_columns_sent, time_spent, db_name
-        )
+        event["collection_errors"][0]["message"] = (
+            "Truncated after fetching {} columns, elapsed time is {}s, database is {}".format(
+                self._total_columns_sent, time_spent, db_name
+            )
+        )        
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting truncation of schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)
