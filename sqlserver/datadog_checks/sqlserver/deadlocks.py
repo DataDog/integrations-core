@@ -28,6 +28,7 @@ PAYLOAD_TIMESTAMP = "deadlock_timestamp"
 PAYLOAD_QUERY_SIGNATURE = "query_signatures"
 PAYLOAD_XML = "xml"
 
+
 def agent_check_getter(self):
     return self._check
 
@@ -54,10 +55,9 @@ class Deadlocks(DBMAsyncJob):
             shutdown_callback=self._close_db_conn,
         )
         self._conn_key_prefix = "dbm-deadlocks-"
-    
+
     def _close_db_conn(self):
         pass
-
 
     def obfuscate_no_except_wrapper(self, sql_text):
         try:
@@ -93,12 +93,12 @@ class Deadlocks(DBMAsyncJob):
                             continue
                         query_signatures.append({"spid": spid, "signature": compute_sql_signature(inputbuf.text)})
                     else:
-                        self._log.error("spid not found in process element. Skipping query signature computation.") 
+                        self._log.error("spid not found in process element. Skipping query signature computation.")
             for frame in process.findall('.//frame'):
                 if frame.text is not None:
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
         return query_signatures
-    
+
     def _query_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
@@ -109,12 +109,9 @@ class Deadlocks(DBMAsyncJob):
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
-                cursor.execute(
-                    DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time()))
-                )
+                cursor.execute(DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time())))
                 columns = [column[0] for column in cursor.description]
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
 
     def _create_deadlock_rows(self):
         db_rows = self._query_deadlocks()
@@ -138,7 +135,7 @@ class Deadlocks(DBMAsyncJob):
                 error = "An error occurred while obfuscating SQLServer deadlocks. The error: {}".format(e)
                 self._log.error(error)
                 continue
-            
+
             total_number_of_characters += len(row) + len(query_signatures)
             if total_number_of_characters > self._deadlock_payload_max_bytes:
                 self._log.warning(
@@ -149,11 +146,13 @@ class Deadlocks(DBMAsyncJob):
                 )
                 break
 
-            deadlock_events.append({
-                PAYLOAD_TIMESTAMP: row[DEADLOCK_TIMESTAMP_ALIAS],
-                PAYLOAD_XML: ET.tostring(root, encoding='unicode'), 
-                PAYLOAD_QUERY_SIGNATURE: query_signatures
-                })
+            deadlock_events.append(
+                {
+                    PAYLOAD_TIMESTAMP: row[DEADLOCK_TIMESTAMP_ALIAS],
+                    PAYLOAD_XML: ET.tostring(root, encoding='unicode'),
+                    PAYLOAD_QUERY_SIGNATURE: query_signatures,
+                }
+            )
         self._last_deadlock_timestamp = time()
         return deadlock_events
 
@@ -182,7 +181,6 @@ class Deadlocks(DBMAsyncJob):
             "sqlserver_deadlocks": deadlock_rows,
         }
         return event
-    
+
     def run_job(self):
         self.collect_deadlocks()
-

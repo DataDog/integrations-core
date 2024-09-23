@@ -13,7 +13,13 @@ import re
 
 from copy import copy, deepcopy
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.deadlocks import Deadlocks, MAX_PAYLOAD_BYTES, PAYLOAD_QUERY_SIGNATURE, PAYLOAD_TIMESTAMP, PAYLOAD_XML
+from datadog_checks.sqlserver.deadlocks import (
+    Deadlocks,
+    MAX_PAYLOAD_BYTES,
+    PAYLOAD_QUERY_SIGNATURE,
+    PAYLOAD_TIMESTAMP,
+    PAYLOAD_XML,
+)
 from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
 from mock import patch, MagicMock
 from threading import Event
@@ -24,6 +30,7 @@ try:
     import pyodbc
 except ImportError:
     pyodbc = None
+
 
 @pytest.fixture
 def dbm_instance(instance_docker):
@@ -38,6 +45,7 @@ def dbm_instance(instance_docker):
     instance_docker['collect_settings'] = {'enabled': False}
     instance_docker['deadlocks_collection'] = {'enabled': True, 'collection_interval': 0.1}
     return copy(instance_docker)
+
 
 def run_check_and_return_deadlock_payloads(dd_run_check, check, aggregator):
     dd_run_check(check)
@@ -57,6 +65,7 @@ def _get_conn_for_user(instance_docker, user, timeout=1, _autocommit=False):
     conn = pyodbc.connect(conn_str, timeout=timeout, autocommit=_autocommit)
     conn.timeout = timeout
     return conn
+
 
 def _run_first_deadlock_query(conn, event1, event2):
     exception_text = ""
@@ -101,7 +110,6 @@ def _create_deadlock(bob_conn, fred_conn):
     exception_2_text = futures_second_query.result()
     executor.shutdown()
     return "deadlock" in exception_1_text or "deadlock" in exception_2_text
-
 
 
 @pytest.mark.integration
@@ -163,12 +171,15 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
         logging.error("deadlock XML: %s", str(d))
         raise e
 
+
 DEADLOCKS_PLAN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deadlocks")
+
 
 def _load_test_deadlocks_xml(filename):
     with open(os.path.join(DEADLOCKS_PLAN_DIR, filename), 'r') as f:
         return f.read()
-    
+
+
 @pytest.fixture
 def deadlocks_collection_instance(instance_docker):
     instance_docker['dbm'] = True
@@ -184,11 +195,16 @@ def deadlocks_collection_instance(instance_docker):
     instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
+
 def test__create_deadlock_rows(deadlocks_collection_instance):
     check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
     deadlocks_obj = check.deadlocks
     xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
-    with patch.object(Deadlocks, '_query_deadlocks', return_value=[{DEADLOCK_TIMESTAMP_ALIAS: "2024-09-20T12:07:16.647000", DEADLOCK_XML_ALIAS: xml}]):
+    with patch.object(
+        Deadlocks,
+        '_query_deadlocks',
+        return_value=[{DEADLOCK_TIMESTAMP_ALIAS: "2024-09-20T12:07:16.647000", DEADLOCK_XML_ALIAS: xml}],
+    ):
         rows = deadlocks_obj._create_deadlock_rows()
         assert len(rows) == 1, "Should have created one deadlock row"
         row = rows[0]
@@ -198,7 +214,8 @@ def test__create_deadlock_rows(deadlocks_collection_instance):
         first_mapping = query_signatures[0]
         assert "spid" in first_mapping, "Should have spid in query signatures"
         assert isinstance(first_mapping["spid"], int), "spid should be an int"
-        
+
+
 def test_deadlock_xml_bad_format(deadlocks_collection_instance):
     test_xml = """
     <event name="xml_deadlock_report" package="sqlserver" timestamp="2024-08-20T08:30:35.762Z">
@@ -289,9 +306,7 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         "</event>"
     )
 
-    with patch(
-        'datadog_checks.sqlserver.deadlocks.Deadlocks.obfuscate_no_except_wrapper', return_value="obfuscated"
-    ):
+    with patch('datadog_checks.sqlserver.deadlocks.Deadlocks.obfuscate_no_except_wrapper', return_value="obfuscated"):
         check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
         deadlocks_obj = check.deadlocks
         root = ET.fromstring(test_xml)
@@ -300,4 +315,3 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         result_string = result_string.replace('\t', '').replace('\n', '')
         result_string = re.sub(r'\s{2,}', ' ', result_string)
         assert expected_xml_string == result_string
-

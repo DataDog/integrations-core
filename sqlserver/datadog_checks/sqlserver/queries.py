@@ -227,7 +227,9 @@ FROM (SELECT CAST([target_data] AS XML) AS Target_Data
     ) AS XML_Data
 CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
 WHERE xdr.value('@timestamp', 'datetime') >= DATEADD(SECOND, ?, GETDATE())
-;""".format(**{"timestamp": DEADLOCK_TIMESTAMP_ALIAS, "xml": DEADLOCK_XML_ALIAS})
+;""".format(
+    **{"timestamp": DEADLOCK_TIMESTAMP_ALIAS, "xml": DEADLOCK_XML_ALIAS}
+)
 
 
 def get_query_ao_availability_groups(sqlserver_major_version):
