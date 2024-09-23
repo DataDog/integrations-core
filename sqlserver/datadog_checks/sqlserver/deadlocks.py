@@ -46,7 +46,7 @@ class Deadlocks(DBMAsyncJob):
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
-            enabled=self._config.deadlocks_config.get('enabled', True),
+            enabled=self._config.deadlocks_config.get('enabled', False),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",

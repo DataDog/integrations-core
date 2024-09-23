@@ -767,7 +767,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable the collection of deadlock data. Requires `dbm: true`. Enabled by default.
+            Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
           value:
             type: boolean
             example: false
