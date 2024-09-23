@@ -283,6 +283,7 @@ def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, c
         report_function=mock.MagicMock(),
         column='size',
         logger=None,
+        tags = [],
     )
     with mock.patch.object(
         SqlMasterDatabaseFileStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
