@@ -29,7 +29,6 @@ from datadog_checks.sqlserver.utils import (
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import deep_compare, not_windows_ci, windows_ci
 
-
 try:
     import pyodbc
 except ImportError:
@@ -454,25 +453,26 @@ def test_set_default_driver_conf():
             set_default_driver_conf()
             assert 'ODBCSYSINI' in os.environ
             assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
-        with EnvVars({'ODBCSYSINI': 'ABC'}):
-            set_default_driver_conf()
-            assert os.environ['ODBCSYSINI'] == 'ABC'
-
-        with EnvVars({}, ignore=['ODBCSYSINI']):
-            with mock.patch("os.path.exists", return_value=True):
-                # odbcinst.ini or odbc.ini exists in agent embedded directory
-                set_default_driver_conf()
-                assert 'ODBCSYSINI' not in os.environ
-
-        with EnvVars({}, ignore=['ODBCSYSINI']):
-            set_default_driver_conf()
-            assert 'ODBCSYSINI' in os.environ  # ODBCSYSINI is set by the integration
-            if pyodbc is not None:
-                assert pyodbc.drivers() is not None
 
         with EnvVars({'ODBCSYSINI': 'ABC'}):
             set_default_driver_conf()
             assert os.environ['ODBCSYSINI'] == 'ABC'
+
+
+@not_windows_ci
+def test_set_default_driver_conf_linux():
+    odbc_config_dir = os.path.expanduser('~')
+    with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=odbc_config_dir):
+        with EnvVars({}, ignore=['ODBCSYSINI']):
+            odbc_inst = os.path.join(odbc_config_dir, "odbcinst.ini")
+            odbc_ini = os.path.join(odbc_config_dir, "odbc.ini")
+            for file in [odbc_inst, odbc_ini]:
+                if os.path.exists(file):
+                    os.remove(file)
+            with open(odbc_ini, "x") as file:
+                file.write("dummy-content")
+            set_default_driver_conf()
+            assert is_non_empty_file(odbc_inst), "odbc_inst should have been created when a non empty odbc.ini exists"
 
 
 @windows_ci
@@ -830,12 +830,10 @@ def test_submit_data():
             {"id": 3, "name": "test_db1", "schemas": [{"id": "1", "tables": [1, 2]}, {"id": "2", "tables": [1, 2]}]},
             {"id": 4, "name": "test_db2", "schemas": [{"id": "3", "tables": [1, 2]}]},
         ],
-        "timestamp": 1.1,
     }
-    difference = DeepDiff(
-        json.loads(submitted_data[0]), expected_data, exclude_paths="root['timestamp']", ignore_order=True
-    )
-    assert len(difference) == 0
+    data = json.loads(submitted_data[0])
+    data.pop("timestamp")
+    assert deep_compare(data, expected_data)
 
 
 def test_fetch_throws(instance_docker):
@@ -880,3 +878,16 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
         'datadog_checks.sqlserver.utils.is_azure_sql_database', return_value={}
     ):
         schemas._fetch_for_databases()
+
+
+def test_get_unixodbc_sysconfig():
+    etc_dir = os.path.sep
+    for dir in ["opt", "datadog-agent", "embedded", "bin", "python"]:
+        etc_dir = os.path.join(etc_dir, dir)
+    assert get_unixodbc_sysconfig(etc_dir).split(os.path.sep) == [
+        "",
+        "opt",
+        "datadog-agent",
+        "embedded",
+        "etc",
+    ], "incorrect unix odbc config dir"
