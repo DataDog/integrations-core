@@ -329,7 +329,7 @@ def test_SqlFractionMetric_base(caplog, base_name):
         report_function=report_function,
         column=None,
         logger=mock.MagicMock(),
-        tags=[],
+        tags=['dd.internal.resource:database_instance:stubbed.hostname', 'optional:tag1'],
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
         mock_cursor, ['Buffer cache hit ratio', base_name], mock.mock.MagicMock()
