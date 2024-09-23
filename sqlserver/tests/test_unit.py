@@ -10,25 +10,24 @@ from collections import namedtuple
 
 import mock
 import pytest
-from deepdiff import DeepDiff
-
 
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
 from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
     extract_sql_comments_and_procedure_name,
+    get_unixodbc_sysconfig,
+    is_non_empty_file,
     parse_sqlserver_major_version,
     set_default_driver_conf,
 )
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
-from .utils import windows_ci
+from .utils import deep_compare, not_windows_ci, windows_ci
 
 
 try:
@@ -438,17 +437,22 @@ def test_set_default_driver_conf():
     with EnvVars({'DOCKER_DD_AGENT': 'true'}, ignore=['ODBCSYSINI']):
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
-
-    # `set_default_driver_conf` have no effect on the cases below
-    with EnvVars({'ODBCSYSINI': 'ABC', 'DOCKER_DD_AGENT': 'true'}):
-        set_default_driver_conf()
-        assert os.environ['ODBCSYSINI'] == 'ABC'
-
+        
     with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
-        with EnvVars({}):
+        with EnvVars({}, ignore=['ODBCSYSINI']):
             set_default_driver_conf()
-            assert 'ODBCSYSINI' in os.environ
-            assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
+            assert 'ODBCSYSINI' in os.environ, "ODBCSYSINI should be set"
+            assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
+
+        with EnvVars({}, ignore=['ODBCSYSINI']):
+            with mock.patch("os.path.exists", return_value=True):
+                # odbcinst.ini or odbc.ini exists in agent embedded directory
+                set_default_driver_conf()
+                assert 'ODBCSYSINI' not in os.environ
+
+        with EnvVars({'ODBCSYSINI': 'ABC'}):
+            set_default_driver_conf()
+            assert os.environ['ODBCSYSINI'] == 'ABC'
 
         with EnvVars({}, ignore=['ODBCSYSINI']):
             with mock.patch("os.path.exists", return_value=True):
