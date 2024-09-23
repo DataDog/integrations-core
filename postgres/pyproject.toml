@@ -37,11 +37,15 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "azure-identity==1.17.1",
-    "boto3==1.35.10",
-    "cachetools==5.5.0",
+    "azure-identity==1.18.0; python_version > '3.0'",
+    "azure-identity==1.7.1; python_version < '3.0'",
+    "boto3==1.17.112; python_version < '3.0'",
+    "boto3==1.35.24; python_version > '3.0'",
+    "cachetools==3.1.1; python_version < '3.0'",
+    "cachetools==5.5.0; python_version > '3.0'",
     "psycopg2-binary==2.9.9",
-    "semver==3.0.2",
+    "semver==2.13.0; python_version < '3.0'",
+    "semver==3.0.2; python_version > '3.0'",
 ]
 
 [project.urls]
