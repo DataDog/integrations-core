@@ -1,12 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-    "--py2",
-    "--install-types",
-    "--non-interactive",
-    "datadog_checks/",
-    "tests/",
-]
+
 mypy-deps = [
   "types-mock==0.1.5",
 ]
@@ -15,7 +9,7 @@ mypy-deps = [
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = ["8.4", "10.0"]
 tls = ["false", "true"]
 

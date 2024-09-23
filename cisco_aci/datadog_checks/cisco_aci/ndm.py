@@ -2,19 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-from six import PY3
-
-if PY3:
-    from datadog_checks.cisco_aci.models import (
-        DeviceMetadata,
-        InterfaceMetadata,
-        NetworkDevicesMetadata,
-        Node,
-        PhysIf,
-    )
-
-from . import helpers
+from datadog_checks.cisco_aci.models import (
+    DeviceMetadata,
+    InterfaceMetadata,
+    NetworkDevicesMetadata,
+    Node,
+    PhysIf,
+)
 
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
@@ -25,7 +19,7 @@ def create_node_metadata(node_attrs, tags, namespace):
     Create a DeviceMetadata object from a node's attributes
     """
     node = Node(attributes=node_attrs)
-    hostname = helpers.get_hostname_from_dn(node.attributes.dn)
+    hostname = node.attributes.name
     id_tags = common_tags(node.attributes.address, hostname, namespace)
     device_tags = [
         'device_vendor:{}'.format(VENDOR_CISCO),

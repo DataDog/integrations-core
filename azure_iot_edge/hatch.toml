@@ -1,18 +1,9 @@
 [env.collectors.datadog-checks]
 check-types = false
-mypy-args = [
-  "--py2",
-  "--check-untyped-defs",
-  "--follow-imports",
-  "skip",
-  "--install-types",
-  "--non-interactive",
-  "datadog_checks/",
-  "tests/",
-]
+
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 protocol = ["tls"]
 
 [envs.default.overrides]

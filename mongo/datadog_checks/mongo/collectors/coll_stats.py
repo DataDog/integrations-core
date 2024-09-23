@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pymongo.errors import OperationFailure
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.mongo.collectors.base import MongoCollector
@@ -44,11 +43,14 @@ class CollStatsCollector(MongoCollector):
         try:
             return api.coll_stats(self.db_name, coll_name)
         except OperationFailure as e:
+            if e.code == 13:
+                # Unauthorized to run $collStats, do not try use the compatible mode, raise the exception
+                raise e
             # Failed to get collection stats using $collStats aggregation
             self.log.debug(
                 "Failed not collect stats for collection %s with $collStats, fallback to collStats command",
                 coll_name,
-                e,
+                e.details,
             )
             self.coll_stats_pipeline_supported = False
             return [api.coll_stats_compatable(self.db_name, coll_name)]
@@ -61,7 +63,15 @@ class CollStatsCollector(MongoCollector):
                 collection_stats = self._get_collection_stats(api, coll_name)
             except OperationFailure as e:
                 # Atlas restricts $collStats on system collections
-                self.log.warning("Could not collect stats for collection %s: %s", coll_name, e)
+                if e.code == 13:
+                    self.log.warning("Unauthorized to run $collStats on collection %s.%s", self.db_name, coll_name)
+                else:
+                    self.log.warning(
+                        "Could not collect stats for collection %s.%s: %s", self.db_name, coll_name, e.details
+                    )
+                continue
+            except Exception as e:
+                self.log.error("Unexpected error when fetch stats for collection %s.%s: %s", self.db_name, coll_name, e)
                 continue
 
             for coll_stats in collection_stats:
@@ -85,7 +95,7 @@ class CollStatsCollector(MongoCollector):
                 # Submit the indexSizes metrics manually
                 if index_sizes:
                     metric_name_alias = self._normalize("collection.indexSizes", AgentCheck.gauge)
-                    for idx, val in iteritems(index_sizes):
+                    for idx, val in index_sizes.items():
                         # we tag the index
                         idx_tags = self.base_tags + additional_tags + ["index:%s" % idx]
                         self.gauge(metric_name_alias, val, tags=idx_tags)

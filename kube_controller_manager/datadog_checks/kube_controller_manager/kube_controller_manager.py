@@ -5,7 +5,6 @@
 import re
 
 import requests
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
@@ -169,7 +168,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin
             transformers[limiter + "_rate_limiter_use"] = self.rate_limiter_use
         queues = self.DEFAULT_QUEUES + instance.get("extra_queues", [])
         for queue in queues:
-            for metric, func in iteritems(self.QUEUE_METRICS_TRANSFORMERS):
+            for metric, func in self.QUEUE_METRICS_TRANSFORMERS.items():
                 transformers[queue + metric] = func
 
         # Support new metrics (introduced in v1.14.0)

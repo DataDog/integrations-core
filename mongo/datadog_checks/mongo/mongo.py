@@ -32,6 +32,7 @@ from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
 from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import (
     SERVICE_CHECK_NAME,
+    HostingType,
     MongosDeployment,
     ReplicaSetDeployment,
     StandaloneDeployment,
@@ -50,14 +51,6 @@ except ImportError:
     from ..stubs import datadog_agent
 
 long = int
-
-
-class HostingType:
-    ATLAS = "mongodb-atlas"
-    ALIBABA_APSARADB = "alibaba-apsaradb"
-    DOCUMENTDB = "amazon-documentdb"
-    SELF_HOSTED = "self-hosted"
-    UNKNOWN = "unknown"
 
 
 class MongoDb(AgentCheck):
@@ -102,6 +95,7 @@ class MongoDb(AgentCheck):
 
         self.deployment_type = None
         self._mongo_version = None
+        self._mongo_modules = None
         self._resolved_hostname = None
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -112,13 +106,14 @@ class MongoDb(AgentCheck):
 
         self.diagnosis.register(self._diagnose_tls)
 
+        # Database autodiscovery
+        self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
+
         # DBM
         self._operation_samples = MongoOperationSamples(check=self)
         self._slow_operations = MongoSlowOperations(check=self)
         self._schemas = MongoSchemas(check=self)
 
-        # Database autodiscovery
-        self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
         self._api = None
 
     @property
@@ -253,12 +248,13 @@ class MongoDb(AgentCheck):
             return []
         return [f"dd.internal.resource:database_instance:{self._resolved_hostname}"]
 
-    def _get_tags(self, include_deployment_tags=False, include_internal_resource_tags=False):
+    def _get_tags(self, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)
-        if include_deployment_tags:
-            tags.extend(self.deployment_type.deployment_tags)
+        tags.extend(self.deployment_type.deployment_tags)
         if include_internal_resource_tags:
             tags.extend(self.internal_resource_tags)
+        if isinstance(self.deployment_type, ReplicaSetDeployment):
+            tags.extend(self.deployment_type.replset_tags)
         return tags
 
     def check(self, _):
@@ -270,9 +266,9 @@ class MongoDb(AgentCheck):
             # DBM
             if self._config.dbm_enabled:
                 self._send_database_instance_metadata()
-                self._operation_samples.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
-                self._slow_operations.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
-                self._schemas.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
+                self._operation_samples.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
+                self._slow_operations.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
+                self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
@@ -281,16 +277,22 @@ class MongoDb(AgentCheck):
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
     def _refresh_metadata(self):
-        if self._mongo_version is None:
-            self.log.debug('No mongo_version metadata present, refreshing it.')
-            self._mongo_version = self.api_client.server_info().get('version', '0.0')
+        if self._mongo_version is None or self._mongo_modules is None:
+            self.log.debug('No mongo_version or mongo_module metadata present, refreshing it.')
+            server_info = self.api_client.server_info()
+            self._mongo_version = server_info.get('version', '0.0')
             self._mongo_version_parsed = Version(self._mongo_version.split("-")[0])
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
+            self._mongo_modules = server_info.get('modules', [])
+            self.set_metadata('modules', ','.join(self._mongo_modules))
+            self.log.debug('modules: %s', self._mongo_modules)
         if self._resolved_hostname is None:
             self._resolved_hostname = self._config.reported_database_hostname or self.api_client.hostname
             self.set_metadata('resolved_hostname', self._resolved_hostname)
             self.log.debug('resolved_hostname: %s', self._resolved_hostname)
+        if self._config.cluster_name:
+            self.set_metadata('cluster_name', self._config.cluster_name)
 
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
@@ -299,7 +301,7 @@ class MongoDb(AgentCheck):
 
     def _collect_metrics(self):
         deployment = self.deployment_type
-        tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
+        tags = self._get_tags(include_internal_resource_tags=True)
 
         dbnames = self._get_db_names(tags)
         self.refresh_collectors(deployment, dbnames, tags)
@@ -357,8 +359,11 @@ class MongoDb(AgentCheck):
         deployment = self.deployment_type
         if self._resolved_hostname not in self._database_instance_emitted:
             # DO NOT emit with internal resource tags, as the metadata event is used to CREATE the databse instance
-            tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=False)
-            mongodb_instance_metadata = {"cluster_name": self._config.cluster_name} | deployment.instance_metadata
+            tags = self._get_tags()
+            mongodb_instance_metadata = {
+                "cluster_name": self._config.cluster_name,
+                "modules": self._mongo_modules,
+            } | deployment.instance_metadata
             database_instance = {
                 "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
@@ -389,8 +394,15 @@ class MongoDb(AgentCheck):
         replset_state = repl_set_payload["myState"]
         hosts = [m['name'] for m in repl_set_payload.get("members", [])]
         replset_me = is_master_payload.get('me')
+        replset_tags = is_master_payload.get('tags')
         return ReplicaSetDeployment(
-            hosting_type, replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role
+            hosting_type,
+            replset_name,
+            replset_state,
+            hosts,
+            replset_me,
+            cluster_role=cluster_role,
+            replset_tags=replset_tags,
         )
 
     def refresh_deployment_type(self):

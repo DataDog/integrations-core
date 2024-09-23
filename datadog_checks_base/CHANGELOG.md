@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 37.0.0 / 2024-09-19
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+## 36.15.0 / 2024-09-05
+
+***Added***:
+
+* `utils.http.RequestsWrapper` accepts a session at initialization, useful for testing and controlling sessions in general. ([#18438](https://github.com/DataDog/integrations-core/pull/18438))
+* Bump ddtrace version to fix CouchDB tests ([#18451](https://github.com/DataDog/integrations-core/pull/18451))
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
 ## 36.14.0 / 2024-08-19
 
 ***Added***:
@@ -12,7 +30,7 @@
 
 * Fix ddtrace import issues ([#18324](https://github.com/DataDog/integrations-core/pull/18324))
 
-## 36.13.0 / 2024-08-09
+## 36.13.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 

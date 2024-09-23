@@ -54,7 +54,7 @@
       "Cloudera Data Platform Overview": "assets/dashboards/cloudera_overview.json"
     },
     "monitors": {
-      "Cloudera High CPU Usage": "assets/monitors/cloudera_high_cpu.json"
+      "Cloudera CPU usage is high": "assets/monitors/cloudera_high_cpu.json"
     }
   },
   "author": {

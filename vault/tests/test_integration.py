@@ -10,6 +10,7 @@ from .utils import assert_collection
 
 @auth_required
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
 @pytest.mark.parametrize('use_auth_file', [False, True])

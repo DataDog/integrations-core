@@ -10,6 +10,7 @@ RATE = AgentCheck.rate
 Core metrics collected by default.
 """
 BASE_METRICS = {
+    # server_status collector
     "asserts.msg": RATE,
     "asserts.regular": RATE,
     "asserts.rollovers": RATE,
@@ -71,6 +72,13 @@ BASE_METRICS = {
     "metrics.operation.idhack": RATE,
     "metrics.operation.scanAndOrder": RATE,
     "metrics.operation.writeConflicts": RATE,
+    "metrics.query.sort.spillToDisk": RATE,
+    "metrics.query.sort.totalBytesSorted": RATE,
+    "metrics.query.sort.totalKeysSorted": RATE,
+    "metrics.query.planCache.classic.hits": RATE,
+    "metrics.query.planCache.classic.misses": RATE,
+    "metrics.query.planCache.sbe.hits": RATE,
+    "metrics.query.planCache.sbe.misses": RATE,
     "metrics.queryExecutor.scanned": RATE,
     "metrics.queryExecutor.scannedObjects": RATE,
     "metrics.record.moves": RATE,
@@ -118,14 +126,17 @@ BASE_METRICS = {
     "opcountersRepl.insert": RATE,
     "opcountersRepl.query": RATE,
     "opcountersRepl.update": RATE,
+    # replication_info collector
     "oplog.logSizeMB": GAUGE,
     "oplog.usedSizeMB": GAUGE,
     "oplog.timeDiff": GAUGE,
+    # replica collector
     "replSet.health": GAUGE,
     "replSet.replicationLag": GAUGE,
     "replSet.state": GAUGE,
     "replSet.votes": GAUGE,
     "replSet.voteFraction": GAUGE,
+    # db_stats collector
     "stats.avgObjSize": GAUGE,
     "stats.collections": GAUGE,
     "stats.dataSize": GAUGE,
@@ -143,8 +154,10 @@ BASE_METRICS = {
     "stats.fsUsedSize": GAUGE,
     "stats.fsTotalSize": GAUGE,
     "stats.views": GAUGE,
+    # session_stats collector
     "sessions.count": GAUGE,
     "uptime": GAUGE,
+    # host_info collector
     "system.memSizeMB": (GAUGE, "system.mem.total"),  # total amount of system memory
     "system.memLimitMB": (GAUGE, "system.mem.limit"),  # memory usage limit
     "system.numCores": (GAUGE, "system.cpu.cores"),  # number of CPU cores
@@ -179,7 +192,8 @@ Required version > 3.0.0.
 https://docs.mongodb.org/manual/reference/command/serverStatus/#serverStatus.metrics.commands
 """
 COMMANDS_METRICS = {
-    # Required version >
+    # Required version > 3.0.0
+    # server_status collector
     "metrics.commands.count.failed": RATE,
     "metrics.commands.count.total": GAUGE,
     "metrics.commands.createIndexes.failed": RATE,
@@ -203,6 +217,7 @@ Required version > 3.0.0.
 https://docs.mongodb.org/manual/reference/command/serverStatus/#server-status-locks
 """
 LOCKS_METRICS = {
+    # server_status collector
     "locks.Collection.acquireCount.R": RATE,
     "locks.Collection.acquireCount.r": RATE,
     "locks.Collection.acquireCount.W": RATE,
@@ -255,6 +270,7 @@ LOCKS_METRICS = {
 TCMalloc memory allocator report.
 """
 TCMALLOC_METRICS = {
+    # server_status collector
     "tcmalloc.generic.current_allocated_bytes": GAUGE,
     "tcmalloc.generic.heap_size": GAUGE,
     "tcmalloc.tcmalloc.aggressive_memory_decommit": GAUGE,
@@ -272,6 +288,7 @@ TCMALLOC_METRICS = {
 WiredTiger storage engine.
 """
 WIREDTIGER_METRICS = {
+    # server_status collector
     "wiredTiger.cache.bytes currently in the cache": (GAUGE, "wiredTiger.cache.bytes_currently_in_cache"),
     "wiredTiger.cache.bytes read into cache": GAUGE,
     "wiredTiger.cache.bytes written from cache": GAUGE,
@@ -308,6 +325,7 @@ Usage statistics for each collection.
 https://docs.mongodb.org/v3.0/reference/command/top/
 """
 TOP_METRICS = {
+    # top collector
     "commands.count": RATE,
     "commands.time": GAUGE,
     "getmore.count": RATE,
@@ -330,6 +348,7 @@ TOP_METRICS = {
 
 COLLECTION_METRICS = {
     # collection storage stats
+    # coll_stats collector
     'collection.size': GAUGE,
     'collection.avgObjSize': GAUGE,
     'collection.count': GAUGE,
@@ -353,11 +372,12 @@ COLLECTION_METRICS = {
     'collection.transactions.ops': RATE,
     'collection.transactions.latency_avg': (GAUGE, 'collection.transactions.latency.avg'),
     # collection query exec stats
-    'collection.collectionScans.total': GAUGE,
-    'collection.collectionScans.nonTailable': GAUGE,
+    'collection.collectionScans.total': RATE,
+    'collection.collectionScans.nonTailable': RATE,
 }
 
 SHARDED_DATA_DISTRIBUTION_METRICS = {
+    # sharded_data_distribution collector
     'numOrphanedDocs': (GAUGE, 'sharded_data_distribution.num_orphaned_docs'),
     'numOwnedDocuments': (GAUGE, 'sharded_data_distribution.num_owned_documents'),
     'ownedSizeBytes': (GAUGE, 'sharded_data_distribution.owned_size_bytes'),
@@ -365,6 +385,7 @@ SHARDED_DATA_DISTRIBUTION_METRICS = {
 }
 
 INDEX_METRICS = {
+    # index stats collector
     'indexes.accesses.ops': RATE,
 }
 

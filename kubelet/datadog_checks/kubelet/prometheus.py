@@ -5,8 +5,6 @@ from __future__ import division
 
 from copy import deepcopy
 
-from six import iteritems
-
 from datadog_checks.base.checks.kubelet_base.base import urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
@@ -294,7 +292,7 @@ class CadvisorPrometheusScraperMixin(object):
             return
 
         samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
-        for c_id, sample in iteritems(samples):
+        for c_id, sample in samples.items():
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
@@ -340,7 +338,7 @@ class CadvisorPrometheusScraperMixin(object):
             return
 
         samples = self._sum_values_by_context(metric, self._get_pod_uid_if_pod_metric)
-        for pod_uid, sample in iteritems(samples):
+        for pod_uid, sample in samples.items():
             pod = get_pod_by_uid(pod_uid, self.pod_list)
             namespace = pod.get('metadata', {}).get('namespace', None)
             if self.pod_list_utils.is_namespace_excluded(namespace):
@@ -372,7 +370,7 @@ class CadvisorPrometheusScraperMixin(object):
         seen_keys = {k: False for k in cache}
 
         samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
-        for c_id, sample in iteritems(samples):
+        for c_id, sample in samples.items():
             c_name = get_container_label(sample[self.SAMPLE_LABELS], 'name')
             if not c_name:
                 continue
@@ -407,7 +405,7 @@ class CadvisorPrometheusScraperMixin(object):
             self.gauge(m_name, val, tags)
 
         # purge the cache
-        for k, seen in iteritems(seen_keys):
+        for k, seen in seen_keys.items():
             if not seen:
                 del cache[k]
 
@@ -418,7 +416,7 @@ class CadvisorPrometheusScraperMixin(object):
         for each sample in the metric and reports the usage_pct
         """
         samples = self._latest_value_by_context(metric, self._get_entity_id_if_container_metric)
-        for c_id, sample in iteritems(samples):
+        for c_id, sample in samples.items():
             limit = sample[self.SAMPLE_VALUE]
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):

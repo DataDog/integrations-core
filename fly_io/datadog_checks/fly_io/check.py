@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from six.moves.urllib.parse import quote_plus
+from urllib.parse import quote_plus
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
@@ -204,14 +204,9 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.set_external_tags(external_host_tags)
 
     @handle_error
-    def _collect_app_metrics(self):
+    def _collect_app_metrics(self, apps_data):
         self.log.debug("Getting apps for org %s", self.org_slug)
-        apps_endpoint = f"{self.machines_api_endpoint}/v1/apps"
-        params = {'org_slug': self.org_slug}
-
-        response = self.http.get(apps_endpoint, params=params)
-        response.raise_for_status()
-        apps = response.json().get("apps", [])
+        apps = apps_data.get("apps", [])
 
         for app in apps:
             app_name = app.get("name")
@@ -234,16 +229,20 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def _collect_machines_api_metrics(self):
         self.log.debug("Collecting metrics from machines api %s", self.machines_api_endpoint)
-        response = self.http.get(f"{self.machines_api_endpoint}/")
+        params = {'org_slug': self.org_slug}
+        response = self.http.get(f"{self.machines_api_endpoint}/v1/apps", params=params)
+        apps_data = None
         try:
             response.raise_for_status()
+            apps_data = response.json()
         except Exception as e:
             self.gauge(MACHINES_API_UP_METRIC, 0, tags=self.tags)
             self.log.error("Encountered an error hitting machines REST API %s: %s", self.machines_api_endpoint, str(e))
             raise
+
         self.log.debug("Connected to the machines API %s", self.machines_api_endpoint)
         self.gauge(MACHINES_API_UP_METRIC, 1, tags=self.tags)
-        self._collect_app_metrics()
+        self._collect_app_metrics(apps_data)
 
     def check(self, instance):
         super().check(instance)

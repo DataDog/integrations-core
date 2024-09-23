@@ -1,19 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-
-from six import PY3, iteritems
+import time
 
 from datadog_checks.base.utils.serialization import json
-
-if PY3:
-    import time
 
 from . import aci_metrics, exceptions, helpers, ndm
 
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
+DEVICE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_device_user_tags"
+INTERFACE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_interface_user_tags"
 
 
 class Fabric:
@@ -41,7 +38,7 @@ class Fabric:
         self.event_platform_event = check.event_platform_event
 
     def ndm_enabled(self):
-        return PY3 and self.send_ndm_metadata
+        return self.send_ndm_metadata
 
     def collect(self):
         fabric_pods = self.api.get_fabric_pods()
@@ -85,9 +82,11 @@ class Fabric:
             node_attrs = node.get('attributes', {})
             node_id = node_attrs.get('id', {})
 
+            device_hostname = node_attrs.get('name', '')
+
             user_tags = self.instance.get('tags', [])
             tags = self.tagger.get_fabric_tags(n, 'fabricNode')
-            tags.extend(ndm.common_tags(node_attrs.get('address', ''), hostname, self.namespace))
+            tags.extend(ndm.common_tags(node_attrs.get('address', ''), device_hostname, self.namespace))
             self.external_host_tags[hostname] = tags + self.check_tags + user_tags
 
             pod_id = helpers.get_pod_from_dn(node_attrs['dn'])
@@ -97,6 +96,10 @@ class Fabric:
             try:
                 if self.ndm_enabled():
                     device_metadata.append(ndm.create_node_metadata(node_attrs, tags, self.namespace))
+
+                    device_id = '{}:{}'.format(self.namespace, node_attrs.get('address', ''))
+                    tags.append('{}:{}'.format(DEVICE_USER_TAGS_PREFIX, device_id))
+
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
@@ -115,8 +118,9 @@ class Fabric:
     def process_eth(self, node):
         self.log.info("processing ethernet ports for %s", node.get('id'))
         hostname = helpers.get_fabric_hostname(node)
+        device_hostname = node.get('name', '')
         pod_id = helpers.get_pod_from_dn(node['dn'])
-        common_tags = ndm.common_tags(node.get('address', ''), hostname, self.namespace)
+        common_tags = ndm.common_tags(node.get('address', ''), device_hostname, self.namespace)
         try:
             eth_list = self.api.get_eth_list(pod_id, node['id'])
         except (exceptions.APIConnectionException, exceptions.APIParsingException):
@@ -130,7 +134,18 @@ class Fabric:
             if self.ndm_enabled():
                 interface_metadata = ndm.create_interface_metadata(e, node.get('address', ''), self.namespace)
                 interfaces.append(interface_metadata)
-                self.submit_interface_status_metric(interface_metadata.status, tags, hostname)
+                device_id = '{}:{}'.format(self.namespace, node.get('address', ''))
+                tags.append('{}:{}'.format(DEVICE_USER_TAGS_PREFIX, device_id))
+                tags.append(
+                    "{}:{}:{}".format(
+                        INTERFACE_USER_TAGS_PREFIX, interface_metadata.device_id, str(interface_metadata.index)
+                    ),
+                )
+                self.submit_interface_status_metric(
+                    interface_metadata.status,
+                    tags,
+                    device_hostname,
+                )
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
@@ -150,10 +165,10 @@ class Fabric:
                 continue
 
             metrics = {}
-            for n, ms in iteritems(aci_metrics.FABRIC_METRICS):
+            for n, ms in aci_metrics.FABRIC_METRICS.items():
                 if n not in name:
                     continue
-                for cisco_metric, dd_metric in iteritems(ms):
+                for cisco_metric, dd_metric in ms.items():
                     mname = dd_metric.format(self.get_fabric_type(obj_type))
                     mval = s.get(name, {}).get("attributes", {}).get(cisco_metric)
                     json_attrs = s.get(name, {}).get("attributes", {})
