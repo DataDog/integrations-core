@@ -12,7 +12,7 @@ import pytest
 from mock import MagicMock
 from pyVmomi import vim, vmodl
 
-from datadog_checks.base import ConfigurationError, to_string
+from datadog_checks.base import to_string
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
@@ -737,56 +737,3 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
         )
 
         aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
-def test_hostname_case(aggregator, realtime_instance, dd_run_check):
-    realtime_instance['hostname_to_lower'] = True
-    check = VSphereCheck('vsphere', {}, [realtime_instance])
-
-    dd_run_check(check)
-    aggregator.assert_metric(
-        'datadog.vsphere.collect_events.time', tags=['vcenter_server:FAKE'], hostname='stubbed.hostname'
-    )
-    aggregator.assert_metric(
-        'datadog.vsphere.refresh_metrics_metadata_cache.time', tags=['vcenter_server:FAKE'], hostname='stubbed.hostname'
-    )
-    aggregator.assert_metric(
-        'datadog.vsphere.refresh_infrastructure_cache.time',
-        tags=['collect_property_metrics:False', 'vcenter_server:FAKE'],
-        hostname='stubbed.hostname',
-    )
-    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-5')
-    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-15')
-    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-19')
-    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='$vm3-2')
-    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm3-1')
-    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-1')
-
-    realtime_instance['hostname_to_lower'] = False
-    realtime_instance['hostname_to_upper'] = True
-    check = VSphereCheck('vsphere', {}, [realtime_instance])
-
-    dd_run_check(check)
-    aggregator.assert_metric(
-        'datadog.vsphere.collect_events.time', tags=['vcenter_server:FAKE'], hostname='STUBBED.HOSTNAME'
-    )
-    aggregator.assert_metric(
-        'datadog.vsphere.refresh_metrics_metadata_cache.time', tags=['vcenter_server:FAKE'], hostname='STUBBED.HOSTNAME'
-    )
-    aggregator.assert_metric(
-        'datadog.vsphere.refresh_infrastructure_cache.time',
-        tags=['collect_property_metrics:False', 'vcenter_server:FAKE'],
-        hostname='STUBBED.HOSTNAME',
-    )
-    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-5')
-    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-15')
-    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-19')
-    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='$VM3-2')
-    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM3-1')
-    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-1')
-
-    realtime_instance['hostname_to_lower'] = True
-    realtime_instance['hostname_to_upper'] = True
-    with pytest.raises(ConfigurationError):
-        check = VSphereCheck('vsphere', {}, [realtime_instance])

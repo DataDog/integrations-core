@@ -445,17 +445,14 @@ instances:
     #
     # include_datastore_cluster_folder_tag: true
 
-    ## @param hostname_to_upper - boolean - optional - default: false
-    ## If true, the check will convert the hostname to uppercase.
+    ## @param hostname_transform - string - optional - default: none
+    ## Should be either 'upper' or 'lower' or 'none'
+    ## If 'upper', the check will convert the vSphere hostname to uppercase.
+    ## If 'lower', the check will convert the vSphere hostname to lowercase.
+    ## If 'none', the check will not transform the vSphere hostname (the default option).
     ## This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
     #
-    # hostname_to_upper: false
-
-    ## @param hostname_to_lower - boolean - optional - default: false
-    ## If true, the check will convert the hostname to lowercase.
-    ## This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
-    #
-    # hostname_to_lower: false
+    # hostname_transform: none
 
     ## REST API options
     ## The options are used when making vSphere REST API calls to retrieve vSphere tags

@@ -340,12 +340,11 @@ class VSphereCheck(AgentCheck):
             mor_payload["tags"] = tags  # type: Dict[str, Any]
 
             if hostname:
-                if self._config.hostname_to_upper:
-                    mor_payload['hostname'] = hostname.upper()
-                elif self._config.hostname_to_lower:
-                    mor_payload['hostname'] = hostname.lower()
-                else:
-                    mor_payload['hostname'] = hostname
+                if self._config.hostname_transform == 'upper':
+                    hostname = hostname.upper()
+                elif self._config.hostname_transform == 'lower':
+                    hostname = hostname.lower()
+                mor_payload['hostname'] = hostname
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
@@ -935,12 +934,7 @@ class VSphereCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        if self._config.hostname_to_upper:
-            self._hostname = datadog_agent.get_hostname().upper()
-        elif self._config.hostname_to_lower:
-            self._hostname = datadog_agent.get_hostname().lower()
-        else:
-            self._hostname = datadog_agent.get_hostname()
+        self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
 
         now = get_timestamp()

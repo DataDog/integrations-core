@@ -141,10 +141,9 @@ class VSphereConfig(object):
         )
         self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
         self.custom_tags = instance.get('tags', [])
-        self.hostname_to_upper = instance.get('hostname_to_upper', False)
-        self.hostname_to_lower = instance.get('hostname_to_lower', False)
-        if self.hostname_to_upper and self.hostname_to_lower:
-            raise ConfigurationError("You cannot set both `hostname_to_upper` and `hostname_to_lower` to true.")
+        self.hostname_transform = instance.get('hostname_transform', 'none')
+        if self.hostname_transform not in ['none', 'lower', 'upper']:
+            raise ConfigurationError("Invalid value for `hostname_transform` in the configuration file.")
         self.validate_config()
 
     def is_historical(self):

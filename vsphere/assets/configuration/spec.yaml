@@ -509,20 +509,16 @@ files:
         value:
           type: boolean
           example: true
-      - name: hostname_to_upper
+      - name: hostname_transform
         description: |
-          If true, the check will convert the hostname to uppercase.
+          Should be either 'upper' or 'lower' or 'none'
+          If 'upper', the check will convert the vSphere hostname to uppercase.
+          If 'lower', the check will convert the vSphere hostname to lowercase.
+          If 'none', the check will not transform the vSphere hostname (the default option).
           This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
         value:
-          type: boolean
-          example: false
-      - name: hostname_to_lower
-        description: |
-          If true, the check will convert the hostname to lowercase.
-          This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
-        value:
-          type: boolean
-          example: false
+          type: string
+          example: none
       - name: rest_api_options
         description: |
           REST API options
