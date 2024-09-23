@@ -375,7 +375,7 @@ def test_SqlFractionMetric_group_by_instance(caplog):
         report_function=report_function,
         column=None,
         logger=mock.MagicMock(),
-        tags=[],
+        tags=['optional:tag1', 'dd.internal.resource:database_instance:stubbed.hostname'],
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
         mock_cursor, ['Foo counter base', 'Foo counter'], mock.mock.MagicMock()
