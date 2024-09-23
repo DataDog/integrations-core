@@ -376,7 +376,6 @@ class SQLServer(AgentCheck):
             self.log.exception("Initialization exception %s", e)
 
     def handle_service_check(self, status, connection_host, database, message=None, is_default=True):
-        custom_tags = self.instance.get("tags", [])
         disable_generic_tags = self.instance.get("disable_generic_tags", False)
         service_check_tags = [
             "sqlserver_host:{}".format(self.resolved_hostname),
@@ -385,8 +384,8 @@ class SQLServer(AgentCheck):
         ]
         if not disable_generic_tags:
             service_check_tags.append("host:{}".format(self.resolved_hostname))
-        if custom_tags is not None:
-            service_check_tags.extend(custom_tags)
+        if self.tags is not None:
+            service_check_tags.extend(self.tags)
         service_check_tags = list(set(service_check_tags))
 
         if status is AgentCheck.OK:
@@ -454,7 +453,6 @@ class SQLServer(AgentCheck):
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         metrics_to_collect = []
-        tags = self.instance.get("tags", [])
 
         # Load instance-level (previously Performance metrics)
         # If several check instances are querying the same server host, it can be wise to turn these off
@@ -469,7 +467,7 @@ class SQLServer(AgentCheck):
                 # if autodiscovery is enabled, we report metrics from the
                 # INSTANCE_METRICS_DATABASE struct below, so do not double report here
                 common_metrics.extend(INSTANCE_METRICS_DATABASE)
-            self._add_performance_counters(common_metrics, metrics_to_collect, tags, db=None)
+            self._add_performance_counters(common_metrics, metrics_to_collect, self.tags, db=None)
 
             # populated through autodiscovery
             if self.databases:
@@ -477,7 +475,7 @@ class SQLServer(AgentCheck):
                     self._add_performance_counters(
                         INSTANCE_METRICS_DATABASE,
                         metrics_to_collect,
-                        tags,
+                        self.tags,
                         db=db.name,
                         physical_database_name=db.physical_db_name,
                     )
@@ -986,7 +984,6 @@ class SQLServer(AgentCheck):
 
         proc = self._config.proc
         guardSql = self.instance.get("proc_only_if")
-        custom_tags = self.instance.get("tags", [])
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
             self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
@@ -1007,7 +1004,7 @@ class SQLServer(AgentCheck):
 
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
-                    tags.extend(custom_tags)
+                    tags.extend(self.tags)
 
                     if row.type.lower() in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
