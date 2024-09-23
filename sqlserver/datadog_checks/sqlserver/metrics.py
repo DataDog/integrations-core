@@ -464,7 +464,7 @@ class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
 
         for row in rows:
             column_val = row[value_column_index]
-        if column_val is None:
+    if column_val is None:
                 continue
             if self.column in ('size', 'max_size'):
                 column_val *= 8  # size reported in 8 KB pages
