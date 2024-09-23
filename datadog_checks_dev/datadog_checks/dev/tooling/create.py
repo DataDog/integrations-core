@@ -22,6 +22,7 @@ from .utils import (
     get_config_models_documentation,
     get_license_header,
     kebab_case_name,
+    normalize_display_name,
     normalize_package_name,
     normalize_project_name,
 )
@@ -55,13 +56,19 @@ def get_valid_templates():
 
 def prefill_template_fields_for_check_only(manifest: dict, normalized_integration_name: str) -> dict:
     author = manifest.get("author", {}).get("name")
-    check_name = normalize_package_name(f"{author}_{normalized_integration_name}")
+    if author is not None:
+        author = normalize_display_name(author)
+    check_name = normalize_package_name(f"{author}_{normalized_integration_name}") if author is not None else None
     return {
-        'author_name': author,
-        'check_name': check_name,
-        'email': manifest.get("author", {}).get("support_email"),
-        'homepage': manifest.get("author", {}).get("homepage"),
-        'sales_email': manifest.get("author", {}).get("sales_email"),
+        k: v
+        for k, v in {
+            'author_name': author,
+            'check_name': check_name,
+            'email': manifest.get("author", {}).get("support_email"),
+            'homepage': manifest.get("author", {}).get("homepage"),
+            'sales_email': manifest.get("author", {}).get("sales_email"),
+        }.items()
+        if v is not None
     }
 
 

@@ -155,8 +155,9 @@ def _valid_template_description():
 @click.option('--non-interactive', '-ni', is_flag=True, help='Disable prompting for fields')
 @click.option('--quiet', '-q', is_flag=True, help='Show less output')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
+@click.option('--skip-manifest', is_flag=True, help='Prevents validating the manfiest for check_only')
 @click.pass_context
-def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
+def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run, skip_manifest):
     """
     Create scaffolding for a new integration.
 
@@ -180,15 +181,16 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     manifest = {}
     # check_only is designed to already have content in it
     if integration_type == 'check_only':
-        if not os.path.exists(os.path.join(integration_dir, "manifest.json")):
-            abort(f"Expected {integration_dir}/manifest.json to exist")
-        # The existing integration folder already includes the author name, strip it out
-        with open(f"{integration_dir_name}/manifest.json", "r") as manifest:
-            manifest = json.loads(manifest.read())
-        author = manifest.get("author", {}).get("name")
-        if author is None:
-            abort("Unable to determine author from manifest")
-        integration_dir_name = integration_dir_name.removeprefix(f"{author}_")
+        if not skip_manifest:
+            if not os.path.exists(os.path.join(integration_dir, "manifest.json")):
+                abort(f"Expected {integration_dir}/manifest.json to exist")
+            # The existing integration folder already includes the author name, strip it out
+            with open(f"{integration_dir_name}/manifest.json", "r") as manifest:
+                manifest = json.loads(manifest.read())
+            author = manifest.get("author", {}).get("name")
+            if author is None:
+                abort("Unable to determine author from manifest")
+            integration_dir_name = integration_dir_name.removeprefix(f"{author}_")
     else:
         if os.path.exists(integration_dir):
             abort(f'Path `{integration_dir}` already exists!')
