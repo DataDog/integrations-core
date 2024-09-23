@@ -5,7 +5,6 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,
     SERVICE_CHECK_EXPIRATION,
@@ -338,7 +337,6 @@ def test_mysql_ok(aggregator, instance_remote_mysql_valid):
     aggregator.assert_all_metrics_covered()
 
 
-@requires_py3
 def test_valid_version_with_critical_certificate_validation_and_critial_certificate_expiration(
     aggregator, instance_remote_ok
 ):
@@ -370,7 +368,6 @@ def test_valid_version_with_critical_certificate_validation_and_critial_certific
     aggregator.assert_all_metrics_covered()
 
 
-@requires_py3
 def test_valid_version_and_critical_certificate_validation_due_to_socket_exception(aggregator, instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
@@ -399,7 +396,6 @@ def test_valid_version_and_critical_certificate_validation_due_to_socket_excepti
     aggregator.assert_all_metrics_covered()
 
 
-@requires_py3
 def test_valid_version_and_critical_certificate_validation_due_to_parsing_error(aggregator, instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)

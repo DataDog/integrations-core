@@ -3,7 +3,7 @@ check-types = false
 
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 
 [envs.default]
 e2e-env = false

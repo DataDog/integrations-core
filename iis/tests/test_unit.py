@@ -2,14 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.iis import IIS
 from datadog_checks.iis.service_check import IIS_APPLICATION_POOL_STATE
 
 from .common import DEFAULT_COUNTERS, PERFORMANCE_OBJECTS
-
-pytestmark = [requires_py3]
 
 
 def get_metrics_data():
