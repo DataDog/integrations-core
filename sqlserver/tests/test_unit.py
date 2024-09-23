@@ -437,19 +437,23 @@ def test_set_default_driver_conf():
     with EnvVars({'DOCKER_DD_AGENT': 'true'}, ignore=['ODBCSYSINI']):
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
-        
+
     with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
         with EnvVars({}, ignore=['ODBCSYSINI']):
             set_default_driver_conf()
             assert 'ODBCSYSINI' in os.environ, "ODBCSYSINI should be set"
             assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
 
-        with EnvVars({}, ignore=['ODBCSYSINI']):
-            with mock.patch("os.path.exists", return_value=True):
-                # odbcinst.ini or odbc.ini exists in agent embedded directory
-                set_default_driver_conf()
-                assert 'ODBCSYSINI' not in os.environ
+    # `set_default_driver_conf` have no effect on the cases below
+    with EnvVars({'ODBCSYSINI': 'ABC', 'DOCKER_DD_AGENT': 'true'}):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == 'ABC'
 
+    with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
+        with EnvVars({}):
+            set_default_driver_conf()
+            assert 'ODBCSYSINI' in os.environ
+            assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
         with EnvVars({'ODBCSYSINI': 'ABC'}):
             set_default_driver_conf()
             assert os.environ['ODBCSYSINI'] == 'ABC'
