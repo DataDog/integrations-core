@@ -329,6 +329,7 @@ def test_SqlFractionMetric_base(caplog, base_name):
         report_function=report_function,
         column=None,
         logger=mock.MagicMock(),
+        tags=[],
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
         mock_cursor, ['Buffer cache hit ratio', base_name], mock.mock.MagicMock()
@@ -374,6 +375,7 @@ def test_SqlFractionMetric_group_by_instance(caplog):
         report_function=report_function,
         column=None,
         logger=mock.MagicMock(),
+        tags=[],
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
         mock_cursor, ['Foo counter base', 'Foo counter'], mock.mock.MagicMock()
