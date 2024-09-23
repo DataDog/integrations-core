@@ -9,6 +9,7 @@ import logging
 import xml.etree.ElementTree as ET
 import os
 import pytest
+import re
 
 from copy import copy, deepcopy
 from datadog_checks.sqlserver import SQLServer
@@ -223,3 +224,80 @@ def test_deadlock_xml_bad_format(deadlocks_collection_instance):
         assert result == "process-list element not found. The deadlock XML is in an unexpected format."
     else:
         assert False, "Should have raised an exception for bad XML format"
+
+
+def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
+    test_xml = """
+    <event name="xml_deadlock_report" package="sqlserver" timestamp="2024-08-20T08:30:35.762Z">
+     <data name="xml_report">
+      <type name="xml" package="package0"/>
+      <value>
+       <deadlock>
+        <victim-list>
+         <victimProcess id="process12108eb088"/>
+        </victim-list>
+        <process-list>
+         <process id="process12108eb088">
+          <executionStack>
+           <frame procname="adhoc" line="1" stmtstart="38" stmtend="180" sqlhandle="0">\nunknown    </frame>
+           <frame procname="adhoc" line="1" stmtend="128" sqlhandle="0">\nunknown    </frame>
+          </executionStack>
+          <inputbuf>\nUPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;   </inputbuf>
+         </process>
+         <process id="process1215b77088">
+          <executionStack>
+           <frame procname="adhoc" line="1" stmtstart="38" stmtend="180" sqlhandle="0">\nunknown    </frame>
+           <frame procname="adhoc" line="1" stmtend="126" sqlhandle="0">\nunknown    </frame>
+          </executionStack>
+          <inputbuf>\nUPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;   </inputbuf>
+         </process>
+        </process-list>
+       </deadlock>
+      </value>
+     </data>
+    </event>
+    """
+
+    expected_xml_string = (
+        "<event name=\"xml_deadlock_report\" package=\"sqlserver\" timestamp=\"2024-08-20T08:30:35.762Z\"> "
+        "<data name=\"xml_report\"> "
+        "<type name=\"xml\" package=\"package0\" /> "
+        "<value> "
+        "<deadlock> "
+        "<victim-list> "
+        "<victimProcess id=\"process12108eb088\" /> "
+        "</victim-list> "
+        "<process-list> "
+        "<process id=\"process12108eb088\"> "
+        "<executionStack> "
+        "<frame procname=\"adhoc\" line=\"1\" stmtstart=\"38\" stmtend=\"180\" sqlhandle=\"0\">obfuscated</frame> "
+        "<frame procname=\"adhoc\" line=\"1\" stmtend=\"128\" sqlhandle=\"0\">obfuscated</frame> "
+        "</executionStack> "
+        "<inputbuf>obfuscated</inputbuf> "
+        "</process> "
+        "<process id=\"process1215b77088\"> "
+        "<executionStack> "
+        "<frame procname=\"adhoc\" line=\"1\" stmtstart=\"38\" stmtend=\"180\" sqlhandle=\"0\">obfuscated</frame> "
+        "<frame procname=\"adhoc\" line=\"1\" stmtend=\"126\" sqlhandle=\"0\">obfuscated</frame> "
+        "</executionStack> "
+        "<inputbuf>obfuscated</inputbuf> "
+        "</process> "
+        "</process-list> "
+        "</deadlock> "
+        "</value> "
+        "</data> "
+        "</event>"
+    )
+
+    with patch(
+        'datadog_checks.sqlserver.deadlocks.Deadlocks.obfuscate_no_except_wrapper', return_value="obfuscated"
+    ):
+        check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
+        deadlocks_obj = check.deadlocks
+        root = ET.fromstring(test_xml)
+        deadlocks_obj._obfuscate_xml(root)
+        result_string = ET.tostring(root, encoding='unicode')
+        result_string = result_string.replace('\t', '').replace('\n', '')
+        result_string = re.sub(r'\s{2,}', ' ', result_string)
+        assert expected_xml_string == result_string
+
