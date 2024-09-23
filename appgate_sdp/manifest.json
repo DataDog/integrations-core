@@ -42,9 +42,7 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-    },
+    "dashboards": {},
     "monitors": {},
     "saved_views": {}
   },
