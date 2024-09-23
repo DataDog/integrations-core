@@ -54,6 +54,10 @@ coverage:
         target: 75
         flags:
         - apache
+      Appgate_SDP:
+        target: 75
+        flags:
+        - appgate_sdp
       ArangoDB:
         target: 75
         flags:
@@ -739,6 +743,11 @@ flags:
     paths:
     - apache/datadog_checks/apache
     - apache/tests
+  appgate_sdp:
+    carryforward: true
+    paths:
+    - appgate_sdp/datadog_checks/appgate_sdp
+    - appgate_sdp/tests
   arangodb:
     carryforward: true
     paths:
