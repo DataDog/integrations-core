@@ -134,6 +134,8 @@ def test_check_instance_metrics_autodiscovery(
 
     for db in AUTODISCOVERY_DBS:
         for metric_name, _, _, _ in INSTANCE_METRICS_DATABASE_SINGLE:
+            print("natasha hereeee")
+            print(tags + ['database:{}'.format(db)])
             aggregator.assert_metric(
                 metric_name,
                 tags=tags + ['database:{}'.format(db)],
