@@ -167,6 +167,21 @@ DEADLOCKS_PLAN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "d
 def _load_test_deadlocks_xml(filename):
     with open(os.path.join(DEADLOCKS_PLAN_DIR, filename), 'r') as f:
         return f.read()
+    
+@pytest.fixture
+def deadlocks_collection_instance(instance_docker):
+    instance_docker['dbm'] = True
+    instance_docker['deadlocks_collection'] = {
+        'enabled': True,
+        'collection_interval': 1.0,
+    }
+    instance_docker['min_collection_interval'] = 1
+    # do not need other dbm metrics
+    instance_docker['query_activity'] = {'enabled': False}
+    instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
+    return copy(instance_docker)
 
 def test__create_deadlock_rows():
     deadlocks_obj = None
@@ -188,3 +203,29 @@ def test__create_deadlock_rows():
         first_mapping = query_signatures[0]
         assert "spid" in first_mapping, "Should have spid in query signatures"
         assert isinstance(first_mapping["spid"], int), "spid should be an int"
+        
+def test_deadlock_xml_bad_format(deadlocks_collection_instance):
+    test_xml = """
+    <event name="xml_deadlock_report" package="sqlserver" timestamp="2024-08-20T08:30:35.762Z">
+     <data name="xml_report">
+      <type name="xml" package="package0"/>
+      <value>
+       <deadlock>
+        <victim-list>
+         <victimProcess id="process12108eb088"/>
+        </victim-list>
+       </deadlock>
+      </value>
+     </data>
+    </event>
+    """
+    check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
+    deadlocks = check.deadlocks
+    root = ET.fromstring(test_xml)
+    try:
+        deadlocks._obfuscate_xml(root)
+    except Exception as e:
+        result = str(e)
+        assert result == "process-list element not found. The deadlock XML is in an unexpected format."
+    else:
+        assert False, "Should have raised an exception for bad XML format"
