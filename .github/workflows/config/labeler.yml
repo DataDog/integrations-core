@@ -543,6 +543,8 @@ integration/voltdb:
 - voltdb/**/*
 integration/vsphere:
 - vsphere/**/*
+integeration/wazuh:
+- wazuh/**/*
 integration/weaviate:
 - weaviate/**/*
 integration/weblogic:
