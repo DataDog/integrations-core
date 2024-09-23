@@ -7,8 +7,8 @@ from __future__ import division
 import copy
 import time
 
-from collections import defaultdict
 from cachetools import TTLCache
+from collections import defaultdict
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative

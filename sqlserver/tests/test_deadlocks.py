@@ -6,10 +6,10 @@ from __future__ import unicode_literals
 
 import concurrent
 import logging
-import xml.etree.ElementTree as ET
 import os
 import pytest
 import re
+import xml.etree.ElementTree as ET
 
 from copy import copy, deepcopy
 from datadog_checks.sqlserver import SQLServer
