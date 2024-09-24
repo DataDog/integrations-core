@@ -5,7 +5,6 @@ from xml.etree.ElementTree import ParseError
 
 import requests
 from lxml import etree
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 
@@ -63,7 +62,7 @@ class IbmWasCheck(AgentCheck):
                 server_tags = ['server:{}'.format(server.get('name'))]
                 server_tags.extend(node_tags)
 
-                for category, prefix in iteritems(self.metric_categories):
+                for category, prefix in self.metric_categories.items():
                     if self.collect_stats.get(category):
                         self.log.debug("Collecting %s stats", category)
                         stats = self.get_node_from_name(server, category)
@@ -151,7 +150,7 @@ class IbmWasCheck(AgentCheck):
 
     def setup_configured_stats(self):
         collect_stats = {}
-        for category, prefix in iteritems(metrics.METRIC_CATEGORIES):
+        for category, prefix in metrics.METRIC_CATEGORIES.items():
             if is_affirmative(self.instance.get('collect_{}_stats'.format(prefix), True)):
                 collect_stats[category] = True
         return collect_stats

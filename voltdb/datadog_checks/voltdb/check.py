@@ -4,7 +4,6 @@
 from typing import Any, List, Optional, cast  # noqa: F401
 
 import requests  # noqa: F401
-from six import raise_from
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
@@ -52,7 +51,7 @@ class VoltDBCheck(AgentCheck):
                 pass
             else:
                 message += ' (details: {})'.format(details)
-            raise_from(Exception(message), exc)
+            raise Exception(message) from exc
 
     def _fetch_version(self):
         # type: () -> Optional[str]

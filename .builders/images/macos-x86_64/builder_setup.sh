@@ -6,10 +6,6 @@ set -euxo pipefail
 "${DD_PYTHON3}" -m pip install --no-warn-script-location virtualenv
 "${DD_PYTHON3}" -m virtualenv py3
 
-"${DD_PYTHON2}" -m pip install --no-warn-script-location --upgrade pip
-"${DD_PYTHON2}" -m pip install --no-warn-script-location virtualenv
-"${DD_PYTHON2}" -m virtualenv py2
-
 # Install always with our own prefix path
 mkdir -p "${DD_PREFIX_PATH}"
 cp "${DD_MOUNT_DIR}/build_context/install-from-source.sh" .
@@ -75,8 +71,8 @@ RELATIVE_PATH="libxslt-{{version}}" \
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
-VERSION="8.7.1" \
-SHA256="f91249c87f68ea00cf27c44fdfa5a78423e41e71b7d408e5901a9896d905c495" \
+VERSION="8.9.1" \
+SHA256="291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5" \
 RELATIVE_PATH="curl-{{version}}" \
   install-from-source \
     --disable-manual \

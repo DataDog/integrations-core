@@ -1,26 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from six import PY3, iteritems
+import time
 
 from datadog_checks.base.utils.serialization import json
 
-if PY3:
-    import time
-
-    from datadog_checks.cisco_aci.models import DeviceMetadata, InterfaceMetadata, NetworkDevicesMetadata, Node, PhysIf
-
-else:
-    DeviceMetadata = None
-    Eth = None
-    InterfaceMetadata = None
-    Node = None
-
-from . import aci_metrics, exceptions, helpers
+from . import aci_metrics, exceptions, helpers, ndm
 
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
+DEVICE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_device_user_tags"
+INTERFACE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_interface_user_tags"
 
 
 class Fabric:
@@ -35,6 +25,9 @@ class Fabric:
         self.check_tags = check.check_tags
         self.namespace = namespace
 
+        # Config for submitting device/interface metadata to NDM
+        self.send_ndm_metadata = self.instance.get('send_ndm_metadata', False)
+
         # grab some functions from the check
         self.gauge = check.gauge
         self.rate = check.rate
@@ -44,15 +37,18 @@ class Fabric:
         self.external_host_tags = self.check.external_host_tags
         self.event_platform_event = check.event_platform_event
 
+    def ndm_enabled(self):
+        return self.send_ndm_metadata
+
     def collect(self):
         fabric_pods = self.api.get_fabric_pods()
         fabric_nodes = self.api.get_fabric_nodes()
         self.log.info("%s pods and %s nodes computed", len(fabric_nodes), len(fabric_pods))
         pods = self.submit_pod_health(fabric_pods)
         devices, interfaces = self.submit_nodes_health_and_metadata(fabric_nodes, pods)
-        if PY3:
+        if self.ndm_enabled():
             collect_timestamp = int(time.time())
-            batches = self.batch_payloads(devices, interfaces, collect_timestamp)
+            batches = ndm.batch_payloads(self.namespace, devices, interfaces, collect_timestamp)
             for batch in batches:
                 self.event_platform_event(json.dumps(batch.model_dump(exclude_none=True)), "network-devices-metadata")
 
@@ -86,9 +82,11 @@ class Fabric:
             node_attrs = node.get('attributes', {})
             node_id = node_attrs.get('id', {})
 
+            device_hostname = node_attrs.get('name', '')
+
             user_tags = self.instance.get('tags', [])
             tags = self.tagger.get_fabric_tags(n, 'fabricNode')
-            tags.extend(self.ndm_common_tags(node_attrs.get('address', ''), hostname, self.namespace))
+            tags.extend(ndm.common_tags(node_attrs.get('address', ''), device_hostname, self.namespace))
             self.external_host_tags[hostname] = tags + self.check_tags + user_tags
 
             pod_id = helpers.get_pod_from_dn(node_attrs['dn'])
@@ -96,8 +94,12 @@ class Fabric:
                 continue
             self.log.info("processing node %s on pod %s", node_id, pod_id)
             try:
-                if PY3:
-                    device_metadata.append(self.submit_node_metadata(node_attrs, tags))
+                if self.ndm_enabled():
+                    device_metadata.append(ndm.create_node_metadata(node_attrs, tags, self.namespace))
+
+                    device_id = '{}:{}'.format(self.namespace, node_attrs.get('address', ''))
+                    tags.append('{}:{}'.format(DEVICE_USER_TAGS_PREFIX, device_id))
+
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
@@ -106,7 +108,7 @@ class Fabric:
                     stats = self.api.get_node_stats(pod_id, node_id)
                     self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
                     eth_metadata = self.process_eth(node_attrs)
-                    if PY3:
+                    if self.ndm_enabled():
                         interface_metadata.extend(eth_metadata)
                 except (exceptions.APIConnectionException, exceptions.APIParsingException):
                     pass
@@ -116,8 +118,9 @@ class Fabric:
     def process_eth(self, node):
         self.log.info("processing ethernet ports for %s", node.get('id'))
         hostname = helpers.get_fabric_hostname(node)
+        device_hostname = node.get('name', '')
         pod_id = helpers.get_pod_from_dn(node['dn'])
-        common_tags = self.ndm_common_tags(node.get('address', ''), hostname, self.namespace)
+        common_tags = ndm.common_tags(node.get('address', ''), device_hostname, self.namespace)
         try:
             eth_list = self.api.get_eth_list(pod_id, node['id'])
         except (exceptions.APIConnectionException, exceptions.APIParsingException):
@@ -128,8 +131,21 @@ class Fabric:
             eth_id = eth_attrs['id']
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
             tags.extend(common_tags)
-            if PY3:
-                interfaces.append(self.create_interface_metadata(e, node.get('address', ''), tags, hostname))
+            if self.ndm_enabled():
+                interface_metadata = ndm.create_interface_metadata(e, node.get('address', ''), self.namespace)
+                interfaces.append(interface_metadata)
+                device_id = '{}:{}'.format(self.namespace, node.get('address', ''))
+                tags.append('{}:{}'.format(DEVICE_USER_TAGS_PREFIX, device_id))
+                tags.append(
+                    "{}:{}:{}".format(
+                        INTERFACE_USER_TAGS_PREFIX, interface_metadata.device_id, str(interface_metadata.index)
+                    ),
+                )
+                self.submit_interface_status_metric(
+                    interface_metadata.status,
+                    tags,
+                    device_hostname,
+                )
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
@@ -149,10 +165,10 @@ class Fabric:
                 continue
 
             metrics = {}
-            for n, ms in iteritems(aci_metrics.FABRIC_METRICS):
+            for n, ms in aci_metrics.FABRIC_METRICS.items():
                 if n not in name:
                     continue
-                for cisco_metric, dd_metric in iteritems(ms):
+                for cisco_metric, dd_metric in ms.items():
                     mname = dd_metric.format(self.get_fabric_type(obj_type))
                     mval = s.get(name, {}).get("attributes", {}).get(cisco_metric)
                     json_attrs = s.get(name, {}).get("attributes", {})
@@ -247,67 +263,8 @@ class Fabric:
         if obj_type == 'l1PhysIf':
             return 'port'
 
-    def batch_payloads(self, devices, interfaces, collect_ts):
-        for device in devices:
-            yield NetworkDevicesMetadata(namespace=self.namespace, devices=[device], collect_timestamp=collect_ts)
-
-        payloads = []
-        for interface in interfaces:
-            if len(payloads) == PAYLOAD_METADATA_BATCH_SIZE:
-                yield NetworkDevicesMetadata(
-                    namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts
-                )
-                payloads = []
-            payloads.append(interface)
-        if payloads:
-            yield NetworkDevicesMetadata(namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts)
-
-    def submit_node_metadata(self, node_attrs, tags):
-        node = Node(attributes=node_attrs)
-        hostname = helpers.get_hostname_from_dn(node.attributes.dn)
-        id_tags = self.ndm_common_tags(node.attributes.address, hostname, self.namespace)
-        device_tags = [
-            'device_vendor:{}'.format(VENDOR_CISCO),
-            "source:cisco-aci",
-        ]
-        device = DeviceMetadata(
-            id='{}:{}'.format(self.namespace, node.attributes.address),
-            id_tags=id_tags,
-            tags=device_tags + tags,
-            name=hostname,
-            ip_address=node.attributes.address,
-            model=node.attributes.model,
-            fabric_st=node.attributes.fabric_st,
-            vendor=VENDOR_CISCO,
-            version=node.attributes.version,
-            serial_number=node.attributes.serial,
-            device_type=node.attributes.device_type,
-        )
-        return device.model_dump(exclude_none=True)
-
-    def create_interface_metadata(self, phys_if, address, tags, hostname):
-        eth = PhysIf(**phys_if.get('l1PhysIf', {}))
-        interface = InterfaceMetadata(
-            device_id='{}:{}'.format(self.namespace, address),
-            id_tags=['interface:{}'.format(eth.attributes.name)],
-            index=eth.attributes.id,
-            name=eth.attributes.name,
-            description=eth.attributes.desc,
-            mac_address=eth.attributes.router_mac,
-            admin_status=eth.attributes.admin_st,
-        )
-        if eth.ethpm_phys_if:
-            interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
-        if interface.status:
+    def submit_interface_status_metric(self, status, tags, hostname):
+        if status:
             new_tags = tags.copy()
-            new_tags.extend(["port.status:{}".format(interface.status)])
+            new_tags.extend(["port.status:{}".format(status)])
             self.gauge('cisco_aci.fabric.port.status', 1, tags=new_tags, hostname=hostname)
-        return interface.model_dump(exclude_none=True)
-
-    def ndm_common_tags(self, address, hostname, namespace):
-        return [
-            'device_ip:{}'.format(address),
-            'device_namespace:{}'.format(namespace),
-            'device_hostname:{}'.format(hostname),
-            'device_id:{}:{}'.format(namespace, address),
-        ]

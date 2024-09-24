@@ -49,7 +49,7 @@
       "Hudi Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "commit_duration": "assets/monitors/commit_duration.json"
+      "Commit duration is high": "assets/monitors/commit_duration.json"
     },
     "saved_views": {
       "hudi_error_logs": "assets/saved_views/error_logs.json",

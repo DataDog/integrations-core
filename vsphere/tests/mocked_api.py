@@ -9,7 +9,6 @@ import re
 from mock import MagicMock
 from pyVmomi import vim
 from requests import Response
-from six import iteritems
 
 from datadog_checks.vsphere.api import VersionInfo
 from tests.common import HERE, VSPHERE_VERSION
@@ -59,7 +58,7 @@ class MockedAPI(object):
             self.infrastructure_data[current_mor]['guest.hostName'] = subtree['guest.hostName']
         if self.config.should_collect_attributes and 'customValue' in subtree:
             mor_attr = []
-            for key_name, value in iteritems(subtree['customValue']):
+            for key_name, value in subtree['customValue'].items():
                 mor_attr.append('{}{}:{}'.format(self.config.attr_prefix, key_name, value))
             self.infrastructure_data[current_mor]['attributes'] = mor_attr
 
@@ -70,9 +69,9 @@ class MockedAPI(object):
             return
 
         # Resolve the runtime.host_moId into pointers to the mocked mors.
-        for _, props in iteritems(self.infrastructure_data):
+        for props in self.infrastructure_data.values():
             if 'runtime.host_moid' in props:
-                hosts = [m for m, p in iteritems(self.infrastructure_data) if p['name'] == props['runtime.host_moid']]
+                hosts = [m for m, p in self.infrastructure_data.items() if p['name'] == props['runtime.host_moid']]
                 props['runtime.host'] = hosts[0] if hosts else object()
                 del props['runtime.host_moid']
 

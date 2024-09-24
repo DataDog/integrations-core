@@ -7,7 +7,6 @@ import copy
 import time
 from collections import defaultdict
 
-import six
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
@@ -16,8 +15,10 @@ from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
+    SqlserverAgentMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverIndexUsageMetrics,
@@ -63,6 +64,7 @@ from datadog_checks.sqlserver.const import (
     SERVICE_CHECK_NAME,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_RDS,
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
     TASK_SCHEDULER_METRICS,
@@ -132,6 +134,7 @@ class SQLServer(AgentCheck):
         self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
         self.sql_metadata = SqlserverMetadata(self, self._config)
         self.activity = SqlserverActivity(self, self._config)
+        self.agent_history = SqlserverAgentHistory(self, self._config)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -238,6 +241,7 @@ class SQLServer(AgentCheck):
         )
 
     def set_resolved_hostname(self):
+        # load static information cache
         self.load_static_information()
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
@@ -274,7 +278,7 @@ class SQLServer(AgentCheck):
         return self._resolved_hostname
 
     def load_static_information(self):
-        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION}
+        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
             with self.connection.open_managed_default_connection():
@@ -305,7 +309,13 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
                         else:
                             self.log.warning("failed to load version static information due to empty results")
-
+                    if STATIC_INFO_RDS not in self.static_info_cache:
+                        cursor.execute("SELECT name FROM sys.databases WHERE name = 'rdsadmin'")
+                        result = cursor.fetchone()
+                        if result:
+                            self.static_info_cache[STATIC_INFO_RDS] = True
+                        else:
+                            self.static_info_cache[STATIC_INFO_RDS] = False
             # re-initialize resolved_hostname to ensure we take into consideration the static information
             # after it's loaded
             self._resolved_hostname = None
@@ -748,7 +758,6 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
-            self.load_static_information()
             # configure custom queries for the check
             if self._query_manager is None:
                 # use QueryManager to process custom queries
@@ -770,6 +779,7 @@ class SQLServer(AgentCheck):
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             if self._config.dbm_enabled:
+                self.agent_history.run_job_loop(self.tags)
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
@@ -857,10 +867,18 @@ class SQLServer(AgentCheck):
             databases=db_names,
         )
 
+        database_agent_metrics = SqlserverAgentMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+
         # create a list of dynamic queries to execute
         self._database_metrics = [
             # instance level metrics
             database_backup_metrics,
+            database_agent_metrics,
             # database level metrics
             index_usage_metrics,
             db_fragmentation_metrics,
@@ -886,7 +904,7 @@ class SQLServer(AgentCheck):
                 instance_results = {}
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
                 # Execute the `fetch_all` operations first to minimize the database calls
-                for cls, metric_names in six.iteritems(self.instance_per_type_metrics):
+                for cls, metric_names in self.instance_per_type_metrics.items():
                     if not metric_names:
                         instance_results[cls] = None, None
                     else:

@@ -6,32 +6,12 @@ files:
     options:
     - name: propagate_agent_tags
       description: |
-        Set to `true` to propagate the tags from `datadog.yaml` to the check.
-        When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+        Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+        When set to `true`, the tags from the agent host are added to the check's tags for all instances.
       value:
         example: false
         type: boolean
-    - name: global_custom_queries
-      description: |
-        See `custom_queries` defined below.
-
-        Global custom queries can be applied to all instances using the
-        `use_global_custom_queries` setting at the instance level.
-      value:
-        type: array
-        items:
-          type: object
-          properties: []
-        example:
-            - metric_prefix: postgresql
-              query: <QUERY>
-              columns:
-                - name: <COLUNMS_1_NAME>
-                  type: <COLUMNS_1_TYPE>
-                - name: <COLUNMS_2_NAME>
-                  type: <COLUMNS_2_TYPE>
-              tags:
-                - <TAG_KEY>:<TAG_VALUE>
+    - template: init_config/db
     - template: init_config/default
   - template: instances
     options:
@@ -83,7 +63,8 @@ files:
     - name: ignore_databases
       description: |
         A list of database to ignore. No metrics or statement samples will be collected for these databases.
-        Each value can be a plain string or a Postgres pattern.
+        Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
+        set collect_default_database to false in addition to adding it to this array.
         For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
       value:
         type: array
@@ -327,36 +308,18 @@ files:
         type: integer
         display_default: 200
         example: 200
-    - name: custom_queries
-      description: |
-        Define custom queries to collect custom metrics from your PostgreSQL
-        See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
-        https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
-      value:
-        type: array
-        items:
-          type: object
-          properties: []
-        example:
-            - metric_prefix: postgresql
-              query: <QUERY>
-              columns:
-                - name: <COLUNMS_1_NAME>
-                  type: <COLUMNS_1_TYPE>
-                - name: <COLUNMS_2_NAME>
-                  type: <COLUMNS_2_TYPE>
-              tags:
-                - <TAG_KEY>:<TAG_VALUE>
-    - name: use_global_custom_queries
-      description: |
-        How `global_custom_queries` should be used for this instance. There are 3 options:
-
-        1. true - `global_custom_queries` override `custom_queries`.
-        2. false - `custom_queries` override `global_custom_queries`.
-        3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
-      value:
-        type: string
-        example: extend
+    - template: instances/db
+      overrides:
+        custom_queries.value.example:
+          - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+            columns:
+              - name: foo
+                type: tag
+              - name: event.total
+                type: gauge
+            tags:
+              - test:postgresql
+            metric_prefix: postgresql
     - name: database_autodiscovery
       description: |
         Define the configuration for database autodiscovery.
@@ -369,6 +332,12 @@ files:
             type: boolean
             example: false
             display_default: false
+        - name: global_view_db
+          description: Database the agent connects to perform autodiscovery operations
+          value:
+            type: string
+            example: postgres
+            display_default: postgres
         - name: max_databases
           description: The maximum number of databases this host should monitor.
           value:
@@ -600,7 +569,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+            Enable collection of database schemas. Requires `dbm: true`.
           value:
             type: boolean
             example: false
@@ -624,6 +593,72 @@ files:
           value:
             type: number
             example: 600
+        - name: include_databases
+          description: |
+            A list of regex patterns to include databases. 
+            Any database whose name matches any one of these patterns will be included. 
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydb"
+        - name: exclude_databases
+          description: |
+            A list of regex patterns to exclude databases. 
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+        - name: include_schemas
+          description: |
+            A list of regex patterns to include schemas. 
+            Any schema whose name matches any one of these patterns will be included.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "myschema"
+        - name: exclude_schemas
+          description: |
+            A list of regex patterns to exclude schemas. 
+            Any schema whose name matches any one of these patterns will be excluded.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privateschema.*"
+        - name: include_tables
+          description: |
+            A list of regex patterns to include tables. 
+            Any table whose name matches any one of these patterns will be included.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "users.*"
+        - name: exclude_tables
+          description: |
+            A list of regex patterns to exclude tables. 
+            Any table whose name matches any one of these patterns will be excluded.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "customer.*"
 
     - name: aws
       description: |
@@ -667,12 +702,18 @@ files:
             To enable IAM Authentication, set `aws.managed_authentication.enabled` to `true`.
             If `aws.managed_authentication.enabled` is set, then the `password` fields will be ignored.
             `aws.region` is required to enable IAM Authentication.
+
+            Optionally, you can set `aws.managed_authentication.role_arn` to specify the IAM role ARN.
+            This can be used to perform cross-account authentication.
           value:
             type: object
             properties:
             - name: enabled
               type: boolean
               example: false
+            - name: role_arn
+              type: string
+              example: arn:aws:iam::123456789012:role/MyRole
 
     - name: gcp
       description: |
@@ -936,8 +977,8 @@ files:
         display_default: false
     - name: propagate_agent_tags
       description: |
-        Set to `true` to propagate the tags from `datadog.yaml` to the check.
-        When set to `true`, the tags from `datadog.yaml` are added to the check's tags.
+        Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+        When set to `true`, the tags from the agent host are added to the check's tags for all instances.
         This option takes precedence over the `propagate_agent_tags` option in `init_config`.
       value:
         example: false

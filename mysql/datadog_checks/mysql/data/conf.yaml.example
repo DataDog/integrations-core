@@ -2,6 +2,12 @@
 #
 init_config:
 
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -45,6 +51,12 @@ instances:
     ## Port to use when connecting to MySQL.
     #
     port: 3306
+
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
 
     ## @param reported_hostname - string - optional
     ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
@@ -234,11 +246,12 @@ instances:
     #
     # options:
 
-        ## @param replication - boolean - optional - default: false
+        ## @param replication - boolean - optional
         ## Set to `true` to collect replication metrics or group replication metrics.
         ## These metrics are only collected from the specified `host`. If you want to collect replication metrics
         ## from the source or primary node and the replica or secondary nodes you need to set separate check
         ## instances to collect them.
+        ## Defaults to `true` when `dbm` is enabled.
         #
         # replication: false
 
@@ -257,8 +270,9 @@ instances:
         #
         # galera_cluster: false
 
-        ## @param extra_status_metrics - boolean - optional - default: false
+        ## @param extra_status_metrics - boolean - optional
         ## Set to `true` to enable extra status metrics.
+        ## Defaults to `true` when `dbm` is enabled.
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
@@ -364,26 +378,6 @@ instances:
         ## `performance_schema.global_variables`.
         #
         # collection_interval: 600
-
-    ## Configure collection of schemas (databases).
-    #
-    # schemas_collection:
-
-        ## @param enabled - boolean - optional - default: false
-        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
-        #
-        # enabled: false
-
-        ## @param collection_interval - number - optional - default: 600
-        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
-        #
-        # collection_interval: 600
-
-        ## @param max_execution_time - number - optional - default: 60
-        ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds. 
-        ## Capped by `schemas_collection.collection_interval`
-        #
-        # max_execution_time: 60
 
     ## Configure collection of query metrics
     #

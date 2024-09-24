@@ -6,7 +6,6 @@ from itertools import chain
 
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.timeout import TimeoutException
@@ -65,10 +64,10 @@ def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics, dd_run_
         else:
             tags = []
 
-        for name, value in iteritems(gauge_metrics):
+        for name, value in gauge_metrics.items():
             aggregator.assert_metric(name, value=value, count=1, metric_type=aggregator.GAUGE, tags=tags)
 
-        for name, value in iteritems(rate_metrics):
+        for name, value in rate_metrics.items():
             aggregator.assert_metric(
                 name,
                 value=value,
@@ -77,7 +76,7 @@ def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics, dd_run_
                 tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
             )
 
-        for name, value in iteritems(count_metrics):
+        for name, value in count_metrics.items():
             aggregator.assert_metric(
                 name,
                 value=value,
@@ -110,14 +109,14 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
     c = Disk('disk', {}, [instance_basic_mount])
     dd_run_check(c)
 
-    for name, value in iteritems(gauge_metrics):
+    for name, value in gauge_metrics.items():
         aggregator.assert_metric(
             name,
             value=value,
             tags=['device:{}'.format(DEFAULT_MOUNT_POINT), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
         )
 
-    for name, value in chain(iteritems(rate_metrics), iteritems(count_metrics)):
+    for name, value in chain(rate_metrics.items(), count_metrics.items()):
         aggregator.assert_metric(
             name,
             value=value,
@@ -155,7 +154,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics, count_metrics, 
         'device_label:mylab',
     ]
 
-    for name, value in chain(iteritems(gauge_metrics), iteritems(rate_metrics), iteritems(count_metrics)):
+    for name, value in chain(gauge_metrics.items(), rate_metrics.items(), count_metrics.items()):
         aggregator.assert_metric(
             name,
             value=value,

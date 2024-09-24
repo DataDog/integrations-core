@@ -18,7 +18,7 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     LDFLAGS="${LDFLAGS} -L/usr/local/lib -lkrb5 -lgssapi_krb5 -llmdb" \
     DOWNLOAD_URL="https://github.com/confluentinc/librdkafka/archive/refs/tags/v{{version}}.tar.gz" \
         VERSION="${kafka_version}" \
-        SHA256="d645e47d961db47f1ead29652606a502bdd2a880c85c1e060e94eea040f1a19a" \
+        SHA256="3dc62de731fd516dfb1032861d9a580d4d0b5b0856beb0f185d06df8e6c26259" \
         RELATIVE_PATH="librdkafka-{{version}}" \
         bash install-from-source.sh --enable-sasl --enable-curl
     always_build+=("confluent-kafka")

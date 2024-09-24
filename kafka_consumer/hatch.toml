@@ -5,7 +5,7 @@
 # Also bump the LIBRDKAFKA_VERSION version in this file
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",
-  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.4.0",
+  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.5.0",
 ]
 
 [envs.default.env-vars]
@@ -13,11 +13,11 @@ ZK_VERSION = "3.6.4"
 AUTHENTICATION = "noauth"
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = ["2.6", "3.3"]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 version = ["3.3"]
 auth = ["ssl", "kerberos"]
 

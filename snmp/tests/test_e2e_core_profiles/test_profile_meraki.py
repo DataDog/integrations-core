@@ -65,6 +65,7 @@ def test_e2e_profile_meraki(dd_agent_check):
         ],
         'vendor': 'meraki',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 

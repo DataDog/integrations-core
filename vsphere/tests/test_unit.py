@@ -2365,7 +2365,7 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     base_tags_vm1 = base_tags + ['vsphere_host:host1']
     base_tags_vm3 = base_tags + ['vsphere_host:host2']
 
-    realtime_instance['excluded_host_tags'] = ['vsphere_host']
+    realtime_instance['excluded_host_tags'] = ['vsphere_host', 'vsphere_type', 'vsphere_folder']
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     caplog.set_level(logging.DEBUG)
     dd_run_check(check)
@@ -2380,8 +2380,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     )
     assert (
         "Could not submit property metric- no metric data: name=`vm.guest.guestFullName`, "
-        "value=`None`, hostname=`vm1`, base tags=`['vcenter_server:FAKE', 'vsphere_host:host1', "
-        "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`"
+        "value=`None`, hostname=`vm1`, base tags=`['vsphere_host:host1', 'vsphere_folder:unknown', "
+        "'vsphere_type:vm', 'vcenter_server:FAKE']` additional tags=`{}`"
     ) in caplog.text
 
     aggregator.assert_metric(
@@ -2440,8 +2440,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     )
     assert (
         "Could not submit property metric- no metric data: name=`vm.guest.toolsRunningStatus`, "
-        "value=`None`, hostname=`vm1`, base tags=`['vcenter_server:FAKE', 'vsphere_host:host1', "
-        "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`"
+        "value=`None`, hostname=`vm1`, base tags=`['vsphere_host:host1', 'vsphere_folder:unknown', "
+        "'vsphere_type:vm', 'vcenter_server:FAKE']` additional tags=`{}`"
     ) in caplog.text
 
     aggregator.assert_metric(
@@ -2521,8 +2521,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
 
     assert (
         "Submit property metric: name=`vm.config.memoryAllocation.limit`, value=`-1.0`, "
-        "hostname=`vm1`, tags=`['vcenter_server:FAKE', 'vsphere_host:host1', "
-        "'vsphere_folder:unknown', 'vsphere_type:vm']`, count=`False`"
+        "hostname=`vm1`, tags=`['vsphere_host:host1', 'vsphere_folder:unknown', "
+        "'vsphere_type:vm', 'vcenter_server:FAKE']`, count=`False`"
     ) in caplog.text
 
     aggregator.assert_metric(
@@ -2533,8 +2533,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     assert (
         "Could not submit property metric- unexpected metric value: "
         "name=`vm.config.cpuAllocation.overheadLimit`, value=`None`, hostname=`vm1`, "
-        "base tags=`['vcenter_server:FAKE', 'vsphere_host:host1', 'vsphere_folder:unknown', "
-        "'vsphere_type:vm']` additional tags=`{}`"
+        "base tags=`['vsphere_host:host1', 'vsphere_folder:unknown', "
+        "'vsphere_type:vm', 'vcenter_server:FAKE']` additional tags=`{}`"
     ) in caplog.text
 
     aggregator.assert_metric(
@@ -2545,8 +2545,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     assert (
         "Could not submit property metric- unexpected metric value: "
         "name=`vm.config.memoryAllocation.overheadLimit`, value=`None`, hostname=`vm1`, "
-        "base tags=`['vcenter_server:FAKE', 'vsphere_host:host1', 'vsphere_folder:unknown', "
-        "'vsphere_type:vm']` additional tags=`{}`"
+        "base tags=`['vsphere_host:host1', 'vsphere_folder:unknown', "
+        "'vsphere_type:vm', 'vcenter_server:FAKE']` additional tags=`{}`"
     ) in caplog.text
 
     # VM 3
@@ -2606,8 +2606,8 @@ def test_vm_property_metrics(aggregator, realtime_instance, dd_run_check, caplog
     )
     assert (
         "Could not submit property metric- unexpected metric value: name=`vm.summary.config.memorySizeMB`, "
-        "value=`None`, hostname=`vm3`, base tags=`['vcenter_server:FAKE', 'vsphere_host:host2', "
-        "'vsphere_folder:unknown', 'vsphere_type:vm']` additional tags=`{}`"
+        "value=`None`, hostname=`vm3`, base tags=`['vsphere_host:host2', "
+        "'vsphere_folder:unknown', 'vsphere_type:vm', 'vcenter_server:FAKE']` additional tags=`{}`"
     ) in caplog.text
 
     aggregator.assert_metric(
@@ -2740,7 +2740,7 @@ def test_host_property_metrics(aggregator, realtime_instance, dd_run_check, capl
     assert (
         "Could not submit property metric- no metric data: "
         "name=`host.hardware.cpuPowerManagementInfo.currentPolicy`, value=`None`, "
-        "hostname=`host2`, base tags=`['vcenter_server:FAKE', 'vsphere_type:host']` "
+        "hostname=`host2`, base tags=`['vsphere_type:host', 'vcenter_server:FAKE']` "
         "additional tags=`{}`"
     ) in caplog.text
 
@@ -3185,6 +3185,41 @@ def test_property_metrics_invalid_ip_route_config_gateway(
         value=1,
         tags=base_tags + ['network_dest_ip:fe83::', 'prefix_length:32'],
         hostname='vm1',
+    )
+
+
+def test_property_metrics_excluded_host_tags(
+    aggregator, realtime_instance, dd_run_check, service_instance, vm_properties_ex, datadog_agent
+):
+    realtime_instance['collect_property_metrics'] = True
+
+    service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
+
+    realtime_instance['excluded_host_tags'] = ['vsphere_host', 'vsphere_folder']
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.vm.summary.quickStats.uptimeSeconds',
+        count=1,
+        value=12184573.0,
+        tags=['vcenter_server:FAKE', 'vsphere_folder:unknown', 'vsphere_host:host1'],
+        hostname='vm1',
+    )
+    datadog_agent.assert_external_tags(
+        'vm1',
+        {'vsphere': ['vcenter_server:FAKE', 'vsphere_type:vm']},
+    )
+    aggregator.assert_metric(
+        'vsphere.host.hardware.cpuPowerManagementInfo.currentPolicy',
+        count=1,
+        value=1,
+        tags=['currentPolicy:Balanced', 'vcenter_server:FAKE'],
+        hostname='host1',
+    )
+    datadog_agent.assert_external_tags(
+        'host1',
+        {'vsphere': ['vcenter_server:FAKE', 'vsphere_type:host']},
     )
 
 

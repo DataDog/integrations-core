@@ -9,7 +9,6 @@ from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
 import vsanapiutils
 from pyVim import connect
 from pyVmomi import SoapStubAdapter, vim, vmodl
-from six import itervalues
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
@@ -290,7 +289,7 @@ class VSphereAPI(object):
             # at this point they are custom pyvmomi objects and the attribute keys are not resolved.
 
             attribute_keys = {x.key: x.name for x in self._fetch_all_attributes()}
-            for props in itervalues(infrastructure_data):
+            for props in infrastructure_data.values():
                 mor_attributes = []
                 if self.config.collect_property_metrics:
                     all_properties = {}

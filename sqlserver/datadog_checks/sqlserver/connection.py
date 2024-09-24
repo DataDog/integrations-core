@@ -5,8 +5,6 @@ import logging
 import socket
 from contextlib import closing, contextmanager
 
-from six import raise_from
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
@@ -23,7 +21,13 @@ except ImportError:
     pyodbc = None
 
 from .azure import generate_managed_identity_token
-from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception
+from .connection_errors import (
+    ConnectionErrorCode,
+    SQLConnectionError,
+    error_with_tags,
+    format_connection_exception,
+    obfuscate_error_msg,
+)
 
 logger = logging.getLogger(__file__)
 
@@ -288,9 +292,7 @@ class Connection(object):
             if tcp_connection_status != "OK" and conn_warn_msg is ConnectionErrorCode.unknown:
                 conn_warn_msg = ConnectionErrorCode.tcp_connection_failed
 
-            password = self.instance.get('password')
-            if password is not None:
-                exception_msg = exception_msg.replace(password, "*" * 6)
+            exception_msg = obfuscate_error_msg(exception_msg, self.instance.get('password'))
 
             check_err_message = error_with_tags(
                 "Unable to connect to SQL Server, see %s#%s for more details on how to debug this issue. "
@@ -312,7 +314,7 @@ class Connection(object):
             if is_default:
                 # the message that is raised here (along with the exception stack trace)
                 # is what will be seen in the agent status output.
-                raise_from(SQLConnectionError(check_err_message), None)
+                raise SQLConnectionError(check_err_message) from None
             else:
                 # if not the default db, we should still log this exception
                 # to give the customer an opportunity to fix the issue

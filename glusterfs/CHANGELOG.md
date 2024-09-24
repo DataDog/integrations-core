@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.8.0 / 2024-09-05
+
+***Added***:
+
+* Change the Glusterfs check to use standard subprocess module ([#18464](https://github.com/DataDog/integrations-core/pull/18464))
+
 ## 1.7.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

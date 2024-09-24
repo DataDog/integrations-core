@@ -8,13 +8,25 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Sophos Central Cloud logs.",
+    "description": "Gain insights into Sophos Central Cloud alert and event logs.",
     "title": "sophos-central-cloud",
-    "media": [],
+    "media": [
+      {
+        "caption": "Sophos Central Cloud - Alerts",
+        "image_url": "images/sophos_central_cloud_alerts.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Sophos Central Cloud - Events",
+        "image_url": "images/sophos_central_cloud_events.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -28,6 +40,13 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Sophos Central Cloud - Alerts": "assets/dashboards/sophos_central_cloud_alerts.json",
+      "Sophos Central Cloud - Events": "assets/dashboards/sophos_central_cloud_events.json"
+    },
+    "logs": {
+      "source": "sophos-central-cloud"
     }
   },
   "author": {
@@ -35,6 +54,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

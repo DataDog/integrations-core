@@ -977,7 +977,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Nodes Overview Dashboard](https://app.datadoghq.com/screen/integration/30340/kubernetes-nodes-overview?tpl_var_cluster=$cluster.value)",
+                            "content": "View more in the [Kubernetes Nodes Overview Dashboard](https://app.datadoghq.com/dash/integration/30340/kubernetes-nodes-overview?tpl_var_cluster=$cluster.value)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -1428,7 +1428,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "View more in the [Kubernetes Deployments Overview Dashboard](https://app.datadoghq.com/screen/integration/30341/kubernetes-deployments-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)\n",
+                            "content": "View more in the [Kubernetes Deployments Overview Dashboard](https://app.datadoghq.com/dash/integration/30341/kubernetes-deployments-overview?tpl_var_kube_cluster_name=$cluster.value&tpl_var_scope=$scope.value)\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -3173,7 +3173,7 @@
                             "requests": [
                                 {
                                     "display_type": "bars",
-                                    "q": "sum:kubernetes_state.container.waiting{$cluster,reason:crashloopbackoff,*,$scope} by {pod_name}",
+                                    "q": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,reason:crashloopbackoff,*,$scope} by {pod_name}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -3551,10 +3551,10 @@
                                         },
                                         {
                                             "alias_name": "waiting",
-                                            "expression": "sum:kubernetes_state.container.waiting{$cluster,$scope}"
+                                            "expression": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,$scope}"
                                         }
                                     ],
-                                    "q": "sum:kubernetes_state.container.ready{$cluster,$scope}, sum:kubernetes_state.container.running{$cluster,$scope}, sum:kubernetes_state.container.terminated{$cluster,$scope}, sum:kubernetes_state.container.waiting{$cluster,$scope}",
+                                    "q": "sum:kubernetes_state.container.ready{$cluster,$scope}, sum:kubernetes_state.container.running{$cluster,$scope}, sum:kubernetes_state.container.terminated{$cluster,$scope}, sum:kubernetes_state.container.status_report.count.waiting{$cluster,$scope}",
                                     "style": {
                                         "line_type": "solid",
                                         "line_width": "normal",
@@ -3650,7 +3650,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes.containers.state.waiting{$cluster,reason:crashloopbackoff,$scope} by {pod_name}"
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,reason:crashloopbackoff,$scope} by {pod_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",

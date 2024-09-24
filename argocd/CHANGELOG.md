@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.4.3 / 2024-08-09 / Agent 7.57.0
+
+***Fixed***:
+
+* Fix collection of 2 appset counters ([#18018](https://github.com/DataDog/integrations-core/pull/18018))
+
 ## 2.4.2 / 2024-07-05 / Agent 7.55.0
 
 ***Fixed***:

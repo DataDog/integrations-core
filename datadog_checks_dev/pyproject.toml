@@ -1,8 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
 ]
 build-backend = "hatchling.build"
 
@@ -28,30 +26,21 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "contextlib2; python_version < '3.0'",
     "coverage>=5.0.3",
-    "flaky; python_version < '3.0'",
-    "flaky>=3.8.0; python_version > '3.0'",
+    "flaky>=3.8.0",
     "mock",
     "psutil",
-    "py>=1.8.2; python_version < '3.0'",  # https://github.com/ionelmc/pytest-benchmark/issues/226
-    "pytest==4.6.11; python_version < '3.0'",
-    "pytest==8.1.1; python_version > '3.0'",
-    "pytest-asyncio>=0.23.4; python_version > '3.0'",
-    "pytest-benchmark[histogram]<4.0.0; python_version < '3.0'",
-    "pytest-benchmark[histogram]>=4.0.0; python_version > '3.0'",
+    "pytest==8.1.1",
+    "pytest-asyncio>=0.23.4",
+    "pytest-benchmark[histogram]>=4.0.0",
     "pytest-cov>=2.6.1",
-    "pytest-memray>=1.4.0; python_version > '3.0' and (platform_system=='Linux' or platform_system=='Darwin')",
+    "pytest-memray>=1.4.0; platform_system=='Linux' or platform_system=='Darwin'",
     "pytest-mock",
     "pyyaml>=5.4.1",
     "requests>=2.22.0",
-    "shutilwhich==1.1.0; python_version < '3.0'",
-    "six",
-    "subprocess32==3.5.4; python_version < '3.0'",
     "tenacity",
 ]
 dynamic = [
@@ -91,13 +80,13 @@ cli = [
     # Move towncrier dependency to ddev once we migrate changelog-related commands.
     # We need at least v23.11.0, because it lets us release with empty changelogs:
     # The issue that is fixed: https://github.com/twisted/towncrier/issues/538
-    "towncrier>=23.11.0",
+    # v24.7 changed the way towncrier searches for template files and that broke us.
+    # We have to pin to 23.11.0 until the following issue is done:
+    # https://github.com/twisted/towncrier/issues/641
+    "towncrier==23.11.0",
     "twine>=1.11.0",
     "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
-    "wheel>=0.31.0",
 ]
 
 [project.entry-points.pytest11]

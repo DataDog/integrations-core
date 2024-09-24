@@ -6,7 +6,6 @@ from collections import defaultdict
 from typing import Any, Dict, Iterator, List, Set  # noqa: F401
 
 from pyVmomi import vim
-from six import iteritems
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.base.utils.http import RequestsWrapper
@@ -24,7 +23,7 @@ MOR_TYPE_MAPPING_FROM_STRING = {
     'ClusterComputeResource': vim.ClusterComputeResource,
 }
 
-MOR_TYPE_MAPPING_TO_STRING = {v: k for k, v in iteritems(MOR_TYPE_MAPPING_FROM_STRING)}
+MOR_TYPE_MAPPING_TO_STRING = {v: k for k, v in MOR_TYPE_MAPPING_FROM_STRING.items()}
 
 
 class VSphereRestAPI(object):

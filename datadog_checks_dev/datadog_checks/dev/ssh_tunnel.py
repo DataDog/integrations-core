@@ -4,20 +4,15 @@
 from __future__ import absolute_import
 
 import os
+import subprocess
 from contextlib import contextmanager
 
 import psutil
-from six import PY3
 
 from .conditions import WaitForPortListening
 from .env import environment_run
 from .structures import LazyFunction, TempDir
 from .utils import ON_WINDOWS, find_free_port, get_ip
-
-if PY3:
-    import subprocess
-else:
-    import subprocess32 as subprocess
 
 PID_FILE = 'ssh.pid'
 

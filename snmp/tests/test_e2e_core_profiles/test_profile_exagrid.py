@@ -98,6 +98,7 @@ def test_e2e_profile_exagrid(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.14941.3.999',
         'vendor': 'exagrid',
         'device_type': 'storage',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

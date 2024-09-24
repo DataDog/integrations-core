@@ -126,11 +126,31 @@ instances:
     #
     # include_ao_metrics: false
 
+    ## Configure collection of agent jobs events and metrics
+    #
+    # agent_jobs:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of agent jobs events and metrics. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 15
+        ## Configure the interval (in seconds) for the collection of agent jobs events and metrics.
+        ## Set the query metric collection interval (in seconds).
+        #
+        # collection_interval: 15
+
+        ## @param history_row_limit - integer - optional - default: 10000
+        ## Set the maximum number of job step rows that can be retrieved in a single check run.
+        #
+        # history_row_limit: 10000
+
     ## @param availability_group - string - optional
-    ## You can specify an availability group when `include_ao_metrics`
-    ## is enabled to monitor a specific availability group.
-    ## If no availability group is specified, then all availability
-    ## groups on the current replica will output metrics.
+    ## When `include_ao_metrics` is enabled, you can provide the resource 
+    ## group id of a specific availability group that you would like to monitor.
+    ## If no availability group is specified, then we will collect AlwaysOn metrics 
+    ## for all availability groups on the current replica.
     #
     # availability_group: <AVAILABILITY_GROUP>
 
@@ -658,27 +678,6 @@ instances:
     ## If the DB specified doesn't exist on the server then don't do the check
     #
     # ignore_missing_database: false
-
-    ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
-    ## only for the database configured with `database` parameter.
-    #
-    # schemas_collection:
-
-        ## @param enabled - boolean - optional - default: false
-        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
-        #
-        # enabled: false
-
-        ## @param collection_interval - number - optional - default: 600
-        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
-        #
-        # collection_interval: 600
-
-        ## @param max_execution_time - number - optional - default: 10
-        ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
-        ## Capped by `schemas_collection.collection_interval`
-        #
-        # max_execution_time: 10
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

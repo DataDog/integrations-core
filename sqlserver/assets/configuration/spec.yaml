@@ -128,12 +128,34 @@ files:
       value:
         type: boolean
         example: false
+    - name: agent_jobs
+      description: Configure collection of agent jobs events and metrics
+      options:
+        - name: enabled
+          description: |
+            Enable collection of agent jobs events and metrics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Configure the interval (in seconds) for the collection of agent jobs events and metrics.
+            Set the query metric collection interval (in seconds).
+          value:
+            type: number
+            example: 15
+        - name: history_row_limit
+          description: |
+            Set the maximum number of job step rows that can be retrieved in a single check run.
+          value:
+            type: integer
+            example: 10000
     - name: availability_group
       description: |
-        You can specify an availability group when `include_ao_metrics`
-        is enabled to monitor a specific availability group.
-        If no availability group is specified, then all availability
-        groups on the current replica will output metrics.
+        When `include_ao_metrics` is enabled, you can provide the resource 
+        group id of a specific availability group that you would like to monitor.
+        If no availability group is specified, then we will collect AlwaysOn metrics 
+        for all availability groups on the current replica.
       value:
         type: string
     - name: only_emit_local
@@ -714,6 +736,7 @@ files:
         example: 1800
         display_default: false
     - name: schemas_collection
+      hidden: True
       description: |
         Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
         only for the database configured with `database` parameter.

@@ -4,11 +4,11 @@
 
 import os
 from copy import deepcopy
+from urllib.parse import urljoin
 
 import pytest
 from mock import patch
 from requests.exceptions import SSLError
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints

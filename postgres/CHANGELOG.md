@@ -2,6 +2,50 @@
 
 <!-- towncrier release notes start -->
 
+## 20.0.0 / 2024-09-05
+
+***Changed***:
+
+* When password and `aws.region` are set and `aws.managed_authentication` is not set, password authentication will be used. IAM Token authentication used to be prioritized. ([#18331](https://github.com/DataDog/integrations-core/pull/18331))
+
+***Added***:
+
+* Added an option to specify default db agent uses to perform autodiscovery operations ([#18037](https://github.com/DataDog/integrations-core/pull/18037))
+* Update the propagate_agent_tags setting. When set to `true`, the tags from the agent host are now added to the check's tags for all instances. ([#18358](https://github.com/DataDog/integrations-core/pull/18358))
+* Add cluster_name as tag to PG metrics ([#18402](https://github.com/DataDog/integrations-core/pull/18402))
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+***Fixed***:
+
+* Fix errors resulting from certain ignore_databases settings
+  Clarified documentation on ignore_databases ([#18287](https://github.com/DataDog/integrations-core/pull/18287))
+* Set the default port to 5432 when user don't provide one, this corrects the issue where the generated IAM authentication token is invalid when a port isn't provided. ([#18386](https://github.com/DataDog/integrations-core/pull/18386))
+
+## 19.1.0 / 2024-08-09 / Agent 7.57.0
+
+***Added***:
+
+* Add global custom queries for Postgres ([#17993](https://github.com/DataDog/integrations-core/pull/17993))
+* Added warning when SSL option for Postgres check is invalid ([#18047](https://github.com/DataDog/integrations-core/pull/18047))
+* Allow filtering of schema collection in Postgres using regexes to include or exclude objects ([#18145](https://github.com/DataDog/integrations-core/pull/18145))
+* Collect blk read/write time from pg_stat_database ([#18169](https://github.com/DataDog/integrations-core/pull/18169))
+* Use QueryManager to collect `custom_queries` and `global_custom_queries`. `custom_queries` now supports configurable `collection_interval`. ([#18183](https://github.com/DataDog/integrations-core/pull/18183))
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Add new config option `role_arn` to AWS managed authentication to support cross account IAM auth. ([#18228](https://github.com/DataDog/integrations-core/pull/18228))
+
+***Fixed***:
+
+* Fixed Postgres settings collection for common extensions ([#18043](https://github.com/DataDog/integrations-core/pull/18043))
+* Fixed Postgres check crash when pg_stat_statements was not yet loaded ([#18081](https://github.com/DataDog/integrations-core/pull/18081))
+* Remove schema collection and dependency on relation metrics. Instead a warning is issued when the missing metrics will impact which tables are collected.
+  Removed the autodiscovery dependency on relation metrics; autodiscovery should now work even if relation metrics are not configured. ([#18144](https://github.com/DataDog/integrations-core/pull/18144))
+
+## 19.0.1 / 2024-07-31 / Agent 7.56.0
+
+***Fixed***:
+
+* Emit dead/live toast rows as gauge ([#18009](https://github.com/DataDog/integrations-core/pull/18009))
+
 ## 19.0.0 / 2024-07-05
 
 ***Changed***:

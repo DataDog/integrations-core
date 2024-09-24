@@ -99,6 +99,7 @@ def test_mongo_dbstats_tag(aggregator, check, instance_dbstats_tag_dbname, dd_ru
     }
     expected_tags = [
         'server:mongodb://localhost:27017/',
+        'hosting_type:self-hosted',
     ] + check.internal_resource_tags
     for metric, value in expected_metrics.items():
         aggregator.assert_metric(metric, value, expected_tags)
@@ -234,4 +235,4 @@ def test_metadata(check, instance, datadog_agent, reported_database_hostname):
         assert check._resolved_hostname == reported_database_hostname
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata('test:123', {'resolved_hostname': check._resolved_hostname})
-    datadog_agent.assert_metadata_count(len(version_metadata) + 3)
+    datadog_agent.assert_metadata_count(len(version_metadata) + 4)

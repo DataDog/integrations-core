@@ -4,6 +4,13 @@ files:
     options:
       - template: init_config
         options:
+          - name: propagate_agent_tags
+            description: |
+              Set to `true` to propagate the tags from `datadog.yaml` to the check.
+              When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+            value:
+              example: false
+              type: boolean
           - template: init_config/db
             overrides:
               global_custom_queries.value.example:
@@ -48,6 +55,14 @@ files:
             value:
               type: number
               example: 3306
+
+          - name: propagate_agent_tags
+            description: |
+              Set to `true` to propagate the tags from `datadog.yaml` to the check.
+              When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+            value:
+              example: false
+              type: boolean
 
           - name: reported_hostname
             description: |
@@ -210,9 +225,12 @@ files:
                   These metrics are only collected from the specified `host`. If you want to collect replication metrics
                   from the source or primary node and the replica or secondary nodes you need to set separate check
                   instances to collect them.
+                  Defaults to `true` when `dbm` is enabled.
+
                 value:
                   type: boolean
                   example: false
+                  display_default: null
 
               - name: replication_channel
                 description: |
@@ -237,11 +255,13 @@ files:
               - name: extra_status_metrics
                 description: |
                   Set to `true` to enable extra status metrics.
+                  Defaults to `true` when `dbm` is enabled.
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
                   type: boolean
                   example: false
+                  display_default: null
 
               - name: extra_innodb_metrics
                 description: |
@@ -363,6 +383,7 @@ files:
                   type: number
                   example: 600
           - name: schemas_collection 
+            hidden: true
             description: |
               Configure collection of schemas (databases).
             options:
@@ -384,7 +405,7 @@ files:
                   Capped by `schemas_collection.collection_interval`
                 value:
                   type: number
-                  example: 60         
+                  example: 60
           - name: query_metrics
             description: Configure collection of query metrics
             options:

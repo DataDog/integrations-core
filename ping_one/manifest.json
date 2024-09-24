@@ -2,15 +2,21 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5fce4e84-ab6e-4ba6-b996-ac85e134642e",
   "app_id": "ping-one",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into PingOne logs",
-    "title": "ping_one",
-    "media": [],
+    "description": "Gain insights into PingOne logs.",
+    "title": "PingOne",
+    "media": [
+      {
+        "caption": "PingOne",
+        "image_url": "images/ping_one.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -29,6 +35,12 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "PingOne": "assets/dashboards/ping_one.json"
+    },
+    "logs": {
+      "source": "ping-one"
     }
   },
   "author": {
@@ -36,6 +48,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

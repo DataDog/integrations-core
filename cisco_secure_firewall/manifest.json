@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "15c8217d-1a43-4efb-a338-053fca68169d",
   "app_id": "cisco-secure-firewall",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -86,7 +86,7 @@
       "Cisco Secure Firewall - Application and Identity-based Firewall": "assets/dashboards/cisco_secure_firewall_application_and_identity_firewall.json",
       "Cisco Secure Firewall - IP Stack": "assets/dashboards/cisco_secure_firewall_ip_stack.json",
       "Cisco Secure Firewall - Failover": "assets/dashboards/cisco_secure_firewall_failover.json",
-      "Cisco Secure Firewall - Threat Detection": "assets/dashboards/cisco_secure_firewall_threat detection.json",
+      "Cisco Secure Firewall - Threat Detection": "assets/dashboards/cisco_secure_firewall_threat_detection.json",
       "Cisco Secure Firewall - Command Interface": "assets/dashboards/cisco_secure_firewall_command_interface.json",
       "Cisco Secure Firewall - OSPF and RIP Routing": "assets/dashboards/cisco_secure_firewall_ospf_and_rip_routing.json",
       "Cisco Secure Firewall - Security Events": "assets/dashboards/cisco_secure_firewall_security_events.json",

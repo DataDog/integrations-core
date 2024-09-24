@@ -94,8 +94,8 @@ jobs:
 
     env:
       FORCE_COLOR: "1"
-      PYTHON_VERSION: "${{ inputs.python-version || '3.11' }}"
-      PYTHON_FILTER: "${{ (inputs.test-py2 && !inputs.test-py3) && '2.7' || (!inputs.test-py2 && inputs.test-py3) && (inputs.python-version || '3.11') || '' }}"
+      PYTHON_VERSION: "${{ inputs.python-version || '3.12' }}"
+      PYTHON_FILTER: "${{ (inputs.test-py2 && !inputs.test-py3) && '2.7' || (!inputs.test-py2 && inputs.test-py3) && (inputs.python-version || '3.12') || '' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers
       DDEV_E2E_AGENT: "${{ inputs.platform == 'windows' && (inputs.agent-image-windows || 'datadog/agent-dev:master-py3-win-servercore') || inputs.agent-image }}"
@@ -141,6 +141,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
+        cache: 'pip'
 
     - name: Restore cache
       if: inputs.repo == 'core'
@@ -397,9 +398,9 @@ jobs:
 
     - name: Upload coverage data
       if: >
-        inputs.standard && 
-        !github.event.repository.private && 
-        always() && 
+        inputs.standard &&
+        !github.event.repository.private &&
+        always() &&
         inputs.pytest-args != '-m flaky'
       # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
       uses: codecov/codecov-action@v4
