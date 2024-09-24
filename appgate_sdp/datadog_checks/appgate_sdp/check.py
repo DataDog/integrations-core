@@ -5,11 +5,11 @@ from typing import Any  # noqa: F401
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-from .metrics import METRIC_MAP
+from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class AppgateSDPCheck(OpenMetricsBaseCheckV2):
-
+    DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'appgate_sdp'
 
     def __init__(self, name, init_config, instances):
@@ -17,5 +17,6 @@ class AppgateSDPCheck(OpenMetricsBaseCheckV2):
 
     def get_default_config(self):
         return {
-            'metrics': [METRIC_MAP],
+            "metrics": [METRIC_MAP],
+            "rename_labels": RENAME_LABELS_MAP,
         }

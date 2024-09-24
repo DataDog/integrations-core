@@ -7,7 +7,7 @@ METRIC_MAP = {
     'apn_audit_events': 'appliance.audit_events',
     'apn_audit_logs': 'appliance.audit_logs',
     'apn_certificate_days_remaining': 'appliance.certificate_days.remaining',
-    'apn_cpu_usage_percent': 'appliance.cpu_usage.percent',
+    'apn_cpu_usage_percent': 'appliance.cpu.percent_usage',
     'apn_disk': 'appliance.disk',
     'apn_disk_partition_statistic': 'appliance.disk.partition_statistic',
     'apn_dns_cache_entries': 'appliance.dns.cache_entries',
@@ -20,7 +20,7 @@ METRIC_MAP = {
     'apn_memory': 'appliance.memory',
     'apn_network_interface_speed': 'appliance.network_interface.speed',
     'apn_network_interface_statistic': 'appliance.network_interface.statistic',
-    'apn_proxy_protocol_messages': 'appliance.proxy_protocol.messages',
+    'apn_proxy_protocol_messages': 'appliance.proxy.protocol_messages',
     'apn_snat': 'appliance.snat',
     'apn_spa_dropped_packets': 'appliance.spa.dropped_packets',
     'apn_spa_packet_authorization_time': 'appliance.spa.packet_authorization_time',
@@ -57,7 +57,7 @@ METRIC_MAP = {
     'ctr_threads': 'controller.threads',
     'gw_azure_resolver_cache': 'gateway.azure_resolver.cache',
     'gw_azure_resolver_cache_ttl': 'gateway.azure_resolver.cache_ttl',
-    'gw_dns_forwarder_cache': 'gateway.dns.forwarder_cache',
+    'gw_dns_forwarder_cache': 'gateway.dns_forwarder.cache',
     'gw_dns_forwarder_domain': 'gateway.dns_forwarder.domain',
     'gw_dns_forwarder_query': 'gateway.dns_forwarder.query',
     'gw_event_queue_period_peak': 'gateway.event_queue.period_peak',
@@ -68,7 +68,7 @@ METRIC_MAP = {
     'gw_http_open_connection': 'gateway.http.open_connection',
     'gw_http_requests': 'gateway.http.requests',
     'gw_illumio_resolver_cache': 'gateway.illumio.resolver.cache',
-    'gw_illumio_resolver_cache_ttl': 'gateway.illumio.resolver_.ache_ttl',
+    'gw_illumio_resolver_cache_ttl': 'gateway.illumio.resolver.cache_ttl',
     'gw_illumio_resolver_label': 'gateway.illumio.resolver.label',
     'gw_name_resolver_cache': 'gateway.name.resolver.cache',
     'gw_name_resolver_names_missing_resolver': 'gateway.name.resolver.names_missing_resolver',
@@ -88,4 +88,8 @@ METRIC_MAP = {
     'gw_vpn_rules_size': 'gateway.vpn.rules_size',
     'gw_vpn_sessions': 'gateway.vpn.sessions',
     'ptl_client': 'portal.client',
+}
+
+RENAME_LABELS_MAP = {
+    'version': 'protocol_version',
 }
