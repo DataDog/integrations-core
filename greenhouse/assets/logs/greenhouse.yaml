@@ -1,0 +1,28 @@
+id: greenhouse
+metric_id: greenhouse
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: greenhouse
+  enabled: true
+  filter:
+    query: "source:greenhouse"
+  processors:
+    - type: date-remapper
+      name: define `event_time` attribute as official timestamp for the logs
+      enabled: true
+      sources:
+        - event_time
+    - type: service-remapper
+      name: Define `service` as the official service of the logs
+      enabled: true
+      sources:
+        - service
+    - type: geo-ip-parser
+      name: GeoIP Parser for `performer.ip_address`
+      enabled: true
+      sources:
+        - performer.ip_address
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing

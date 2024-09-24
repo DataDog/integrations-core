@@ -1,0 +1,52 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "ad6f406c-cee2-4af5-9325-b85828f8946f",
+  "app_id": "greenhouse",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into organization's activities by monitoring Greenhouse audit logs",
+    "title": "Greenhouse",
+    "media": [
+      {
+        "caption": "Greenhouse - Audit Logs",
+        "image_url": "images/greenhouse_audit_logs.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 27063273,
+      "source_type_name": "Greenhouse",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Greenhouse - Audit Logs": "assets/dashboards/greenhouse_audit_logs.json"
+    },
+    "logs": {
+      "source": "greenhouse"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
