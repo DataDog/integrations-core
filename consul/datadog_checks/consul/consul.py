@@ -8,11 +8,10 @@ from datetime import datetime, timedelta
 from itertools import islice
 from multiprocessing.pool import ThreadPool
 from time import time as timestamp
+from urllib.parse import urljoin
 
 import requests
 from requests import HTTPError
-from six import iteritems, iterkeys, itervalues
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.base.utils.serialization import json
@@ -309,7 +308,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 )
                 self.warning(log_line)
 
-                services = {s: services[s] for s in list(islice(iterkeys(allowed_services), 0, self.max_services))}
+                services = {s: services[s] for s in list(islice(allowed_services, 0, self.max_services))}
 
         return services
 
@@ -381,7 +380,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 elif STATUS_SEVERITY[status] > STATUS_SEVERITY[sc[sc_id]['status']]:
                     sc[sc_id]['status'] = status
 
-            for s in itervalues(sc):
+            for s in sc.values():
                 self.service_check(HEALTH_CHECK, s['status'], tags=main_tags + s['tags'])
 
         except Exception as e:
@@ -437,7 +436,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                     nodes_with_service[service] if self.thread_pool is None else nodes_with_service[service].get(),
                 )
 
-            for node, service_status in iteritems(nodes_to_service_status):
+            for node, service_status in nodes_to_service_status.items():
                 # For every node discovered for included services, gauge the following:
                 # `consul.catalog.services_up` : Total services registered on node
                 # `consul.catalog.services_passing` : Total passing services on node
@@ -455,7 +454,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                         tags=main_tags + node_tags,
                     )
 
-            for node_status, count in iteritems(nodes_per_service_tag_counts):
+            for node_status, count in nodes_per_service_tag_counts.items():
                 service_tags = [
                     'consul_{}_service_tag:{}'.format(node_status.service_name, tag)
                     for tag in node_status.service_tags_set

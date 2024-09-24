@@ -5,7 +5,6 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.dev.testing import requires_py3
 
 from .common import skip_windows_ci
 
@@ -265,7 +264,6 @@ def test_ssl_check_normal_connection_before_ssl_connection(instance_ssl_dummy):
         get_ssl_connection.assert_called_with(config, logger)
 
 
-@requires_py3
 def test_queue_manager_process_direct_ssl(instance):
     from datadog_checks.ibm_mq.config import IBMMQConfig
 

@@ -389,3 +389,42 @@ def test_get_interpolated_timestamp():
     assert _get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
     assert _get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
     assert _get_interpolated_timestamp({10: 200}, 15) is None
+
+
+@pytest.mark.parametrize(
+    'read_persistent_cache, kafka_instance_config, consumer_lag_seconds_count',
+    [
+        pytest.param(
+            "",
+            {
+                'consumer_groups': {},
+                'data_streams_enabled': 'true',
+                'monitor_unlisted_consumer_groups': True,
+            },
+            0,
+            id='Read from cache failed',
+        ),
+    ],
+)
+def test_load_broker_timestamps_empty(
+    read_persistent_cache,
+    kafka_instance_config,
+    consumer_lag_seconds_count,
+    kafka_instance,
+    dd_run_check,
+    caplog,
+    aggregator,
+    check,
+):
+
+    kafka_instance.update(kafka_instance_config)
+    check = check(kafka_instance)
+    check.read_persistent_cache = mock.Mock(return_value=read_persistent_cache)
+    dd_run_check(check)
+
+    caplog.set_level(logging.WARN)
+    expected_warning = " Could not read broker timestamps from cache"
+
+    assert expected_warning in caplog.text
+    aggregator.assert_metric("kafka.estimated_consumer_lag", count=consumer_lag_seconds_count)
+    assert check.read_persistent_cache.mock_calls == [mock.call("broker_timestamps_")]

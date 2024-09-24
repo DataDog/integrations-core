@@ -27,7 +27,7 @@ pytestmark = pytest.mark.unit
     ],
 )
 def test_open_session(instance, side_effect, expected_session, tag):
-    with mock.patch('six.moves.xmlrpc_client.Server', side_effect=side_effect):
+    with mock.patch('datadog_checks.citrix_hypervisor.check.ServerProxy', side_effect=side_effect):
         check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
         session = check.open_session()
 
@@ -38,7 +38,7 @@ def test_open_session(instance, side_effect, expected_session, tag):
 @pytest.mark.usefixtures('mock_responses')
 @pytest.mark.parametrize('server_type', [pytest.param('master'), pytest.param('slave')])
 def test_check(aggregator, dd_run_check, instance, server_type):
-    with mock.patch('six.moves.xmlrpc_client.Server', return_value=mocked_xenserver(server_type)):
+    with mock.patch('datadog_checks.citrix_hypervisor.check.ServerProxy', return_value=mocked_xenserver(server_type)):
         check = CitrixHypervisorCheck('citrix_hypervisor', {}, [instance])
         dd_run_check(check)
 
