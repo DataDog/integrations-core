@@ -7,4 +7,4 @@ services:
       - "5556:5556"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ../fixtures/appgate_metrics.txt:/metrics/metrics
+      - ../fixtures/appgate_sdp_metrics.txt:/metrics/metrics
