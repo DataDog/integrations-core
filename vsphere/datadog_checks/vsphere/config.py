@@ -6,7 +6,6 @@ import re
 from typing import Any, Dict, List  # noqa: F401
 
 from pyVmomi import vim
-from six import iteritems, string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
@@ -208,9 +207,7 @@ class VSphereConfig(object):
                 )
 
             # Check required fields and their types
-            for field, field_type in iteritems(
-                {'resource': string_types, 'property': string_types, 'type': string_types, 'patterns': list}
-            ):
+            for field, field_type in {'resource': str, 'property': str, 'type': str, 'patterns': list}.items():
                 if field not in resource_filter:
                     self.log.warning(
                         "Ignoring filter %r because it doesn't contain a %s field.", resource_filter, field
@@ -282,7 +279,7 @@ class VSphereConfig(object):
         # type: (MetricFilterConfig) -> MetricFilters
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
         metric_filters = {}
-        for resource_type, filters in iteritems(all_metric_filters):
+        for resource_type, filters in all_metric_filters.items():
             if resource_type not in allowed_resource_types:
                 self.log.warning(
                     "Ignoring metric_filter for resource '%s'. When collection_type is '%s', it should be one of '%s'",
@@ -293,7 +290,7 @@ class VSphereConfig(object):
                 continue
             metric_filters[resource_type] = filters
 
-        return {k: [re.compile(r) for r in v] for k, v in iteritems(metric_filters)}
+        return {k: [re.compile(r) for r in v] for k, v in metric_filters.items()}
 
     def _normalize_event_resource_filters(self, filters):
         return [filter.lower() for filter in filters]

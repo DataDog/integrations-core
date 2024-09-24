@@ -6,7 +6,6 @@ import re
 from copy import deepcopy
 
 import requests
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
@@ -108,7 +107,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
             # Explicit shallow copy of the instance tags
             _tags = list(scraper_config['custom_tags'])
 
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 _tags.append('{}:{}'.format(label_name, label_value))
             # submit raw metric
             self.gauge(metric_name, sample[self.SAMPLE_VALUE], _tags)

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import clickhouse_driver
-from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
@@ -119,10 +118,7 @@ class ClickhouseCheck(AgentCheck):
                 self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
             )
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
-
-            # When an exception is raised in the context of another one, both will be printed. To avoid
-            # this we set the context to None. https://www.python.org/dev/peps/pep-0409/
-            raise_from(type(e)(error), None)
+            raise type(e)(error) from None
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._client = client

@@ -7,7 +7,6 @@ import copy
 import time
 from collections import defaultdict
 
-import six
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
@@ -905,7 +904,7 @@ class SQLServer(AgentCheck):
                 instance_results = {}
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
                 # Execute the `fetch_all` operations first to minimize the database calls
-                for cls, metric_names in six.iteritems(self.instance_per_type_metrics):
+                for cls, metric_names in self.instance_per_type_metrics.items():
                     if not metric_names:
                         instance_results[cls] = None, None
                     else:
