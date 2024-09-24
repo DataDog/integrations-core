@@ -2,7 +2,7 @@
     "version": 2,
     "created_at": "2023-12-13",
     "last_updated_at": "2023-12-13",
-    "title": "Low GPU Utilization low on Anyscale Node",
+    "title": "GPU Utilization low on Anyscale Node",
     "description": "Ray can leverage the computing power of GPUs to perform machine learning or data processing tasks. Underutilizing available GPU can be expensive. This monitor alerts when the GPU utilization is low on a Anyscale node indicating overprovisioning.",
     "definition": {
         "id": 136350024,

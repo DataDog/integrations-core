@@ -2,11 +2,11 @@
     "version": 2,
     "created_at": "2023-12-13",
     "last_updated_at": "2023-12-13",
-    "title": "High Number of Failed Tasks on anyscale Node",
+    "title": "High Number of Failed Tasks on Anyscale Node",
     "description": "Tasks are scheduled to workers by the Anyscale scheduler. This monitor alerts when there are too many scheduling failures within a specified time period due to a particular reason.",
     "definition": {
         "id": 136348417,
-        "name": "High Number of Failed Tasks on anyscale Node",
+        "name": "High Number of Failed Tasks on Anyscale Node",
         "type": "query alert",
         "query": "avg(last_5m):avg:ray.scheduler.failed_worker_startup{*} by {reason,nodeaddress} > 25",
         "message": "{{#is_alert}}\nThere are {{value}} tasks that failed to be schedule because workers were not available. This occurred on node: {{nodeaddress.name}}. The stated reason was {{reason.name}}.\n{{/is_alert}}",

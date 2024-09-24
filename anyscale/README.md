@@ -6,11 +6,11 @@ This check monitors [Anyscale][1]. Anyscale is a compute platform that hosts [Ra
 
 ## Setup
 
-To install and configure the Datadog Agent with the Ray integration on Anyscale, follow [this documentation][6].
+To install and configure the Datadog Agent with the Ray integration on Anyscale, see the [official Anyscale documentation][6].
 
 ## Data Collected
 
-See the [Data Collected by Ray][4].
+See the [Ray integration's Data Collected section][4].
 
 ## Troubleshooting
 
