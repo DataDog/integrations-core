@@ -2,6 +2,12 @@
 #
 init_config:
 
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -45,6 +51,12 @@ instances:
     ## Port to use when connecting to MySQL.
     #
     port: 3306
+
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
 
     ## @param reported_hostname - string - optional
     ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent

@@ -4,9 +4,7 @@
 import os
 from contextlib import contextmanager
 from typing import Iterator  # noqa: F401
-
-from six import string_types
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
@@ -168,7 +166,7 @@ def docker_run(
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')
 
     if compose_file is not None:
-        if not isinstance(compose_file, string_types):
+        if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
 
         set_up = ComposeFileUp(compose_file, build=build, service_name=service_name)

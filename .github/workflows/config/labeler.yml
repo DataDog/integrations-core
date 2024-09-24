@@ -193,6 +193,8 @@ integration/fly_io:
 - fly_io/**/*
 integration/foundationdb:
 - foundationdb/**/*
+integration/freshservice:
+- freshservice/**/*
 integration/gearmand:
 - gearmand/**/*
 integration/gitlab:
@@ -291,10 +293,10 @@ integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
-integration/kubevirt_controller:
-- kubevirt_controller/**/*
 integration/kubevirt_api:
 - kubevirt_api/**/*
+integration/kubevirt_controller:
+- kubevirt_controller/**/*
 integration/kubevirt_handler:
 - kubevirt_handler/**/*
 integration/kyototycoon:

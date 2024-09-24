@@ -6,14 +6,13 @@ import os
 import ssl
 import threading
 import time
+from http import server as BaseHTTPServer
+from urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, urlunparse
 
 import mock
 import pytest
 import urllib3
 from requests import RequestException
-from six import iteritems
-from six.moves import BaseHTTPServer
-from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, urlunparse
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -655,60 +654,50 @@ SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS = {
 }
 
 
+def _assert(aggregator, values_and_tags):
+    for m_vals, tags in values_and_tags:
+        for metric, value in m_vals.items():
+            aggregator.assert_metric(metric, value=value, tags=tags)
+
+
 @pytest.mark.unit
 def test_yarn(aggregator, dd_run_check):
     with mock.patch('requests.get', yarn_requests_get_mock):
         c = SparkCheck('spark', {}, [YARN_CONFIG])
         dd_run_check(c)
 
-        # Check the succeeded job metrics
-        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the running stage metrics
-        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the complete stage metrics
-        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the optional executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the RDD metrics
-        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the streaming statistics metrics
-        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the structured streaming metrics
-        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
+        _assert(
+            aggregator,
+            [
+                # Check the succeeded job metrics
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the running stage metrics
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the complete stage metrics
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the driver metrics
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the optional driver metrics
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the executor level metrics
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the optional executor level metrics
+                (
+                    SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS,
+                ),
+                # Check the summary executor metrics
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the optional summary executor metrics
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the RDD metrics
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the streaming statistics metrics
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the structured streaming metrics
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+            ],
+        )
         tags = ['url:http://localhost:8088'] + CLUSTER_TAGS + CUSTOM_TAGS
         tags.sort()
 
@@ -751,58 +740,40 @@ def test_mesos(aggregator, dd_run_check):
     with mock.patch('requests.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_CONFIG])
         dd_run_check(c)
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the succeeded job metrics
-        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the running stage metrics
-        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the complete stage metrics
-        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the optional executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the RDD metrics
-        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the streaming statistics metrics
-        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the structured streaming metrics
-        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
+        _assert(
+            aggregator,
+            [
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the succeeded job metrics
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the running stage metrics
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the complete stage metrics
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the driver metrics
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the optional driver metrics
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the executor level metrics
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the optional executor level metrics
+                (
+                    SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS,
+                ),
+                # Check the summary executor metrics
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the optional summary executor metrics
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the RDD metrics
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the streaming statistics metrics,
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the structured streaming metrics
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+            ],
+        )
         # Check the service tests
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
@@ -842,58 +813,40 @@ def test_driver_unit(aggregator, dd_run_check):
         c = SparkCheck('spark', {}, [DRIVER_CONFIG])
         dd_run_check(c)
 
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the succeeded job metrics
-        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the running stage metrics
-        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the complete stage metrics
-        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the optional executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS)
-
-        # Check the summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the RDD metrics
-        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the streaming statistics metrics
-        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
-        # Check the structured streaming metrics
-        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
-
+        _assert(
+            aggregator,
+            [
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the succeeded job metrics
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the running stage metrics
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the complete stage metrics
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the driver metrics
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the optional driver metrics
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the executor level metrics
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS),
+                # Check the optional executor level metrics
+                (
+                    SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+                    SPARK_EXECUTOR_LEVEL_METRIC_TAGS + CUSTOM_TAGS,
+                ),
+                # Check the summary executor metrics
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the optional summary executor metrics
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the RDD metrics
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the streaming statistics metrics
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+                # Check the structured streaming metrics
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS + CUSTOM_TAGS),
+            ],
+        )
         # Check the service tests
 
         for sc in aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK):
@@ -920,62 +873,39 @@ def test_standalone_unit(aggregator, dd_run_check):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
         dd_run_check(c)
 
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS)
-
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS)
-
-        # Check the succeeded job metrics
-        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS)
-
-        # Check the running stage metrics
-        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_RUNNING_METRIC_TAGS)
-
-        # Check the complete stage metrics
-        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_COMPLETE_METRIC_TAGS)
-
-        # Check the driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
-
-        # Check the optional executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
-
-        # Check the executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the RDD metrics
-        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the streaming statistics metrics
-        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the structured streaming metrics
-        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
+        _assert(
+            aggregator,
+            [
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                # Check the succeeded job metrics
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS),
+                # Check the running stage metrics
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS),
+                # Check the complete stage metrics
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS),
+                # Check the driver metrics
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional driver metrics
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the executor level metrics
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the optional executor level metrics
+                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the executor metrics
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional summary executor metrics
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the RDD metrics
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                # Check the streaming statistics metrics
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                # Check the structured streaming metrics
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+            ],
+        )
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
             assert sc.status == SparkCheck.OK
@@ -995,61 +925,39 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
     with mock.patch('requests.get', proxy_with_warning_page_mock):
         dd_run_check(c)
 
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS)
-
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS)
-
-        # Check the succeeded job metrics
-        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS)
-
-        # Check the running stage metrics
-        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_RUNNING_METRIC_TAGS)
-
-        # Check the complete stage metrics
-        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_COMPLETE_METRIC_TAGS)
-
-        # Check the driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
-
-        # Check the optional executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
-
-        # Check the summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the RDD metrics
-        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the streaming statistics metrics
-        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the structured streaming metrics
-        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
+        _assert(
+            aggregator,
+            [
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                # Check the succeeded job metrics
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS),
+                # Check the running stage metrics
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS),
+                # Check the complete stage metrics
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS),
+                # Check the driver metrics
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional driver metrics
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the executor level metrics
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the optional executor level metrics
+                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the summary executor metrics
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional summary executor metrics
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the RDD metrics
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                # Check the streaming statistics metrics
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                # Check the structured streaming metrics
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+            ],
+        )
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
@@ -1070,61 +978,39 @@ def test_standalone_pre20(aggregator, dd_run_check):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG_PRE_20])
         dd_run_check(c)
 
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS)
-
-        # Check the running job metrics
-        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS)
-
-        # Check the succeeded job metrics
-        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS)
-
-        # Check the running stage metrics
-        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_RUNNING_METRIC_TAGS)
-
-        # Check the complete stage metrics
-        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_COMPLETE_METRIC_TAGS)
-
-        # Check the driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
-
-        # Check the optional executor level metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=SPARK_EXECUTOR_LEVEL_METRIC_TAGS)
-
-        # Check the summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the RDD metrics
-        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the streaming statistics metrics
-        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
-
-        # Check the structured streaming metrics
-        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
-            aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
+        _assert(
+            aggregator,
+            [
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_METRIC_TAGS),
+                # Check the succeeded job metrics
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_METRIC_TAGS),
+                # Check the running stage metrics
+                (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS),
+                # Check the complete stage metrics
+                (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS),
+                # Check the driver metrics
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional driver metrics
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the executor level metrics
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the optional executor level metrics
+                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the summary executor metrics
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional summary executor metrics
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the RDD metrics
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                # Check the streaming statistics metrics
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                # Check the structured streaming metrics
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+            ],
+        )
 
         # Check the service tests
         for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
@@ -1200,14 +1086,14 @@ def test_enable_query_name_tag_for_structured_streaming(
         c = SparkCheck('spark', {}, [instance])
         dd_run_check(c)
 
-        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_VALUES):
+        for metric, value in SPARK_STRUCTURED_STREAMING_METRIC_VALUES.items():
             tags = base_tags
             if metric not in SPARK_STRUCTURED_STREAMING_METRIC_NO_TAGS:
                 tags = base_tags + ["query_name:my_named_query"]
 
             aggregator.assert_metric(metric, value=value, tags=tags)
 
-        for metric, value in iteritems(SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS):
+        for metric, value in SPARK_STRUCTURED_STREAMING_METRIC_PUNCTUATED_TAGS.items():
             tags = base_tags + ["query_name:my.app.punctuation"]
 
             aggregator.assert_metric(metric, value=value, tags=tags)

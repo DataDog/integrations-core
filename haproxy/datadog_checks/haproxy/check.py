@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import PY2
+from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
-
+from .checkv2 import HaproxyCheckV2
 from .legacy.haproxy import HAProxyCheckLegacy
 from .metrics import METRIC_MAP
 
@@ -16,14 +15,6 @@ class HAProxyCheck(OpenMetricsBaseCheck):
         instance = instances[0]
 
         if is_affirmative(instance.get('use_openmetrics', False)):
-            if PY2:
-                raise ConfigurationError(
-                    "Openmetrics on this integration is only available when using py3. "
-                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information"
-                )
-            from .checkv2 import HaproxyCheckV2
-
             return HaproxyCheckV2(name, init_config, instances)
         elif is_affirmative(instance.get('use_prometheus', False)):
             return super(HAProxyCheck, cls).__new__(cls)

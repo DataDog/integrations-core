@@ -454,10 +454,6 @@ coverage:
         target: 75
         flags:
         - openstack_controller
-      Oracle_Database:
-        target: 75
-        flags:
-        - oracle
       PDH:
         target: 75
         flags:
@@ -1305,11 +1301,6 @@ flags:
     paths:
     - openstack_controller/datadog_checks/openstack_controller
     - openstack_controller/tests
-  oracle:
-    carryforward: true
-    paths:
-    - oracle/datadog_checks/oracle
-    - oracle/tests
   pdh_check:
     carryforward: true
     paths:
