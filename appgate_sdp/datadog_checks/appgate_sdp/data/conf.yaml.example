@@ -46,9 +46,15 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## The URL exposing metrics in the OpenMetrics format.
+    ## The URL of the OpenMetrics endpoint.
     #
   - openmetrics_endpoint: http://localhost:5556/metrics
+
+    ## @param raw_metric_prefix - string - optional
+    ## A prefix that is removed from all exposed metric names, if present.
+    ## All configuration options will use the prefix-less name.
+    #
+    # raw_metric_prefix: <PREFIX>_
 
     ## @param extra_metrics - (list of string or mapping) - optional
     ## This list defines metrics to collect from the `openmetrics_endpoint`, in addition to
@@ -159,6 +165,43 @@ instances:
     #
     # ignore_connection_errors: false
 
+    ## @param hostname_label - string - optional
+    ## Override the hostname for every metric submission with the value of one of its labels.
+    #
+    # hostname_label: <HOSTNAME_LABEL>
+
+    ## @param hostname_format - string - optional
+    ## When `hostname_label` is set, this instructs the check how to format the values. The string
+    ## `<HOSTNAME>` is replaced by the value of the label defined by `hostname_label`.
+    #
+    # hostname_format: <HOSTNAME>
+
+    ## @param collect_histogram_buckets - boolean - optional - default: true
+    ## Whether or not to send histogram buckets.
+    #
+    # collect_histogram_buckets: true
+
+    ## @param non_cumulative_histogram_buckets - boolean - optional - default: false
+    ## Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
+    #
+    # non_cumulative_histogram_buckets: false
+
+    ## @param histogram_buckets_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+    ## enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
+    ##
+    ## Learn more about distribution metrics:
+    ## https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+    #
+    # histogram_buckets_as_distributions: false
+
+    ## @param collect_counters_with_distributions - boolean - optional - default: false
+    ## Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+    ## when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+    ## `histogram_buckets_as_distributions` option.
+    #
+    # collect_counters_with_distributions: false
+
     ## @param use_process_start_time - boolean - optional - default: false
     ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
     ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
@@ -167,6 +210,36 @@ instances:
     #
     # use_process_start_time: false
 
+    ## @param share_labels - mapping - optional
+    ## This mapping allows for the sharing of labels across multiple metrics. The keys represent the
+    ## exposed metrics from which to share labels, and the values are mappings that configure the
+    ## sharing behavior. Each mapping must have at least one of the following keys:
+    ##
+    ##   labels - This is a list of labels to share. All labels are shared if this is not set.
+    ##   match - This is a list of labels to match on other metrics as a condition for sharing.
+    ##   values - This is a list of allowed values as a condition for sharing.
+    ##
+    ## To unconditionally share all labels of a metric, set it to `true`.
+    ##
+    ## For example, the following configuration instructs the check to apply all labels from `metric_a`
+    ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
+    ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
+    ## to all other metrics if their value is equal to `23` or `42`.
+    ##
+    ##   share_labels:
+    ##     metric_a: true
+    ##     metric_b:
+    ##       labels:
+    ##       - node
+    ##       match:
+    ##       - pod
+    ##     metric_c:
+    ##       values:
+    ##       - 23
+    ##       - 42
+    #
+    # share_labels: {}
+
     ## @param cache_shared_labels - boolean - optional - default: true
     ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
     ## for improved performance.
@@ -174,6 +247,23 @@ instances:
     ## Set this to `false` to compute label sharing for every payload at the risk of potentially increased memory usage.
     #
     # cache_shared_labels: true
+
+    ## @param raw_line_filters - list of strings - optional
+    ## A list of regular expressions used to exclude lines read from the `openmetrics_endpoint`
+    ## from being parsed.
+    #
+    # raw_line_filters: []
+
+    ## @param cache_metric_wildcards - boolean - optional - default: true
+    ## Whether or not to cache data from metrics that are defined by regular expressions rather
+    ## than the full metric name.
+    #
+    # cache_metric_wildcards: true
+
+    ## @param telemetry - boolean - optional - default: false
+    ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
+    #
+    # telemetry: false
 
     ## @param ignore_tags - list of strings - optional
     ## A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
@@ -215,6 +305,33 @@ instances:
     # skip_proxy: false
 
     ## @param auth_type - string - optional - default: basic
+    ## The type of authentication to use. The available types (and related options) are:
+    ##
+    ##   - basic
+    ##     |__ username
+    ##     |__ password
+    ##     |__ use_legacy_auth_encoding
+    ##   - digest
+    ##     |__ username
+    ##     |__ password
+    ##   - ntlm
+    ##     |__ ntlm_domain
+    ##     |__ password
+    ##   - kerberos
+    ##     |__ kerberos_auth
+    ##     |__ kerberos_cache
+    ##     |__ kerberos_delegate
+    ##     |__ kerberos_force_initiate
+    ##     |__ kerberos_hostname
+    ##     |__ kerberos_keytab
+    ##     |__ kerberos_principal
+    ##   - aws
+    ##     |__ aws_region
+    ##     |__ aws_host
+    ##     |__ aws_service
+    ##
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
+    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
 
@@ -232,6 +349,134 @@ instances:
     ## The password to use if services are behind basic or NTLM auth.
     #
     # password: <PASSWORD>
+
+    ## @param ntlm_domain - string - optional
+    ## If your services use NTLM authentication, specify
+    ## the domain used in the check. For NTLM Auth, append
+    ## the username to domain, not as the `username` parameter.
+    #
+    # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
+
+    ## @param kerberos_auth - string - optional - default: disabled
+    ## If your services use Kerberos authentication, you can specify the Kerberos
+    ## strategy to use between:
+    ##
+    ##   - required
+    ##   - optional
+    ##   - disabled
+    ##
+    ## See https://github.com/requests/requests-kerberos#mutual-authentication
+    #
+    # kerberos_auth: disabled
+
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KERBEROS_CACHE>
+
+    ## @param kerberos_delegate - boolean - optional - default: false
+    ## Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
+    ##
+    ## See https://github.com/requests/requests-kerberos#delegation
+    #
+    # kerberos_delegate: false
+
+    ## @param kerberos_force_initiate - boolean - optional - default: false
+    ## Set to `true` to preemptively initiate the Kerberos GSS exchange and
+    ## present a Kerberos ticket on the initial request (and all subsequent).
+    ##
+    ## See https://github.com/requests/requests-kerberos#preemptive-authentication
+    #
+    # kerberos_force_initiate: false
+
+    ## @param kerberos_hostname - string - optional
+    ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
+    ## match its Kerberos hostname, for example: behind a content switch or load balancer.
+    ##
+    ## See https://github.com/requests/requests-kerberos#hostname-override
+    #
+    # kerberos_hostname: <KERBEROS_HOSTNAME>
+
+    ## @param kerberos_principal - string - optional
+    ## Set an explicit principal, to force Kerberos to look for a
+    ## matching credential cache for the named user.
+    ##
+    ## See https://github.com/requests/requests-kerberos#explicit-principal
+    #
+    # kerberos_principal: <KERBEROS_PRINCIPAL>
+
+    ## @param kerberos_keytab - string - optional
+    ## Set the path to your Kerberos key tab file.
+    #
+    # kerberos_keytab: <KEYTAB_FILE_PATH>
+
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+
+    ## @param aws_region - string - optional
+    ## If your services require AWS Signature Version 4 signing, set the region.
+    ##
+    ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
+    #
+    # aws_region: <AWS_REGION>
+
+    ## @param aws_host - string - optional
+    ## If your services require AWS Signature Version 4 signing, set the host.
+    ## This only needs the hostname and does not require the protocol (HTTP, HTTPS, and more).
+    ## For example, if connecting to https://us-east-1.amazonaws.com/, set `aws_host` to `us-east-1.amazonaws.com`.
+    ##
+    ## Note: This setting is not necessary for official integrations.
+    ##
+    ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
+    #
+    # aws_host: <AWS_HOST>
+
+    ## @param aws_service - string - optional
+    ## If your services require AWS Signature Version 4 signing, set the service code. For a list
+    ## of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
+    ##
+    ## Note: This setting is not necessary for official integrations.
+    ##
+    ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
+    #
+    # aws_service: <AWS_SERVICE>
 
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of services.
@@ -284,6 +529,24 @@ instances:
     #   - TLSv1.2
     #   - TLSv1.3
 
+    ## @param headers - mapping - optional
+    ## The headers parameter allows you to send specific headers with every request.
+    ## You can use it for explicitly specifying the host header or adding headers for
+    ## authorization purposes.
+    ##
+    ## This overrides any default headers.
+    #
+    # headers:
+    #   Host: <ALTERNATIVE_HOSTNAME>
+    #   X-Auth-Token: <AUTH_TOKEN>
+
+    ## @param extra_headers - mapping - optional
+    ## Additional headers to send with every request.
+    #
+    # extra_headers:
+    #   Host: <ALTERNATIVE_HOSTNAME>
+    #   X-Auth-Token: <AUTH_TOKEN>
+
     ## @param timeout - number - optional - default: 10
     ## The timeout for accessing services.
     ##
@@ -295,6 +558,21 @@ instances:
     ## The connect timeout for accessing services. Defaults to `timeout`.
     #
     # connect_timeout: <CONNECT_TIMEOUT>
+
+    ## @param read_timeout - number - optional
+    ## The read timeout for accessing services. Defaults to `timeout`.
+    #
+    # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
+    ## @param log_requests - boolean - optional - default: false
+    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
+    #
+    # log_requests: false
 
     ## @param persist_connections - boolean - optional - default: false
     ## Whether or not to persist cookies and use connection pooling for improved performance.
@@ -322,3 +600,26 @@ instances:
     #
     # service: <SERVICE>
 
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

@@ -11,40 +11,6 @@ files:
       overrides: 
         openmetrics_endpoint.required: true
         openmetrics_endpoint.value.example: http://localhost:5556/metrics
-        raw_metric_prefix.hidden: true 
-        hostname_label.hidden: true
-        hostname_format.hidden: true 
-        collect_histogram_buckets.hidden: true
-        non_cumulative_histogram_buckets.hidden: true 
-        histogram_buckets_as_distributions.hidden: true 
-        collect_counters_with_distributions.hidden: true 
-        share_labels.hidden: true 
-        raw_line_filters.hidden: true 
-        cache_metric_wildcards.hidden: true 
-        telemetry.hidden: true 
-        ntlm_domain.hidden: true 
-        kerberos_auth.hidden: true 
-        kerberos_cache.hidden: true 
-        kerberos_delegate.hidden: true 
-        kerberos_force_initiate.hidden: true 
-        kerberos_hostname.hidden: true 
-        kerberos_principal.hidden: true 
-        kerberos_keytab.hidden: true 
-        auth_token.hidden: true 
-        aws_region.hidden: true 
-        aws_host.hidden: true 
-        aws_service.hidden: true 
-        read_timeout.hidden: true 
-        log_requests.hidden: true 
-        headers.hidden: true 
-        extra_headers.hidden: true 
-        request_size.hidden: true 
-        min_collection_interval.hidden: true 
-        empty_default_hostname.hidden: true 
-        metric_patterns.hidden: true 
-        auth_type.description: ""
+        openmetrics_endpoint.description: |
+          The URL of the OpenMetrics endpoint.
 
-  - template: instances/openmetrics_legacy_base
-    hidden: true
-    overrides:
-      prometheus_url.required: false

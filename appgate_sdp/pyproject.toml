@@ -9,7 +9,7 @@ name = "datadog-appgate-sdp"
 description = "The Appgate SDP check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",
