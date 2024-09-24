@@ -113,7 +113,9 @@ class Deadlocks(DBMAsyncJob):
                 try:
                     cursor.execute(DEADLOCK_QUERY, (self._max_deadlocks, self._get_lookback_seconds()))
                 except Exception as e:
-                    raise Exception(f"{str(e)} | cursor.description: {cursor.description}")
+                    if "Data column of Unknown ADO type" in str(e):
+                        raise Exception(f"{str(e)} | cursor.description: {cursor.description}")
+                    raise e
 
                 columns = [column[0] for column in cursor.description]
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
