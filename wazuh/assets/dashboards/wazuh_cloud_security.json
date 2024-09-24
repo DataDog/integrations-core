@@ -93,9 +93,12 @@
                     {
                         "id": 5292538524670792,
                         "definition": {
-                            "title": "Events Count",
+                            "title": "Total Events Count",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "hide_incomplete_cost_data": true
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -120,6 +123,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
                                         }
                                     ]
                                 }
@@ -222,418 +232,6 @@
                 "y": 3,
                 "width": 5,
                 "height": 5
-            }
-        },
-        {
-            "id": 4875838896961110,
-            "definition": {
-                "title": "GITHUB",
-                "background_color": "vivid_green",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 7702225747947318,
-                        "definition": {
-                            "title": "Events Over Time by Organization",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@data.github.org",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 2676818957173066,
-                        "definition": {
-                            "title": "Events Distribution by Users",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@usr.name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 7,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 7550893216388226,
-                        "definition": {
-                            "title": "Top 10 Organizations",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@data.github.org",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "dog_classic"
-                            }
-                        },
-                        "layout": {
-                            "x": 7,
-                            "y": 3,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5076107730865302,
-                        "definition": {
-                            "title": "Top 10 Rules",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@rule.description",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "dog_classic"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 7,
-                            "width": 7,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2785447412027712,
-                        "definition": {
-                            "title": "Top 10 Actions",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@data.github.action",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
-                            }
-                        },
-                        "layout": {
-                            "x": 7,
-                            "y": 7,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6220483431481606,
-                        "definition": {
-                            "title": "Geo-distribution of Actor Locations",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "type": "geomap",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@data.github.actor_location.country_code",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "palette": "hostmap_blues",
-                                "palette_flip": false
-                            },
-                            "view": {
-                                "focus": "WORLD"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 11,
-                            "width": 12,
-                            "height": 4
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 8,
-                "width": 12,
-                "height": 16
             }
         },
         {
@@ -759,74 +357,7 @@
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5786382126685622,
-                        "definition": {
-                            "title": "Events Over Time by Sources",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@data.aws.source",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:wazuh service:amazon $Service $Group $Agent_Name $Manager_Name $Level"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "area"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 3,
-                            "width": 8,
+                            "width": 6,
                             "height": 4
                         }
                     },
@@ -892,76 +423,9 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 7,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2991381177838404,
-                        "definition": {
-                            "title": "Events Over Time by S3 Buckets",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@data.aws.log_info.s3bucket",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:wazuh service:amazon $Service $Group $Agent_Name $Manager_Name $Level"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "area"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 7,
-                            "width": 8,
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
                             "height": 4
                         }
                     },
@@ -1027,7 +491,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 11,
+                            "y": 7,
                             "width": 3,
                             "height": 4
                         }
@@ -1095,7 +559,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 11,
+                            "y": 7,
                             "width": 5,
                             "height": 4
                         }
@@ -1163,7 +627,7 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 11,
+                            "y": 7,
                             "width": 4,
                             "height": 4
                         }
@@ -1231,7 +695,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 15,
+                            "y": 11,
                             "width": 5,
                             "height": 4
                         }
@@ -1291,7 +755,7 @@
                         },
                         "layout": {
                             "x": 5,
-                            "y": 15,
+                            "y": 11,
                             "width": 7,
                             "height": 4
                         }
@@ -1358,7 +822,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 19,
+                            "y": 15,
                             "width": 12,
                             "height": 4
                         }
@@ -1433,7 +897,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 23,
+                            "y": 19,
                             "width": 12,
                             "height": 4
                         }
@@ -1442,9 +906,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 24,
+                "y": 8,
                 "width": 12,
-                "height": 28
+                "height": 24
             }
         },
         {
@@ -1644,16 +1108,12 @@
                     {
                         "id": 3692677507540432,
                         "definition": {
-                            "title": "Events Distribution by Instances",
+                            "title": "Top 10 Instances",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "toplist",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -1681,6 +1141,11 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
                                         "count": 500,
                                         "order_by": [
@@ -1690,15 +1155,15 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
                                     }
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
                             }
                         },
                         "layout": {
@@ -1711,7 +1176,7 @@
                     {
                         "id": 7999724327545938,
                         "definition": {
-                            "title": "Events Distribution by Instances",
+                            "title": "Events Distribution by Response Code",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -2051,7 +1516,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 52,
+                "y": 32,
                 "width": 12,
                 "height": 20
             }
@@ -2197,7 +1662,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -2241,7 +1713,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -2733,9 +2212,421 @@
             },
             "layout": {
                 "x": 0,
-                "y": 72,
+                "y": 52,
                 "width": 12,
                 "height": 23
+            }
+        },
+        {
+            "id": 4875838896961110,
+            "definition": {
+                "title": "GITHUB",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7702225747947318,
+                        "definition": {
+                            "title": "Events Over Time by Organization",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.github.org",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2676818957173066,
+                        "definition": {
+                            "title": "Events Distribution by Users",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 7,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7550893216388226,
+                        "definition": {
+                            "title": "Top 10 Organizations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.github.org",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 3,
+                            "width": 5,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5076107730865302,
+                        "definition": {
+                            "title": "Top 10 Rules",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@rule.description",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 7,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2785447412027712,
+                        "definition": {
+                            "title": "Top 10 Actions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.github.action",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 7,
+                            "width": 5,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6220483431481606,
+                        "definition": {
+                            "title": "Geo-distribution of Actor Locations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "hide_incomplete_cost_data": true
+                            },
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@data.github.actor_location.country_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "palette": "hostmap_blues",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 75,
+                "width": 12,
+                "height": 16
             }
         },
         {
@@ -2750,7 +2641,7 @@
                     {
                         "id": 7156208150716184,
                         "definition": {
-                            "title": "Events Over Time by Images",
+                            "title": "Events Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -2780,16 +2671,7 @@
                                             "compute": {
                                                 "aggregation": "count"
                                             },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@data.docker.Actor.Attributes.image",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
+                                            "group_by": [],
                                             "search": {
                                                 "query": "source:wazuh service:docker $Service $Group $Agent_Name $Manager_Name $Level"
                                             },
@@ -3090,7 +2972,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 95,
+                "y": 91,
                 "width": 12,
                 "height": 10
             }

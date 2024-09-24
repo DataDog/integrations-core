@@ -34,7 +34,7 @@
                     {
                         "id": 442076009473208,
                         "definition": {
-                            "title": "System Events Over Time",
+                            "title": "Events Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -46,6 +46,9 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {
+                                "hide_incomplete_cost_data": true
+                            },
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -93,9 +96,12 @@
                     {
                         "id": 807392182347004,
                         "definition": {
-                            "title": "Total System Events Count",
+                            "title": "Total Events Count",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "hide_incomplete_cost_data": true
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -121,6 +127,13 @@
                                         {
                                             "formula": "query1"
                                         }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
                                     ]
                                 }
                             ],
@@ -137,7 +150,7 @@
                     {
                         "id": 7475578766639274,
                         "definition": {
-                            "title": "System Events Distribution by Rule Level",
+                            "title": "Events Distribution by Rule Level",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -267,6 +280,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
                                         }
                                     ]
                                 }
@@ -514,6 +534,13 @@
                                         {
                                             "formula": "query1"
                                         }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
                                     ]
                                 }
                             ],
@@ -558,6 +585,13 @@
                                         {
                                             "formula": "query1"
                                         }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
                                     ]
                                 }
                             ],
@@ -601,6 +635,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 1,
+                                            "palette": "black_on_light_yellow"
                                         }
                                     ]
                                 }
@@ -685,7 +726,7 @@
                 "x": 0,
                 "y": 21,
                 "width": 12,
-                "height": 1
+                "height": 9
             }
         },
         {
@@ -727,6 +768,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
                                         }
                                     ]
                                 }
@@ -772,6 +820,13 @@
                                         {
                                             "formula": "query1"
                                         }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
                                     ]
                                 }
                             ],
@@ -816,6 +871,13 @@
                                         {
                                             "formula": "query1"
                                         }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
                                     ]
                                 }
                             ],
@@ -859,6 +921,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
                                         }
                                     ]
                                 }
@@ -1076,7 +1145,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 22,
+                "y": 30,
                 "width": 12,
                 "height": 13
             }
@@ -1121,7 +1190,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
                                 }
                             ],
                             "autoscale": true,
@@ -1403,7 +1479,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 35,
+                "y": 43,
                 "width": 12,
                 "height": 9
             }
@@ -1447,6 +1523,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
                                         }
                                     ]
                                 }
@@ -1592,9 +1675,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 44,
+                "y": 52,
                 "width": 12,
-                "height": 1
+                "height": 9
             }
         },
         {
@@ -1636,6 +1719,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
                                         }
                                     ]
                                 }
@@ -1788,9 +1878,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 45,
+                "y": 61,
                 "width": 12,
-                "height": 1
+                "height": 5
             }
         },
         {
@@ -1832,6 +1922,13 @@
                                     "formulas": [
                                         {
                                             "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
                                         }
                                     ]
                                 }
@@ -2054,72 +2151,87 @@
             },
             "layout": {
                 "x": 0,
-                "y": 46,
+                "y": 66,
                 "width": 12,
-                "height": 1
+                "height": 5
             }
         },
         {
-            "id": 8513797087942712,
+            "id": 6435847721864372,
             "definition": {
-                "title": "System Event Details",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "hide_incomplete_cost_data": true
-                },
-                "requests": [
+                "title": "Events Details",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "response_format": "event_list",
-                        "query": {
-                            "data_source": "logs_stream",
-                            "query_string": "source:wazuh service:system ",
-                            "indexes": [],
-                            "storage": "hot"
+                        "id": 8513797087942712,
+                        "definition": {
+                            "title": "System Event Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:wazuh service:system $Agent_Name $Manager_Name $Level $Service $Group ",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "agent.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "rule.level",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "rule.id",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "rule.groups",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "full"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
                         },
-                        "columns": [
-                            {
-                                "field": "status_line",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "timestamp",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "service",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "agent.name",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "rule.level",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "rule.id",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "rule.groups",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "content",
-                                "width": "full"
-                            }
-                        ]
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
                     }
-                ],
-                "type": "list_stream"
+                ]
             },
             "layout": {
                 "x": 0,
-                "y": 0,
+                "y": 71,
                 "width": 12,
-                "height": 4
+                "height": 5
             }
         }
     ],

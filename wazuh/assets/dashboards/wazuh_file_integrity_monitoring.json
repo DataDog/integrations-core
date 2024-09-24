@@ -62,6 +62,13 @@
                                         {
                                             "formula": "query1"
                                         }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
                                     ]
                                 }
                             ],
@@ -377,17 +384,12 @@
                     {
                         "id": 5881951673117876,
                         "definition": {
-                            "title": "Events Distribution by Agents",
+                            "title": "Top Agents by Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "toplist",
                             "requests": [
                                 {
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
                                     "queries": [
                                         {
                                             "data_source": "logs",
@@ -401,7 +403,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@agent.name",
-                                                    "limit": 10,
+                                                    "limit": 1000,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
@@ -414,11 +416,14 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 1000,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -429,9 +434,12 @@
                                     }
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
                             }
                         },
                         "layout": {
@@ -1225,7 +1233,7 @@
                 "x": 0,
                 "y": 49,
                 "width": 12,
-                "height": 5
+                "height": 1
             }
         },
         {

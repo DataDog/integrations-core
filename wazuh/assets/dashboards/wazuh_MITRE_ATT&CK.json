@@ -102,9 +102,12 @@
                     {
                         "id": 4197916590627842,
                         "definition": {
-                            "title": "Events Count",
+                            "title": "Total Events Count",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "hide_incomplete_cost_data": true
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
