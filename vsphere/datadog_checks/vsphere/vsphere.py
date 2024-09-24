@@ -11,7 +11,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Type, cast  # noqa: F401
 
 from pyVmomi import vim, vmodl
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
@@ -182,7 +181,7 @@ class VSphereCheck(AgentCheck):
         resource_filters_without_tags = [f for f in self._config.resource_filters if not isinstance(f, TagFilter)]
         filtered_infra_data = {
             mor: props
-            for mor, props in iteritems(infrastructure_data)
+            for mor, props in infrastructure_data.items()
             if isinstance(mor, tuple(self._config.collected_resource_types))
             and is_resource_collected_by_filters(mor, infrastructure_data, resource_filters_without_tags)
         }
@@ -234,7 +233,7 @@ class VSphereCheck(AgentCheck):
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
-        for mor, properties in iteritems(infrastructure_data):
+        for mor, properties in infrastructure_data.items():
             if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
                 continue
@@ -487,7 +486,7 @@ class VSphereCheck(AgentCheck):
                 counters = self.metrics_metadata_cache.get_metadata(resource_type)
                 metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
                 is_historical_batch = metric_type == HISTORICAL
-                for counter_key, metric_name in iteritems(counters):
+                for counter_key, metric_name in counters.items():
                     # PerformanceManager.MetricId `instance` kwarg:
                     # - An asterisk (*) to specify all instances of the metric for the specified counterId
                     # - Double-quotes ("") to specify aggregated statistics
@@ -504,7 +503,7 @@ class VSphereCheck(AgentCheck):
 
                 for batch in self.make_batch(mors, metric_ids, resource_type, is_historical_batch=is_historical_batch):
                     query_specs = []
-                    for mor, metrics in iteritems(batch):
+                    for mor, metrics in batch.items():
                         query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
                         query_spec.entity = mor
                         query_spec.metricId = metrics
@@ -902,7 +901,12 @@ class VSphereCheck(AgentCheck):
             )
             return
 
-        base_tags = self._config.base_tags + resource_tags
+        base_tags = []
+        if self._config.excluded_host_tags:
+            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
+        else:
+            base_tags.extend(resource_tags)
+        base_tags.extend(self._config.base_tags)
 
         if resource_type == vim.VirtualMachine:
             object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])

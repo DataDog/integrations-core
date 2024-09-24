@@ -23,7 +23,7 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
     "click~=8.1.6",
@@ -76,12 +76,12 @@ scripts = ["ddev"]
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py311"]
+target-version = ["py312"]
 extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
 exclude = []
-target-version = "py311"
+target-version = "py312"
 line-length = 120
 
 [tool.ruff.lint]

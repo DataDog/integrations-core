@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import threading
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
@@ -121,7 +119,7 @@ class IbmMqCheck(AgentCheck):
 
     def send_metrics_from_properties(self, properties, metrics_map, prefix, tags):
         # type: (Dict, Dict, str, List[str]) -> None
-        for metric_name, (pymqi_type, metric_type) in iteritems(metrics_map):
+        for metric_name, (pymqi_type, metric_type) in metrics_map.items():
             metric_full_name = '{}.{}'.format(prefix, metric_name)
             if pymqi_type not in properties:
                 self.log.debug("MQ type `%s` not found in properties for metric `%s` and tags `%s`", metric_name, tags)

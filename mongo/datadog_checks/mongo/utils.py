@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from urllib.parse import quote_plus, unquote_plus, urlencode, urlunparse
 
 import pymongo
-from six.moves.urllib.parse import quote_plus, unquote_plus, urlencode, urlunparse
 
 
 def build_connection_string(hosts, scheme, username=None, password=None, database=None, options=None):

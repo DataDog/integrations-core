@@ -4,8 +4,7 @@
 import mock
 import pytest
 
-from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.dev.testing import requires_py2, requires_py3
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import PROMETHEUS_METRICS_MAP
 
@@ -35,13 +34,6 @@ def test_unique_metrics():
         duplicated_metrics.add(value)
 
 
-@requires_py2
-def test_check_with_py2(aggregator, dd_run_check, check, mock_http_response):
-    with pytest.raises(ConfigurationError, match="This version of the integration is only available when using py3."):
-        check(DEFAULT_INSTANCE)
-
-
-@requires_py3
 def test_check(aggregator, dd_run_check, check, mock_http_response):
     mock_http_response(file_path=get_fixture_path('./openmetrics/openmetrics.txt'))
 
@@ -70,7 +62,6 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@requires_py3
 def test_collect_metadata(datadog_agent, fixture_path, mock_http_response, check, default_instance):
     c = check(default_instance)
     c.check_id = 'test:123'
@@ -92,7 +83,6 @@ def test_collect_metadata(datadog_agent, fixture_path, mock_http_response, check
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-@requires_py3
 def test_collect_metadata_with_invalid_base_url(
     datadog_agent, fixture_path, mock_http_response, check, default_instance
 ):
@@ -106,7 +96,6 @@ def test_collect_metadata_with_invalid_base_url(
     c.log.debug.assert_called_with('Skipping server info collection due to malformed url: %s', b'')
 
 
-@requires_py3
 @pytest.mark.parametrize(
     'fixture_file',
     [
@@ -139,7 +128,6 @@ def test_local_rate_limit_metrics(aggregator, dd_run_check, check, mock_http_res
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@requires_py3
 def test_tags_in_ssl_metrics(aggregator, dd_run_check, check, mock_http_response):
     mock_http_response(file_path=get_fixture_path('./openmetrics/openmetrics_ssl_metrics.txt'))
 
@@ -157,7 +145,6 @@ def test_tags_in_ssl_metrics(aggregator, dd_run_check, check, mock_http_response
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@requires_py3
 def test_collect_metadata_with_disabled_collect_server_info(
     datadog_agent, fixture_path, mock_http_response, check, default_instance
 ):

@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import iteritems
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.utils.containers import hash_mutable
@@ -146,7 +144,7 @@ class CiscoACICheck(AgentCheck):
             instance = {}
 
         user_tags = instance.get('tags', [])
-        for mname, mval in iteritems(metrics):
+        for mname, mval in metrics.items():
             tags_to_send = []
             if mval:
                 if hostname:
@@ -162,7 +160,7 @@ class CiscoACICheck(AgentCheck):
 
     def get_external_host_tags(self):
         external_host_tags = []
-        for hostname, tags in iteritems(self.external_host_tags):
+        for hostname, tags in self.external_host_tags.items():
             host_tags = tags + self.check_tags
             external_host_tags.append((hostname, {SOURCE_TYPE: host_tags}))
         return external_host_tags

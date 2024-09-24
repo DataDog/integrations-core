@@ -6,14 +6,12 @@ from __future__ import absolute_import
 import json
 import os
 import re
-import warnings
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
 from typing import Dict, List, Optional, Tuple  # noqa: F401
 
 import pytest
-from six import PY2, ensure_text
 
 from .._env import (
     E2E_FIXTURE_NAME,
@@ -138,7 +136,7 @@ def dd_environment_runner(request):
         # Exit testing and pass data back up to command
         if E2E_RESULT_FILE in os.environ:
             with open(os.environ[E2E_RESULT_FILE], 'w', encoding='utf-8') as f:
-                f.write(ensure_text(json.dumps(data)))
+                f.write(json.dumps(data))
 
             # Rather than exiting we skip every test to avoid the following output:
             # !!!!!!!!!! _pytest.outcomes.Exit: !!!!!!!!!!
@@ -391,18 +389,6 @@ def pytest_configure(config):
 def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
-    if PY2:
-        # Add dummy memray options to make it possible to run memray with `ddev test --memray <integration>`
-        # in both py2 and 3 environments. In py2 the option is simply ignored, see pytest_collection_modifyitems.
-        # In py3 the option enables the memray plugin.
-        parser.addoption("--memray", action="store_true", default=False, help="Dummy parameter for memray")
-        parser.addoption(
-            "--hide-memray-summary",
-            action="store_true",
-            default=False,
-            help="Dummy parameter for memray to hide the summary",
-        )
-
 
 def pytest_collection_modifyitems(config, items):
     # at test collection time, this function gets called by pytest, see:
@@ -412,20 +398,12 @@ def pytest_collection_modifyitems(config, items):
         # --run-check-metrics given in cli: do not skip slow tests
         return
 
-    if PY2:
-        for option in ("--memray",):
-            if config.getoption(option):
-                warnings.warn(  # noqa: B028
-                    "`{}` option ignored as it's not supported for py2 environments.".format(option)
-                )  # noqa: B028, E501
-
     skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:
         if "latest_metrics" in item.keywords:
             item.add_marker(skip_latest_metrics)
 
-        # In Python 2 we're using a much older version of pytest where the Item interface is different.
-        item_path = item.fspath if PY2 else item.path
+        item_path = item.path
         if item_path is None:
             continue
         for ttype in TEST_TYPES:

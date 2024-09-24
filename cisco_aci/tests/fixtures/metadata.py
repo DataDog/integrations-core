@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import six
-
-if six.PY3:
-    from datadog_checks.cisco_aci.models import DeviceMetadataList, InterfaceMetadata, NetworkDevicesMetadata
+from datadog_checks.cisco_aci.models import DeviceMetadataList, InterfaceMetadata, NetworkDevicesMetadata
 
 DEVICE_METADATA = [
     {
