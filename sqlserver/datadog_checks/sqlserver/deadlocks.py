@@ -96,7 +96,7 @@ class Deadlocks(DBMAsyncJob):
                 if frame.text is not None:
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
         return query_signatures
-    
+
     def _get_lookback_seconds(self):
         return min(-60, self._last_deadlock_timestamp - time())
 
@@ -116,7 +116,7 @@ class Deadlocks(DBMAsyncJob):
                     raise KeyError(f"{str(e)} | cursor.description: {cursor.description}")
                 except Exception as e:
                     raise e
-                
+
                 columns = [column[0] for column in cursor.description]
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
 

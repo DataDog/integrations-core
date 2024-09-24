@@ -234,7 +234,7 @@ def test_deadlock_xml_bad_format(deadlocks_collection_instance):
      </data>
     </event>
     """
-    deadlocks_obj = get_deadlock_obj(deadlocks_collection_instance)    
+    deadlocks_obj = get_deadlock_obj(deadlocks_collection_instance)
     root = ET.fromstring(test_xml)
     try:
         deadlocks_obj._obfuscate_xml(root)
@@ -323,4 +323,3 @@ def test__get_lookback_seconds(deadlocks_collection_instance):
     deadlocks_obj._last_deadlock_timestamp = 100
     lookback_seconds = deadlocks_obj._get_lookback_seconds()
     assert isinstance(lookback_seconds, float), "Should return a float"
-
