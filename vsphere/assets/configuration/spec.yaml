@@ -515,7 +515,7 @@ files:
           If 'upper', the check will convert the vSphere hostname to uppercase.
           If 'lower', the check will convert the vSphere hostname to lowercase.
           If 'default', the check will not transform the vSphere hostname (the default option).
-          This is useful when you have hostnames that are case-insensitive and you want to avoid duplicates.
+          Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
         value:
           type: string
           example: default

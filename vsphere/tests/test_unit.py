@@ -3484,12 +3484,96 @@ def test_hostname_case_lower(aggregator, realtime_instance, dd_run_check, datado
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-6')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-7')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-8')
-    datadog_agent.assert_external_tags('vm4-5', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('vm4-15', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('vm4-19', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('vm4-6', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('vm4-7', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('vm4-8', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
+    datadog_agent.assert_external_tags(
+        'vm4-5',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm4-15',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm4-19',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm4-6',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm4-7',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm4-8',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
@@ -3521,12 +3605,96 @@ def test_hostname_case_upper(aggregator, realtime_instance, dd_run_check, datado
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-6')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-7')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-8')
-    datadog_agent.assert_external_tags('VM4-5', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('VM4-15', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('VM4-19', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('VM4-6', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('VM4-7', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('VM4-8', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
+    datadog_agent.assert_external_tags(
+        'VM4-5',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'VM4-15',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'VM4-19',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'VM4-6',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'VM4-7',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'VM4-8',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
@@ -3557,12 +3725,96 @@ def test_hostname_case_no_case_change(aggregator, realtime_instance, dd_run_chec
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-6')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-7')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-8')
-    datadog_agent.assert_external_tags('VM4-5', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('VM4-15', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('VM4-19', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('vm4-6', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('vm4-7', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
-    datadog_agent.assert_external_tags('vm4-8', {'vsphere': ['vcenter_server:FAKE', 'vsphere_cluster:Cluster2', 'vsphere_datacenter:Datacenter2', 'vsphere_folder:Datacenters', 'vsphere_folder:Discovered virtual machine', 'vsphere_folder:vm', 'vsphere_host:10.0.0.104', 'vsphere_type:vm']})
+    datadog_agent.assert_external_tags(
+        'VM4-5',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'VM4-15',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'VM4-19',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm4-6',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm4-7',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm4-8',
+        {
+            'vsphere': [
+                'vcenter_server:FAKE',
+                'vsphere_cluster:Cluster2',
+                'vsphere_datacenter:Datacenter2',
+                'vsphere_folder:Datacenters',
+                'vsphere_folder:Discovered virtual machine',
+                'vsphere_folder:vm',
+                'vsphere_host:10.0.0.104',
+                'vsphere_type:vm',
+            ]
+        },
+    )
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
