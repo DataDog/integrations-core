@@ -57,6 +57,8 @@ integration/ambari:
 - ambari/**/*
 integration/apache:
 - apache/**/*
+integration/appgate_sdp:
+- appgate_sdp/**/*
 integration/arangodb:
 - arangodb/**/*
 integration/argo_rollouts:
