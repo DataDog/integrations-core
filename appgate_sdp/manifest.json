@@ -33,7 +33,7 @@
       },
       "metrics": {
         "prefix": "appgate_sdp.",
-        "check": "",
+        "check": "appgate_sdp.appliance.active_connections",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
