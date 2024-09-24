@@ -2,8 +2,8 @@
 	"version": 2,
 	"created_at": "2024-09-11",
 	"last_updated_at": "2024-09-11",
-	"title": "[Brevo] High Block Rate by Subject",
-	"description": "Monitors block rates for transactional emails by subject line. A high block rate may indicate that unsubscribed recipients are still receiving emails. Helps identify and resolve problems to improve the deliverability of transactional messages.",
+	"title": "High Block Rate by Subject",
+	"description": "This monitor alerts when block rates for transactional emails by subject line are higher than usual. A high block rate may indicate that unsubscribed recipients are still receiving emails. This monitor helps to identify and resolve problems to improve the deliverability of transactional messages.",
 	"definition": {
 		"id": 152860279,
 		"name": "[Brevo] High Block Rate by Subject",

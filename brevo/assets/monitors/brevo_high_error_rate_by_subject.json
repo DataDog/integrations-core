@@ -2,8 +2,8 @@
 	"version": 2,
 	"created_at": "2024-09-11",
 	"last_updated_at": "2024-09-11",
-	"title": "[Brevo] High Error Rate by Subject",
-	"description": "Monitors error rates for transactional emails by subject line. High error rates may indicate issues with content or recipient details. Helps identify and address problems to ensure reliable delivery of transactional emails.",
+	"title": "High Error Rate by Subject",
+	"description": "Alerts when error rates for transactional emails by subject line are higher than usual. High error rates may indicate issues with content or recipient details. This monitor helps to identify and address problems to ensure reliable delivery of transactional emails.",
 	"definition": {
 		"id": 152943106,
 		"name": "[Brevo] High Error Rate by Subject",
