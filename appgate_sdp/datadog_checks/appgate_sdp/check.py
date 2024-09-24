@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any  # noqa: F401
-
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from .metrics import METRIC_MAP, RENAME_LABELS_MAP
