@@ -22,7 +22,12 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Anyscale"
+      "source_type_id": 27164037,
+      "source_type_name": "Anyscale",
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+
     },
     "dashboards": {
       "Anyscale Overview": "assets/dashboards/anyscale_overview.json"
