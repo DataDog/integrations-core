@@ -195,9 +195,13 @@ def deadlocks_collection_instance(instance_docker):
     return copy(instance_docker)
 
 
-def test__create_deadlock_rows(deadlocks_collection_instance):
+def get_deadlock_obj(deadlocks_collection_instance):
     check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
-    deadlocks_obj = check.deadlocks
+    return check.deadlocks
+
+
+def test__create_deadlock_rows(deadlocks_collection_instance):
+    deadlocks_obj = get_deadlock_obj(deadlocks_collection_instance)
     xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
     with patch.object(
         Deadlocks,
@@ -230,8 +234,7 @@ def test_deadlock_xml_bad_format(deadlocks_collection_instance):
      </data>
     </event>
     """
-    check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
-    deadlocks_obj = check.deadlocks
+    deadlocks_obj = get_deadlock_obj(deadlocks_collection_instance)    
     root = ET.fromstring(test_xml)
     try:
         deadlocks_obj._obfuscate_xml(root)
@@ -306,11 +309,11 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
     )
 
     with patch('datadog_checks.sqlserver.deadlocks.Deadlocks.obfuscate_no_except_wrapper', return_value="obfuscated"):
-        check = SQLServer(CHECK_NAME, {}, [deadlocks_collection_instance])
-        deadlocks_obj = check.deadlocks
+        deadlocks_obj = get_deadlock_obj(deadlocks_collection_instance)
         root = ET.fromstring(test_xml)
         deadlocks_obj._obfuscate_xml(root)
         result_string = ET.tostring(root, encoding='unicode')
         result_string = result_string.replace('\t', '').replace('\n', '')
         result_string = re.sub(r'\s{2,}', ' ', result_string)
         assert expected_xml_string == result_string
+

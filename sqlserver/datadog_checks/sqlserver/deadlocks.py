@@ -96,6 +96,9 @@ class Deadlocks(DBMAsyncJob):
                 if frame.text is not None:
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
         return query_signatures
+    
+    def _get_lookback_seconds(self):
+        return self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time())
 
     def _query_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
@@ -107,7 +110,7 @@ class Deadlocks(DBMAsyncJob):
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
-                cursor.execute(DEADLOCK_QUERY, (self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time())))
+                cursor.execute(DEADLOCK_QUERY, (self._get_lookback_seconds()))
                 columns = [column[0] for column in cursor.description]
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
