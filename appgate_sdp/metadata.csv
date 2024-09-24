@@ -47,7 +47,7 @@ appgate_sdp.controller.database.replication.slot_replay_lag,gauge,,byte,,The rep
 appgate_sdp.controller.database.size,gauge,,byte,,The size of the PostgreSQL database used by the controller in bytes.,0,appgate_sdp,,,
 appgate_sdp.controller.evaluate_user_claim_script.count,count,,,,The execution and performance of User Claim Scripts within the controller system.,0,appgate_sdp,,,
 appgate_sdp.controller.ip_pool,gauge,,,,The usage of IP addresses from a specific IP pool.,0,appgate_sdp,,,
-appgate_sdp.controller.license,gauge,,,,The license entitlements for different types of users or features in your system.,.,,,,,
+appgate_sdp.controller.license,gauge,,,,The license entitlements for different types of users or features in your system.,0,appgate_sdp,,,
 appgate_sdp.controller.license.days_remaining,gauge,,,,The number of days remaining until the next license expiration for the appliance.,0,appgate_sdp,,,
 appgate_sdp.controller.memory_heap,gauge,,byte,,The memory heap usage of the controller daemon.,0,appgate_sdp,,,
 appgate_sdp.controller.policy_evaluator,gauge,,byte,,The cache size used by the controller policy evaluator.,0,appgate_sdp,,,
