@@ -4,10 +4,12 @@
 
 This integration ingests the following logs:
 
-- Workbench Alerts: This endpoint contains information about all the standalone alerts triggered by detection models.
-- Observed Attack Techniques: This endpoint contains information about observed attack techniques from Detections, Endpoint Activity, Cloud Activity, Email Activity, Mobile Activity, Network Activity, Container Activity, and Identity Activity data sources.
+- **Workbench Alerts**: This endpoint contains information about all the standalone alerts triggered by detection models.
+- **Observed Attack Techniques**: This endpoint contains information about observed attack techniques from Detections, Endpoint Activity, Cloud Activity, Email Activity, Mobile Activity, Network Activity, Container Activity, and Identity Activity data sources.
 
-This integration collects all the above listed logs and sends them to Datadog for analysis. Datadog uses the built-in logs pipeline to parse and enrich these logs, enabling effortless search and analysis. The integration provides insight into workbench alerts and observed attack techniques through the out-of-the-box dashboards. Also, This integration provides out of the box detection rules.
+This integration collects logs from the sources listed above and sends them to Datadog for analysis with our Log Explorer and Cloud SIEM products
+* https://docs.datadoghq.com/logs/explorer/
+* https://www.datadoghq.com/product/cloud-siem/
 
 ## Setup
 
@@ -15,13 +17,13 @@ This integration collects all the above listed logs and sends them to Datadog fo
 
 #### Create API KEY from Trend Micro Vision One XDR
 
-1. On the Trend Vision One console, go to **Administration > API Keys** .
-2. Generate a new authentication token. Click **Add API key**. Specify the settings of the new API key.
-    - Name: A meaningful name that can help you identify the API key
-    - Role: The user role assigned to the key. Select **SIEM** from dropdown.
-    - Expiration time: The time the API key remains valid.
-    - Status: Whether the API key is enabled.
-    - Details: Extra information about the API key.
+1. In the Trend Vision One console, go to **Administration > API Keys** .
+2. Generate a new authentication token. Click **Add API key**. Specify the settings of the new API key with the following:
+    - **Name**: A meaningful name that can help you identify the API key
+    - **Role**: The user role assigned to the key. Select **SIEM** from dropdown.
+    - **Expiration time**: The time the API key remains valid.
+    - **Status**: Whether the API key is enabled.
+    - **Details**: Extra information about the API key.
 3. Click **Add**.
 4. Copy and store the authentication token in a secure location.
 
@@ -31,7 +33,7 @@ This integration collects all the above listed logs and sends them to Datadog fo
 Configure the Datadog endpoint to forward Trend Micro Vision One XDR logs to Datadog.
 
 1. Navigate to `Trend Micro Vision One XDR`.
-2. Add your Trend Micro Vision One XDR credentials.
+2. Add your Trend Micro Vision One XDR Host Region and API Key.
 
 | Trend Micro Vision One XDR Parameters | Description                                                  |
 | ------------------------------------- | ------------------------------------------------------------ |
