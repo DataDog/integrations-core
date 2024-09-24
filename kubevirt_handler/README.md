@@ -37,8 +37,6 @@ The KubeVirt Handler integration does not include any events.
 
 The KubeVirt Handler integration does not include any service checks.
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
