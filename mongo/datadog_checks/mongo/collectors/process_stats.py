@@ -93,8 +93,7 @@ class ProcessStatsCollector(MongoCollector):
             return
 
         try:
-            cpu_percent = process.cpu_percent()
-            if cpu_percent != 0:
+            if (cpu_percent := process.cpu_percent()) != 0:
                 # the first call of cpu_percent is 0.0 and should be ignored
                 # the cpu_percent can be > 100% if the process has multiple threads
                 self._submit_payload({"system": {"cpu_percent": cpu_percent}})
