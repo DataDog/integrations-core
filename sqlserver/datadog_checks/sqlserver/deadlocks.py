@@ -112,10 +112,8 @@ class Deadlocks(DBMAsyncJob):
                 )
                 try:
                     cursor.execute(DEADLOCK_QUERY, (self._max_deadlocks, self._get_lookback_seconds()))
-                except KeyError as e:
-                    raise KeyError(f"{str(e)} | cursor.description: {cursor.description}")
                 except Exception as e:
-                    raise e
+                    raise Exception(f"{str(e)} | cursor.description: {cursor.description}")
 
                 columns = [column[0] for column in cursor.description]
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
