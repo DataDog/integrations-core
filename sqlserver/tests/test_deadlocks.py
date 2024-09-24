@@ -317,3 +317,10 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         result_string = re.sub(r'\s{2,}', ' ', result_string)
         assert expected_xml_string == result_string
 
+
+def test__get_lookback_seconds(deadlocks_collection_instance):
+    deadlocks_obj = get_deadlock_obj(deadlocks_collection_instance)
+    deadlocks_obj._last_deadlock_timestamp = 100
+    lookback_seconds = deadlocks_obj._get_lookback_seconds()
+    assert isinstance(lookback_seconds, float), "Should return a float"
+

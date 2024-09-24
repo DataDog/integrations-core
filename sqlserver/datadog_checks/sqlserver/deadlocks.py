@@ -98,7 +98,7 @@ class Deadlocks(DBMAsyncJob):
         return query_signatures
     
     def _get_lookback_seconds(self):
-        return self._max_deadlocks, min(-60, self._last_deadlock_timestamp - time())
+        return min(-60, self._last_deadlock_timestamp - time())
 
     def _query_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
@@ -110,12 +110,13 @@ class Deadlocks(DBMAsyncJob):
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
-                cursor.execute(DEADLOCK_QUERY, (self._get_lookback_seconds()))
+                cursor.execute(DEADLOCK_QUERY, (self._max_deadlocks, self._get_lookback_seconds()))
                 columns = [column[0] for column in cursor.description]
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     def _create_deadlock_rows(self):
         db_rows = self._query_deadlocks()
+        breakpoint()
         deadlock_events = []
         total_number_of_characters = 0
         for i, row in enumerate(db_rows):
