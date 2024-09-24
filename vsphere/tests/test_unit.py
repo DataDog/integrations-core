@@ -3475,9 +3475,15 @@ def test_hostname_case_lower(aggregator, realtime_instance, dd_run_check):
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-5')
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-15')
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-19')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-6')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-7')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-8')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='$vm3-2')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm3-1')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-1')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-6')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-7')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-8')
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
@@ -3500,9 +3506,45 @@ def test_hostname_case_upper(aggregator, realtime_instance, dd_run_check):
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-5')
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-15')
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-19')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-6')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-7')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-8')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='$VM3-2')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM3-1')
     aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-1')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-6')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-7')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-8')
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
+def test_hostname_case_no_case_change(aggregator, realtime_instance, dd_run_check):
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'datadog.vsphere.collect_events.time', tags=['vcenter_server:FAKE'], hostname='stubbed.hostname'
+    )
+    aggregator.assert_metric(
+        'datadog.vsphere.refresh_metrics_metadata_cache.time', tags=['vcenter_server:FAKE'], hostname='stubbed.hostname'
+    )
+    aggregator.assert_metric(
+        'datadog.vsphere.refresh_infrastructure_cache.time',
+        tags=['collect_property_metrics:False', 'vcenter_server:FAKE'],
+        hostname='stubbed.hostname',
+    )
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-5')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-15')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-19')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-6')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-7')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='vm4-8')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='$VM3-2')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM3-1')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='VM4-1')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-6')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-7')
+    aggregator.assert_metric('vsphere.mem.entitlement.avg', tags=['vcenter_server:FAKE'], hostname='vm4-8')
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
