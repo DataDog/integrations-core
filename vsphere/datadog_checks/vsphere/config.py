@@ -141,8 +141,8 @@ class VSphereConfig(object):
         )
         self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
         self.custom_tags = instance.get('tags', [])
-        self.hostname_transform = instance.get('hostname_transform', 'none')
-        if self.hostname_transform not in ['none', 'lower', 'upper']:
+        self.hostname_transform = instance.get('hostname_transform', 'default')
+        if self.hostname_transform not in ['default', 'lower', 'upper']:
             raise ConfigurationError("Invalid value for `hostname_transform` in the configuration file.")
         self.validate_config()
 

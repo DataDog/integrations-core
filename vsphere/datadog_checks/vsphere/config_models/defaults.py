@@ -61,7 +61,7 @@ def instance_excluded_host_tags():
 
 
 def instance_hostname_transform():
-    return 'none'
+    return 'default'
 
 
 def instance_include_datastore_cluster_folder_tag():
