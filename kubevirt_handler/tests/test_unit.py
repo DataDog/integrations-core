@@ -2,12 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Callable, Dict  # noqa: F401
 
 import pytest
 
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubevirt_handler import KubeVirtHandlerCheck
 
@@ -35,7 +32,7 @@ def test_check_collects_metrics(dd_run_check, aggregator, instance, mocker):
         "pod_name:virt-handler-some-id",
     ]
 
-    aggregator.assert_metric_has_tags("kubevirt_handler.info", tags=metric_tags)  # gauge
+    # aggregator.assert_metric_has_tags("kubevirt_handler.info", tags=metric_tags)  # gauge
 
     aggregator.assert_metric_has_tags(
         "kubevirt_handler.vmi.cpu_system_usage_seconds.count", tags=metric_tags
@@ -157,3 +154,26 @@ def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, i
         0,
         tags=["endpoint:https://127.0.0.1:8443/healthz", *base_tags],
     )
+
+
+def test_version_metadata(instance, dd_run_check, datadog_agent, aggregator, mocker):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+    check = KubeVirtHandlerCheck("kubevirt_handler", {}, [instance])
+    check.check_id = "test:123"
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        "kubevirt_handler.can_connect",
+        1,
+        tags=["endpoint:https://127.0.0.1:8443/healthz", *base_tags],
+    )
+
+    version_metadata = {
+        "version.scheme": "semver",
+        "version.major": "1",
+        "version.minor": "2",
+        "version.patch": "2",
+        "version.raw": "v1.2.2",
+    }
+
+    datadog_agent.assert_metadata("test:123", version_metadata)

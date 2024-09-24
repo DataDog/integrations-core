@@ -73,7 +73,30 @@ class KubeVirtHandlerCheck(OpenMetricsBaseCheckV2):
 
     def _configure_additional_transformers(self):
         metric_transformer = self.scrapers[self.kubevirt_handler_metrics_endpoint].metric_transformer
+        metric_transformer.add_custom_transformer("kubevirt_info", self.configure_metadata_transformer)
         metric_transformer.add_custom_transformer(r".*", self.configure_transformer_kubevirt_metrics(), pattern=True)
+
+    def configure_metadata_transformer(self, metric, sample_data, runtime_data):
+        """
+        Parse the kubevirt_info metric to extract the kubevirt version.
+        """
+        for sample, *_ in sample_data:
+            kubeversion = sample.labels["kubeversion"]
+            version_split = kubeversion[1:].split(".")
+
+            major = version_split[0]
+            minor = version_split[1]
+            patch = version_split[2]
+
+            version_raw = kubeversion
+
+            version_parts = {
+                "major": major,
+                "minor": minor,
+                "patch": patch,
+            }
+
+            self.set_metadata("version", version_raw, scheme="semver", part_map=version_parts)
 
     def configure_transformer_kubevirt_metrics(self):
         """
