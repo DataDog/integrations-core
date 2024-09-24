@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from datadog_checks.dcgm.metrics import METRIC_MAP, RENAME_LABELS_MAP, IGNORED_TAGS
+from datadog_checks.dcgm.metrics import IGNORED_TAGS, METRIC_MAP, RENAME_LABELS_MAP
 
 
 class DcgmCheck(OpenMetricsBaseCheckV2):

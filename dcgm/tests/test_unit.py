@@ -21,6 +21,7 @@ def test_critical_service_check(dd_run_check, aggregator, mock_http_response, ch
         dd_run_check(check)
     aggregator.assert_service_check('dcgm.openmetrics.health', status=check.CRITICAL)
 
+
 @pytest.mark.usefixtures("mock_label_remap")
 def test_label_remap(dd_run_check, aggregator, check):
     """
