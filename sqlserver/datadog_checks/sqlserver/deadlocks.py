@@ -110,13 +110,18 @@ class Deadlocks(DBMAsyncJob):
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
-                cursor.execute(DEADLOCK_QUERY, (self._max_deadlocks, self._get_lookback_seconds()))
+                try:
+                    cursor.execute(DEADLOCK_QUERY, (self._max_deadlocks, self._get_lookback_seconds()))
+                except KeyError as e:
+                    raise KeyError(f"{str(e)} | cursor.description: {cursor.description}")
+                except Exception as e:
+                    raise e
+                
                 columns = [column[0] for column in cursor.description]
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     def _create_deadlock_rows(self):
         db_rows = self._query_deadlocks()
-        breakpoint()
         deadlock_events = []
         total_number_of_characters = 0
         for i, row in enumerate(db_rows):
