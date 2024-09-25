@@ -36,7 +36,7 @@ class BaseSqlServerMetric(object):
     QUERY_BASE = None
     OPERATION_NAME = 'base_metrics'
 
-    # Flag to indicate if this subclass/table is available for custom queries
+    # Flag to indicate if this subclass/table is available for cus,tom queries
     CUSTOM_QUERIES_AVAILABLE = True
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger):
