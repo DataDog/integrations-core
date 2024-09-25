@@ -211,6 +211,8 @@ integration/go_expvar:
 - go_expvar/**/*
 integration/godaddy:
 - godaddy/**/*
+integration/greenhouse:
+- greenhouse/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:
