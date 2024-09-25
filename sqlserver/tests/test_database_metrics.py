@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""
+
 from unittest import mock
 
 import pytest
@@ -289,4 +289,3 @@ def test_sqlserver_database_backup_metrics(
     dd_run_check(sqlserver_check)
     for metric_name in database_backup_metrics.metric_names()[0]:
         aggregator.assert_metric(metric_name, count=0)
-"""

@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""
 import os
 import re
 
@@ -646,4 +645,3 @@ def test_obfuscate_error_msg(
 ):
     obfuscated_error_message = obfuscate_error_msg(error_message, password)
     assert obfuscated_error_message == expected_error_message
-"""

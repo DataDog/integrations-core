@@ -1,7 +1,7 @@
 ﻿# (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""
+
 from __future__ import unicode_literals
 
 import logging
@@ -367,4 +367,3 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
         "dd.sqlserver.async_job.cancel",
         tags=_expected_dbm_instance_tags(dbm_instance) + ['job:procedure-metrics'],
     )
-"""
