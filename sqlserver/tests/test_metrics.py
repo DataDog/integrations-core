@@ -120,8 +120,6 @@ def test_check_instance_metrics_autodiscovery(
     dd_run_check(sqlserver_check)
 
     tags = instance_docker_metrics.get('tags', [])
-    print("natasha hereeeee")
-    print(tags)
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, True
@@ -136,6 +134,9 @@ def test_check_instance_metrics_autodiscovery(
 
     for db in AUTODISCOVERY_DBS:
         for metric_name, _, _, _ in INSTANCE_METRICS_DATABASE_SINGLE:
+            print("natasha hereeeee")
+            print(db)
+            print(tags + ['database:{}'.format(db)])
             aggregator.assert_metric(
                 metric_name,
                 tags=tags + ['database:{}'.format(db)],
