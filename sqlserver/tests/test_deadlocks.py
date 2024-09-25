@@ -167,7 +167,7 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
             found == 1
         ), "Should have collected the UPDATE statement in deadlock exactly once, but collected: {}.".format(found)
     except AssertionError as e:
-        logging.error("deadlock XML: %s", str(d))
+        logging.error("deadlock payload: %s", str(deadlocks))
         raise e
 
 
