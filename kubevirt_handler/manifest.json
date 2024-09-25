@@ -34,7 +34,10 @@
       },
       "metrics": {
         "prefix": "kubevirt_handler.",
-        "check": ["kubevirt_handler.can_connect", "kubevirt_handler.vmi.cpu_system_usage_seconds.count"],
+        "check": [
+          "kubevirt_handler.can_connect", 
+          "kubevirt_handler.vmi.cpu_system_usage_seconds.count"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
