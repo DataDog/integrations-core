@@ -6,9 +6,9 @@
 import json
 import time
 from copy import deepcopy
+from urllib.parse import urlparse
 
 from cachetools import TTLCache
-from urllib.parse import urlparse
 from packaging.version import Version
 
 from datadog_checks.base.config import is_affirmative
