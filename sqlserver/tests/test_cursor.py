@@ -31,15 +31,6 @@ def __check_prepand_sql_comment(sa_conn):
     with sa_conn as conn:
         with conn.cursor() as cursor:
             cursor.execute(
-                """
-                # SELECT
-                #     st.text
-                # FROM
-                #     sys.dm_exec_query_stats AS qs
-                # CROSS APPLY
-                #     sys.dm_exec_sql_text(qs.sql_handle) AS st
-                # WHERE st.text LIKE '%testcomments%'
-                """
             )
             result = cursor.fetchall()
             assert len(result) > 0

@@ -35,17 +35,6 @@ def high_cardinality_instance(instance_docker):
 @high_cardinality_only
 @pytest.mark.run_high_cardinality_forever
 def test_run_high_cardinality_forever(high_cardinality_instance):
-    """
-    # This test is a utility and is useful in situations where you want to connect to the database instance
-    # and have queries executing against it. Note, you must kill the test execution to stop this test.
-
-    # In order to run this test, you must pass the `--run_high_cardinality_forever` flag.
-    # e.g. `ddev ... -pa --run_high_cardinality_forever`
-
-    # TIP: It's easier to utilize this by running it as a standalone test operation.
-    # e.g. in conjunction with the required flag
-    # `ddev ... -pa --run_high_cardinality_forever -k test_run_high_cardinality_forever`
-    """
     queries = HighCardinalityQueries(high_cardinality_instance)
     _check_queries_is_ready(queries)
     queries.start_background(config={'hc_threads': 20, 'slow_threads': 5, 'complex_threads': 10})
