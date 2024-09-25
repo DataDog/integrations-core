@@ -136,7 +136,7 @@ tests:
       rcvd=230 rule="15 (LAN->WAN)" app=5 af_polid=4 ipscat=N/A
       appcat="PROXY-ACCESS" appid=2900 dstname=10.10.10.10 arg=/ code=64
       Category="Not Rated" note="Policy: cfsZonePolicy0, Info: 6148 " n=2520325
-      fw_action="NA" dpi=1 op=0 msg="Web site hit'
+      fw_action="NA" dpi=1 op=0 msg="Web site hit"'
     result:
       custom:
         Category: "Not Rated"

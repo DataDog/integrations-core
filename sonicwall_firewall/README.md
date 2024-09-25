@@ -13,7 +13,7 @@ To install the Sonicwall Firewall integration, run the following Agent installat
 
 For more information, see the [Integration Management][2] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.57.0.
+**Note**: This step is not necessary for Agent version >= 7.58.0.
 
 Linux command
   ```shell
