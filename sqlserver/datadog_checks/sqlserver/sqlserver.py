@@ -600,7 +600,7 @@ class SQLServer(AgentCheck):
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
         if db is not None:
-            self.tags.append("database:{}".format(db))
+            cfg_tags = tags.copy() + ["database:{}".format(db)]
         for name, counter_name, instance_name, object_name in metrics:
             try:
                 sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
@@ -610,7 +610,7 @@ class SQLServer(AgentCheck):
                     "instance_name": db or instance_name,
                     "object_name": object_name,
                     "physical_db_name": physical_database_name,
-                    "tags": self.tags,
+                    "tags": cfg_tags,
                 }
 
                 metrics_to_collect.append(
