@@ -8,6 +8,7 @@ import time
 from copy import deepcopy
 
 from cachetools import TTLCache
+from urllib.parse import urlparse
 from packaging.version import Version
 
 from datadog_checks.base.config import is_affirmative
@@ -211,8 +212,10 @@ class MongoInstance:
         # Atlas deployments have mongodb.net in the internal hostname
         # DO NOT use the connection host because this can be a load balancer or proxy
         # TODO: Is there a better way to detect MongoDB Atlas deployment?
-        if self.api_client.hostname and "mongodb.net" in self.api_client.hostname:
-            return True
+        if self.api_client.hostname:
+            parsed_hostname = urlparse(f"//{self.api_client.hostname}").hostname
+            if parsed_hostname and parsed_hostname.endswith(".mongodb.net"):
+                return True
         return False
 
     def refresh_shards(self):
