@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""
 import copy
 import json
 import os
@@ -870,4 +869,3 @@ def test_exception_handling_by_do_for_dbs(instance_docker):
         'datadog_checks.sqlserver.utils.is_azure_sql_database', return_value={}
     ):
         schemas._fetch_for_databases()
-"""
