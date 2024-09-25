@@ -375,7 +375,6 @@ class SQLServer(AgentCheck):
             self.log.exception("Initialization exception %s", e)
 
     def handle_service_check(self, status, connection_host, database, message=None, is_default=True):
-        custom_tags = self.instance.get("tags", [])
         disable_generic_tags = self.instance.get("disable_generic_tags", False)
         service_check_tags = [
             "sqlserver_host:{}".format(self.resolved_hostname),
@@ -384,8 +383,8 @@ class SQLServer(AgentCheck):
         ]
         if not disable_generic_tags:
             service_check_tags.append("host:{}".format(self.resolved_hostname))
-        if custom_tags is not None:
-            service_check_tags.extend(custom_tags)
+        if self.tags is not None:
+            service_check_tags.extend(self.tags)
         service_check_tags = list(set(service_check_tags))
 
         if status is AgentCheck.OK:
@@ -453,7 +452,6 @@ class SQLServer(AgentCheck):
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         metrics_to_collect = []
-        tags = self.instance.get("tags", [])
 
         # Load instance-level (previously Performance metrics)
         # If several check instances are querying the same server host, it can be wise to turn these off
@@ -468,7 +466,7 @@ class SQLServer(AgentCheck):
                 # if autodiscovery is enabled, we report metrics from the
                 # INSTANCE_METRICS_DATABASE struct below, so do not double report here
                 common_metrics.extend(INSTANCE_METRICS_DATABASE)
-            self._add_performance_counters(common_metrics, metrics_to_collect, tags, db=None)
+            self._add_performance_counters(common_metrics, metrics_to_collect, self.tags, db=None)
 
             # populated through autodiscovery
             if self.databases:
@@ -476,7 +474,7 @@ class SQLServer(AgentCheck):
                     self._add_performance_counters(
                         INSTANCE_METRICS_DATABASE,
                         metrics_to_collect,
-                        tags,
+                        self.tags,
                         db=db.name,
                         physical_database_name=db.physical_db_name,
                     )
@@ -491,7 +489,7 @@ class SQLServer(AgentCheck):
                 self.instance.get("database", self.connection.DEFAULT_DATABASE)
             ]
             for db_name in db_names:
-                cfg = {"name": name, "table": table, "column": column, "instance_name": db_name, "tags": tags}
+                cfg = {"name": name, "table": table, "column": column, "instance_name": db_name, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load AlwaysOn metrics
@@ -503,7 +501,7 @@ class SQLServer(AgentCheck):
                     "table": table,
                     "column": column,
                     "instance_name": db_name,
-                    "tags": tags,
+                    "tags": self.tags,
                     "ao_database": self.instance.get("ao_database", None),
                     "availability_group": self.instance.get("availability_group", None),
                     "only_emit_local": is_affirmative(self.instance.get("only_emit_local", False)),
@@ -513,13 +511,13 @@ class SQLServer(AgentCheck):
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get("include_task_scheduler_metrics", False)):
             for name, table, column in TASK_SCHEDULER_METRICS:
-                cfg = {"name": name, "table": table, "column": column, "tags": tags}
+                cfg = {"name": name, "table": table, "column": column, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load sys.master_files metrics
         if is_affirmative(self.instance.get("include_master_files_metrics", False)):
             for name, table, column in DATABASE_MASTER_FILES:
-                cfg = {"name": name, "table": table, "column": column, "tags": tags}
+                cfg = {"name": name, "table": table, "column": column, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
@@ -527,7 +525,7 @@ class SQLServer(AgentCheck):
             self.instance.get("include_tempdb_file_space_usage_metrics", True)
         ) and not is_azure_sql_database(engine_edition):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
-                cfg = {"name": name, "table": table, "column": column, "instance_name": "tempdb", "tags": tags}
+                cfg = {"name": name, "table": table, "column": column, "instance_name": "tempdb", "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
@@ -535,7 +533,7 @@ class SQLServer(AgentCheck):
             sql_counter_type = None
             base_name = None
 
-            custom_tags = tags + cfg.get("tags", [])
+            custom_tags = self.tags + cfg.get("tags", [])
             cfg["tags"] = custom_tags
 
             db_table = cfg.get("table", DEFAULT_PERFORMANCE_TABLE)
@@ -600,8 +598,9 @@ class SQLServer(AgentCheck):
                 self.instance_per_type_metrics[cls].add(m.base_name)
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
+        cfg_tags = tags.copy()
         if db is not None:
-            tags = tags + ["database:{}".format(db)]
+            cfg_tags = cfg_tags + ["database:{}".format(db)]
         for name, counter_name, instance_name, object_name in metrics:
             try:
                 sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
@@ -611,7 +610,7 @@ class SQLServer(AgentCheck):
                     "instance_name": db or instance_name,
                     "object_name": object_name,
                     "physical_db_name": physical_database_name,
-                    "tags": tags,
+                    "tags": cfg_tags,
                 }
 
                 metrics_to_collect.append(
@@ -704,7 +703,7 @@ class SQLServer(AgentCheck):
 
         cfg_inst["hostname"] = self.resolved_hostname
 
-        return cls(cfg_inst, base_name, metric_type, column, self.log)
+        return cls(cfg_inst, base_name, metric_type, column, self.log, self.tags)
 
     def _check_connections_by_connecting_to_db(self):
         for db in self.databases:
@@ -985,7 +984,6 @@ class SQLServer(AgentCheck):
 
         proc = self._config.proc
         guardSql = self.instance.get("proc_only_if")
-        custom_tags = self.instance.get("tags", [])
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
             self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
@@ -1006,7 +1004,7 @@ class SQLServer(AgentCheck):
 
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
-                    tags.extend(custom_tags)
+                    tags.extend(self.tags)
 
                     if row.type.lower() in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
