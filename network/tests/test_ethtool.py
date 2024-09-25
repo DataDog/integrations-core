@@ -9,7 +9,6 @@ import platform
 
 import mock
 import pytest
-from six import PY3, iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network import ethtool
@@ -445,9 +444,9 @@ GVE_ETHTOOL_VALUES = {
 
 def send_ethtool_ioctl_mock(iface, sckt, data):
     for input, result in common.ETHTOOL_IOCTL_INPUTS_OUTPUTS.items():
-        if input == (iface, data.tobytes() if PY3 else data.tostring()):
+        if input == (iface, data.tobytes()):
             data[:] = array.array('B', [])
-            data.frombytes(result) if PY3 else data.fromstring(result)
+            data.frombytes(result)
             return
     raise ValueError("Couldn't match any iface/data combination in the test data")
 
@@ -558,8 +557,8 @@ def test_submit_ena_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check,
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     check_instance._handle_ethtool_stats('eth0', [])
 
-    for tag, metrics in iteritems(ENA_ETHTOOL_VALUES):
-        for metric_suffix, value in iteritems(metrics):
+    for tag, metrics in ENA_ETHTOOL_VALUES.items():
+        for metric_suffix, value in metrics.items():
             aggregator.assert_metric(
                 'system.net.' + metric_suffix,
                 count=1,
@@ -581,8 +580,8 @@ def test_submit_hv_netvsc_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, 
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     check_instance._handle_ethtool_stats('hv_netvsc', [])
 
-    for tag, metrics in iteritems(HV_NETVSC_ETHTOOL_VALUES):
-        for metric_suffix, value in iteritems(metrics):
+    for tag, metrics in HV_NETVSC_ETHTOOL_VALUES.items():
+        for metric_suffix, value in metrics.items():
             aggregator.assert_metric(
                 'system.net.' + metric_suffix,
                 count=1,
@@ -604,8 +603,8 @@ def test_submit_gve_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check,
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     check_instance._handle_ethtool_stats('gve', [])
 
-    for tag, metrics in iteritems(GVE_ETHTOOL_VALUES):
-        for metric_suffix, value in iteritems(metrics):
+    for tag, metrics in GVE_ETHTOOL_VALUES.items():
+        for metric_suffix, value in metrics.items():
             aggregator.assert_metric(
                 'system.net.' + metric_suffix,
                 count=1,

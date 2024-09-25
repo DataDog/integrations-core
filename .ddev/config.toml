@@ -105,12 +105,9 @@ simplejson = ['MIT']
 supervisor = ['BSD-3-Clause-Modification']
 # https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
 uptime = ['BSD-2-Clause']
-# https://github.com/hickeroar/win_inet_pton/blob/master/LICENSE
-win-inet-pton = ['Unlicense']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
-contextlib2 = 'https://github.com/jazzband/contextlib2'
 dnspython = 'https://github.com/rthalley/dnspython'
 foundationdb = 'https://github.com/apple/foundationdb'
 in-toto = 'https://github.com/in-toto/in-toto'
@@ -127,7 +124,6 @@ service-identity = 'https://github.com/pyca/service-identity'
 snowflake-connector-python = 'https://github.com/snowflakedb/snowflake-connector-python'
 supervisor = 'https://github.com/Supervisor/supervisor'
 tuf = 'https://github.com/theupdateframework/python-tuf'
-typing = 'https://github.com/python/typing'
 
 [overrides.validate.openmetrics]
 exclude = [

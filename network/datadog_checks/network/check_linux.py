@@ -4,8 +4,6 @@
 import os
 import socket
 
-from six import PY3, iteritems
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
@@ -18,9 +16,6 @@ try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
-
-if PY3:
-    long = int
 
 
 class LinuxNetwork(Network):
@@ -89,7 +84,7 @@ class LinuxNetwork(Network):
                             self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
                             self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
-                for metric, value in iteritems(metrics):
+                for metric, value in metrics.items():
                     self.gauge(metric, value, tags=custom_tags)
 
             except OSError as e:
@@ -107,7 +102,7 @@ class LinuxNetwork(Network):
                 # udp6       0      0 :::41458                :::*
 
                 metrics = self.parse_cx_state(lines[2:], self.tcp_states['netstat'], 5)
-                for metric, value in iteritems(metrics):
+                for metric, value in metrics.items():
                     self.gauge(metric, value, tags=custom_tags)
 
                 if self._collect_cx_queues:
@@ -136,17 +131,17 @@ class LinuxNetwork(Network):
             cols = line.split(':', 1)
             x = cols[1].split()
             # Filter inactive interfaces
-            if self.parse_long(x[0]) or self.parse_long(x[8]):
+            if self.parse_int(x[0]) or self.parse_int(x[8]):
                 iface = cols[0].strip()
                 metrics = {
-                    'bytes_rcvd': self.parse_long(x[0]),
-                    'bytes_sent': self.parse_long(x[8]),
-                    'packets_in.count': self.parse_long(x[1]),
-                    'packets_in.drop': self.parse_long(x[3]),
-                    'packets_in.error': self.parse_long(x[2]) + self.parse_long(x[3]),
-                    'packets_out.count': self.parse_long(x[9]),
-                    'packets_out.drop': self.parse_long(x[11]),
-                    'packets_out.error': self.parse_long(x[10]) + self.parse_long(x[11]),
+                    'bytes_rcvd': self.parse_int(x[0]),
+                    'bytes_sent': self.parse_int(x[8]),
+                    'packets_in.count': self.parse_int(x[1]),
+                    'packets_in.drop': self.parse_int(x[3]),
+                    'packets_in.error': self.parse_int(x[2]) + self.parse_int(x[3]),
+                    'packets_out.count': self.parse_int(x[9]),
+                    'packets_out.drop': self.parse_int(x[11]),
+                    'packets_out.error': self.parse_int(x[10]) + self.parse_int(x[11]),
                 }
                 self.submit_devicemetrics(iface, metrics, custom_tags)
                 self._handle_ethtool_stats(iface, custom_tags)
@@ -251,14 +246,14 @@ class LinuxNetwork(Network):
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
                     self.submit_netmetric(
-                        nstat_metrics_names[k][met], self.parse_long(netstat_data[k][met]), tags=custom_tags
+                        nstat_metrics_names[k][met], self.parse_int(netstat_data[k][met]), tags=custom_tags
                     )
 
         for k in nstat_metrics_gauge_names:
             for met in nstat_metrics_gauge_names[k]:
                 if met in netstat_data.get(k, {}):
                     self._submit_netmetric_gauge(
-                        nstat_metrics_gauge_names[k][met], self.parse_long(netstat_data[k][met]), tags=custom_tags
+                        nstat_metrics_gauge_names[k][met], self.parse_int(netstat_data[k][met]), tags=custom_tags
                     )
 
         # Get the conntrack -S information
@@ -460,7 +455,7 @@ class LinuxNetwork(Network):
             assert m in allowed
 
         count = 0
-        for metric, val in iteritems(vals_by_metric):
+        for metric, val in vals_by_metric.items():
             self.log.debug("Submitting system.net.%s", metric)
             self.gauge('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
@@ -480,9 +475,9 @@ class LinuxNetwork(Network):
         base_tags_with_device.append('device:{}'.format(iface))
 
         count = 0
-        for ethtool_tag, metric_map in iteritems(ethtool_metrics):
+        for ethtool_tag, metric_map in ethtool_metrics.items():
             tags = base_tags_with_device + [ethtool_tag]
-            for metric, val in iteritems(metric_map):
+            for metric, val in metric_map.items():
                 self.log.debug("Submitting system.net.%s", metric)
                 self.monotonic_count('system.net.%s' % metric, val, tags=tags)
                 count += 1

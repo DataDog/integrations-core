@@ -21,6 +21,7 @@ from datadog_checks.mongo.collectors import (
     FsyncLockCollector,
     HostInfoCollector,
     IndexStatsCollector,
+    ProcessStatsCollector,
     ReplicaCollector,
     ReplicationOpLogCollector,
     ServerStatusCollector,
@@ -134,6 +135,7 @@ class MongoDb(AgentCheck):
             FsyncLockCollector(self, tags),
             ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
             HostInfoCollector(self, tags),
+            ProcessStatsCollector(self, tags),
         ]
         if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
