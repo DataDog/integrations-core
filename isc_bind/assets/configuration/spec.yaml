@@ -1,4 +1,4 @@
-name: isc_bind
+name: isc-bind
 files:
 - name: isc_bind.yaml
   options:
