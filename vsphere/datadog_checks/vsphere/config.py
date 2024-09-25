@@ -6,7 +6,6 @@ import re
 from typing import Any, Dict, List  # noqa: F401
 
 from pyVmomi import vim
-from six import iteritems, string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
@@ -29,6 +28,7 @@ from datadog_checks.vsphere.constants import (
     EXCLUDE_FILTERS,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL,
+    HOSTNAME_CASE_OPTIONS,
     MOR_TYPE_AS_STRING,
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
@@ -142,6 +142,12 @@ class VSphereConfig(object):
         )
         self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
         self.custom_tags = instance.get('tags', [])
+        self.hostname_transform = instance.get('hostname_transform', 'default')
+        if self.hostname_transform not in HOSTNAME_CASE_OPTIONS:
+            raise ConfigurationError(
+                "Invalid value for `hostname_transform` in the configuration file: "
+                + "use one of: `default`, `lower`, or `upper`"
+            )
         self.validate_config()
 
     def is_historical(self):
@@ -208,9 +214,7 @@ class VSphereConfig(object):
                 )
 
             # Check required fields and their types
-            for field, field_type in iteritems(
-                {'resource': string_types, 'property': string_types, 'type': string_types, 'patterns': list}
-            ):
+            for field, field_type in {'resource': str, 'property': str, 'type': str, 'patterns': list}.items():
                 if field not in resource_filter:
                     self.log.warning(
                         "Ignoring filter %r because it doesn't contain a %s field.", resource_filter, field
@@ -282,7 +286,7 @@ class VSphereConfig(object):
         # type: (MetricFilterConfig) -> MetricFilters
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
         metric_filters = {}
-        for resource_type, filters in iteritems(all_metric_filters):
+        for resource_type, filters in all_metric_filters.items():
             if resource_type not in allowed_resource_types:
                 self.log.warning(
                     "Ignoring metric_filter for resource '%s'. When collection_type is '%s', it should be one of '%s'",
@@ -293,7 +297,7 @@ class VSphereConfig(object):
                 continue
             metric_filters[resource_type] = filters
 
-        return {k: [re.compile(r) for r in v] for k, v in iteritems(metric_filters)}
+        return {k: [re.compile(r) for r in v] for k, v in metric_filters.items()}
 
     def _normalize_event_resource_filters(self, filters):
         return [filter.lower() for filter in filters]

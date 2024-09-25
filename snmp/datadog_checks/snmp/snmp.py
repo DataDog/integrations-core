@@ -14,8 +14,6 @@ from collections import defaultdict
 from concurrent import futures
 from typing import Any, DefaultDict, Dict, List, Optional, Pattern, Tuple  # noqa: F401
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.snmp.utils import extract_value
@@ -515,7 +513,7 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Ignoring metric %s', name)
                 continue
             if isinstance(metric, ParsedTableMetric):
-                for index, val in iteritems(results[name]):
+                for index, val in results[name].items():
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
                     self.submit_metric(
                         name, val, metric.forced_type, metric_tags, metric.options, metric.extract_value_pattern

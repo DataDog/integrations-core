@@ -4,8 +4,6 @@
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 from typing import Optional
 
-from six import PY2, PY3, iteritems
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
@@ -51,7 +49,7 @@ class PostgresConfig:
             )
 
         self.application_name = instance.get('application_name', 'datadog-agent')
-        if not self.isascii(self.application_name):
+        if not self.application_name.isascii():
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = int(instance.get('query_timeout', 5000))
@@ -220,7 +218,7 @@ class PostgresConfig:
                 m['query'] = m['query'] % '{metrics_columns}'
 
             try:
-                for ref, (_, mtype) in iteritems(m['metrics']):
+                for ref, (_, mtype) in m['metrics'].items():
                     cap_mtype = mtype.upper()
                     if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                         raise ConfigurationError(
@@ -232,17 +230,6 @@ class PostgresConfig:
             except Exception as e:
                 raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
         return custom_metrics
-
-    @staticmethod
-    def isascii(application_name):
-        if PY3:
-            return application_name.isascii()
-        elif PY2:
-            try:
-                application_name.encode('ascii')
-                return True
-            except UnicodeEncodeError:
-                return False
 
     @staticmethod
     def _aws_managed_authentication(aws, password):

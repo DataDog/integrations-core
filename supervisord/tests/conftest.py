@@ -4,9 +4,9 @@
 
 import os
 from copy import deepcopy
+from xmlrpc.client import ServerProxy
 
 import pytest
-from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.dev import docker_run
 from datadog_checks.supervisord.supervisord import SupervisordCheck
@@ -32,6 +32,6 @@ def bad_instance():
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(compose_file=os.path.join(HERE, 'compose', 'supervisord.yaml'), endpoints=URL, mount_logs=True):
-        server = xmlrpclib.Server('{}/RPC2'.format(URL))
+        server = ServerProxy('{}/RPC2'.format(URL))
         server.supervisor.startAllProcesses()
         yield SUPERVISORD_CONFIG
