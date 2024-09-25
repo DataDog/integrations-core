@@ -24,6 +24,7 @@ from datadog_checks.sqlserver.deadlocks import (
 from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
 
 from .common import CHECK_NAME
+from .utils import not_windows_ado
 
 try:
     import pyodbc
@@ -111,6 +112,8 @@ def _create_deadlock(bob_conn, fred_conn):
     return "deadlock" in exception_1_text or "deadlock" in exception_2_text
 
 
+# TODO: remove @not_windows_ado when the functionality is supported for MSOLEDBSQL
+@not_windows_ado
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
