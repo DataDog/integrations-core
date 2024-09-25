@@ -1,6 +1,6 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "ad6f406c-cee2-4af5-9325-b85828f8946f",
+  "app_uuid": "7cf95e39-874e-4179-91da-bd142ff391ee",
   "app_id": "greenhouse",
   "display_on_public_website": false,
   "tile": {
@@ -27,7 +27,7 @@
   "assets": {
     "integration": {
       "auto_install": false,
-      "source_type_id": 27063273,
+      "source_type_id": 26725515,
       "source_type_name": "Greenhouse",
       "events": {
         "creates_events": false

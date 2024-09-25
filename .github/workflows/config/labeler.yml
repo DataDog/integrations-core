@@ -57,6 +57,8 @@ integration/ambari:
 - ambari/**/*
 integration/apache:
 - apache/**/*
+integration/appgate_sdp:
+- appgate_sdp/**/*
 integration/arangodb:
 - arangodb/**/*
 integration/argo_rollouts:
@@ -295,10 +297,10 @@ integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
-integration/kubevirt_controller:
-- kubevirt_controller/**/*
 integration/kubevirt_api:
 - kubevirt_api/**/*
+integration/kubevirt_controller:
+- kubevirt_controller/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:

@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 from requests.exceptions import HTTPError
-from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.time import get_precise_time
@@ -81,9 +80,6 @@ class TeamCityRest(AgentCheck):
         self.tags.update(instance_tags)
 
         self.bc_store = BuildConfigs()
-
-        if PY2:
-            self.check_initializations.append(self._validate_config)
 
     def _validate_config(self):
         if self.instance.get('projects'):
@@ -172,10 +168,6 @@ class TeamCityRest(AgentCheck):
             self._initialize_single_build_config()
 
         else:
-            if PY2:
-                raise self.CheckException(
-                    'Multi-build configuration monitoring is not currently supported in Python 2.'
-                )
             self.log.debug("Initializing multi-build configuration monitoring.")
             self._initialize_multi_build_config()
 

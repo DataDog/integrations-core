@@ -273,7 +273,7 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /greenhouse/                                                          @DataDog/saas-integrations
 /greenhouse/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /greenhouse/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
-/greenhouse/assets/logs/ 
+/greenhouse/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /lastpass/                                                          @DataDog/saas-integrations
 /lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation

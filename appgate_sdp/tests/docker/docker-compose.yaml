@@ -1,0 +1,10 @@
+services:
+
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "5556:5556"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/appgate_sdp_metrics.txt:/metrics/metrics

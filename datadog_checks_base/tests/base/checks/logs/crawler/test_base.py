@@ -1,9 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.testing import requires_py3
-
-pytestmark = [requires_py3]
 
 
 # TODO: Remove lazy imports and `.format` calls when we drop support for Python 2
