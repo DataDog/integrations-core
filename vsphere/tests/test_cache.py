@@ -6,7 +6,6 @@ import logging
 import pytest
 from mock import MagicMock, patch
 from pyVmomi import vim
-from six import iteritems
 
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, VSphereCache
 from datadog_checks.vsphere.config import VSphereConfig
@@ -68,10 +67,10 @@ def test_metrics_metadata_cache():
     data = {k: object() for k in ALL_RESOURCES_WITH_METRICS}
 
     with cache.update():
-        for k, v in iteritems(data):
+        for k, v in data.items():
             cache.set_metadata(k, v)
 
-    for k, v in iteritems(data):
+    for k, v in data.items():
         assert cache.get_metadata(k) == v
 
 
@@ -83,14 +82,14 @@ def test_infrastructure_cache(realtime_instance):
 
     mors = {MagicMock(spec=k, _moId="foo"): object() for k in ALL_RESOURCES_WITH_METRICS * 2}
     with cache.update():
-        for k, v in iteritems(mors):
+        for k, v in mors.items():
             cache.set_mor_props(k, v)
         cache.set_all_tags(mock_api.get_resource_tags_for_mors(mors))
 
     for r in ALL_RESOURCES_WITH_METRICS:
         assert len(list(cache.get_mors(r))) == 2
 
-    for k, v in iteritems(mors):
+    for k, v in mors.items():
         assert cache.get_mor_props(k) == v
 
     vm_mor = vim.VirtualMachine(moId='VM4-4-1')

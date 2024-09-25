@@ -7,11 +7,10 @@ import re
 import sys
 from collections import defaultdict
 from copy import deepcopy
+from urllib.parse import urlparse
 
 import requests
 from kubeutil import get_connection_info
-from six import iteritems
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
@@ -532,9 +531,9 @@ class KubeletCheck(
             tags += instance_tags
             hash_tags = tuple(sorted(tags))
             pods_tag_counter[hash_tags] += 1
-        for tags, count in iteritems(pods_tag_counter):
+        for tags, count in pods_tag_counter.items():
             self.gauge(self.NAMESPACE + '.pods.running', count, list(tags))
-        for tags, count in iteritems(containers_tag_counter):
+        for tags, count in containers_tag_counter.items():
             self.gauge(self.NAMESPACE + '.containers.running', count, list(tags))
 
     def _report_container_spec_metrics(self, pod_list, instance_tags):
@@ -578,14 +577,14 @@ class KubeletCheck(
                     tags += instance_tags
 
                     try:
-                        for resource, value_str in iteritems(ctr.get('resources', {}).get('requests', {})):
+                        for resource, value_str in ctr.get('resources', {}).get('requests', {}).items():
                             value = self.parse_quantity(value_str)
                             self.gauge('{}.{}.requests'.format(self.NAMESPACE, resource), value, tags)
                     except (KeyError, AttributeError) as e:
                         self.log.debug("Unable to retrieve container requests for %s: %s", c_name, e)
 
                     try:
-                        for resource, value_str in iteritems(ctr.get('resources', {}).get('limits', {})):
+                        for resource, value_str in ctr.get('resources', {}).get('limits', {}).items():
                             value = self.parse_quantity(value_str)
                             self.gauge('{}.{}.limits'.format(self.NAMESPACE, resource), value, tags)
                     except (KeyError, AttributeError) as e:
@@ -730,7 +729,7 @@ class KubeletCheck(
             # Determine the tags to send
             tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
             pvc_name, kube_ns = None, None
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 if label_name == "persistentvolumeclaim":
                     pvc_name = label_value
                 elif label_name == "namespace":

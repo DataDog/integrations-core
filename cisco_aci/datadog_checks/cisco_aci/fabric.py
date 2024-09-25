@@ -1,14 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-
-from six import PY3, iteritems
+import time
 
 from datadog_checks.base.utils.serialization import json
-
-if PY3:
-    import time
 
 from . import aci_metrics, exceptions, helpers, ndm
 
@@ -43,7 +38,7 @@ class Fabric:
         self.event_platform_event = check.event_platform_event
 
     def ndm_enabled(self):
-        return PY3 and self.send_ndm_metadata
+        return self.send_ndm_metadata
 
     def collect(self):
         fabric_pods = self.api.get_fabric_pods()
@@ -170,10 +165,10 @@ class Fabric:
                 continue
 
             metrics = {}
-            for n, ms in iteritems(aci_metrics.FABRIC_METRICS):
+            for n, ms in aci_metrics.FABRIC_METRICS.items():
                 if n not in name:
                     continue
-                for cisco_metric, dd_metric in iteritems(ms):
+                for cisco_metric, dd_metric in ms.items():
                     mname = dd_metric.format(self.get_fabric_type(obj_type))
                     mval = s.get(name, {}).get("attributes", {}).get(cisco_metric)
                     json_attrs = s.get(name, {}).get("attributes", {})
