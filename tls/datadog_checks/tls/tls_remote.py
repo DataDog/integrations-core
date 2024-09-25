@@ -14,7 +14,6 @@ from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import SERVICE_CHECK_CAN_CONNECT, SERVICE_CHECK_EXPIRATION, SERVICE_CHECK_VALIDATION
-from .utils import closing
 
 
 class TLSRemoteCheck(object):
@@ -58,13 +57,11 @@ class TLSRemoteCheck(object):
             self.log.debug("Could not validate certificate because there is no connection")
             return cert, protocol_version
         # Get the cert & TLS version from the connection
-        with closing(sock):
+        with sock:
             self.log.debug('Getting cert and TLS protocol version')
             try:
-                with closing(
-                    self.agent_check.get_tls_context().wrap_socket(
-                        sock, server_hostname=self.agent_check._server_hostname
-                    )
+                with self.agent_check.get_tls_context().wrap_socket(
+                    sock, server_hostname=self.agent_check._server_hostname
                 ) as secure_sock:
                     protocol_version = secure_sock.version()
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -180,14 +177,12 @@ class TLSRemoteCheck(object):
             self.log.error('Error occurred while connecting to socket to discover intermediate certificates: %s', e)
             return
 
-        with closing(sock):
+        with sock:
             try:
                 context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
                 context.verify_mode = ssl.CERT_NONE
 
-                with closing(
-                    context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname)
-                ) as secure_sock:
+                with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     protocol_version = secure_sock.version()
                     if protocol_version and protocol_version not in self.agent_check.allowed_versions:

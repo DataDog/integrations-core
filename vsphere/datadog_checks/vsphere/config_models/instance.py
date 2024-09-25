@@ -154,6 +154,7 @@ class InstanceConfig(BaseModel):
     event_resource_filters: Optional[tuple[str, ...]] = None
     excluded_host_tags: Optional[tuple[str, ...]] = None
     host: str
+    hostname_transform: Optional[str] = None
     include_datastore_cluster_folder_tag: Optional[bool] = None
     include_events: Optional[tuple[IncludeEvent, ...]] = None
     max_historical_metrics: Optional[int] = None

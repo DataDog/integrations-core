@@ -8,11 +8,10 @@ import random
 import re
 import time
 from datetime import datetime, timedelta
+from urllib.parse import urljoin
 
 import requests
 import simplejson as json
-from six import iteritems
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
@@ -852,7 +851,7 @@ class OpenStackCheck(AgentCheck):
         else:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, tags=service_check_tags)
 
-        for label, val in iteritems(hyp):
+        for label, val in hyp.items():
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{0}".format(label)
                 self.gauge(metric_label, val, tags=tags)
@@ -1196,7 +1195,7 @@ class OpenStackCheck(AgentCheck):
             #  The scopes we iterate over should all be OpenStackProjectScope
             #  instances
             projects = []
-            for _, scope in iteritems(scope_map):
+            for _, scope in scope_map.items():
                 # Store the scope on the object so we don't have to keep passing it around
                 self._current_scope = scope
 
@@ -1408,7 +1407,7 @@ class OpenStackCheck(AgentCheck):
         """
         self.log.debug("Collecting external_host_tags now")
         external_host_tags = []
-        for k, v in iteritems(self.external_host_tags):
+        for k, v in self.external_host_tags.items():
             external_host_tags.append((k, {SOURCE_TYPE: v}))
 
         self.log.debug("Sending external_host_tags: %s", external_host_tags)

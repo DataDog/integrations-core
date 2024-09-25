@@ -5,8 +5,6 @@ import logging
 import socket
 from contextlib import closing, contextmanager
 
-from six import raise_from
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
@@ -316,7 +314,7 @@ class Connection(object):
             if is_default:
                 # the message that is raised here (along with the exception stack trace)
                 # is what will be seen in the agent status output.
-                raise_from(SQLConnectionError(check_err_message), None)
+                raise SQLConnectionError(check_err_message) from None
             else:
                 # if not the default db, we should still log this exception
                 # to give the customer an opportunity to fix the issue

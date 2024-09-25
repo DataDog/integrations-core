@@ -13,9 +13,9 @@ import platform
 import socket
 from contextlib import closing, contextmanager
 from io import open
+from urllib.request import urlopen
 
 import yaml
-from six.moves.urllib.request import urlopen
 
 from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
 from .fs import basepath, file_exists, get_parent_dir, path_join, read_file
