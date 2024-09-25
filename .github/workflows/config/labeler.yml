@@ -463,6 +463,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonicwall-firewall:
+- sonicwall-firewall/**/*
 integration/sophos_central_cloud:
 - sophos_central_cloud/**/*
 integration/spark:
