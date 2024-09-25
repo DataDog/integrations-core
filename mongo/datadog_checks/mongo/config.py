@@ -64,6 +64,7 @@ class MongoConfig(object):
                     'Configure one check instance for each node instead'
                 )
             self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
+        self.direct_connection = is_affirmative(self.additional_options.get('direct_connection', True))
 
         if not self.hosts:
             raise ConfigurationError('No `hosts` specified')

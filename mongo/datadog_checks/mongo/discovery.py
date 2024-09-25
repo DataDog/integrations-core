@@ -11,8 +11,9 @@ DEFAULT_REFRESH_INTERVAL = 600
 
 
 class MongoDBDatabaseAutodiscovery(Discovery):
-    def __init__(self, check):
-        self._autodiscovery_config = check._config.database_autodiscovery_config
+    def __init__(self, mongo_instance):
+        self._mongo_instance = mongo_instance
+        self._autodiscovery_config = mongo_instance._config.database_autodiscovery_config
         self.autodiscovery_enabled = self._autodiscovery_config.get("enabled", False)
 
         super(MongoDBDatabaseAutodiscovery, self).__init__(
@@ -21,14 +22,13 @@ class MongoDBDatabaseAutodiscovery(Discovery):
             exclude=self._autodiscovery_config.get("exclude"),
             interval=self._autodiscovery_config.get('refresh_interval', DEFAULT_REFRESH_INTERVAL),
         )
-        self._check = check
-        self._log = self._check.log
+        self._log = mongo_instance._log
         self._max_databases = self._autodiscovery_config.get("max_databases", DEFAULT_MAX_DATABASES)
 
         self.database_count = 0  # total number of databases on the server
 
     def _list_databases(self):
-        deployment = self._check.deployment_type
+        deployment = self._mongo_instance.deployment_type
 
         databases = []
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
@@ -36,7 +36,7 @@ class MongoDBDatabaseAutodiscovery(Discovery):
         elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
             self._log.debug("Replicaset is in recovering state, will skip reading database names")
         else:
-            databases = self._check.api_client.list_database_names()
+            databases = self._mongo_instance.api_client.list_database_names()
             self.database_count = len(databases)
         return databases
 

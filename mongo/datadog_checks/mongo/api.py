@@ -38,15 +38,16 @@ class MongoApi(object):
         Valid for ReplicaSetDeployment deployments
     """
 
-    def __init__(self, config, log, replicaset: str = None):
-        self._config = config
+    def __init__(self, connection_host, connection_options, log, replicaset: str = None):
+        self._connection_host = connection_host
+        self._config = connection_options
         self._log = log
         options = {
-            'host': self._config.server if self._config.server else self._config.hosts,
+            'host': self._connection_host,
             'socketTimeoutMS': self._config.timeout,
             'connectTimeoutMS': self._config.timeout,
             'serverSelectionTimeoutMS': self._config.timeout,
-            'directConnection': True,
+            'directConnection': self._config.direct_connection,
             'read_preference': ReadPreference.PRIMARY_PREFERRED,
             'appname': DD_APP_NAME,
         }

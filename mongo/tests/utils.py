@@ -8,7 +8,7 @@ import os
 from .common import HERE
 
 
-def assert_metrics(check_instance, aggregator, metrics_categories, additional_tags=None):
+def assert_metrics(internal_resource_tags, aggregator, metrics_categories, additional_tags=None):
     if additional_tags is None:
         additional_tags = []
     for cat in metrics_categories:
@@ -18,7 +18,7 @@ def assert_metrics(check_instance, aggregator, metrics_categories, additional_ta
                     metric['name'],
                     value=metric['value'],
                     count=1,
-                    tags=additional_tags + metric['tags'] + check_instance.internal_resource_tags,
+                    tags=additional_tags + metric['tags'] + internal_resource_tags,
                     metric_type=metric['type'],
                 )
 

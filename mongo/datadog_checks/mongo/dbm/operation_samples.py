@@ -84,32 +84,35 @@ class MongoOperationSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_operation_samples(self):
-        if not self._should_collect_operation_samples():
-            return
-        now = time.time()
+        for mongo_instance in self._check.mongo_instances:
+            if not self._should_collect_operation_samples(mongo_instance):
+                continue
+            now = time.time()
 
-        activities = []
+            activities = []
 
-        for activity, sample in self._get_operation_samples(now, databases_monitored=self._check.databases_monitored):
-            if sample:
-                self._check.log.debug("Sending operation sample: %s", sample)
-                self._check.database_monitoring_query_sample(json_util.dumps(sample))
-            activities.append(activity)
-        activities_payload = self._create_activities_payload(now, activities)
-        self._check.log.debug("Sending activities payload: %s", activities_payload)
-        self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
+            for activity, sample in self._get_operation_samples(
+                mongo_instance, now, databases_monitored=mongo_instance.databases_monitored
+            ):
+                if sample:
+                    self._check.log.debug("Sending operation sample: %s", sample)
+                    self._check.database_monitoring_query_sample(json_util.dumps(sample))
+                activities.append(activity)
+            activities_payload = self._create_activities_payload(mongo_instance, now, activities)
+            self._check.log.debug("Sending activities payload: %s", activities_payload)
+            self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
 
-        self._last_sampled_timestamp = now
+            self._last_sampled_timestamp = now
 
-    def _should_collect_operation_samples(self) -> bool:
-        deployment = self._check.deployment_type
+    def _should_collect_operation_samples(self, mongo_instance) -> bool:
+        deployment = mongo_instance.deployment_type
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping operation samples collection on arbiter node")
             return False
         return True
 
-    def _get_operation_samples(self, now, databases_monitored: List[str]):
-        for operation in self._get_current_op():
+    def _get_operation_samples(self, mongo_instance, now, databases_monitored: List[str]):
+        for operation in self._get_current_op(mongo_instance):
             try:
                 if not self._should_include_operation(operation, databases_monitored):
                     continue
@@ -134,21 +137,21 @@ class MongoOperationSamples(DBMAsyncJob):
                     continue
 
                 explain_plan = get_explain_plan(
-                    api_client=self._check.api_client,
+                    api_client=mongo_instance.api_client,
                     op=operation.get("op"),
                     command=command,
                     dbname=operation_metadata["dbname"],
                 )
                 sample = self._create_operation_sample_payload(
-                    now, operation_metadata, obfuscated_command, query_signature, explain_plan, activity
+                    mongo_instance, now, operation_metadata, obfuscated_command, query_signature, explain_plan, activity
                 )
                 yield activity, sample
             except Exception as e:
                 self._check.log.error("Unexpected error while collecting operation samples: %s", e)
                 continue
 
-    def _get_current_op(self):
-        operations = self._check.api_client.current_op()
+    def _get_current_op(self, mongo_instance):
+        operations = mongo_instance.api_client.current_op()
         for operation in operations:
             self._check.log.debug("Found operation: %s", operation)
             yield operation
@@ -291,6 +294,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
     def _create_operation_sample_payload(
         self,
+        mongo_instance,
         now: float,
         operation_metadata: OperationSampleOperationMetadata,
         obfuscated_command: str,
@@ -299,11 +303,11 @@ class MongoOperationSamples(DBMAsyncJob):
         activity: OperationSampleActivityRecord,
     ) -> OperationSampleEvent:
         event = {
-            "host": self._check._resolved_hostname,
+            "host": mongo_instance.resolved_hostname,
             "dbm_type": "plan",
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
-            "ddtags": ",".join(self._check._get_tags()),
+            "ddtags": ",".join(mongo_instance.get_tags()),
             "timestamp": now * 1000,
             "network": {
                 "client": operation_metadata["client"],
@@ -350,15 +354,15 @@ class MongoOperationSamples(DBMAsyncJob):
         return activity
 
     def _create_activities_payload(
-        self, now: float, activities: List[OperationSampleActivityRecord]
+        self, mongo_instance, now: float, activities: List[OperationSampleActivityRecord]
     ) -> OperationActivityEvent:
         return {
-            "host": self._check._resolved_hostname,
+            "host": mongo_instance.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
-            "ddtags": self._check._get_tags(),
+            "ddtags": mongo_instance.get_tags(),
             "timestamp": now * 1000,
             "mongodb_activity": activities,
         }

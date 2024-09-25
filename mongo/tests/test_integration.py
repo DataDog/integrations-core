@@ -25,7 +25,7 @@ def _get_mongodb_instance_event(aggregator):
 
 def _assert_mongodb_instance_event(
     aggregator,
-    check,
+    mongo_instance,
     expected_tags,
     dbm,
     replset_name,
@@ -43,8 +43,7 @@ def _assert_mongodb_instance_event(
         return
 
     assert mongodb_instance_event is not None
-    assert mongodb_instance_event['host'] == check._resolved_hostname
-    assert mongodb_instance_event['host'] == check._resolved_hostname
+    assert mongodb_instance_event['host'] == mongo_instance.resolved_hostname
     assert mongodb_instance_event['dbms'] == "mongo"
     assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
 
@@ -60,7 +59,7 @@ def _assert_mongodb_instance_event(
     }
     assert mongodb_instance_event['metadata'] == {
         'dbm': dbm,
-        'connection_host': check._config.clean_server_name,
+        'connection_host': mongo_instance.connection_host[0],
         "instance_metadata": {k: v for k, v in expected_instance_metadata.items() if v is not None},
     }
 
@@ -78,7 +77,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
         dd_run_check(mongos_check)
 
     assert_metrics(
-        mongos_check,
+        mongos_check.mongo_instances[0].internal_resource_tags,
         aggregator,
         [
             'count-dbs',
@@ -113,7 +112,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos', 'hosting_type:self-hosted']
     _assert_mongodb_instance_event(
         aggregator,
-        mongos_check,
+        mongo_instance=mongos_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=dbm,
         replset_name=None,
@@ -170,9 +169,11 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'fsynclock',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
     # Lag metrics are tagged with the state of the member and not with the current one.
-    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary-in-shard'])
+    assert_metrics(
+        mongo_check.mongo_instances[0].internal_resource_tags, aggregator, ['replset-lag-from-primary-in-shard']
+    )
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -225,7 +226,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='mongo-mongodb-sharded-shard-0',
@@ -270,7 +271,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
         'connection-pool',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -288,7 +289,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='mongo-mongodb-sharded-shard-0',
@@ -326,7 +327,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
     ]
     metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
 
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -344,7 +345,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='mongo-mongodb-sharded-shard-0',
@@ -390,8 +391,10 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         'fsynclock',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
-    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary-configsvr'])
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
+    assert_metrics(
+        mongo_check.mongo_instances[0].internal_resource_tags, aggregator, ['replset-lag-from-primary-configsvr']
+    )
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -445,7 +448,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='mongo-mongodb-sharded-configsvr',
@@ -488,7 +491,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
         'connection-pool',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -506,7 +509,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='mongo-mongodb-sharded-configsvr',
@@ -553,9 +556,9 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         'collection',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
     # Lag metrics are tagged with the state of the member and not with the current one.
-    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, ['replset-lag-from-primary'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -609,7 +612,7 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='replset',
@@ -658,9 +661,9 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         'collection',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
     # Lag metrics are tagged with the state of the member and not with the current one.
-    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, ['replset-lag-from-primary'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -717,7 +720,7 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='replset',
@@ -768,7 +771,7 @@ def test_integration_replicaset_secondary(
     if collect_custom_queries:
         metrics_categories.append('custom-queries')
 
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -786,7 +789,7 @@ def test_integration_replicaset_secondary(
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='replset',
@@ -823,7 +826,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
     ]
     metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
 
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -841,7 +844,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name='replset',
@@ -879,7 +882,12 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
         'collection',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
+    assert_metrics(
+        mongo_check.mongo_instances[0].internal_resource_tags,
+        aggregator,
+        metrics_categories,
+        ['hosting_type:self-hosted'],
+    )
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -897,7 +905,7 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
     expected_tags = [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=False,
         replset_name=None,
@@ -946,7 +954,12 @@ def test_db_names_with_nonexistent_database(check, instance_integration, aggrega
         'collection',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
+    assert_metrics(
+        mongo_check.mongo_instances[0].internal_resource_tags,
+        aggregator,
+        metrics_categories,
+        ['hosting_type:self-hosted'],
+    )
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -981,7 +994,12 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
         'collection',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
+    assert_metrics(
+        mongo_check.mongo_instances[0].internal_resource_tags,
+        aggregator,
+        metrics_categories,
+        ['hosting_type:self-hosted'],
+    )
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -1082,7 +1100,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
     expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
     _assert_mongodb_instance_event(
         aggregator,
-        mongo_check,
+        mongo_instance=mongo_check.mongo_instances[0],
         expected_tags=expected_tags,
         dbm=True,
         replset_name='mongo-mongodb-sharded-shard-0',
@@ -1108,7 +1126,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
 
     # Override the deployment type replset_state to secondary
     # next check run should detect the change and re-emit the mongodb instance event
-    mongo_check.deployment_type.replset_state = SECONDARY_STATE_ID
+    mongo_check.mongo_instances[0].deployment_type.replset_state = SECONDARY_STATE_ID
     dd_run_check(mongo_check)
     assert _get_mongodb_instance_event(aggregator) is not None
 
@@ -1141,9 +1159,9 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         'collection-autodiscover',
         'hostinfo',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, metrics_categories, replica_tags)
     # Lag metrics are tagged with the state of the member and not with the current one.
-    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
+    assert_metrics(mongo_check.mongo_instances[0].internal_resource_tags, aggregator, ['replset-lag-from-primary'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -1175,4 +1193,9 @@ def test_integration_localhost_process_stats(instance_integration, aggregator, c
     metrics_categories = [
         'process-stats',
     ]
-    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])
+    assert_metrics(
+        mongo_check.mongo_instances[0].internal_resource_tags,
+        aggregator,
+        metrics_categories,
+        ['hosting_type:self-hosted'],
+    )

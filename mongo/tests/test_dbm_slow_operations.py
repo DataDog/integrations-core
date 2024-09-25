@@ -45,7 +45,7 @@ def test_mongo_slow_operations_standalone(aggregator, instance_integration_clust
         assert slow_operation_explain_plans_payload == expected_slow_operation_explain_plans_payload
 
     assert_metrics(
-        mongo_check,
+        mongo_check.mongo_instances[0].internal_resource_tags,
         aggregator,
         ["profiling"],
     )

@@ -49,60 +49,63 @@ class MongoSchemas(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_schemas(self):
-        if not self._should_collect_schemas():
-            self._check.log.debug(
-                "Skipping schema collection. Schema collection only runs on ReplicaSet primary or Mongos."
-            )
-            return
-
-        base_payload = {
-            "host": self._check._resolved_hostname,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "mongo",
-            "kind": "mongodb_databases",
-            "collection_interval": self._collection_interval,
-            "dbms_version": self._check._mongo_version,
-            "tags": self._check._get_tags(),
-        }
-
-        collected_collections = 0
-        for db_name in self._check.databases_monitored:
-            if db_name in MONGODB_SYSTEM_DATABASES:
-                self._check.log.debug("Skipping system database %s", db_name)
-                continue
-            if self._max_collections and collected_collections >= self._max_collections:
-                break
-
-            collections = []
-            for coll_name in self._check.api_client.list_authorized_collections(
-                db_name, limit=self._max_collections_per_database
-            ):
-                try:
-                    collection = self._discover_collection(db_name, coll_name)
-                    collections.append(collection)
-                    collected_collections += 1
-                    if self._max_collections and collected_collections >= self._max_collections:
-                        self._check.log.debug("max_collection is configured to %d and reached", self._max_collections)
-                        break
-                except Exception as e:
-                    self._check.log.error("Error collecting schema for %s.%s: %s", db_name, coll_name, e)
-
-            if not collections:
-                self._check.log.debug("No collections found for database %s", db_name)
+        for mongo_instance in self._check.mongo_instances:
+            if not self._should_collect_schemas(mongo_instance):
+                self._check.log.debug(
+                    "Skipping schema collection. Schema collection only runs on ReplicaSet primary or Mongos."
+                )
                 continue
 
-            # Submit one schema payload per database to avoid hitting the payload size limit
-            self._submit_schema_payload(base_payload, db_name, collections)
+            base_payload = {
+                "host": mongo_instance.resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "mongo",
+                "kind": "mongodb_databases",
+                "collection_interval": self._collection_interval,
+                "dbms_version": mongo_instance.mongo_version,
+                "tags": mongo_instance.get_tags(),
+            }
 
-    def _should_collect_schemas(self) -> bool:
+            collected_collections = 0
+            for db_name in mongo_instance.databases_monitored:
+                if db_name in MONGODB_SYSTEM_DATABASES:
+                    self._check.log.debug("Skipping system database %s", db_name)
+                    continue
+                if self._max_collections and collected_collections >= self._max_collections:
+                    break
+
+                collections = []
+                for coll_name in mongo_instance.api_client.list_authorized_collections(
+                    db_name, limit=self._max_collections_per_database
+                ):
+                    try:
+                        collection = self._discover_collection(mongo_instance, db_name, coll_name)
+                        collections.append(collection)
+                        collected_collections += 1
+                        if self._max_collections and collected_collections >= self._max_collections:
+                            self._check.log.debug(
+                                "max_collection is configured to %d and reached", self._max_collections
+                            )
+                            break
+                    except Exception as e:
+                        self._check.log.error("Error collecting schema for %s.%s: %s", db_name, coll_name, e)
+
+                if not collections:
+                    self._check.log.debug("No collections found for database %s", db_name)
+                    continue
+
+                # Submit one schema payload per database to avoid hitting the payload size limit
+                self._submit_schema_payload(base_payload, db_name, collections)
+
+    def _should_collect_schemas(self, mongo_instance) -> bool:
         # Only collect schemas on primary or mongos
-        return self._check.deployment_type.is_principal()
+        return mongo_instance.deployment_type.is_principal()
 
-    def _discover_collection(self, dbname, collname):
-        schema = self._discover_collection_schema(dbname, collname)
-        indexes = self._discover_collection_indexes(dbname, collname)
-        search_indexes = self._discover_collection_search_indexes(dbname, collname)
-        is_sharded = self._check.api_client.is_collection_sharded(dbname, collname)
+    def _discover_collection(self, mongo_instance, dbname, collname):
+        schema = self._discover_collection_schema(mongo_instance, dbname, collname)
+        indexes = self._discover_collection_indexes(mongo_instance, dbname, collname)
+        search_indexes = self._discover_collection_search_indexes(mongo_instance, dbname, collname)
+        is_sharded = mongo_instance.api_client.is_collection_sharded(dbname, collname)
         return {
             "name": collname,
             "namespace": f"{dbname}.{collname}",
@@ -112,10 +115,10 @@ class MongoSchemas(DBMAsyncJob):
             "search_indexes": search_indexes,
         }
 
-    def _discover_collection_schema(self, dbname, collname):
+    def _discover_collection_schema(self, mongo_instance, dbname, collname):
         # Sample the collection, fetch sampled docs into memory
         # so that we know the length of sampled docs in case it's less than the sample size
-        sampled_docs = list(self._check.api_client.sample(dbname, collname, self._sample_size))
+        sampled_docs = list(mongo_instance.api_client.sample(dbname, collname, self._sample_size))
         if len(sampled_docs) < self._sample_size:
             self._check.log.debug(
                 "Sampled documents count is less than the sample size for %s.%s, ",
@@ -148,8 +151,8 @@ class MongoSchemas(DBMAsyncJob):
 
         return schema
 
-    def _discover_collection_indexes(self, dbname, collname):
-        indexes = self._check.api_client.index_information(dbname, collname)
+    def _discover_collection_indexes(self, mongo_instance, dbname, collname):
+        indexes = mongo_instance.api_client.index_information(dbname, collname)
         return [self._create_index_payload(index_name, index_details) for index_name, index_details in indexes.items()]
 
     def _create_index_payload(self, index_name, index_details):
@@ -208,13 +211,13 @@ class MongoSchemas(DBMAsyncJob):
                 return "geospatial"
         return "regular"
 
-    def _discover_collection_search_indexes(self, dbname, collname):
-        if not self._check.deployment_type.hosting_type == HostingType.ATLAS:
+    def _discover_collection_search_indexes(self, mongo_instance, dbname, collname):
+        if not mongo_instance.deployment_type.hosting_type == HostingType.ATLAS:
             self._check.log.debug("Search indexes are only supported for Atlas deployments")
             return []
 
         try:
-            search_indexes = self._check.api_client.list_search_indexes(dbname, collname)
+            search_indexes = mongo_instance.api_client.list_search_indexes(dbname, collname)
             return [self._create_search_index_payload(search_index) for search_index in search_indexes]
         except Exception as e:
             self._check.log.error("Error collecting search indexes for %s.%s: %s", dbname, collname, e)

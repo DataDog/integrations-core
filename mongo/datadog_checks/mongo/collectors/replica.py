@@ -20,11 +20,11 @@ class ReplicaCollector(MongoCollector):
     in order to submit events on any status change.
     """
 
-    def __init__(self, check, tags):
+    def __init__(self, check, tags, deployment_type):
         super(ReplicaCollector, self).__init__(check, tags)
         self._last_states = check.last_states_by_server
         self.hostname = self.extract_hostname_for_event(self.check._config.clean_server_name)
-        self.deployment_type = self.check.deployment_type
+        self.deployment_type = deployment_type
 
     def compatible_with(self, deployment):
         # Can only be run on mongod that are part of a replica set.
@@ -115,7 +115,9 @@ class ReplicaCollector(MongoCollector):
         if self.deployment_type.is_arbiter:
             self.log.debug("Current node is arbiter. Collecting the replset from the primary instead.")
             try:
-                api = MongoApi(self.check._config, self.log, replicaset=self.deployment_type.replset_name)
+                api = MongoApi(
+                    api._connection_host, api._config, self.log, replicaset=self.deployment_type.replset_name
+                )
             except Exception as e:
                 self.log.debug(str(e))
                 self.log.warning(
@@ -127,7 +129,7 @@ class ReplicaCollector(MongoCollector):
 
     def collect(self, api):
         status = api.replset_get_status()
-        result = {}
+        result = {'state': status['myState']}
 
         # Find nodes: current node (ourself) and the primary
         current = primary = None
@@ -161,7 +163,6 @@ class ReplicaCollector(MongoCollector):
                     votes = member.get('votes', 1)
             result['votes'] = votes
             result['voteFraction'] = votes / total
-            result['state'] = status['myState']
         self._submit_payload({'replSet': result})
         if is_primary:
             # Submit events

@@ -15,8 +15,8 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
-from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
-from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
+from datadog_checks.mongo.common import HostingType, MongosDeployment, ReplicaSetDeployment, get_state_name
+from datadog_checks.mongo.mongo import MongoDb, metrics
 from datadog_checks.mongo.utils import parse_mongo_uri
 
 from . import common
@@ -60,12 +60,14 @@ def test_emits_ok_service_check_when_service_is_available(
 ):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
-    check.refresh_collectors = mock.MagicMock()
+    check._refresh_mongo_instances()
+    for mongo_instance in check.mongo_instances:
+        mongo_instance._refresh_collectors = mock.MagicMock()
     # When
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    assert check._resolved_hostname == 'test-hostname:27018'
+    assert check.mongo_instances[0].resolved_hostname == 'test-hostname:27018'
 
 
 @mock.patch(
@@ -82,13 +84,15 @@ def test_emits_ok_service_check_each_run_when_service_is_available(
 ):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
-    check.refresh_collectors = mock.MagicMock()
+    check._refresh_mongo_instances()
+    for mongo_instance in check.mongo_instances:
+        mongo_instance._refresh_collectors = mock.MagicMock()
     # When
     dd_run_check(check)
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK, count=2)
-    assert check._resolved_hostname == 'test-hostname:27018'
+    assert check.mongo_instances[0].resolved_hostname == 'test-hostname:27018'
 
 
 @mock.patch(
@@ -106,7 +110,6 @@ def test_version_metadata(
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost:27017']}])
     check.check_id = 'test:123'
-    check.refresh_collectors = mock.MagicMock()
     # When
     dd_run_check(check)
     # Then
@@ -118,7 +121,6 @@ def test_version_metadata(
             'version.minor': '0',
             'version.patch': '0',
             'version.raw': '5.0.0',
-            'resolved_hostname': 'test-hostname:27017',
         },
     )
 
@@ -138,7 +140,9 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
 ):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
-    check.refresh_collectors = mock.MagicMock()
+    check._refresh_mongo_instances()
+    for mongo_instance in check.mongo_instances:
+        mongo_instance._refresh_collectors = mock.MagicMock()
     # When
     dd_run_check(check)
     # Then
@@ -146,8 +150,8 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     mock_command.assert_has_calls([mock.call('serverStatus'), mock.call('getCmdLineOpts'), mock.call('isMaster')])
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
-    assert check._resolved_hostname == 'test-hostname:27017'
-    assert check.deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
+    assert check.mongo_instances[0].resolved_hostname == 'test-hostname:27017'
+    assert check.mongo_instances[0].deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
 
 
 @mock.patch(
@@ -166,7 +170,9 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
 ):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
-    check.refresh_collectors = mock.MagicMock()
+    check._refresh_mongo_instances()
+    for mongo_instance in check.mongo_instances:
+        mongo_instance._refresh_collectors = mock.MagicMock()
     # When
     dd_run_check(check)
     # Then
@@ -199,7 +205,9 @@ def test_when_replicaset_state_recovering_then_database_names_not_called(
 ):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
-    check.refresh_collectors = mock.MagicMock()
+    check._refresh_mongo_instances()
+    for mongo_instance in check.mongo_instances:
+        mongo_instance._refresh_collectors = mock.MagicMock()
     # When
     dd_run_check(check)
     # Then
@@ -502,10 +510,10 @@ def test_api_alibaba_mongos(check, aggregator):
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
         check = check(common.INSTANCE_BASIC)
-        # check.api_client = MongoApi(config, log)
-        check.refresh_deployment_type()
-        assert isinstance(check.deployment_type, MongosDeployment)
-        assert check.deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
+        check._refresh_mongo_instances()
+        check.mongo_instances[0].refresh_deployment_type()
+        assert isinstance(check.mongo_instances[0].deployment_type, MongosDeployment)
+        assert check.mongo_instances[0].deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
 
 
 def test_api_alibaba_mongod_shard(check, aggregator):
@@ -520,8 +528,9 @@ def test_api_alibaba_mongod_shard(check, aggregator):
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
         check = check(common.INSTANCE_BASIC)
-        check.refresh_deployment_type()
-        deployment_type = check.deployment_type
+        check._refresh_mongo_instances()
+        check.mongo_instances[0].refresh_deployment_type()
+        deployment_type = check.mongo_instances[0].deployment_type
         assert isinstance(deployment_type, ReplicaSetDeployment)
         assert deployment_type.cluster_role == 'shardsvr'
         assert deployment_type.replset_state_name == 'primary'
@@ -542,8 +551,9 @@ def test_api_alibaba_configsvr(check, aggregator):
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
         check = check(common.INSTANCE_BASIC)
-        check.refresh_deployment_type()
-        deployment_type = check.deployment_type
+        check._refresh_mongo_instances()
+        check.mongo_instances[0].refresh_deployment_type()
+        deployment_type = check.mongo_instances[0].deployment_type
         assert isinstance(deployment_type, ReplicaSetDeployment)
         assert deployment_type.cluster_role == 'configsvr'
         assert deployment_type.replset_state_name == 'secondary'
@@ -567,8 +577,9 @@ def test_api_alibaba_mongod(check, aggregator):
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
         check = check(common.INSTANCE_BASIC)
-        check.refresh_deployment_type()
-        deployment_type = check.deployment_type
+        check._refresh_mongo_instances()
+        check.mongo_instances[0].refresh_deployment_type()
+        deployment_type = check.mongo_instances[0].deployment_type
         assert isinstance(deployment_type, ReplicaSetDeployment)
         assert deployment_type.cluster_role is None
         assert deployment_type.replset_state_name == 'primary'
@@ -682,7 +693,9 @@ def test_emits_ok_service_check_for_documentdb_deployment(
 ):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
-    check.refresh_collectors = mock.MagicMock()
+    check._refresh_mongo_instances()
+    for mongo_instance in check.mongo_instances:
+        mongo_instance._refresh_collectors = mock.MagicMock()
     # When
     dd_run_check(check)
     # Then
@@ -697,7 +710,7 @@ def test_emits_ok_service_check_for_documentdb_deployment(
     )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
-    assert check.deployment_type.hosting_type == HostingType.DOCUMENTDB
+    assert check.mongo_instances[0].deployment_type.hosting_type == HostingType.DOCUMENTDB
 
 
 @mock.patch(
@@ -714,7 +727,9 @@ def test_emits_ok_service_check_for_mongodb_atlas_deployment(
 ):
     # Given
     check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
-    check.refresh_collectors = mock.MagicMock()
+    check._refresh_mongo_instances()
+    for mongo_instance in check.mongo_instances:
+        mongo_instance._refresh_collectors = mock.MagicMock()
     # When
     dd_run_check(check)
     # Then
@@ -727,8 +742,8 @@ def test_emits_ok_service_check_for_mongodb_atlas_deployment(
     )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
-    assert check.deployment_type.hosting_type == HostingType.ATLAS
-    assert check.api_client.hostname == 'xxxx.mongodb.net:27017'
+    assert check.mongo_instances[0].deployment_type.hosting_type == HostingType.ATLAS
+    assert check.mongo_instances[0].api_client.hostname == 'xxxx.mongodb.net:27017'
 
 
 def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
@@ -743,12 +758,13 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     mc.replset_get_status.return_value = load_json_fixture('replSetGetStatus-replica-primary-in-shard')
     mc.is_master.return_value = load_json_fixture('isMaster-replica-primary-in-shard')
     mc.get_cmdline_opts.return_value = load_json_fixture('getCmdLineOpts-replica-primary-in-shard')['parsed']
-    mongo_check.api_client = mc
+    mongo_check._refresh_mongo_instances()
+    mongo_check.mongo_instances[0].api_client = mc
 
     dd_run_check(mongo_check)
 
-    assert isinstance(mongo_check.deployment_type, ReplicaSetDeployment)
-    assert mongo_check.deployment_type.cluster_role == 'shardsvr'
+    assert isinstance(mongo_check.mongo_instances[0].deployment_type, ReplicaSetDeployment)
+    assert mongo_check.mongo_instances[0].deployment_type.cluster_role == 'shardsvr'
 
     # Now we simulate a change in node role.
     new_opts = load_json_fixture('getCmdLineOpts-replica-primary-in-shard')['parsed']
@@ -757,8 +773,8 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
 
     dd_run_check(mongo_check)
 
-    assert isinstance(mongo_check.deployment_type, ReplicaSetDeployment)
-    assert mongo_check.deployment_type.cluster_role == 'TEST'
+    assert isinstance(mongo_check.mongo_instances[0].deployment_type, ReplicaSetDeployment)
+    assert mongo_check.mongo_instances[0].deployment_type.cluster_role == 'TEST'
 
 
 def seed_mock_client():

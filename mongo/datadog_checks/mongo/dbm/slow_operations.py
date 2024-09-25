@@ -47,10 +47,7 @@ class MongoSlowOperations(DBMAsyncJob):
             ttl=45 * 60 / self._slow_operations_config['explained_operations_per_hour_per_query'],
         )
         # _database_profiling_levels: cache the profiling levels for each database
-        self._database_profiling_levels = TTLCache(
-            maxsize=check._database_autodiscovery._max_databases,
-            ttl=60 * 60,  # 1 hour
-        )
+        self._database_profiling_levels = {}
 
         super(MongoSlowOperations, self).__init__(
             check,
@@ -69,85 +66,92 @@ class MongoSlowOperations(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_slow_operations(self):
-        if not self._should_collect_slow_operations():
-            return
+        for mongo_instance in self._check.mongo_instances:
+            if not self._should_collect_slow_operations(mongo_instance):
+                continue
 
-        is_mongos = isinstance(self._check.deployment_type, MongosDeployment)
+            if mongo_instance.resolved_hostname not in self._database_profiling_levels:
+                self._database_profiling_levels[mongo_instance.resolved_hostname] = TTLCache(
+                    maxsize=mongo_instance._database_autodiscovery._max_databases,
+                    ttl=60 * 60,  # 1 hour
+                )
 
-        # set of db names for which we need to collect slow operations from logs
-        slow_operations_from_logs = set()
+            is_mongos = isinstance(mongo_instance.deployment_type, MongosDeployment)
 
-        last_collection_timestamp = self._last_collection_timestamp
-        if not last_collection_timestamp:
-            # First run, set the lookback to 2x the collection interval
-            last_collection_timestamp = time.time() - 2 * self._collection_interval
-        self._last_collection_timestamp = time.time()
+            # set of db names for which we need to collect slow operations from logs
+            slow_operations_from_logs = set()
 
-        slow_operation_events = []
+            last_collection_timestamp = self._last_collection_timestamp
+            if not last_collection_timestamp:
+                # First run, set the lookback to 2x the collection interval
+                last_collection_timestamp = time.time() - 2 * self._collection_interval
+            self._last_collection_timestamp = time.time()
 
-        for db_name in self._check.databases_monitored:
-            if not is_mongos and self._is_profiling_enabled(db_name):
-                for slow_operation in self._collect_slow_operations_from_profiler(
-                    db_name, last_ts=last_collection_timestamp
+            slow_operation_events = []
+
+            for db_name in mongo_instance.databases_monitored:
+                if not is_mongos and self._is_profiling_enabled(mongo_instance, db_name):
+                    for slow_operation in self._collect_slow_operations_from_profiler(
+                        mongo_instance, db_name, last_ts=last_collection_timestamp
+                    ):
+                        slow_operation_events.append(self._create_slow_operation_event(slow_operation))
+
+                        self._collect_slow_operation_explain_plan(mongo_instance, slow_operation, db_name)
+
+                        if len(slow_operation_events) >= self._max_operations:
+                            break
+                else:
+                    slow_operations_from_logs.add(db_name)
+
+            if slow_operations_from_logs and len(slow_operation_events) < self._max_operations:
+                for slow_operation in self._collect_slow_operations_from_logs(
+                    mongo_instance, slow_operations_from_logs, last_ts=last_collection_timestamp
                 ):
                     slow_operation_events.append(self._create_slow_operation_event(slow_operation))
 
-                    self._collect_slow_operation_explain_plan(slow_operation, db_name)
+                    self._collect_slow_operation_explain_plan(mongo_instance, slow_operation, slow_operation["dbname"])
 
                     if len(slow_operation_events) >= self._max_operations:
                         break
-            else:
-                slow_operations_from_logs.add(db_name)
 
-        if slow_operations_from_logs and len(slow_operation_events) < self._max_operations:
-            for slow_operation in self._collect_slow_operations_from_logs(
-                slow_operations_from_logs, last_ts=last_collection_timestamp
-            ):
-                slow_operation_events.append(self._create_slow_operation_event(slow_operation))
+            self._check.log.debug(
+                "Collected %d slow operations, capped at %d", len(slow_operation_events), self._max_operations
+            )
+            self._check.log.debug("Sending slow operations: %s", slow_operation_events)
+            if slow_operation_events:
+                self._submit_slow_operation_payload(mongo_instance, slow_operation_events)
 
-                self._collect_slow_operation_explain_plan(slow_operation, slow_operation["dbname"])
-
-                if len(slow_operation_events) >= self._max_operations:
-                    break
-
-        self._check.log.debug(
-            "Collected %d slow operations, capped at %d", len(slow_operation_events), self._max_operations
-        )
-        self._check.log.debug("Sending slow operations: %s", slow_operation_events)
-        if slow_operation_events:
-            self._submit_slow_operation_payload(slow_operation_events)
-
-    def _should_collect_slow_operations(self) -> bool:
-        deployment = self._check.deployment_type
+    def _should_collect_slow_operations(self, mongo_instance) -> bool:
+        deployment = mongo_instance.deployment_type
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping slow operations collection on arbiter node")
             return False
         return True
 
-    def _is_profiling_enabled(self, db_name):
+    def _is_profiling_enabled(self, mongo_instance, db_name):
         try:
-            if db_name in self._database_profiling_levels:
-                return self._database_profiling_levels[db_name] > 0
+            if db_name in self._database_profiling_levels[mongo_instance.resolved_hostname]:
+                return self._database_profiling_levels[mongo_instance.resolved_hostname][db_name] > 0
 
-            profiling_level = self._check.api_client.get_profiling_level(db_name)
+            profiling_level = mongo_instance.api_client.get_profiling_level(db_name)
             level = profiling_level.get("was", 0)  # profiling by default is disabled
             slowms = profiling_level.get("slowms", 100)  # slowms threshold is 100ms by default
-            tags = self._check._get_tags(include_internal_resource_tags=True)
+            tags = mongo_instance.get_tags(include_internal_resource_tags=True)
             tags.append("db:%s" % db_name)
             # Emit the profiling level and slowms as raw metrics
             # raw ensures that level = 0 is also emitted
             self._check.gauge('mongodb.profiling.level', level, tags=tags, raw=True)
             self._check.gauge('mongodb.profiling.slowms', slowms, tags=tags, raw=True)
             # Cache the profiling level
-            self._database_profiling_levels[db_name] = level
+            self._database_profiling_levels[mongo_instance.resolved_hostname][db_name] = level
             return level > 0
         except OperationFailure:
             # If the command fails, we assume profiling is not enabled
-            self._database_profiling_levels[db_name] = 0
+            self._database_profiling_levels[mongo_instance.resolved_hostname][db_name] = 0
             return False
 
-    def _collect_slow_operations_from_profiler(self, db_name, last_ts):
-        profiling_data = self._check.api_client.get_profiling_data(db_name, datetime.fromtimestamp(last_ts))
+    def _collect_slow_operations_from_profiler(self, mongo_instance, db_name, last_ts):
+        profiling_data = mongo_instance.api_client.get_profiling_data(db_name, datetime.fromtimestamp(last_ts))
 
         for profile in profiling_data:
             if 'command' not in profile:
@@ -155,8 +159,8 @@ class MongoSlowOperations(DBMAsyncJob):
             profile["ts"] = profile["ts"].timestamp()  # convert datetime to timestamp
             yield self._obfuscate_slow_operation(profile, db_name)
 
-    def _collect_slow_operations_from_logs(self, db_names, last_ts):
-        logs = self._check.api_client.get_log_data()
+    def _collect_slow_operations_from_logs(self, mongo_instance, db_names, last_ts):
+        logs = mongo_instance.api_client.get_log_data()
         log_entries = logs.get("log", [])
         start_index = self._binary_search(log_entries, last_ts)
         for i in range(start_index, len(log_entries)):
@@ -182,7 +186,7 @@ class MongoSlowOperations(DBMAsyncJob):
                 log_attr["ts"] = ts
                 yield self._obfuscate_slow_operation(log_attr, db_name)
 
-    def _collect_slow_operation_explain_plan(self, slow_operation, dbname):
+    def _collect_slow_operation_explain_plan(self, mongo_instance, slow_operation, dbname):
         try:
             if should_explain_operation(
                 namespace=slow_operation.get("ns"),
@@ -197,10 +201,12 @@ class MongoSlowOperations(DBMAsyncJob):
                 else:
                     # explain the slow operation from the logs
                     explain_plan = get_explain_plan(
-                        self._check.api_client, slow_operation.get("op"), slow_operation["command"], dbname
+                        mongo_instance.api_client, slow_operation.get("op"), slow_operation["command"], dbname
                     )
 
-                explain_plan_payload = self._create_slow_operation_explain_plan_payload(slow_operation, explain_plan)
+                explain_plan_payload = self._create_slow_operation_explain_plan_payload(
+                    mongo_instance, slow_operation, explain_plan
+                )
                 self._check.database_monitoring_query_sample(json_util.dumps(explain_plan_payload))
         except Exception as e:
             # Log the error and continue
@@ -294,16 +300,16 @@ class MongoSlowOperations(DBMAsyncJob):
 
         return self._sanitize_event(event)
 
-    def _create_slow_operation_explain_plan_payload(self, slow_operation: dict, explain_plan: dict):
+    def _create_slow_operation_explain_plan_payload(self, mongo_instance, slow_operation: dict, explain_plan: dict):
         '''
         Create a slow operation explain plan payload
         '''
         event = {
-            "host": self._check._resolved_hostname,
+            "host": mongo_instance.resolved_hostname,
             "dbm_type": "plan",
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
-            "ddtags": ",".join(self._check._get_tags()),
+            "ddtags": ",".join(mongo_instance.get_tags()),
             "timestamp": slow_operation["ts"] * 1000,
             "network": {
                 "client": self._get_slow_operation_client(slow_operation),
@@ -376,14 +382,14 @@ class MongoSlowOperations(DBMAsyncJob):
         # remove empty fields
         return {k: v for k, v in event.items() if v is not None}
 
-    def _submit_slow_operation_payload(self, slow_operation_events):
+    def _submit_slow_operation_payload(self, mongo_instance, slow_operation_events):
         payload = {
-            "host": self._check._resolved_hostname,
+            "host": mongo_instance.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
             "dbm_type": "slow_query",
             "collection_interval": self._collection_interval,
-            "ddtags": self._check._get_tags(),
+            "ddtags": mongo_instance.get_tags(),
             "timestamp": time.time() * 1000,
             "mongodb_slow_queries": slow_operation_events,
         }
