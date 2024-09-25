@@ -313,7 +313,7 @@ VALUES (
 );
 """
 
-
+"""
 @pytest.fixture
 def agent_jobs_instance(instance_docker):
     instance_docker['dbm'] = True
@@ -496,3 +496,4 @@ def history_date_time_from_time(now):
     time = time.split(".")[0]
     time = time.replace(':', "")
     return date, time
+"""

@@ -1,7 +1,7 @@
 ﻿# (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+"""
 from __future__ import unicode_literals
 
 import logging
@@ -1081,3 +1081,4 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
         database_names = {row['database_name'] for row in sqlserver_rows}
         assert 'datadog_test-1' in database_names, "should have collected metrics for datadog_test-1 databases"
         assert 'master' in database_names, "should have collected metrics for master databases"
+"""

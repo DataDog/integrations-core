@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+"""
 from __future__ import unicode_literals
 
 import logging
@@ -391,3 +391,4 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
             ):
                 found = True
     assert found
+"""

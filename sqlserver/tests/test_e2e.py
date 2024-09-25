@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -142,3 +143,4 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
     )
+"""

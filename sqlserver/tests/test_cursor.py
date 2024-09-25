@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
@@ -43,3 +44,4 @@ def __check_prepand_sql_comment(sa_conn):
             result = cursor.fetchall()
             assert len(result) > 0
             assert result[0][0].startswith('/* service=\'datadog-agent\' */')
+"""

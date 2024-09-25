@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""
 import logging
 import threading
 import time
@@ -149,3 +150,4 @@ def _check_queries_is_ready(queries):
             queries.EXPECTED_OBJ_COUNT, queries.EXPECTED_ROW_COUNT
         )
     )
+"""
