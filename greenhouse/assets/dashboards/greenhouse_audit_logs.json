@@ -104,7 +104,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Performer_Email $Performer_Type $Activity $Event_Type $Request_Type $Location $Request_ID"
                                             },
                                             "storage": "hot"
                                         }
@@ -165,7 +165,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Performer_Email $Performer_Type $Activity $Event_Type $Request_Type $Location $Request_ID"
                                             },
                                             "storage": "hot"
                                         }
@@ -779,7 +779,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -856,7 +856,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Performer_Type $Activity $Event_Type $Request_Type $Location $Request_ID $Performer_Email"
                                             },
                                             "storage": "hot"
                                         }
@@ -909,7 +909,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:data_change_create $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:data_change_create $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -983,7 +983,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:data_change_update $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:data_change_update $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1057,7 +1057,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:data_change_destroy $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:data_change_destroy $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1131,7 +1131,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:harvest_access $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:harvest_access $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1205,7 +1205,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:action $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity @event.type:action $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1297,7 +1297,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:(\"API Key Created\" OR \"Single Sign-On Changed\" OR \"Candidate has been unhired\") $Request_ID $Event_Type $Request_Type $Performer_Email $Activity $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:(\"API Key Created\" OR \"Single Sign-On Changed\" OR \"Candidate has been unhired\") $Request_ID $Event_Type $Request_Type $Performer_Email $Activity $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1378,7 +1378,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:\"PII Page Accessed\" $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:\"PII Page Accessed\" $Performer_Type $Activity $Event_Type $Request_Type $Location $Request_ID $Performer_Email"
                                             },
                                             "storage": "hot"
                                         }
@@ -1441,7 +1441,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:\"User Login\" $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:\"User Login\" $Performer_Email $Performer_Type $Activity $Event_Type $Request_Type $Location $Request_ID"
                                             },
                                             "storage": "hot"
                                         }
@@ -1498,7 +1498,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Request_ID $Event_Type $Request_Type $Performer_Email $Activity $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1560,7 +1560,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Event_Type $Request_Type $Request_ID $Performer_Email $Activity $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Event_Type $Request_Type $Request_ID $Performer_Email $Activity $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1646,7 +1646,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:(\"Temporary Access Granted\" OR \"Temporary Access Revoked\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:(\"Temporary Access Granted\" OR \"Temporary Access Revoked\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type $Activity $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1720,7 +1720,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:(\"GDPR Data Protection Officer Changed\" OR \"GDPR Legal basis updated\" OR \"GDPR Rule Modified\" OR \"Pay Transparency Rule Created\" OR \"Pay Transparency Rule Changed\" OR \"Pay Transparency Rule Deleted\" OR \"GDPR Rule Added\" OR \"GDPR Rule Deleted\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:(\"GDPR Data Protection Officer Changed\" OR \"GDPR Legal basis updated\" OR \"GDPR Rule Modified\" OR \"Pay Transparency Rule Created\" OR \"Pay Transparency Rule Changed\" OR \"Pay Transparency Rule Deleted\" OR \"GDPR Rule Added\" OR \"GDPR Rule Deleted\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type $Activity $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1806,7 +1806,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:(\"Auto Merge Setting Changed\" OR \"Department/Office Changed\" OR \"Department/Office Deleted\" OR \"Org Permission Policy Changed\" OR \"Organization Name Changed\" OR \"Next Requisition ID Changed\" OR \"Department/Office Created\" OR \"Referral Program Changed\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:(\"Auto Merge Setting Changed\" OR \"Department/Office Changed\" OR \"Department/Office Deleted\" OR \"Org Permission Policy Changed\" OR \"Organization Name Changed\" OR \"Next Requisition ID Changed\" OR \"Department/Office Created\" OR \"Referral Program Changed\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type $Activity $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1892,7 +1892,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:(\"Bulk Delete Candidate\" OR \"Bulk Agency Job Edited\" OR \"Bulk Copied Rules to Jobs\" OR \"Bulk Interview Plan Edited\" OR \"Bulk Reject Candidate\" OR \"Bulk User Permission Edit\" OR \"Bulk Job Scorecard Edited\" OR \"Bulk User Permission Edited\" OR \"Bulk Deactivate Users\" OR \"Bulk Import Candidates\" OR \"Bulk Import Prospects\" OR \"Bulk Candidate Stage Change\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:(\"Bulk Delete Candidate\" OR \"Bulk Agency Job Edited\" OR \"Bulk Copied Rules to Jobs\" OR \"Bulk Interview Plan Edited\" OR \"Bulk Reject Candidate\" OR \"Bulk User Permission Edit\" OR \"Bulk Job Scorecard Edited\" OR \"Bulk User Permission Edited\" OR \"Bulk Deactivate Users\" OR \"Bulk Import Candidates\" OR \"Bulk Import Prospects\" OR \"Bulk Candidate Stage Change\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type $Activity $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -1996,7 +1996,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:(Applications OR Candidates OR \"API Key Created\" OR \"API Key Permissions Updated\" OR \"API Key Re-Enabled\" OR \"API Key Revoked\" OR \"API Key Updated\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:(Applications OR Candidates OR \"API Key Created\" OR \"API Key Permissions Updated\" OR \"API Key Re-Enabled\" OR \"API Key Revoked\" OR \"API Key Updated\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type $Activity $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -2082,7 +2082,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse @event.target_type:(\"Webhook Created\" OR \"Webhook Changed\" OR \"Webhook Removed\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type"
+                                                "query": "service:audit source:greenhouse @event.target_type:(\"Webhook Created\" OR \"Webhook Changed\" OR \"Webhook Removed\") $Request_ID $Event_Type $Request_Type $Performer_Email $Performer_Type $Activity $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -2174,7 +2174,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Event_Type $Request_Type $Performer_Email $Activity $Request_ID $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Event_Type $Request_Type $Performer_Email $Activity $Request_ID $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -2246,7 +2246,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "service:audit source:greenhouse $Event_Type $Request_Type $Performer_Email $Activity $Request_ID $Performer_Type"
+                                                "query": "service:audit source:greenhouse $Event_Type $Request_Type $Performer_Email $Activity $Request_ID $Performer_Type $Location"
                                             },
                                             "storage": "hot"
                                         }
@@ -2291,7 +2291,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "service:audit source:greenhouse $Event_Type $Request_Type $Request_ID $Performer_Email $Activity $Performer_Type ",
+                                        "query_string": "service:audit source:greenhouse $Event_Type $Request_Type $Request_ID $Performer_Email $Activity $Performer_Type $Location",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

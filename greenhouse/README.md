@@ -60,7 +60,7 @@ Greenhouse does not include any service checks.
 
 Greenhouse does not include any events.
 
-## Troubleshooting
+## Support
 
 Need help? Contact [Datadog support][3].
 
