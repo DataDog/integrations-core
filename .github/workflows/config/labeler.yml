@@ -247,6 +247,8 @@ integration/ibm_mq:
 - ibm_mq/**/*
 integration/ibm_was:
 - ibm_was/**/*
+integration/isc_bind:
+- isc_bind/**/*
 integration/ignite:
 - ignite/**/*
 integration/iis:
