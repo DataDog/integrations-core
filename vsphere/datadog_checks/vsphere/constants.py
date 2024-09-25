@@ -234,3 +234,5 @@ VSAN_EVENT_IDS = [
     'vsan.health.test.vsanhardwarecert.event',
     'vsan.health.test.hciskip.event',
 ]
+
+HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']

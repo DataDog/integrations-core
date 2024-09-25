@@ -270,6 +270,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /godaddy/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
 /godaddy/metadata.csv                                               @DataDog/saas-integrations @DataDog/documentation
 
+/greenhouse/                                                          @DataDog/saas-integrations
+/greenhouse/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/greenhouse/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/greenhouse/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /lastpass/                                                          @DataDog/saas-integrations
 /lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /lastpass/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation

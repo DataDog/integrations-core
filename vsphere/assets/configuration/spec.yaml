@@ -515,6 +515,16 @@ files:
         value:
           type: boolean
           example: true
+      - name: hostname_transform
+        description: |
+          Should be either 'upper' or 'lower' or 'default'
+          If 'upper', the check will convert the vSphere hostname to uppercase.
+          If 'lower', the check will convert the vSphere hostname to lowercase.
+          If 'default', the check will not transform the vSphere hostname (the default option).
+          Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
+        value:
+          type: string
+          example: default
       - name: rest_api_options
         description: |
           REST API options
