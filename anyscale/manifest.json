@@ -22,6 +22,7 @@
   },
   "assets": {
     "integration": {
+      "auto_install": true,
       "source_type_id": 27164037,
       "source_type_name": "Anyscale",
       "service_checks": {
