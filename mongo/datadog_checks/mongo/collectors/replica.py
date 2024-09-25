@@ -115,9 +115,10 @@ class ReplicaCollector(MongoCollector):
         if self.deployment_type.is_arbiter:
             self.log.debug("Current node is arbiter. Collecting the replset from the primary instead.")
             try:
-                api = MongoApi(
+                primary_node = MongoApi(
                     api._connection_host, api._config, self.log, replicaset=self.deployment_type.replset_name
                 )
+                return primary_node['local']['system.replset'].find_one()
             except Exception as e:
                 self.log.debug(str(e))
                 self.log.warning(

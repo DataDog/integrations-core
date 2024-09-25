@@ -48,7 +48,7 @@ class MongoInstance:
         self.connection_options = connection_options
         self.reported_database_hostname = reported_database_hostname
 
-        self._api_client = None
+        self._api = None
 
         self.deployment_type = None
         self.resolved_hostname = None
@@ -68,17 +68,21 @@ class MongoInstance:
 
     @property
     def api_client(self):
-        if self._api_client is None:
-            self._api_client = MongoApi(self.connection_host, self.connection_options, self._check.log)
-        return self._api_client
+        if self._api is None:
+            self._api = MongoApi(self.connection_host, self.connection_options, self._check.log)
+        return self._api
 
     @api_client.setter
     def api_client(self, value):
-        self._api_client = value
+        self._api = value
 
     def refresh(self):
+        self._log.debug("Refreshing MongoInstance")
+        self._log.debug("before refreshing metadata")
         self._refresh_metadata()
+        self._log.debug("after refreshing metadata")
         self._refresh_deployment()
+        self._log.debug("after refreshing deployment")
         if self._config.dbm_enabled:
             self.send_database_instance_metadata()
         self.collect_metrics()
@@ -94,7 +98,7 @@ class MongoInstance:
             self._log.debug('modules: %s', self.mongo_modules)
             self._check.set_metadata('version', self.mongo_version)
             self._check.set_metadata('modules', ','.join(self.mongo_modules))
-            self._check.set_metadata('cluster_name', self._config.cluster_name)
+            self._check.set_metadata('cluster_name', self._config.cluster_name or '')
         if self.resolved_hostname is None:
             self.resolved_hostname = self.reported_database_hostname or self.api_client.hostname
 
