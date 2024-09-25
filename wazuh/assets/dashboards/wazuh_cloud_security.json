@@ -2229,10 +2229,19 @@
                     {
                         "id": 7702225747947318,
                         "definition": {
-                            "title": "Events Over Time by Organization",
+                            "title": "Events Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2251,16 +2260,7 @@
                                             "compute": {
                                                 "aggregation": "count"
                                             },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@data.github.org",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
+                                            "group_by": [],
                                             "search": {
                                                 "query": "source:wazuh service:github $Service $Group $Agent_Name $Manager_Name $Level"
                                             },

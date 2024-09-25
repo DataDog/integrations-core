@@ -1024,6 +1024,7 @@
                             "title": "Log Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1043,15 +1044,15 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@rule.id",
+                                            "field": "rule.id",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@rule.groups",
+                                            "field": "rule.groups",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@syscheck.event",
+                                            "field": "syscheck.event",
                                             "width": "auto"
                                         },
                                         {
@@ -1059,7 +1060,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "@rule.description",
+                                            "field": "rule.description",
                                             "width": "auto"
                                         },
                                         {
@@ -1169,6 +1170,7 @@
                             "title": "Log Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1188,18 +1190,6 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "agent.name",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "rule.level",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "rule.id",
                                             "width": "auto"
                                         },
@@ -1208,12 +1198,20 @@
                                             "width": "auto"
                                         },
                                         {
+                                            "field": "syscheck.event",
+                                            "width": "auto"
+                                        },
+                                        {
                                             "field": "syscheck.changed_attributes",
                                             "width": "auto"
                                         },
                                         {
+                                            "field": "rule.description",
+                                            "width": "auto"
+                                        },
+                                        {
                                             "field": "content",
-                                            "width": "full"
+                                            "width": "compact"
                                         }
                                     ]
                                 }
@@ -1233,7 +1231,7 @@
                 "x": 0,
                 "y": 49,
                 "width": 12,
-                "height": 1
+                "height": 5
             }
         },
         {
