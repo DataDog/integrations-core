@@ -12,7 +12,7 @@ boto3 @ https://agent-int-packages.datadoghq.com/external/boto3/boto3-1.35.10-py
 botocore @ https://agent-int-packages.datadoghq.com/external/botocore/botocore-1.35.10-py3-none-any.whl#sha256=0d96d023b9b0cea99a0a428a431d011329d3a958730aee6ed6a6fec5d9bfbc03
 bytecode @ https://agent-int-packages.datadoghq.com/external/bytecode/bytecode-0.15.1-py3-none-any.whl#sha256=0a1dc340cac823cff605609b8b214f7f9bf80418c6b9e0fc8c6db1793c27137d
 cachetools @ https://agent-int-packages.datadoghq.com/external/cachetools/cachetools-5.5.0-py3-none-any.whl#sha256=02134e8439cdc2ffb62023ce1debca2944c3f289d66bb17ead3ab3dede74b292
-cattrs @ https://agent-int-packages.datadoghq.com/external/cattrs/cattrs-24.1.1-py3-none-any.whl#sha256=ec8ce8fdc725de9d07547cd616f968670687c6fa7a2e263b088370c46d834d97
+cattrs @ https://agent-int-packages.datadoghq.com/external/cattrs/cattrs-24.1.2-py3-none-any.whl#sha256=67c7495b760168d931a10233f979b28dc04daf853b30752246f4f8471c6d68d0
 certifi @ https://agent-int-packages.datadoghq.com/external/certifi/certifi-2024.8.30-py3-none-any.whl#sha256=922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8
 cffi @ https://agent-int-packages.datadoghq.com/external/cffi/cffi-1.17.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=b62ce867176a75d03a665bad002af8e6d54644fad99a3c70905c543130e39d93
 charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-normalizer/charset_normalizer-3.3.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=90d558489962fd4918143277a773316e56c72da56ec7aa3dc3dbbe20fdfed15b
@@ -20,7 +20,7 @@ clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhou
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6dbcee870c60d9835e5dce1456ab6b9d807e6669246357f4b321ef747b90fa43
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20240402154838-py3-none-manylinux2014_x86_64.whl#sha256=aba3c1683ef1b2099933e030464d29b3ad1c206784ebd15d8a7147ecd6ba24e1
 confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.5.0-20240917155249-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=aea2f7e617f82476c56eed42d0b5cf6b944a2769d93c8bf7baf0adef19d19bf7
-cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-43.0.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=299d3da8e00b7e2b54bb02ef58d73cd5f55fb31f33ebbf33bd00d9aa6807df7e
+cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-43.0.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=58d4e9129985185a06d849aa6df265bdd5a74ca6e1b736a77959b498e0505b85
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=5fc70ac472093093d9908965d95d977206372a3ddc8a2562acf9dfd57c6864d8
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.1.1-py3-none-any.whl#sha256=b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186
