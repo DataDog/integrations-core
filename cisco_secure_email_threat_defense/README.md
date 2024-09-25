@@ -37,7 +37,7 @@ Configure the Datadog endpoint to forward Cisco Secure Email Threat Defense logs
 | API Key           | API Key from Cisco Secure Email Threat Defense.         |
 | Client ID      | Client ID from Cisco Secure Email Threat Defense.    |
 | Client Password      | Client Password from Cisco Secure Email Threat Defense.    |
-| Verdict Delay      | Time (in minutes) required to allow verdicts to be updated. Specify a number from 0 to 720. The recommended value is 30.    |
+| Verdict Delay      | Time (in minutes) required to allow verdicts to be updated. Specify a number from 0 to 720. The Default value is 30.    |
 
 ## Data Collected
 
