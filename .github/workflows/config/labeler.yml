@@ -331,6 +331,8 @@ integration/mesos_master:
 - mesos_master/**/*
 integration/mesos_slave:
 - mesos_slave/**/*
+integration/metabase:
+- metabase/**/*
 integration/mimecast:
 - mimecast/**/*
 integration/mongo:
