@@ -87,10 +87,6 @@ facets:
     name: User Name
     path: usr.name
     source: log
-      - User
-    name: User Name
-    path: usr.name
-    source: log
 pipeline:
   type: pipeline
   name: Sonicwall Firewall
