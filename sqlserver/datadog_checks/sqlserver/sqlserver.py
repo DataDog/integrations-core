@@ -376,6 +376,9 @@ class SQLServer(AgentCheck):
             self.log.exception("Initialization exception %s", e)
 
     def handle_service_check(self, status, connection_host, database, message=None, is_default=True):
+        print("natasha here 2")
+        print(self.instance.get("tags", []))
+        print(self.tags)
         disable_generic_tags = self.instance.get("disable_generic_tags", False)
         service_check_tags = [
             "sqlserver_host:{}".format(self.resolved_hostname),
@@ -453,6 +456,9 @@ class SQLServer(AgentCheck):
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         metrics_to_collect = []
+        print("natasha here 3")
+        print(self.instance.get("tags", []))
+        print(self.tags)
 
         # Load instance-level (previously Performance metrics)
         # If several check instances are querying the same server host, it can be wise to turn these off
@@ -490,6 +496,9 @@ class SQLServer(AgentCheck):
                 self.instance.get("database", self.connection.DEFAULT_DATABASE)
             ]
             for db_name in db_names:
+                print("natasha here 4")
+                print(self.instance.get("tags", []))
+                print(self.tags)
                 cfg = {"name": name, "table": table, "column": column, "instance_name": db_name, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -599,6 +608,9 @@ class SQLServer(AgentCheck):
                 self.instance_per_type_metrics[cls].add(m.base_name)
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
+        print("natasha here 5")
+        print(tags)
+        print(self.tags)
         cfg_tags = tags.copy()
         if db is not None:
             cfg_tags = cfg_tags + ["database:{}".format(db)]
@@ -982,6 +994,10 @@ class SQLServer(AgentCheck):
         """
         Fetch the metrics from the stored proc
         """
+
+        print("natasha here 6")
+        print(self.instance.get("tags", []))
+        print(self.tags)
 
         proc = self._config.proc
         guardSql = self.instance.get("proc_only_if")

@@ -40,6 +40,9 @@ class BaseSqlServerMetric(object):
     CUSTOM_QUERIES_AVAILABLE = True
 
     def __init__(self, cfg_instance, base_name, report_function, column, logger, tags):
+        print("natasha here 1")
+        print(cfg_instance.get('tags'))
+        print(tags)
         self.cfg_instance = cfg_instance
         self.metric_name = cfg_instance['name']
         self.sql_name = cfg_instance.get('counter_name', '')
