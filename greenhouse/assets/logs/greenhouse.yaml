@@ -50,12 +50,12 @@ pipeline:
     query: "source:greenhouse"
   processors:
     - type: date-remapper
-      name: define `event_time` attribute as official timestamp for the logs
+      name: Define `event_time` as the official date of the log
       enabled: true
       sources:
         - event_time
     - type: service-remapper
-      name: Define `service` as the official service of the logs
+      name: Define `service` as the official service of the log
       enabled: true
       sources:
         - service
