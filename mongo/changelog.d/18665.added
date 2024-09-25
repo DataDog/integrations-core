@@ -1,0 +1,1 @@
+Refactor mongo check into mongo_instance class per mongodb host. This change is to prepare for upcoming mongodb cluster instances autodiscovery.
