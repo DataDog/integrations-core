@@ -66,6 +66,7 @@
     },
     "dashboards": {
       "CoreDNS": "assets/dashboards/coredns.json"
+      "CoreDNS [V2]": "assets/dashboards/coredns_v2.json"
     },
     "monitors": {
       "Cache hits count is low": "assets/monitors/coredns_cache_hits_low.json",
