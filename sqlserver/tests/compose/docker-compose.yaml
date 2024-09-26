@@ -8,6 +8,7 @@ services:
       dockerfile: Dockerfile
       args:
         - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
+    user: root
     platform: linux/amd64
     environment:
       - ACCEPT_EULA=Y
