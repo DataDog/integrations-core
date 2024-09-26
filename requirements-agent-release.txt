@@ -92,7 +92,7 @@ datadog-jboss-wildfly==2.2.0
 datadog-journald==1.2.0
 datadog-kafka-consumer==4.6.1
 datadog-kafka==2.16.0
-datadog-karpenter==1.5.0
+datadog-karpenter==1.6.0
 datadog-kong==3.2.2
 datadog-kube-apiserver-metrics==4.3.1
 datadog-kube-controller-manager==5.1.1
@@ -189,7 +189,7 @@ datadog-vault==4.2.1
 datadog-vertica==4.6.0
 datadog-vllm==1.0.0
 datadog-voltdb==3.2.1
-datadog-vsphere==7.6.0
+datadog-vsphere==8.0.0
 datadog-weaviate==2.3.3
 datadog-weblogic==1.3.0
 datadog-win32-event-log==3.3.0; sys_platform == 'win32'
