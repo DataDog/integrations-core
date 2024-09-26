@@ -297,6 +297,7 @@ def full_e2e_config(instance_session_default):
     return {"init_config": INIT_CONFIG, "instances": [instance_session_default]}
 
 
+# dummy comment
 @pytest.fixture(scope='session')
 def dd_environment(full_e2e_config):
     if pyodbc is None:
