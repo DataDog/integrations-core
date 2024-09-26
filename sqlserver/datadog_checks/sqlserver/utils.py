@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
-import shutil
 import sys
 from typing import Dict
 
@@ -12,7 +11,6 @@ from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
-ODBC_INST_INI = 'odbcinst.ini'
 
 
 # Database is used to store both the name and physical_database_name
@@ -32,22 +30,6 @@ class Database:
 
     def __str__(self):
         return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
-
-
-def get_unixodbc_sysconfig(python_executable):
-    return os.path.join(os.path.dirname(os.path.dirname(python_executable)), "etc")
-
-
-def is_non_empty_file(path):
-    if not os.path.exists(path):
-        return False
-    try:
-        if os.path.getsize(path) > 0:
-            return True
-    # exists and getsize aren't atomic
-    except FileNotFoundError:
-        return False
-    return False
 
 
 def set_default_driver_conf():
@@ -72,16 +54,13 @@ def set_default_driver_conf():
         # linux_unixodbc_sysconfig is set to the agent embedded /etc directory
         # this is a hacky way to get the path to the etc directory
         # by getting the path to the python executable and get the directory above /bin/python
-        linux_unixodbc_sysconfig = get_unixodbc_sysconfig(sys.executable)
-        odbc_ini = os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
-        if is_non_empty_file(odbc_ini):
-            os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
-            odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
-            if not is_non_empty_file(odbc_inst_ini_sysconfig):
-                shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
-                # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
-                # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
-                return
+        linux_unixodbc_sysconfig = os.path.dirname(os.path.dirname(sys.executable))
+        if os.path.exists(os.path.join(linux_unixodbc_sysconfig, 'odbcinst.ini')) or os.path.exists(
+            os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
+        ):
+            # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
+            # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
+            return
 
         # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
         os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
