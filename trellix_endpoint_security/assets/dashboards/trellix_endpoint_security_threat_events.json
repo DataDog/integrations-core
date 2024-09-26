@@ -779,7 +779,7 @@
                                     ]
                                 }
                             ],
-                            "autoscale": false,
+                            "autoscale": true,
                             "precision": 0
                         },
                         "layout": {
