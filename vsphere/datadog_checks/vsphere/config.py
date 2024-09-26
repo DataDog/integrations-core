@@ -28,6 +28,7 @@ from datadog_checks.vsphere.constants import (
     EXCLUDE_FILTERS,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL,
+    HOSTNAME_CASE_OPTIONS,
     MOR_TYPE_AS_STRING,
     OBJECT_PROPERTIES_BY_RESOURCE_TYPE,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
@@ -141,6 +142,12 @@ class VSphereConfig(object):
         )
         self.include_datastore_cluster_folder_tag = instance.get("include_datastore_cluster_folder_tag", True)
         self.custom_tags = instance.get('tags', [])
+        self.hostname_transform = instance.get('hostname_transform', 'default')
+        if self.hostname_transform not in HOSTNAME_CASE_OPTIONS:
+            raise ConfigurationError(
+                "Invalid value for `hostname_transform` in the configuration file: "
+                + "use one of: `default`, `lower`, or `upper`"
+            )
         self.validate_config()
 
     def is_historical(self):

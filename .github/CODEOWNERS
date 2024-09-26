@@ -270,6 +270,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /godaddy/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
 /godaddy/metadata.csv                                               @DataDog/saas-integrations @DataDog/documentation
 
+/greenhouse/                                                          @DataDog/saas-integrations
+/greenhouse/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/greenhouse/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/greenhouse/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /lastpass/                                                          @DataDog/saas-integrations
 /lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /lastpass/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
@@ -328,6 +333,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /trend_micro_email_security/*.md                                    @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_email_security/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_email_security/assets/logs/                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/trellix_endpoint_security/                                         @DataDog/saas-integrations
+/trellix_endpoint_security/*.md                                     @DataDog/saas-integrations @DataDog/documentation
+/trellix_endpoint_security/manifest.json                            @DataDog/saas-integrations @DataDog/documentation
+/trellix_endpoint_security/assets/logs/                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /docusign/                                                          @DataDog/saas-integrations
 /docusign/*.md                                                      @DataDog/saas-integrations @DataDog/documentation

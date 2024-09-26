@@ -5,12 +5,11 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.cockroachdb import CockroachdbCheck
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 from .common import COCKROACHDB_VERSION, assert_metrics
 
-pytestmark = [pytest.mark.usefixtures('dd_environment'), requires_py3]
+pytestmark = [pytest.mark.usefixtures('dd_environment')]
 
 
 def test_metrics(aggregator, instance, dd_run_check):
