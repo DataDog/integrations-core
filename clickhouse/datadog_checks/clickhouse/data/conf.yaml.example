@@ -69,6 +69,11 @@ instances:
     #
     # compression: <COMPRESSION>
 
+    ## @param tls_ca_cert - string - optional
+    ## The path to the CA certificate file.
+    #
+    # tls_ca_cert: <TLS_CA_CERT>
+
     ## @param tls_verify - boolean - optional - default: false
     ## Whether or not to connect securely using TLS. The server must also support this.
     #
