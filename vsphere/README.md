@@ -57,6 +57,18 @@ collect_per_instance_filters:
 
 `disk` metrics are specific for each disk on the host, therefore these metrics need to be enabled using `collect_per_instance_filters` to be collected.
 
+#### Collecting property metrics
+
+The vSphere integration can also collect property-based metrics. These are configuration properties such as if a host is in maintenance mode or a cluster is configured with DRS.
+
+To enable property metrics, enable the following option:
+```
+collect_property_metrics: true
+```
+
+Property metrics are prefixed by the resource name. For example, host property metrics metrics are prefixed with `vsphere.host.*` and VM property metrics are prefixed with `vsphere.vm.*`. View all the possible property metrics in the [metadata.csv][10].
+
+
 ### Events
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. The check defaults to emit the following event types:
