@@ -57,7 +57,7 @@ runners = { linux = ["ubuntu-20.04"] }
 
 [overrides.ci.sqlserver]
 platforms = ["windows", "linux"]
-runners = { windows = ["windows-2019"] }
+runners = { windows = ["windows-2019"], linux = ["ubuntu-20.04"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
