@@ -34,7 +34,7 @@ pipeline:
       enabled: true
       categories:
         - filter:
-            query: @attributes.threateventid:[1102 TO 1104] OR
+            query: "@attributes.threateventid:[1102 TO 1104] OR
               @attributes.threateventid:[1300 TO 1328] OR
               @attributes.threateventid:[1400 TO 1431] OR
               @attributes.threateventid:[18051 TO 18060] OR
@@ -44,24 +44,24 @@ pipeline:
               @attributes.threateventid:(1024 OR 1025 OR 1027 OR 1037 OR 1051 OR
               1059 OR 1064 OR 1065 OR 1087 OR 1088 OR 1091 OR 1092 OR 1095 OR
               1096 OR 1106 OR 1202 OR 1203 OR 1278 OR 1280 OR 1282 OR 1284 OR
-              1290 OR 1292 OR 34900 OR 34910 OR 34928)
+              1290 OR 1292 OR 34900 OR 34910 OR 34928)"
           name: threat-prevention
         - filter:
-            query: @attributes.threateventid:[1118 TO 1121] OR
-              @attributes.threateventid:(34857 OR 34865)
+            query: "@attributes.threateventid:[1118 TO 1121] OR
+              @attributes.threateventid:(34857 OR 34865)"
           name: common
         - filter:
-            query: @attributes.threateventid:[35000 TO 35003] OR
-              @attributes.threateventid:[35009 TO 35011]
+            query: "@attributes.threateventid:[35000 TO 35003] OR
+              @attributes.threateventid:[35009 TO 35011]"
           name: firewall
         - filter:
-            query: @attributes.threateventid:[35100 TO 35107] OR
+            query: "@attributes.threateventid:[35100 TO 35107] OR
               @attributes.threateventid:[35111 TO 35114] OR
               @attributes.threateventid:[37275 TO 37280] OR
-              @attributes.threateventid:(35116 OR 35117)
+              @attributes.threateventid:(35116 OR 35117)"
           name: adaptive-threat-protection
         - filter:
-            query: @attributes.threateventid:(18600 OR 18601)
+            query: "@attributes.threateventid:(18600 OR 18601)"
           name: web-protection
       target: modulename
     - type: service-remapper
