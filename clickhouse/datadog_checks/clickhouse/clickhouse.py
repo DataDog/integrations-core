@@ -109,7 +109,7 @@ class ClickhouseCheck(AgentCheck):
                 sync_request_timeout=self._connect_timeout,
                 compression=self._compression,
                 secure=self._tls_verify,
-                ca_certs=self.tls_ca_cert,
+                ca_certs=self._tls_ca_cert,
                 settings={},
                 # Make every client unique for server logs
                 client_name='datadog-{}'.format(self.check_id),
