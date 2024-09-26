@@ -34,7 +34,7 @@ RUN /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script
  && /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m virtualenv /py2
 
 # openssl
-RUN yum install -y perl-IPC-Cmd && \
+RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
  cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
  VERSION="3.3.2" \
