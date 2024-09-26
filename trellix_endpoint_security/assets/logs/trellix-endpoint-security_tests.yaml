@@ -215,133 +215,6 @@ tests:
   sample: |-
     {
       "links" : {
-        "self" : "/epo/v2/events/3f88c4ad-8d89-4a0e-bc9b-e21f2c4c08ad"
-      },
-      "attributes" : {
-        "detectedutc" : "1726009831000",
-        "analyzermac" : "000000000a01",
-        "receivedutc" : "1726009912159",
-        "sourceipv6" : "/0:0:0:0:0:ffff:ffff:ffff",
-        "sourceipv4" : "10.10.10.10",
-        "targetusername" : "Test",
-        "threatseverity" : "6",
-        "sourceprocesssigned" : true,
-        "analyzer" : "ENDP_AM_1070",
-        "nodepath" : "1\\2942564",
-        "threattype" : " ",
-        "threateventid" : 18600,
-        "timestamp" : "2024-09-10T23:11:52.159Z",
-        "targetport" : "1850",
-        "analyzerversion" : "10.7.0.6711",
-        "agentguid" : "a078a2e6-e490-4345-839e-7c1f8665a2b9",
-        "targetfilename" : "C:\\ProgramData\\Test.log",
-        "threatactiontaken" : "none",
-        "threatname" : " ",
-        "analyzername" : "Trellix Endpoint Security",
-        "sourceurl" : "reports.allowedSite",
-        "threatcategory" : "ops.informational.event",
-        "autoguid" : "4c99b752-ae2d-4de9-bfbe-61969c0a80dc",
-        "targetipv6" : "/0:0:0:0:0:ffff:0:0",
-        "analyzeripv6" : "/0:0:0:0:0:ffff:ffff:ffff",
-        "analyzeripv4" : "10.10.10.10",
-        "sourceusername" : "TEST\\TEST",
-        "analyzerhostname" : "DESKTOP-TEST",
-        "targetipv4" : "20.20.20.20",
-        "threathandled" : true
-      },
-      "id" : "3f88c4ad-8d89-4a0e-bc9b-e21f2c4c08ad",
-      "type" : "MVEvents"
-    }
-  result:
-    custom:
-      attributes:
-        agentguid: "a078a2e6-e490-4345-839e-7c1f8665a2b9"
-        analyzer: "ENDP_AM_1070"
-        analyzerhostname: "DESKTOP-TEST"
-        analyzeripv4: "10.10.10.10"
-        analyzeripv6: "/0:0:0:0:0:ffff:ffff:ffff"
-        analyzermac: "000000000a01"
-        analyzername: "Trellix Endpoint Security"
-        analyzerversion: "10.7.0.6711"
-        autoguid: "4c99b752-ae2d-4de9-bfbe-61969c0a80dc"
-        detectedutc: "1726009831000"
-        nodepath: "1\\2942564"
-        receivedutc: "1726009912159"
-        sourceipv6: "/0:0:0:0:0:ffff:ffff:ffff"
-        sourceprocesssigned: true
-        sourceurl: "reports.allowedSite"
-        targetfilename: "C:\\ProgramData\\Test.log"
-        targetipv6: "/0:0:0:0:0:ffff:0:0"
-        targetusername: "Test"
-        threatactiontaken: "None"
-        threatcategory: "Informational event"
-        threateventid: 18600
-        threathandled: true
-        threatname: "N/A"
-        threatseverity: "6"
-        threattype: "N/A"
-        timestamp: "2024-09-10T23:11:52.159Z"
-      id: "3f88c4ad-8d89-4a0e-bc9b-e21f2c4c08ad"
-      links:
-        self: "/epo/v2/events/3f88c4ad-8d89-4a0e-bc9b-e21f2c4c08ad"
-      network:
-        client:
-          ip: "10.10.10.10"
-        destination:
-          ip: "20.20.20.20"
-          port: "1850"
-      severity: "Info"
-      type: "MVEvents"
-      usr:
-        name: "TEST\\TEST"
-    message: |-
-      {
-        "links" : {
-          "self" : "/epo/v2/events/3f88c4ad-8d89-4a0e-bc9b-e21f2c4c08ad"
-        },
-        "attributes" : {
-          "detectedutc" : "1726009831000",
-          "analyzermac" : "000000000a01",
-          "receivedutc" : "1726009912159",
-          "sourceipv6" : "/0:0:0:0:0:ffff:ffff:ffff",
-          "sourceipv4" : "10.10.10.10",
-          "targetusername" : "Test",
-          "threatseverity" : "6",
-          "sourceprocesssigned" : true,
-          "analyzer" : "ENDP_AM_1070",
-          "nodepath" : "1\\2942564",
-          "threattype" : " ",
-          "threateventid" : 18600,
-          "timestamp" : "2024-09-10T23:11:52.159Z",
-          "targetport" : "1850",
-          "analyzerversion" : "10.7.0.6711",
-          "agentguid" : "a078a2e6-e490-4345-839e-7c1f8665a2b9",
-          "targetfilename" : "C:\\ProgramData\\Test.log",
-          "threatactiontaken" : "none",
-          "threatname" : " ",
-          "analyzername" : "Trellix Endpoint Security",
-          "sourceurl" : "reports.allowedSite",
-          "threatcategory" : "ops.informational.event",
-          "autoguid" : "4c99b752-ae2d-4de9-bfbe-61969c0a80dc",
-          "targetipv6" : "/0:0:0:0:0:ffff:0:0",
-          "analyzeripv6" : "/0:0:0:0:0:ffff:ffff:ffff",
-          "analyzeripv4" : "10.10.10.10",
-          "sourceusername" : "TEST\\TEST",
-          "analyzerhostname" : "DESKTOP-TEST",
-          "targetipv4" : "20.20.20.20",
-          "threathandled" : true
-        },
-        "id" : "3f88c4ad-8d89-4a0e-bc9b-e21f2c4c08ad",
-        "type" : "MVEvents"
-      }
-    status: "info"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1726009831000
- -
-  sample: |-
-    {
-      "links" : {
         "self" : "/epo/v2/events/502301bb-cc98-4708-ae12-1be817f8cf50"
       },
       "attributes" : {
@@ -500,3 +373,10 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1726561344000
+ -
+  sample: '{"id":"b34295d8-f1d0-4da5-b8b6-344fe0cf9923","type":"MVEvents","links":{"self":"/epo/v2/events/b34295d8-f1d0-4da5-b8b6-344fe0cf9923"},"attributes":{"timestamp":"2024-09-12T11:56:54.046Z","autoguid":"9de8bc2c-27bd-4160-9edb-bfe0bf9d90eb","detectedutc":"1726138800000","receivedutc":"1726142214046","agentguid":"a078a2e6-e490-4345-839e-7c1f8665a2b9","analyzer":"ENDP_WP_1070","analyzername":"Trellix
+    Endpoint
+    Security","analyzerversion":"10.7.0","analyzerhostname":"TEST","analyzeripv4":"10.10.10.10","analyzeripv6":"/0:0:0:0:0:ffff:ffff:ffff","analyzermac":"000000000a01","analyzerdatversion":null,"analyzerengineversion":null,"analyzerdetectionmethod":null,"sourcehostname":null,"sourceipv4":"10.10.10.10","sourceipv6":"/0:0:0:0:0:ffff:ffff:ffff","sourcemac":null,"sourceusername":"TEST\\TEST","sourceprocessname":null,"sourceurl":"reports.allowedSite","targethostname":null,"targetipv4":"20.20.20.20","targetipv6":"/0:0:0:0:0:ffff:0:0","targetmac":null,"targetusername":null,"targetport":null,"targetprotocol":null,"targetprocessname":null,"targetfilename":null,"threatcategory":"ops.informational.event","threateventid":18600,"threatseverity":"6","threatname":"
+    ","threattype":"
+    ","threatactiontaken":"none","threathandled":null,"nodepath":"1\\2942564","targethash":null,"sourceprocesshash":null,"sourceprocesssigned":null,"sourceprocesssigner":null,"sourcefilepath":null}}'
+  result: null
