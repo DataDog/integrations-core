@@ -57,6 +57,24 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+# Wait for SQL Server to be ready. The container may be running, 
+# but the SQL Server service may not be ready.
+@pytest.mark.usefixtures('dd_environment')
+def test_aaa_wait_on_sqlserver(instance_docker):
+    connected = False
+    for _ in range(60):
+        try:
+            conn = _get_conn_for_user(instance_docker, "bob")
+            if conn:
+                conn.close()
+                connected = True
+        except Exception as e:
+            pass
+        finally:
+            time.sleep(1)
+    assert connected, "SQL Server did not become ready"
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])

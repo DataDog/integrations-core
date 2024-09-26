@@ -314,7 +314,7 @@ def dd_environment(full_e2e_config):
         ).is_ready()
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
-    conditions = [WaitFor(sqlserver_can_connect, wait=3, attempts=20)]
+    conditions = [WaitFor(sqlserver_can_connect, wait=3, attempts=10)]
 
     completion_message = 'INFO: setup.sql completed.'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
