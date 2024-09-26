@@ -6,7 +6,7 @@
 
 This integration ingests the following logs:
 
-- Tickets: Case sheet that contains the history of an issue, from the time it was reported to the time it is closed
+- Tickets: Case sheet detailing an issue's history, from the time it was reported until it was closed
 
 The Freshservice integration seamlessly collect ticket logs of Freshservice channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into ticket logs through the out-of-the-box dashboards.
 
