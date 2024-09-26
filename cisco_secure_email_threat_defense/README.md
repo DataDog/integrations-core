@@ -45,7 +45,7 @@ Configure the Datadog endpoint to forward Cisco Secure Email Threat Defense logs
 
 The Cisco Secure Email Threat Defense integration collects and forwards Cisco Secure Email Threat Defense message logs to Datadog. This integration will ingest messages with verdict values of scam, malicious, phishing, BEC, spam, graymail, and neutral.
 
-**Note**: Events are fetched with a delay according to the time specified in the Verdict Delay. This delay is intended to accommodate retrospective verdicts. However, this does not guarantee that all retrospective verdicts are processed within this timeframe, as the time required for updates varies.
+**Note**: Events are fetched every xx minutes up to the time specified in the Verdict Delay. This delay is necessary to ensure that the logs include retrospective verdicts. However, this does not guarantee that all retrospective verdicts are captured within this timeframe, as the time required for updates can vary. For complete verdict information, please log in to your Cisco Secure Email Threat Defense system.
 
 ### Metrics
 
