@@ -17,7 +17,7 @@ This integration collects logs from the sources listed above and sends them to D
 
 #### Create API KEY from Trend Micro Vision One XDR
 
-1. In the Trend Vision One console, go to **Administration > API Keys** .
+1. In the Trend Vision One console, go to **Administration > API Keys**.
 2. Generate a new authentication token. Click **Add API key**. Specify the settings of the new API key with the following:
     - **Name**: A meaningful name that can help you identify the API key
     - **Role**: The user role assigned to the key. Select **SIEM** from dropdown.
