@@ -1,7 +1,7 @@
 ------------------------------ COMMON SETUP ------------------------------
 ALTER login sa ENABLE;
 GO
-ALTER login sa WITH PASSWORD = 'Password123';
+ALTER login sa WITH PASSWORD = 'Password123!';
 GO
 
 -- datadog user

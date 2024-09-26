@@ -217,7 +217,7 @@ class SelfHealingConnection:
 def sa_conn(instance_docker):
     # system administrator connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
-        instance_docker['driver'], instance_docker['host'], "sa", "Password123"
+        instance_docker['driver'], instance_docker['host'], "sa", "Password123!"
     )
     conn = _common_pyodbc_connect(conn_str)
     yield conn
@@ -303,14 +303,14 @@ def dd_environment(full_e2e_config):
         raise Exception("pyodbc is not installed!")
 
     def sqlserver_can_connect():
-        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;TrustServerCertificate=yes;'.format(
+        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123!;TrustServerCertificate=yes;'.format(
             get_local_driver(), DOCKER_SERVER
         )
         pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
 
     def high_cardinality_env_is_ready():
         return HighCardinalityQueries(
-            {'driver': get_local_driver(), 'host': DOCKER_SERVER, 'username': 'sa', 'password': 'Password123'}
+            {'driver': get_local_driver(), 'host': DOCKER_SERVER, 'username': 'sa', 'password': 'Password123!'}
         ).is_ready()
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
