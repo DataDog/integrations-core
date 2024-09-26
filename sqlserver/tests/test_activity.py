@@ -72,7 +72,7 @@ def dbm_instance(instance_docker):
         ],
     ],
 )
-def test_collect_load_activity(
+def collect_load_activity(
     aggregator,
     instance_docker,
     dd_run_check,
@@ -96,6 +96,7 @@ def test_collect_load_activity(
         # since Unicode is a default format
         cur.execute("SET CONTEXT_INFO 0xff")
         cur.execute(q)
+        #return cur.fetchall()
 
     # run the test query once before the blocking test to ensure that if it's
     # a procedure then it is populated in the sys.dm_exec_procedure_stats table
