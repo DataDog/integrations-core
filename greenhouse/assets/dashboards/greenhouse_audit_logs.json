@@ -225,7 +225,7 @@
                         "id": 7407165880992840,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates Audit logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Agreenhouse%20service%3Aaudit%20).",
+                            "content": "Datadog Cloud SIEM analyzes and correlates Audit logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Agreenhouse).",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "left",
@@ -2305,6 +2305,14 @@
                                             "width": "auto"
                                         },
                                         {
+                                            "field": "event.target_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "event.type",
+                                            "width": "auto"
+                                        },
+                                        {
                                             "field": "request.id",
                                             "width": "auto"
                                         },
@@ -2318,6 +2326,10 @@
                                         },
                                         {
                                             "field": "performer.meta.username",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.geoip.country.name",
                                             "width": "auto"
                                         },
                                         {
