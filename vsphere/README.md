@@ -59,14 +59,14 @@ collect_per_instance_filters:
 
 #### Collecting property metrics
 
-The vSphere integration can also collect property-based metrics. These are configuration properties such as if a host is in maintenance mode or a cluster is configured with DRS.
+The vSphere integration can also collect property-based metrics. These are configuration properties, such as if a host is in maintenance mode or a cluster is configured with DRS.
 
-To enable property metrics, enable the following option:
+To enable property metrics, configure the following option:
 ```
 collect_property_metrics: true
 ```
 
-Property metrics are prefixed by the resource name. For example, host property metrics metrics are prefixed with `vsphere.host.*` and VM property metrics are prefixed with `vsphere.vm.*`. View all the possible property metrics in the [metadata.csv][10].
+Property metrics are prefixed by the resource name. For example, host property metrics metrics are prefixed with `vsphere.host.*`, and VM property metrics are prefixed with `vsphere.vm.*`. View all the possible property metrics in the [metadata.csv][10].
 
 
 ### Events
