@@ -3300,7 +3300,7 @@ jobs:
       job-name: Squid
       target: squid
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-20.04"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
