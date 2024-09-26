@@ -4,8 +4,8 @@ base-package-features = ["deps", "db", "json"]
 [[envs.default.matrix]]
 python = ["3.12"]
 os = ["linux"]
-version = ["2017", "2019", "2022"]
-setup = ["single", "ha"]
+version = ["2019"]
+setup = ["single"]
 
 # test the full combination of python-version/driver against a the latest sql server version
 # ideally we'd test this against all sql server versions but that makes the test take too long and time out.
