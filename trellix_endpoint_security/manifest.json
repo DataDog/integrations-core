@@ -10,7 +10,13 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Trellix Endpoint Security logs",
     "title": "Trellix Endpoint Security (ENS)",
-    "media": [],
+    "media": [
+      {
+        "caption": "Trellix Endpoint Security (ENS) - Threat Events",
+        "image_url": "images/trellix_endpoint_security_threat_events.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -30,6 +36,12 @@
         "metadata_path": "assets/service_checks.json"
       }
     }
+  },
+  "dashboards": {
+    "Trellix Endpoint Security (ENS) - Threat Events": "assets/dashboards/trellix_endpoint_security_threat_events.json"
+  },
+  "logs": {
+    "source": "trellix-endpoint-security"
   },
   "author": {
     "support_email": "help@datadoghq.com",
