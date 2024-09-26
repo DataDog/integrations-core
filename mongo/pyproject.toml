@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools>=66",
 ]
 build-backend = "hatchling.build"
 
@@ -39,6 +38,7 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "cachetools==5.5.0",
+    "psutil==5.9.6",
     "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
 

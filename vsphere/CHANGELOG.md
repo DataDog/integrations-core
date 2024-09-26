@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2024-09-25
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Added the hostname_transform config option ([#18652](https://github.com/DataDog/integrations-core/pull/18652))
+
+***Fixed***:
+
+* Fixed excluded host tags for property metrics ([#18601](https://github.com/DataDog/integrations-core/pull/18601))
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
 ## 7.6.0 / 2024-07-05 / Agent 7.56.0
 
 ***Added***:
