@@ -379,4 +379,5 @@ tests:
     Security","analyzerversion":"10.7.0","analyzerhostname":"TEST","analyzeripv4":"10.10.10.10","analyzeripv6":"/0:0:0:0:0:ffff:ffff:ffff","analyzermac":"000000000a01","analyzerdatversion":null,"analyzerengineversion":null,"analyzerdetectionmethod":null,"sourcehostname":null,"sourceipv4":"10.10.10.10","sourceipv6":"/0:0:0:0:0:ffff:ffff:ffff","sourcemac":null,"sourceusername":"TEST\\TEST","sourceprocessname":null,"sourceurl":"reports.allowedSite","targethostname":null,"targetipv4":"20.20.20.20","targetipv6":"/0:0:0:0:0:ffff:0:0","targetmac":null,"targetusername":null,"targetport":null,"targetprotocol":null,"targetprocessname":null,"targetfilename":null,"threatcategory":"ops.informational.event","threateventid":18600,"threatseverity":"6","threatname":"
     ","threattype":"
     ","threatactiontaken":"none","threathandled":null,"nodepath":"1\\2942564","targethash":null,"sourceprocesshash":null,"sourceprocesssigned":null,"sourceprocesssigner":null,"sourcefilepath":null}}'
+  service: "threat-events"
   result: null
