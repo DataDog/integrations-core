@@ -21,7 +21,7 @@ This integration provides enrichment and visualization for threat prevention, we
    - **Client Type**: Enter a descriptive and identifiable name.
    - **APIs**: Choose **Threat Events** from the dropdown.
    - **Method Types**: Choose **GET** from the dropdown.
-5. Click **Request** to submit the request. It typically takes 2–3 days to process. You will be notified once your credentials are ready.
+5. Click **Request** to submit the request. It typically takes 2-3 days to process. You will be notified once your credentials are ready.
 6. When your credentials are available, generate your Client credentials by clicking **Generate** under **Create Client Credentials**.
 7. Copy and store the API key from Access management, Client ID and Client Secret from Create Client Credentials in a secure location.
 

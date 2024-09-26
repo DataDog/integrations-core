@@ -35,13 +35,13 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Trellix Endpoint Security (ENS) - Threat Events": "assets/dashboards/trellix_endpoint_security_threat_events.json"
+    },
+    "logs": {
+      "source": "trellix-endpoint-security"
     }
-  },
-  "dashboards": {
-    "Trellix Endpoint Security (ENS) - Threat Events": "assets/dashboards/trellix_endpoint_security_threat_events.json"
-  },
-  "logs": {
-    "source": "trellix-endpoint-security"
   },
   "author": {
     "support_email": "help@datadoghq.com",
