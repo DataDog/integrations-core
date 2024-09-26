@@ -15,7 +15,7 @@ The Cisco Secure Email Threat Defense integration provides out-of-the-box dashbo
 
 #### Get API Credentials for Cisco Secure Email Threat Defense 
 
-Steps to generate API key, Client ID and Client Password:
+Follow these steps to generate an API key, Client ID, and Client Password:
 
 1. Log in to the Cisco Secure Email Threat Defense UI.
 2. Navigate to **Administration** and select the **API Clients** tab.
