@@ -274,9 +274,6 @@
         "title": "Events by Security Attacks Detected",
         "title_size": "16",
         "title_align": "left",
-        "time": {
-          "hide_incomplete_cost_data": true
-        },
         "requests": [
           {
             "formulas": [
@@ -774,7 +771,7 @@
                     }
                   },
                   {
-                    "facet": "@network.destination.ip",
+                    "facet": "@network.client.port",
                     "limit": 5,
                     "sort": {
                       "order": "desc",
@@ -782,7 +779,7 @@
                     }
                   },
                   {
-                    "facet": "@network.client.port",
+                    "facet": "@network.destination.ip",
                     "limit": 5,
                     "sort": {
                       "order": "desc",

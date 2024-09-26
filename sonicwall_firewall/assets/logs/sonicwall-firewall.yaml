@@ -134,14 +134,14 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: >-
-          rule1 %{date("MMM dd HH:mm:ss"):date} %{ipv4:ip}
+          rule1 %{date("MMM dd HH:mm:ss"):date} %{ip:ip}
           %{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
 
           rule2 %{date("MMM  d HH:mm:ss"):date} %{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
 
           rule3 (<)?%{number:message_priority}> %{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
 
-          rule4 (%{ipv4:ip})?%{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
+          rule4 (%{ip:ip})?%{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
     - type: grok-parser
       name: Parsing Sonicwall Firewall destination
       enabled: true
@@ -156,15 +156,15 @@ pipeline:
         supportRules: ""
         matchRules: >-
           rule1
-          (%{ipv4:network.destination.ip})?(:%{number:network.destination.port})?(:%{word:destination.network_interface})?(:%{hostname:destination.resolved_name})?
+          (%{ip:network.destination.ip})?(:%{number:network.destination.port})?(:%{word:destination.network_interface})?(:%{hostname:destination.resolved_name})?
 
-          rule2 %{ipv4:network.destination.ip}::%{word:destination.network_interface}
+          rule2 %{ip:network.destination.ip}::%{word:destination.network_interface}
 
-          rule3 %{ipv4:network.destination.ip}:::%{hostname:destination.resolved_name}
+          rule3 %{ip:network.destination.ip}:::%{hostname:destination.resolved_name}
 
-          rule4 %{ipv4:network.destination.ip}:%{number:network.destination.port}::%{hostname:destination.resolved_name}
+          rule4 %{ip:network.destination.ip}:%{number:network.destination.port}::%{hostname:destination.resolved_name}
 
-          rule5 %{ipv4:network.destination.ip}::%{word:destination.network_interface}:%{hostname:destination.resolved_name}
+          rule5 %{ip:network.destination.ip}::%{word:destination.network_interface}:%{hostname:destination.resolved_name}
 
           rule6 ::%{word:destination.network_interface}(:%{hostname:destination.resolved_name})?
 
@@ -185,15 +185,15 @@ pipeline:
         supportRules: ""
         matchRules: >-
           rule1
-          %{ipv4:network.client.ip}(:%{number:network.client.port})?(:%{word:source.network_interface})?(:%{hostname:source.resolved_name})?
+          %{ip:network.client.ip}(:%{number:network.client.port})?(:%{word:source.network_interface})?(:%{hostname:source.resolved_name})?
 
-          rule2 %{ipv4:network.client.ip}::%{word:source.network_interface}
+          rule2 %{ip:network.client.ip}::%{word:source.network_interface}
 
-          rule3 %{ipv4:network.client.ip}:::%{hostname:source.resolved_name}
+          rule3 %{ip:network.client.ip}:::%{hostname:source.resolved_name}
 
-          rule4 %{ipv4:network.client.ip}:%{number:network.client.port}::%{hostname:source.resolved_name}
+          rule4 %{ip:network.client.ip}:%{number:network.client.port}::%{hostname:source.resolved_name}
 
-          rule5 %{ipv4:network.client.ip}::%{word:source.network_interface}:%{hostname:source.resolved_name}
+          rule5 %{ip:network.client.ip}::%{word:source.network_interface}:%{hostname:source.resolved_name}
 
           rule6 ::%{word:source.network_interface}(:%{hostname:source.resolved_name})?
 
@@ -209,7 +209,7 @@ pipeline:
         - 10.10.10.10
       grok:
         supportRules: ""
-        matchRules: example_rule %{ipv4:source.nat.ip}(:%{number:source.nat.port})?
+        matchRules: example_rule %{ip:source.nat.ip}(:%{number:source.nat.port})?
     - type: grok-parser
       name: Parsing Sonicwall Firewall nat destination
       enabled: true
@@ -219,8 +219,7 @@ pipeline:
         - 10.10.10.10:320
       grok:
         supportRules: ""
-        matchRules: example_rule
-          %{ipv4:destination.nat.ip}(:%{number:destination.nat.port})?
+        matchRules: example_rule %{ip:destination.nat.ip}(:%{number:destination.nat.port})?
     - type: grok-parser
       name: Parsing Sonicwall Firewall protocol and service
       enabled: true

@@ -8,7 +8,7 @@
         "type": "image",
         "url": "https://securityaffairs.com/wp-content/uploads/2020/10/SonicWall.png",
         "url_dark_theme": "https://securityaffairs.com/wp-content/uploads/2020/10/SonicWall.png",
-        "sizing": "cover",
+        "sizing": "contain",
         "margin": "md",
         "has_background": false,
         "has_border": false,
@@ -192,7 +192,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:sonicwall-firewall"
+                        "query": "source:sonicwall-firewall @gcat:4"
                       },
                       "storage": "hot"
                     }
