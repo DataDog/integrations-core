@@ -1,0 +1,136 @@
+id: hubspot-content-hub
+tests:
+  - sample: '{"id": "3959685975", "loginAt": "2024-09-16T06:55:51.186Z", "userId":
+      70769783, "email": "john.doe@techworldhub.com", "loginSucceeded": true,
+      "ipAddress": "10.10.10.10", "location": "delhi, india", "userAgent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
+      Gecko) Chrome/128.0.0.0 Safari/537.36", "countryCode": "in", "regionCode":
+      "dl"}'
+    result: null
+  - sample: '{"id": "LT83ZDteVkseUUdWEQUSg==", "category": "LOGIN", "subCategory":
+      "LOGIN_SUCCEEDED", "action": "PERFORM", "targetObjectId": "1",
+      "occurredAt": "2024-09-10T12:12:47.868Z", "actingUser": {"userId":
+      70700058, "userEmail": "sara.lee@nextgenventures.com"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZUAfREhSRV1EGVhdSlFIQBtYMDc3bDUwIERFGkFQWkVVRxpdXUxZ",
+      "category": "CONTENT", "subCategory": "CONTENT_SETTINGS", "action":
+      "CREATE", "targetObjectId": "178043830806", "occurredAt":
+      "2024-09-10T12:12:56.858Z", "actingUser": {"userId": 70700058,
+      "userEmail": "sara.lee@nextgenventures.com"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1EGV1UQFZHSRRYMDc3bDUwIERFGkFQWkVXQxxbUk1U",
+      "category": "CONTENT", "subCategory": "BLOG", "action": "CREATE",
+      "targetObjectId": "178046197799", "occurredAt":
+      "2024-09-10T12:51:50.745Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1E1UQFZHSRRYJjU2bDUwIERFGkFQWkVXQxxaVE9S",
+      "category": "CONTENT", "subCategory": "BLOG", "action": "UPDATE",
+      "targetObjectId": "178046197799", "occurredAt":
+      "2024-09-10T12:51:51.163Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1E1dS1ZCRhlYIzAwYSgmLCwwAEJSUUdcQx9TV0BRSEU=",
+      "category": "CONTENT", "subCategory": "BLOG_POST", "action": "PUBLISH",
+      "targetObjectId": "178046827264", "occurredAt":
+      "2024-09-10T12:53:49.085Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1E5TQVlJSBxYMDc3bUwIERFGkFQWkVXTRlbU0hT",
+      "category": "CONTENT", "subCategory": "BLOG_POST", "action": "CREATE",
+      "targetObjectId": "178045688981", "occurredAt":
+      "2024-09-10T12:55:40.612Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1E1dS1ZCRhlYJjU2bUwIERFGkFQWkVXTB9cXE1X",
+      "category": "CONTENT", "subCategory": "BLOG_POST", "action": "UPDATE",
+      "targetObjectId": "178046827264", "occurredAt":
+      "2024-09-10T12:53:47.946Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREgjGhAWsKDU4XAkICBw1fbMwJT0xaV5UVEBQTRpZXUhVQUId",
+      "category": "CONTENT", "subCategory": "THEME", "action": "CREATE",
+      "targetObjectId": "@hubspot/growth", "occurredAt":
+      "2024-09-10T12:53:34.120Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1E1dSllBRBtYMDc3bUwIERFGkFQWkVXTBRbUklU",
+      "category": "CONTENT", "subCategory": "WEBSITE_PAGE", "action": "CREATE",
+      "targetObjectId": "178046838146", "occurredAt":
+      "2024-09-10T12:54:50.705Z", "actingUser": {"userId": 70700783,
+      "userEmail": "david.williams@creativelabs.com"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1E1dSllBRBtYJjU2bUwIERFGkFQWkVXTRxeV09V",
+      "category": "CONTENT", "subCategory": "WEBSITE_PAGE", "action": "UPDATE",
+      "targetObjectId": "178046838146", "occurredAt":
+      "2024-09-10T12:55:15.264Z", "actingUser": {"userId": 70700783,
+      "userEmail": "david.williams@creativelabs.com"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1E1dSllBRBtYIzAwYSgmLCwwAEJSUUdcQx5bUUhYSUI=",
+      "category": "CONTENT", "subCategory": "WEBSITE_PAGE", "action": "PUBLISH",
+      "targetObjectId": "178046838146", "occurredAt":
+      "2024-09-10T12:57:21.992Z", "actingUser": {"userId": 70700783,
+      "userEmail": "david.williams@creativelabs.com"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1EpUTFZBQB5YMDc3bDUwIERFGkFQWkVWRRxfVkBV",
+      "category": "CONTENT", "subCategory": "FILE", "action": "CREATE",
+      "targetObjectId": "178051157103", "occurredAt":
+      "2024-09-10T12:58:34.394Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1EGV1WT1dAQB9YJjU2bDUwIERFGkFQWkVWTBtfXE1T",
+      "category": "CONTENT", "subCategory": "LANDING_PAGE", "action": "UPDATE",
+      "targetObjectId": "178046366002", "occurredAt":
+      "2024-09-10T13:11:04.942Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1EGV1WT1dAQB9YMDc3bDUwIERFGkFQWkVWTBhfV0hX",
+      "category": "CONTENT", "subCategory": "LANDING_PAGE", "action": "CREATE",
+      "targetObjectId": "178046366002", "occurredAt":
+      "2024-09-10T13:10:54.216Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id":
+      "Ij8+eTA9MV8ZVkZRWUAfREhSRV1EGV1WT1dAQB9YIzAwYSgmLCwwAEJSUUdcQx5TU0xYQEg=",
+      "category": "CONTENT", "subCategory": "LANDING_PAGE", "action": "PUBLISH",
+      "targetObjectId": "178046366002", "occurredAt":
+      "2024-09-10T13:11:05.908Z", "actingUser": {"userId": 70700061,
+      "userEmail": "jane.smith@innovatesolutions.org"}}'
+    result: null
+  - sample: '{"id": "IiI5eTwwJ5yIDYwIDtjXlZWRFFNHV5USQ==", "category":
+      "CRITICAL_ACTION", "subCategory": "ADD_ADMIN_USER", "action": "CREATE",
+      "targetObjectId": "70700783", "occurredAt": "2024-09-10T12:17:22.688Z",
+      "actingUser": {"userId": 70700058, "userEmail":
+      "sara.lee@nextgenventures.com"}}'
+    result: null
+  - sample: '{"id": "356492480", "createdAt": "2024-09-10T12:26:58.098Z", "userId":
+      70700783, "type": "DEACTIVATE_USER", "actingUser":
+      "david.williams@creativelabs.com", "objectId": "70769658", "infoUrl":
+      null, "location": null, "ipAddress": "10.10.10.10", "countryCode": "in",
+      "regionCode": "mh"}'
+    result: null
+  - sample: '{"id": "357371136", "createdAt": "2024-09-13T07:45:47.385Z", "userId":
+      70700783, "type": "INSTALL_INTEGRATION", "actingUser":
+      "david.williams@creativelabs.com", "objectId": "39031290", "infoUrl":
+      null, "location": null, "ipAddress": null, "countryCode": null,
+      "regionCode": null}'
+    result: null
+  - sample: '{"id": "356492269", "createdAt": "2024-09-10T12:25:49.854Z", "userId":
+      70769678, "type": "REMOVE_ADMIN_PERMISSIONS", "actingUser":
+      "sara.lee@nextgenventures.com", "objectId": "70769658", "infoUrl": null,
+      "location": null, "ipAddress": "10.10.10.10", "countryCode": "in",
+      "regionCode": "mh"}'
+    result: null
