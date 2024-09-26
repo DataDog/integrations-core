@@ -297,6 +297,16 @@ class Api:
         response = self.make_request(path)
         return self._parse_response(response)
 
+    def get_lldp_adj_ep(self):
+        path = '/api/node/class/lldpAdjEp.json'
+        response = self.make_request(path)
+        return self._parse_response(response)
+
+    def get_cdp_adj_ep(self):
+        path = '/api/node/class/cdpAdjEp.json'
+        response = self.make_request(path)
+        return self._parse_response(response)
+
     def get_eqpt_capacity(self, eqpt):
         base_path = '/api/class/eqptcapacityEntity.json'
         base_query = 'query-target=self&rsp-subtree-include=stats&rsp-subtree-class='

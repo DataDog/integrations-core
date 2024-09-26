@@ -8,6 +8,9 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
+from . import helpers
+
+
 """
 Cisco ACI Response Models
 """
@@ -77,6 +80,43 @@ class PhysIf(BaseModel):
         return None
 
 
+class LldpAdjAttributes(BaseModel):
+    chassis_id_t: Optional[str] = Field(default=None, alias="chassisIdT")
+    chassis_id_v: Optional[str] = Field(default=None, alias="chassisIdV")
+    dn: Optional[str] = None
+    mgmt_ip: Optional[str] = Field(default=None, alias="mgmtIp")
+    mgmt_port_mac: Optional[str] = Field(default=None, alias="mgmtPortMac")
+    port_desc: Optional[str] = Field(default=None, alias="portDesc")
+    port_id_t: Optional[str] = Field(default=None, alias="portIdT")
+    port_id_v: Optional[str] = Field(default=None, alias="portIdV")
+    sys_desc: Optional[str] = Field(default=None, alias="sysDesc")
+    sys_name: Optional[str] = Field(default=None, alias="sysName")
+
+    @computed_field
+    @property
+    def local_device_dn(self) -> str:
+        # example: topology/pod-1/node-101/sys/lldp/inst/if-[eth1/49]/adj-1
+        return helpers.get_hostname_from_dn(self.dn)
+
+    @computed_field
+    @property
+    def remote_device_index(self) -> str:
+        # example: topology/pod-1/paths-201/path-ep-[eth1/1]
+        # use regex to extract port alias from square brackets - ex: eth1/1
+        return helpers.get_eth_id_from_dn(self.port_desc)
+
+    @computed_field
+    @property
+    def local_port_id(self) -> str:
+        # example: topology/pod-1/paths-201/path-ep-[eth1/1]
+        # use regex to extract port alias from square brackets - ex: eth1/1
+        return helpers.get_eth_id_from_dn(self.dn)
+
+
+class LldpAdjEp(BaseModel):
+    attributes: dict = LldpAdjAttributes
+
+
 """
 NDM Models
 """
@@ -95,6 +135,9 @@ class DeviceMetadata(BaseModel):
     serial_number: Optional[str] = Field(default=None)
     device_type: Optional[str] = Field(default=None)
     integration: Optional[str] = Field(default='cisco-aci')
+
+    # non-exported fields
+    pod_node_id: Optional[str] = Field(default=None, exclude=True)
 
     @computed_field
     @property
@@ -195,10 +238,45 @@ class InterfaceMetadataList(BaseModel):
     interface_metadata: list = Field(default_factory=list)
 
 
+class TopologyLinkDevice(BaseModel):
+    dd_id: Optional[str] = None
+    id: Optional[str] = None
+    id_type: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    ip_address: Optional[str] = None
+
+
+class TopologyLinkInterface(BaseModel):
+    dd_id: Optional[str] = None
+    id: Optional[str] = None
+    id_type: Optional[str] = None
+    description: Optional[str] = None
+
+
+class TopologyLinkSide(BaseModel):
+    device: Optional[TopologyLinkDevice] = None
+    interface: Optional[TopologyLinkInterface] = None
+
+
+class SourceType(StrEnum):
+    LLDP = "lldp"
+    CDP = "cdp"
+    OTHER = "OTHER"
+
+
+class TopologyLinkMetadata(BaseModel):
+    id: Optional[str] = None
+    source_type = Optional[SourceType]
+    local = Optional[TopologyLinkSide]
+    remote = Optional[TopologyLinkSide]
+
+
 class NetworkDevicesMetadata(BaseModel):
     namespace: str = None
     devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
     interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
+    links: Optional[list[TopologyLinkMetadata]] = Field(default_factory=list)
     collect_timestamp: Optional[int] = None
     size: Optional[int] = Field(default=0, exclude=True)
 

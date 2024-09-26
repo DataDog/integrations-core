@@ -5,10 +5,18 @@
 from datadog_checks.cisco_aci.models import (
     DeviceMetadata,
     InterfaceMetadata,
+    LldpAdjEp,
     NetworkDevicesMetadata,
     Node,
     PhysIf,
+    SourceType,
+    TopologyLinkDevice,
+    TopologyLinkInterface,
+    TopologyLinkMetadata,
+    TopologyLinkSide,
 )
+
+from . import helpers
 
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
@@ -37,6 +45,7 @@ def create_node_metadata(node_attrs, tags, namespace):
         version=node.attributes.version,
         serial_number=node.attributes.serial,
         device_type=node.attributes.device_type,
+        pod_node_id=helpers.get_hostname_from_dn(node.attributes.dn),
     )
     return device
 
@@ -61,6 +70,55 @@ def create_interface_metadata(phys_if, address, namespace):
     return interface
 
 
+def create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, namespace):
+    """
+    Create a TopologyLinkMetadata object from LLDP or CDP
+    """
+    lldp_adj_eps_list = LldpAdjEp()
+    for lldp_adj_ep in lldp_adj_eps_list:
+        local_device_id = device_map.get(lldp_adj_ep.attributes.local_device_dn)
+        remote_entry_unique_id = lldp_adj_ep.attributes.local_port_id + "." + lldp_adj_ep.attributes.remote_port_id
+
+        local = TopologyLinkSide(
+            # TODO: need to grab the device id from mapping
+            device=TopologyLinkDevice(dd_id=local_device_id),
+            # TODO: double check resolve the local interface id
+            interface=TopologyLinkInterface(
+                dd_id='', id=lldp_adj_ep.attributes.local_port_id, id_type='interface_name'
+            ),
+        )
+        remote = TopologyLinkSide(
+            # this is all good afaik
+            device=TopologyLinkDevice(
+                name=lldp_adj_ep.attributes.system_name,
+                description=lldp_adj_ep.attributes.system_desc,
+                id=lldp_adj_ep.attributes.chassis_id_v,
+                id_type=lldp_adj_ep.attributes.chassis_id_t,
+                ip_address=lldp_adj_ep.attributes.mgmt_ip,
+            ),
+            # TODO: check on the interface alias/name for resolution vs. taken what's given to us
+            interface=TopologyLinkInterface(
+                id=lldp_adj_ep.attributes.remote_port_id,
+                id_type=lldp_adj_ep.attributes.port_id_t,
+                description=lldp_adj_ep.attributes.port_desc,
+            ),
+        )
+        yield TopologyLinkMetadata(
+            id='{}:{}'.format(local_device_id, remote_entry_unique_id),
+            source_type=SourceType.LLDP,
+            local=local,
+            remote=remote,
+        )
+
+
+def get_device_ip_mapping(devices):
+    devices_map = {}
+    for device in devices:
+        key = device.pod_node_id
+        devices_map[key] = device.ip_address
+    return devices_map
+
+
 def get_device_info(device):
     """
     Get device ID and node ID from a device object
@@ -72,7 +130,7 @@ def get_device_info(device):
     return device.id, node_id
 
 
-def batch_payloads(namespace, devices, interfaces, collect_ts):
+def batch_payloads(namespace, devices, interfaces, links, collect_ts):
     """
     Batch payloads into NetworkDevicesMetadata objects
     """
@@ -85,6 +143,12 @@ def batch_payloads(namespace, devices, interfaces, collect_ts):
 
     for interface in interfaces:
         current_payload, new_payload = append_to_payload(interface, network_devices_metadata, namespace, collect_ts)
+        if new_payload:
+            yield current_payload
+            network_devices_metadata = new_payload
+
+    for link in links:
+        current_payload, new_payload = append_to_payload(link, network_devices_metadata, namespace, collect_ts)
         if new_payload:
             yield current_payload
             network_devices_metadata = new_payload
