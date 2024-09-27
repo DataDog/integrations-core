@@ -109,6 +109,15 @@ files:
         type: boolean
         display_default: false
         example: true
+      enabled: false
+    - name: disable_legacy_service_check_tags
+      description: |
+        Disable the submission of the elasticsearch `host` and `port` as tags in service checks. 
+        Submit them as `url` instead.
+      value:
+        type: boolean
+        display_default: false
+        example: true
       enabled: true
     - name: custom_queries
       description: |

@@ -7,7 +7,7 @@ import logging
 import mock
 import pytest
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
@@ -174,6 +174,42 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
             check.SERVICE_CHECK_CONNECT_NAME,
             status=check.CRITICAL,
             tags=check._config.service_check_tags,
+            message="Error 500 Server Error: None for url: None when hitting test.com",
+        )
+
+
+@pytest.mark.parametrize(
+    'es_instance',
+    [
+        pytest.param(
+            {'url': 'http://localhost:9200', 'disable_legacy_service_check_tags': 'true'},
+            id="disable legacy service check behavior",
+        ),
+        pytest.param(
+            {'url': 'http://localhost:9200', 'disable_legacy_service_check_tags': 'false'},
+            id="use legacy service check behavior",
+        ),
+    ],
+)
+def test_disable_legacy_sc_tags(aggregator, es_instance):
+    with mock.patch(
+        'requests.get',
+        return_value=MockResponse(status_code=500),
+    ):
+        check = ESCheck('elastic', {}, instances=[es_instance])
+
+        with pytest.raises(Exception):
+            check._get_data(url='test.com')
+
+        if is_affirmative(es_instance['disable_legacy_service_check_tags']):
+            expected_tags = ['url:http://localhost:9200']
+        else:
+            expected_tags = ['host:localhost', 'port:9200']
+
+        aggregator.assert_service_check(
+            check.SERVICE_CHECK_CONNECT_NAME,
+            status=check.CRITICAL,
+            tags=expected_tags,
             message="Error 500 Server Error: None for url: None when hitting test.com",
         )
 
