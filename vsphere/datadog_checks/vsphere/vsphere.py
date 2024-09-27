@@ -32,10 +32,8 @@ from datadog_checks.vsphere.constants import (
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import (
     ALLOWED_METRICS_FOR_MOR,
+    ALLOWED_METRICS_FOR_VSAN,
     PERCENT_METRICS,
-    VSAN_CLUSTER_METRICS,
-    VSAN_DISK_METRICS,
-    VSAN_HOST_METRICS,
     VSAN_PERCENT_METRICS,
 )
 from datadog_checks.vsphere.resource_filters import TagFilter
@@ -529,103 +527,71 @@ class VSphereCheck(AgentCheck):
                             if latest_value != 'None':
                                 if given_metric.metricId.label in VSAN_PERCENT_METRICS:
                                     latest_value = float(latest_value) / 100.0
+
+                                hostname = None
                                 if resource_type == 'cluster':
-                                    if 'vsan.cluster.{}'.format(given_metric.metricId.label) in VSAN_CLUSTER_METRICS:
-                                        tags = self.infrastructure_cache.get_mor_tags(
+                                    tags = self.infrastructure_cache.get_mor_tags(
+                                        given_metric.metricId.dynamicProperty[0][1]
+                                    )
+                                    tags.extend(
+                                        self.infrastructure_cache.get_mor_props(
                                             given_metric.metricId.dynamicProperty[0][1]
-                                        )
-                                        tags.extend(
-                                            self.infrastructure_cache.get_mor_props(
-                                                given_metric.metricId.dynamicProperty[0][1]
-                                            )['tags']
-                                        )
-                                        tags.extend(self._config.base_tags)
-                                        self.gauge(
-                                            'vsan.cluster.{}'.format(given_metric.metricId.label),
-                                            # for now we only collect the latest value
-                                            float(latest_value),
-                                            tags=tags,
-                                            hostname=None,
-                                        )
-                                        self.log.debug(
-                                            "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
-                                            given_metric.metricId.label,
-                                            float(latest_value),
-                                            self._hostname,
-                                            tags,
-                                        )
-                                    else:
-                                        self.log.debug(
-                                            "Skipping metric %s because it is not in the list of metrics to collect",
-                                            given_metric.metricId.label,
-                                        )
+                                        )['tags']
+                                    )
+                                    tags.extend(self._config.base_tags)
                                 elif resource_type == 'host':
-                                    if 'vsan.host.{}'.format(given_metric.metricId.label) in VSAN_HOST_METRICS:
-                                        tags = (
-                                            [
-                                                t
-                                                for t in self.infrastructure_cache.get_mor_tags(
-                                                    given_metric.metricId.dynamicProperty[0][1]
-                                                )
-                                                if t.split(":", 1)[0] in self._config.excluded_host_tags
-                                            ]
-                                            if self._config.excluded_host_tags
-                                            else []
-                                        )
-                                        tags.extend(
-                                            self.infrastructure_cache.get_mor_props(
+                                    tags = (
+                                        [
+                                            t
+                                            for t in self.infrastructure_cache.get_mor_tags(
                                                 given_metric.metricId.dynamicProperty[0][1]
-                                            )['tags']
-                                        )
-                                        tags.extend(self._config.base_tags)
-                                        self.gauge(
-                                            'vsan.host.{}'.format(given_metric.metricId.label),
-                                            # for now we only collect the latest value
-                                            float(latest_value),
-                                            tags=tags,
-                                            hostname=given_metric.metricId.dynamicProperty[0][2],
-                                        )
-                                        self.log.debug(
-                                            "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
-                                            given_metric.metricId.label,
-                                            float(latest_value),
-                                            given_metric.metricId.dynamicProperty[0][2],
-                                            tags,
-                                        )
-                                    else:
-                                        self.log.debug(
-                                            "Skipping metric %s because it is not in the list of metrics to collect",
-                                            given_metric.metricId.label,
-                                        )
+                                            )
+                                            if t.split(":", 1)[0] in self._config.excluded_host_tags
+                                        ]
+                                        if self._config.excluded_host_tags
+                                        else []
+                                    )
+                                    tags.extend(
+                                        self.infrastructure_cache.get_mor_props(
+                                            given_metric.metricId.dynamicProperty[0][1]
+                                        )['tags']
+                                    )
+                                    tags.extend(self._config.base_tags)
+                                    hostname = given_metric.metricId.dynamicProperty[0][2]
                                 elif resource_type == 'disk':
-                                    if 'vsan.disk.{}'.format(given_metric.metricId.label) in VSAN_DISK_METRICS:
-                                        self.gauge(
-                                            'vsan.disk.{}'.format(given_metric.metricId.label),
-                                            # for now we only collect the latest value
-                                            float(latest_value),
-                                            tags=[
-                                                'vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])
-                                            ]
-                                            + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
-                                            + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
-                                            + self._config.base_tags,
-                                            hostname=None,
-                                        )
-                                        self.log.debug(
-                                            "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
-                                            given_metric.metricId.label,
-                                            float(latest_value),
-                                            'None',
-                                            ['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
-                                            + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
-                                            + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
-                                            + self._config.base_tags,
-                                        )
-                                    else:
-                                        self.log.debug(
-                                            "Skipping metric %s because it is not in the list of metrics to collect",
-                                            given_metric.metricId.label,
-                                        )
+                                    tags = (
+                                        ['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
+                                        + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
+                                        + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
+                                        + self._config.base_tags
+                                    )
+
+                                if (
+                                    'vsan.{}.{}'.format(resource_type, given_metric.metricId.label)
+                                    in ALLOWED_METRICS_FOR_VSAN[resource_type]
+                                ):
+                                    full_metric_name = 'vsan.{}.{}'.format(resource_type, given_metric.metricId.label)
+                                else:
+                                    self.log.debug(
+                                        "Skipping metric %s because it is not in the list of metrics to collect",
+                                        given_metric.metricId.label,
+                                    )
+                                    continue
+
+                                self.gauge(
+                                    full_metric_name,
+                                    # for now we only collect the latest value
+                                    float(latest_value),
+                                    tags=tags,
+                                    hostname=hostname,
+                                )
+                                self.log.debug(
+                                    "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                                    given_metric.metricId.label,
+                                    float(latest_value),
+                                    str(hostname),
+                                    tags,
+                                )
                         if latest_metric_time is None:
                             latest_metric_time = collect_start_time
                     else:

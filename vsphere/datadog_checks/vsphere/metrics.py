@@ -495,6 +495,12 @@ DATASTORE_METRICS = {
     ],
 }
 
+ALLOWED_METRICS_FOR_VSAN = {
+    'cluster': VSAN_CLUSTER_METRICS,
+    'host': VSAN_HOST_METRICS,
+    'disk': VSAN_DISK_METRICS,
+}
+
 # All metrics that can be collected from Datacenters.
 DATACENTER_METRICS = {
     'realtime': [],

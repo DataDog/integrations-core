@@ -132,6 +132,7 @@ class MockedAPI(object):
             }
         ]
         mock_performance_data = [
+            [],
             [
                 MagicMock(
                     value=[MagicMock(metricId=MagicMock(label='oio', dynamicProperty=[{0: 'cluster', 1: MagicMock()}]))]

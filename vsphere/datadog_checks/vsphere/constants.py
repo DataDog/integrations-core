@@ -219,20 +219,11 @@ PER_RESOURCE_EVENTS = [
     'ScheduledTaskEvent',
 ]
 
-VSAN_CLUSTER_PREFIX = 'vsan.cluster.'
-VSAN_HOST_PREFIX = 'vsan.host.'
-VSAN_DISK_PREFIX = 'vsan.disk.'
-
 VSAN_EVENT_IDS = [
-    'vsan.health.test.cloudhealth.advisor.event',
     'vsan.health.test.cloudhealth.diskusage.event',
     'vsan.health.test.cluster.consistentconfig.event',
     'vsan.health.test.network.hostdisconnected.event',
-    'vsan.health.test.overallsummary.event',
-    'vsan.health.test.perfsvc.perfsvcstatus.event',
     'vsan.health.test.physicaldisks.diskusage.event',
-    'vsan.health.test.vsanhardwarecert.event',
-    'vsan.health.test.hciskip.event',
 ]
 
 HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']
