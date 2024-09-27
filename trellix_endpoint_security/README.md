@@ -36,7 +36,7 @@ Configure the Datadog endpoint to forward Trellix Endpoint Security logs to Data
 | ------------------------------------ | -------------------------------------- |
 | Client ID                            | The Client ID of Trellix ePO SaaS.     |
 | Client Secret                        | The Client Secret of Trellix ePO SaaS. |
-| API Key                              | The API Key of of Trellix ePO SaaS.    |
+| API Key                              | The API Key of Trellix ePO SaaS.       |
 
 ## Data Collected
 
