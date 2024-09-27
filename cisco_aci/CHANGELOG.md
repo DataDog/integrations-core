@@ -18,7 +18,7 @@
 
 * [NDM] [Cisco ACI] Use name instead of node ID as device hostname ([#18375](https://github.com/DataDog/integrations-core/pull/18375))
 
-## 2.10.2 / 2024-09-02
+## 2.10.2 / 2024-09-02 / Agent 7.57.0
 
 ***Fixed***:
 

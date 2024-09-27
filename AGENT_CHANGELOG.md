@@ -1,3 +1,44 @@
+## Datadog Agent version [7.57.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7572)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.57.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7571)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.57.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7570)
+
+* Amazon Kafka [4.10.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* ArgoCD [2.4.3](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
+* AWS Neuron [1.0.0](https://github.com/DataDog/integrations-core/blob/master/aws_neuron/CHANGELOG.md)
+* Datadog Checks Base [36.13.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Cisco ACI [2.10.2](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* Datadog Cluster Agent [3.2.0](https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/CHANGELOG.md)
+* Fly.io [1.0.0](https://github.com/DataDog/integrations-core/blob/master/fly_io/CHANGELOG.md)
+* Gunicorn [2.7.1](https://github.com/DataDog/integrations-core/blob/master/gunicorn/CHANGELOG.md)
+* HTTP [9.8.0](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* IBM WAS [3.3.2](https://github.com/DataDog/integrations-core/blob/master/ibm_was/CHANGELOG.md)
+* Kafka Consumer [4.6.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* Karpenter [1.5.0](https://github.com/DataDog/integrations-core/blob/master/karpenter/CHANGELOG.md)
+* MongoDB [6.9.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [12.7.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* OpenStack Controller [6.9.0](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
+* ossec-security [1.0.0](https://github.com/DataDog/integrations-core/blob/master/ossec_security/CHANGELOG.md)
+* PingFederate [1.0.0](https://github.com/DataDog/integrations-core/blob/master/ping_federate/CHANGELOG.md)
+* Postgres [19.1.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Redis [5.7.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+* SAP HANA [3.3.0](https://github.com/DataDog/integrations-core/blob/master/sap_hana/CHANGELOG.md)
+* SNMP [7.4.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* Snowflake [5.8.0](https://github.com/DataDog/integrations-core/blob/master/snowflake/CHANGELOG.md)
+* SQL Server [17.5.2](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* SSH [2.9.0](https://github.com/DataDog/integrations-core/blob/master/ssh_check/CHANGELOG.md)
+* suricata [1.0.0](https://github.com/DataDog/integrations-core/blob/master/suricata/CHANGELOG.md)
+* TeamCity [4.3.1](https://github.com/DataDog/integrations-core/blob/master/teamcity/CHANGELOG.md)
+* Temporal [2.3.0](https://github.com/DataDog/integrations-core/blob/master/temporal/CHANGELOG.md)
+* tibco_ems [1.0.0](https://github.com/DataDog/integrations-core/blob/master/tibco_ems/CHANGELOG.md)
+* TLS [2.19.0](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+* Vertica [4.6.0](https://github.com/DataDog/integrations-core/blob/master/vertica/CHANGELOG.md)
+
 ## Datadog Agent version [7.56.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7562)
 
 * There were no integration updates for this version of the Agent.

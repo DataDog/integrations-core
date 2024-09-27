@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from requests.exceptions import ConnectionError, HTTPError, Timeout
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.constants import ServiceCheck
@@ -96,7 +95,7 @@ class AmbariCheck(AgentCheck):
                     continue
 
                 metrics = self.flatten_host_metrics(host_metrics)
-                for metric_name, value in iteritems(metrics):
+                for metric_name, value in metrics.items():
                     metric_tags = self.base_tags + [cluster_tag]
                     if isinstance(value, float):
                         self._submit_gauge(metric_name, value, metric_tags, hostname)
@@ -111,7 +110,7 @@ class AmbariCheck(AgentCheck):
 
         for cluster in clusters:
             tags = self.base_tags + [CLUSTER_TAG_TEMPLATE.format(cluster)]
-            for service, components in iteritems(self.included_services):
+            for service, components in self.included_services.items():
                 service_tags = tags + [SERVICE_TAG + service.lower()]
 
                 if collect_service_metrics:
@@ -144,7 +143,7 @@ class AmbariCheck(AgentCheck):
 
         component_metrics_endpoint = common.create_endpoint(self.base_url, cluster, service, COMPONENT_METRICS_QUERY)
         components_response = self._make_request(component_metrics_endpoint)
-        component_included = {k.upper(): v for k, v in iteritems(component_included)}
+        component_included = {k.upper(): v for k, v in component_included.items()}
 
         if components_response is None or 'items' not in components_response:
             self.log.warning("No components found for service %s.", service)
@@ -171,7 +170,7 @@ class AmbariCheck(AgentCheck):
 
                 metrics = self.flatten_service_metrics(component_metrics[header], header)
                 component_tag = COMPONENT_TAG + component_name.lower()
-                for metric_name, value in iteritems(metrics):
+                for metric_name, value in metrics.items():
                     metric_tags = base_tags + [component_tag]
                     if isinstance(value, float):
                         self._submit_gauge(metric_name, value, metric_tags)
@@ -206,7 +205,7 @@ class AmbariCheck(AgentCheck):
     @classmethod
     def flatten_service_metrics(cls, metric_dict, prefix):
         flat_metrics = {}
-        for raw_metric_name, metric_value in iteritems(metric_dict):
+        for raw_metric_name, metric_value in metric_dict.items():
             if isinstance(metric_value, dict):
                 flat_metrics.update(cls.flatten_service_metrics(metric_value, prefix))
             else:
@@ -217,7 +216,7 @@ class AmbariCheck(AgentCheck):
     @classmethod
     def flatten_host_metrics(cls, metric_dict, prefix=""):
         flat_metrics = {}
-        for raw_metric_name, metric_value in iteritems(metric_dict):
+        for raw_metric_name, metric_value in metric_dict.items():
             metric_name = '{}.{}'.format(prefix, raw_metric_name) if prefix else raw_metric_name
             if raw_metric_name == "boottime":
                 flat_metrics["boottime"] = metric_value

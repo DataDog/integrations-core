@@ -1,0 +1,41 @@
+name: KubeVirt Handler
+files:
+  - name: kubevirt_handler.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/openmetrics
+      - template: instances
+        options:
+          - name: kubevirt_handler_metrics_endpoint
+            description: |
+              URL to the KubeVirt Handler Service /metrics endpoint.
+            value:
+              display_default: null
+              example: https://10.244.0.38:443/metrics
+              type: string
+          - name: kubevirt_handler_healthz_endpoint
+            description: |
+              URL to check the KubeVirt Handler /healthz endpoint.
+            value:
+              display_default: null
+              example: https://10.244.0.38:443/healthz
+              type: string
+          - name: kube_namespace
+            description: |
+              The namespace where the KubeVirt Handler is running.  (Provided via autodiscovery template variables)
+            value:
+              display_default: null
+              example: kubevirt
+              type: string
+          - name: kube_pod_name
+            description: |
+              The name of the KubeVirt Handler pod. (Provided via autodiscovery template variables)
+            value:
+              display_default: null
+              example: virt-handler-id-1234
+              type: string
+          - template: instances/openmetrics
+            overrides:
+              openmetrics_endpoint.required: false
+              openmetrics_endpoint.hidden: true

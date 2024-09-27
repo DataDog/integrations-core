@@ -17,8 +17,6 @@ from pyVmomi import (
     vim,  # pylint: disable=E0611
     vmodl,  # pylint: disable=E0611
 )
-from six import itervalues
-from six.moves import range
 
 from datadog_checks.base import AgentCheck, ensure_unicode, to_string
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
@@ -951,7 +949,7 @@ class VSphereLegacyCheck(AgentCheck):
         batch_size = self.batch_morlist_size or n_mors
         for batch in mors_batch_method(i_key, batch_size, max_historical_metrics):
             query_specs = []
-            for mor in itervalues(batch):
+            for mor in batch.values():
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
                 if mor['mor_type'] not in REALTIME_RESOURCES and ('metrics' not in mor or not mor['metrics']):

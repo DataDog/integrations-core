@@ -11,7 +11,6 @@ import sys
 from collections import defaultdict
 
 import pytest
-from six import iteritems
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
@@ -336,7 +335,7 @@ def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
     """
     aggregator = dd_agent_check(*args, **kwargs)
     new_agg_metrics = defaultdict(list)
-    for metric_name, metric_list in iteritems(aggregator._metrics):
+    for metric_name, metric_list in aggregator._metrics.items():
         new_metrics = []
         for metric in metric_list:
             # metric is a Namedtuple, to modify namedtuple fields we need to use `._replace()`

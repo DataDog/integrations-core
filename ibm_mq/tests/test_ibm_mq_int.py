@@ -7,11 +7,9 @@ import os
 
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.time import ensure_aware_datetime
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
@@ -280,7 +278,7 @@ def test_check_channel_count(aggregator, get_check, instance_queue_regex_tag, se
         'my_channel', pymqi.CMQCFC.MQCHS_RUNNING, ["channel:my_channel"]
     )
 
-    for status, expected_value in iteritems(metrics_to_assert):
+    for status, expected_value in metrics_to_assert.items():
         aggregator.assert_metric(
             'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
         )
@@ -305,7 +303,7 @@ def test_check_channel_count_status_unknown(aggregator, get_check, instance_queu
     check = get_check(instance_queue_regex_tag)
     check.channel_metric_collector._submit_channel_count('my_channel', 123, ["channel:my_channel"])
 
-    for status, expected_value in iteritems(metrics_to_assert):
+    for status, expected_value in metrics_to_assert.items():
         aggregator.assert_metric(
             'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
         )
@@ -413,7 +411,6 @@ def test_channel_status_no_duplicates(aggregator, get_check, instance, dd_run_ch
     aggregator.assert_service_check("ibm_mq.channel.status", check.OK, tags=tags, count=1)
 
 
-@requires_py3
 def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run_check):
     class ProcessMock(object):
         @property
@@ -442,7 +439,6 @@ def test_queue_manager_process_not_found(aggregator, get_check, instance, dd_run
     aggregator.assert_all_metrics_covered()
 
 
-@requires_py3
 def test_queue_manager_process_found(aggregator, get_check, instance, dd_run_check):
     class ProcessMock(object):
         @property
@@ -469,7 +465,6 @@ def test_queue_manager_process_found(aggregator, get_check, instance, dd_run_che
     assert_all_metrics(aggregator)
 
 
-@requires_py3
 def test_queue_manager_process_found_cleanup(get_check, instance, dd_run_check):
     class ProcessMock(object):
         @property

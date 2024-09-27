@@ -60,8 +60,8 @@
       "mysql-screenboard": "assets/dashboards/overview-screenboard.json"
     },
     "monitors": {
-      "select query rate": "assets/monitors/select_query_rate.json",
-      "replica running": "assets/monitors/replica_running.json"
+      "SELECT query volume is dropping": "assets/monitors/select_query_rate.json",
+      "MySQL database replica is not running properly": "assets/monitors/replica_running.json"
     },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",

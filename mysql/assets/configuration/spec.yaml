@@ -4,6 +4,13 @@ files:
     options:
       - template: init_config
         options:
+          - name: propagate_agent_tags
+            description: |
+              Set to `true` to propagate the tags from `datadog.yaml` to the check.
+              When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+            value:
+              example: false
+              type: boolean
           - template: init_config/db
             overrides:
               global_custom_queries.value.example:
@@ -48,6 +55,14 @@ files:
             value:
               type: number
               example: 3306
+
+          - name: propagate_agent_tags
+            description: |
+              Set to `true` to propagate the tags from `datadog.yaml` to the check.
+              When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
+            value:
+              example: false
+              type: boolean
 
           - name: reported_hostname
             description: |
@@ -390,7 +405,7 @@ files:
                   Capped by `schemas_collection.collection_interval`
                 value:
                   type: number
-                  example: 60         
+                  example: 60
           - name: query_metrics
             description: Configure collection of query metrics
             options:

@@ -1340,3 +1340,40 @@ envoy_cluster_client_ssl_socket_factory_ssl_context_update_by_sds{envoy_cluster_
 envoy_cluster_client_ssl_socket_factory_upstream_context_secrets_not_ready{envoy_cluster_name="foo_cluster"} 2
 # TYPE envoy_cluster_client_ssl_socket_factory_downstream_context_secrets_not_ready counter
 envoy_cluster_client_ssl_socket_factory_downstream_context_secrets_not_ready{envoy_cluster_name="foo_cluster"} 0
+# TYPE envoy_tls_inspector_alpn_found counter
+envoy_tls_inspector_alpn_found{} 0
+# TYPE envoy_tls_inspector_alpn_not_found counter
+envoy_tls_inspector_alpn_not_found{} 0
+# TYPE envoy_tls_inspector_client_hello_too_large counter
+envoy_tls_inspector_client_hello_too_large{} 0
+# TYPE envoy_tls_inspector_sni_found counter
+envoy_tls_inspector_sni_found{} 0
+# TYPE envoy_tls_inspector_sni_not_found counter
+envoy_tls_inspector_sni_not_found{} 0
+# TYPE envoy_tls_inspector_tls_found counter
+envoy_tls_inspector_tls_found{} 0
+# TYPE envoy_tls_inspector_tls_not_found counter
+envoy_tls_inspector_tls_not_found{} 0
+# TYPE envoy_tls_inspector_bytes_processed histogram
+envoy_tls_inspector_bytes_processed_bucket{le="0.5"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="1"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="5"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="10"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="25"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="50"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="100"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="250"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="500"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="1000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="2500"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="5000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="10000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="30000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="60000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="300000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="600000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="1800000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="3600000"} 0
+envoy_tls_inspector_bytes_processed_bucket{le="+Inf"} 0
+envoy_tls_inspector_bytes_processed_sum{} 0
+envoy_tls_inspector_bytes_processed_count{} 0

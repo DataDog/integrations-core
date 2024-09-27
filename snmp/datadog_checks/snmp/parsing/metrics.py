@@ -8,8 +8,6 @@ import re
 from logging import Logger  # noqa: F401
 from typing import Dict, List, NamedTuple, Optional, Pattern, Sequence, TypedDict, Union, cast
 
-import six
-
 from datadog_checks.base import ConfigurationError
 
 from ..models import OID
@@ -558,7 +556,7 @@ def _parse_index_slices(metric_tag):
             if not isinstance(rule, dict) or set(rule) != {'start', 'end'}:
                 raise ConfigurationError('Transform rule must contain start and end. Invalid rule: {}'.format(rule))
             start, end = rule['start'], rule['end']
-            if not isinstance(start, six.integer_types) or not isinstance(end, six.integer_types):
+            if not isinstance(start, int) or not isinstance(end, int):
                 raise ConfigurationError('Transform rule start and end must be integers. Invalid rule: {}'.format(rule))
             if start > end:
                 raise ConfigurationError(

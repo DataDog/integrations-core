@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psutil
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.platform import Platform
@@ -22,11 +21,11 @@ class SystemCore(AgentCheck):
 
         for i, cpu in enumerate(cpu_times):
             tags = instance_tags + ['core:{0}'.format(i)]
-            for key, value in iteritems(cpu._asdict()):
+            for key, value in cpu._asdict().items():
                 self.rate('system.core.{0}'.format(key), 100.0 * value, tags=tags)
 
         total_cpu_times = psutil.cpu_times()
-        for key, value in iteritems(total_cpu_times._asdict()):
+        for key, value in total_cpu_times._asdict().items():
             self.rate('system.core.{0}.total'.format(key), 100.0 * value / n_cpus, tags=instance_tags)
 
         # https://psutil.readthedocs.io/en/latest/#psutil.cpu_freq

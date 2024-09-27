@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 37.0.0 / 2024-09-19
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
 ## 36.15.0 / 2024-09-05
 
 ***Added***:
@@ -20,7 +30,7 @@
 
 * Fix ddtrace import issues ([#18324](https://github.com/DataDog/integrations-core/pull/18324))
 
-## 36.13.0 / 2024-08-09
+## 36.13.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 

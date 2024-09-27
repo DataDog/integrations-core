@@ -41,9 +41,9 @@
       "Cisco SD-WAN": "assets/dashboards/cisco_sd-wan.json"
     },
     "monitors": {
-      "[Cisco SD-WAN] Device Unreachable Alert": "assets/monitors/device_unreachable.json",
-      "[Cisco SD-WAN] Tunnel Down Alert": "assets/monitors/tunnel_down.json",
-      "[Cisco SD-WAN] Device Reboot Alert": "assets/monitors/device_reboot.json"
+      "Cisco SD-WAN Device is unreachable": "assets/monitors/device_unreachable.json",
+      "Cisco SD-WAN Tunnel is down": "assets/monitors/tunnel_down.json",
+      "Cisco SD-WAN Device has rebooted several times": "assets/monitors/device_reboot.json"
     }
   },
   "author": {
