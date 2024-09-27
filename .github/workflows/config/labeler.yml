@@ -57,6 +57,8 @@ integration/ambari:
 - ambari/**/*
 integration/apache:
 - apache/**/*
+integration/appgate_sdp:
+- appgate_sdp/**/*
 integration/arangodb:
 - arangodb/**/*
 integration/argo_rollouts:
@@ -213,6 +215,8 @@ integration/go_expvar:
 - go_expvar/**/*
 integration/godaddy:
 - godaddy/**/*
+integration/greenhouse:
+- greenhouse/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:
@@ -329,6 +333,8 @@ integration/mesos_master:
 - mesos_master/**/*
 integration/mesos_slave:
 - mesos_slave/**/*
+integration/metabase:
+- metabase/**/*
 integration/mimecast:
 - mimecast/**/*
 integration/mongo:
@@ -523,6 +529,8 @@ integration/traefik_mesh:
 - traefik_mesh/**/*
 integration/traffic_server:
 - traffic_server/**/*
+integration/trellix_endpoint_security:
+- trellix_endpoint_security/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
 integration/trend_micro_vision_one_endpoint_security:
