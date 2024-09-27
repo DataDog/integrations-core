@@ -27,7 +27,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=37.0.0",
 ]
 dynamic = [
     "version",
@@ -37,7 +37,7 @@ requires-python = ">=3.9"
 
 [project.optional-dependencies]
 deps = [
-    "psutil==5.9.6",
+    "psutil==6.0.0",
     "pymqi==1.12.10; (sys_platform != 'darwin' or platform_machine != 'arm64')",
 ]
 

@@ -10,7 +10,7 @@ clickhouse-cityhash==1.0.2.4
 clickhouse-driver==0.2.9
 cm-client==45.0.4
 confluent-kafka==2.5.0
-cryptography==43.0.0
+cryptography==43.0.1
 ddtrace==2.10.6
 dnspython==2.6.1
 foundationdb==6.3.24
@@ -31,7 +31,7 @@ paramiko==3.4.1
 ply==3.11
 prometheus-client==0.20.0
 protobuf==5.27.3
-psutil==5.9.6
+psutil==6.0.0
 psycopg2-binary==2.9.9
 pyasn1==0.4.8
 pycryptodomex==3.20.0
@@ -59,7 +59,7 @@ requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
 requests-unixsocket2==0.4.2
 requests==2.32.3
-rethinkdb==2.4.9
+rethinkdb==2.4.10post1
 scandir==1.10.0; python_version < '3.5'
 securesystemslib[crypto,pynacl]==0.28.0
 semver==3.0.2
