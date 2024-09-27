@@ -1,4 +1,4 @@
-# CiscoACI Integration
+# Cisco ACI Integration
 
 ## Overview
 
@@ -7,6 +7,7 @@ The Cisco ACI Integration lets you:
 - Track the state and health of your network
 - Track the capacity of your ACI
 - Monitor the switches and controllers themselves
+  - The ability to monitor devices via [Network Devices Monitoring][11]
 
 ## Setup
 
@@ -52,6 +53,11 @@ To configure this check for an Agent running on a host:
         # tenant:
         #   - <TENANT_1>
         #   - <TENANT_2>
+
+        ## @param send_ndm_metadata - boolean - optional - default: false
+        ## Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
+        #
+        # send_ndm_metadata: false
    ```
    
    *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
@@ -135,3 +141,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
+[11]: https://www.datadoghq.com/product/network-monitoring/network-device-monitoring/
