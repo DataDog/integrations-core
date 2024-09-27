@@ -136,7 +136,7 @@ instances:
 
     ## @param disable_legacy_service_check_tags - boolean - optional - default: false
     ## Disable the submission of the elasticsearch `host` and `port` as tags in service checks. 
-    ## Submit them as `elastic_host` and `elastic_port` instead.
+    ## Submit them as `url` instead.
     #
     disable_legacy_service_check_tags: true
 
