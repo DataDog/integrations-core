@@ -63,7 +63,7 @@ ply @ https://agent-int-packages.datadoghq.com/external/ply/ply-3.11-py2.py3-non
 portalocker @ https://agent-int-packages.datadoghq.com/external/portalocker/portalocker-2.10.1-py3-none-any.whl#sha256=53a5984ebc86a025552264b459b46a2086e269b21823cb572f8f28ee759e45bf
 prometheus-client @ https://agent-int-packages.datadoghq.com/external/prometheus-client/prometheus_client-0.20.0-py3-none-any.whl#sha256=cde524a85bce83ca359cc837f28b8c0db5cac7aa653a588fd7e84ba061c329e7
 protobuf @ https://agent-int-packages.datadoghq.com/external/protobuf/protobuf-5.27.3-cp310-abi3-win_amd64.whl#sha256=16ddf3f8c6c41e1e803da7abea17b1793a97ef079a912e42351eabb19b2cffe7
-psutil @ https://agent-int-packages.datadoghq.com/external/psutil/psutil-5.9.6-cp37-abi3-win_amd64.whl#sha256=6e5fb8dc711a514da83098bc5234264e551ad980cec5f85dabf4d38ed6f15e9a
+psutil @ https://agent-int-packages.datadoghq.com/external/psutil/psutil-6.0.0-cp37-abi3-win_amd64.whl#sha256=33ea5e1c975250a720b3a6609c490db40dae5d83a4eb315170c4fe0d8b1f34b3
 psycopg2-binary @ https://agent-int-packages.datadoghq.com/external/psycopg2-binary/psycopg2_binary-2.9.9-cp312-cp312-win_amd64.whl#sha256=81ff62668af011f9a48787564ab7eded4e9fb17a4a6a74af5ffa6a457400d2ab
 pyasn1 @ https://agent-int-packages.datadoghq.com/external/pyasn1/pyasn1-0.4.8-py2.py3-none-any.whl#sha256=39c7e2ec30515947ff4e87fb6f456dfc6e84857d34be479c9d4a4ba4bf46aa5d
 pyasn1-modules @ https://agent-int-packages.datadoghq.com/external/pyasn1-modules/pyasn1_modules-0.4.1-py3-none-any.whl#sha256=49bfa96b45a292b711e986f222502c1c9a5e1f4e568fc30e2574a6c7d07838fd
