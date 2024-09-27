@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime
 import json
 import os
 from pathlib import Path
@@ -10,7 +11,11 @@ import mock
 import pytest
 import requests
 
+from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.fs import get_here
+
+BASE_TIME = ensure_aware_datetime(datetime.datetime.strptime("2024-09-23 14:45:58.888492", '%Y-%m-%d %H:%M:%S.%f'))
+MOCKED_TIMESTAMPS = [BASE_TIME] * 20
 
 
 @pytest.fixture(scope='session')

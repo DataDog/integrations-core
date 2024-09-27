@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
-import logging
 
 import mock
 import pytest
@@ -12,6 +11,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
+from .conftest import MOCKED_TIMESTAMPS
 from .constants import (
     ALL_METRICS,
     PROJECT_ALL_METRICS,
@@ -22,11 +22,13 @@ from .constants import (
     PROJECT_NO_METRICS,
     PROJECT_ONLY_HI_METRICS,
     PROJECT_ONLY_HI_MY_PROJECT_METRICS,
+    TASK_COUNT_METRICS,
 )
 
 
 @pytest.mark.usefixtures('mock_http_get')
-def test_check(dd_run_check, aggregator, instance):
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_check(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     dd_run_check(check)
 
@@ -76,7 +78,8 @@ def test_space_invalid(dd_run_check, aggregator, instance):
 
 
 @pytest.mark.usefixtures('mock_http_get')
-def test_space_cached(dd_run_check, aggregator, instance):
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_space_cached(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     check._get_space_id = mock.MagicMock()
     check.space_id = "Spaces-1"
@@ -128,7 +131,10 @@ def test_space_cached(dd_run_check, aggregator, instance):
     ],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_project_groups_discovery(dd_run_check, aggregator, instance, project_groups_config, expected_metrics):
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_project_groups_discovery(
+    get_current_datetime, dd_run_check, aggregator, instance, project_groups_config, expected_metrics
+):
     instance = copy.deepcopy(instance)
     instance['project_groups'] = project_groups_config
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -138,7 +144,8 @@ def test_project_groups_discovery(dd_run_check, aggregator, instance, project_gr
 
 
 @pytest.mark.usefixtures('mock_http_get')
-def test_project_groups_discovery_error(dd_run_check, instance):
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_project_groups_discovery_error(get_current_datetime, dd_run_check, instance):
     instance = copy.deepcopy(instance)
     instance['project_groups'] = {'include': None}
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -186,11 +193,23 @@ def test_project_groups_discovery_error(dd_run_check, instance):
     ],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_projects_discovery(dd_run_check, aggregator, instance, project_groups_config, expected_metrics, caplog):
-    caplog.set_level(logging.DEBUG)
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_projects_discovery(
+    get_current_datetime, dd_run_check, aggregator, instance, project_groups_config, expected_metrics
+):
     instance = copy.deepcopy(instance)
     instance['project_groups'] = project_groups_config
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     dd_run_check(check)
     for metric in expected_metrics:
+        aggregator.assert_metric(metric["name"], count=metric["count"], tags=metric["tags"])
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_task_metrics(get_current_datetime, dd_run_check, aggregator, instance):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    dd_run_check(check)
+
+    for metric in TASK_COUNT_METRICS:
         aggregator.assert_metric(metric["name"], count=metric["count"], tags=metric["tags"])

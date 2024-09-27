@@ -3,3 +3,4 @@ octopus_deploy.api.can_connect,gauge,,,,Whether or not the check can connect to 
 octopus_deploy.project.count,gauge,,,,Number of projects discovered.,-1,octopus_deploy,octopus_deploy projects count,,
 octopus_deploy.project_group.count,gauge,,,,Number of project groups discovered.,-1,octopus_deploy,octopus_deploy project group count,,
 octopus_deploy.space.count,gauge,,,,Number of spaces discovered.,-1,octopus_deploy,octopus_deploy space count,,
+octopus_deploy.task.count,gauge,,,,Number of tasks monitored.,-1,octopus_deploy,octopus_deploy space count,,

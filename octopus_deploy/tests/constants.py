@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-ALL_METRICS = ["octopus_deploy.project_group.count", "octopus_deploy.project.count"]
+ALL_METRICS = ["octopus_deploy.project_group.count", "octopus_deploy.project.count", "octopus_deploy.task.count"]
 
 PROJECT_GROUP_ALL_METRICS = [
     {
@@ -448,5 +448,65 @@ PROJECT_NO_METRICS = [
             "project_id:Projects-1",
         ],
         'count': 0,
+    },
+]
+
+
+TASK_COUNT_METRICS = [
+    {
+        'name': 'octopus_deploy.task.count',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1845",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+    },
+    {
+        'name': 'octopus_deploy.task.count',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1846",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+    },
+    {
+        'name': 'octopus_deploy.task.count',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1847",
+            "task_name:Deploy",
+            "task_state:Failed",
+        ],
+        'count': 1,
+    },
+    {
+        'name': 'octopus_deploy.task.count',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test-api",
+            "project_id:Projects-1",
+            "task_id:ServerTasks-1844",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
     },
 ]

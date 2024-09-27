@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import datetime, timedelta
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
@@ -31,7 +33,42 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._initialize_project_groups()
         for _, project_group_name, project_group, project_group_config in self.project_groups():
             self._initialize_projects(project_group.id, project_group_name, project_group_config)
-            self.projects(project_group.id, project_group_name)
+            for _, _, project, _ in self.projects(project_group.id, project_group_name):
+                self._get_new_tasks_for_project(project, project_group)
+
+    def _get_new_tasks_for_project(self, project, project_group):
+        self.log.debug("Getting new tasks for project %s", project.name)
+        params = {'project': project.id, 'fromCompletedDate': project.last_task_time}
+        url = f"{self.config.octopus_endpoint}/{self.space_id}/tasks"
+        response = self.http.get(url, params=params)
+        response.raise_for_status()
+        tasks_json = response.json().get('Items', [])
+        new_completed_time = project.last_task_time
+        self.log.debug("Found %s new tasks for project %s", len(tasks_json), project.name)
+
+        for task in tasks_json:
+            task_id = task.get("Id")
+            task_name = task.get("Name")
+            state = task.get("State")
+            completed_time = task.get("CompletedTime")
+
+            completed_time_converted = datetime.fromisoformat(completed_time)
+            if completed_time_converted > new_completed_time:
+                new_completed_time = completed_time_converted
+
+            project_tags = [
+                f"project_id:{project.id}",
+                f"project_name:{project.name}",
+                f"project_group_id:{project_group.id}",
+                f"project_group_name:{project_group.name}",
+            ]
+
+            tags = [f'task_name:{task_name}', f'task_id:{task_id}', f'task_state:{state}']
+
+            self.gauge("task.count", 1, tags=self.base_tags + project_tags + tags)
+
+        new_completed_time = new_completed_time + timedelta(milliseconds=1)
+        project.last_completed_time = new_completed_time
 
     def _initialize_projects(self, project_group_id, project_group_name, project_group_config):
         if not self._projects_discovery.get(project_group_name):
