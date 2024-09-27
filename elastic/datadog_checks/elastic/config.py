@@ -59,7 +59,7 @@ def from_instance(instance):
 
     custom_tags = instance.get('tags', [])
     if is_affirmative(instance.get('disable_legacy_service_check_tags', False)):
-        service_check_tags = ['elastic_host:{}'.format(host), 'elastic_port:{}'.format(port)]
+        service_check_tags = ['url:{}'.format(url)]
     else:
         service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)]
     service_check_tags.extend(custom_tags)

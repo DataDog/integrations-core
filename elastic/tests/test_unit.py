@@ -195,7 +195,7 @@ def test_disable_legacy_sc_tags(aggregator, es_instance):
             check._get_data(url='test.com')
 
         if is_affirmative(es_instance['disable_legacy_service_check_tags']):
-            expected_tags = ['elastic_host:localhost', 'elastic_port:9200']
+            expected_tags = ['url:http://localhost:9200']
         else:
             expected_tags = ['host:localhost', 'port:9200']
 
