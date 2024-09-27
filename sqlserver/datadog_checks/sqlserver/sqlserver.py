@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from __future__ import division
 
 import copy
@@ -12,6 +13,11 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.utils import (
+    default_json_event_encoding,
+    resolve_db_host,
+    tracked_query,
+)
 from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
@@ -23,6 +29,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverDBFragmentationMetrics,
     SqlserverIndexUsageMetrics,
 )
+from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
@@ -135,6 +142,7 @@ class SQLServer(AgentCheck):
         self.sql_metadata = SqlserverMetadata(self, self._config)
         self.activity = SqlserverActivity(self, self._config)
         self.agent_history = SqlserverAgentHistory(self, self._config)
+        self.deadlocks = Deadlocks(self, self._config)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -171,6 +179,7 @@ class SQLServer(AgentCheck):
         self.activity.cancel()
         self.sql_metadata.cancel()
         self._schemas.cancel()
+        self.deadlocks.cancel()
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
@@ -783,6 +792,7 @@ class SQLServer(AgentCheck):
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
                 self._schemas.run_job_loop(self.tags)
+                self.deadlocks.run_job_loop(self.tags)
         else:
             self.log.debug("Skipping check")
 
