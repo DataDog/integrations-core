@@ -132,7 +132,7 @@ instances:
     ## @param disable_legacy_cluster_tag - boolean - optional - default: false
     ## Enable to stop submitting the tag `cluster_name`, which has been renamed to `elastic_cluster`.
     #
-    disable_legacy_cluster_tag: true
+    # disable_legacy_cluster_tag: true
 
     ## @param disable_legacy_service_check_tags - boolean - optional - default: false
     ## Disable the submission of the elasticsearch `host` and `port` as tags in service checks. 

@@ -109,7 +109,7 @@ files:
         type: boolean
         display_default: false
         example: true
-      enabled: true
+      enabled: false
     - name: disable_legacy_service_check_tags
       description: |
         Disable the submission of the elasticsearch `host` and `port` as tags in service checks. 
