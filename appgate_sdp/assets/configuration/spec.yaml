@@ -1,0 +1,16 @@
+name: Appgate SDP
+files:
+- name: appgate_sdp.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides: 
+        openmetrics_endpoint.required: true
+        openmetrics_endpoint.value.example: http://localhost:5556/metrics
+        openmetrics_endpoint.description: |
+          The URL of the OpenMetrics endpoint.
+

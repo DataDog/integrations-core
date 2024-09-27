@@ -217,3 +217,5 @@ PER_RESOURCE_EVENTS = [
     'PermissionEvent',
     'ScheduledTaskEvent',
 ]
+
+HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']
