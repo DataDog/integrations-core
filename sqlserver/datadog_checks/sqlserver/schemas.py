@@ -32,7 +32,6 @@ from datadog_checks.sqlserver.utils import convert_to_bool, execute_query, get_l
 
 
 class SubmitData:
-
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
         self._base_event = base_event

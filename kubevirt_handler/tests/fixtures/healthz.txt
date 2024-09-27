@@ -1,0 +1,17 @@
+{
+ "apiserver": {
+  "connectivity": "ok",
+  "version": {
+   "buildDate": "2024-06-27T19:09:53Z",
+   "compiler": "gc",
+   "gitCommit": "04088714581f0ad0a9e2c81c6ecc36bdd30d4b53",
+   "gitTreeState": "clean",
+   "gitVersion": "v1.30.2-eks-db838b0",
+   "goVersion": "go1.22.4",
+   "major": "1",
+   "minor": "30+",
+   "platform": "linux/amd64"
+  }
+ },
+ "config-resource-version": "3243404"
+}

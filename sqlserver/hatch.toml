@@ -14,7 +14,7 @@ setup = ["single", "ha"]
 [[envs.default.matrix]]
 python = ["3.12"]
 os = ["windows"]
-driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
+driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
 version = ["2019", "2022"]
 setup = ["single"]
 
