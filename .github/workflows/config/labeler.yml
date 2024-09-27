@@ -55,6 +55,8 @@ integration/amazon_msk:
 - amazon_msk/**/*
 integration/ambari:
 - ambari/**/*
+integration/anyscale:
+- anyscale/**/*
 integration/apache:
 - apache/**/*
 integration/appgate_sdp:
