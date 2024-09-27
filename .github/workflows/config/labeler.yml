@@ -303,6 +303,8 @@ integration/kubevirt_api:
 - kubevirt_api/**/*
 integration/kubevirt_controller:
 - kubevirt_controller/**/*
+integration/kubevirt_handler:
+- kubevirt_handler/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
