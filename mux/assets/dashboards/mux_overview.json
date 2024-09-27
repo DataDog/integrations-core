@@ -51,7 +51,7 @@
             "id": 7443013710863374,
             "definition": {
                 "type": "note",
-                "content": "**[Mux](https://www.mux.com/)** is an all-in-one video streaming platform designed for developers and businesses. It offers APIs and tools for video hosting, live streaming, web player customization, and in-depth analytics, enabling users to easily create, manage, and optimize video content. \n\nThis **Mux Metrics** Dashboard provides comprehensive insights, including views, unique viewers, playing time, viewer experience score, playback success score, player startup time, smoothness score, video quality score, and rebuffer percentage, with the latest metrics showcasing consolidated statistics for video performance in the last 30 days.\n\nFor more information, see the [Mux Integration Documentation](https://docs.datadoghq.com/integrations/mux/).\n\n\n**Note**:\n- The dashboard widgets show the overall metric values captured for each Mux metrics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**[Mux](https://www.mux.com/)** is an all-in-one video streaming platform designed for developers and businesses. It offers APIs and tools for video hosting, live streaming, web player customization, and in-depth analytics, enabling users to easily create, manage, and optimize video content. \n\nThis **Mux Metrics** Dashboard provides comprehensive insights, including views, unique viewers, playing time, viewer experience score, playback success score, player startup time, smoothness score, video quality score, and rebuffer percentage, with the latest metrics showcasing consolidated statistics for video performance.\n\nFor more information, see the [Mux Integration Documentation](https://docs.datadoghq.com/integrations/mux/).\n\n\n**Note**:\n- The dashboard widgets show the overall metric values captured for each Mux metrics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "purple",
                 "font_size": "14",
                 "text_align": "left",
@@ -75,7 +75,9 @@
                 "title_size": "16",
                 "title_align": "left",
                 "time": {
-                    "hide_incomplete_cost_data": true
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
                 },
                 "type": "query_value",
                 "requests": [
@@ -107,7 +109,10 @@
                 "autoscale": true,
                 "precision": 2,
                 "timeseries_background": {
-                    "type": "bars"
+                    "type": "area",
+                    "yaxis": {
+                        "include_zero": true
+                    }
                 }
             },
             "layout": {
@@ -123,6 +128,11 @@
                 "title": "Unique Viewers",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
                 "type": "query_value",
                 "requests": [
                     {
@@ -152,7 +162,10 @@
                 "autoscale": true,
                 "precision": 2,
                 "timeseries_background": {
-                    "type": "bars"
+                    "type": "area",
+                    "yaxis": {
+                        "include_zero": true
+                    }
                 }
             },
             "layout": {
@@ -168,6 +181,11 @@
                 "title": "Playing Time",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
                 "type": "query_value",
                 "requests": [
                     {
@@ -203,7 +221,10 @@
                 "autoscale": true,
                 "precision": 2,
                 "timeseries_background": {
-                    "type": "bars"
+                    "type": "area",
+                    "yaxis": {
+                        "include_zero": true
+                    }
                 }
             },
             "layout": {
@@ -229,7 +250,9 @@
                     "sum"
                 ],
                 "time": {
-                    "hide_incomplete_cost_data": true
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
                 },
                 "type": "timeseries",
                 "requests": [
@@ -281,7 +304,9 @@
                     "sum"
                 ],
                 "time": {
-                    "hide_incomplete_cost_data": true
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
                 },
                 "type": "timeseries",
                 "requests": [
@@ -332,7 +357,11 @@
                     "value",
                     "sum"
                 ],
-                "time": {},
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
                 "type": "timeseries",
                 "requests": [
                     {
@@ -382,6 +411,11 @@
                             "title": "Overall Viewer Experience",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -433,6 +467,11 @@
                             "title": "Playback Success Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -478,7 +517,11 @@
                             "title": "Video Startup Time",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -524,6 +567,11 @@
                             "title": "Smoothness Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -570,6 +618,11 @@
                             "title": "Video Quality",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -616,6 +669,11 @@
                             "title": "Playback Failure Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -667,6 +725,11 @@
                             "title": "Video Startup Failure Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -718,7 +781,11 @@
                             "title": "Exits Before Video Start",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -770,6 +837,11 @@
                             "title": "Rebuffer Count",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -815,6 +887,11 @@
                             "title": "Rebuffer Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -866,7 +943,11 @@
                             "title": "Weighted Average Bitrate",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -919,7 +1000,11 @@
                             "title": "Rebuffer Frequency ",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -969,7 +1054,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 0,
                 "width": 12,
                 "height": 10,
                 "is_column_break": true

@@ -8,7 +8,7 @@
         "id": 154118482,
         "name": "[Mux] Video Startup Failure Percentage is higher than usual",
         "type": "query alert",
-        "query": "max(last_5m):max:mux.metric.video_startup_failure_percentage{*} by {video_id} > 20",
+        "query": "max(last_4h):max:mux.metric.video_startup_failure_percentage{*} by {video_id} > 20",
         "message": "{{#is_warning}}  \nThe Video Startup Failure Percentage for video id: {{video_id.name}} has exceeded the threshold.  \nCurrent Video Startup Failure Percentage: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe Video Startup Failure Percentage for video id: {{video_id.name}} has exceeded the threshold.    \nCurrent Video Startup Failure Percentage: {{value}}%    \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n@example@example.com",
         "tags": [
             "integration:mux"

@@ -8,8 +8,8 @@
         "id": 154116834,
         "name": "[Mux] Anomaly Detected in Page Load Time",
         "type": "query alert",
-        "query": "avg(last_1h):anomalies(max:mux.metric.page_load_time{*} by {video_id}, 'agile', 2, direction='both', interval=20, alert_window='last_5m', timezone='utc', count_default_zero='true', seasonality='daily') >= 1",
-        "message": "{{#is_warning}}  \nThe page load time for video id: {{video_id.name}} has exceeded the threshold.  \nCurrent Page Load Time: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe page load time for video id: {{video_id.name}} has exceeded the threshold.    \nCurrent Page Load Time: {{value}}%    \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n @abc@test.com",
+        "query": "avg(last_2d):anomalies(max:mux.metric.page_load_time{*} by {video_id}, 'agile', 2, direction='both', interval=600, alert_window='last_4h', timezone='utc', count_default_zero='true', seasonality='daily') >= 1",
+        "message": "{{#is_warning}}  \nThe page load time for video id: {{video_id.name}} has exceeded the threshold.  \nCurrent Page Load Time: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe page load time for video id: {{video_id.name}} has exceeded the threshold.    \nCurrent Page Load Time: {{value}}%    \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n@example@example.com",
         "tags": [
             "integration:mux"
         ],
@@ -23,8 +23,8 @@
             "require_full_window": false,
             "renotify_interval": 0,
             "threshold_windows": {
-                "trigger_window": "last_5m",
-                "recovery_window": "last_15m"
+                "trigger_window": "last_4h",
+                "recovery_window": "last_1h"
             },
             "on_missing_data": "default",
             "include_tags": false,

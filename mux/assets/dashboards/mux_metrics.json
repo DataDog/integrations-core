@@ -30,8 +30,8 @@
                 "title_align": "left",
                 "time": {
                     "type": "live",
-                    "unit": "minute",
-                    "value": 30
+                    "unit": "hour",
+                    "value": 4
                 },
                 "type": "query_value",
                 "requests": [
@@ -77,7 +77,7 @@
             "id": 323399805713430,
             "definition": {
                 "type": "note",
-                "content": "**[Mux](https://www.mux.com/)** is an all-in-one video streaming platform designed for developers and businesses. It offers APIs and tools for video hosting, live streaming, web player customization, and in-depth analytics, enabling users to easily create, manage, and optimize video content. \n\nThis **Mux Metrics** Dashboard provides comprehensive insights, including views, unique viewers, playing time, viewer experience score, playback success score, player startup time, smoothness score, video quality score, and rebuffer percentage, with the latest metrics showcasing consolidated statistics for video performance in the last 30 days.\n\nFor more information, see the [Mux Integration Documentation](https://docs.datadoghq.com/integrations/mux/).\n\n\n**Note**:\n- The dashboard widgets show the latest metric values captured for each Mux metrics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**[Mux](https://www.mux.com/)** is an all-in-one video streaming platform designed for developers and businesses. It offers APIs and tools for video hosting, live streaming, web player customization, and in-depth analytics, enabling users to easily create, manage, and optimize video content. \n\nThis **Mux Metrics** Dashboard provides comprehensive insights, including views, unique viewers, playing time, viewer experience score, playback success score, player startup time, smoothness score, video quality score, and rebuffer percentage, with the latest metrics showcasing consolidated statistics for video performance.\n\nFor more information, see the [Mux Integration Documentation](https://docs.datadoghq.com/integrations/mux/).\n\n\n**Note**:\n- The dashboard widgets show the latest metric values captured for each Mux metrics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "purple",
                 "font_size": "14",
                 "text_align": "left",
@@ -101,7 +101,9 @@
                 "title_size": "16",
                 "title_align": "left",
                 "time": {
-                    "hide_incomplete_cost_data": true
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
                 },
                 "type": "toplist",
                 "requests": [
@@ -154,7 +156,9 @@
                 "title_size": "16",
                 "title_align": "left",
                 "time": {
-                    "hide_incomplete_cost_data": true
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
                 },
                 "requests": [
                     {
@@ -206,7 +210,9 @@
                 "title_size": "16",
                 "title_align": "left",
                 "time": {
-                    "hide_incomplete_cost_data": true
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
                 },
                 "requests": [
                     {
@@ -266,6 +272,11 @@
                             "title": "Overall Viewer Experience Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -312,6 +323,11 @@
                             "title": "Top Videos with High Viewer Experience Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "toplist",
                             "requests": [
                                 {
@@ -380,6 +396,11 @@
                             "title": "Playback Success Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -430,6 +451,11 @@
                             "title": "Playback Failure Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -481,6 +507,11 @@
                             "title": "Video Startup Failure Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -532,6 +563,11 @@
                             "title": "Business Exception Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -583,6 +619,11 @@
                             "title": "Exits Before Video Start",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -634,6 +675,11 @@
                             "title": "Video Startup Business Exception Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -685,6 +731,11 @@
                             "title": "Top Videos with High Playback Success Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "toplist",
                             "requests": [
                                 {
@@ -735,6 +786,11 @@
                             "title": "Top Videos with High Playback Failure Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "toplist",
                             "requests": [
                                 {
@@ -785,7 +841,11 @@
                             "title": "Playback Success Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_table",
                             "requests": [
                                 {
@@ -806,24 +866,6 @@
                                             "data_source": "metrics",
                                             "name": "query3",
                                             "query": "avg:mux.metric.playback_business_exception_percentage{video_id:*,$Video_Id} by {video_id}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query4",
-                                            "query": "avg:mux.metric.video_startup_failure_percentage{video_id:*,$Video_Id} by {video_id}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query5",
-                                            "query": "avg:mux.metric.video_startup_business_exception_percentage{video_id:*,$Video_Id} by {video_id}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query6",
-                                            "query": "avg:mux.metric.exits_before_video_start{video_id:*,$Video_Id} by {video_id}",
                                             "aggregator": "last"
                                         }
                                     ],
@@ -862,10 +904,68 @@
                                                     "unit_name": "percent"
                                                 }
                                             }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2801208370061346,
+                        "definition": {
+                            "title": "Video Startup Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:mux.metric.video_startup_failure_percentage{video_id:*,$Video_Id} by {video_id}",
+                                            "aggregator": "last"
                                         },
                                         {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:mux.metric.video_startup_business_exception_percentage{video_id:*,$Video_Id} by {video_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:mux.metric.exits_before_video_start{video_id:*,$Video_Id} by {video_id}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
                                             "alias": "Video Startup Failure Percentage",
-                                            "formula": "query4 * 100",
+                                            "formula": "query1 * 100",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -875,7 +975,7 @@
                                         },
                                         {
                                             "alias": "Video Startup Business Exception Percentage",
-                                            "formula": "query5 * 100",
+                                            "formula": "query2 * 100",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -886,7 +986,7 @@
                                         {
                                             "cell_display_mode": "number",
                                             "alias": "Exits Before Video Starts",
-                                            "formula": "query6 * 100",
+                                            "formula": "query3 * 100",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -901,7 +1001,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 9,
+                            "y": 13,
                             "width": 12,
                             "height": 4
                         }
@@ -912,7 +1012,7 @@
                 "x": 0,
                 "y": 14,
                 "width": 12,
-                "height": 14
+                "height": 18
             }
         },
         {
@@ -930,6 +1030,11 @@
                             "title": "Startup Time Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -976,6 +1081,11 @@
                             "title": "Video Startup Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1022,6 +1132,11 @@
                             "title": "Player Startup Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1068,6 +1183,11 @@
                             "title": "Page Load Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1113,6 +1233,11 @@
                             "title": "Aggregate Startup Time",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1158,6 +1283,11 @@
                             "title": "Seek Latency",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1214,7 +1344,9 @@
                                 "sum"
                             ],
                             "time": {
-                                "hide_incomplete_cost_data": true
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
                             },
                             "type": "timeseries",
                             "requests": [
@@ -1255,6 +1387,11 @@
                             "title": "Startup Time Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_table",
                             "requests": [
                                 {
@@ -1353,7 +1490,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 28,
+                "y": 0,
                 "width": 12,
                 "height": 14,
                 "is_column_break": true
@@ -1374,6 +1511,11 @@
                             "title": "Smoothness Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1420,6 +1562,11 @@
                             "title": "Rebuffer Count",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1465,7 +1612,11 @@
                             "title": "Rebuffer Duration",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1517,6 +1668,11 @@
                             "title": "Rebuffer Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1568,7 +1724,11 @@
                             "title": "Rebuffer Frequency",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1620,6 +1780,11 @@
                             "title": "Top Videos with High Smoothness Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1670,7 +1835,11 @@
                             "title": "Smoothness Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_table",
                             "requests": [
                                 {
@@ -1769,7 +1938,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 42,
+                "y": 14,
                 "width": 12,
                 "height": 15
             }
@@ -1789,6 +1958,11 @@
                             "title": "Video Quality Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1835,7 +2009,11 @@
                             "title": "Weighted Average Bitrate",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1887,7 +2065,11 @@
                             "title": "Live Stream Latency",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1940,6 +2122,11 @@
                             "title": "Upscale Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1972,7 +2159,7 @@
                                     ]
                                 }
                             ],
-                            "autoscale": true,
+                            "autoscale": false,
                             "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
@@ -1991,6 +2178,11 @@
                             "title": "Downscale Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2042,6 +2234,11 @@
                             "title": "Max Upscale Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2094,6 +2291,11 @@
                             "title": "Max Downscale Percentage",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2143,9 +2345,14 @@
                     {
                         "id": 6601500419927196,
                         "definition": {
-                            "title": "Top Video with High Quality Score",
+                            "title": "Top Videos with High Quality Score",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2205,7 +2412,11 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2252,7 +2463,11 @@
                             "title": "Video Quality Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
                             "type": "query_table",
                             "requests": [
                                 {
@@ -2273,30 +2488,6 @@
                                             "data_source": "metrics",
                                             "name": "query3",
                                             "query": "avg:mux.metric.weighted_average_bitrate{video_id:*,$Video_Id} by {video_id}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query4",
-                                            "query": "avg:mux.metric.upscale_percentage{video_id:*,$Video_Id} by {video_id}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query5",
-                                            "query": "avg:mux.metric.max_upscale_percentage{video_id:*,$Video_Id} by {video_id}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query6",
-                                            "query": "avg:mux.metric.downscale_percentage{video_id:*,$Video_Id} by {video_id}",
-                                            "aggregator": "last"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query7",
-                                            "query": "avg:mux.metric.max_downscale_percentage{video_id:*,$Video_Id} by {video_id}",
                                             "aggregator": "last"
                                         }
                                     ],
@@ -2340,46 +2531,6 @@
                                                 }
                                             },
                                             "formula": "query3"
-                                        },
-                                        {
-                                            "alias": "Upscale Percentge",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            },
-                                            "formula": "query4 * 100"
-                                        },
-                                        {
-                                            "alias": "Max Upscale Percentge",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            },
-                                            "formula": "query5 * 100"
-                                        },
-                                        {
-                                            "alias": "Downscale Percentge",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            },
-                                            "formula": "query6 * 100"
-                                        },
-                                        {
-                                            "alias": "Max Downscale Percentge",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            },
-                                            "formula": "query7 * 100"
                                         }
                                     ]
                                 }
@@ -2392,14 +2543,118 @@
                             "width": 12,
                             "height": 4
                         }
+                    },
+                    {
+                        "id": 6980401583290302,
+                        "definition": {
+                            "title": "Upscale/Downscale Percentage Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:mux.metric.upscale_percentage{video_id:*,$Video_Id} by {video_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:mux.metric.max_upscale_percentage{video_id:*,$Video_Id} by {video_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:mux.metric.downscale_percentage{video_id:*,$Video_Id} by {video_id}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:mux.metric.max_downscale_percentage{video_id:*,$Video_Id} by {video_id}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Upscale Percentage",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query1 * 100"
+                                        },
+                                        {
+                                            "alias": "Max Upscale Percentage",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query2 * 100"
+                                        },
+                                        {
+                                            "alias": "Downscale Percentage",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query3 * 100"
+                                        },
+                                        {
+                                            "alias": "Max Downscale Percentage",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query4 * 100"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 12,
+                            "height": 4
+                        }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 57,
+                "y": 29,
                 "width": 12,
-                "height": 12
+                "height": 16
             }
         }
     ],

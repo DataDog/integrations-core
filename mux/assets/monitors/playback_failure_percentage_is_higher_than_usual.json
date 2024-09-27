@@ -8,7 +8,7 @@
         "id": 154118176,
         "name": "[Mux] Playback Failure Percentage is higher than usual",
         "type": "query alert",
-        "query": "max(last_5m):max:mux.metric.playback_failure_percentage{*} by {video_id} > 20",
+        "query": "max(last_4h):max:mux.metric.playback_failure_percentage{*} by {video_id} > 20",
         "message": "{{#is_warning}}  \nThe playback failure percentage for video id: {{video_id.name}} has exceeded the threshold.  \nCurrent Playback Failure Percentage: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe playback failure percentage for video id: {{video_id.name}} has exceeded the threshold.    \nCurrent Playback Failure Percentage: {{value}}%    \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n@example@example.com",
         "tags": [
             "integration:mux"
