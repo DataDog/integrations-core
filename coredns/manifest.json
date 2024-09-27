@@ -65,7 +65,7 @@
       "auto_install": true
     },
     "dashboards": {
-      "CoreDNS": "assets/dashboards/coredns.json"
+      "CoreDNS": "assets/dashboards/coredns.json",
       "CoreDNS [V2]": "assets/dashboards/coredns_v2.json"
     },
     "monitors": {
