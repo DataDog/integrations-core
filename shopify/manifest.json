@@ -8,9 +8,30 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Shopify Order, Product, Customer and Event logs.",
+    "description": "Gain insights into Shopify Event, Product, Customer and Order logs.",
     "title": "Shopify",
-    "media": [],
+    "media": [
+      {
+        "caption": "Shopify - Event",
+        "image_url": "images/shopify_event.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Shopify - Product",
+        "image_url": "images/shopify_product.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Shopify - Customer",
+        "image_url": "images/shopify_customer.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Shopify - Order",
+        "image_url": "images/shopify_order.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Submitted Data Type::Logs",
@@ -28,6 +49,16 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Shopify - Event Overview" : "assets/dashboards/shopify_event_overview.json",
+      "Shopify - Product Overview" : "assets/dashboards/shopify_product_overview.json",
+      "Shopify - Customer Overview" : "assets/dashboards/shopify_customer_overview.json",
+      "Shopify - Order Overview" : "assets/dashboards/shopify_order_overview.json"
+    },
+    "monitors" : {
+      "[Shopify] Product Inventory is Out of Stock" : "assets/monitors/product_inventory_out_of_stock.json",
+      "[Shopify] Order Cancellation Rate is High" : "assets/monitors/order_cancellation_rate.json"
     },
     "logs": {
       "source": "shopify"

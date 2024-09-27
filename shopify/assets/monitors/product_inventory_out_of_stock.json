@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2024-09-27",
+	"last_updated_at": "2024-09-27",
+	"title": "[Shopify] Product Inventory is Out of Stock",
+	"description": "Out of stock product inventory is monitored.",
+	"definition": {
+		"id": 154857060,
+		"name": "[Shopify] Product Inventory is Out of Stock",
+		"type": "log alert",
+		"query": "logs(\"source:shopify service:product @tracksInventory:true @totalInventory:<=0\").index(\"*\").rollup(\"count\").by(\"@legacyResourceId,@title\").last(\"1h\") > 0",
+		"message": "{{#is_alert}}\nProduct {{@title.name}} (ID: {{@legacyResourceId.name}}) is currently out of stock. Please restock to ensure it's availability.\n{{/is_alert}}\n\n\n@jay.patel7@crestdata.ai",
+		"tags": [
+			"shopify"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 60,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:shopify"
+	]
+}
