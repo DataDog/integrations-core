@@ -18,7 +18,6 @@ from datadog_checks.base.utils.db.utils import (
     resolve_db_host,
     tracked_query,
 )
-from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
