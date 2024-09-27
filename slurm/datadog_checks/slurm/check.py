@@ -16,14 +16,13 @@ SINFO_NODE_PARAMS = ["-NO", "PartitionName:|,Available:|,NodeList:|,NodeAIOT:|,M
 SINFO_ADDITIONAL_NODE_PARAMS = "Cluster:|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:|,"
 GPU_PARAMS = "Gres:|,GresUsed:|,"
 SQUEUE_PARAMS = ["-ho", "%A|%u|%j|%T|%N|%C|%R|%m"]
-SSHARE_PARAMS = ["-hp"]
+SSHARE_PARAMS = ["-lnpU"]
 SACCT_PARAMS = [
     "-npo",
     "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
     "--units=M",
     f"--starttime=now-{time_diff}seconds",
 ]
-SDIAG_PARAMS = ["--parsable2"]
 
 
 def get_subprocess_out(cmd):
@@ -48,7 +47,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.sinfo_partition_cmd = self.get_slurm_command('sinfo', 'sinfo', SINFO_PARTITION_PARAMS)
         self.squeue_cmd = self.get_slurm_command('squeue', 'squeue', SQUEUE_PARAMS)
         self.sacct_cmd = self.get_slurm_command('sacct', 'sacct', SACCT_PARAMS)
-        self.sdiag_cmd = self.get_slurm_command('sdiag', 'sdiag', SDIAG_PARAMS)
+        self.sdiag_cmd = self.get_slurm_command('sdiag', 'sdiag', [])
         self.sshare_cmd = self.get_slurm_command('sshare', 'sshare', SSHARE_PARAMS)
 
         # Metric and Tag configuration
@@ -122,7 +121,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('slurm.partition.cpu.other', other, tags=tags)
             self.gauge('slurm.partition.cpu.total', total, tags=tags)
 
-    def _process_sinfo_cpu_state(self, cpus_state: str, tags):
+    def _process_sinfo_cpu_state(self, cpus_state: str):
         # "0/2/0/2"
         allocated, idle, other, total = cpus_state.split('/')
         return int(allocated), int(idle), int(other), int(total)
@@ -151,12 +150,11 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         )
 
     def process_sinfo_node(self, output):
+        # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES      |GRES_USED |
+        # normal    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.84 |    5440 |       0 |idle  |none   |(null)          |      1 |(null)    |(null)    |
         for line in output.strip().split('\n'):
             node_data = line.split('|')
             tags = self._create_node_tags(node_data)
-
-            # Process CPU state
-            self._process_sinfo_node_cpu_state(node_data[3], tags)
 
             # Process GPU data if enabled
             if self.gpu_stats:
@@ -185,8 +183,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('slurm.node.info', 1, tags=tags)
 
     def _create_node_tags(self, node_data):
-        # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES      |GRES_USED |
-        # normal    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.84 |    5440 |       0 |idle  |none   |(null)          |      1 |(null)    |(null)    |
         tag_fields = [
             ('slurm_partition', 0),
             ('slurm_node_availability', 1),
@@ -203,14 +199,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             ]
         return [f"{field}:{node_data[index].strip()}" for field, index in tag_fields]
 
-    def _process_sinfo_node_cpu_state(self, cpus_state, tags):
-        cpu_states = ['allocated', 'idle', 'other', 'total']
-        for state, value in zip(cpu_states, cpus_state.split('/')):
-            self.gauge(f'slurm.node.cpu.{state}', int(value), tags=tags)
-
     def process_squeue(self, output):
-    # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY
-    #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M  
+        # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY
+        #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M  
         for line in output.strip().split('\n'):
             job_data = line.split('|')
             tags = [
@@ -226,9 +217,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('slurm.job.info', 1, tags=tags)
     
     def process_sacct(self, output):
-    # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList   |
-    # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         |
-    # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         |
+        # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList   |
+        # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         |
+        # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         |
         for line in output.strip().split('\n'):
             job_data = line.split('|')
             tags = [
@@ -282,3 +273,23 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 metrics['backfill_depth_mean'] = int(line.split(':')[1].strip())
 
         return metrics
+    
+    def process_sshare(self, output):
+        # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                    |
+        # root    |root |        1 |           |       0 |          |    0.000000 | 0.000000 |0.000000 |            |cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0 |
+        for line in output.strip().split('\n'):
+            share_data = line.split('|')
+            tags = [
+                f"slurm_account:{share_data[0]}",
+                f"slurm_user:{share_data[1]}",
+                f"slurm_group_tres_mins:{share_data[9]}",
+                f"slurm_tres_run_mins:{share_data[10]}",
+            ]
+
+            self.gauge('slurm.share.raw_shares', share_data[2], tags=tags)
+            self.gauge('slurm.share.norm_shares', share_data[3], tags=tags)
+            self.gauge('slurm.share.raw_usage', share_data[4], tags=tags)
+            self.gauge('slurm.share.norm_usage', share_data[5], tags=tags)
+            self.gauge('slurm.share.effective_usage', share_data[6], tags=tags)
+            self.gauge('slurm.share.fair_share', share_data[7], tags=tags)
+            self.gauge('slurm.share.level_fs', share_data[8], tags=tags)
