@@ -1743,7 +1743,7 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1 * 100",
+                                            "formula": "query1",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
