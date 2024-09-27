@@ -993,7 +993,6 @@ class SQLServer(AgentCheck):
 
         proc = self._config.proc
         guardSql = self.instance.get("proc_only_if")
-        custom_tags = self.instance.get("tags", [])
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
             self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
@@ -1014,7 +1013,7 @@ class SQLServer(AgentCheck):
 
                 for row in rows:
                     tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
-                    tags.extend(custom_tags)
+                    tags.extend(self.tags)
 
                     if row.type.lower() in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
