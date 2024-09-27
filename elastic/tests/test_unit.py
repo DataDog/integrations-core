@@ -177,11 +177,18 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
             message="Error 500 Server Error: None for url: None when hitting test.com",
         )
 
+
 @pytest.mark.parametrize(
     'es_instance',
     [
-        pytest.param({'url': 'http://localhost:9200', 'disable_legacy_service_check_tags': 'true'}, id="disable legacy service check behavior"),
-        pytest.param({'url': 'http://localhost:9200', 'disable_legacy_service_check_tags': 'false'}, id="use legacy service check behavior"),
+        pytest.param(
+            {'url': 'http://localhost:9200', 'disable_legacy_service_check_tags': 'true'},
+            id="disable legacy service check behavior",
+        ),
+        pytest.param(
+            {'url': 'http://localhost:9200', 'disable_legacy_service_check_tags': 'false'},
+            id="use legacy service check behavior",
+        ),
     ],
 )
 def test_disable_legacy_sc_tags(aggregator, es_instance):
