@@ -134,6 +134,12 @@ instances:
     #
     disable_legacy_cluster_tag: true
 
+    ## @param disable_legacy_service_check_tags - boolean - optional - default: false
+    ## Disable the submission of the elasticsearch `host` and `port` as tags in service checks. 
+    ## Submit them as `elastic_host` and `elastic_port` instead.
+    #
+    disable_legacy_service_check_tags: true
+
     ## @param custom_queries - list of mappings - optional
     ## Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
     ## Note: Each custom query requires an `endpoint`, `data_path`, and `columns` parameter. Each `columns` parameter

@@ -110,6 +110,15 @@ files:
         display_default: false
         example: true
       enabled: true
+    - name: disable_legacy_service_check_tags
+      description: |
+        Disable the submission of the elasticsearch `host` and `port` as tags in service checks. 
+        Submit them as `elastic_host` and `elastic_port` instead.
+      value:
+        type: boolean
+        display_default: false
+        example: true
+      enabled: true
     - name: custom_queries
       description: |
         Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
