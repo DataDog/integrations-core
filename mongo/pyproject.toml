@@ -40,6 +40,7 @@ license = "BSD-3-Clause"
 deps = [
     "cachetools==3.1.1; python_version < '3.0'",
     "cachetools==5.5.0; python_version > '3.0'",
+    "psutil==6.0.0",
     "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
 
