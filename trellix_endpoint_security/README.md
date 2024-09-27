@@ -4,9 +4,9 @@
 
 This integration ingests the following logs:
 
-- **Threat Events**: This endpoint provides details about threat activity and events triggered by Trellix Endpoint Security, including threat prevention, web control, firewall, and adaptive threat protection.
+- **Threat Events**: This endpoint provides details about threat events triggered by Trellix Endpoint Security, including threat prevention, web control, firewall, and adaptive threat protection.
 
-This integration provides enrichment and visualization for threat prevention, web control, firewall, and adaptive threat protection events. It helps to visualize detailed insights into security trends, threats, and policy violations through the out-of-the-box dashboards. Also, This integration provides out of the box detection rules.
+This integration provides enrichment and visualization for above mentioned event types. It helps to visualize detailed insights into security trends, threats, and policy violations through the out-of-the-box dashboards. Also, This integration provides out of the box detection rules.
 
 ## Setup
 
@@ -19,11 +19,11 @@ This integration provides enrichment and visualization for threat prevention, we
 3. Under **Self-Service**, select **API Access Management**.
 4. In the **Credential Configurations** section, provide the following details:
    - **Client Type**: Enter a descriptive and identifiable name.
-   - **APIs**: Choose **Threat Events** from the dropdown.
-   - **Method Types**: Choose **GET** from the dropdown.
+   - **APIs**: Choose **Events** from the dropdown.
+   - **Method Types**: Select **GET**.
 5. Click **Request** to submit the request. It typically takes 2-3 days to process. You will be notified once your credentials are ready.
 6. When your credentials are available, generate your Client credentials by clicking **Generate** under **Create Client Credentials**.
-7. Copy and store the API key from Access management, Client ID and Client Secret from Create Client Credentials in a secure location.
+7. Copy and securely store the API key from **Access Management**, along with the Client ID and Client Secret from **Create Client Credentials**.
 
 #### Configure the Trellix Endpoint Security and Datadog Integration
 

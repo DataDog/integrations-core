@@ -95,7 +95,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -215,7 +215,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -335,7 +335,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -415,7 +415,7 @@
                     {
                         "id": 2109154923689130,
                         "definition": {
-                            "title": "Total Adaptive Threat Protection Events",
+                            "title": "Total ATP Events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -455,7 +455,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -575,7 +575,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -658,7 +658,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 1
+                "height": 16
             }
         },
         {
@@ -673,7 +673,7 @@
                     {
                         "id": 3871774228100030,
                         "definition": {
-                            "title": "Distribution by Module Names",
+                            "title": "Distribution of Events by Module Names",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -780,7 +780,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 9,
@@ -859,7 +859,7 @@
                     {
                         "id": 8423990386060400,
                         "definition": {
-                            "title": "Top 10 Endpoint Names with Threat",
+                            "title": "Top 10 Endpoint Names by Threat Types",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -883,6 +883,14 @@
                                                         "order": "desc",
                                                         "aggregation": "count"
                                                     }
+                                                },
+                                                {
+                                                    "facet": "@attributes.threattype",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
                                                 }
                                             ],
                                             "search": {
@@ -898,7 +906,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 100,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -997,7 +1005,7 @@
                     {
                         "id": 3679200050694014,
                         "definition": {
-                            "title": "Top 10 Threat Action Taken",
+                            "title": "Top 10 Action Taken for Threats",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1352,17 +1360,14 @@
                     {
                         "id": 8594292922198596,
                         "definition": {
-                            "title": "Distribution by Attack Vector Type",
+                            "title": "Distribution of Events by Attack Vector Type",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -1394,6 +1399,16 @@
                                     "response_format": "scalar",
                                     "style": {
                                         "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
                                     }
                                 }
                             ],
@@ -2234,13 +2249,12 @@
                             "title": "Threat Event Log Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:trellix-endpoint-security $Module-Name $Client-IP $Severity $Threat-Action-Taken $Threat-Type ",
+                                        "query_string": "source:trellix-endpoint-security $Module-Name $Client-IP $Severity $Threat-Action-Taken $Threat-Type",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2317,7 +2331,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 4,
+                "y": 19,
                 "width": 12,
                 "height": 49,
                 "is_column_break": true
@@ -2396,7 +2410,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -2447,7 +2461,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
                             }
@@ -2568,7 +2582,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 0,
@@ -2619,7 +2633,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 2,
@@ -2670,7 +2684,7 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 0
+                            "precision": 2
                         },
                         "layout": {
                             "x": 2,
@@ -2817,7 +2831,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 53,
+                "y": 68,
                 "width": 12,
                 "height": 1
             }
