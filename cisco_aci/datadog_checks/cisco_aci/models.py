@@ -10,7 +10,6 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validat
 
 from . import helpers
 
-
 """
 Cisco ACI Response Models
 """
@@ -100,21 +99,31 @@ class LldpAdjAttributes(BaseModel):
 
     @computed_field
     @property
-    def remote_device_index(self) -> str:
+    def local_port_id(self) -> str:
+        # example: topology/pod-1/paths-201/path-ep-[eth1/1]
+        # use regex to extract port alias from square brackets - ex: eth1/1
+        return helpers.get_eth_id_from_dn(self.dn)
+
+    @computed_field
+    @property
+    def local_port_index(self) -> int:
+        return helpers.get_index_from_eth_id(self.local_port_id)
+
+    @computed_field
+    @property
+    def remote_port_id(self) -> str:
         # example: topology/pod-1/paths-201/path-ep-[eth1/1]
         # use regex to extract port alias from square brackets - ex: eth1/1
         return helpers.get_eth_id_from_dn(self.port_desc)
 
     @computed_field
     @property
-    def local_port_id(self) -> str:
-        # example: topology/pod-1/paths-201/path-ep-[eth1/1]
-        # use regex to extract port alias from square brackets - ex: eth1/1
-        return helpers.get_eth_id_from_dn(self.dn)
+    def remote_port_index(self) -> int:
+        return helpers.get_index_from_eth_id(self.remote_port_id)
 
 
 class LldpAdjEp(BaseModel):
-    attributes: dict = LldpAdjAttributes
+    attributes: LldpAdjAttributes
 
 
 """
@@ -267,9 +276,9 @@ class SourceType(StrEnum):
 
 class TopologyLinkMetadata(BaseModel):
     id: Optional[str] = None
-    source_type = Optional[SourceType]
-    local = Optional[TopologyLinkSide]
-    remote = Optional[TopologyLinkSide]
+    source_type: Optional[SourceType] = Field(default=None)
+    local: Optional[TopologyLinkSide] = Field(default=None)
+    remote: Optional[TopologyLinkSide] = Field(default=None)
 
 
 class NetworkDevicesMetadata(BaseModel):
@@ -287,4 +296,6 @@ class NetworkDevicesMetadata(BaseModel):
             self.devices.append(metadata)
         if isinstance(metadata, InterfaceMetadata):
             self.interfaces.append(metadata)
+        if isinstance(metadata, TopologyLinkMetadata):
+            self.links.append(metadata)
         self.size += 1

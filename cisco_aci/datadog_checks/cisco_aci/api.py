@@ -297,12 +297,12 @@ class Api:
         response = self.make_request(path)
         return self._parse_response(response)
 
-    def get_lldp_adj_ep(self):
+    def get_lldp_adj_eps(self):
         path = '/api/node/class/lldpAdjEp.json'
         response = self.make_request(path)
         return self._parse_response(response)
 
-    def get_cdp_adj_ep(self):
+    def get_cdp_adj_eps(self):
         path = '/api/node/class/cdpAdjEp.json'
         response = self.make_request(path)
         return self._parse_response(response)

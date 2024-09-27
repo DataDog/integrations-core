@@ -631,6 +631,10 @@ FIXTURE_LIST = [
     # 4efe80304d50330f5ed0f79252ef0a84 - Api.get_apps
     '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped',
     # c8e9a0dbceac67fb1149684f7fc7772c - Api.get_tenant_stats
+    '_api_node_class_lldpAdjEp_json',
+    # f3713df3a586908a3a11f4c356153519 - Api.get_lldp_adj_eps
+    '_api_node_class_cdpAdjEp_json',
+    # 588ea77fffc6df4b37dfdfa4290cdc89 - Api.get_cdp_adj_eps
 ]
 
 # The map will contain the md5 hash to the fixture

@@ -74,32 +74,33 @@ def create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, namespa
     """
     Create a TopologyLinkMetadata object from LLDP or CDP
     """
-    lldp_adj_eps_list = LldpAdjEp()
-    for lldp_adj_ep in lldp_adj_eps_list:
+    for lldp_adj_ep in lldp_adj_eps:
+        lldp_adj_ep = LldpAdjEp(**lldp_adj_ep.get("lldpAdjEp", {}))
+
         local_device_id = device_map.get(lldp_adj_ep.attributes.local_device_dn)
-        remote_entry_unique_id = lldp_adj_ep.attributes.local_port_id + "." + lldp_adj_ep.attributes.remote_port_id
+        local_interface_id = "{}:{}".format(local_device_id, lldp_adj_ep.attributes.local_port_index)
+
+        remote_entry_unique_id = "{}.{}".format(
+            lldp_adj_ep.attributes.local_port_index, lldp_adj_ep.attributes.remote_port_index
+        )
 
         local = TopologyLinkSide(
-            # TODO: need to grab the device id from mapping
             device=TopologyLinkDevice(dd_id=local_device_id),
-            # TODO: double check resolve the local interface id
             interface=TopologyLinkInterface(
-                dd_id='', id=lldp_adj_ep.attributes.local_port_id, id_type='interface_name'
+                dd_id=local_interface_id, id=lldp_adj_ep.attributes.local_port_id, id_type='interface_name'
             ),
         )
         remote = TopologyLinkSide(
-            # this is all good afaik
             device=TopologyLinkDevice(
-                name=lldp_adj_ep.attributes.system_name,
-                description=lldp_adj_ep.attributes.system_desc,
+                name=lldp_adj_ep.attributes.sys_name,
+                description=lldp_adj_ep.attributes.sys_desc,
                 id=lldp_adj_ep.attributes.chassis_id_v,
                 id_type=lldp_adj_ep.attributes.chassis_id_t,
                 ip_address=lldp_adj_ep.attributes.mgmt_ip,
             ),
-            # TODO: check on the interface alias/name for resolution vs. taken what's given to us
             interface=TopologyLinkInterface(
                 id=lldp_adj_ep.attributes.remote_port_id,
-                id_type=lldp_adj_ep.attributes.port_id_t,
+                id_type="interface_name",
                 description=lldp_adj_ep.attributes.port_desc,
             ),
         )
@@ -115,7 +116,7 @@ def get_device_ip_mapping(devices):
     devices_map = {}
     for device in devices:
         key = device.pod_node_id
-        devices_map[key] = device.ip_address
+        devices_map[key] = device.id
     return devices_map
 
 
