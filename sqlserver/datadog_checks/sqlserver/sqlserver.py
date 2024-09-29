@@ -395,6 +395,10 @@ class SQLServer(AgentCheck):
             service_check_tags.extend(self.tags)
         service_check_tags = list(set(service_check_tags))
 
+        print("natasha heree 1")
+        print(self.instance.get("tags", []))
+        print(self.tags)
+
         if status is AgentCheck.OK:
             message = None
 
@@ -457,6 +461,10 @@ class SQLServer(AgentCheck):
         Store the list of metrics to collect by instance_key.
         Will also create and cache cursors to query the db.
         """
+
+        print("natasha heree 2")
+        print(self.instance.get("tags", []))
+        print(self.tags)
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         metrics_to_collect = []
@@ -539,6 +547,11 @@ class SQLServer(AgentCheck):
         for cfg in custom_metrics:
             sql_counter_type = None
             base_name = None
+
+
+            print("natasha heree 3")
+            print(self.instance.get("tags", []))
+            print(self.tags)
 
             custom_tags = self.tags + cfg.get("tags", [])
             cfg["tags"] = custom_tags
@@ -989,6 +1002,11 @@ class SQLServer(AgentCheck):
         """
         Fetch the metrics from the stored proc
         """
+
+
+        print("natasha heree 4")
+        print(self.instance.get("tags", []))
+        print(self.tags)
 
         proc = self._config.proc
         guardSql = self.instance.get("proc_only_if")
