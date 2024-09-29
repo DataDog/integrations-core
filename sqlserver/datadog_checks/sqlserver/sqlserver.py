@@ -548,7 +548,6 @@ class SQLServer(AgentCheck):
             sql_counter_type = None
             base_name = None
 
-
             print("natasha heree 3")
             print(self.instance.get("tags", []))
             print(self.tags)
@@ -1002,7 +1001,6 @@ class SQLServer(AgentCheck):
         """
         Fetch the metrics from the stored proc
         """
-
 
         print("natasha heree 4")
         print(self.instance.get("tags", []))
