@@ -314,6 +314,10 @@ coverage:
         target: 75
         flags:
         - kong
+      KubeVirt_Handler:
+        target: 75
+        flags:
+        - kubevirt_handler
       KubeVirt_Controller:
         target: 75
         flags:
@@ -1171,6 +1175,11 @@ flags:
     paths:
     - kubernetes_state/datadog_checks/kubernetes_state
     - kubernetes_state/tests
+  kubevirt_handler:
+    carryforward: true
+    paths:
+    - kubevirt_handler/datadog_checks/kubevirt_handler
+    - kubevirt_handler/tests
   kubevirt_controller:
     carryforward: true
     paths:

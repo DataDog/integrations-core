@@ -1,0 +1,802 @@
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 4.9735e-05
+go_gc_duration_seconds{quantile="0.25"} 6.245e-05
+go_gc_duration_seconds{quantile="0.5"} 7.272e-05
+go_gc_duration_seconds{quantile="0.75"} 0.000100238
+go_gc_duration_seconds{quantile="1"} 0.002951245
+go_gc_duration_seconds_sum 0.204560487
+go_gc_duration_seconds_count 1875
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 177
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.21.8 X:nocoverageredesign"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 2.1352688e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 4.080429088e+09
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.925698e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 3.8863331e+07
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 6.188536e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 2.1352688e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 6.9525504e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 2.8286976e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 130532
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 6.9189632e+07
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 9.781248e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.7225147024544632e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 3.8993863e+07
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 2400
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 464688
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 488880
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 3.7487872e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 482878
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 2.850816e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 2.850816e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 1.09764888e+08
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 13
+# HELP kubevirt_info Version information
+# TYPE kubevirt_info gauge
+kubevirt_info{goversion="go1.21.8 X:nocoverageredesign",kubeversion="v1.2.2"} 1
+# HELP kubevirt_vmi_cpu_system_usage_seconds_total Total CPU time spent in system mode.
+# TYPE kubevirt_vmi_cpu_system_usage_seconds_total counter
+kubevirt_vmi_cpu_system_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 110.09
+kubevirt_vmi_cpu_system_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 120.08
+kubevirt_vmi_cpu_system_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 109.31
+kubevirt_vmi_cpu_system_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 51.13
+# HELP kubevirt_vmi_cpu_usage_seconds_total Total CPU time spent in all modes (sum of both vcpu and hypervisor usage).
+# TYPE kubevirt_vmi_cpu_usage_seconds_total counter
+kubevirt_vmi_cpu_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 397.3
+kubevirt_vmi_cpu_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 415.3
+kubevirt_vmi_cpu_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 386.89
+kubevirt_vmi_cpu_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 193.19
+# HELP kubevirt_vmi_cpu_user_usage_seconds_total Total CPU time spent in user mode.
+# TYPE kubevirt_vmi_cpu_user_usage_seconds_total counter
+kubevirt_vmi_cpu_user_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 287.21
+kubevirt_vmi_cpu_user_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 295.22
+kubevirt_vmi_cpu_user_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 277.58
+kubevirt_vmi_cpu_user_usage_seconds_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 142.06
+# HELP kubevirt_vmi_memory_actual_balloon_bytes Current balloon size in bytes.
+# TYPE kubevirt_vmi_memory_actual_balloon_bytes gauge
+kubevirt_vmi_memory_actual_balloon_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.4e+07
+kubevirt_vmi_memory_actual_balloon_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.4e+07
+kubevirt_vmi_memory_actual_balloon_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.4e+07
+kubevirt_vmi_memory_actual_balloon_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.4e+07
+# HELP kubevirt_vmi_memory_available_bytes amount of usable memory as seen by the domain. This value may not be accurate if a balloon driver is in use or if the guest OS does not initialize all assigned pages
+# TYPE kubevirt_vmi_memory_available_bytes gauge
+kubevirt_vmi_memory_available_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 4.5617152e+07
+kubevirt_vmi_memory_available_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 4.5617152e+07
+kubevirt_vmi_memory_available_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 4.5617152e+07
+kubevirt_vmi_memory_available_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 4.5617152e+07
+# HELP kubevirt_vmi_memory_domain_bytes The amount of memory in bytes allocated to the domain. The `memory` value in domain xml file.
+# TYPE kubevirt_vmi_memory_domain_bytes gauge
+kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.4e+07
+kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.4e+07
+kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.4e+07
+kubevirt_vmi_memory_domain_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.4e+07
+# HELP kubevirt_vmi_memory_pgmajfault_total The number of page faults when disk IO was required. Page faults occur when a process makes a valid access to virtual memory that is not available. When servicing the page fault, if disk IO is required, it is considered as major fault.
+# TYPE kubevirt_vmi_memory_pgmajfault_total counter
+kubevirt_vmi_memory_pgmajfault_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 18
+kubevirt_vmi_memory_pgmajfault_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 21
+kubevirt_vmi_memory_pgmajfault_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 21
+kubevirt_vmi_memory_pgmajfault_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 18
+# HELP kubevirt_vmi_memory_pgminfault_total The number of other page faults, when disk IO was not required. Page faults occur when a process makes a valid access to virtual memory that is not available. When servicing the page fault, if disk IO is NOT required, it is considered as minor fault.
+# TYPE kubevirt_vmi_memory_pgminfault_total counter
+kubevirt_vmi_memory_pgminfault_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 31695
+kubevirt_vmi_memory_pgminfault_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 31692
+kubevirt_vmi_memory_pgminfault_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 31669
+kubevirt_vmi_memory_pgminfault_total{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 31706
+# HELP kubevirt_vmi_memory_resident_bytes Resident set size of the process running the domain.
+# TYPE kubevirt_vmi_memory_resident_bytes gauge
+kubevirt_vmi_memory_resident_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.06589952e+08
+kubevirt_vmi_memory_resident_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.06688256e+08
+kubevirt_vmi_memory_resident_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.07474688e+08
+kubevirt_vmi_memory_resident_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.0529152e+08
+# HELP kubevirt_vmi_memory_swap_in_traffic_bytes The total amount of data read from swap space of the guest in bytes.
+# TYPE kubevirt_vmi_memory_swap_in_traffic_bytes gauge
+kubevirt_vmi_memory_swap_in_traffic_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_memory_swap_in_traffic_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_memory_swap_in_traffic_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_memory_swap_in_traffic_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+# HELP kubevirt_vmi_memory_swap_out_traffic_bytes The total amount of memory written out to swap space of the guest in bytes.
+# TYPE kubevirt_vmi_memory_swap_out_traffic_bytes gauge
+kubevirt_vmi_memory_swap_out_traffic_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_memory_swap_out_traffic_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_memory_swap_out_traffic_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_memory_swap_out_traffic_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+# HELP kubevirt_vmi_memory_unused_bytes The amount of memory left completely unused by the system. Memory that is available but used for reclaimable caches should NOT be reported as free.
+# TYPE kubevirt_vmi_memory_unused_bytes gauge
+kubevirt_vmi_memory_unused_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 8.331264e+06
+kubevirt_vmi_memory_unused_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 8.462336e+06
+kubevirt_vmi_memory_unused_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 8.433664e+06
+kubevirt_vmi_memory_unused_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 8.343552e+06
+# HELP kubevirt_vmi_memory_usable_bytes The amount of memory which can be reclaimed by balloon without pushing the guest system to swap, corresponds to 'Available' in /proc/meminfo
+# TYPE kubevirt_vmi_memory_usable_bytes gauge
+kubevirt_vmi_memory_usable_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.4768512e+07
+kubevirt_vmi_memory_usable_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.4772608e+07
+kubevirt_vmi_memory_usable_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.4752128e+07
+kubevirt_vmi_memory_usable_bytes{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.4743936e+07
+# HELP kubevirt_vmi_network_receive_bytes_total Total network traffic received in bytes.
+# TYPE kubevirt_vmi_network_receive_bytes_total counter
+kubevirt_vmi_network_receive_bytes_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 12143
+kubevirt_vmi_network_receive_bytes_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 12089
+kubevirt_vmi_network_receive_bytes_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 11739
+kubevirt_vmi_network_receive_bytes_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 7663
+# HELP kubevirt_vmi_network_receive_errors_total Total network received error packets.
+# TYPE kubevirt_vmi_network_receive_errors_total counter
+kubevirt_vmi_network_receive_errors_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_receive_errors_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_receive_errors_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_receive_errors_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+# HELP kubevirt_vmi_network_receive_packets_dropped_total The total number of rx packets dropped on vNIC interfaces.
+# TYPE kubevirt_vmi_network_receive_packets_dropped_total counter
+kubevirt_vmi_network_receive_packets_dropped_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_receive_packets_dropped_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_receive_packets_dropped_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_receive_packets_dropped_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+# HELP kubevirt_vmi_network_receive_packets_total Total network traffic received packets.
+# TYPE kubevirt_vmi_network_receive_packets_total counter
+kubevirt_vmi_network_receive_packets_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 155
+kubevirt_vmi_network_receive_packets_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 154
+kubevirt_vmi_network_receive_packets_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 149
+kubevirt_vmi_network_receive_packets_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 91
+# HELP kubevirt_vmi_network_traffic_bytes_total deprecated.
+# TYPE kubevirt_vmi_network_traffic_bytes_total counter
+kubevirt_vmi_network_traffic_bytes_total{interface="tap0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",type="rx"} 12143
+kubevirt_vmi_network_traffic_bytes_total{interface="tap0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",type="tx"} 2157
+kubevirt_vmi_network_traffic_bytes_total{interface="tap0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",type="rx"} 12089
+kubevirt_vmi_network_traffic_bytes_total{interface="tap0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",type="tx"} 2157
+kubevirt_vmi_network_traffic_bytes_total{interface="tap0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",type="rx"} 11739
+kubevirt_vmi_network_traffic_bytes_total{interface="tap0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",type="tx"} 2157
+kubevirt_vmi_network_traffic_bytes_total{interface="tap0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",type="rx"} 7663
+kubevirt_vmi_network_traffic_bytes_total{interface="tap0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",type="tx"} 2157
+# HELP kubevirt_vmi_network_transmit_bytes_total Total network traffic transmitted in bytes.
+# TYPE kubevirt_vmi_network_transmit_bytes_total counter
+kubevirt_vmi_network_transmit_bytes_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2157
+kubevirt_vmi_network_transmit_bytes_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2157
+kubevirt_vmi_network_transmit_bytes_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2157
+kubevirt_vmi_network_transmit_bytes_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2157
+# HELP kubevirt_vmi_network_transmit_errors_total Total network transmitted error packets.
+# TYPE kubevirt_vmi_network_transmit_errors_total counter
+kubevirt_vmi_network_transmit_errors_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_transmit_errors_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_transmit_errors_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_transmit_errors_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+# HELP kubevirt_vmi_network_transmit_packets_dropped_total The total number of tx packets dropped on vNIC interfaces.
+# TYPE kubevirt_vmi_network_transmit_packets_dropped_total counter
+kubevirt_vmi_network_transmit_packets_dropped_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_transmit_packets_dropped_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_transmit_packets_dropped_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_network_transmit_packets_dropped_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+# HELP kubevirt_vmi_network_transmit_packets_total Total network traffic transmitted packets.
+# TYPE kubevirt_vmi_network_transmit_packets_total counter
+kubevirt_vmi_network_transmit_packets_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 21
+kubevirt_vmi_network_transmit_packets_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 21
+kubevirt_vmi_network_transmit_packets_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 21
+kubevirt_vmi_network_transmit_packets_total{interface="default",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 21
+# HELP kubevirt_vmi_node_cpu_affinity Number of VMI CPU affinities to node physical cores.
+# TYPE kubevirt_vmi_node_cpu_affinity gauge
+kubevirt_vmi_node_cpu_affinity{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2
+kubevirt_vmi_node_cpu_affinity{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2
+kubevirt_vmi_node_cpu_affinity{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2
+kubevirt_vmi_node_cpu_affinity{kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2
+# HELP kubevirt_vmi_storage_flush_requests_total Total storage flush requests.
+# TYPE kubevirt_vmi_storage_flush_requests_total counter
+kubevirt_vmi_storage_flush_requests_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_flush_requests_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_flush_requests_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_flush_requests_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_flush_requests_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 27
+kubevirt_vmi_storage_flush_requests_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 27
+kubevirt_vmi_storage_flush_requests_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 27
+kubevirt_vmi_storage_flush_requests_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 27
+# HELP kubevirt_vmi_storage_flush_times_seconds_total Total time spent on cache flushing.
+# TYPE kubevirt_vmi_storage_flush_times_seconds_total counter
+kubevirt_vmi_storage_flush_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_flush_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_flush_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_flush_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_flush_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0.027409991
+kubevirt_vmi_storage_flush_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0.035236182
+kubevirt_vmi_storage_flush_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0.021652017
+kubevirt_vmi_storage_flush_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0.031011467
+# HELP kubevirt_vmi_storage_iops_read_total Total number of I/O read operations.
+# TYPE kubevirt_vmi_storage_iops_read_total counter
+kubevirt_vmi_storage_iops_read_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 37
+kubevirt_vmi_storage_iops_read_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 37
+kubevirt_vmi_storage_iops_read_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 37
+kubevirt_vmi_storage_iops_read_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 37
+kubevirt_vmi_storage_iops_read_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1074
+kubevirt_vmi_storage_iops_read_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1109
+kubevirt_vmi_storage_iops_read_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1111
+kubevirt_vmi_storage_iops_read_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1103
+# HELP kubevirt_vmi_storage_iops_write_total Total number of I/O write operations.
+# TYPE kubevirt_vmi_storage_iops_write_total counter
+kubevirt_vmi_storage_iops_write_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_iops_write_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_iops_write_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_iops_write_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_iops_write_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 376
+kubevirt_vmi_storage_iops_write_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 380
+kubevirt_vmi_storage_iops_write_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 381
+kubevirt_vmi_storage_iops_write_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 381
+# HELP kubevirt_vmi_storage_read_times_seconds_total Total time spent on read operations.
+# TYPE kubevirt_vmi_storage_read_times_seconds_total counter
+kubevirt_vmi_storage_read_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0.036076314
+kubevirt_vmi_storage_read_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0.036427565
+kubevirt_vmi_storage_read_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0.023200456
+kubevirt_vmi_storage_read_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0.030489989
+kubevirt_vmi_storage_read_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1.185274588
+kubevirt_vmi_storage_read_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1.095161689
+kubevirt_vmi_storage_read_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1.031214763
+kubevirt_vmi_storage_read_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1.219122621
+# HELP kubevirt_vmi_storage_read_traffic_bytes_total Total number of bytes read from storage.
+# TYPE kubevirt_vmi_storage_read_traffic_bytes_total counter
+kubevirt_vmi_storage_read_traffic_bytes_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 173568
+kubevirt_vmi_storage_read_traffic_bytes_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 173568
+kubevirt_vmi_storage_read_traffic_bytes_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 173568
+kubevirt_vmi_storage_read_traffic_bytes_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 173568
+kubevirt_vmi_storage_read_traffic_bytes_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.2044672e+07
+kubevirt_vmi_storage_read_traffic_bytes_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.2070272e+07
+kubevirt_vmi_storage_read_traffic_bytes_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.213376e+07
+kubevirt_vmi_storage_read_traffic_bytes_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.2007808e+07
+# HELP kubevirt_vmi_storage_write_times_seconds_total Total time spent on write operations.
+# TYPE kubevirt_vmi_storage_write_times_seconds_total counter
+kubevirt_vmi_storage_write_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_write_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_write_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_write_times_seconds_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_write_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 3.44507966
+kubevirt_vmi_storage_write_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 3.476135676
+kubevirt_vmi_storage_write_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 2.95795906
+kubevirt_vmi_storage_write_times_seconds_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 3.812077287
+# HELP kubevirt_vmi_storage_write_traffic_bytes_total Total number of written bytes.
+# TYPE kubevirt_vmi_storage_write_traffic_bytes_total counter
+kubevirt_vmi_storage_write_traffic_bytes_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_write_traffic_bytes_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_write_traffic_bytes_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_write_traffic_bytes_total{drive="cloudinitdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_storage_write_traffic_bytes_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1.2408832e+07
+kubevirt_vmi_storage_write_traffic_bytes_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1.2411904e+07
+kubevirt_vmi_storage_write_traffic_bytes_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1.241088e+07
+kubevirt_vmi_storage_write_traffic_bytes_total{drive="containerdisk",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 1.2408832e+07
+# HELP kubevirt_vmi_vcpu_delay_seconds_total Amount of time spent by each vcpu waiting in the queue instead of running.
+# TYPE kubevirt_vmi_vcpu_delay_seconds_total counter
+kubevirt_vmi_vcpu_delay_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 21.632295298
+kubevirt_vmi_vcpu_delay_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 31.020036404
+kubevirt_vmi_vcpu_delay_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 19.0588205
+kubevirt_vmi_vcpu_delay_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 6.744160432
+# HELP kubevirt_vmi_vcpu_seconds_total Total amount of time spent in each state by each vcpu (cpu_time excluding hypervisor time). Where `id` is the vcpu identifier and `state` can be one of the following: [`OFFLINE`, `RUNNING`, `BLOCKED`].
+# TYPE kubevirt_vmi_vcpu_seconds_total counter
+kubevirt_vmi_vcpu_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",state="running"} 238300
+kubevirt_vmi_vcpu_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",state="running"} 247100
+kubevirt_vmi_vcpu_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",state="running"} 230380
+kubevirt_vmi_vcpu_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal",state="running"} 118440
+# HELP kubevirt_vmi_vcpu_wait_seconds_total Amount of time spent by each vcpu while waiting on I/O.
+# TYPE kubevirt_vmi_vcpu_wait_seconds_total counter
+kubevirt_vmi_vcpu_wait_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-1",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_vcpu_wait_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-2",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_vcpu_wait_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-4",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+kubevirt_vmi_vcpu_wait_seconds_total{id="0",kubernetes_vmi_label_kubevirt_io_domain="testvm",kubernetes_vmi_label_kubevirt_io_nodeName="ip-192-168-58-28.eu-west-3.compute.internal",kubernetes_vmi_label_kubevirt_io_size="small",name="aws-kubevirt-vm-6",namespace="default",node="ip-192-168-58-28.eu-west-3.compute.internal"} 0
+# HELP kubevirt_workqueue_adds_total Total number of adds handled by workqueue
+# TYPE kubevirt_workqueue_adds_total counter
+kubevirt_workqueue_adds_total{name="virt-handler-node-labeller"} 800
+kubevirt_workqueue_adds_total{name="virt-handler-vm"} 2552
+# HELP kubevirt_workqueue_depth Current depth of workqueue
+# TYPE kubevirt_workqueue_depth gauge
+kubevirt_workqueue_depth{name="virt-handler-node-labeller"} 0
+kubevirt_workqueue_depth{name="virt-handler-vm"} 0
+# HELP kubevirt_workqueue_longest_running_processor_seconds How many seconds has the longest running processor for workqueue been running.
+# TYPE kubevirt_workqueue_longest_running_processor_seconds gauge
+kubevirt_workqueue_longest_running_processor_seconds{name="virt-handler-node-labeller"} 0
+kubevirt_workqueue_longest_running_processor_seconds{name="virt-handler-vm"} 0
+# HELP kubevirt_workqueue_queue_duration_seconds How long an item stays in workqueue before being requested.
+# TYPE kubevirt_workqueue_queue_duration_seconds histogram
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="1e-08"} 0
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="1e-07"} 0
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="1e-06"} 0
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="9.999999999999999e-06"} 18
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="9.999999999999999e-05"} 793
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="0.001"} 798
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="0.01"} 798
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="0.1"} 799
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="1"} 800
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="10"} 800
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-node-labeller",le="+Inf"} 800
+kubevirt_workqueue_queue_duration_seconds_sum{name="virt-handler-node-labeller"} 0.16665142600000019
+kubevirt_workqueue_queue_duration_seconds_count{name="virt-handler-node-labeller"} 800
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="1e-08"} 0
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="1e-07"} 0
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="1e-06"} 0
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="9.999999999999999e-06"} 2470
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="9.999999999999999e-05"} 2529
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="0.001"} 2538
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="0.01"} 2540
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="0.1"} 2548
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="1"} 2552
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="10"} 2552
+kubevirt_workqueue_queue_duration_seconds_bucket{name="virt-handler-vm",le="+Inf"} 2552
+kubevirt_workqueue_queue_duration_seconds_sum{name="virt-handler-vm"} 3.9256964050000023
+kubevirt_workqueue_queue_duration_seconds_count{name="virt-handler-vm"} 2552
+# HELP kubevirt_workqueue_retries_total Total number of retries handled by workqueue
+# TYPE kubevirt_workqueue_retries_total counter
+kubevirt_workqueue_retries_total{name="virt-handler-node-labeller"} 0
+kubevirt_workqueue_retries_total{name="virt-handler-vm"} 4
+# HELP kubevirt_workqueue_unfinished_work_seconds How many seconds of work has done that is in progress and hasn't been observed by work_duration. Large values indicate stuck threads. One can deduce the number of stuck threads by observing the rate at which this increases.
+# TYPE kubevirt_workqueue_unfinished_work_seconds gauge
+kubevirt_workqueue_unfinished_work_seconds{name="virt-handler-node-labeller"} 0
+kubevirt_workqueue_unfinished_work_seconds{name="virt-handler-vm"} 0
+# HELP kubevirt_workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes.
+# TYPE kubevirt_workqueue_work_duration_seconds histogram
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="1e-08"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="1e-07"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="1e-06"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="9.999999999999999e-06"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="9.999999999999999e-05"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="0.001"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="0.01"} 513
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="0.1"} 796
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="1"} 800
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="10"} 800
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-node-labeller",le="+Inf"} 800
+kubevirt_workqueue_work_duration_seconds_sum{name="virt-handler-node-labeller"} 8.983542171000003
+kubevirt_workqueue_work_duration_seconds_count{name="virt-handler-node-labeller"} 800
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="1e-08"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="1e-07"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="1e-06"} 0
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="9.999999999999999e-06"} 4
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="9.999999999999999e-05"} 4
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="0.001"} 4
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="0.01"} 4
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="0.1"} 2425
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="1"} 2548
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="10"} 2552
+kubevirt_workqueue_work_duration_seconds_bucket{name="virt-handler-vm",le="+Inf"} 2552
+kubevirt_workqueue_work_duration_seconds_sum{name="virt-handler-vm"} 171.68139235400002
+kubevirt_workqueue_work_duration_seconds_count{name="virt-handler-vm"} 2552
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 196.84
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 44
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 7.8794752e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.72229006453e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 2.238455808e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 1
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
+# HELP rest_client_rate_limiter_duration_seconds Client side rate limiter latency in seconds. Broken down by verb and URL.
+# TYPE rest_client_rate_limiter_duration_seconds histogram
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1.433e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.001"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.002"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.004"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.008"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.016"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.032"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.064"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.128"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.256"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.512"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="+Inf"} 8
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST"} 1.8045999999999996e-05
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST"} 8
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.001"} 5497
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.002"} 5497
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.004"} 5497
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.008"} 5499
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.016"} 5499
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.032"} 5499
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.064"} 5499
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.128"} 5499
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.256"} 5499
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.512"} 5499
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="+Inf"} 5499
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET"} 0.09202629000000012
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET"} 5499
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.001"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.002"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.004"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.008"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.016"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.032"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.064"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.128"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.256"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.512"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="+Inf"} 2347
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH"} 0.014310617999999989
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH"} 2347
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1.638e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1.368e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.001"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.002"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.004"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.008"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.016"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.032"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.064"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.128"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.256"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.512"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="+Inf"} 20
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT"} 6.943800000000001e-05
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT"} 20
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 2
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 4.5160000000000005e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.100.0.1:443/version",verb="GET"} 2.322e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.100.0.1:443/version",verb="GET"} 1
+# HELP rest_client_request_latency_seconds Request latency in seconds. Broken down by verb and URL.
+# TYPE rest_client_request_latency_seconds histogram
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.002243092
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.005"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.025"} 7
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.05"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.1"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.2"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.4"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.6"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="0.8"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="1"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="1.25"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="1.5"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="2"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="3"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="4"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="5"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="6"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="8"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="10"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="15"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="20"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="30"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="45"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="60"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST",le="+Inf"} 8
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST"} 0.125952513
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/api/v1/namespaces/%7Bnamespace%7D/events",verb="POST"} 8
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.005"} 74
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.025"} 5419
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.05"} 5469
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.1"} 5485
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.2"} 5496
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.4"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.6"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="0.8"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="1"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="1.25"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="1.5"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="2"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="3"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="4"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="5"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="6"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="8"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="10"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="15"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="20"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="30"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="45"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="60"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET",le="+Inf"} 5499
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET"} 50.253009939
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="GET"} 5499
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.005"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.025"} 1582
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.05"} 2267
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.1"} 2340
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.2"} 2344
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.4"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.6"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="0.8"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="1"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="1.25"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="1.5"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="2"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="3"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="4"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="5"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="6"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="8"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="10"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="15"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="20"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="30"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="45"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="60"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH",le="+Inf"} 2347
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH"} 60.20290004700005
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/api/v1/nodes/%7Bname%7D",verb="PATCH"} 2347
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.14079302
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.012085376
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.005"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.025"} 9
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.05"} 19
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.1"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.2"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.4"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.6"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="0.8"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="1"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="1.25"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="1.5"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="2"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="3"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="4"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="5"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="6"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="8"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="10"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="15"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="20"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="30"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="45"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="60"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT",le="+Inf"} 20
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT"} 0.526331432
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/apis/kubevirt.io/v1/namespaces/%7Bnamespace%7D/virtualmachineinstances/%7Bname%7D",verb="PUT"} 20
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 2
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.021060896000000003
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/apis/kubevirt.io/v1/virtualmachineinstances?labelSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.005"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.100.0.1:443/version",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.100.0.1:443/version",verb="GET"} 0.002780404
+rest_client_request_latency_seconds_count{url="https://10.100.0.1:443/version",verb="GET"} 1
+# HELP rest_client_requests_total Number of HTTP requests, partitioned by status code, method, and host.
+# TYPE rest_client_requests_total counter
+rest_client_requests_total{code="200",host="10.100.0.1:443",method="GET",resource="configmaps",verb="LIST"} 511
+rest_client_requests_total{code="200",host="10.100.0.1:443",method="GET",resource="customresourcedefinitions",verb="LIST"} 499
+rest_client_requests_total{code="200",host="10.100.0.1:443",method="GET",resource="kubevirts",verb="LIST"} 503
+rest_client_requests_total{code="200",host="10.100.0.1:443",method="GET",resource="nodes",verb="GET"} 5499
+rest_client_requests_total{code="200",host="10.100.0.1:443",method="GET",resource="none",verb="none"} 1
+rest_client_requests_total{code="200",host="10.100.0.1:443",method="GET",resource="virtualmachineinstances",verb="LIST"} 998
+rest_client_requests_total{code="200",host="10.100.0.1:443",method="PATCH",resource="nodes",verb="PATCH"} 2347
+rest_client_requests_total{code="200",host="10.100.0.1:443",method="PUT",resource="virtualmachineinstances",verb="UPDATE"} 16
+rest_client_requests_total{code="201",host="10.100.0.1:443",method="POST",resource="events",verb="CREATE"} 8
+rest_client_requests_total{code="409",host="10.100.0.1:443",method="PUT",resource="virtualmachineinstances",verb="UPDATE"} 4

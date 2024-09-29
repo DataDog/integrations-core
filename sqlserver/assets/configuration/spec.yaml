@@ -775,6 +775,29 @@ files:
       value:
         example: false
         type: boolean
+    - name: deadlocks_collection
+      hidden: True
+      description: |
+        Configure the collection of deadlock data. The feature is supported for odbc connector only.
+      options:
+        - name: enabled
+          description: |
+            Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
+          value:
+            type: number
+            example: 600
+        - name: max_deadlocks
+          description: |
+            Set the maximum number of deadlocks to retrieve per collection.
+          value:
+            type: number
+            example: 100
     - template: instances/default
   - template: logs
     example:
