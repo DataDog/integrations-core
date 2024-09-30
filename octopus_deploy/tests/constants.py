@@ -510,3 +510,49 @@ TASK_COUNT_METRICS = [
         'count': 1,
     },
 ]
+
+
+TASK_COUNT_METRICS_NO_PROJECT_1 = [
+    {
+        'name': 'octopus_deploy.task.count',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1845",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+    },
+    {
+        'name': 'octopus_deploy.task.count',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1846",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+    },
+    {
+        'name': 'octopus_deploy.task.count',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1847",
+            "task_name:Deploy",
+            "task_state:Failed",
+        ],
+        'count': 1,
+    },
+]

@@ -68,10 +68,6 @@ def mock_responses():
     def method(method, url, file='response', headers=None, params=None):
         filename = file
         request_path = url
-        request_path = request_path.replace('?', '/')
-        if params:
-            param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
-            request_path = f'{url}/{param_string}'
 
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
         return response
@@ -104,12 +100,20 @@ def mock_http_get(request, monkeypatch, mock_http_call):
     def get(url, *args, **kwargs):
         method = 'GET'
         url = get_url_path(url)
-        if http_error and url in http_error:
-            return http_error[url]
+        request_path = url.replace('?', '/')
+        params = kwargs.get('params')
+        if params:
+            param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
+            request_path = f'{url}/{param_string}'
+
+        print(request_path)
+        if http_error and request_path in http_error:
+            return http_error[request_path]
+
         mock_status_code = mock.MagicMock(return_value=200)
         headers = kwargs.get('headers')
-        params = kwargs.get('params')
-        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
+
+        mock_json = mock.MagicMock(return_value=mock_http_call(method, request_path, headers=headers))
         return mock.MagicMock(json=mock_json, status_code=mock_status_code)
 
     mock_get = mock.MagicMock(side_effect=get)

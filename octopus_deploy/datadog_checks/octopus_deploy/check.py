@@ -12,6 +12,7 @@ from datadog_checks.base.utils.models.types import copy_raw
 
 from .config_models import ConfigMixin
 from .constants import API_UP_METRIC, PROJECT_COUNT_METRIC, PROJECT_GROUP_COUNT_METRIC
+from .error import handle_error
 from .project_groups import Project, ProjectGroup
 
 
@@ -34,6 +35,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         for _, _, project_group, project_group_config in self.project_groups():
             self._initialize_projects(project_group, project_group_config)
 
+    @handle_error
     def _get_new_tasks_for_project(self, project):
         self.log.debug("Getting new tasks for project %s", project.name)
         params = {'project': project.id, 'fromCompletedDate': project.last_task_time}
@@ -116,7 +118,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         return projects
 
     def collect_project_metrics(self, project_group):
-
         project_group_tags = [
             f"project_group_id:{project_group.id}",
             f"project_group_name:{project_group.name}",
@@ -124,6 +125,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.gauge(PROJECT_GROUP_COUNT_METRIC, 1, tags=self.base_tags + project_group_tags)
 
         projects = self.projects(project_group)
+        all_project_names = [project.name for _, _, project, _ in projects]
+        self.log.info(
+            "Collecting data from project group: %s, for projects: %s", project_group.name, ",".join(all_project_names)
+        )
 
         for _, _, project, _ in projects:
             project_tags = [
@@ -131,9 +136,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 f"project_name:{project.name}",
             ]
             self.gauge(PROJECT_COUNT_METRIC, 1, tags=self.base_tags + project_group_tags + project_tags)
-
-        all_project_names = [project.name for _, _, project, _ in projects]
-        self.log.info("Collecting data from projects: %s", ",".join(all_project_names))
 
     def _get_new_projects(self, project_group):
         projects_endpoint = f"{self.config.octopus_endpoint}/{self.space_id}/projectgroups/{project_group.id}/projects"
@@ -155,6 +157,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         for project_group in project_groups_json:
             new_project_group = ProjectGroup(project_group)
             project_groups.append(new_project_group)
+
+        all_project_group_names = [project_group.name for project_group in project_groups]
+        self.log.debug("Found new project groups: %s", all_project_group_names)
         return project_groups
 
     def _get_space_id(self):
@@ -207,7 +212,8 @@ def normalize_discover_config_include(log, config):
     for entry in include_list:
         if isinstance(entry, str):
             normalized_config[entry] = None
-        elif isinstance(entry, dict):
+        # entry is dict
+        else:
             for key, value in entry.items():
                 normalized_config[key] = value.copy()
     return normalized_config

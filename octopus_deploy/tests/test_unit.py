@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import logging
 
 import mock
 import pytest
@@ -23,6 +24,7 @@ from .constants import (
     PROJECT_ONLY_HI_METRICS,
     PROJECT_ONLY_HI_MY_PROJECT_METRICS,
     TASK_COUNT_METRICS,
+    TASK_COUNT_METRICS_NO_PROJECT_1,
 )
 
 
@@ -212,4 +214,32 @@ def test_task_metrics(get_current_datetime, dd_run_check, aggregator, instance):
     dd_run_check(check)
 
     for metric in TASK_COUNT_METRICS:
+        aggregator.assert_metric(metric["name"], count=metric["count"], tags=metric["tags"])
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get, message'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api/Spaces-1/tasks/project=Projects-1/fromCompletedDate=2024-09-23 '
+                    '14:45:58.888492+00:00': MockResponse(status_code=404)
+                }
+            },
+            'Encountered a RequestException in \'_get_new_tasks_for_project\'',
+            id='404',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_exception_when_getting_tasks(get_current_datetime, dd_run_check, aggregator, instance, message, caplog):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    caplog.set_level(logging.INFO)
+    dd_run_check(check)
+    assert message in caplog.text
+
+    for metric in PROJECT_GROUP_ALL_METRICS + PROJECT_ALL_METRICS + TASK_COUNT_METRICS_NO_PROJECT_1:
         aggregator.assert_metric(metric["name"], count=metric["count"], tags=metric["tags"])
