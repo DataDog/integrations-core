@@ -3,7 +3,7 @@
 	"created_at": "2024-09-30",
 	"last_updated_at": "2024-09-30",
 	"title": "High number of user invites",
-	"description": "This monitor tracks the volume of user invites sent within your platform. A significant increase in invites may indicate growing interest in your service, potential viral growth, or active marketing efforts. However, it could also signal unusual behavior or spam activities. By keeping an eye on this metric, you can assess user engagement and outreach effectiveness, as well as identify any anomalies that may require further investigation.",
+	"description": "This monitor tracks user invite volume on your platform. A surge may show interest, viral growth, or marketing. Yet, it might signal odd behavior or spam. Monitoring aids in gauging engagement, outreach impact, and spotting anomalies for investigation.",
 	"definition": {
 		"id": 154753670,
 		"name": "High number of user invites",

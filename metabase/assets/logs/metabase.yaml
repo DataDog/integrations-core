@@ -3,14 +3,14 @@ metric_id: metabase
 backend_only: false
 facets:
   - groups:
-      - User
-    name: User ID
-    path: usr.id
-    source: log
-  - groups:
       - Event
     name: Event Name
     path: evt.name
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
     source: log
 pipeline:
   type: pipeline
@@ -40,7 +40,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: date-remapper
-      name: Define `timestamp` as the official timestamp of the log
+      name: Define `timestamp` as the official date of the log
       enabled: true
       sources:
         - timestamp
