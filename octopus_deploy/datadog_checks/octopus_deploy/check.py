@@ -31,12 +31,12 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def _initialize_caches(self):
         self._initialize_project_groups()
-        for _, project_group_name, project_group, project_group_config in self.project_groups():
-            self._initialize_projects(project_group.id, project_group_name, project_group_config)
-            for _, _, project, _ in self.projects(project_group.id, project_group_name):
-                self._get_new_tasks_for_project(project, project_group)
+        for _, _, project_group, project_group_config in self.project_groups():
+            self._initialize_projects(project_group, project_group_config)
+            for _, _, project, _ in self.projects(project_group):
+                self._get_new_tasks_for_project(project)
 
-    def _get_new_tasks_for_project(self, project, project_group):
+    def _get_new_tasks_for_project(self, project):
         self.log.debug("Getting new tasks for project %s", project.name)
         params = {'project': project.id, 'fromCompletedDate': project.last_task_time}
         url = f"{self.config.octopus_endpoint}/{self.space_id}/tasks"
@@ -59,8 +59,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             project_tags = [
                 f"project_id:{project.id}",
                 f"project_name:{project.name}",
-                f"project_group_id:{project_group.id}",
-                f"project_group_name:{project_group.name}",
+                f"project_group_id:{project.project_group.id}",
+                f"project_group_name:{project.project_group.name}",
             ]
 
             tags = [f'task_name:{task_name}', f'task_id:{task_id}', f'task_state:{state}']
@@ -70,19 +70,19 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         new_completed_time = new_completed_time + timedelta(milliseconds=1)
         project.last_completed_time = new_completed_time
 
-    def _initialize_projects(self, project_group_id, project_group_name, project_group_config):
-        if not self._projects_discovery.get(project_group_name):
+    def _initialize_projects(self, project_group, project_group_config):
+        if not self._projects_discovery.get(project_group.name):
             normalized_projects = normalize_discover_config_include(
                 self.log, project_group_config.get("projects") if project_group_config else None
             )
             self.log.debug(
                 "Projects discovery for project_group %s: %s",
-                project_group_name,
+                project_group.name,
                 normalized_projects,
             )
             if normalized_projects:
-                self._projects_discovery[project_group_name] = Discovery(
-                    lambda: self._get_new_projects(project_group_id),
+                self._projects_discovery[project_group.name] = Discovery(
+                    lambda: self._get_new_projects(project_group),
                     limit=project_group_config.get('projects').get('limit') if project_group_config else None,
                     include=normalized_projects,
                     exclude=project_group_config.get('projects').get('exclude') if project_group_config else None,
@@ -90,7 +90,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                     key=lambda project: project.name,
                 )
             else:
-                self._projects_discovery[project_group_name] = None
+                self._projects_discovery[project_group.name] = None
 
         self.log.debug("Discovered projects: %s", self._projects_discovery)
 
@@ -109,18 +109,18 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                     key=lambda project_group: project_group.name,
                 )
 
-    def projects(self, project_group_id, project_group_name):
-        if self._projects_discovery.get(project_group_name):
-            projects = list(self._projects_discovery[project_group_name].get_items())
+    def projects(self, project_group):
+        if self._projects_discovery.get(project_group.name):
+            projects = list(self._projects_discovery[project_group.name].get_items())
         else:
-            projects = [(None, project.name, project, None) for project in self._get_new_projects(project_group_id)]
+            projects = [(None, project.name, project, None) for project in self._get_new_projects(project_group)]
 
         for _, _, project, _ in projects:
             tags = [
                 f"project_id:{project.id}",
                 f"project_name:{project.name}",
-                f"project_group_id:{project_group_id}",
-                f"project_group_name:{project_group_name}",
+                f"project_group_id:{project.project_group.id}",
+                f"project_group_name:{project.project_group.name}",
             ]
             self.gauge(PROJECT_COUNT_METRIC, 1, tags=self.base_tags + tags)
 
@@ -128,14 +128,14 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.info("Collecting data from projects: %s", ",".join(all_project_names))
         return projects
 
-    def _get_new_projects(self, project_group_id):
-        projects_endpoint = f"{self.config.octopus_endpoint}/{self.space_id}/projectgroups/{project_group_id}/projects"
+    def _get_new_projects(self, project_group):
+        projects_endpoint = f"{self.config.octopus_endpoint}/{self.space_id}/projectgroups/{project_group.id}/projects"
         response = self.http.get(projects_endpoint)
         response.raise_for_status()
         projects_json = response.json().get('Items', [])
         projects = []
         for project in projects_json:
-            new_project = Project(project)
+            new_project = Project(project, project_group)
             projects.append(new_project)
         return projects
 
