@@ -135,7 +135,7 @@ tests:
         "conversation_id" : "",
         "to_number" : "918540877900",
         "error_message" : "",
-        "error_code: null,
+        "error_code": null,
         "dlt_template_category" : "",
         "dlt_template_id" : "",
         "mnc" : "650",
