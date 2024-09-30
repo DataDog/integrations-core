@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.16.0 / 2024-09-30
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
 ## 36.15.0 / 2024-09-05
 
 ***Added***:
