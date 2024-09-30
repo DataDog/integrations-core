@@ -501,7 +501,7 @@ class SQLServer(AgentCheck):
                     "table": table,
                     "column": column,
                     "instance_name": db_name,
-                    "tags": self.non_internal_tags
+                    "tags": self.non_internal_tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -543,7 +543,7 @@ class SQLServer(AgentCheck):
                     "table": table,
                     "column": column,
                     "instance_name": "tempdb",
-                    "tags": self.non_internal_tags
+                    "tags": self.non_internal_tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
