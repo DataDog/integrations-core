@@ -122,10 +122,10 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
     dd_run_check(sqlserver_check)
 
     expected_tags = (
-        instance_docker.get('tags', [])+ 
-        sp_tags.split(',') + [
-        'dd.internal.resource:database_instance:stubbed.hostname'
-    ])
+        instance_docker.get('tags', [])
+        + sp_tags.split(',')
+        + ['dd.internal.resource:database_instance:stubbed.hostname']
+    )
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
