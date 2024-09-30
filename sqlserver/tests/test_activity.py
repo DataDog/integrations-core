@@ -203,8 +203,7 @@ def test_collect_load_activity(
     # internal debug metrics
     aggregator.assert_metric(
         OPERATION_TIME_METRIC_NAME,
-        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity']
-        + _expected_dbm_instance_tags(dbm_instance),
+        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity'] + _expected_dbm_instance_tags(check),
     )
 
 
@@ -755,8 +754,8 @@ def _get_conn_for_user(instance_docker, user, _autocommit=False):
     return conn
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags']
+def _expected_dbm_instance_tags(check):
+    return check._config.tags
 
 
 @pytest.mark.parametrize("activity_enabled", [True, False])
@@ -794,7 +793,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check.activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
-        tags=['job:query-activity'] + _expected_dbm_instance_tags(dbm_instance),
+        tags=['job:query-activity'] + _expected_dbm_instance_tags(check),
         hostname='',
     )
 
@@ -813,7 +812,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
-        tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-activity'],
+        tags=_expected_dbm_instance_tags(check) + ['job:query-activity'],
     )
 
 

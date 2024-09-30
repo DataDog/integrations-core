@@ -95,7 +95,7 @@ def test_sqlserver_index_usage_metrics(
     if not include_index_usage_metrics:
         assert index_usage_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
                 db, index_name, table, *metric_values = row
@@ -203,7 +203,7 @@ def test_sqlserver_db_fragmentation_metrics(
     if not include_db_fragmentation_metrics:
         assert db_fragmentation_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
                 database_name, object_name, index_id, index_name, *metric_values = row
@@ -273,7 +273,7 @@ def test_sqlserver_database_backup_metrics(
     sqlserver_check._database_metrics = [database_backup_metrics]
 
     dd_run_check(sqlserver_check)
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
     for result in mocked_results:
         db, database, *metric_values = result
         metrics = zip(database_backup_metrics.metric_names()[0], metric_values)
