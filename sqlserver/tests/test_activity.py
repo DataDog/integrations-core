@@ -203,8 +203,7 @@ def test_collect_load_activity(
     # internal debug metrics
     aggregator.assert_metric(
         OPERATION_TIME_METRIC_NAME,
-        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity']
-        + _expected_dbm_instance_tags(check),
+        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity'] + _expected_dbm_instance_tags(check),
     )
 
 
