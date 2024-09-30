@@ -294,11 +294,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /palo_alto_cortex_xdr/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_cortex_xdr/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/plivo/                                                              @DataDog/saas-integrations
-/plivo/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
-/plivo/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
-/plivo/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
-
 /snowflake/                                                          @DataDog/saas-integrations
 /snowflake/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /snowflake/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation

@@ -14,15 +14,13 @@ facets:
     path: plivo.carrier_fees
     source: log
     type: double
-  - facetType: list
-    groups:
+  - groups:
       - plivo
     name: Error Message
     path: error.message
     source: log
     type: string
-  - facetType: list
-    groups:
+  - groups:
       - plivo
     name: Error Type
     path: error.type
