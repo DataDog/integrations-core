@@ -43,7 +43,6 @@ except ImportError:
 def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_docker):
     instance_docker['password'] = 'FOO'
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-    instance_tags = instance_docker.get('tags', [])
 
     with pytest.raises(SQLConnectionError) as excinfo:
         sqlserver_check.initialize_connection()
@@ -56,7 +55,7 @@ def test_check_invalid_password(aggregator, dd_run_check, init_config, instance_
             'db:master',
             'connection_host:{}'.format(instance_docker.get('host')),
         ]
-        + instance_tags,
+        + sqlserver_check._config.tags,
         message=str(excinfo.value),
     )
 
@@ -93,7 +92,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
         instance_docker['autodiscovery_include'] = autodiscovery_dbs
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_docker.get('tags', []) + [
+    expected_tags = sqlserver_check._config.tags + [
         'connection_host:{}'.format(instance_docker.get('host')),
         'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
         'db:master',
@@ -101,7 +100,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     assert_metrics(
         instance_docker,
         aggregator,
-        check_tags=instance_docker.get('tags', []),
+        check_tags=sqlserver_check._config.tags,
         service_tags=expected_tags,
         dbm_enabled=dbm_enabled,
         hostname=sqlserver_check.resolved_hostname,
@@ -120,7 +119,7 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
 
-    expected_tags = instance_docker.get('tags', []) + sp_tags.split(',')
+    expected_tags = sqlserver_check._config.tags + sp_tags.split(',')
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
@@ -146,7 +145,7 @@ def test_check_stored_procedure_proc_if(aggregator, dd_run_check, init_config, i
 def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object_name, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     dd_run_check(sqlserver_check)
-    instance_tags = instance_docker.get('tags', []) + ['optional_tag:tag1']
+    instance_tags = sqlserver_check._config.tags + ['optional_tag:tag1']
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=instance_tags, count=1)
     aggregator.assert_metric('sqlserver.broker_activation.tasks_running', tags=instance_tags, count=1)
@@ -159,7 +158,7 @@ def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tab
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config_alt_tables, [instance_docker])
     dd_run_check(sqlserver_check)
-    instance_tags = instance_docker.get('tags', [])
+    instance_tags = sqlserver_check._config.tags
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=instance_tags, count=1)
     aggregator.assert_metric('sqlserver.LCK_M_S.signal_wait_time_ms', tags=instance_tags, count=1)
@@ -805,7 +804,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(check)
-    expected_tags = instance_docker.get('tags', []) + [
+    expected_tags = check._config.tags + [
         'db:datadog_test-1',
         'table:ϑings',
         'index_name:thingsindex',
@@ -844,15 +843,6 @@ def test_propagate_agent_tags(
         init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
 
     agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
-    expected_tags = (
-        instance_docker.get('tags', [])
-        + [
-            'connection_host:{}'.format(instance_docker.get('host')),
-            'sqlserver_host:None',
-            'db:master',
-        ]
-        + agent_tags
-    )
 
     with mock.patch('datadog_checks.sqlserver.config.get_agent_host_tags', return_value=agent_tags):
         check = SQLServer(CHECK_NAME, init_config, [instance_docker])
@@ -860,6 +850,15 @@ def test_propagate_agent_tags(
         if should_propagate_agent_tags:
             assert all(tag in check.tags for tag in agent_tags)
             dd_run_check(check)
+            expected_tags = (
+                check._config.tags
+                + [
+                    'connection_host:{}'.format(instance_docker.get('host')),
+                    'sqlserver_host:None',
+                    'db:master',
+                ]
+                + agent_tags
+            )
             aggregator.assert_service_check(
                 'sqlserver.can_connect',
                 count=1,
