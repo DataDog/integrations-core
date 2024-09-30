@@ -13,12 +13,12 @@
     "media": [
       {
         "caption": "Cisco Secure Web Appliance - Access Logs",
-        "image_url": "images/cisco_secure_endpoint_access_logs.png",
+        "image_url": "images/cisco_secure_web_appliance_access_logs.png",
         "media_type": "image"
       },
       {
-        "caption": "Cisco Secure Endpoint - Event",
-        "image_url": "images/cisco_secure_endpoint_l4tm_logs.png",
+        "caption": "Cisco Secure Web Appliance - L4TM Logs",
+        "image_url": "images/cisco_secure_web_appliance_l4tm_logs.png",
         "media_type": "image"
       }
     ],
