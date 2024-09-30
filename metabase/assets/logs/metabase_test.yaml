@@ -1,0 +1,14 @@
+id: metabase
+tests:
+  - sample: '{"id": "178", "topic": "dashboard-add-cards", "timestamp":
+      "2024-09-30T11:47:26.247269+05:30", "end_timestamp": null, "user_id": 1,
+      "entity_type": "dashboard", "entity_id": 11, "entity_qualified_id":
+      "dashboard_11", "details": {"description": null, "name": "CDS-Views",
+      "id": 11, "dashcards": [{"name": "Client, Filtered by Client ID is abc", "description": null, "id": 118, "card_id": 120}]}}'
+    result: null
+  - sample: '{"id": "188", "topic": "setting-update", "timestamp":
+      "2024-09-30T12:37:04.133904+05:30", "end_timestamp": null, "user_id": 1,
+      "entity_type": "setting", "entity_id": null, "entity_qualified_id": null,
+      "details": {"key": "report-timezone", "previous-value": "UCT",
+      "new-value": "UTC"}}'
+    result: null

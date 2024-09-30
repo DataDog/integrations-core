@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-09-30",
+	"last_updated_at": "2024-09-30",
+	"title": "High number of user deactivations",
+	"description": "This monitor tracks the rate of user deactivations within your platform. A sudden spike in deactivations may suggest issues such as user dissatisfaction, security breaches, or policy violations. By monitoring this metric, you can quickly identify trends and investigate the underlying causes, allowing for timely intervention and improved user retention strategies.",
+	"definition": {
+		"id": 154754660,
+		"name": "High number of user deactivations",
+		"type": "log alert",
+		"query": "logs(\"source:metabase service:activity-events @evt.name:user-deactivated\").index(\"*\").rollup(\"count\").last(\"12h\") > 10",
+		"message": "{{#is_alert}}\n\nThis indicates a significant rise in user account deactivations, potentially highlighting issues with user satisfaction or engagement. Monitoring this trend is crucial for improving retention strategies.\n\n{{/is_alert}}\n\n{{#is_warning}}\n\nThis indicates a significant increase in user account deactivations, which may signal underlying issues with user satisfaction or engagement. Immediate attention is required to address this trend and implement effective retention strategies to prevent further losses. Monitor closely and act swiftly!\n\n{{/is_warning}}\n\n@example@example.com",
+		"tags": [
+			"integration:metabase"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"enable_logs_sample": true,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"silenced": {}
+		},
+		"priority": 1,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:metabase"
+	]
+}

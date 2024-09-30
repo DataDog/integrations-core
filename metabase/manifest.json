@@ -8,9 +8,50 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Metabase is a business intelligence analytics platform that can be used to ask questions about your data",
+    "description": "Gain insights into Metabase activity log events.",
     "title": "Metabase",
-    "media": [],
+    "media": [
+      {
+        "caption": "Metabase - Activity Overview 1",
+        "image_url": "images/metabase_activity_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 2",
+        "image_url": "images/metabase_activity_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 3",
+        "image_url": "images/metabase_activity_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 4",
+        "image_url": "images/metabase_activity_overview_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 5",
+        "image_url": "images/metabase_activity_overview_5.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 6",
+        "image_url": "images/metabase_activity_overview_6.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 7",
+        "image_url": "images/metabase_activity_overview_7.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Activity Overview 8",
+        "image_url": "images/metabase_activity_overview_8.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Submitted Data Type::Logs",
@@ -28,6 +69,17 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Metabase - Activity Overview": "assets/dashboards/metabase_activity_overview.json"
+    },
+    "logs": {
+      "source": "metabase"
+    },
+    "monitors": {
+      "High number of user invites" : "assets/monitors/high_number_of_user_invites.json",
+      "High number of API Key regenerations" : "assets/monitors/high_number_of_api_key_regenerations.json",
+      "High number of user deactivations" : "assets/monitors/high_number_of_user_deactivations.json"
     }
   },
   "author": {

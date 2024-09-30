@@ -1,0 +1,51 @@
+id: metabase
+metric_id: metabase
+backend_only: false
+facets:
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Metabase
+  enabled: true
+  filter:
+    query: "source:metabase"
+  processors:
+    - type: attribute-remapper
+      name: Map `user_id` to `usr.id`
+      enabled: true
+      sources:
+        - user_id
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `topic` to `evt.name`
+      enabled: true
+      sources:
+        - topic
+      sourceType: attribute
+      target: evt.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: date-remapper
+      name: Define `timestamp` as the official timestamp of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
