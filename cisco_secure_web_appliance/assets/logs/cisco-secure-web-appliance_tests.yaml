@@ -1,49 +1,18 @@
 id: cisco-secure-web-appliance
 tests:
-  - sample: '<38>Sep 25 12:13:55 Crest.CSWA accesslogs: Info: 1727246631.866 93971
-      10.10.11.12 TCP_MISS/200 8560 CONNECT tunnel://csp.withgoogle.com:443/ -
-      DIRECT/csp.withgoogle.com application/octet-stream
-      DEFAULT_CASE_12-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE
-      <"IW_comp",3.0,1,"-",-,-,-,1,"-",-,-,-,"-",1,-,"-","-",-,-,"IW_comp,IW_csec",-,"-","Computers
-      and
-      Internet","-","Unknown","Unknown","-","-",0.73,0,-,"-","-",1,"-",-,-,"-","-",-,1,"-",-,->
-      - -'
+  - sample: '<38>Sep 25 12:13:55 Crest.CSWA accesslogs: Info: 1727246631.866 93971 10.10.10.10 TCP_MISS/200 8560 CONNECT tunnel://csp.withgoogle.com:443/ - DIRECT/csp.withgoogle.com application/octet-stream DEFAULT_CASE_12-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE <"IW_comp",3.0,1,"-",-,-,-,1,"-",-,-,-,"-",1,-,"-","-",-,-,"IW_comp,IW_csec",-,"-","Computers and Internet","-","Unknown","Unknown","-","-",0.73,0,-,"-","-",1,"-",-,-,"-","-",-,1,"-",-,-> - -'
     result: null
-  - sample: '<38>Sep 25 12:13:55 Crest.CSWA accesslogs: Info: 1727360160.873 206
-      10.10.10.10 DIRECT/451 8207 GET www.learning.com - DIRECT/www.learning.com
-      application/json
-      BLOCK_AMW_REQ_12-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE
-      <"IW_infr",-6.5,21,"Troj/Phish",0,354385,12559,21,"WSA_INFECTED_FILE.pdf",-,Trojan,Troj/Phish,"Rootkit",21,-,"Reference","Troj/Phish",1,1,"Reference",Reference,"-","Social
-      Networking","-","Social Networking","Social
-      Networking","-","-",246.75,0,Local,"-Troj/Phish","-",39,"W32.CiscoTestVector",33,1,"WSA-INFECTED-FILE.pdf","fd5ef49d4213e05f448f11ed9c98253d85829614fba368a421d14e64c426da5e",ARCHIVESCAN_BLOCKEDFILETYPE,EXT_ARCHIVESCAN_VERDICT,"EXT_ARCHIVESCAN_THREATDETAIL",EXT_WTT_BEHAVIOR,EXT_YTCAT>
-      - -'
+  - sample: '<38>Sep 25 12:13:55 Crest.CSWA accesslogs: Info: 1727360160.873 206 10.10.10.10 DIRECT/451 8207 GET www.learning.com - DIRECT/www.learning.com application/json BLOCK_AMW_REQ_12-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE <"IW_infr",-6.5,21,"Troj/Phish",0,354385,12559,21,"WSA_INFECTED_FILE.pdf",-,Trojan,Troj/Phish,"Rootkit",21,-,"Reference","Troj/Phish",1,1,"Reference",Reference,"-","Social Networking","-","Social Networking","Social Networking","-","-",246.75,0,Local,"-Troj/Phish","-",39,"W32.CiscoTestVector",33,1,"WSA-INFECTED-FILE.pdf","fd5ef49d4213e05f448f11ed9c98253d85829614fba368a421d14e64c426da5e",ARCHIVESCAN_BLOCKEDFILETYPE,EXT_ARCHIVESCAN_VERDICT,"EXT_ARCHIVESCAN_THREATDETAIL",EXT_WTT_BEHAVIOR,EXT_YTCAT> - -'
     result: null
-  - sample: 1727360160.873 206 10.10.10.10 (abc.com) DIRECT/451 8207 GET
-      www.gottapedia.com - DIRECT/www.gottapedia.com application/json
-      BLOCK_AMW_RESP_11-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE
-      <"IW_infr",-6.5,21,"Troj/Phish",0,354385,12559,21,"WSA_INFECTED_FILE.pdf",-,Trojan,Troj/Phish,"Rootkit",21,-,"Reference","Troj/Phish",1,1,"Reference",Reference,"Phishing
-      URL","Social Networking","-","Social Networking","Social
-      Networking","-","-",246.75,0,Local,"-","-",39,"W32.CiscoTestVector",33,1,"WSA-INFECTED-FILE.pdf","fd5ef49d4213e05f448f11ed9c98253d85829614fba368a421d14e64c426da5e",ARCHIVESCAN_BLOCKEDFILETYPE,EXT_ARCHIVESCAN_VERDICT,"EXT_ARCHIVESCAN_THREATDETAIL",EXT_WTT_BEHAVIOR,EXT_YTCAT>
-      - -
+  - sample: 1727360160.873 206 10.10.10.10 (abc.com) DIRECT/451 8207 GET www.gottapedia.com - DIRECT/www.gottapedia.com application/json BLOCK_AMW_RESP_11-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE <"IW_infr",-6.5,21,"Troj/Phish",0,354385,12559,21,"WSA_INFECTED_FILE.pdf",-,Trojan,Troj/Phish,"Rootkit",21,-,"Reference","Troj/Phish",1,1,"Reference",Reference,"Phishing URL","Social Networking","-","Social Networking","Social Networking","-","-",246.75,0,Local,"-","-",39,"W32.CiscoTestVector",33,1,"WSA-INFECTED-FILE.pdf","fd5ef49d4213e05f448f11ed9c98253d85829614fba368a421d14e64c426da5e",ARCHIVESCAN_BLOCKEDFILETYPE,EXT_ARCHIVESCAN_VERDICT,"EXT_ARCHIVESCAN_THREATDETAIL",EXT_WTT_BEHAVIOR,EXT_YTCAT> - -
     result: null
-  - sample: 1727246631.866 93971 10.10.11.12 TCP_MISS/200 8560 CONNECT
-      tunnel://csp.withgoogle.com:443/ - DIRECT/csp.withgoogle.com
-      application/octet-stream
-      DEFAULT_CASE_12-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE
-      <"IW_comp",3.0,1,"-",-,-,-,1,"-",-,-,-,"-",1,-,"-","-",-,-,"IW_comp,IW_csec",-,"-","Computers
-      and
-      Internet","-","Unknown","Unknown","-","-",0.73,0,-,"-","-",1,"-",-,-,"-","-",-,1,"-",-,->
-      - -
+  - sample: 1727246631.866 93971 10.10.11.12 TCP_MISS/200 8560 CONNECT tunnel://csp.withgoogle.com:443/ - DIRECT/csp.withgoogle.com application/octet-stream DEFAULT_CASE_12-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE <"IW_comp",3.0,1,"-",-,-,-,1,"-",-,-,-,"-",1,-,"-","-",-,-,"IW_comp,IW_csec",-,"-","Computers and Internet","-","Unknown","Unknown","-","-",0.73,0,-,"-","-",1,"-",-,-,"-","-",-,1,"-",-,-> - -
     result: null
-  - sample: "Wed Sep 18 18:59:26 2024 Info: Firewall allowed TCP data from
-      10.10.10.10:80 to 10.10.10.10:80."
+  - sample: "Wed Sep 18 18:59:26 2024 Info: Firewall allowed TCP data from 10.10.10.10:80 to 10.10.10.10:80."
     result: null
-  - sample: "Wed Sep 18 18:59:26 2024 Info: Firewall blocked TCP data from
-      10.10.10.10 (abc.net) to 10.10.10.10 (abc.net)."
+  - sample: "Wed Sep 18 18:59:26 2024 Info: Firewall blocked TCP data from 10.10.10.10 (abc.net) to 10.10.10.10 (abc.net)."
     result: null
-  - sample: "Wed Sep 18 18:59:27 2024 Info: Address 10.10.10.10 for blocksite.net
-      (blocksite.net) removed from firewall block list."
+  - sample: "Wed Sep 18 18:59:27 2024 Info: Address 10.10.10.10 for blocksite.net (blocksite.net) removed from firewall block list."
     result: null
-  - sample: "Wed Sep 18 18:59:27 2024 Info: Address 10.10.10.10 (abc.net) for
-      blocksite.net (blocksite.net) removed from firewall block list."
+  - sample: "Wed Sep 18 18:59:27 2024 Info: Address 10.10.10.10 (abc.net) for blocksite.net (blocksite.net) removed from firewall block list."
     result: null
