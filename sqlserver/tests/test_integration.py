@@ -188,7 +188,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     master_tags = [
         'database:master',
@@ -229,7 +229,7 @@ def test_autodiscovery_db_service_checks(
     instance_autodiscovery['autodiscovery_db_service_check'] = service_check_enabled
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     # verify that the old status check returns OK
     aggregator.assert_service_check(
@@ -280,7 +280,7 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
     instance_autodiscovery['autodiscovery_include'] = ['master']
     instance_autodiscovery['autodiscovery_exclude'] = ['msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     dd_run_check(check)
 
@@ -324,7 +324,7 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
     instance_autodiscovery['autodiscovery_include'] = ['master', 'msdb']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE_SINGLE]
     master_tags = ['database:master'] + instance_tags
@@ -341,7 +341,7 @@ def test_autodiscovery_perf_counters_ao(aggregator, dd_run_check, instance_autod
     instance_autodiscovery['autodiscovery_include'] = ['datadog_test-1']
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     dd_run_check(check)
-    instance_tags = instance_autodiscovery.get('tags', [])
+    instance_tags = check._config.tags
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
     tags = ['database:datadog_test-1'] + instance_tags
