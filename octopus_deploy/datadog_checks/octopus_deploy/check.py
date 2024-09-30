@@ -33,8 +33,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._initialize_project_groups()
         for _, _, project_group, project_group_config in self.project_groups():
             self._initialize_projects(project_group, project_group_config)
-            for _, _, project, _ in self.projects(project_group):
-                self._get_new_tasks_for_project(project)
 
     def _get_new_tasks_for_project(self, project):
         self.log.debug("Getting new tasks for project %s", project.name)
@@ -115,18 +113,27 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         else:
             projects = [(None, project.name, project, None) for project in self._get_new_projects(project_group)]
 
+        return projects
+
+    def collect_project_metrics(self, project_group):
+
+        project_group_tags = [
+            f"project_group_id:{project_group.id}",
+            f"project_group_name:{project_group.name}",
+        ]
+        self.gauge(PROJECT_GROUP_COUNT_METRIC, 1, tags=self.base_tags + project_group_tags)
+
+        projects = self.projects(project_group)
+
         for _, _, project, _ in projects:
-            tags = [
+            project_tags = [
                 f"project_id:{project.id}",
                 f"project_name:{project.name}",
-                f"project_group_id:{project.project_group.id}",
-                f"project_group_name:{project.project_group.name}",
             ]
-            self.gauge(PROJECT_COUNT_METRIC, 1, tags=self.base_tags + tags)
+            self.gauge(PROJECT_COUNT_METRIC, 1, tags=self.base_tags + project_group_tags + project_tags)
 
         all_project_names = [project.name for _, _, project, _ in projects]
         self.log.info("Collecting data from projects: %s", ",".join(all_project_names))
-        return projects
 
     def _get_new_projects(self, project_group):
         projects_endpoint = f"{self.config.octopus_endpoint}/{self.space_id}/projectgroups/{project_group.id}/projects"
@@ -178,20 +185,13 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             project_groups = [
                 (None, project_groups.name, project_groups, None) for project_groups in self._get_new_project_groups()
             ]
-
-        for _, project_group_name, project_group, _ in project_groups:
-            tags = [
-                f"project_group_id:{project_group.id}",
-                f"project_group_name:{project_group_name}",
-            ]
-            self.gauge(PROJECT_GROUP_COUNT_METRIC, 1, tags=self.base_tags + tags)
-
-        all_project_group_names = [project_group.name for _, _, project_group, _ in project_groups]
-        self.log.info("Collecting data from project_groups: %s", ",".join(all_project_group_names))
         return project_groups
 
     def check(self, _):
-        pass
+        for _, _, project_group, _ in self.project_groups():
+            self.collect_project_metrics(project_group)
+            for _, _, project, _ in self.projects(project_group):
+                self._get_new_tasks_for_project(project)
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
