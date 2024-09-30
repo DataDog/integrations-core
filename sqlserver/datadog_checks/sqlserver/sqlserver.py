@@ -709,8 +709,8 @@ class SQLServer(AgentCheck):
             metric_type = getattr(self, metric_type_str)
 
         cfg_inst["hostname"] = self.resolved_hostname
-
-        return cls(cfg_inst, base_name, metric_type, column, self.log, self.tags)
+        tags = [t for t in self.tags if not t.startswith('dd.internal')]
+        return cls(cfg_inst, base_name, metric_type, column, self.log, tags)
 
     def _check_connections_by_connecting_to_db(self):
         for db in self.databases:
