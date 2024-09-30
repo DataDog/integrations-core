@@ -1,6 +1,16 @@
 # Squid Integration
 
 ## Overview
+[Squid][1] is an open-source caching and forwarding web proxy server that operates as an intermediary between clients and servers on a network. It acts as a gateway, enabling clients to access various internet resources such as websites, files, and other content from servers.
+
+This integration provides enrichment and visualization for access and cache logs. It helps to visualize detailed insights into access and cache log analysis through the out-of-the-box dashboards and detection rules enhance detection and response capabilities.
+
+Additionally, it includes pre-configured monitors for proactive notifications on the following:
+
+1. High usage of cache digest memory
+2. High number of server errors
+3. High latency requests
+4. High number of client HTTP errors
 
 This check monitors [Squid][1] metrics from the Cache Manager through the Datadog Agent.
 
@@ -51,6 +61,8 @@ _Available for Agent versions >6.0_
 
     Change the `path` and `service` parameter values and configure them for your environment.
 
+    **Note**: if you change the default filepath make sure you keep the same filename i.e. `access.log` and `cache.log`.
+
 3. [Restart the Agent][5].
 
 <!-- xxz tab xxx -->
@@ -87,6 +99,33 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ## Data Collected
 
+### Logs
+The Squid integration collects access and cache logs.
+
+#### Supported Access Log Formats
+
+logformat squid      `%ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %[un %Sh/%<a %mt`
+
+logformat common     `%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %Ss:%Sh`
+
+logformat combined   `%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh`
+
+Refer Squid log formats [here][12]
+
+**Note**: Default logformat is `squid`. you can update the supported log format in `/etc/squid/squid.conf`, then restart Squid. below is example.
+
+For combined logformat add below line in `/etc/squid/squid.conf`
+
+```
+logformat combined   %>a %[ui %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh
+access_log /var/log/squid/access.log combined
+```
+Then restart th squid service
+
+  ```shell
+  sudo systemctl restart squid
+  ```  
+
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this check.
@@ -115,3 +154,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/squid/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/squid/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
+[12]: https://www.squid-cache.org/Doc/config/logformat/
+[13]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
