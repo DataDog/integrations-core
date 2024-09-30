@@ -852,7 +852,7 @@ def test_propagate_agent_tags(
             dd_run_check(check)
             expected_tags = check._config.tags + [
                 'connection_host:{}'.format(instance_docker.get('host')),
-                'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
+                'sqlserver_host:{}'.format(check.resolved_hostname),
                 'db:master',
             ]
             aggregator.assert_service_check(
