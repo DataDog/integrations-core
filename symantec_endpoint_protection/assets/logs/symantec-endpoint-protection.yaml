@@ -3,27 +3,62 @@ metric_id: symantec-endpoint-protection
 backend_only: false
 facets:
   - groups:
-      - User
-    name: User Name
-    path: usr.name
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
     source: log
   - groups:
       - Web Access
     name: Client IP
     path: network.client.ip
     source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
 pipeline:
   type: pipeline
   name: Symantec Endpoint Protection
   enabled: true
   filter:
-    query: "source:symantec-endpoint-protection "
+    query: source:symantec-endpoint-protection
   processors:
     - type: pipeline
       name: Processing for Application Logs
       enabled: true
       filter:
-        query: "Device ID "
+        query: "Device ID"
       processors:
         - type: grok-parser
           name: Parsing Application Logs
@@ -31,7 +66,7 @@ pipeline:
           source: message
           samples:
             - "<54>Sep 13 08:21:26 WIN-RQBT7BNE363 SymantecServer:
-              DESKTOP-CIK30CC,10.50.11.208,Continue,Application and Device
+              DESKTOP-CIK30CC,172.50.12.208,Continue,Application and Device
               Control is ready,System,Begin: 2024-09-13 08:20:13,End Time:
               2024-09-13 08:20:13,Rule: Built-in
               rule,0,SysPlant,0,SysPlant,None,User Name: None,Domain Name:
@@ -44,7 +79,7 @@ pipeline:
               example.local,Action Type: Block,File size (bytes): 16385,Device
               ID: 890124,IP Address: 104.199.65.125,IP Address1: 203.0.113.1,MAC
               Address1: 00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP Address2:
-              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP
+              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 172.0.0.1,IP
               Address3: 192.0.2.1,MAC Address3: 11:22:33:44:55:66,GATEWAY3:
               172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
               66:77:88:99:00:11,GATEWAY4: 203.0.113.254"
@@ -83,7 +118,7 @@ pipeline:
               )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
               )?%{regex("[^,]*"):gateway4}?)?'
         - type: attribute-remapper
-          name: Mapping `user_name` to `usr.name`
+          name: Map `user_name` to `usr.name`
           enabled: true
           sources:
             - user_name
@@ -93,7 +128,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Mapping `ip_address` to `network.client.ip`
+          name: Map `ip_address` to `network.client.ip`
           enabled: true
           sources:
             - ip_address
@@ -106,7 +141,7 @@ pipeline:
       name: Processing for Security Logs
       enabled: true
       filter:
-        query: "CIDS Signature ID "
+        query: "CIDS Signature ID"
       processors:
         - type: grok-parser
           name: Parsing Security Logs
@@ -115,9 +150,9 @@ pipeline:
           samples:
             - "<54>Sep 16 23:59:55 WIN-RQBT7BNE363 SymantecServer:
               WIN-4K914H0NBUP,Event Description: Host Integrity check passed
-              ,Event Type: ,Local Host IP: 10.50.11.216,Local Host MAC:
+              ,Event Type: ,Local Host IP: 172.50.12.216,Local Host MAC:
               0050569214AF,Remote Host Name: ,Remote Host IP:
-              10.50.11.216,Remote Host MAC: 000000000000,Unknown,OTHERS,,Begin:
+              172.50.12.216,Remote Host MAC: 000000000000,Unknown,OTHERS,,Begin:
               2024-09-16 23:58:20,End Time: 2024-09-16 23:58:20,Occurrences:
               1,Application: ,Location: Default,User Name: none,Domain Name:
               ,Local Port: 0,Remote Port: 0,CIDS Signature ID: 0,CIDS Signature
@@ -129,7 +164,7 @@ pipeline:
               the device. [name]:VMware USB Pointing Device [class]:Mice and
               other pointing devices [guid]:4d36e96f-e325-11ce-bfc1-08002be10318
               [deviceID]:HID\\VID_0E0F&PID_0003&MI_01\\8&95BC71C&0&0000,Event
-              Type: ,Local Host IP: 10.50.11.208,Local Host MAC:
+              Type: ,Local Host IP: 172.50.12.208,Local Host MAC:
               00505681213E,Remote Host Name: ,Remote Host IP: 0.0.0.0,Remote
               Host MAC: 000000000000,Unknown,Unknown,,Begin: 2024-09-12
               00:10:39,End Time: 2024-09-12 00:10:39,Occurrences:
@@ -141,12 +176,12 @@ pipeline:
             - "<52>Sep 11 03:17:37 WIN-RQBT7BNE363 SymantecServer:
               DESKTOP-GGG3BOO,\"Event Description: Somebody is scanning your
               computer.  Your computer's TCP ports:   21, 22, 443, 25 and 23
-              have been scanned from 10.50.7.24.\",Event Type: ,Local Host IP:
-              10.50.11.207,Local Host MAC: 00505681D973,Remote Host Name:
-              ,Remote Host IP: 10.50.7.24,Remote Host MAC:
+              have been scanned from 172.50.7.24.\",Event Type: ,Local Host IP:
+              172.50.11.207,Local Host MAC: 00505681D973,Remote Host Name:
+              ,Remote Host IP: 172.50.7.24,Remote Host MAC:
               00505681A7C6,Inbound,TCP,,Begin: 2024-09-11 03:15:28,End Time:
               2024-09-11 03:15:29,Occurrences: 1,Application: ,Location:
-              Default,User Name: Crest,Domain Name: DESKTOP-GGG3BOO,Local Port:
+              Default,User Name: Test,Domain Name: DESKTOP-GGG3BOO,Local Port:
               0,Remote Port: 0,CIDS Signature ID: 0,CIDS Signature string: ,CIDS
               Signature SubID: 0,Intrusion URL: ,Intrusion Payload URL:
               ,SHA-256: ,MD-5: ,Intensive Protection Level: N/A,URL Risk:
@@ -157,7 +192,7 @@ pipeline:
               this application: C:\\PROGRAM FILES
               (X86)\\GOOGLE\\CHROME\\APPLICATION\\CHROME.EXE,Event Type:
               Intrusion Prevention System Intrusion Detected,Local Host IP:
-              10.160.11.56,Local Host MAC: 0050569214B1,Remote Host Name:
+              172.160.12.56,Local Host MAC: 0050569214B1,Remote Host Name:
               test456,Remote Host IP: 93.184.216.100,Remote Host MAC:
               00:11:22:33:44:55,Inbound,TCP,Blocked,Begin: 2022-04-27
               00:58:20,End Time: 2022-04-27 00:58:20,Occurrences: 1,Application:
@@ -171,7 +206,7 @@ pipeline:
               ckMe&amp;rand=1651046295517,Intrusion Payload URL:
               http://example.com,IP Address1: 203.0.113.1,MAC Address1:
               00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP Address2:
-              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP
+              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 172.0.0.1,IP
               Address3: 192.0.2.1,MAC Address3: 11:22:33:44:55:66,GATEWAY3:
               172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
               66:77:88:99:00:11,GATEWAY4: 203.0.113.254,SHA-256:
@@ -241,7 +276,7 @@ pipeline:
               )?%{regex("(.*?)"):url_category}?(,Correlation ID:(
               )?%{regex("(.*?)"):correlation_id}?)?
         - type: attribute-remapper
-          name: Mapping `user_name` to `usr.name`
+          name: Map `user_name` to `usr.name`
           enabled: true
           sources:
             - user_name
@@ -251,7 +286,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Mapping `remote_host_ip` to `network.client.ip`
+          name: Map `remote_host_ip` to `network.client.ip`
           enabled: true
           sources:
             - remote_host_ip
@@ -264,7 +299,7 @@ pipeline:
       name: Processing for Risk Logs
       enabled: true
       filter:
-        query: "Risk name "
+        query: "Risk name"
       processors:
         - type: grok-parser
           name: Parsing Risk Logs
@@ -272,17 +307,17 @@ pipeline:
           source: message
           samples:
             - "<54>Sep 11 02:54:24 WIN-RQBT7BNE363 SymantecServer: Virus
-              found,IP Address: 10.50.11.207,Computer name:
+              found,IP Address: 172.50.12.207,Computer name:
               DESKTOP-GGG3BOO,Source: Auto-Protect scan,Risk name:
               Trojan.Gen.NPE.2,Occurrences: 1,File path:
-              C:\\Users\\Crest.DESKTOP-GGG3BOO\\Downloads\\Unconfirmed
+              C:\\Users\\Test.DESKTOP-GGG3BOO\\Downloads\\Unconfirmed
               791873.crdownload,Description: ,Actual action: Cleaned by
               deletion,Requested action: Cleaned,Secondary action:
               Quarantined,Event time: 2024-09-11 02:52:57,Event Insert Time:
               2024-09-11 02:54:24,End Time: 2024-09-11 02:52:58,Last update
               time: 2024-09-11 02:54:24,Domain Name: Default,Group Name: My
               Company\\Default Group,Server Name: WIN-RQBT7BNE363,User Name:
-              Crest,Source Computer Name: ,Source Computer IP: ,Disposition:
+              Test,Source Computer Name: ,Source Computer IP: ,Disposition:
               Bad,Download site: ,Web domain: ,Downloaded by:
               msedge.exe,Prevalence: This file has been seen by tens of
               thousands of Symantec users.,Confidence: This file is
@@ -310,7 +345,7 @@ pipeline:
               DESKTOP-GHI789,Source Computer IP: 192.168.1.104,IP Address 1:
               203.0.113.1,MAC Address 1: 00:11:22:33:44:55,GATEWAY IP 1:
               192.168.1.1,IP Address 2: 198.51.100.1,MAC Address 2:
-              AA:BB:CC:DD:EE:FF,GATEWAY IP 2: 10.0.0.1,IP Address 3:
+              AA:BB:CC:DD:EE:FF,GATEWAY IP 2: 172.0.0.1,IP Address 3:
               192.0.2.1,MAC Address 3: 11:22:33:44:55:66,GATEWAY IP 3:
               172.16.1.1,IP Address 4: 185.245.40.65,MAC Address 4:
               66:77:88:99:00:11,GATEWAY IP 4: 203.0.113.254,Disposition:
@@ -396,7 +431,7 @@ pipeline:
               )?%{regex("(.*?)(?=,)"):signing_timestamp}?,Certificate serial
               number:( )?%{regex("(.*?)"):certificate_serial_number}?'
         - type: attribute-remapper
-          name: Mapping `user_name` to `usr.name`
+          name: Map `user_name` to `usr.name`
           enabled: true
           sources:
             - user_name
@@ -406,7 +441,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Mapping `ip_address` to `network.client.ip`
+          name: Map `ip_address` to `network.client.ip`
           enabled: true
           sources:
             - ip_address
@@ -419,7 +454,7 @@ pipeline:
       name: Processing for Scan Logs
       enabled: true
       filter:
-        query: "Scan ID "
+        query: "Scan ID"
       processors:
         - type: grok-parser
           name: Parsing Scan Logs
@@ -434,7 +469,7 @@ pipeline:
               732   Files/Folders/Drives Omitted: 0 Trusted Files Skipped:
               338,Command: Not a command scan (),Threats: 0,Infected: 0,Total
               files: 732,Omitted: 0,Computer: DESKTOP-GGG3BOO,IP Address:
-              10.50.11.207,Domain Name: Default,Group Name: My Company\\Default
+              172.50.12.207,Domain Name: Default,Group Name: My Company\\Default
               Group,Server Name: WIN-RQBT7BNE363,Scan Type: Definition Watch
               Scan\t"
             - "<54>Sep 17 04:21:09 WIN-RQBT7BNE363 SymantecServer: Scan ID:
@@ -455,7 +490,7 @@ pipeline:
               WIN-RQBT7BNE363,Scan Type: Definition Watch Scan,IP Address1:
               203.0.113.1,MAC Address1: 00:11:22:33:44:55,GATEWAY1:
               192.168.1.1,IP Address2: 198.51.100.1,MAC Address2:
-              AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP Address3: 192.0.2.1,MAC
+              AA:BB:CC:DD:EE:FF,GATEWAY2: 172.0.0.1,IP Address3: 192.0.2.1,MAC
               Address3: 11:22:33:44:55:66,GATEWAY3: 172.16.1.1,IP Address4:
               185.245.40.65,MAC Address4: 66:77:88:99:00:11,GATEWAY4:
               203.0.113.254"
@@ -471,7 +506,7 @@ pipeline:
               Group,Server Name: WIN-RQBT7BNE363,Scan Type: Definition Watch
               Scan,IP Address1: 203.0.113.1,MAC Address1:
               00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP Address2:
-              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP
+              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 172.0.0.1,IP
               Address3: 192.0.2.1,MAC Address3: 11:22:33:44:55:66,GATEWAY3:
               172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
               66:77:88:99:00:11,GATEWAY4: 203.0.113.254"
@@ -512,7 +547,7 @@ pipeline:
               )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
               )?%{regex("[^,]*"):gateway4})?
         - type: attribute-remapper
-          name: Mapping `ip_address` to `network.client.ip`
+          name: Map `ip_address` to `network.client.ip`
           enabled: true
           sources:
             - ip_address
@@ -525,7 +560,7 @@ pipeline:
       name: Processing for Traffic Logs
       enabled: true
       filter:
-        query: "Action "
+        query: "Action"
       processors:
         - type: grok-parser
           name: Parsing Traffic Logs
@@ -533,8 +568,8 @@ pipeline:
           source: message
           samples:
             - "<54>Apr 27 00:49:29 C7016238111 SymantecServer: C7332658237,Local
-              Host IP: 10.160.11.56,Local Port: 3,Local Host MAC:
-              00505624157B,Remote Host IP: 10.160.59.184,Remote Host Name:
+              Host IP: 172.160.12.56,Local Port: 3,Local Host MAC:
+              00505624157B,Remote Host IP: 172.160.60.184,Remote Host Name:
               test,Remote Port: 3,Remote Host MAC:
               00505604B7C5,ICMP,Outbound,Begin: 2022-04-27 02:44:28,End Time:
               2022-04-27 02:44:28,Occurrences: 1,Application: test,Rule: Block
@@ -542,20 +577,20 @@ pipeline:
               Administrator,Domain Name: C7332658237,Action: Blocked,SHA-256:
               test,MD-5:"
             - "<54>Sep 11 03:07:36 WIN-RQBT7BNE363 SymantecServer:
-              DESKTOP-GGG3BOO,Local Host IP: 10.50.11.207,Local Port: 3,Local
-              Host MAC: 00505681D973,Remote Host IP: 10.50.11.206,Remote Host
+              DESKTOP-GGG3BOO,Local Host IP: 172.50.12.207,Local Port: 3,Local
+              Host MAC: 00505681D973,Remote Host IP: 172.50.12.206,Remote Host
               Name: ,Remote Port: 3,Remote Host MAC:
               005056816AF5,ICMP,Outbound,Begin: 2024-09-11 03:01:49,End Time:
               2024-09-11 03:01:49,Occurrences: 1,Application: ,Rule: Block all
-              other IP traffic and log,Location: Default,User Name: Crest,Domain
+              other IP traffic and log,Location: Default,User Name: Test,Domain
               Name: DESKTOP-GGG3BOO,Action: Blocked,SHA-256: ,MD-5:"
             - "<54>Sep 11 03:16:36 WIN-RQBT7BNE363 SymantecServer:
-              DESKTOP-GGG3BOO,Local Host IP: 10.50.11.207,Local Port: 3,Local
-              Host MAC: 00505681D973,Remote Host IP: 10.50.11.206,Remote Host
+              DESKTOP-GGG3BOO,Local Host IP: 172.50.12.207,Local Port: 3,Local
+              Host MAC: 00505681D973,Remote Host IP: 172.50.12.206,Remote Host
               Name: ,Remote Port: 3,Remote Host MAC:
               005056816AF5,ICMP,Outbound,Begin: 2024-09-11 03:14:28,End Time:
               2024-09-11 03:14:28,Occurrences: 1,Application: ,Rule: Block all
-              other IP traffic and log,Location: Default,User Name: Crest,Domain
+              other IP traffic and log,Location: Default,User Name: Test,Domain
               Name: DESKTOP-GGG3BOO,IP Address1: ,Action: Blocked,SHA-256:
               ,MD-5:"
             - >
@@ -569,7 +604,7 @@ pipeline:
               Default,User Name: Test user,Domain Name: DESKTOP-GGG3BOO,IP
               Address1: 203.0.113.1,MAC Address1: 00:11:22:33:44:55,GATEWAY1:
               192.168.1.1,IP Address2: 198.51.100.1,MAC Address2:
-              AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP Address3: 192.0.2.1,MAC
+              AA:BB:CC:DD:EE:FF,GATEWAY2: 172.0.0.1,IP Address3: 192.0.2.1,MAC
               Address3: 11:22:33:44:55:66,GATEWAY3: 172.16.1.1,IP Address4:
               185.245.40.65,MAC Address4: 66:77:88:99:00:11,GATEWAY4:
               203.0.113.254,Action: Blocked,SHA-256:
@@ -609,7 +644,7 @@ pipeline:
               )?%{regex("(.*?)(?=,)"):action}?,SHA-256:(
               )?%{regex("(.*?)(?=,)"):sha_256}?,MD-5:( )?%{regex("(.*?)"):md5}?'
         - type: attribute-remapper
-          name: Mapping  `user_name` to `usr.name`
+          name: Map `user_name` to `usr.name`
           enabled: true
           sources:
             - user_name
@@ -619,7 +654,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Mapping `remote_host_ip` to `network.client.ip`
+          name: Map `remote_host_ip` to `network.client.ip`
           enabled: true
           sources:
             - remote_host_ip
@@ -632,7 +667,7 @@ pipeline:
       name: Processing for Client Activity Logs
       enabled: true
       filter:
-        query: "Category "
+        query: "Category"
       processors:
         - type: grok-parser
           name: Parsing System - Client Actvity Logs
@@ -685,7 +720,7 @@ pipeline:
               name: system
           target: service
         - type: service-remapper
-          name: Service Remapper
+          name: Define `service` as the official service of the log
           enabled: true
           sources:
             - service
@@ -693,7 +728,7 @@ pipeline:
       name: Processing for System Logs
       enabled: true
       filter:
-        query: "Site "
+        query: "Site"
       processors:
         - type: grok-parser
           name: Parsing System Logs
@@ -703,7 +738,7 @@ pipeline:
             - "<54>Sep 16 04:25:05 WIN-RQBT7BNE363 SymantecServer: Site: My
               Site,Server Name: WIN-RQBT7BNE363,Domain Name: Default,The
               management server received the client log
-              successfully,DESKTOP-GGG3BOO,Crest,LocalComputer\t\t\t\t\t\t\t\t\t\
+              successfully,DESKTOP-GGG3BOO,Test,LocalComputer\t\t\t\t\t\t\t\t\t\
               \t"
             - "<51>Sep 11 00:03:41 WIN-RQBT7BNE363 SymantecServer: Site: My
               Site,Server Name: WIN-RQBT7BNE363,Event Description: The
@@ -740,7 +775,7 @@ pipeline:
 
               server_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname}? SymantecServer: Site:( )?%{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:( )?%{regex("(.*?)(?=,)"):server_name}?,Event Description:( )?%{regex("(.*?)"):server_event_description}?
         - type: attribute-remapper
-          name: Mapping `user_name` to `usr.name`
+          name: Map `user_name` to `usr.name`
           enabled: true
           sources:
             - user_name
