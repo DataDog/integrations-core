@@ -1,0 +1,812 @@
+id: symantec-endpoint-protection
+metric_id: symantec-endpoint-protection
+backend_only: false
+facets:
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+pipeline:
+  type: pipeline
+  name: Symantec Endpoint Protection
+  enabled: true
+  filter:
+    query: "source:symantec-endpoint-protection "
+  processors:
+    - type: pipeline
+      name: Processing for Application Logs
+      enabled: true
+      filter:
+        query: "Device ID "
+      processors:
+        - type: grok-parser
+          name: Parsing Application Logs
+          enabled: true
+          source: message
+          samples:
+            - "<54>Sep 13 08:21:26 WIN-RQBT7BNE363 SymantecServer:
+              DESKTOP-CIK30CC,10.50.11.208,Continue,Application and Device
+              Control is ready,System,Begin: 2024-09-13 08:20:13,End Time:
+              2024-09-13 08:20:13,Rule: Built-in
+              rule,0,SysPlant,0,SysPlant,None,User Name: None,Domain Name:
+              None,Action Type: ,File size (bytes): 0,Device ID:"
+            - "<54>Sep 13 08:34:00 WIN-RQBT7BNE363 SymantecServer:
+              DESKTOP-CIK30CC,198.252.206.17,Continue,Application and Device
+              Control is ready,System,Begin: 2024-09-13 08:32:44,End Time:
+              2024-09-13 08:32:44,Rule: Built-in
+              rule,0,SysPlant,0,SysPlant,None,User Name: Bob,Domain Name:
+              example.local,Action Type: Block,File size (bytes): 16385,Device
+              ID: 890124,IP Address: 104.199.65.125,IP Address1: 203.0.113.1,MAC
+              Address1: 00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP Address2:
+              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP
+              Address3: 192.0.2.1,MAC Address3: 11:22:33:44:55:66,GATEWAY3:
+              172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
+              66:77:88:99:00:11,GATEWAY4: 203.0.113.254"
+          grok:
+            supportRules: ""
+            matchRules: 'application_rule (<%{integer}>)?(%{date("MMM  d
+              HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})?
+              %{notSpace:syslog.hostname}? SymantecServer:(
+              )?%{regex("(.*?)(?=,)"):syslog.symantecServer}?,(
+              )?%{ip:ip_address}?,( )?%{regex("(.*?)"):action_description}?,(
+              )?%{regex("(.*?)(?=,)"):application_event_description}?,(
+              )?%{regex("(.*?)(?=,)"):api_name}?,Begin:( )?%{date("yyyy-MM-dd
+              HH:mm:ss"):start_time}?,End Time:(
+              )?%{regex("(.*?)(?=,)"):end_time}?,Rule:(
+              )?%{regex("(.*?)(?=,)"):rule_name}?,(
+              )?%{regex("(.*?)(?=,)"):caller_process_id}?,(
+              )?%{regex("(.*?)(?=,)"):called_process_name}?,(
+              )?%{regex("(.*?)(?=,)"):caller_return_address}?,(
+              )?%{regex("(.*?)(?=,)"):caller_return_module_name}?,(
+              )?%{regex("(.*?)(?=,)"):parameters}?,User Name:(
+              )?%{regex("(.*?)(?=,)"):user_name}?,Domain Name:(
+              )?%{regex("(.*?)(?=,)"):domain_name}?,Action Type:(
+              )?%{regex("(.*?)(?=,)"):action_type}?,File size \(bytes\):(
+              )?%{integer:file_size}?,Device ID:( )?%{integer:device_id}?(,IP
+              Address:( )?%{ip:ip_Address}?)?(,IP Address1:(
+              )?%{ip:ip_address_1}?)?(,MAC Address1:(
+              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY1:(
+              )?%{regex("[^,]*"):gateway1})?(,IP Address2:(
+              )?%{ip:ip_address_2}?)?(,MAC Address2:(
+              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY2:(
+              )?%{regex("[^,]*"):gateway2})?(,IP Address3:
+              %{ip:ip_address_3}?)?(,MAC Address3:(
+              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY3:(
+              )?%{regex("[^,]*"):gateway3})?(,IP Address4:(
+              )?%{ip:ip_address_4})?(,MAC Address4:(
+              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
+              )?%{regex("[^,]*"):gateway4}?)?'
+        - type: attribute-remapper
+          name: Mapping `user_name` to `usr.name`
+          enabled: true
+          sources:
+            - user_name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Mapping `ip_address` to `network.client.ip`
+          enabled: true
+          sources:
+            - ip_address
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processing for Security Logs
+      enabled: true
+      filter:
+        query: "CIDS Signature ID "
+      processors:
+        - type: grok-parser
+          name: Parsing Security Logs
+          enabled: true
+          source: message
+          samples:
+            - "<54>Sep 16 23:59:55 WIN-RQBT7BNE363 SymantecServer:
+              WIN-4K914H0NBUP,Event Description: Host Integrity check passed
+              ,Event Type: ,Local Host IP: 10.50.11.216,Local Host MAC:
+              0050569214AF,Remote Host Name: ,Remote Host IP:
+              10.50.11.216,Remote Host MAC: 000000000000,Unknown,OTHERS,,Begin:
+              2024-09-16 23:58:20,End Time: 2024-09-16 23:58:20,Occurrences:
+              1,Application: ,Location: Default,User Name: none,Domain Name:
+              ,Local Port: 0,Remote Port: 0,CIDS Signature ID: 0,CIDS Signature
+              string: ,CIDS Signature SubID: 0,Intrusion URL: ,Intrusion Payload
+              URL: ,SHA-256: ,MD-5: ,Intensive Protection Level: N/A,URL Risk:
+              N/A,URL Category: N/A,Correlation ID:"
+            - "<51>Sep 12 00:11:39 WIN-RQBT7BNE363 SymantecServer:
+              DESKTOP-CIK30CC,Event Description: Device Manager Message Disabled
+              the device. [name]:VMware USB Pointing Device [class]:Mice and
+              other pointing devices [guid]:4d36e96f-e325-11ce-bfc1-08002be10318
+              [deviceID]:HID\\VID_0E0F&PID_0003&MI_01\\8&95BC71C&0&0000,Event
+              Type: ,Local Host IP: 10.50.11.208,Local Host MAC:
+              00505681213E,Remote Host Name: ,Remote Host IP: 0.0.0.0,Remote
+              Host MAC: 000000000000,Unknown,Unknown,,Begin: 2024-09-12
+              00:10:39,End Time: 2024-09-12 00:10:39,Occurrences:
+              1,Application:  ,Location: Default,User Name: admin,Domain Name:
+              DESKTOP-CIK30CC,Local Port: 0,Remote Port: 0,CIDS Signature ID:
+              0,CIDS Signature string: ,CIDS Signature SubID: 0,Intrusion URL:
+              ,Intrusion Payload URL: ,SHA-256: ,MD-5: ,Intensive Protection
+              Level: N/A,URL Risk: N/A,URL Category: N/A,Correlation ID:"
+            - "<52>Sep 11 03:17:37 WIN-RQBT7BNE363 SymantecServer:
+              DESKTOP-GGG3BOO,\"Event Description: Somebody is scanning your
+              computer.  Your computer's TCP ports:   21, 22, 443, 25 and 23
+              have been scanned from 10.50.7.24.\",Event Type: ,Local Host IP:
+              10.50.11.207,Local Host MAC: 00505681D973,Remote Host Name:
+              ,Remote Host IP: 10.50.7.24,Remote Host MAC:
+              00505681A7C6,Inbound,TCP,,Begin: 2024-09-11 03:15:28,End Time:
+              2024-09-11 03:15:29,Occurrences: 1,Application: ,Location:
+              Default,User Name: Crest,Domain Name: DESKTOP-GGG3BOO,Local Port:
+              0,Remote Port: 0,CIDS Signature ID: 0,CIDS Signature string: ,CIDS
+              Signature SubID: 0,Intrusion URL: ,Intrusion Payload URL:
+              ,SHA-256: ,MD-5: ,Intensive Protection Level: N/A,URL Risk:
+              N/A,URL Category: N/A,Correlation ID:\t"
+            - "<54>Apr 27 00:49:29 C7016238111 SymantecServer: C7332658237,Event
+              Description: [SID: 24461] Web Attack: EICAR Standard Anti-Virus
+              Test File Download attack blocked. Traffic has been blocked for
+              this application: C:\\PROGRAM FILES
+              (X86)\\GOOGLE\\CHROME\\APPLICATION\\CHROME.EXE,Event Type:
+              Intrusion Prevention System Intrusion Detected,Local Host IP:
+              10.160.11.56,Local Host MAC: 0050569214B1,Remote Host Name:
+              test456,Remote Host IP: 93.184.216.100,Remote Host MAC:
+              00:11:22:33:44:55,Inbound,TCP,Blocked,Begin: 2022-04-27
+              00:58:20,End Time: 2022-04-27 00:58:20,Occurrences: 1,Application:
+              C:/PROGRAM FILES
+              (X86)/GOOGLE/CHROME/APPLICATION/CHROME.EXE,Location: Default,User
+              Name: Administrator,Domain Name: C7332658237,Local Port:
+              53967,Remote Port: 80,CIDS Signature ID: 24461,CIDS Signature
+              string: Web Attack: EICAR Standard Anti-Virus Test File
+              Download,CIDS Signature SubID: 65536,Intrusion URL:
+              http://s3-eu-west-1.amazonaws.com/cp-chk-files/e.txt?static=CPChe\
+              ckMe&amp;rand=1651046295517,Intrusion Payload URL:
+              http://example.com,IP Address1: 203.0.113.1,MAC Address1:
+              00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP Address2:
+              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP
+              Address3: 192.0.2.1,MAC Address3: 11:22:33:44:55:66,GATEWAY3:
+              172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
+              66:77:88:99:00:11,GATEWAY4: 203.0.113.254,SHA-256:
+              45DE9F5A25BF478C6A8D8625A984895C9B3FDEA6EB12A55DDD088DCEBD9DF5AB,\
+              MD-5: 9f86d081884c7d659a2feaa0c55ad023,Intensive Protection Level:
+              N/A,URL Risk: N/A,URL Category: Content Servers,Correlation ID:
+              12345"
+            - "<54>Apr 27 00:49:29 C7016238111 SymantecServer: C7332658237,Event
+              Description: Active Response that started at 4/27/2022 12:58:20 AM
+              is disengaged. The traffic from IP address 52.218.40.91 was
+              blocked for 600 second(s).  ,Event Type: Active Response was
+              disengaged,Local Host IP: 192.0.2.1,Local Host MAC:
+              0050569214B0,Remote Host Name: test123,Remote Host IP:
+              134.122.45.250,Remote Host MAC:
+              000000000000,Unknown,OTHERS,,Begin: 2022-04-27 01:08:20,End Time:
+              2022-04-27 01:08:20,Occurrences: 1,Application:
+              C:/path/testApplication,Location: Default,User Name:
+              Administrator,Domain Name: C7332658237,Local Port: 80,Remote Port:
+              0,CIDS Signature ID: 0,CIDS Signature string: Test Signature,CIDS
+              Signature SubID: 0,Intrusion URL: ,Intrusion Payload URL:
+              ,SHA-256: ,MD-5: ,Intensive Protection Level: N/A,URL Risk:
+              N/A,URL Category: N/A"
+          grok:
+            supportRules: ""
+            matchRules: security_log_rule1 (<%{integer}>)?%{date("MMM d
+              HH:mm:ss"):timestamp}? %{notSpace:syslog.hostname}
+              SymantecServer:(
+              )?%{regex("(.*?)(?=,)"):syslog.symantecServer}?,(")?Event
+              Description:(
+              )?%{regex("(.*?)(?=,)"):security_event_description}?,Event Type:(
+              )?%{regex("(.*?)(?=,)"):event_type}?,Local Host IP:(
+              )?%{ip:local_host_ip}?,Local Host MAC:(
+              )?%{notSpace:local_host_mac}?,Remote Host Name:(
+              )?%{regex("(.*?)(?=,)"):remote_host_name}?,Remote Host IP:(
+              )?%{ip:remote_host_ip}?,Remote Host MAC:(
+              )?%{notSpace:remote_host_mac}?,%{word:traffic_direction}?,%{word:network_protocol}?,%{word:hack_type}?,Begin:(
+              )?%{date("yyyy-MM-dd HH:mm:ss"):start_time},End Time:(
+              )?%{date("yyyy-MM-dd HH:mm:ss"):end_time}?,Occurrences:(
+              )?%{integer:occurrences}?,Application:(
+              )?%{regex("(.*?)(?=,)"):application}?,Location:(
+              )?%{regex("(.*?)(?=,)"):location}?,User Name:(
+              )?%{regex("(.*?)(?=,)"):user_name}?,Domain Name:(
+              )?%{regex("(.*?)(?=,)"):domain_name}?,Local Port:(
+              )?%{integer:local_port}?,Remote Port:(
+              )?%{integer:remote_port}?,CIDS Signature ID:(
+              )?%{integer:cids_signature_id}?,CIDS Signature string:(
+              )?%{regex("(.*?)(?=,)"):cids_signature_string}?,CIDS Signature
+              SubID:( )?%{integer:cids_signature_subid}?,Intrusion URL:(
+              )?%{regex("(.*?)(?=,)"):intrusion_url}?,Intrusion Payload URL:(
+              )?%{regex("(.*?)(?=,)"):intrusion_payload_url}?(,IP Address1:(
+              )?%{ip:ip_address_1}?)?(,MAC Address1:(
+              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY1:(
+              )?%{regex("[^,]*"):gateway1})?(,IP Address2:(
+              )?%{ip:ip_address_2}?)?(,MAC Address2:(
+              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY2:(
+              )?%{regex("[^,]*"):gateway2})?(,IP Address3:(
+              )?%{ip:ip_address_3}?)?(,MAC Address3:(
+              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY3:(
+              )?%{regex("[^,]*"):gateway3})?(,IP Address4:(
+              )%{ip:ip_address_4}?)?(,MAC Address4:(
+              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
+              )?%{regex("[^,]*"):gateway4})?,SHA-256:(
+              )?%{regex("(.*?)(?=,)"):sha256}?,MD-5:(
+              )?%{regex("(.*?)(?=,)"):md5}?,Intensive Protection Level:(
+              )?%{regex("(.*?)(?=,)"):intensive_protection_level}?,URL Risk:(
+              )?%{regex("(.*?)(?=,)"):url_risk}?,URL Category:(
+              )?%{regex("(.*?)"):url_category}?(,Correlation ID:(
+              )?%{regex("(.*?)"):correlation_id}?)?
+        - type: attribute-remapper
+          name: Mapping `user_name` to `usr.name`
+          enabled: true
+          sources:
+            - user_name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Mapping `remote_host_ip` to `network.client.ip`
+          enabled: true
+          sources:
+            - remote_host_ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processing for Risk Logs
+      enabled: true
+      filter:
+        query: "Risk name "
+      processors:
+        - type: grok-parser
+          name: Parsing Risk Logs
+          enabled: true
+          source: message
+          samples:
+            - "<54>Sep 11 02:54:24 WIN-RQBT7BNE363 SymantecServer: Virus
+              found,IP Address: 10.50.11.207,Computer name:
+              DESKTOP-GGG3BOO,Source: Auto-Protect scan,Risk name:
+              Trojan.Gen.NPE.2,Occurrences: 1,File path:
+              C:\\Users\\Crest.DESKTOP-GGG3BOO\\Downloads\\Unconfirmed
+              791873.crdownload,Description: ,Actual action: Cleaned by
+              deletion,Requested action: Cleaned,Secondary action:
+              Quarantined,Event time: 2024-09-11 02:52:57,Event Insert Time:
+              2024-09-11 02:54:24,End Time: 2024-09-11 02:52:58,Last update
+              time: 2024-09-11 02:54:24,Domain Name: Default,Group Name: My
+              Company\\Default Group,Server Name: WIN-RQBT7BNE363,User Name:
+              Crest,Source Computer Name: ,Source Computer IP: ,Disposition:
+              Bad,Download site: ,Web domain: ,Downloaded by:
+              msedge.exe,Prevalence: This file has been seen by tens of
+              thousands of Symantec users.,Confidence: This file is
+              untrustworthy.,URL Tracking Status: On,First Seen: Symantec has
+              known about this file for more than 1 year.,Sensitivity: ,Allowed
+              application reason: Not on the allow list,Application hash:
+              E1105070BA828007508566E28A2B8D4C65D192E9EAF3B7868382B7CAE747B397,\
+              Hash type: SHA2,Company name: ,Application name: Unconfirmed
+              767397.crdownload,Application version: ,Application type: 127,File
+              size (bytes): 308,Category set: Malware,Category type:
+              Virus,Location: Default,Intensive Protection Level: 0,Certificate
+              issuer: ,Certificate signer: ,Certificate thumbprint: ,Signing
+              timestamp: 0,Certificate serial number:"
+            - '<54>Sep 16 08:30:10 WIN-RQBT7BNE367 SymantecServer: Virus
+              found,IP Address: 192.168.1.104,Computer name:
+              DESKTOP-GHI789,Source: Auto-Protect scan,Risk name:
+              Worm.P2P.Gen,Occurrences: 1,File path:
+              C:\Downloads\infected.zip,Description: Worm detected,Actual
+              action: Cleaned by deletion,Requested action: Cleaned,Secondary
+              action: Quarantined,Event time: 2024-09-16 08:28:05,Event Insert
+              Time: 2024-09-16 08:30:10,End Time: 2024-09-16 08:28:07,Last
+              update time: 2024-09-16 08:30:10,Domain Name:
+              MyCompanyDomain,Group Name: My Company\Sales Team,Server Name:
+              WIN-RQBT7BNE367,User Name: Robert Brown,Source Computer Name:
+              DESKTOP-GHI789,Source Computer IP: 192.168.1.104,IP Address 1:
+              203.0.113.1,MAC Address 1: 00:11:22:33:44:55,GATEWAY IP 1:
+              192.168.1.1,IP Address 2: 198.51.100.1,MAC Address 2:
+              AA:BB:CC:DD:EE:FF,GATEWAY IP 2: 10.0.0.1,IP Address 3:
+              192.0.2.1,MAC Address 3: 11:22:33:44:55:66,GATEWAY IP 3:
+              172.16.1.1,IP Address 4: 185.245.40.65,MAC Address 4:
+              66:77:88:99:00:11,GATEWAY IP 4: 203.0.113.254,Disposition:
+              Bad,Download site: https://untrustedsource.com,Web domain:
+              untrustedsource.com,Downloaded by: edge.exe,Prevalence: This file
+              has been seen by some Symantec users.,Confidence: This file is
+              untrustworthy.,URL Tracking Status: On,First Seen: Symantec has
+              known about this file for more than 2 years.,Sensitivity:
+              Medium,Allowed application reason: Not on the allow
+              list,Application hash: 67890ABCDEF1234567890ABCDEF1234567890,Hash
+              type: SHA2,Company name: GHI Corporation,Application name:
+              infected.zip,Application version: 5.0,Application type: 130,File
+              size (bytes): 8192,Category set: Worm,Category type:
+              Virus,Location: Default,Intensive Protection Level: 4,Certificate
+              issuer: Symantec Corporation,Certificate signer: Symantec SHA256
+              Code Signing CA,Certificate thumbprint:
+              567890ABCDEF1234567890ABCDEF,Signing timestamp:
+              1643723400,Certificate serial number: 567890ABCDEF"'
+          grok:
+            supportRules: ""
+            matchRules: 'risk_rule (<%{integer}>)?(%{date("MMM  d
+              HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})?
+              %{notSpace:syslog.hostname}? SymantecServer:(
+              )?%{regex("(.*?)(?=,)"):risk_type}?,IP Address:(
+              )?%{ip:ip_address}?,Computer name:(
+              )?%{regex("(.*?)(?=,)"):computer_name}?,Source:(
+              )?%{regex("(.*?)(?=,)"):scan_source}?,Risk name:(
+              )?%{regex("(.*?)(?=,)"):risk_name}?,Occurrences:(
+              )?%{integer:occurrences}?,File path:(
+              )?%{regex("(.*?)(?=,)"):file_path}?,Description:(
+              )?%{regex("(.*?)(?=,)"):risk_event_description}?,Actual action:(
+              )?%{regex("(.*?)(?=,)"):actual_action}?,Requested action:(
+              )?%{regex("(.*?)(?=,)"):requested_action}?,Secondary action:(
+              )?%{regex("(.*?)(?=,)"):secondary_action}?,Event time:(
+              )?%{regex("(.*?)(?=,)"):event_time}?,Event Insert Time:(
+              )?%{regex("(.*?)(?=,)"):event_insert_time}?,End Time:(
+              )?%{regex("(.*?)(?=,)"):end_time}?,Last update time:(
+              )?%{regex("(.*?)(?=,)"):last_update_time}?,Domain Name:(
+              )?%{regex("(.*?)(?=,)"):domain_name}?,Group Name:(
+              )?%{regex("(.*?)(?=,)"):group_name}?,Server Name:(
+              )?%{regex("(.*?)(?=,)"):server_name}?,User Name:(
+              )?%{regex("(.*?)(?=,)"):user_name}?,Source Computer Name:(
+              )?%{regex("(.*?)(?=,)"):source_computer_name}?,Source Computer
+              IP:( )?%{regex("(.*?)(?=,)"):source_computer_ip}?(,IP Address 1:(
+              )?%{ip:ip_address_1}?)?(,MAC Address 1:(
+              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY IP 1:(
+              )?%{regex("[^,]*"):gateway1})?(,IP Address 2:(
+              )?%{ip:ip_address_2}?)?(,MAC Address 2:(
+              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY IP 2:(
+              )?%{regex("[^,]*"):gateway2})?(,IP Address 3:
+              %{ip:ip_address_3}?)?(,MAC Address 3:(
+              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY IP 3:(
+              )?%{regex("[^,]*"):gateway3})?(,IP Address 4:(
+              )?%{ip:ip_address_4})?(,MAC Address 4:(
+              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY IP 4:(
+              )?%{regex("[^,]*"):gateway4})?,Disposition:(
+              )?%{regex("(.*?)(?=,)"):disposition}?,Download site:(
+              )?%{regex("(.*?)(?=,)"):download_site}?,Web domain:(
+              )?%{regex("(.*?)(?=,)"):web_domain}?,Downloaded by:(
+              )?%{regex("(.*?)(?=,)"):downloaded_by}?,Prevalence:(
+              )?%{regex("(.*?)(?=,)"):prevalence}?,Confidence:(
+              )?%{regex("(.*?)(?=,)"):confidence}?,URL Tracking Status:(
+              )?%{regex("(.*?)(?=,)"):url_tracking_status}?,First Seen:(
+              )?%{regex("(.*?)(?=,)"):first_seen}?,Sensitivity:(
+              )?%{regex("(.*?)(?=,)"):sensitivity}?,Allowed application reason:(
+              )?%{regex("(.*?)(?=,)"):allowed_application_reason}?,Application
+              hash:( )?%{regex("(.*?)(?=,)"):application_hash}?,Hash type:(
+              )?%{regex("(.*?)(?=,)"):hash_type}?,Company name:(
+              )?%{regex("(.*?)(?=,)"):company_name}?,Application name:(
+              )?%{regex("(.*?)(?=,)"):application_name}?,Application version:(
+              )?%{regex("(.*?)(?=,)"):application_version}?,Application type:(
+              )?%{regex("(.*?)(?=,)"):application_type}?,File size \(bytes\):(
+              )?%{integer:file_size}?,Category set:(
+              )?%{regex("(.*?)(?=,)"):category_set}?,Category type:(
+              )?%{regex("(.*?)(?=,)"):category_type}?,Location:(
+              )?%{regex("(.*?)(?=,)"):location}?,Intensive Protection Level:(
+              )?%{regex("(.*?)(?=,)"):intensive_protection_level}?,Certificate
+              issuer:( )?%{regex("(.*?)(?=,)"):certificate_issuer}?,Certificate
+              signer:( )?%{regex("(.*?)(?=,)"):certificate_signer}?,Certificate
+              thumbprint:(
+              )?%{regex("(.*?)(?=,)"):certificate_thumbprint}?,Signing
+              timestamp:(
+              )?%{regex("(.*?)(?=,)"):signing_timestamp}?,Certificate serial
+              number:( )?%{regex("(.*?)"):certificate_serial_number}?'
+        - type: attribute-remapper
+          name: Mapping `user_name` to `usr.name`
+          enabled: true
+          sources:
+            - user_name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Mapping `ip_address` to `network.client.ip`
+          enabled: true
+          sources:
+            - ip_address
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processing for Scan Logs
+      enabled: true
+      filter:
+        query: "Scan ID "
+      processors:
+        - type: grok-parser
+          name: Parsing Scan Logs
+          enabled: true
+          source: message
+          samples:
+            - "<54>Sep 10 21:54:23 WIN-RQBT7BNE363 SymantecServer: Scan ID:
+              1725971909,Begin: 2024-09-10 21:45:57,End Time: 2024-09-10
+              21:48:31,Completed,Duration (seconds): 154,User1: SYSTEM,User2:
+              SYSTEM,Scan started on selected drives and folders and all
+              extensions.,Scan Complete:  Risks: 0   Scanned:
+              732   Files/Folders/Drives Omitted: 0 Trusted Files Skipped:
+              338,Command: Not a command scan (),Threats: 0,Infected: 0,Total
+              files: 732,Omitted: 0,Computer: DESKTOP-GGG3BOO,IP Address:
+              10.50.11.207,Domain Name: Default,Group Name: My Company\\Default
+              Group,Server Name: WIN-RQBT7BNE363,Scan Type: Definition Watch
+              Scan\t"
+            - "<54>Sep 17 04:21:09 WIN-RQBT7BNE363 SymantecServer: Scan ID:
+              1725972038,Begin: 2024-09-17 04:19:12,End Time: ,Started,Duration
+              (seconds): 0,User1: SYSTEM,User2: ,Scan started on selected drives
+              and folders and all extensions.,,Command: Not a command scan
+              (),Threats: 0,Infected: 0,Total files: 0,Omitted: 0,Computer:
+              DESKTOP-GGG3BOO,IP Address: 198.51.100.1,Domain Name:
+              Default,Group Name: My Company\\Default Group,Server Name:
+              WIN-RQBT7BNE363,Scan Type: Definition Watch Scan"
+            - "<54>Sep 11 05:01:59 WIN-RQBT7BNE363 SymantecServer: Scan ID:
+              1725971915,Begin: 2024-09-11 22:33:48,End Time: ,Started,Duration
+              (seconds): 0,User1: SYSTEM,User2: ,Scan started on selected drives
+              and folders and all extensions.,,Command: Not a command scan
+              (),Threats: 0,Infected: 0,Total files: 0,Omitted: 0,Computer:
+              DESKTOP-GGG3BOO,IP Address: 203.0.113.123,Domain Name:
+              Default,Group Name: My Company\\Default Group,Server Name:
+              WIN-RQBT7BNE363,Scan Type: Definition Watch Scan,IP Address1:
+              203.0.113.1,MAC Address1: 00:11:22:33:44:55,GATEWAY1:
+              192.168.1.1,IP Address2: 198.51.100.1,MAC Address2:
+              AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP Address3: 192.0.2.1,MAC
+              Address3: 11:22:33:44:55:66,GATEWAY3: 172.16.1.1,IP Address4:
+              185.245.40.65,MAC Address4: 66:77:88:99:00:11,GATEWAY4:
+              203.0.113.254"
+            - "<54>Sep 10 21:54:23 WIN-RQBT7BNE363 SymantecServer: Scan ID:
+              1725971909,Begin: 2024-09-10 21:45:57,End Time: 2024-09-10
+              21:48:31,Completed,Duration (seconds): 154,User1: SYSTEM,User2:
+              SYSTEM,Scan started on selected drives and folders and all
+              extensions.,Scan Complete:  Risks: 0   Scanned:
+              732   Files/Folders/Drives Omitted: 0 Trusted Files Skipped:
+              338,Command: Not a command scan (),Threats: 0,Infected: 0,Total
+              files: 732,Omitted: 0,Computer: DESKTOP-GGG3BOO,IP Address:
+              203.0.113.1,Domain Name: Default,Group Name: My Company\\Default
+              Group,Server Name: WIN-RQBT7BNE363,Scan Type: Definition Watch
+              Scan,IP Address1: 203.0.113.1,MAC Address1:
+              00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP Address2:
+              198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP
+              Address3: 192.0.2.1,MAC Address3: 11:22:33:44:55:66,GATEWAY3:
+              172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
+              66:77:88:99:00:11,GATEWAY4: 203.0.113.254"
+          grok:
+            supportRules: scan_results ?((Scan Complete|Scan
+              Suspended):?\s+Risks:\s+%{integer:scan_results.risks}\s+Scanned:\s+%{integer:scan_results.scanned}\s+%{notSpace:scan_results.file_path}
+              Omitted:\s+%{integer:scan_results.omitted}\s+Trusted Files
+              Skipped:\s+%{integer:scan_results.trusted_files_skipped})
+            matchRules: scan_rule (<%{integer}>)?(%{date("MMM  d
+              HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})
+              %{notSpace:syslog.hostname} SymantecServer:( )Scan ID:(
+              )?%{integer:scan_id}?,Begin:( )?%{date("yyyy-MM-dd
+              HH:mm:ss"):start_time}?,End Time:( )?%{date("yyyy-MM-dd
+              HH:mm:ss"):end_time}?,%{word:status}?,Duration \(seconds\):(
+              )?%{integer:duration}?,User1:(
+              )?%{regex("(.*?)(?=,)"):user1}?,User2:(
+              )?%{regex("(.*?)(?=,)"):user2}?,%{regex("[^,]*"):scan_description}?,%{scan_results}?,Command:(
+              )?%{regex("(.*?)(?=,)"):command}?,Threats:(
+              )%{integer:threats}?,Infected:( )?%{integer:infected}?,Total
+              files:( )?%{integer:total_files}?,Omitted:(
+              )?%{integer:omitted_files}?,Computer:(
+              )?%{regex("(.*?)(?=,)"):computer}?,IP Address:(
+              )?%{ip:ip_address}?,Domain Name:(
+              )?%{regex("(.*?)(?=,)"):domain_name}?,Group Name:(
+              )?%{regex("(.*?)(?=,)"):group_name}?,Server Name:(
+              )?%{regex("(.*?)(?=,)"):server_name}?,Scan Type:(
+              )?%{regex("[^,]*"):scan_type}?(,IP Address1:(
+              )?%{ip:ip_address_1}?)?(,MAC Address1:(
+              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY1:(
+              )?%{regex("[^,]*"):gateway1})?(,IP Address2:(
+              )?%{ip:ip_address_2}?)?(,MAC Address2:(
+              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY2:(
+              )?%{regex("[^,]*"):gateway2})?(,IP Address3:(
+              )?%{ip:ip_address_3}?)?(,MAC Address3:(
+              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY3:(
+              )?%{regex("[^,]*"):gateway3})?(,IP Address4:(
+              )?%{ip:ip_address_4}?)?(,MAC Address4:(
+              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
+              )?%{regex("[^,]*"):gateway4})?
+        - type: attribute-remapper
+          name: Mapping `ip_address` to `network.client.ip`
+          enabled: true
+          sources:
+            - ip_address
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processing for Traffic Logs
+      enabled: true
+      filter:
+        query: "Action "
+      processors:
+        - type: grok-parser
+          name: Parsing Traffic Logs
+          enabled: true
+          source: message
+          samples:
+            - "<54>Apr 27 00:49:29 C7016238111 SymantecServer: C7332658237,Local
+              Host IP: 10.160.11.56,Local Port: 3,Local Host MAC:
+              00505624157B,Remote Host IP: 10.160.59.184,Remote Host Name:
+              test,Remote Port: 3,Remote Host MAC:
+              00505604B7C5,ICMP,Outbound,Begin: 2022-04-27 02:44:28,End Time:
+              2022-04-27 02:44:28,Occurrences: 1,Application: test,Rule: Block
+              all other IP traffic and log,Location: Default,User Name:
+              Administrator,Domain Name: C7332658237,Action: Blocked,SHA-256:
+              test,MD-5:"
+            - "<54>Sep 11 03:07:36 WIN-RQBT7BNE363 SymantecServer:
+              DESKTOP-GGG3BOO,Local Host IP: 10.50.11.207,Local Port: 3,Local
+              Host MAC: 00505681D973,Remote Host IP: 10.50.11.206,Remote Host
+              Name: ,Remote Port: 3,Remote Host MAC:
+              005056816AF5,ICMP,Outbound,Begin: 2024-09-11 03:01:49,End Time:
+              2024-09-11 03:01:49,Occurrences: 1,Application: ,Rule: Block all
+              other IP traffic and log,Location: Default,User Name: Crest,Domain
+              Name: DESKTOP-GGG3BOO,Action: Blocked,SHA-256: ,MD-5:"
+            - "<54>Sep 11 03:16:36 WIN-RQBT7BNE363 SymantecServer:
+              DESKTOP-GGG3BOO,Local Host IP: 10.50.11.207,Local Port: 3,Local
+              Host MAC: 00505681D973,Remote Host IP: 10.50.11.206,Remote Host
+              Name: ,Remote Port: 3,Remote Host MAC:
+              005056816AF5,ICMP,Outbound,Begin: 2024-09-11 03:14:28,End Time:
+              2024-09-11 03:14:28,Occurrences: 1,Application: ,Rule: Block all
+              other IP traffic and log,Location: Default,User Name: Crest,Domain
+              Name: DESKTOP-GGG3BOO,IP Address1: ,Action: Blocked,SHA-256:
+              ,MD-5:"
+            - >
+              <54>Sep 27 10:06:25 WIN-RQBT7BNE363 SymantecServer:
+              WIN-4K914H0NBUP,Local Host IP: 93.184.216.34,Local Port: 21,Local
+              Host MAC: 0050569214AF,Remote Host IP: 185.245.40.100,Remote Host
+              Name: test267,Remote Port: 17000,Remote Host MAC:
+              00505681A7C6,TCP,Inbound,Begin: 2024-09-27 10:00:06,End Time:
+              2024-09-27 10:00:06,Occurrences: 2,Application:
+              testApplication,Rule: Block all other IP traffic and log,Location:
+              Default,User Name: Test user,Domain Name: DESKTOP-GGG3BOO,IP
+              Address1: 203.0.113.1,MAC Address1: 00:11:22:33:44:55,GATEWAY1:
+              192.168.1.1,IP Address2: 198.51.100.1,MAC Address2:
+              AA:BB:CC:DD:EE:FF,GATEWAY2: 10.0.0.1,IP Address3: 192.0.2.1,MAC
+              Address3: 11:22:33:44:55:66,GATEWAY3: 172.16.1.1,IP Address4:
+              185.245.40.65,MAC Address4: 66:77:88:99:00:11,GATEWAY4:
+              203.0.113.254,Action: Blocked,SHA-256:
+              4567890987654321098765432109876543210987654321098765432109876543,MD-5:
+              3a4a436a436a436a436a436a436a436a
+          grok:
+            supportRules: ""
+            matchRules: 'traffic_rule (<%{integer}>)?(%{date("MMM d HH:mm:ss"):timestamp})?
+              %{notSpace:syslog.hostname} SymantecServer:(
+              )?%{regex("(.*?)(?=,)"):syslog.symantecServer}?,Local Host IP:(
+              )?%{ip:local_host_ip}?,Local Port:( )?%{integer:local_port}?,Local
+              Host MAC:( )?%{regex("(.*?)(?=,)"):local_host_mac}?,Remote Host
+              IP:( )?%{ip:remote_host_ip}?,Remote Host Name:(
+              )?%{regex("(.*?)(?=,)"):remote_host_name}?,Remote Port:(
+              )?%{integer:remote_port}?,Remote Host MAC:(
+              )?%{regex("(.*?)(?=,)"):remote_host_mac}?,%{word:network_protocol}?,%{word:traffic_direction}?,Begin:(
+              )?%{date("yyyy-MM-dd HH:mm:ss"):start_time},End Time:(
+              )?%{date("yyyy-MM-dd HH:mm:ss"):end_time}?,Occurrences:(
+              )?%{integer:occurrences}?,Application:(
+              )?%{regex("(.*?)(?=,)"):application}?,Rule:(
+              )?%{regex("(.*?)(?=,)"):traffic_rule}?,Location:(
+              )?%{regex("(.*?)(?=,)"):location}?,User Name:(
+              )?%{regex("(.*?)(?=,)"):user_name}?,Domain Name:(
+              )?%{regex("(.*?)(?=,)"):domain_name}?(,IP Address1:(
+              )?%{ip:ip_address_1}?)?(,MAC Address1:(
+              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY1:(
+              )?%{regex("[^,]*"):gateway1})?(,IP Address2:(
+              )?%{ip:ip_address_2}?)?(,MAC Address2:(
+              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY2:(
+              )?%{regex("[^,]*"):gateway2})?(,IP Address3:
+              %{ip:ip_address_3}?)?(,MAC Address3:(
+              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY3:(
+              )?%{regex("[^,]*"):gateway3})?(,IP Address4:(
+              )?%{ip:ip_address_4})?(,MAC Address4:(
+              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
+              )?%{regex("[^,]*"):gateway4})?,Action:(
+              )?%{regex("(.*?)(?=,)"):action}?,SHA-256:(
+              )?%{regex("(.*?)(?=,)"):sha_256}?,MD-5:( )?%{regex("(.*?)"):md5}?'
+        - type: attribute-remapper
+          name: Mapping  `user_name` to `usr.name`
+          enabled: true
+          sources:
+            - user_name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Mapping `remote_host_ip` to `network.client.ip`
+          enabled: true
+          sources:
+            - remote_host_ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processing for Client Activity Logs
+      enabled: true
+      filter:
+        query: "Category "
+      processors:
+        - type: grok-parser
+          name: Parsing System - Client Actvity Logs
+          enabled: true
+          source: message
+          samples:
+            - "<54>Sep 11 02:44:55 WIN-RQBT7BNE363 SymantecServer:
+              DESKTOP-GGG3BOO,Category: 2,SONAR,\"Event Description: [SONAR
+              heuristic Submission] File submitted to Symantec for analysis.
+              File : 'c:\\program files
+              (x86)\\microsoft\\edge\\application\\msedge.exe',  Size (bytes):
+              5044.\",Event time: 2024-09-11 02:40:35,Group Name: My
+              Company\\Default Group\t\t\t\t\t\t\t\t\t\t"
+            - "<54>Sep 10 05:46:31 WIN-RQBT7BNE363 SymantecServer:
+              DESKTOP-GGG3BOO,Category: 0,CVE,Event Description: Downloaded new
+              content update from the management server successfully.     Remote
+              file path:
+              https://WIN-RQBT7BNE363:443/content/{05306A8A-E8C1-4081-BD49-94C8\
+              E01AF2C1}/240412011/Full.zip,Event time: 2024-09-10 05:42:28,Group
+              Name: My Company\\Default Group\t\t\t\t\t\t\t\t\t\t"
+          grok:
+            supportRules: ""
+            matchRules: client_rule (<%{integer}>)?(%{date("MMM  d
+              HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})?
+              %{notSpace:syslog.hostname}? SymantecServer:(
+              )?%{regex("(.*?)(?=,)"):syslog.SymantecServer}?,Category:(
+              )?%{integer:category}?,(
+              )?%{regex("(.*?)(?=,)"):event_source}?,(")?Event Description:(
+              )?%{regex("(.*?)"):client_event_description}?(,IP Address1:(
+              )?%{ip:ip_address_1}?)?(,MAC Address1:(
+              )?%{regex("[^,]"):mac_address_1})?(,GATEWAY1:(
+              )?%{regex("[^,]"):gateway1})?(,IP Address2:(
+              )?%{ip:ip_address_2}?)?(,MAC Address2:(
+              )?%{regex("[^,]"):mac_address_2})?(,GATEWAY2:(
+              )?%{regex("[^,]"):gateway2})?(,IP Address3:(
+              )?%{ip:ip_address_3}?)?(,MAC Address3:(
+              )?%{regex("[^,]"):mac_address_3})?(,GATEWAY3:(
+              )?%{regex("[^,]"):gateway3})?(,IP Address4:(
+              )?%{ip:ip_address_4}?)?(,MAC Address4:(
+              )?%{regex("[^,]"):mac_address_4})?(,GATEWAY4:(
+              )?%{regex("[^,]"):gateway4})?,Event time:(
+              )?%{regex("(.*?)(?=,)"):event_time}?,Group Name:(
+              )?%{regex("(.*?)"):group_name}?
+        - type: category-processor
+          name: Define `service` for client activity logs
+          enabled: true
+          categories:
+            - filter:
+                query: "@category:*"
+              name: system
+          target: service
+        - type: service-remapper
+          name: Service Remapper
+          enabled: true
+          sources:
+            - service
+    - type: pipeline
+      name: Processing for System Logs
+      enabled: true
+      filter:
+        query: "Site "
+      processors:
+        - type: grok-parser
+          name: Parsing System Logs
+          enabled: true
+          source: message
+          samples:
+            - "<54>Sep 16 04:25:05 WIN-RQBT7BNE363 SymantecServer: Site: My
+              Site,Server Name: WIN-RQBT7BNE363,Domain Name: Default,The
+              management server received the client log
+              successfully,DESKTOP-GGG3BOO,Crest,LocalComputer\t\t\t\t\t\t\t\t\t\
+              \t"
+            - "<51>Sep 11 00:03:41 WIN-RQBT7BNE363 SymantecServer: Site: My
+              Site,Server Name: WIN-RQBT7BNE363,Event Description: The
+              administrator's user name or password is incorrect. Type a valid
+              user name or password.\t\t\t\t\t\t\t\t"
+            - "<54>Sep 11 03:00:13 WIN-RQBT7BNE363 SymantecServer: Site: My
+              Site,Server Name: WIN-RQBT7BNE363,Domain Name: Default,Admin:
+              admin,Event Description: Site: My Site\t\t\t\t\t\t\t\t\t\t"
+            - "<54>Sep 10 03:55:14 WIN-RQBT7BNE363 SymantecServer: Site: My
+              Site,Server Name: WIN-RQBT7BNE363,Domain Name: Default,Admin:
+              admin,Event Description: Added shared policy upon system install:
+              Added shared policy upon system install,Daily Scheduled
+              Scan\t\t\t\t"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              client_server_rule (<%{integer}>)?(%{date("MMM  d
+              HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})?
+              %{notSpace:syslog.hostname:nullIf("-")}? SymantecServer: Site:
+              %{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:(
+              )%{regex("(.*?)(?=,)"):server_name}?,Domain Name:(
+              )?%{regex("(.*?)(?=,)"):domain_name}?,(
+              )?%{regex("(.*?)(?=,)"):client_server_event_description}?,(
+              )?%{regex("(.*?)(?=,)"):host_name}?,(
+              )?%{regex("(.*?)(?=,)"):user_name}?,(
+              )?%{regex("(.*?)"):Location}?
+
+
+              audit_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname:nullIf("-")}? SymantecServer: Site: %{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:( )%{regex("(.*?)(?=,)"):server_name}?,Domain Name:( )?%{regex("(.*?)(?=,)"):domain_name}?,Admin:( )?%{regex("(.*?)(?=,)"):audit_admin_name}?,Event Description:( )?%{regex("(.*?)(?=:)"):audit_event_description}?:( )?%{regex("(.*?)(?=,)"):event_type}?,%{regex("(.*?)"):policy_name}?
+
+
+              admin_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname}? SymantecServer: Site:( )?%{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:( )?%{regex("(.*?)(?=,)"):server_name}?,Domain Name:( )?%{regex("(.*?)(?=,)"):domain_name}?,Admin:( )?%{regex("(.*?)(?=,)"):admin_name}?,Event Description:( )?%{regex("(.*?)"):admin_event_description}?
+
+
+              server_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname}? SymantecServer: Site:( )?%{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:( )?%{regex("(.*?)(?=,)"):server_name}?,Event Description:( )?%{regex("(.*?)"):server_event_description}?
+        - type: attribute-remapper
+          name: Mapping `user_name` to `usr.name`
+          enabled: true
+          sources:
+            - user_name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: category-processor
+      name: Define `service` from unique fields of logs
+      enabled: true
+      categories:
+        - filter:
+            query: (@device_id:* OR @application_event_description:*)
+          name: application-control
+        - filter:
+            query: (@cids_signature_id:* OR @security_event_description:*)
+          name: security
+        - filter:
+            query: (@risk_name:* OR @risk_event_description:*)
+          name: risk
+        - filter:
+            query: (@scan_id:* OR @scan_type:*)
+          name: scan
+        - filter:
+            query: (@action:* OR @traffic_rule:*)
+          name: traffic
+        - filter:
+            query: "@policy_name:*"
+          name: audit
+        - filter:
+            query: (@syslog.site:* OR @admin_event_description:* OR
+              @client_server_event_description:* OR @server_event_description:*)
+          name: system
+      target: service
+    - type: category-processor
+      name: Define `activity`  for system logs
+      enabled: true
+      categories:
+        - filter:
+            query: (@category:* OR @client_event_description:*)
+          name: client
+        - filter:
+            query: "@server_event_description:*"
+          name: server
+        - name: admin
+          filter:
+            query: (@admin_name:* OR @admin_event_description:*)
+        - name: client-server
+          filter:
+            query: (@client_server_admin_name:* OR @client_server_event_description:*)
+      target: activity
+    - type: geo-ip-parser
+      name: "GeoIp Parser for `network.client.ip` "
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service

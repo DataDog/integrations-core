@@ -1,0 +1,130 @@
+id: symantec-endpoint-protection
+tests:
+  - sample: "<54>Sep 13 08:34:00 WIN-RQBT7BNE363 SymantecServer:
+      DESKTOP-CIK30CC,198.252.206.17,Continue,Application and Device Control is
+      ready,System,Begin: 2024-09-13 08:32:44,End Time: 2024-09-13
+      08:32:44,Rule: Built-in rule,0,SysPlant,0,SysPlant,None,User Name:
+      Bob,Domain Name: example.local,Action Type: Block,File size (bytes):
+      16385,Device ID: 890124,IP Address: 104.199.65.125,IP Address1:
+      203.0.113.1,MAC Address1: 00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP
+      Address2: 198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2:
+      172.16.1.1,IP Address3: 192.0.2.1,MAC Address3: 11:22:33:44:55:66,GATEWAY3:
+      172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
+      66:77:88:99:00:11,GATEWAY4: 203.0.113.254"
+    result: null
+  - sample: "<54>Apr 27 00:49:29 C7016238111 SymantecServer: C7332658237,Event
+      Description: [SID: 24461] Web Attack: EICAR Standard Anti-Virus Test File
+      Download attack blocked. Traffic has been blocked for this application:
+      C:\\PROGRAM FILES (X86)\\GOOGLE\\CHROME\\APPLICATION\\CHROME.EXE,Event
+      Type: Intrusion Prevention System Intrusion Detected,Local Host IP:
+      172.16.1.1,Local Host MAC: 0050569214B1,Remote Host Name: test456,Remote
+      Host IP: 93.184.216.100,Remote Host MAC:
+      00:11:22:33:44:55,Inbound,TCP,Blocked,Begin: 2022-04-27 00:58:20,End Time:
+      2022-04-27 00:58:20,Occurrences: 1,Application: C:/PROGRAM FILES
+      (X86)/GOOGLE/CHROME/APPLICATION/CHROME.EXE,Location: Default,User Name:
+      Administrator,Domain Name: C7332658237,Local Port: 53967,Remote Port:
+      80,CIDS Signature ID: 24461,CIDS Signature string: Web Attack: EICAR
+      Standard Anti-Virus Test File Download,CIDS Signature SubID:
+      65536,Intrusion URL:
+      http://s3-eu-west-1.amazonaws.com/cp-chk-files/e.txt?static=CPCheckMe&amp\
+      ;rand=1651046295517,Intrusion Payload URL: http://example.com,IP Address1:
+      203.0.113.1,MAC Address1: 00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP
+      Address2: 198.51.100.1,MAC Address2: AA:BB:CC:DD:EE:FF,GATEWAY2:
+      172.16.1.1,IP Address3: 192.0.2.1,MAC Address3: 11:22:33:44:55:66,GATEWAY3:
+      172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
+      66:77:88:99:00:11,GATEWAY4: 203.0.113.254,SHA-256:
+      45DE9F5A25BF478C6A8D8625A984895C9B3FDEA6EB12A55DDD088DCEBD9DF5AB,MD-5:
+      9f86d081884c7d659a2feaa0c55ad023,Intensive Protection Level: N/A,URL Risk:
+      N/A,URL Category: Content Servers,Correlation ID: 12345"
+    result: null
+  - sample: "<54>Sep 16 08:30:10 WIN-RQBT7BNE367 SymantecServer: Virus found,IP
+      Address: 192.168.1.104,Computer name: DESKTOP-GHI789,Source: Auto-Protect
+      scan,Risk name: Worm.P2P.Gen,Occurrences: 1,File path:
+      C:\\Downloads\\infected.zip,Description: Worm detected,Actual action:
+      Cleaned by deletion,Requested action: Cleaned,Secondary action:
+      Quarantined,Event time: 2024-09-16 08:28:05,Event Insert Time: 2024-09-16
+      08:30:10,End Time: 2024-09-16 08:28:07,Last update time: 2024-09-16
+      08:30:10,Domain Name: MyCompanyDomain,Group Name: My Company\\Sales
+      Team,Server Name: WIN-RQBT7BNE367,User Name: Robert Brown,Source Computer
+      Name: DESKTOP-GHI789,Source Computer IP: 192.168.1.104,IP Address 1:
+      203.0.113.1,MAC Address 1: 00:11:22:33:44:55,GATEWAY IP 1: 192.168.1.1,IP
+      Address 2: 198.51.100.1,MAC Address 2: AA:BB:CC:DD:EE:FF,GATEWAY IP 2:
+      172.16.1.1,IP Address 3: 192.0.2.1,MAC Address 3: 11:22:33:44:55:66,GATEWAY
+      IP 3: 172.16.1.1,IP Address 4: 185.245.40.65,MAC Address 4:
+      66:77:88:99:00:11,GATEWAY IP 4: 203.0.113.254,Disposition: Bad,Download
+      site: https://untrustedsource.com,Web domain:
+      untrustedsource.com,Downloaded by: edge.exe,Prevalence: This file has been
+      seen by some Symantec users.,Confidence: This file is untrustworthy.,URL
+      Tracking Status: On,First Seen: Symantec has known about this file for
+      more than 2 years.,Sensitivity: Medium,Allowed application reason: Not on
+      the allow list,Application hash:
+      67890ABCDEF1234567890ABCDEF1234567890,Hash type: SHA2,Company name: GHI
+      Corporation,Application name: infected.zip,Application version:
+      5.0,Application type: 130,File size (bytes): 8192,Category set:
+      Worm,Category type: Virus,Location: Default,Intensive Protection Level:
+      4,Certificate issuer: Symantec Corporation,Certificate signer: Symantec
+      SHA256 Code Signing CA,Certificate thumbprint:
+      567890ABCDEF1234567890ABCDEF,Signing timestamp: 1643723400,Certificate
+      serial number: 567890ABCDEF"
+    result: null
+  - sample: "<54>Sep 10 21:54:23 WIN-RQBT7BNE363 SymantecServer: Scan ID:
+      1725971909,Begin: 2024-09-10 21:45:57,End Time: 2024-09-10
+      21:48:31,Completed,Duration (seconds): 154,User1: SYSTEM,User2:
+      SYSTEM,Scan started on selected drives and folders and all
+      extensions.,Scan Complete:  Risks: 0   Scanned: 732   Files/Folders/Drives
+      Omitted: 0 Trusted Files Skipped: 338,Command: Not a command scan
+      (),Threats: 0,Infected: 0,Total files: 732,Omitted: 0,Computer:
+      DESKTOP-GGG3BOO,IP Address: 203.0.113.1,Domain Name: Default,Group Name:
+      My Company\\Default Group,Server Name: WIN-RQBT7BNE363,Scan Type:
+      Definition Watch Scan,IP Address1: 203.0.113.1,MAC Address1:
+      00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP Address2: 198.51.100.1,MAC
+      Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 172.16.1.1,IP Address3: 192.0.2.1,MAC
+      Address3: 11:22:33:44:55:66,GATEWAY3: 172.16.1.1,IP Address4:
+      185.245.40.65,MAC Address4: 66:77:88:99:00:11,GATEWAY4: 203.0.113.254"
+    result: null
+  - sample: "<54>Sep 27 10:06:25 WIN-RQBT7BNE363 SymantecServer:
+      WIN-4K914H0NBUP,Local Host IP: 93.184.216.34,Local Port: 21,Local Host
+      MAC: 0050569214AF,Remote Host IP: 185.245.40.100,Remote Host Name:
+      test267,Remote Port: 17000,Remote Host MAC:
+      00505681A7C6,TCP,Inbound,Begin: 2024-09-27 10:00:06,End Time: 2024-09-27
+      10:00:06,Occurrences: 2,Application: testApplication,Rule: Block all other
+      IP traffic and log,Location: Default,User Name: Test user,Domain Name:
+      DESKTOP-GGG3BOO,IP Address1: 203.0.113.1,MAC Address1:
+      00:11:22:33:44:55,GATEWAY1: 192.168.1.1,IP Address2: 198.51.100.1,MAC
+      Address2: AA:BB:CC:DD:EE:FF,GATEWAY2: 172.16.1.1,IP Address3: 192.0.2.1,MAC
+      Address3: 11:22:33:44:55:66,GATEWAY3: 172.16.1.1,IP Address4:
+      185.245.40.65,MAC Address4: 66:77:88:99:00:11,GATEWAY4:
+      203.0.113.254,Action: Blocked,SHA-256:
+      4567890987654321098765432109876543210987654321098765432109876543,MD-5:
+      3a4a436a436a436a436a436a436a436a"
+    result: null
+  - sample: "<54>Sep 10 05:46:31 WIN-RQBT7BNE363 SymantecServer:
+      DESKTOP-GGG3BOO,Category: 0,CVE,Event Description: Downloaded new content
+      update from the management server successfully.     Remote file path:
+      https://WIN-RQBT7BNE363:443/content/{05306A8A-E8C1-4081-BD49-94C8E01AF2C1\
+      }/240412011/Full.zip,Event time: 2024-09-10 05:42:28,Group Name: My
+      Company\\Default Group"
+    result: null
+  - sample: "<54>Sep 16 04:25:05 WIN-RQBT7BNE363 SymantecServer: Site: My
+      Site,Server Name: WIN-RQBT7BNE363,Domain Name: Default,The management
+      server received the client log
+      successfully,DESKTOP-GGG3BOO,Test,LocalComputer"
+    result: null
+  - sample: "<51>Sep 11 00:03:41 WIN-RQBT7BNE363 SymantecServer: Site: My
+      Site,Server Name: WIN-RQBT7BNE363,Event Description: The administrator's
+      user name or password is incorrect. Type a valid user name or password."
+    result: null
+  - sample: "<54>Sep 11 03:00:13 WIN-RQBT7BNE363 SymantecServer: Site: My
+      Site,Server Name: WIN-RQBT7BNE363,Domain Name: Default,Admin: admin,Event
+      Description: Site: My Site\t\t\t\t\t\t\t\t\t\t\t\t\t"
+    result: null
+  - sample: "<54>Sep 10 03:55:14 WIN-RQBT7BNE363 SymantecServer: Site: My
+      Site,Server Name: WIN-RQBT7BNE363,Domain Name: Default,Admin: admin,Event
+      Description: Added shared policy upon system install: Added shared policy
+      upon system install,Daily Scheduled Scan"
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
