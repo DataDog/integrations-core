@@ -6,10 +6,6 @@ set -euxo pipefail
 "${DD_PYTHON3}" -m pip install --no-warn-script-location virtualenv
 "${DD_PYTHON3}" -m virtualenv py3
 
-"${DD_PYTHON2}" -m pip install --no-warn-script-location --upgrade pip
-"${DD_PYTHON2}" -m pip install --no-warn-script-location virtualenv
-"${DD_PYTHON2}" -m virtualenv py2
-
 # Install always with our own prefix path
 mkdir -p "${DD_PREFIX_PATH}"
 cp "${DD_MOUNT_DIR}/build_context/install-from-source.sh" .
