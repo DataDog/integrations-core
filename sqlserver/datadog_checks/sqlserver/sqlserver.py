@@ -474,7 +474,7 @@ class SQLServer(AgentCheck):
                 # if autodiscovery is enabled, we report metrics from the
                 # INSTANCE_METRICS_DATABASE struct below, so do not double report here
                 common_metrics.extend(INSTANCE_METRICS_DATABASE)
-            self._add_performance_counters(common_metrics, metrics_to_collect, db=None)
+            self._add_performance_counters(common_metrics, metrics_to_collect, self.tags, db=None)
 
             # populated through autodiscovery
             if self.databases:
@@ -482,6 +482,7 @@ class SQLServer(AgentCheck):
                     self._add_performance_counters(
                         INSTANCE_METRICS_DATABASE,
                         metrics_to_collect,
+                        self.tags,
                         db=db.name,
                         physical_database_name=db.physical_db_name,
                     )
@@ -616,10 +617,9 @@ class SQLServer(AgentCheck):
             if m.base_name:
                 self.instance_per_type_metrics[cls].add(m.base_name)
 
-    def _add_performance_counters(self, metrics, metrics_to_collect, db=None, physical_database_name=None):
-        cfg_tags = copy.deepcopy(self.tags)
+    def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
         if db is not None:
-            cfg_tags = cfg_tags + ["database:{}".format(db)]
+            tags = tags + ["database:{}".format(db)]
         for name, counter_name, instance_name, object_name in metrics:
             try:
                 sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
@@ -629,7 +629,7 @@ class SQLServer(AgentCheck):
                     "instance_name": db or instance_name,
                     "object_name": object_name,
                     "physical_db_name": physical_database_name,
-                    "tags": cfg_tags,
+                    "tags": tags,
                 }
 
                 metrics_to_collect.append(
