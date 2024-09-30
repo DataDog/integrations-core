@@ -4,59 +4,59 @@
   "app_id": "squid",
   "display_on_public_website": true,
   "tile": {
-    "overview": "README.md#Overview",
-    "configuration": "README.md#Setup",
-    "support": "README.md#Support",
-    "changelog": "CHANGELOG.md",
-    "description": "Track metrics from your squid-cache servers with Datadog",
-    "title": "Squid",
-    "media": [],
-    "classifier_tags": [
-      "Category::Caching",
-      "Category::Log Collection",
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Offering::Integration"
-    ]
+      "overview": "README.md#Overview",
+      "configuration": "README.md#Setup",
+      "support": "README.md#Support",
+      "changelog": "CHANGELOG.md",
+      "description": "Track metrics from your squid-cache servers with Datadog",
+      "title": "Squid",
+      "media": [],
+      "classifier_tags": [
+          "Category::Caching",
+          "Category::Log Collection",
+          "Supported OS::Linux",
+          "Supported OS::Windows",
+          "Supported OS::macOS",
+          "Offering::Integration"
+      ]
   },
   "author": {
-    "support_email": "help@datadoghq.com",
-    "name": "Datadog",
-    "homepage": "https://www.datadoghq.com",
-    "sales_email": "info@datadoghq.com"
+      "support_email": "help@datadoghq.com",
+      "name": "Datadog",
+      "homepage": "https://www.datadoghq.com",
+      "sales_email": "info@datadoghq.com"
   },
   "assets": {
-    "integration": {
-      "source_type_name": "Squid",
-      "configuration": {
-        "spec": "assets/configuration/spec.yaml"
-      },
-      "events": {
-        "creates_events": false
-      },
-      "metrics": {
-        "prefix": "squid.",
-        "check": "squid.cachemgr.cpu_time",
-        "metadata_path": "metadata.csv"
-      },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
+      "integration": {
+          "source_type_name": "Squid",
+          "configuration": {
+              "spec": "assets/configuration/spec.yaml"
+          },
+          "events": {
+              "creates_events": false
+          },
+          "metrics": {
+              "prefix": "squid.",
+              "check": "squid.cachemgr.cpu_time",
+              "metadata_path": "metadata.csv"
+          },
+          "service_checks": {
+              "metadata_path": "assets/service_checks.json"
+          },
+          "source_type_id": 10022,
+          "auto_install": true
       },
       "dashboards": {
-        "Squid": "assets/dashboards/squid.json"
+          "Squid": "assets/dashboards/squid.json"
       },
       "monitors": {
-        "[Squid] CPU usage exceeded": "assets/monitors/cpu_usage_exceeded.json",
-        "[Squid] High latency requests": "assets/monitors/high_latency_requests.json",
-        "[Squid] High number of client HTTP errors": "assets/monitors/high_number_of_client_http_errors.json",
-        "[Squid] High number of server errors": "assets/monitors/high_number_of_server_errors.json",
+          "[Squid] CPU usage exceeded": "assets/monitors/cpu_usage_exceeded.json",
+          "[Squid] High latency requests": "assets/monitors/high_latency_requests.json",
+          "[Squid] High number of client HTTP errors": "assets/monitors/high_number_of_client_http_errors.json",
+          "[Squid] High number of server errors": "assets/monitors/high_number_of_server_errors.json"
       },
       "logs": {
-        "source": "squid"
-      },
-      "source_type_id": 10022,
-      "auto_install": true
-    }
+          "source": "squid"
+      }
   }
 }

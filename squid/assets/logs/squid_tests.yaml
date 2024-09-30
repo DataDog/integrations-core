@@ -20,8 +20,10 @@ tests:
       network:
         bytes_written: 491.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "99.86.88.89"
         protocol: "TCP"
       squid:
@@ -53,8 +55,10 @@ tests:
       network:
         bytes_written: 491.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "99.86.88.128"
         protocol: "TCP"
       squid:
@@ -85,6 +89,7 @@ tests:
       network:
         bytes_written: 4114.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         protocol: "TCP"
       squid:
@@ -111,8 +116,10 @@ tests:
       network:
         bytes_written: 0.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "8.8.8.8"
         protocol: "TCP"
       squid:
@@ -142,8 +149,10 @@ tests:
       network:
         bytes_written: 1380.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "99.86.88.128"
         protocol: "TCP"
       squid:
@@ -174,8 +183,10 @@ tests:
       network:
         bytes_written: 12712.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "172.217.20.68"
         protocol: "TCP"
       squid:
@@ -197,12 +208,15 @@ tests:
         status_category: "Success"
         status_code: 200
         url_details:
-          path: "www.google.com:443"
+          host: "www.google.com"
+          port: 443
       network:
         bytes_written: 15851.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "172.217.20.68"
         protocol: "TCP"
       squid:
@@ -224,12 +238,16 @@ tests:
         status_category: "Success"
         status_code: 200
         url_details:
-          path: "8.8.8.8:443/"
+          host: "8.8.8.8"
+          path: "/"
+          port: 443.0
       network:
         bytes_written: 4094.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "8.8.8.8"
         protocol: "TCP"
       squid:
@@ -261,8 +279,10 @@ tests:
       network:
         bytes_written: 4006.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "172.217.20.68"
         protocol: "TCP"
       squid:
@@ -294,6 +314,7 @@ tests:
       network:
         bytes_written: 3903.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         protocol: "TCP"
       squid:

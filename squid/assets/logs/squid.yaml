@@ -2,30 +2,11 @@ id: squid
 metric_id: squid
 backend_only: false
 facets:
-  - groups:
-      - User
-    name: User Name
-    path: usr.name
-    source: log
   - facetType: list
     groups:
       - Web Access
     name: Method
     path: http.method
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Web Access
-    name: Destination IP
-    path: network.destination.ip
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Web Access
-    name: Client IP
-    path: network.client.ip
     source: log
     type: string
   - facetType: list
@@ -63,6 +44,110 @@ facets:
     path: http.url_details.scheme
     source: log
     type: string
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - facetType: list
+    groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+    type: string
+  - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - facetType: list
+    groups:
+      - Web Access
+    name: Destination IP
+    path: network.destination.ip
+    source: log
+    type: string
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
   - facetType: list
     groups:
       - Network
@@ -103,11 +188,10 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - 1725599181.650      0 10.212.128.16 TCP_MISS_ABORTED/000 0 - error:transaction-end-before-headers - HIER_NONE/- -
-        - 1725599185.240      0 10.212.128.16 TCP_DENIED/407 4660 GET http://clientservices.googleapis.com/chrome-variations/seed? - HIER_NONE/- text/html [http_request_headers] [http_response_headers]
-        - 10.212.128.16 - - [06/Sep/2024:10:32:43 +0530] "CONNECT fcmconnection.googleapis.com:443 HTTP/1.1" 407 4053 TCP_DENIED:HIER_NONE
-        - 10.212.128.16 - - [06/Sep/2024:10:34:44 +0530] "CONNECT mobile.events.data.microsoft.com:443 HTTP/1.1" 407 4277 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.92.2 Chrome/124.0.6367.243 Electron/30.1.2 Safari/537.36" TCP_DENIED:HIER_NONE
-        - 2019/10/11 09:14:49 kid1| Accepting HTTP Socket connections at local=[::]:3128 remote=[::] FD 11 flags=9
+        - 1570784654.576    111 127.0.0.1 TCP_MISS/301 491 GET http://www.datadog.com - HIER_DIRECT/99.86.88.89 - [http_request_headers] [http_response_headers]
+        - 1570784663.985    120 127.0.0.1 TCP_MISS/301 491 GET http://datadog.com/test/?queryParam1=1&queryParam2=queryParam2 - HIER_DIRECT/99.86.88.128 -
+        - 1570784722.610    196 127.0.0.1 TCP_MISS/200 12712 GET http://www.google.com/ - HIER_DIRECT/172.217.20.68 text/html
+        - 1570784681.846  12140 127.0.0.1 TCP_MISS_ABORTED/000 0 GET http://8.8.8.8/ - HIER_DIRECT/8.8.8.8 -
       grok:
         supportRules: >
           helper_rule1 (-|%{ip:network.client.ip}) -
