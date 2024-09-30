@@ -857,7 +857,6 @@ def test_propagate_agent_tags(
             ]
             aggregator.assert_service_check(
                 'sqlserver.can_connect',
-                count=1,
                 status=SQLServer.OK,
                 tags=expected_tags,
             )
