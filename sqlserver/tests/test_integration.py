@@ -95,8 +95,9 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
         'connection_host:{}'.format(instance_docker.get('host')),
-        'sqlserver_host:stubbed.hostname',
+        'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),,
         'db:master',
+        'dd.internal.resource:database_instance:stubbed.hostname',
     ]
     assert_metrics(
         instance_docker,
@@ -121,10 +122,10 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
     dd_run_check(sqlserver_check)
 
     expected_tags = (
-        instance_docker.get('tags', [])
-        + sp_tags.split(',')
-        + ['dd.internal.resource:database_instance:stubbed.hostname']
-    )
+        instance_docker.get('tags', [])+ 
+        sp_tags.split(',') + [
+        'dd.internal.resource:database_instance:stubbed.hostname'
+    ])
     aggregator.assert_metric('sql.sp.testa', value=100, tags=expected_tags, count=1)
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
@@ -151,9 +152,10 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
     sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     dd_run_check(sqlserver_check)
     instance_tags = instance_docker.get('tags', []) + ['optional_tag:tag1']
+    expected_tags = instance_tags + ['dd.internal.resource:database_instance:stubbed.hostname']
 
-    aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=instance_tags, count=1)
-    aggregator.assert_metric('sqlserver.broker_activation.tasks_running', tags=instance_tags, count=1)
+    aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=expected_tags, count=1)
+    aggregator.assert_metric('sqlserver.broker_activation.tasks_running', tags=expected_tags, count=1)
 
 
 @pytest.mark.integration
