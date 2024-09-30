@@ -223,8 +223,6 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1727360160873
-      result: null
-      service: "l4tm_logs"
   - sample: '1727246631.866 93971 10.10.11.12 TCP_MISS/200 8560 CONNECT tunnel://csp.withgoogle.com:443/ - DIRECT/csp.withgoogle.com application/octet-stream DEFAULT_CASE_12-DefaultGroup-match_network-NONE-NONE-NONE-DefaultGroup-NONE <"IW_comp",3.0,1,"-",-,-,-,1,"-",-,-,-,"-",1,-,"-","-",-,-,"IW_comp,IW_csec",-,"-","Computers and Internet","-","Unknown","Unknown","-","-",0.73,0,-,"-","-",1,"-",-,-,"-","-",-,1,"-",-,-> - -'
     service: "access_logs"
     result:
