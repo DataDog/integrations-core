@@ -817,7 +817,7 @@ def test_obfuscate_xml_plan(test_file, obfuscated_file, datadog_agent):
 PORT = 1432
 
 
-def _expected_dbm_instance_tags(dbm_instance):
+def _expected_dbm_instance_tags(check):
     return check._config.tags
 
 
