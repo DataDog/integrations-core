@@ -150,6 +150,7 @@ class ObfuscatorOptions(BaseModel):
     keep_boolean: Optional[bool] = None
     keep_dollar_quoted_func: Optional[bool] = None
     keep_identifier_quotation: Optional[bool] = None
+    keep_json_path: Optional[bool] = None
     keep_null: Optional[bool] = None
     keep_positional_parameter: Optional[bool] = None
     keep_sql_alias: Optional[bool] = None

@@ -945,6 +945,13 @@ files:
             type: boolean
             example: false
             display_default: false
+        - name: keep_json_path
+          description: |
+            Set to `true` to keep JSON path expressions (e.g. `data->'key'`) in your normalized SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
     - name: log_unobfuscated_queries
       hidden: true
       description: |
