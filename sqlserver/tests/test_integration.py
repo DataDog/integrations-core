@@ -428,7 +428,7 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
 
     for metric_name, kwargs in assert_metrics:
         kwargs = copy(kwargs)
-        kwargs['tags'] = instance['tags'] + kwargs.get('tags', [])
+        kwargs['tags'] = check._config.tags + kwargs.get('tags', [])
         aggregator.assert_metric(metric_name, **kwargs)
 
 
@@ -857,7 +857,6 @@ def test_propagate_agent_tags(
                     'sqlserver_host:None',
                     'db:master',
                 ]
-                + agent_tags
             )
             aggregator.assert_service_check(
                 'sqlserver.can_connect',
