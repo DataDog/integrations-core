@@ -40,7 +40,7 @@ deps = [
     "cachetools==3.1.1; python_version < '3.0'",
     "cachetools==5.5.0; python_version > '3.0'",
     "cryptography==3.3.2; python_version < '3.0'",
-    "cryptography==43.0.0; python_version > '3.0'",
+    "cryptography==43.0.1; python_version > '3.0'",
     "pymysql==0.10.1; python_version < '3.0'",
     "pymysql==1.1.1; python_version > '3.0'",
 ]
