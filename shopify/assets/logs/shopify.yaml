@@ -91,7 +91,7 @@ pipeline:
         query: "service:event"
       processors:
         - type: date-remapper
-          name: "Define `created_at` as the official date of the log"
+          name: Define `created_at` as the official date of the log
           enabled: true
           sources:
             - created_at
@@ -163,7 +163,7 @@ pipeline:
           target: usr.name
           replaceMissing: false
         - type: geo-ip-parser
-          name: "GeoIP Parser for `network.client.ip` "
+          name: GeoIP Parser for `network.client.ip`
           enabled: true
           sources:
             - network.client.ip

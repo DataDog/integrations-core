@@ -9,7 +9,7 @@
 		"name": "[Shopify] Product Inventory is Out of Stock",
 		"type": "log alert",
 		"query": "logs(\"source:shopify service:product @tracksInventory:true @totalInventory:<=0\").index(\"*\").rollup(\"count\").by(\"@legacyResourceId,@title\").last(\"1h\") > 0",
-		"message": "{{#is_alert}}\nProduct {{@title.name}} (ID: {{@legacyResourceId.name}}) is currently out of stock. Please restock to ensure it's availability.\n{{/is_alert}}\n\n\n@jay.patel7@crestdata.ai",
+		"message": "{{#is_alert}}\nProduct {{@title.name}} (ID: {{@legacyResourceId.name}}) is currently out of stock. Please restock to ensure it's availability.\n{{/is_alert}}\n\n\n@user@example.com",
 		"tags": [
 			"shopify"
 		],
