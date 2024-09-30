@@ -439,7 +439,7 @@ def test_statement_metrics_and_plans(
     aggregator.assert_metric(
         OPERATION_TIME_METRIC_NAME,
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_statement_metrics_and_plans']
-        + _expected_dbm_instance_tags(dbm_instance),
+        + _expected_dbm_instance_tags(check),
     )
 
 
@@ -768,7 +768,7 @@ def test_plan_collection_deadline(aggregator, dd_run_check, dbm_instance, slow_p
         mock_obj.side_effect = _mock_slow_load_plan
         dd_run_check(check)
 
-    expected_debug_tags = ['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance)
+    expected_debug_tags = ['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(check)
 
     if slow_plans:
         aggregator.assert_metric("dd.sqlserver.statements.deadline_exceeded", tags=expected_debug_tags)
@@ -818,7 +818,7 @@ PORT = 1432
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags']
+    return check._config.tags
 
 
 @pytest.mark.parametrize("statement_metrics_enabled", [True, False])
@@ -843,7 +843,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check.statement_metrics._job_loop_future.result()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
-        tags=['job:query-metrics'] + _expected_dbm_instance_tags(dbm_instance),
+        tags=['job:query-metrics'] + _expected_dbm_instance_tags(check),
         hostname='',
     )
 
@@ -862,7 +862,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
-        tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-metrics'],
+        tags=_expected_dbm_instance_tags(check) + ['job:query-metrics'],
     )
 
 

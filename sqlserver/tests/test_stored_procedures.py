@@ -38,8 +38,8 @@ SELF_HOSTED_ENGINE_EDITIONS = {
 logger = logging.getLogger(__name__)
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags']
+def _expected_dbm_instance_tags(check):
+    return check._config.tags
 
 
 @pytest.fixture(autouse=True)
@@ -285,7 +285,7 @@ def test_procedure_metrics(
     aggregator.assert_metric(
         OPERATION_TIME_METRIC_NAME,
         tags=['agent_hostname:stubbed.hostname', 'operation:collect_procedure_metrics']
-        + _expected_dbm_instance_tags(dbm_instance),
+        + _expected_dbm_instance_tags(check),
     )
 
 
@@ -345,7 +345,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     dd_run_check(check)
     check.procedure_metrics._job_loop_future.result()
     print("natasha heree")
-    print(['job:procedure-metrics'] + _expected_dbm_instance_tags(dbm_instance))
+    print(['job:procedure-metrics'] + _expected_dbm_instance_tags(check))
     print(['job:procedure-metrics'] + check._config.tags)
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
@@ -368,5 +368,5 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
-        tags=_expected_dbm_instance_tags(dbm_instance) + ['job:procedure-metrics'],
+        tags=_expected_dbm_instance_tags(check) + ['job:procedure-metrics'],
     )
