@@ -1,4 +1,4 @@
-name: symantec-endpoint-protection
+name: Symantec Endpoint Protection
 files:
 - name: symantec_endpoint_protection.yaml
   options:
