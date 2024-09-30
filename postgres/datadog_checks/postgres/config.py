@@ -157,7 +157,7 @@ class PostgresConfig:
             'keep_identifier_quotation': is_affirmative(
                 obfuscator_options_config.get('keep_identifier_quotation', False)
             ),
-            'keep_json_path': is_affirmative(obfuscator_options_config.get('keep_json_path', False))
+            'keep_json_path': is_affirmative(obfuscator_options_config.get('keep_json_path', False)),
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
