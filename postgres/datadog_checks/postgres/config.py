@@ -4,15 +4,9 @@
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 from typing import Optional
 
-from six import PY2, PY3, iteritems
-
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
+from datadog_checks.base.utils.db.utils import get_agent_host_tags
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -35,7 +29,7 @@ class PostgresConfig:
         self.host = instance.get('host', '')
         if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
-        self.port = instance.get('port', '')
+        self.port = instance.get('port', '5432')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
@@ -55,7 +49,7 @@ class PostgresConfig:
             )
 
         self.application_name = instance.get('application_name', 'datadog-agent')
-        if not self.isascii(self.application_name):
+        if not self.application_name.isascii():
             raise ConfigurationError("Application name can include only ASCII characters: %s", self.application_name)
 
         self.query_timeout = int(instance.get('query_timeout', 5000))
@@ -68,7 +62,6 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
-            agent_tags=datadog_agent.get_config('tags') or [],
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
 
@@ -173,7 +166,7 @@ class PostgresConfig:
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
 
-    def _build_tags(self, custom_tags, agent_tags, propagate_agent_tags=True):
+    def _build_tags(self, custom_tags, propagate_agent_tags):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
@@ -196,8 +189,14 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
 
-        if propagate_agent_tags and agent_tags:
-            tags.extend(agent_tags)
+        if propagate_agent_tags:
+            try:
+                agent_tags = get_agent_host_tags()
+                tags.extend(agent_tags)
+            except Exception as e:
+                raise ConfigurationError(
+                    'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
+                )
         return tags
 
     @staticmethod
@@ -219,7 +218,7 @@ class PostgresConfig:
                 m['query'] = m['query'] % '{metrics_columns}'
 
             try:
-                for ref, (_, mtype) in iteritems(m['metrics']):
+                for ref, (_, mtype) in m['metrics'].items():
                     cap_mtype = mtype.upper()
                     if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                         raise ConfigurationError(
@@ -231,17 +230,6 @@ class PostgresConfig:
             except Exception as e:
                 raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
         return custom_metrics
-
-    @staticmethod
-    def isascii(application_name):
-        if PY3:
-            return application_name.isascii()
-        elif PY2:
-            try:
-                application_name.encode('ascii')
-                return True
-            except UnicodeEncodeError:
-                return False
 
     @staticmethod
     def _aws_managed_authentication(aws, password):

@@ -5,14 +5,10 @@ import copy
 
 import mock
 import pytest
-from six import PY3
 
 from datadog_checks.dev import EnvVars
 
 from . import common
-
-if PY3:
-    long = int
 
 
 @pytest.mark.parametrize(

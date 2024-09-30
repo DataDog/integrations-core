@@ -3,7 +3,9 @@
         "replset-data-0.mongo.default.svc.cluster.local:27017",
         "replset-data-1.mongo.default.svc.cluster.local:27017"
     ],
-    "arbiters": ["replset-arbiter-0.mongo.default.svc.cluster.local:27017"],
+    "arbiters": [
+        "replset-arbiter-0.mongo.default.svc.cluster.local:27017"
+    ],
     "setName": "replset",
     "setVersion": 1,
     "ismaster": true,
@@ -99,5 +101,9 @@
             "t": 1600348939,
             "i": 85
         }
+    },
+    "tags": {
+        "nodeType": "ELECTABLE",
+        "workloadType": "OPERATIONAL"
     }
 }

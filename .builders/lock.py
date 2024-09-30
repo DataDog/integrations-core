@@ -36,6 +36,11 @@ def default_python_version() -> str:
     return match.group(1)
 
 
+@cache
+def target_python_for_major(python_major: str):
+    return '2.7' if python_major == '2' else default_python_version()
+
+
 def is_compatible_wheel(
     target_name: str,
     target_python_major: str,
@@ -44,7 +49,7 @@ def is_compatible_wheel(
     platform: str,
 ) -> bool:
     if interpreter.startswith('cp'):
-        target_python = '2.7' if target_python_major == '2' else default_python_version()
+        target_python = target_python_for_major(target_python_major)
         expected_tag = f'cp{target_python_major}' if abi == 'abi3' else f'cp{target_python}'.replace('.', '')
         if expected_tag not in interpreter:
             return False
@@ -59,8 +64,17 @@ def is_compatible_wheel(
     return True
 
 
-def generate_lock_file(requirements_file: Path, lock_file: Path) -> None:
-    target, _, python_version = lock_file.stem.rpartition('_')
+def generate_lock_file(
+    requirements_file: Path,
+    lock_file_folder: Path,
+    target: str,
+    python_version: str,
+) -> None:
+    python_target = target_python_for_major(python_version)
+    # The lockfiles contain the major.minor Python version
+    # so that the Agent can transition safely
+    lock_file = lock_file_folder / f'{target}_{python_target}.txt'
+
     python_major = python_version[-1]
 
     dependencies: dict[str, str] = {}
@@ -135,7 +149,10 @@ def main():
         for python_version in target.iterdir():
             if python_version.name.startswith('py'):
                 generate_lock_file(
-                    python_version / 'frozen.txt', LOCK_FILE_DIR / f'{target.name}_{python_version.name}.txt'
+                    python_version / 'frozen.txt',
+                    LOCK_FILE_DIR,
+                    target.name,
+                    python_version.name.strip('py'),
                 )
 
         if (image_digest_file := target / 'image_digest').is_file():

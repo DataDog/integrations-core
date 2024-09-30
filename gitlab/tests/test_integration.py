@@ -5,7 +5,6 @@ import mock
 import pytest
 from requests.exceptions import ConnectionError
 
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.gitlab import GitlabCheck
 
 from .common import (
@@ -30,7 +29,6 @@ def test_check(dd_run_check, aggregator, gitlab_check, get_config, use_openmetri
     assert_check(aggregator, METRICS_TO_TEST_V2 if use_openmetrics else METRICS_TO_TEST, use_openmetrics)
 
 
-@requires_py3
 def test_check_gitaly(dd_run_check, aggregator, gitlab_check, get_config):
     from datadog_checks.gitlab.gitlab_v2 import GitlabCheckV2
 
@@ -70,7 +68,6 @@ def test_connection_failure(aggregator, gitlab_check, get_bad_config):
         )
 
 
-@requires_py3
 def test_connection_failure_openmetrics(dd_run_check, aggregator, gitlab_check, get_bad_config):
     check = gitlab_check(get_bad_config(True))
 

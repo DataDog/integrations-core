@@ -9,7 +9,9 @@ from .db_stat import DbStatCollector
 from .fsynclock import FsyncLockCollector
 from .host_info import HostInfoCollector
 from .index_stats import IndexStatsCollector
+from .process_stats import ProcessStatsCollector
 from .replica import ReplicaCollector
 from .replication_info import ReplicationOpLogCollector
 from .server_status import ServerStatusCollector
+from .sharded_data_distribution_stats import ShardedDataDistributionStatsCollector
 from .top import TopCollector

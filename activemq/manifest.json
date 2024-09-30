@@ -67,8 +67,8 @@
       "artemis": "assets/dashboards/artemis_dashboard.json"
     },
     "monitors": {
-      "[ActiveMQ Artemis] High unrouted messages": "assets/monitors/activemq_artemis_unrouted_messages.json",
-      "[ActiveMQ Artemis] High disk store usage": "assets/monitors/activemq_artemis_high_disk_store.json"
+      "Number of unrouted messages is high": "assets/monitors/activemq_artemis_unrouted_messages.json",
+      "Host is running out of disk space": "assets/monitors/activemq_artemis_high_disk_store.json"
     },
     "saved_views": {
       "activemq_processes": "assets/saved_views/activemq_processes.json"

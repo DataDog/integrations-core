@@ -4,11 +4,10 @@
 
 import copy
 from os import environ
+from urllib.parse import urljoin
 
 import requests
 from openstack import connection
-from six import PY3
-from six.moves.urllib.parse import urljoin
 
 from .exceptions import (
     AuthenticationNeeded,
@@ -215,15 +214,10 @@ class OpenstackSDKApi(AbstractApi):
         return self.connection.list_hypervisors()
 
     def get_os_hypervisor_uptime(self, hypervisor):
-        if PY3:
-            if hypervisor.uptime is None:
-                self._check_authentication()
-                self.connection.compute.get_hypervisor_uptime(hypervisor)
-            return hypervisor.uptime
-        else:
-            # Hypervisor uptime is not available in openstacksdk 0.24.0.
-            self.logger.warning("Hypervisor uptime is not available with this version of openstacksdk")
-            raise NotImplementedError()
+        if hypervisor.uptime is None:
+            self._check_authentication()
+            self.connection.compute.get_hypervisor_uptime(hypervisor)
+        return hypervisor.uptime
 
     def get_os_aggregates(self):
         # Each aggregate is missing the 'uuid' attribute compared to what is returned by SimpleApi

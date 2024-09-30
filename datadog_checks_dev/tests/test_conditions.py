@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import sys
+from urllib.response import addinfourl
 
 import pytest
-from six.moves.urllib.response import addinfourl
 
 from datadog_checks.dev.conditions import CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.errors import RetryError
