@@ -496,7 +496,13 @@ class SQLServer(AgentCheck):
                 self.instance.get("database", self.connection.DEFAULT_DATABASE)
             ]
             for db_name in db_names:
-                cfg = {"name": name, "table": table, "column": column, "instance_name": db_name, "tags": self.non_internal_tags}
+                cfg = {
+                    "name": name,
+                    "table": table,
+                    "column": column,
+                    "instance_name": db_name,
+                    "tags": self.non_internal_tags
+                }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load AlwaysOn metrics
@@ -532,7 +538,13 @@ class SQLServer(AgentCheck):
             self.instance.get("include_tempdb_file_space_usage_metrics", True)
         ) and not is_azure_sql_database(engine_edition):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
-                cfg = {"name": name, "table": table, "column": column, "instance_name": "tempdb", "tags": self.non_internal_tags}
+                cfg = {
+                    "name": name,
+                    "table": table,
+                    "column": column,
+                    "instance_name": "tempdb",
+                    "tags": self.non_internal_tags
+                }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
@@ -709,7 +721,7 @@ class SQLServer(AgentCheck):
             metric_type = getattr(self, metric_type_str)
 
         cfg_inst["hostname"] = self.resolved_hostname
-        return cls(cfg_inst, base_name, metric_type, column, self.log, self.non_internal_tags)
+        return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def _check_connections_by_connecting_to_db(self):
         for db in self.databases:

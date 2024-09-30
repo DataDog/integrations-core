@@ -285,7 +285,6 @@ def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, c
         report_function=mock.MagicMock(),
         column='size',
         logger=None,
-        tags=[],
     )
     with mock.patch.object(
         SqlMasterDatabaseFileStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
@@ -331,7 +330,6 @@ def test_SqlFractionMetric_base(caplog, base_name):
         report_function=report_function,
         column=None,
         logger=mock.MagicMock(),
-        tags=['optional:tag1', 'dd. internal. resource:database_instance: stubbed.hostname'],
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
         mock_cursor, ['Buffer cache hit ratio', base_name], mock.mock.MagicMock()
@@ -377,7 +375,6 @@ def test_SqlFractionMetric_group_by_instance(caplog):
         report_function=report_function,
         column=None,
         logger=mock.MagicMock(),
-        tags=['optional:tag1', 'dd. internal. resource:database_instance: stubbed.hostname'],
     )
     results_rows, results_cols = SqlFractionMetric.fetch_all_values(
         mock_cursor, ['Foo counter base', 'Foo counter'], mock.mock.MagicMock()
