@@ -474,7 +474,7 @@ class SQLServer(AgentCheck):
                 # if autodiscovery is enabled, we report metrics from the
                 # INSTANCE_METRICS_DATABASE struct below, so do not double report here
                 common_metrics.extend(INSTANCE_METRICS_DATABASE)
-            self._add_performance_counters(common_metrics, metrics_to_collect, db=None)
+            self._add_performance_counters(common_metrics, metrics_to_collect, self.tags, db=None)
 
             # populated through autodiscovery
             if self.databases:
@@ -482,6 +482,7 @@ class SQLServer(AgentCheck):
                     self._add_performance_counters(
                         INSTANCE_METRICS_DATABASE,
                         metrics_to_collect,
+                        self.tags,
                         db=db.name,
                         physical_database_name=db.physical_db_name,
                     )
@@ -496,7 +497,13 @@ class SQLServer(AgentCheck):
                 self.instance.get("database", self.connection.DEFAULT_DATABASE)
             ]
             for db_name in db_names:
-                cfg = {"name": name, "table": table, "column": column, "instance_name": db_name, "tags": self.tags}
+                cfg = {
+                    "name": name,
+                    "table": table,
+                    "column": column,
+                    "instance_name": db_name,
+                    "tags": self.tags,
+                }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load AlwaysOn metrics
@@ -532,7 +539,13 @@ class SQLServer(AgentCheck):
             self.instance.get("include_tempdb_file_space_usage_metrics", True)
         ) and not is_azure_sql_database(engine_edition):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
-                cfg = {"name": name, "table": table, "column": column, "instance_name": "tempdb", "tags": self.tags}
+                cfg = {
+                    "name": name,
+                    "table": table,
+                    "column": column,
+                    "instance_name": "tempdb",
+                    "tags": self.tags,
+                }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
@@ -604,10 +617,9 @@ class SQLServer(AgentCheck):
             if m.base_name:
                 self.instance_per_type_metrics[cls].add(m.base_name)
 
-    def _add_performance_counters(self, metrics, metrics_to_collect, db=None, physical_database_name=None):
-        cfg_tags = self.tags.copy()
+    def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
         if db is not None:
-            cfg_tags = cfg_tags + ["database:{}".format(db)]
+            tags = tags + ["database:{}".format(db)]
         for name, counter_name, instance_name, object_name in metrics:
             try:
                 sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
@@ -617,7 +629,7 @@ class SQLServer(AgentCheck):
                     "instance_name": db or instance_name,
                     "object_name": object_name,
                     "physical_db_name": physical_database_name,
-                    "tags": cfg_tags,
+                    "tags": tags,
                 }
 
                 metrics_to_collect.append(
@@ -710,7 +722,7 @@ class SQLServer(AgentCheck):
 
         cfg_inst["hostname"] = self.resolved_hostname
 
-        return cls(cfg_inst, base_name, metric_type, column, self.log, self.tags)
+        return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def _check_connections_by_connecting_to_db(self):
         for db in self.databases:
