@@ -95,7 +95,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
     dd_run_check(sqlserver_check)
     expected_tags = instance_docker.get('tags', []) + [
         'connection_host:{}'.format(instance_docker.get('host')),
-        'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),,
+        'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
         'db:master',
         'dd.internal.resource:database_instance:stubbed.hostname',
     ]
