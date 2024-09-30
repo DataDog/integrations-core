@@ -50,7 +50,7 @@ class DatabaseAutodiscovery(BaseModel):
     enabled: Optional[bool] = None
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
-    max_collection_per_database: Optional[int] = None
+    max_collections_per_database: Optional[int] = None
     max_databases: Optional[int] = None
     refresh_interval: Optional[int] = None
 

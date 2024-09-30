@@ -149,7 +149,7 @@ files:
               - "admin$"
               - "config$"
               - "local$"
-        - name: max_collection_per_database
+        - name: max_collections_per_database
           description: |
             The maximum number of collections to collect metrics from per database.
             Defaults to 100.
@@ -266,7 +266,7 @@ files:
         - name: max_collections
           description: |
             Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
-            per database is bounded by `database_autodiscovery.max_collection_per_database`. By setting this option, you
+            per database is bounded by `database_autodiscovery.max_collections_per_database`. By setting this option, you
             are adding an additional limit to the total number of collections across all monitored databases that schemas
             will be collected from. By default, this option is not set.
           value:
