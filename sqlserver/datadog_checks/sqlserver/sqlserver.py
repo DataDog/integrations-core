@@ -153,13 +153,13 @@ class SQLServer(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
-        self.check_initializations.append(self.config_checks)
         # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
         self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
 
         # Query declarations
