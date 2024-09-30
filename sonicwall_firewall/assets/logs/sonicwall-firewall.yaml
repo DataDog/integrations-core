@@ -228,11 +228,16 @@ pipeline:
         - tcp/http
         - icmp
         - ipv6-icmp
+        - udp/netbios-ns
       grok:
-        supportRules: ""
+        supportRules: >-
+          protocol_rule
+          %{regex("[a-zA-Z0-9_@#$%^&!<>-~!+'\":\\]\\[|\\(\\)\\{\\}]*-?[a-zA-Z0-9_@#$%^&!<>~!+'\":\\]\\[|\\(\\)\\{\\}-]*"):protocol}
+
+          service_rule %{regex("[a-zA-Z0-9_@#$%^&!<>-~!+'\":/\\]\\[|\\(\\)\\{\\}]*-?[a-zA-Z0-9_@#$%^&!<>~!+'\":/\\]\\[|\\(\\)\\{\\}-]*"):service}
         matchRules: |-
-          rule1 %{word:protocol}(/%{word:service})?
-          rule2 %{regex("[a-zA-Z0-9]*-[a-zA-Z0-9]*"):protocol}
+          rule1 %{protocol_rule}/%{service_rule}
+          rule2 %{protocol_rule}
     - type: grok-parser
       name: Parsing Sonicwall Firewall time
       enabled: true
@@ -269,6 +274,16 @@ pipeline:
           rule6 FIN-Flooding machine %{greedyData:message_value} blacklisted
 
           rule7 Possible replay attack with this client IP - %{greedyData:message_value}
+    - type: attribute-remapper
+      name: Map `app` to `syslog_appid`
+      enabled: true
+      sources:
+        - app
+      sourceType: attribute
+      target: syslog_appid
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
     - type: attribute-remapper
       name: Map `af_polid` to `app.policy.id`
       enabled: true
@@ -336,16 +351,6 @@ pipeline:
         - ai
       sourceType: attribute
       target: active_interface
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `app` to `syslog_appid`
-      enabled: true
-      sources:
-        - app
-      sourceType: attribute
-      target: syslog_appid
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false

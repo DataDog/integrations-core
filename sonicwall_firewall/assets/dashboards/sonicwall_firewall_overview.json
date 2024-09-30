@@ -2210,7 +2210,7 @@
             "id": 2830819343474136,
             "definition": {
               "type": "note",
-              "content": "\nDatadog Cloud SIEM analyzes and correlates SonicWall Firewall Event logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](https://docs.datadoghq.com/integrations/sonicwall_firewall). ",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates SonicWall Firewall Event logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Asonicwall-firewall). ",
               "background_color": "vivid_blue",
               "font_size": "14",
               "text_align": "left",
