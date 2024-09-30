@@ -501,7 +501,7 @@ class SQLServer(AgentCheck):
                     "table": table,
                     "column": column,
                     "instance_name": db_name,
-                    "tags": self.non_internal_tags,
+                    "tags": self.tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -514,7 +514,7 @@ class SQLServer(AgentCheck):
                     "table": table,
                     "column": column,
                     "instance_name": db_name,
-                    "tags": self.non_internal_tags,
+                    "tags": self.tags,
                     "ao_database": self.instance.get("ao_database", None),
                     "availability_group": self.instance.get("availability_group", None),
                     "only_emit_local": is_affirmative(self.instance.get("only_emit_local", False)),
@@ -524,13 +524,13 @@ class SQLServer(AgentCheck):
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get("include_task_scheduler_metrics", False)):
             for name, table, column in TASK_SCHEDULER_METRICS:
-                cfg = {"name": name, "table": table, "column": column, "tags": self.non_internal_tags}
+                cfg = {"name": name, "table": table, "column": column, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load sys.master_files metrics
         if is_affirmative(self.instance.get("include_master_files_metrics", False)):
             for name, table, column in DATABASE_MASTER_FILES:
-                cfg = {"name": name, "table": table, "column": column, "tags": self.non_internal_tags}
+                cfg = {"name": name, "table": table, "column": column, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
@@ -543,7 +543,7 @@ class SQLServer(AgentCheck):
                     "table": table,
                     "column": column,
                     "instance_name": "tempdb",
-                    "tags": self.non_internal_tags,
+                    "tags": self.tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -552,7 +552,7 @@ class SQLServer(AgentCheck):
             sql_counter_type = None
             base_name = None
 
-            custom_tags = self.non_internal_tags + cfg.get("tags", [])
+            custom_tags = self.tags + cfg.get("tags", [])
             cfg["tags"] = custom_tags
 
             db_table = cfg.get("table", DEFAULT_PERFORMANCE_TABLE)
@@ -617,7 +617,7 @@ class SQLServer(AgentCheck):
                 self.instance_per_type_metrics[cls].add(m.base_name)
 
     def _add_performance_counters(self, metrics, metrics_to_collect, db=None, physical_database_name=None):
-        cfg_tags = self.non_internal_tags.copy()
+        cfg_tags = copy.deepcopy(self.tags)
         if db is not None:
             cfg_tags = cfg_tags + ["database:{}".format(db)]
         for name, counter_name, instance_name, object_name in metrics:
@@ -721,6 +721,7 @@ class SQLServer(AgentCheck):
             metric_type = getattr(self, metric_type_str)
 
         cfg_inst["hostname"] = self.resolved_hostname
+
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def _check_connections_by_connecting_to_db(self):
