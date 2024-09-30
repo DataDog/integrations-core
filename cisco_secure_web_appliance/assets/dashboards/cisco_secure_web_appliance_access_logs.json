@@ -65,7 +65,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @action:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @http.method:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -110,7 +110,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @action:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @http.method:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -222,7 +222,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs status:critical $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs status:critical $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             }
                                         }
                                     ],
@@ -272,7 +272,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs status:high $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs status:high $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             }
                                         }
                                     ],
@@ -331,7 +331,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs status:critical $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs status:critical $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             }
                                         }
                                     ],
@@ -397,7 +397,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs status:medium $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs status:medium $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             }
                                         }
                                     ],
@@ -448,7 +448,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs status:low $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs status:low $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             }
                                         }
                                     ],
@@ -491,7 +491,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs status:info $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs status:info $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             }
                                         }
                                     ],
@@ -550,7 +550,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs status:high $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs status:high $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             }
                                         }
                                     ],
@@ -624,7 +624,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs status:medium $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs status:medium $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             }
                                         }
                                     ],
@@ -716,7 +716,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -783,7 +783,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -852,7 +852,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @average_bandwidth_consumed:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @average_bandwidth_consumed:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -919,7 +919,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @user_type:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @user_type:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -977,7 +977,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@request_throttled",
+                                                    "facet": "@request_throttled_status",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -986,7 +986,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @request_throttled:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @request_throttled_status:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1049,7 +1049,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1120,7 +1120,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1149,7 +1149,7 @@
                         "layout": {
                             "x": 0,
                             "y": 11,
-                            "width": 6,
+                            "width": 12,
                             "height": 4
                         }
                     },
@@ -1187,7 +1187,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1214,9 +1214,9 @@
                             }
                         },
                         "layout": {
-                            "x": 6,
-                            "y": 11,
-                            "width": 6,
+                            "x": 0,
+                            "y": 15,
+                            "width": 12,
                             "height": 4
                         }
                     },
@@ -1250,7 +1250,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $Destination_IP $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1283,7 +1283,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 15,
+                            "y": 19,
                             "width": 12,
                             "height": 6
                         }
@@ -1294,7 +1294,7 @@
                 "x": 0,
                 "y": 17,
                 "width": 12,
-                "height": 22
+                "height": 26
             }
         },
         {
@@ -1336,7 +1336,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @acl_decision_tag:BLOCK* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @acl_decision_tag:BLOCK* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1403,7 +1403,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @request_threat_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @request_threat_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1470,7 +1470,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @webroot_spyware_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @webroot_spyware_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1537,7 +1537,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @mcafee_detected_virus_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @mcafee_detected_virus_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1604,7 +1604,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @response_side_anti_malware_scanning_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @response_side_anti_malware_scanning_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1671,7 +1671,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @request_side_anti_malware_scanning_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @request_side_anti_malware_scanning_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1709,11 +1709,14 @@
                         }
                     },
                     {
-                        "id": 2375835874441026,
+                        "id": 1543734261349152,
                         "definition": {
-                            "title": "Top 10 Blocked URL Categories Determined by Dynamic Content Analysis Engine",
+                            "title": "Top 10 Threats Determined by Advanced Malware File Scanning",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "hide_incomplete_cost_data": true
+                            },
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1729,7 +1732,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@cisco_web_usage_url_category_verdict",
+                                                    "facet": "@advance_malware_protection_detected_threat_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1738,7 +1741,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @acl_decision_tag:BLOCK* @cisco_web_usage_url_category_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1805,7 +1808,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @advance_malware_protection_file_scanning_verdict:Malicious $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @advance_malware_protection_file_scanning_verdict:Malicious $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1843,14 +1846,11 @@
                         }
                     },
                     {
-                        "id": 1543734261349152,
+                        "id": 4896008862853376,
                         "definition": {
-                            "title": "Top 10 Threats Determined by Advanced Malware File Scanning",
+                            "title": "Top 10 Sophos Categorized Malware Verdicts",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1866,7 +1866,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@advance_malware_protection_detected_threat_name",
+                                                    "facet": "@sophos_malware_scanning_verdict_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1875,7 +1875,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs -@sophos_malware_scanning_verdict:(\"-\" OR 0 OR 1 OR 2 OR 3 OR 4) $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1915,7 +1915,7 @@
                     {
                         "id": 2017920686237264,
                         "definition": {
-                            "title": "Top 10 McAfee Categorized Malware Transactions",
+                            "title": "Top 10 McAfee Categorized Malware Verdicts",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1933,7 +1933,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@response_side_anti_malware_scanning_verdict",
+                                                    "facet": "@mcafee_malware_scanning_verdict_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1942,7 +1942,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @mcafee_malware_scanning_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs -@mcafee_malware_scanning_verdict:(\"-\" OR 0 OR 1 OR 2 OR 3 OR 4) $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1980,76 +1980,9 @@
                         }
                     },
                     {
-                        "id": 4896008862853376,
-                        "definition": {
-                            "title": "Top 10 Sophos Categorized Malware Transactions",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@response_side_anti_malware_scanning_verdict",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @sophos_malware_scanning_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 20,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
                         "id": 1986172214811800,
                         "definition": {
-                            "title": "Top 10 Webroot Categorized Malware Transactions",
+                            "title": "Top 10 Webroot Categorized Malware Verdicts",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2067,7 +2000,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@response_side_anti_malware_scanning_verdict",
+                                                    "facet": "@webroot_malware_scanning_verdict_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -2076,74 +2009,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @webroot_malware_scanning_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 20,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 7135662198723920,
-                        "definition": {
-                            "title": "Distribution of Transactions by URL Category Determined by Dynamic Content Analysis Engine",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@cisco_web_usage_url_category_verdict",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @cisco_web_usage_url_category_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs -@webroot_malware_scanning_verdict:(\"-\" OR 0 OR 1 OR 2 OR 3 OR 4) $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -2175,74 +2041,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 24,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2145705823863606,
-                        "definition": {
-                            "title": "Distribution of Transactions by Cisco Data Security Scan Verdict",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@cisco_data_security_scanning_verdict",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @cisco_data_security_scanning_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 24,
+                            "y": 20,
                             "width": 6,
                             "height": 4
                         }
@@ -2272,7 +2071,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@external_dlp_scan_verdict",
+                                                    "facet": "@external_dlp_scan_verdict_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -2281,7 +2080,74 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs @external_dlp_scan_verdict:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @external_dlp_scan_verdict_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 20,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2145705823863606,
+                        "definition": {
+                            "title": "Distribution of Transactions by Cisco Data Security Scan Verdict",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@cisco_data_security_scanning_verdict_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:cisco-secure-web-appliance service:access_logs @cisco_data_security_scanning_verdict_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -2309,7 +2175,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 28,
+                            "y": 24,
                             "width": 6,
                             "height": 4
                         }
@@ -2348,7 +2214,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Action"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -2376,7 +2242,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 28,
+                            "y": 24,
                             "width": 6,
                             "height": 4
                         }
@@ -2392,7 +2258,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cisco-secure-web-appliance service:access_logs @advance_malware_protection_file_scanning_verdict:Malicious $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Action $Server_Type $Custom_URL_Category",
+                                        "query_string": "source:cisco-secure-web-appliance service:access_logs @advance_malware_protection_file_scanning_verdict:Malicious $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Http_Method $Server_Type $Custom_URL_Category",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -2452,7 +2318,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 32,
+                            "y": 28,
                             "width": 12,
                             "height": 4
                         }
@@ -2468,7 +2334,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cisco-secure-web-appliance service:access_logs @mcafee_detected_virus_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Action $Server_Type $Custom_URL_Category",
+                                        "query_string": "source:cisco-secure-web-appliance service:access_logs @mcafee_detected_virus_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Http_Method $Server_Type $Custom_URL_Category",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -2499,6 +2365,10 @@
                                         },
                                         {
                                             "field": "@acl_decision_tag",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@mcafee_malware_scanning_verdict_name",
                                             "width": "auto"
                                         },
                                         {
@@ -2528,7 +2398,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 36,
+                            "y": 32,
                             "width": 12,
                             "height": 4
                         }
@@ -2544,7 +2414,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cisco-secure-web-appliance service:access_logs @webroot_spyware_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Action $Server_Type $Custom_URL_Category",
+                                        "query_string": "source:cisco-secure-web-appliance service:access_logs @webroot_spyware_name:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Http_Method $Server_Type $Custom_URL_Category",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -2578,6 +2448,10 @@
                                             "width": "auto"
                                         },
                                         {
+                                            "field": "@webroot_malware_scanning_verdict_name",
+                                            "width": "auto"
+                                        },
+                                        {
                                             "field": "@webroot_spyware_name",
                                             "width": "auto"
                                         },
@@ -2604,7 +2478,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 40,
+                            "y": 36,
                             "width": 12,
                             "height": 4
                         }
@@ -2613,9 +2487,10 @@
             },
             "layout": {
                 "x": 0,
-                "y": 39,
+                "y": 43,
                 "width": 12,
-                "height": 45
+                "height": 41,
+                "is_column_break": true
             }
         },
         {
@@ -2629,7 +2504,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:cisco-secure-web-appliance service:access_logs @action:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Action $Server_Type $Custom_URL_Category ",
+                            "query_string": "source:cisco-secure-web-appliance service:access_logs @http.method:* $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Http_Method $Server_Type $Custom_URL_Category ",
                             "indexes": [],
                             "storage": "hot",
                             "sort": {
@@ -2707,8 +2582,8 @@
             "default": "*"
         },
         {
-            "name": "Action",
-            "prefix": "@action",
+            "name": "Http_Method",
+            "prefix": "@http.method",
             "available_values": [],
             "default": "*"
         },

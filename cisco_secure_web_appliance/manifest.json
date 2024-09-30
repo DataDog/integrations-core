@@ -10,7 +10,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Web Proxy filtering and scanning activity and Layer-4 Traffic Monitor activity",
     "title": "Cisco Secure Web Appliance",
-    "media": [],
+    "media": [
+      {
+        "caption": "Cisco Secure Web Appliance - Access Logs",
+        "image_url": "images/cisco_secure_endpoint_access_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Endpoint - Event",
+        "image_url": "images/cisco_secure_endpoint_l4tm_logs.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
