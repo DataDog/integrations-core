@@ -361,4 +361,48 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570785289000
+  - 
+    sample: >
+      10.10.10.10 - testuser1 [12/Sep/2024:12:38:20 +0530] "CONNECT
+      ssl.gstatic.com:443 HTTP/1.1" 200 0 "-" "Mozilla/5.0 (Windows NT 10.0;
+      Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0
+      Safari/537.36" NONE_NONE:HIER_DIRECT
+    result: null
+  - 
+    sample: >
+        10.10.10.10 - - [12/Sep/2024:12:38:20 +0530] "GET
+        http://proxy.squid.local:3128/squid-internal-mgr/counters HTTP/1.1" 407
+        4235 "-" "Datadog Agent/7.53.0" TCP_DENIED:HIER_NONE
+    result: null
+  - 
+    sample: >
+        10.10.10.10 - - [12/Sep/2024:12:38:20 +0530] "-
+        error:transaction-end-before-headers NONE/0.0" 0 0 "-" "-"
+        NONE_NONE:HIER_NONE
+    result: null
+  - 
+    sample: >
+        10.10.10.10 - - [12/Sep/2024:12:08:20 +0530] "-
+        error:transaction-end-before-headers NONE/0.0" 0 0 NONE_NONE:HIER_NONE
+    result: null
+  - 
+    sample: >
+        10.10.10.10 - testuser2 [12/Sep/2024:12:08:20 +0530] "CONNECT
+        ssl.gstatic.com:443 HTTP/1.1" 200 0 NONE_NONE:HIER_DIRECT
+    result: null
+  - 
+    sample: >
+        1726124251      0 10.10.10.10 TCP_DENIED/403 3920 CONNECT
+        ts01-gyr-maverick.cloudsink.net:443 - HIER_NONE/- text/html
+    result: null
+  - 
+    sample: >
+        1726124258.221      0 10.10.10.10 NONE_NONE/400 3913 GET /favicon.ico -
+        HIER_NONE/- text/html
+    result: null
+  - 
+    sample: >
+        1726124255.221      0 10.10.10.10 NONE_NONE/000 0 -
+        error:transaction-end-before-headers - HIER_NONE/- -
+    result: null
 

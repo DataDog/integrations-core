@@ -4,16 +4,14 @@
 
 ## 3.0.0 / 2023-09-12 / Agent 7.57.0
 
+***Changed***:
+
+* Updated pipeline and standard remappers.
+
 ***Added***:
 
 * Added support for different log formats of access logs e.g common and combined.
-* Added standard remappers.
-* Added dashboard for visualization of logs and metrics.
-* Added monitors for better security.
-
-***Fixed***:
-
-* Updated the pipeline to use the new `grok-parser` processor.
+* Added OOTB assets dashboard, monitors, detection rule.
 
 ## 2.5.1 / 2024-05-31 / Agent 7.55.0
 

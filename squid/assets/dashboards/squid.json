@@ -1,5 +1,5 @@
 {
-    "description": "This dashboard provides information about the Access and Cache logs generated in Squid Proxy server.",
+    "description": "This dashboard provides information about the Squid logs generated in Squid Proxy server.",
     "layout_type": "ordered",
     "notify_list": [
     ],
@@ -63,15 +63,15 @@
                 "has_background": true,
                 "has_border": true,
                 "horizontal_align": "center",
-                "sizing": "cover",
+                "sizing": "contain",
                 "type": "image",
-                "url": "https://webhostinggeeks.com/blog/wp-content/uploads/2023/07/Squid-proxy-980x782-optimized.png",
-                "url_dark_theme": "https://webhostinggeeks.com/blog/wp-content/uploads/2023/07/Squid-proxy-980x782-optimized.png",
+                "url": "https://www.squid-cache.org/Artwork/Banner.png",
+                "url_dark_theme": "https://www.squid-cache.org/Artwork/Banner.png",
                 "vertical_align": "center"
             },
             "id": 993530611301326,
             "layout": {
-                "height": 4,
+                "height": 2,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -82,143 +82,39 @@
                 "background_color": "vivid_blue",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Squid Logs Overview",
+                "title": "Squid Monitors Summary",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "horizontal",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "Squid Logs",
-                                            "formula": "query1",
-                                            "style": {
-                                                "palette": "classic",
-                                                "palette_index": 1
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "data_source": "logs",
-                                            "group_by": [
-                                            ],
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "name": "query1",
-                                            "search": {
-                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "title": "Total Logs Over Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:squid $Protocol $User $Status_Code $Status_Category $Squid_Status",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "show_status": true,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "Squid Monitors Summary",
+                            "type": "manage_status"
                         },
-                        "id": 562039589224150,
+                        "id": 5292238472737108,
                         "layout": {
-                            "height": 4,
+                            "height": 5,
                             "width": 6,
                             "x": 0,
                             "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "custom_bg_color": "#dbdef5",
-                                            "palette": "custom_bg",
-                                            "value": 0
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "data_source": "logs",
-                                            "group_by": [
-                                            ],
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "name": "query1",
-                                            "search": {
-                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
-                            },
-                            "title": "Total Logs",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 6991966801111114,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 0,
-                            "y": 4
                         }
                     }
                 ]
             },
             "id": 6105759479053774,
             "layout": {
-                "height": 8,
+                "height": 6,
                 "width": 6,
                 "x": 6,
                 "y": 0
@@ -227,7 +123,7 @@
         {
             "definition": {
                 "background_color": "white",
-                "content": "Gain a comprehensive view of your network's web and cache activities by monitoring detailed Squid Access and Cache logs through this dashboard.\n\nOperational metrics like HTTP Requests/Second, CPU Usage, and Memory Usage give a real-time view of system performance, while key indicators such as Aborted Requests/Second and Cache Hit Rate highlight potential issues in the system. Analyze Client HTTP Requests vs HTTP Hits Overtime and Client Errors vs Server Errors for insights into user experience and server-side performance. \n\nSquid Access Logs provide in-depth insights into web access patterns, tracking key metrics such as Total Access Logs, Access Logs Over Time. Analyze Top Client IPs and Top Users by Error Status Category to identify which clients and users are experiencing the most issues. \n\nSquid Cache Logs offer a detailed breakdown of caching activities, including Total Cache Logs, Cache Logs Over Time, and Distribution by Instance Name. \n\nFor more information, see the [Squid Integration Documentation](https://docs.datadoghq.com/integrations/squid)\n  \n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "Gain a comprehensive view of your network's web and cache activities by monitoring detailed Squid Access logs through this dashboard.\n\nSquid Access Logs provide in-depth insights into web access patterns, such as Total squid Logs, Logs Over Time. Analyze Top Client IPs and Top Users by Error Status Category to identify which clients and users are experiencing the most issues. \n\nOperational metrics provides a comprehensive overview of server performance, caching effectiveness, and client behavior. It helps you monitor key metrics, identify potential issues, and optimize your caching configuration. The dashboard covers CPU and memory usage, HTTP requests and errors, and FTP traffic.\n\nFor more information, see the [Squid Integration Documentation](https://docs.datadoghq.com/integrations/squid)\n  \n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "font_size": "14",
                 "has_padding": true,
                 "show_tick": false,
@@ -242,7 +138,7 @@
                 "height": 4,
                 "width": 6,
                 "x": 0,
-                "y": 4
+                "y": 2
             }
         },
         {
@@ -789,672 +685,10 @@
             },
             "id": 3255980586575102,
             "layout": {
-                "height": 10,
+                "height": 1,
                 "width": 12,
                 "x": 0,
-                "y": 8
-            }
-        },
-        {
-            "definition": {
-                "background_color": "blue",
-                "layout_type": "ordered",
-                "show_title": true,
-                "title": "Squid Metric Details",
-                "type": "group",
-                "widgets": [
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 0,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.cpu_time{*}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "timeseries_background": {
-                                "type": "area"
-                            },
-                            "title": "CPU Usage ",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 3820300543090186,
-                        "layout": {
-                            "height": 3,
-                            "width": 3,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 0,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 + query2",
-                                            "number_format": {
-                                                "unit": {
-                                                    "per_unit_name": "second",
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "request"
-                                                }
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.client_http.requests{*}"
-                                        },
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:squid.cachemgr.server.all.requests{*}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
-                            },
-                            "title": "HTTP Requests Per Second",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 2674308426925946,
-                        "layout": {
-                            "height": 3,
-                            "width": 4,
-                            "x": 3,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "color_preference": "text",
-                            "count": 50,
-                            "display_format": "countsAndList",
-                            "hide_zero_counts": true,
-                            "last_triggered_format": "relative",
-                            "query": "tag:squid $Protocol $User $Status_Code $Status_Category $Squid_Status",
-                            "show_last_triggered": false,
-                            "show_priority": false,
-                            "show_status": true,
-                            "sort": "status,asc",
-                            "start": 0,
-                            "summary_type": "monitors",
-                            "title": "Squid Monitors Summary",
-                            "type": "manage_status"
-                        },
-                        "id": 5292238472737108,
-                        "layout": {
-                            "height": 6,
-                            "width": 5,
-                            "x": 7,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 0,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "query": "sum:squid.cachemgr.client_http.hits{*}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
-                            },
-                            "title": "Cache Hit Rate",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 3295959737486096,
-                        "layout": {
-                            "height": 3,
-                            "width": 2,
-                            "x": 0,
-                            "y": 3
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 0,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 + query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.cd.memory{*}"
-                                        },
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:squid.cachemgr.cd.local_memory{*}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "timeseries_background": {
-                                "type": "area"
-                            },
-                            "title": "Memory Usage ",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 4258165939341752,
-                        "layout": {
-                            "height": 3,
-                            "width": 2,
-                            "x": 2,
-                            "y": 3
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 0,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.aborted_requests{*}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
-                            },
-                            "title": "Aborted Requests Per Second",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 2786611055040880,
-                        "layout": {
-                            "height": 3,
-                            "width": 3,
-                            "x": 4,
-                            "y": 3
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "horizontal",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "Client HTTP Requests",
-                                            "formula": "query1",
-                                            "style": {
-                                                "palette": "classic",
-                                                "palette_index": 1
-                                            }
-                                        },
-                                        {
-                                            "alias": "Client HTTP Hits",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Client Hits Rate",
-                                            "formula": "query2 / query1 * 100"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.client_http.requests{*}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:squid.cachemgr.client_http.hits{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "Client HTTP Requests vs HTTP Hits Over Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 2069184515494228,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 0,
-                            "y": 6
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "horizontal",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "Server HTTP Requests",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Traffic Read",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Traffic Write",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.server.http.requests{*}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:squid.cachemgr.server.http.kbytes_in{*}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "query": "sum:squid.cachemgr.server.http.kbytes_out{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "HTTP Traffic Analysis",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 1805246720143070,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 6,
-                            "y": 6
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "Client HTTP Errors",
-                                            "formula": "query1",
-                                            "style": {
-                                                "palette": "warm",
-                                                "palette_index": 5
-                                            }
-                                        },
-                                        {
-                                            "alias": "Server HTTP Errors",
-                                            "formula": "query2",
-                                            "style": {
-                                                "palette": "purple",
-                                                "palette_index": 5
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.client_http.errors{*}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:squid.cachemgr.server.all.errors{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "Client Errors vs Server Errors ",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 6482725862183798,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 0,
-                            "y": 9
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "FTP Requests",
-                                            "formula": "query1",
-                                            "style": {
-                                                "palette": "dd20",
-                                                "palette_index": 3
-                                            }
-                                        },
-                                        {
-                                            "alias": "FTP Errors",
-                                            "formula": "query2",
-                                            "style": {
-                                                "palette": "dd20",
-                                                "palette_index": 4
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.server.ftp.requests{*}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:squid.cachemgr.server.ftp.errors{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "title": "FTP Requests vs FTP Errors Over Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 1932830340289702,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 6,
-                            "y": 9
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "horizontal",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "Traffic Read",
-                                            "formula": "query1",
-                                            "style": {
-                                                "palette": "warm",
-                                                "palette_index": 3
-                                            }
-                                        },
-                                        {
-                                            "alias": "Traffic Write",
-                                            "formula": "query2",
-                                            "style": {
-                                                "palette": "classic",
-                                                "palette_index": 3
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.server.all.kbytes_in{*}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:squid.cachemgr.server.all.kbytes_out{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "title": "Squid Cache Server Traffic Read Vs Traffic Write",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 3053023205098324,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 0,
-                            "y": 12
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "horizontal",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "alias": "CPU Usage",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:squid.cachemgr.cpu_time{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "title": "CPU Usage Over Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 6415929501862064,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 6,
-                            "y": 12
-                        }
-                    }
-                ]
-            },
-            "id": 4126822935793754,
-            "layout": {
-                "height": 16,
-                "width": 12,
-                "x": 0,
-                "y": 18
+                "y": 6
             }
         },
         {
@@ -1462,7 +696,7 @@
                 "background_color": "vivid_green",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Access Log Details",
+                "title": "Squid Log Details",
                 "type": "group",
                 "widgets": [
                     {
@@ -1497,7 +731,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -1505,13 +739,7 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
-                            },
-                            "title": "Total Access Logs",
+                            "title": "Total Squid Logs",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
@@ -1560,7 +788,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -1575,10 +803,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "title": "Access Logs Over Time",
+                            "title": "Squid Logs over time",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1597,6 +822,13 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1",
@@ -1626,7 +858,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -1651,126 +883,6 @@
                             "width": 3,
                             "x": 0,
                             "y": 3
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "compute": {
-                                                "aggregation": "avg",
-                                                "metric": "@duration"
-                                            },
-                                            "data_source": "logs",
-                                            "group_by": [
-                                                {
-                                                    "facet": "@http.url_details.host",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "avg",
-                                                        "metric": "@duration",
-                                                        "order": "desc"
-                                                    }
-                                                }
-                                            ],
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "name": "query1",
-                                            "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "Request Duration Over Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 1821045533603400,
-                        "layout": {
-                            "height": 4,
-                            "width": 9,
-                            "x": 3,
-                            "y": 4
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "data_source": "logs",
-                                            "group_by": [
-                                            ],
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "name": "query1",
-                                            "search": {
-                                                "query": "source:squid filename:access.log @squid.status:DENIED @network.protocol:TCP $Protocol $User $Status_Code $Status_Category $Squid_Status"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
-                            "timeseries_background": {
-                                "type": "area"
-                            },
-                            "title": "Total TCP Denied Logs",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 1552732595455472,
-                        "layout": {
-                            "height": 3,
-                            "width": 3,
-                            "x": 0,
-                            "y": 6
                         }
                     },
                     {
@@ -1806,7 +918,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -1837,7 +949,7 @@
                             "height": 4,
                             "width": 9,
                             "x": 3,
-                            "y": 8
+                            "y": 4
                         }
                     },
                     {
@@ -1846,6 +958,14 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#db3333",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -1864,7 +984,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log @squid.status:DENIED @network.protocol:UDP $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid @squid.status:DENIED @network.protocol:TCP $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -1872,9 +992,135 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {
-                                "hide_incomplete_cost_data": true
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
                             },
+                            "title": "Total TCP Denied Logs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 1552732595455472,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@duration"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "avg",
+                                                        "metric": "@duration",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                },
+                                "palette": "dog_classic"
+                            },
+                            "title": "Top Avg Request Duration by URL Host",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 1821045533603400,
+                        "layout": {
+                            "height": 4,
+                            "width": 9,
+                            "x": 3,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#db3333",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:squid @squid.status:DENIED @network.protocol:UDP $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
                             "timeseries_background": {
                                 "type": "area"
                             },
@@ -1930,7 +1176,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -1997,7 +1243,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2058,7 +1304,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2125,7 +1371,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2189,7 +1435,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2256,7 +1502,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2323,7 +1569,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2398,7 +1644,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log @http.status_code:>=400 $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   @http.status_code:>=400 $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2465,7 +1711,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2540,7 +1786,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log @http.status_code:>=400 $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   @http.status_code:>=400 $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2607,7 +1853,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2682,7 +1928,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log @squid.status:DENIED $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   @squid.status:DENIED $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2757,7 +2003,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log @squid.status:MISS $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   @squid.status:MISS $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2824,7 +2070,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2899,7 +2145,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -2966,7 +2212,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -3034,7 +2280,7 @@
                                             ],
                                             "name": "query1",
                                             "search": {
-                                                "query": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
+                                                "query": "source:squid   $Protocol $User $Status_Code $Status_Category $Squid_Status"
                                             },
                                             "storage": "hot"
                                         }
@@ -3118,13 +2364,13 @@
                                         "data_source": "logs_stream",
                                         "indexes": [
                                         ],
-                                        "query_string": "source:squid filename:access.log $Protocol $User $Status_Code $Status_Category $Squid_Status",
+                                        "query_string": "source:squid $Protocol $User $Status_Code $Status_Category $Squid_Status ",
                                         "storage": "hot"
                                     },
                                     "response_format": "event_list"
                                 }
                             ],
-                            "title": "Squid Access Log Details",
+                            "title": "Squid Log Details",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "list_stream"
@@ -3144,23 +2390,35 @@
                 "height": 62,
                 "width": 12,
                 "x": 0,
-                "y": 34
+                "y": 7
             }
         },
         {
             "definition": {
-                "background_color": "vivid_green",
+                "background_color": "blue",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Cache Log Details",
+                "title": "Squid Metric Details",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
                             "autoscale": true,
-                            "precision": 2,
+                            "precision": 0,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_green",
+                                            "value": 80
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "black_on_light_red",
+                                            "value": 80
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -3168,37 +2426,24 @@
                                     ],
                                     "queries": [
                                         {
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "data_source": "logs",
-                                            "group_by": [
-                                            ],
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
                                             "name": "query1",
-                                            "search": {
-                                                "query": "source:squid filename:cache.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
-                                            },
-                                            "storage": "hot"
+                                            "query": "sum:squid.cachemgr.cpu_time{*}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
-                            "timeseries_background": {
-                                "type": "area"
-                            },
-                            "title": "Total Cache Logs",
+                            "title": "CPU Usage ",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 4230173597179062,
+                        "id": 3820300543090186,
                         "layout": {
-                            "height": 4,
-                            "width": 3,
+                            "height": 3,
+                            "width": 4,
                             "x": 0,
                             "y": 0
                         }
@@ -3218,26 +2463,15 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "alias": "Cache Logs",
+                                            "alias": "CPU Usage",
                                             "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "data_source": "logs",
-                                            "group_by": [
-                                            ],
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "data_source": "metrics",
                                             "name": "query1",
-                                            "search": {
-                                                "query": "source:squid filename:cache.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
-                                            },
-                                            "storage": "hot"
+                                            "query": "sum:squid.cachemgr.cpu_time{*}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3253,26 +2487,156 @@
                             "time": {
                                 "hide_incomplete_cost_data": true
                             },
-                            "title": "Cache Logs Over Time",
+                            "title": "CPU Usage Over Time",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
                         },
-                        "id": 5993534060267602,
+                        "id": 6415929501862064,
                         "layout": {
-                            "height": 4,
-                            "width": 9,
-                            "x": 3,
+                            "height": 3,
+                            "width": 8,
+                            "x": 4,
                             "y": 0
                         }
                     },
                     {
                         "definition": {
-                            "legend": {
-                                "type": "automatic"
-                            },
+                            "autoscale": true,
+                            "precision": 0,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_yellow",
+                                            "value": 750
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "black_on_light_red",
+                                            "value": 1000
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 + query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:squid.cachemgr.cd.memory{*}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:squid.cachemgr.cd.local_memory{*}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Memory Usage ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4258165939341752,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#26b0df",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 + query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "per_unit_name": "second",
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "request"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:squid.cachemgr.client_http.requests{*}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:squid.cachemgr.server.all.requests{*}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "HTTP Requests Per Second",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2674308426925946,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 0,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "custom_bg_color": "#e66833",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -3280,115 +2644,379 @@
                                     ],
                                     "queries": [
                                         {
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "data_source": "logs",
-                                            "group_by": [
-                                                {
-                                                    "facet": "@squid.instance_name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc"
-                                                    }
-                                                }
-                                            ],
-                                            "indexes": [
-                                                "*"
-                                            ],
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
                                             "name": "query1",
-                                            "search": {
-                                                "query": "source:squid filename:cache.log $Protocol $User $Status_Code $Status_Category $Squid_Status"
-                                            },
-                                            "storage": "hot"
+                                            "query": "sum:squid.cachemgr.aborted_requests{*}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "index": 0,
-                                                "order": "desc",
-                                                "type": "formula"
-                                            }
-                                        ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "title": "Distribution by Instance Name",
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Aborted Requests Per Second",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "sunburst"
+                            "type": "query_value"
                         },
-                        "id": 5455990337127794,
+                        "id": 2786611055040880,
                         "layout": {
-                            "height": 4,
-                            "width": 12,
-                            "x": 0,
-                            "y": 4
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 3
                         }
                     },
                     {
                         "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
                             "requests": [
                                 {
-                                    "columns": [
+                                    "display_type": "line",
+                                    "formulas": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
+                                            "alias": "Client HTTP Requests",
+                                            "formula": "query1",
+                                            "style": {
+                                                "palette": "classic",
+                                                "palette_index": 1
+                                            }
                                         },
                                         {
-                                            "field": "timestamp",
-                                            "width": "auto"
+                                            "alias": "Client HTTP Hits",
+                                            "formula": "query2"
                                         },
                                         {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "@squid.instance_name",
-                                            "width": "auto"
+                                            "alias": "Client Hits Rate",
+                                            "formula": "query2 / query1 * 100"
                                         }
                                     ],
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "indexes": [
-                                        ],
-                                        "query_string": "source:squid filename:cache.log $Protocol $User $Status_Code $Status_Category $Squid_Status",
-                                        "storage": "hot"
-                                    },
-                                    "response_format": "event_list"
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:squid.cachemgr.client_http.requests{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:squid.cachemgr.client_http.hits{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
                                 }
                             ],
+                            "show_legend": true,
+                            "title": "Client HTTP Requests vs HTTP Hits Over Time",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2069184515494228,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Client HTTP Errors",
+                                            "formula": "query1",
+                                            "style": {
+                                                "palette": "warm",
+                                                "palette_index": 5
+                                            }
+                                        },
+                                        {
+                                            "alias": "Server HTTP Errors",
+                                            "formula": "query2",
+                                            "style": {
+                                                "palette": "purple",
+                                                "palette_index": 5
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:squid.cachemgr.client_http.errors{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:squid.cachemgr.server.all.errors{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Client Errors vs Server Errors ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6482725862183798,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Traffic Read",
+                                            "formula": "query1",
+                                            "style": {
+                                                "palette": "warm",
+                                                "palette_index": 3
+                                            }
+                                        },
+                                        {
+                                            "alias": "Traffic Write",
+                                            "formula": "query2",
+                                            "style": {
+                                                "palette": "classic",
+                                                "palette_index": 3
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:squid.cachemgr.server.all.kbytes_in{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:squid.cachemgr.server.all.kbytes_out{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
                             "time": {
                                 "hide_incomplete_cost_data": true
                             },
-                            "title": "Squid Cache Log Details",
+                            "title": "Squid Cache Server Traffic Read Vs Traffic Write",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "list_stream"
+                            "type": "timeseries"
                         },
-                        "id": 5486344305951922,
+                        "id": 3053023205098324,
                         "layout": {
-                            "height": 6,
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "horizontal",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Server HTTP Requests",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Traffic Read",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Traffic Write",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:squid.cachemgr.server.http.requests{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:squid.cachemgr.server.http.kbytes_in{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:squid.cachemgr.server.http.kbytes_out{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "HTTP Traffic Analysis",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1805246720143070,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "FTP Requests",
+                                            "formula": "query1",
+                                            "style": {
+                                                "palette": "dd20",
+                                                "palette_index": 3
+                                            }
+                                        },
+                                        {
+                                            "alias": "FTP Errors",
+                                            "formula": "query2",
+                                            "style": {
+                                                "palette": "dd20",
+                                                "palette_index": 4
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:squid.cachemgr.server.ftp.requests{*}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:squid.cachemgr.server.ftp.errors{*}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {
+                                "hide_incomplete_cost_data": true
+                            },
+                            "title": "FTP Requests vs FTP Errors Over Time",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1932830340289702,
+                        "layout": {
+                            "height": 3,
                             "width": 12,
                             "x": 0,
-                            "y": 8
+                            "y": 12
                         }
                     }
                 ]
             },
-            "id": 8493654937755022,
+            "id": 4126822935793754,
             "layout": {
-                "height": 15,
+                "height": 16,
                 "width": 12,
                 "x": 0,
-                "y": 96
+                "y": 69
             }
         }
     ]

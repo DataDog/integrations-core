@@ -22,7 +22,6 @@ facets:
     name: URL Host
     path: http.url_details.host
     source: log
-    type: string
   - facetType: list
     groups:
       - Web Access
@@ -36,14 +35,12 @@ facets:
     name: URL Port
     path: http.url_details.port
     source: log
-    type: string
   - facetType: list
     groups:
       - Web Access
     name: URL scheme
     path: http.url_details.scheme
     source: log
-    type: string
   - groups:
       - Web Access
     name: Browser
@@ -100,7 +97,6 @@ facets:
     name: Client IP
     path: network.client.ip
     source: log
-    type: string
   - groups:
       - Geoip
     name: Destination City Name
@@ -142,7 +138,6 @@ facets:
     name: Destination IP
     path: network.destination.ip
     source: log
-    type: string
   - groups:
       - User
     name: User Name
@@ -192,34 +187,40 @@ pipeline:
         - 1570784663.985    120 127.0.0.1 TCP_MISS/301 491 GET http://datadog.com/test/?queryParam1=1&queryParam2=queryParam2 - HIER_DIRECT/99.86.88.128 -
         - 1570784722.610    196 127.0.0.1 TCP_MISS/200 12712 GET http://www.google.com/ - HIER_DIRECT/172.217.20.68 text/html
         - 1570784681.846  12140 127.0.0.1 TCP_MISS_ABORTED/000 0 GET http://8.8.8.8/ - HIER_DIRECT/8.8.8.8 -
+        - 2019/10/11 09:14:49 kid1| Accepting HTTP Socket connections at local=[::]:3128 remote=[::] FD 11 flags=9
+        - 1725599181.650      0 10.212.128.16 TCP_MISS_ABORTED/000 0 - error:transaction-end-before-headers - HIER_NONE/- -
+        - 1725599185.240      0 10.212.128.16 TCP_DENIED/407 4660 GET http://clientservices.googleapis.com/chrome-variations/seed? - HIER_NONE/- text/html [http_request_headers] [http_response_headers]
+        - 10.212.128.16 - - [06/Sep/2024:10:32:43 +0530] "CONNECT fcmconnection.googleapis.com:443 HTTP/1.1" 407 4053 TCP_DENIED:HIER_NONE
+        - 10.212.128.16 - - [06/Sep/2024:10:34:44 +0530] "CONNECT mobile.events.data.microsoft.com:443 HTTP/1.1" 407 4277 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.92.2 Chrome/124.0.6367.243 Electron/30.1.2 Safari/537.36" TCP_DENIED:HIER_NONE
+        - 2019/10/11 09:14:49 kid1| Accepting HTTP Socket connections at local=[::]:3128 remote=[::] FD 11 flags=9
       grok:
         supportRules: >
-          helper_rule1 (-|%{ip:network.client.ip}) -
+          parse_prefix_combined_log_rule (-|%{ip:network.client.ip}) -
           (-|%{word:squid.user_identity}) \[%{date("dd/MMM/yyyy:HH:mm:ss
           Z"):timestamp}\] \"(-|%{word:http.method})
-          (-|%{regex("(http|https)://[^\\s]+"):http.url}|error:%{regex("[^|]*"):error.message}|%{parse_url})
-          %{regex("[^|]*"):http.version}\" (-|%{number:http.status_code})
+          (-|%{regex("(http|https)://[^\\s]+"):http.url}|error:%{greedyData:error.message}|%{parse_url})
+          %{regex("[^\"]*"):http.version}\" (-|%{number:http.status_code})
           %{number:network.bytes_written}
 
-          helper_rule2 (NONE|%{regex("[^_]*"):network.protocol}_%{regex("[^|]*"):squid.status})\:(-|%{word:squid.peer_status}).*
+          parse_suffix_combined_log_rule (NONE|%{regex("[^_]*"):network.protocol}_%{regex("[^:]*"):squid.status})\:(-|%{word:squid.peer_status}).*
 
-          parse_url %{hostname:http.url_details.host}(:%{number:http.url_details.port})?(%{regex("[^?]*"):http.url_details.path})?(\?%{regex("[^#]*"):http.url_details.queryString:keyvalue("=","+%","","&")})?(\#%{regex("[^|]*"):http.url_details.hash})?
+          parse_url %{hostname:http.url_details.host}(:%{number:http.url_details.port})?(%{regex("[^?|^#]*"):http.url_details.path})?(\?%{regex("[^#]*"):http.url_details.queryString:keyvalue("=","+%","","&")})?(\#%{notSpace:http.url_details.hash})?
         matchRules: >
           squid_access_parser
           %{number:timestamp:scale(1000)}\s+(-|%{number:duration:scale(1000000)})
           (-|%{ip:network.client.ip})
           %{regex("[^_]*"):network.protocol}_%{regex("[^/]*"):squid.status}/(000|%{integer:http.status_code})
           (-|%{number:network.bytes_written}) (-|%{word:http.method})
-          (-|%{regex("(http|https)://[^\\s]+"):http.url}|error:%{regex("[^|]*"):error.message}|%{parse_url})
+          (-|%{regex("(http|https)://[^\\s]+"):http.url}|error:%{greedyData:error.message}|%{parse_url})
           (-|%{notSpace:squid.user_identity})
           (-|%{word:squid.peer_status})/(-|%{ip:network.destination.ip})
           (:|-|%{notSpace:http.resource.content_type})(
           \[%{regex("[^]]*"):http.headers.request}\])?(
           \[%{regex("[^]]*"):http.headers.response}\])?.*
 
-          combined_access_parser %{helper_rule1} \"(-|%{regex("[^|]*"):http.referer})\" \"(-|%{regex("[^|]*"):http.useragent})\" %{helper_rule2}
+          combined_access_parser %{parse_prefix_combined_log_rule} \"(-|%{regex("[^\"]*"):http.referer})\" \"(-|%{regex("[^\"]*"):http.useragent})\" %{parse_suffix_combined_log_rule}.*
 
-          common_access_parser %{helper_rule1} %{helper_rule2}
+          common_access_parser %{parse_prefix_combined_log_rule} %{parse_suffix_combined_log_rule}.*
 
           squid_cache_parser %{date("yyyy/MM/dd HH:mm:ss"):timestamp}( %{word:squid.instance_name})?\| %{data:squid.properties:keyvalue("=","\\[\\]:")}
 

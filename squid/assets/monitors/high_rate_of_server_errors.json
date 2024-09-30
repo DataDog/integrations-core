@@ -2,14 +2,14 @@
     "version": 2,
     "created_at": "2024-09-12",
     "last_updated_at": "2024-09-12",
-    "title": "[Squid] High number of client HTTP errors",
-    "description": "High number of client HTTP errors monitored.",
+    "title": "[Squid] High rate of server errors",
+    "description": "High rate of server errors is monitored.",
     "definition": {
-        "id": 153452296,
-        "name": "[Squid] High number of client HTTP errors",
+        "id": 153451847,
+        "name": "[Squid] High rate of server errors",
         "type": "query alert",
-        "query": "max(last_5m):sum:squid.cachemgr.client_http.errors{*} / sum:squid.cachemgr.client_http.requests{*} * 100 >= 15",
-        "message": "{{#is_warning}}  \nToo many client errors exceeded the threshold.  \nThreshold: {{warn_threshold}} % \n{{/is_warning}}\n\n{{#is_alert}}  \nToo many client errors exceeded the threshold.  \nCurrent errors : {{value}} % \nThreshold: {{threshold}} % \n{{/is_alert}}",
+        "query": "max(last_5m):sum:squid.cachemgr.server.all.errors{*} / sum:squid.cachemgr.server.all.requests{*} * 100 >= 15",
+        "message": "{{#is_warning}}  \nToo many server errors exceeded the threshold.  \nThreshold: {{warn_threshold}} % \n{{/is_warning}}\n\n{{#is_alert}}  \nToo many server errors exceeded the threshold.  \nCurrent errors : {{value}} % \nThreshold: {{threshold}} % \n{{/is_alert}}",
         "tags": [ "squid" ],
         "options": {
             "thresholds": {
