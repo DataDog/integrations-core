@@ -196,9 +196,10 @@
                     {
                         "id": 2501347681053432,
                         "definition": {
-                            "title": "Top 10 DNS Queried Domains",
+                            "title": "Top 100 DNS Queried Domains",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -215,7 +216,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@dns.question.name",
-                                                    "limit": 10,
+                                                    "limit": 100,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
@@ -235,7 +236,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 100,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -257,7 +258,7 @@
                             "x": 0,
                             "y": 4,
                             "width": 6,
-                            "height": 4
+                            "height": 8
                         }
                     },
                     {
@@ -369,9 +370,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 0,
+                            "x": 6,
                             "y": 8,
-                            "width": 12,
+                            "width": 6,
                             "height": 4
                         }
                     }
@@ -611,12 +612,10 @@
                     {
                         "id": 1351364273551944,
                         "definition": {
-                            "title": "Top 10 Error Queried Domains",
+                            "title": "Top 25 Error Queried Domains",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {
-                                "hide_incomplete_cost_data": true
-                            },
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -633,7 +632,7 @@
                                             "group_by": [
                                                 {
                                                     "facet": "@dns.question.name",
-                                                    "limit": 10,
+                                                    "limit": 25,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
@@ -653,7 +652,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 25,
                                         "order_by": [
                                             {
                                                 "type": "formula",
