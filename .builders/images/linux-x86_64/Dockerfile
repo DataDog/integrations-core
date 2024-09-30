@@ -33,10 +33,11 @@ RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-lo
  && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
 
 # openssl
-RUN yum install -y perl-IPC-Cmd && \
+RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
+ cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.0.13" \
- SHA256="88525753f79d3bec27d2fa7c66aa0b92b3aa9498dafd93d7cfa4b3780cdae313" \
+ VERSION="3.3.2" \
+ SHA256="2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -51,11 +52,11 @@ RUN yum install -y perl-IPC-Cmd && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.11.8
+ENV PYTHON3_VERSION=3.12.6
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889" \
+ SHA256="85a4c1be906d20e5c5a69f2466b00da769c221d6a684acfd3a514dbf5bf10a66" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
@@ -80,6 +81,36 @@ RUN \
  SHA256="704aed49b19eb5a7178b34b2873620ec299db08752d6a8574f95d41879ab8851" \
  RELATIVE_PATH="krb5-{{version}}/src" \
  bash install-from-source.sh --without-keyutils --without-system-verto --without-libedit --disable-static
+
+# libxml & libxslt for lxml
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
+ VERSION="2.12.6" \
+ SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
+ RELATIVE_PATH="libxml2-{{version}}" \
+ bash install-from-source.sh \
+ --without-iconv \
+ --without-python \
+ --without-icu \
+ --without-debug \
+ --without-mem-debug \
+ --without-run-debug \
+ --without-legacy \
+ --without-catalog \
+ --without-docbook \
+ --disable-static
+
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
+ VERSION="1.1.39" \
+ SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
+ RELATIVE_PATH="libxslt-{{version}}" \
+ bash install-from-source.sh \
+ --without-python \
+ --without-crypto \
+ --without-profiler \
+ --without-debugger \
+ --disable-static
 
 # libpq and pg_config as needed by psycopg2
 RUN \
