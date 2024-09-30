@@ -3,7 +3,7 @@
 	"created_at": "2024-09-30",
 	"last_updated_at": "2024-09-30",
 	"title": "High number of API Key regenerations",
-	"description": "This monitor tracks the frequency of API key regenerations in your system. A high number may indicate security concerns, misuse, or misconfigurations. Monitoring this metric ensures effective API key management, identifying unusual patterns signaling unauthorized access attempts or other immediate issues.",
+	"description": "This monitor tracks API key regeneration frequency in your system. A high number may indicate security concerns, misuse, or misconfigurations. Monitoring ensures effective API key management, identifying unusual patterns hinting at unauthorized access attempts or other immediate issues.",
 	"definition": {
 		"id": 154754176,
 		"name": "High number of API Key regenerations",
