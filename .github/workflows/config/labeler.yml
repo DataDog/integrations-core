@@ -109,6 +109,8 @@ integration/cisco_secure_endpoint:
 - cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
 - cisco_secure_firewall/**/*
+integration/cisco_secure_web_appliance:
+- cisco_secure_web_appliance/**/*
 integration/cisco_umbrella_dns:
 - cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
