@@ -1,7 +1,7 @@
 {
     "version": "4.1.13",
     "gitVersion": "441714bc4c70699950f3ac51a5cac41dcd413eaa",
-    "modules": [],
+    "modules": ["enterprise"],
     "allocator": "tcmalloc",
     "javascriptEngine": "mozjs",
     "sysInfo": "deprecated",

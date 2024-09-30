@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2024-09-06
+
+***Added***:
+
+* Bump hazalcast-python-client version for Python 3.12 support ([#18520](https://github.com/DataDog/integrations-core/pull/18520))
+
+## 4.0.0 / 2024-09-05
+
+***Changed***:
+
+* Drop name from excluded tags.
+  Updated Hazelcast and Management Center to use version 5.x.
+  Updated the status to reflect health of Management Center (Not Hazelcast cluster state). ([#17367](https://github.com/DataDog/integrations-core/pull/17367))
+
+***Added***:
+
+* Added metrics for queues, topics and reliable topics. ([#17367](https://github.com/DataDog/integrations-core/pull/17367))
+
 ## 3.2.1 / 2024-05-31 / Agent 7.55.0
 
 ***Fixed***:

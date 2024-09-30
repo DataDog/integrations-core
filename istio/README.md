@@ -55,24 +55,9 @@ To customize the data plane portion of the integration:
 
    instances:
      - use_openmetrics: true
-       send_histogram_buckets: true
+       send_histograms_buckets: false
        istio_mesh_endpoint: http://%%host%%:15020/stats/prometheus
        tag_by_endpoint: false
-       exclude_labels:
-         - source_version
-         - destination_version
-         - source_canonical_revision
-         - destination_canonical_revision
-         - source_principal
-         - destination_principal
-         - source_cluster
-         - destination_cluster
-         - source_canonical_service
-         - destination_canonical_service
-         - source_workload_namespace
-         - destination_workload_namespace
-         - request_protocol
-         - connection_security_policy
    ```
 
 2. Customize this file with any additional configurations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
@@ -234,7 +219,8 @@ Be sure to exclude Istio and Envoy metrics from your configuration to avoid high
 #
 instances:
   - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
-    metrics: [*]
+    metrics:
+    - '.*'
     exclude_metrics:
       - istio_*
       - envoy_*
@@ -249,7 +235,7 @@ Be sure to exclude Istio and Envoy metrics from your configuration to avoid high
 instances:
   - prometheus_url: <PROMETHEUS_URL>
     metrics:
-      - *
+      - '*'
     ignore_metrics:
       - istio_*
       - envoy_*

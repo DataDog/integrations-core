@@ -15,7 +15,7 @@
       "id": 1,
       "definition": {
         "type": "event_stream",
-        "query": "source:vsphere $vcenter_server.value $vcenter_datacenter.value",
+        "query": "source:vsphere $vcenter_server $vcenter_datacenter",
         "event_size": "l",
         "title": "vSphere events",
         "title_size": "16",

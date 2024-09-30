@@ -14,6 +14,7 @@
     "classifier_tags": [
       "Category::Languages",
       "Category::Log Collection",
+      "Category::Windows",
       "Supported OS::Windows",
       "Offering::Integration"
     ]

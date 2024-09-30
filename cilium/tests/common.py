@@ -228,6 +228,7 @@ AGENT_V1_METRICS = [
     "cilium.kvstore.quorum_errors.total",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
+    "cilium.version",
 ]
 
 AGENT_V1_METRICS_1_14 = [

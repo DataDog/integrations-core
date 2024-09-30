@@ -13,6 +13,7 @@ from .common import (
     FLAKY_METRICS,
     LOCAL_RATE_LIMIT_METRICS,
     PROMETHEUS_METRICS,
+    TLS_INSPECTOR_METRICS,
     requires_new_environment,
 )
 
@@ -23,7 +24,7 @@ pytestmark = [requires_new_environment]
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(DEFAULT_INSTANCE, rate=True)
 
-    for metric in PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CONNECTION_LIMIT_METRICS:
+    for metric in PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CONNECTION_LIMIT_METRICS + TLS_INSPECTOR_METRICS:
         formatted_metric = "envoy.{}".format(metric)
         if metric in FLAKY_METRICS:
             aggregator.assert_metric(formatted_metric, at_least=0)

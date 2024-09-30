@@ -63,7 +63,7 @@
       "mongodb": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[MongoDB] High incoming connections": "assets/monitors/high_connections.json"
+      "Connection pool is reaching saturation": "assets/monitors/high_connections.json"
     },
     "saved_views": {
       "operations_by_type_overview": "assets/saved_views/operations_by_type_overview.json",

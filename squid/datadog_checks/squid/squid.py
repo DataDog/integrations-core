@@ -5,9 +5,7 @@
 import re
 
 import requests
-from six import iteritems
 
-# project
 from datadog_checks.base import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
@@ -100,7 +98,7 @@ class SquidCheck(AgentCheck):
         counters = self.get_counters(host, port, tags + custom_tags)
 
         # Send these values as rate
-        for counter, value in iteritems(counters):
+        for counter, value in counters.items():
             self.rate(counter, value, tags=tags + custom_tags)
 
     def get_counters(self, host, port, tags):

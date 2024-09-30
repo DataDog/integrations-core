@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 1.5.0 / 2024-08-09
+## 1.6.0 / 2024-09-23
+
+***Added***:
+
+* Update Karpenter Metrics for Karpenter V1 ([#18448](https://github.com/DataDog/integrations-core/pull/18448))
+
+## 1.5.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 

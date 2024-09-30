@@ -58,8 +58,8 @@
       "auto_install": true
     },
     "monitors": {
-      "cluster_operate_resource_state": "assets/monitors/cluster_operator_resource.json",
-      "topic_operate_resource_state": "assets/monitors/topic_operator_resource.json"
+      "Strimzi Cluster Operator Resource on host is in a \"fail\" state\"": "assets/monitors/cluster_operator_resource.json",
+      "Strimzi Topic Operator Resource on host is in a \"fail\" state\"": "assets/monitors/topic_operator_resource.json"
     },
     "dashboards": {
       "strimzi": "assets/dashboards/overview.json"

@@ -22,6 +22,19 @@ def test_critical_service_check(dd_run_check, aggregator, mock_http_response, ch
     aggregator.assert_service_check('dcgm.openmetrics.health', status=check.CRITICAL)
 
 
+@pytest.mark.usefixtures("mock_label_remap")
+def test_label_remap(dd_run_check, aggregator, check):
+    """
+    Test that the labels are remapped correctly.
+    """
+    dd_run_check(check)
+    aggregator.assert_service_check('dcgm.openmetrics.health', DcgmCheck.OK)
+    relabeled_tags = ['kube_namespace:foo', 'pod_name:bar', 'kube_container_name:baz']
+    aggregator.assert_metric('dcgm.gpu_utilization')
+    for tag in relabeled_tags:
+        aggregator.assert_metric_has_tag('dcgm.gpu_utilization', tag)
+
+
 @pytest.mark.usefixtures("mock_metrics")
 def test_successful_run(dd_run_check, aggregator, check):
     dd_run_check(check)

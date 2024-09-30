@@ -81,7 +81,7 @@ def test_invalid_requirement(repository, ddev, helpers):
     with agent_requirements_path.open(encoding='utf-8') as file:
         requirements = file.readlines()
 
-    requirements[0] = requirements[0].replace('==', '==^')
+    requirements[0] = "aerospike==^4.0.0; sys_platform != 'win32' and sys_platform != 'darwin'\n"
 
     with agent_requirements_path.open(mode='w', encoding='utf-8') as file:
         file.writelines(requirements[:3])
