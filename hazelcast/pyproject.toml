@@ -37,6 +37,7 @@ dynamic = [
 [project.optional-dependencies]
 deps = [
     "hazelcast-python-client==5.4.0",
+    "hazelcast-python-client==5.5.0; python_version > '3.0'",
 ]
 
 [project.urls]
