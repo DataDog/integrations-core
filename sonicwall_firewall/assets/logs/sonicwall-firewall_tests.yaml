@@ -1,6 +1,7 @@
-id: sonicwall-firewall
+id: "sonicwall-firewall"
 tests:
-  - sample: "<134>  id=firewall sn=0040103060B5 time=\"2024-09-02 13:11:35 UTC\"
+  - 
+    sample: "<134>  id=firewall sn=0040103060B5 time=\"2024-09-02 13:11:35 UTC\"
       fw=10.10.10.10 pri=6 c=16 gcat=2 m=1382 src=10.10.10.10:51692
       dst=10.10.10.10:443:X1 usr=\"admin\" sess=\"API\" msg=\"Configuration
       succeeded:  'peActObjLogCustomRPObj' , User_Test, changed to [Global]\"
@@ -55,7 +56,8 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1725282695000
-  - sample: '<133>  id=firewall sn=0019206645 time="2024-09-03 10:42:36 UTC"
+  - 
+    sample: '<133>  id=firewall sn=0019206645 time="2024-09-03 10:42:36 UTC"
       fw=10.10.10.10 pri=5 c=4 gcat=3 m=16 srcMac=00:50:56:81:3c:9e
       src=10.40.1.245:65025:X0 natSrc=10.10.10.10:62448 dstMac=a8:46:9d:23:d2:7a
       dst=10.10.10.10:443:X1 natDst=10.10.10.10:443 proto=tcp/https sent=354
@@ -128,92 +130,86 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1725360156000
-  - sample: '10.10.10.10 id=firewall sn=12345678 time="2022-03-11 14:17:52 UTC"
-      fw=10.10.10.10 pri=6 c=1024 gcat=2 m=97 srcMac=12:34:56:78:90:ab
-      src=10.10.10.10:41856:X0 srcZone=Trusted natSrc=10.10.10.10:8689
-      dstMac=ab:09:87:65:43:21 dst=10.10.10.10:443:X1 dstZone=Untrusted
-      natDst=10.10.10.10:443 usr="Unknown (SSO failed)" proto=tcp/https sent=104
-      rcvd=230 rule="15 (LAN->WAN)" app=5 af_polid=4 ipscat=N/A
-      appcat="PROXY-ACCESS" appid=2900 dstname=10.10.10.10 arg=/ code=64
-      Category="Not Rated" note="Policy: cfsZonePolicy0, Info: 6148 " n=2520325
-      fw_action="NA" dpi=1 op=0 msg="Web site hit"'
-    result:
-      custom:
-        Category: "Not Rated"
-        app:
-          category: "PROXY-ACCESS"
-        appid: 2900
-        bytes:
-          received: 230
-          sent: 104
-        code: 64
+  - 
+   sample: "10.10.10.10 id=firewall sn=12345678 time=\"2022-03-11 14:17:52 UTC\" fw=10.10.10.10 pri=6 c=1024 gcat=2 m=97 srcMac=12:34:56:78:90:ab src=10.10.10.10:41856:X0 srcZone=Trusted natSrc=10.10.10.10:8689 dstMac=ab:09:87:65:43:21 dst=10.10.10.10:443:X1 dstZone=Untrusted natDst=10.10.10.10:443 usr=\"Unknown (SSO failed)\" proto=tcp/https sent=104 rcvd=230 rule=\"15 (LAN->WAN)\" app=5 af_polid=4 ipscat=N/A appcat=\"PROXY-ACCESS\" appid=2900 dstname=10.10.10.10 arg=/ code=64 Category=\"Not Rated\" note=\"Policy: cfsZonePolicy0, Info: 6148 \" n=2520325 fw_action=\"NA\" dpi=1 op=0 msg=\"Web site hit\""
+   result:
+    custom:
+      Category: "Not Rated"
+      app:
+        category: "PROXY-ACCESS"
+        policy:
+          id: 4
+      appid: 2900
+      bytes:
+        received: 230
+        sent: 104
+      code: 64
+      destination:
+        hostname: "10.10.10.10"
+        mac: "ab:09:87:65:43:21"
+        nat:
+          ip: "10.10.10.10"
+          port: 443.0
+        network_interface: "X1"
+        zone: "Untrusted"
+      device_serial_number: 12345678
+      dpi: 1
+      dst: "10.10.10.10:443:X1"
+      event:
+        count: 2520325
+      firewall:
+        WAN: "10.10.10.10"
+        action: "NA"
+      gcat: 2
+      group_category: "Log"
+      http:
+        url_details:
+          path: "/"
+      http_operation_code: 0
+      id: "firewall"
+      ip: "10.10.10.10"
+      ips:
+        category: "N/A"
+      message_category: 1024
+      message_id: 97
+      natDst: "10.10.10.10:443"
+      natSrc: "10.10.10.10:8689"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 41856.0
         destination:
-          hostname: "10.10.10.10"
-          mac: "ab:09:87:65:43:21"
-          nat:
-            ip: "10.10.10.10"
-            port: 443.0
-          network_interface: "X1"
-          zone: "Untrusted"
-        device_serial_number: 12345678
-        dpi: 1
-        dst: "10.10.10.10:443:X1"
-        event:
-          count: 2520325
-        firewall:
-          WAN: "10.10.10.10"
-          action: "NA"
-        gcat: 2
-        group_category: "Log"
-        http:
-          url_details:
-            path: "/"
-        http_operation_code: 0
-        id: "firewall"
-        ip: "10.10.10.10"
-        ips:
-          category: "N/A"
-        message_category: 1024
-        message_id: 97
-        natDst: "10.10.10.10:443"
-        natSrc: "10.10.10.10:8689"
-        network:
-          client:
-            geoip: {}
-            ip: "10.10.10.10"
-            port: 41856.0
-          destination:
-            geoip: {}
-            ip: "10.10.10.10"
-            port: 443.0
-        note: "Policy: cfsZonePolicy0, Info: 6148"
-        priority: "Info"
-        priority_level: 6
-        proto: "tcp/https"
-        protocol: "tcp"
-        rule: "15 (LAN->WAN)"
-        service: "https"
-        source:
-          mac: "12:34:56:78:90:ab"
-          nat:
-            ip: "10.10.10.10"
-            port: 8689.0
-          network_interface: "X0"
-          zone: "Trusted"
-        src: "10.10.10.10:41856:X0"
-        syslog_appid:
-          policy:
-            id: 4
-        time: "2022-03-11 14:17:52 UTC"
-        timestamp: 1647008272000
-        usr:
-          name: "Unknown (SSO failed)"
-      message: "Web site hit"
-      status: "info"
-      tags:
-      - "source:LOGS_SOURCE"
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 443.0
+      note: "Policy: cfsZonePolicy0, Info: 6148"
+      priority: "Info"
+      priority_level: 6
+      proto: "tcp/https"
+      protocol: "tcp"
+      rule: "15 (LAN->WAN)"
+      service: "https"
+      source:
+        mac: "12:34:56:78:90:ab"
+        nat:
+          ip: "10.10.10.10"
+          port: 8689.0
+        network_interface: "X0"
+        zone: "Trusted"
+      src: "10.10.10.10:41856:X0"
+      syslog_appid: 5
+      time: "2022-03-11 14:17:52 UTC"
       timestamp: 1647008272000
-  - sample: <134>  id=firewall sn=004018281E114 time="2022-05-16 15:22:26 UTC"
+      usr:
+        name: "Unknown (SSO failed)"
+    message: "Web site hit"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1647008272000
+  - 
+    sample: <134>  id=firewall sn=004018281E114 time="2022-05-16 15:22:26 UTC"
       fw=10.10.10.10 pri=6 c=1024 m=537 msg="Connection Closed" app=12
       sess="Web" n=795 usr="admin" src=10.10.10.10:65055:X1
       dst=10.10.10.10:443:X1 srcMac=16:20:55:81:11:30 proto=tcp/https sent=1930
@@ -272,7 +268,8 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1652714546000
-  - sample: Jan  3 13:45:51 10.10.10.10 id=firewall sn=000SERIAL time="2007-01-03
+  - 
+    sample: Jan  3 13:45:51 10.10.10.10 id=firewall sn=000SERIAL time="2007-01-03
       14:48:22" fw=10.10.10.10 pri=6 c=262144 m=98 msg="Connection Opened"
       n=23427 src=:28503:WAN:SOURCEHOST
       srcV6=2a52:cf50:add:4002:91f2:a9b2:e09a:6fc6 dst=::LAN:DSTHOST
@@ -311,7 +308,8 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1
-  - sample: Apr 27 10:32:18 10.10.10.10 id=firewall sn=0000TSAA00 time="2022-04-27
+  - 
+    sample: Apr 27 10:32:18 10.10.10.10 id=firewall sn=0000TSAA00 time="2022-04-27
       10:32:51" fw=10.10.10.10 pri=6 c=16 m=998 msg="GUI administration session
       ended" sess="Web" dur=510 n=11 usr="admin" src=10.10.10.10::X0
       dst=10.10.10.10:4444:X0 proto=tcp/4444 note="admin"
@@ -357,7 +355,8 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1
-  - sample: <134>  id=firewall sn=02003DE21 time="2022-05-16 08:19:21"
+  - 
+    sample: <134>  id=firewall sn=02003DE21 time="2022-05-16 08:19:21"
       fw=10.10.10.10 pri=6 c=0 gcat=6 m=1235 srcMac=00:09:c1:dd:4f:d4
       src=10.10.10.10:54606:X1 srcZone=Untrusted natSrcV6=not_an_IP
       dstMac=00:20:d5:30:f9:d9 dst=10.10.10.10:80:X1 dstZone=Untrusted
@@ -415,7 +414,8 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1
-  - sample: '<129> id=firewall sn=ZZZZZZZZZ time="2022-02-24 03:29:07"
+  - 
+    sample: '<129> id=firewall sn=ZZZZZZZZZ time="2022-02-24 03:29:07"
       fw=10.10.10.10 pri=1 c=32 m=609 msg="IPS Prevention Alert: WEB-ATTACKS
       Apache Log4j2 JNDI Log Messages Remote Code Execution" sid=2307
       ipscat="WEB-ATTACKS Apache Log4j2 JNDI Log Messages Remote Code Execution"
@@ -459,7 +459,8 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1
-  - sample: Jan  3 13:45:43 10.10.10.10 id=firewall sn=000SERIAL time="2007-01-03
+  - 
+    sample: Jan  3 13:45:43 10.10.10.10 id=firewall sn=000SERIAL time="2007-01-03
       14:48:14" fw=10.10.10.10 pri=5 c=256 m=38 msg="ICMP packet dropped"
       n=22070 src=10.10.10.10:1026:WAN dst=10.10.10.10:6822:WAN  type=3 code=3
     result:
@@ -497,7 +498,8 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1
-  - sample: Jan  3 13:45:39 10.10.10.10 id=firewall sn=000SERIAL time="2007-01-03
+  - 
+    sample: Jan  3 13:45:39 10.10.10.10 id=firewall sn=000SERIAL time="2007-01-03
       14:48:10" fw=10.10.10.10 pri=6 c=1024 m=537 msg="Connection
       Closed"n=567999 src=10.10.10.10:4280:LAN
       dst=10.10.10.10:41850:WANproto=tcp/41850 sent=386026 rcvd=454118
@@ -531,14 +533,8 @@ tests:
       tags:
       - "source:LOGS_SOURCE"
       timestamp: 1
-  - sample: Jan  3 13:45:39 10.10.10.10 id=firewall sn=000SERIAL time="2007-01-03
-      14:48:10" fw=10.10.10.10 pri=6 c=1024 m=537 msg="Connection Closed"
-      n=567999 src=10.10.10.10:4280:LAN dst=10.10.10.10:41850:WAN
-      proto=tcp/41850 sent=386026 rcvd=454118 vpnpolicy="name" af_policy=0
-      af_type=0 af_service=0 af_action="NA" af_object=0 ai=0 bcastRx=0 bcastTx=0
-      bid=0 bytesRx=0 bytesTx=0 catid=0 change=0 conns=0 contentObject=0 dyn=0
-      f=0 filetxstatus=0 fwlan=0 goodRxBytes=0 goodTxBytes=0 i=0 if=0 lic=0 pt=0
-      rcptTo="NA" spycat=0 spypri=0 ucastRx=0 ucastTx=0 vpnpolicyDst=0
+  - 
+    sample: "Jan  3 13:45:39 10.10.10.10 id=firewall sn=000SERIAL time=\"2007-01-03 14:48:10\" fw=10.10.10.10 pri=6 c=1024 m=537 msg=\"Connection Closed\" n=567999 src=10.10.10.10:4280:LAN dst=10.10.10.10:41850:WAN proto=tcp/41850 sent=386026 rcvd=454118 vpnpolicy=\"name\" af_policy=0 af_type=0 af_service=0 af_action=\"NA\" af_object=0 ai=0 bcastRx=0 bcastTx=0 bid=0 bytesRx=0 bytesTx=0 catid=0 change=0 conns=0 contentObject=0 dyn=0 f=0 filetxstatus=0 fwlan=0 goodRxBytes=0 goodTxBytes=0 i=0 if=0 lic=0 pt=0 rcptTo=\"NA\" spycat=0 spypri=0 ucastRx=0 ucastTx=0 vpnpolicyDst=0"
     result:
       custom:
         active_interface: 0
@@ -546,6 +542,12 @@ tests:
           category: 0
           priority: 0
         app:
+          policy:
+            action: "NA"
+            name: 0
+            object_name: 0
+            service_name: 0
+            type: 0
           rule: 0
         blade_id: 0
         broadcast:
@@ -602,13 +604,6 @@ tests:
           network_interface: "LAN"
           vpn_policy: "name"
         src: "10.10.10.10:4280:LAN"
-        syslog_appid:
-          policy:
-            action: "NA"
-            name: 0
-            object_name: 0
-            service_name: 0
-            type: 0
         time: "2007-01-03 14:48:10"
         unicast:
           packets_received: 0

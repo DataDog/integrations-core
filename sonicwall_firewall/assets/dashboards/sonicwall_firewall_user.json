@@ -65,7 +65,7 @@
                 },
                 "group_by": [],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:4"
+                  "query": "source:sonicwall-firewall @gcat:4 $Priority"
                 },
                 "storage": "hot"
               }
@@ -192,7 +192,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:4"
+                        "query": "source:sonicwall-firewall @gcat:4 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -250,7 +250,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:4 @message_id:(30 OR 32 OR 33 OR 35 OR 200 OR 246 OR 329 OR 486 OR 549 OR 759 OR 986 OR 987 OR 1035 OR 1048 OR 1117 OR 1120 OR 1121 OR 1122 OR 1123 OR 1157 OR 1243 OR 1585 OR 1655 OR 1672)"
+                        "query": "source:sonicwall-firewall @gcat:4 @message_id:(30 OR 32 OR 33 OR 35 OR 200 OR 246 OR 329 OR 486 OR 549 OR 759 OR 986 OR 987 OR 1035 OR 1048 OR 1117 OR 1120 OR 1121 OR 1122 OR 1123 OR 1157 OR 1243 OR 1585 OR 1655 OR 1672) $Priority"
                       },
                       "storage": "hot"
                     }
@@ -309,7 +309,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:4 @message_id:(29 OR 30 OR 31 OR 32 OR 33 OR 200 OR 235 OR 236 OR 237 OR 238 OR 199 OR 984 OR 246 OR 220 OR 239 OR 243 OR 244 OR 245 OR 988 OR 989 OR 990 OR 1552 OR 439 OR 1572 OR 1585 OR 1655 OR 1672)"
+                        "query": "source:sonicwall-firewall @gcat:4 @message_id:(29 OR 30 OR 31 OR 32 OR 33 OR 200 OR 235 OR 236 OR 237 OR 238 OR 199 OR 984 OR 246 OR 220 OR 239 OR 243 OR 244 OR 245 OR 988 OR 989 OR 990 OR 1552 OR 439 OR 1572 OR 1585 OR 1655 OR 1672) $Priority"
                       },
                       "storage": "hot"
                     }
@@ -367,7 +367,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:4 @message_id:(30 OR 32 OR 33 OR 35 OR 200 OR 246 OR 329 OR 486 OR 549 OR 759 OR 986 OR 987 OR 1035 OR 1048 OR 1117 OR 1120 OR 1121 OR 1122 OR 1123 OR 1157 OR 1243 OR 1585 OR 1655 OR 1672)"
+                        "query": "source:sonicwall-firewall @gcat:4 @message_id:(30 OR 32 OR 33 OR 35 OR 200 OR 246 OR 329 OR 486 OR 549 OR 759 OR 986 OR 987 OR 1035 OR 1048 OR 1117 OR 1120 OR 1121 OR 1122 OR 1123 OR 1157 OR 1243 OR 1585 OR 1655 OR 1672) $Priority"
                       },
                       "storage": "hot"
                     }
@@ -435,7 +435,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:4 @message_id:(1572 OR 1655)"
+                        "query": "source:sonicwall-firewall @gcat:4 @message_id:(1572 OR 1655) $Priority"
                       },
                       "storage": "hot"
                     }
@@ -502,7 +502,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:4"
+                        "query": "source:sonicwall-firewall @gcat:4 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -569,7 +569,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:4"
+                        "query": "source:sonicwall-firewall @gcat:4 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -637,7 +637,7 @@
                 },
                 "group_by": [],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:4 @message_id:([988 TO 993] OR 1073 OR 1075 OR 1076 OR 1150 OR 1151 OR 1178 OR 1179)"
+                  "query": "source:sonicwall-firewall @gcat:4 @message_id:([988 TO 993] OR 1073 OR 1075 OR 1076 OR 1150 OR 1151 OR 1178 OR 1179) $Priority"
                 },
                 "storage": "hot"
               }
@@ -692,7 +692,7 @@
                   }
                 ],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:4 @message_id:([988 TO 993] OR 1073 OR 1075)"
+                  "query": "source:sonicwall-firewall @gcat:4 @message_id:([988 TO 993] OR 1073 OR 1075) $Priority"
                 },
                 "storage": "hot"
               }
@@ -759,7 +759,7 @@
                   }
                 ],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:4 @message_id:([988 TO 993] OR 1073 OR 1075)"
+                  "query": "source:sonicwall-firewall @gcat:4 @message_id:([988 TO 993] OR 1073 OR 1075) $Priority"
                 },
                 "storage": "hot"
               }
@@ -826,7 +826,7 @@
                   }
                 ],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:4 @message_id:([243 TO 245] OR [744 TO 758] OR [1009 TO 1011])"
+                  "query": "source:sonicwall-firewall @gcat:4 @message_id:([243 TO 245] OR [744 TO 758] OR [1009 TO 1011]) $Priority"
                 },
                 "storage": "hot"
               }
@@ -893,7 +893,7 @@
                   }
                 ],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:4 @message_id:[1552 TO 1556]"
+                  "query": "source:sonicwall-firewall @gcat:4 @message_id:[1552 TO 1556] $Priority"
                 },
                 "storage": "hot"
               }
@@ -942,7 +942,7 @@
             "response_format": "event_list",
             "query": {
               "data_source": "logs_stream",
-              "query_string": "source:sonicwall-firewall @usr.name:* @gcat:4 ",
+              "query_string": "source:sonicwall-firewall @usr.name:* @gcat:4 $Priority",
               "indexes": [],
               "storage": "hot",
               "sort": {

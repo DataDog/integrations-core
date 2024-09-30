@@ -248,7 +248,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:10"
+                        "query": "source:sonicwall-firewall @gcat:10 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -300,7 +300,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:10 @packets.sent:*"
+                        "query": "source:sonicwall-firewall @gcat:10 @packets.sent:* $Priority"
                       },
                       "storage": "hot"
                     }
@@ -348,7 +348,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:10 @packets.received:*"
+                        "query": "source:sonicwall-firewall @gcat:10 @packets.received:* $Priority"
                       },
                       "storage": "hot"
                     }
@@ -643,7 +643,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:10"
+                        "query": "source:sonicwall-firewall @gcat:10 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -710,7 +710,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:10"
+                        "query": "source:sonicwall-firewall @gcat:10 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -777,7 +777,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:10"
+                        "query": "source:sonicwall-firewall @gcat:10 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -847,7 +847,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:10"
+                        "query": "source:sonicwall-firewall @gcat:10 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -917,7 +917,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:10"
+                        "query": "source:sonicwall-firewall @gcat:10 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -1177,7 +1177,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:sonicwall-firewall @bytes.sent:* @gcat:5"
+                        "query": "source:sonicwall-firewall @bytes.sent:* @gcat:5 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -1232,7 +1232,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:5 @firewall.action:*"
+                        "query": "source:sonicwall-firewall @gcat:5 @firewall.action:* $Priority"
                       },
                       "storage": "hot"
                     }
@@ -1299,7 +1299,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:5"
+                        "query": "source:sonicwall-firewall @gcat:5 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -1359,7 +1359,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:sonicwall-firewall @bytes.received:* @gcat:5"
+                        "query": "source:sonicwall-firewall @bytes.received:* @gcat:5 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -2005,7 +2005,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:5 @message_id:1115"
+                        "query": "source:sonicwall-firewall @gcat:5 @message_id:1115 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -2067,7 +2067,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:5"
+                        "query": "source:sonicwall-firewall @gcat:5 $Priority"
                       },
                       "storage": "hot"
                     }
@@ -2134,7 +2134,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall @gcat:5"
+                        "query": "source:sonicwall-firewall @gcat:5 $Priority"
                       },
                       "storage": "hot"
                     }

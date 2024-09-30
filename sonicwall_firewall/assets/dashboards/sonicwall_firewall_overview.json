@@ -1293,7 +1293,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:sonicwall-firewall $group_category $Protocol $Policy"
+                        "query": "source:sonicwall-firewall $group_category $Protocol $Policy $Status_Code"
                       },
                       "storage": "hot"
                     }
@@ -1692,7 +1692,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:sonicwall-firewall @gcat:6 $Protocol $Policy ",
+                    "query_string": "source:sonicwall-firewall @gcat:6 $Protocol $Policy $Status_Code $group_category",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1763,7 +1763,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:sonicwall-firewall @gcat:(10 OR 5) $Protocol $Policy ",
+                    "query_string": "source:sonicwall-firewall @gcat:(10 OR 5) $Protocol $Policy $Status_Code $group_category",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1838,7 +1838,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:sonicwall-firewall @gcat:3 $Protocol $Policy ",
+                    "query_string": "source:sonicwall-firewall @gcat:3 $Protocol $Policy $Status_Code $group_category",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1917,7 +1917,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:sonicwall-firewall @gcat:4 $Protocol $Policy ",
+                    "query_string": "source:sonicwall-firewall @gcat:4 $Protocol $Policy $Status_Code $group_category",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1988,7 +1988,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:sonicwall-firewall @gcat:7 $Protocol $Policy ",
+                    "query_string": "source:sonicwall-firewall @gcat:7 $Protocol $Policy $Status_Code $group_category",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -2059,7 +2059,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:sonicwall-firewall @gcat:14 $Protocol $Policy ",
+                    "query_string": "source:sonicwall-firewall @gcat:14 $Protocol $Policy $Status_Code $group_category",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -2130,7 +2130,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:sonicwall-firewall -@gcat:(6 OR 7 OR 4 OR 3 OR 10 OR 14) $Protocol $Policy ",
+                    "query_string": "source:sonicwall-firewall -@gcat:(6 OR 7 OR 4 OR 3 OR 10 OR 14 OR 5 OR 10) $Protocol $Policy $Status_Code $group_category ",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {

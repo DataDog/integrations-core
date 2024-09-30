@@ -294,7 +294,7 @@
                   }
                 ],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:14 @message_id:1378"
+                  "query": "source:sonicwall-firewall @gcat:14 @message_id:1378 $Priority"
                 },
                 "storage": "hot"
               }
@@ -447,7 +447,7 @@
                   }
                 ],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:14"
+                  "query": "source:sonicwall-firewall @gcat:14 $Priority"
                 },
                 "storage": "hot"
               }
@@ -514,7 +514,7 @@
                   }
                 ],
                 "search": {
-                  "query": "source:sonicwall-firewall @gcat:14"
+                  "query": "source:sonicwall-firewall @gcat:14 $Priority"
                 },
                 "storage": "hot"
               }
