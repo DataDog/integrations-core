@@ -850,14 +850,11 @@ def test_propagate_agent_tags(
         if should_propagate_agent_tags:
             assert all(tag in check.tags for tag in agent_tags)
             dd_run_check(check)
-            expected_tags = (
-                check._config.tags
-                + [
-                    'connection_host:{}'.format(instance_docker.get('host')),
-                    'sqlserver_host:None',
-                    'db:master',
-                ]
-            )
+            expected_tags = check._config.tags + [
+                'connection_host:{}'.format(instance_docker.get('host')),
+                'sqlserver_host:None',
+                'db:master',
+            ]
             aggregator.assert_service_check(
                 'sqlserver.can_connect',
                 count=1,
