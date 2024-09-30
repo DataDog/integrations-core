@@ -16,14 +16,14 @@ facets:
     type: double
   - facetType: list
     groups:
-      - Error
+      - plivo
     name: Error Message
     path: error.message
     source: log
     type: string
   - facetType: list
     groups:
-      - Error
+      - plivo
     name: Error Type
     path: error.type
     source: log
@@ -49,55 +49,41 @@ facets:
     path: plivo.total_amount
     source: log
     type: double
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: City Name
     path: network.client.geoip.city.name
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Continent Code
     path: network.client.geoip.continent.code
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Continent Name
     path: network.client.geoip.continent.name
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Country ISO Code
     path: network.client.geoip.country.iso_code
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Country Name
     path: network.client.geoip.country.name
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Subdivision ISO Code
     path: network.client.geoip.subdivision.iso_code
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Subdivision Name
     path: network.client.geoip.subdivision.name
     source: log
-    type: string
 pipeline:
   type: pipeline
   name: Plivo
@@ -106,7 +92,7 @@ pipeline:
     query: "source:plivo"
   processors:
     - type: service-remapper
-      name: Define `message_type` as official service of the log
+      name: Define `message_type` as the official service of the log
       enabled: true
       sources:
         - message_type
@@ -123,7 +109,7 @@ pipeline:
           HH:mm:ss.SSSSSSZZ"):timestamp}|%{date("yyyy-MM-dd
           HH:mm:ss.SSSSSZZ"):timestamp}
     - type: date-remapper
-      name: Define `timestamp` as the official timestamp of the log
+      name: Define `timestamp` as the official date of the log
       enabled: true
       sources:
         - timestamp
@@ -200,7 +186,7 @@ pipeline:
       defaultLookup: info
       type: lookup-processor
     - type: status-remapper
-      name: Define `status` as official status of the log
+      name: Define `status` as the official status of the log
       enabled: true
       sources:
         - status
