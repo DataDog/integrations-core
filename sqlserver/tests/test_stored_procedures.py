@@ -344,6 +344,8 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
     check.procedure_metrics._job_loop_future.result()
+    print("natasha heree")
+    print(['job:procedure-metrics'] + _expected_dbm_instance_tags(dbm_instance))
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
         tags=['job:procedure-metrics'] + _expected_dbm_instance_tags(dbm_instance),
