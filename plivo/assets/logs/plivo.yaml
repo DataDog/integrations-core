@@ -1,0 +1,242 @@
+id: plivo
+metric_id: plivo
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - facetType: range
+    groups:
+      - plivo
+    name: Carrier Fees
+    path: plivo.carrier_fees
+    source: log
+    type: double
+  - facetType: list
+    groups:
+      - Error
+    name: Error Message
+    path: error.message
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Error
+    name: Error Type
+    path: error.type
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - plivo
+    name: messaging.conversation_id
+    path: messaging.conversation_id
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - plivo
+    name: messaging.message_id
+    path: messaging.message_id
+    source: log
+    type: string
+  - facetType: range
+    groups:
+      - plivo
+    name: Total Amount
+    path: plivo.total_amount
+    source: log
+    type: double
+  - facetType: list
+    groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Plivo
+  enabled: true
+  filter:
+    query: "source:plivo"
+  processors:
+    - type: service-remapper
+      name: Define `message_type` as official service of the log
+      enabled: true
+      sources:
+        - message_type
+    - type: grok-parser
+      name: Parsing `message_time` to `timestamp` (epoch)
+      enabled: true
+      source: message_time
+      samples:
+        - 2024-09-09 10:32:50.037663+05:30
+        - 2024-09-09 10:32:50.03763+05:30
+      grok:
+        supportRules: ""
+        matchRules: date_rule %{date("yyyy-MM-dd
+          HH:mm:ss.SSSSSSZZ"):timestamp}|%{date("yyyy-MM-dd
+          HH:mm:ss.SSSSSZZ"):timestamp}
+    - type: date-remapper
+      name: Define `timestamp` as the official timestamp of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: attribute-remapper
+      name: Map `requester_ip` to `network.client.ip`
+      enabled: true
+      sources:
+        - requester_ip
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: geo-ip-parser
+      name: GeoIP for the `network.client.ip`
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: attribute-remapper
+      name: Map `destination_country_iso2` to `geo.country_iso_code`
+      enabled: true
+      sources:
+        - destination_country_iso2
+      sourceType: attribute
+      target: geo.country_iso_code
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `message_uuid` to `messaging.message_id`
+      enabled: true
+      sources:
+        - message_uuid
+      sourceType: attribute
+      target: messaging.message_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `error_code` to `error.type`
+      enabled: true
+      sources:
+        - error_code
+      sourceType: attribute
+      target: error.type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `error_message` to `error.message`
+      enabled: true
+      sources:
+        - error_message
+      sourceType: attribute
+      target: error.message
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - name: Lookup for `message_state` to `status`
+      enabled: true
+      source: message_state
+      target: status
+      lookupTable: |-
+        undelivered,warning
+        delivered,info
+        sent,info
+        failed,critical
+        received,info
+        queued,info
+        read,info
+        rejected,high
+      defaultLookup: info
+      type: lookup-processor
+    - type: status-remapper
+      name: Define `status` as official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: attribute-remapper
+      name: Map `total_amount` to `plivo.total_amount`
+      enabled: true
+      sources:
+        - total_amount
+      sourceType: attribute
+      target: plivo.total_amount
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `carrier_fees` to `plivo.carrier_fees`
+      enabled: true
+      sources:
+        - carrier_fees
+      sourceType: attribute
+      target: plivo.carrier_fees
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: pipeline
+      name: whatsapp
+      enabled: true
+      filter:
+        query: "service:whatsapp"
+      processors:
+        - type: attribute-remapper
+          name: Map `conversation_id` to `messaging.conversation_id`
+          enabled: true
+          sources:
+            - conversation_id
+          sourceType: attribute
+          target: messaging.conversation_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
