@@ -51,7 +51,7 @@ class BaseSqlServerMetric(object):
         self.instance = cfg_instance.get('instance_name', '')
         self.physical_db_name = cfg_instance.get('physical_db_name', '')
         self.object_name = cfg_instance.get('object_name', '')
-        self.tags = tags
+        self.tags = cfg_instance.get('tags', []) or []
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
