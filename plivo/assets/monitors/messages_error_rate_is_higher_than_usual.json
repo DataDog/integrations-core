@@ -66,7 +66,7 @@
 						}
 					],
 					"search": {
-						"query": "source:plivo @error.type:000"
+						"query": "source:plivo @plivo.error.type:000"
 					},
 					"storage": "hot"
 				}

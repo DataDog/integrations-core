@@ -751,7 +751,7 @@
                         },
                         "group_by": [
                           {
-                            "facet": "@error.message",
+                            "facet": "@plivo.error.message",
                             "limit": 10,
                             "sort": {
                               "order": "desc",
@@ -761,7 +761,7 @@
                           }
                         ],
                         "search": {
-                          "query": "source:plivo -@error.type:000 @error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                          "query": "source:plivo -@plivo.error.type:000 @plivo.error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                         },
                         "storage": "hot"
                       }
@@ -815,7 +815,7 @@
                         },
                         "group_by": [
                           {
-                            "facet": "@error.message",
+                            "facet": "@plivo.error.message",
                             "limit": 10,
                             "sort": {
                               "order": "desc",
@@ -824,7 +824,7 @@
                             }
                           },
                           {
-                            "facet": "@error.type",
+                            "facet": "@plivo.error.type",
                             "limit": 10,
                             "sort": {
                               "order": "desc",
@@ -843,7 +843,7 @@
                           }
                         ],
                         "search": {
-                          "query": "source:plivo -@error.type:000 @error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                          "query": "source:plivo -@plivo.error.type:000 @plivo.error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                         },
                         "storage": "hot"
                       }

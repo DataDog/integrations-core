@@ -17,13 +17,13 @@ facets:
   - groups:
       - plivo
     name: Error Message
-    path: error.message
+    path: plivo.error.message
     source: log
     type: string
   - groups:
       - plivo
     name: Error Type
-    path: error.type
+    path: plivo.error.type
     source: log
     type: string
   - facetType: list
@@ -149,22 +149,22 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `error_code` to `error.type`
+      name: Map `error_code` to `plivo.error.type`
       enabled: true
       sources:
         - error_code
       sourceType: attribute
-      target: error.type
+      target: plivo.error.type
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `error_message` to `error.message`
+      name: Map `error_message` to `plivo.error.message`
       enabled: true
       sources:
         - error_message
       sourceType: attribute
-      target: error.message
+      target: plivo.error.message
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false

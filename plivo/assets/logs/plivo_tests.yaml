@@ -45,9 +45,6 @@ tests:
         dlt_entity_id: ""
         dlt_template_category: ""
         dlt_template_id: ""
-        error:
-          message: ""
-          type: "000"
         from_number: "18763009800"
         geo:
           country_iso_code: "IN"
@@ -71,6 +68,9 @@ tests:
         plivo:
           carrier_fees: "0.00000"
           total_amount: "0.08000"
+          error:
+            message: ""
+            type: "000"
         replaced_sender: "18763009800"
         resource_uri: "/v1/Account/MOWTXTOIZONQSONGQONS/Message/e8fccb36-6051-4c12-8ff5-493309woxt2d4/"
         status: "info"
@@ -135,6 +135,7 @@ tests:
         "conversation_id" : "",
         "to_number" : "918540877900",
         "error_message" : "",
+        "error_code: null,
         "dlt_template_category" : "",
         "dlt_template_id" : "",
         "mnc" : "650",
@@ -161,8 +162,6 @@ tests:
         dlt_entity_id: ""
         dlt_template_category: ""
         dlt_template_id: ""
-        error:
-          message: ""
         from_number: "18763009800"
         geo:
           country_iso_code: "US"
@@ -185,6 +184,8 @@ tests:
         plivo:
           carrier_fees: "0.01000"
           total_amount: "0.02800"
+          error:
+            message: ""
         replaced_sender: "18763009800"
         resource_uri: "/v1/Account/MOWTXTOIZONQSONGQONS/Message/13d7cef0-5521-479e-b2fe-22dd93341708/"
         status: "info"
@@ -273,9 +274,6 @@ tests:
         dlt_entity_id: ""
         dlt_template_category: ""
         dlt_template_id: ""
-        error:
-          message: ""
-          type: "000"
         from_number: "18763009800"
         geo:
           country_iso_code: "IN"
@@ -297,6 +295,9 @@ tests:
         plivo:
           carrier_fees: "0.00000"
           total_amount: "00.00000"
+          error:
+            message: ""
+            type: "000"
         replaced_sender: "18763009800"
         resource_uri: "/v1/Account/MOWTXTOIZONQSONGQONS/Message/db344858-6436-45b9-9f42-cc5f03fa2do2/"
         status: "info"
