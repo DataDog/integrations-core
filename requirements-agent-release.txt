@@ -160,7 +160,7 @@ datadog-solr==2.0.0
 datadog-sonarqube==4.0.0
 datadog-spark==5.0.0
 datadog-sqlserver==18.0.0
-datadog-squid==2.5.1
+datadog-squid==3.0.0
 datadog-ssh-check==2.10.0
 datadog-statsd==1.12.0
 datadog-strimzi==2.2.2
