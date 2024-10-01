@@ -16,25 +16,25 @@ from datadog_checks.cisco_aci.api import Api, SessionWrapper
 from . import common
 
 
-@freeze_time("2012-01-14 03:21:34", auto_tick_seconds=1)
 def test_cisco(aggregator):
     cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG])
     api = Api(common.ACI_URLS, cisco_aci_check.http, common.USERNAME, password=common.PASSWORD, log=cisco_aci_check.log)
     api.wrapper_factory = common.FakeSessionWrapper
     cisco_aci_check._api_cache[hash_mutable(common.CONFIG)] = api
     check_tags = ['cisco']
-    cisco_aci_check.check({})
+    with freeze_time("2012-01-14 03:21:34", auto_tick_seconds=1):
+        cisco_aci_check.check({})
 
-    aggregator.assert_metric(
-        'datadog.cisco_aci.check_interval',
-        value=1326511296,
-        metric_type=aggregator.MONOTONIC_COUNT,
-        count=1,
-        tags=check_tags,
-    )
-    aggregator.assert_metric(
-        'datadog.cisco_aci.check_duration', value=2, metric_type=aggregator.GAUGE, count=1, tags=check_tags
-    )
+        aggregator.assert_metric(
+            'datadog.cisco_aci.check_interval',
+            value=1326511296,
+            metric_type=aggregator.MONOTONIC_COUNT,
+            count=1,
+            tags=check_tags,
+        )
+        aggregator.assert_metric(
+            'datadog.cisco_aci.check_duration', value=2, metric_type=aggregator.GAUGE, count=1, tags=check_tags
+        )
 
 
 @pytest.mark.parametrize(
