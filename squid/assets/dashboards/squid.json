@@ -123,7 +123,7 @@
         {
             "definition": {
                 "background_color": "white",
-                "content": "Gain a comprehensive view of your network's web and cache activities by monitoring detailed Squid Access logs through this dashboard.\n\nSquid Access Logs provide in-depth insights into web access patterns, such as Total squid Logs, Logs Over Time. Analyze Top Client IPs and Top Users by Error Status Category to identify which clients and users are experiencing the most issues. \n\nOperational metrics provides a comprehensive overview of server performance, caching effectiveness, and client behavior. It helps you monitor key metrics, identify potential issues, and optimize your caching configuration. The dashboard covers CPU and memory usage, HTTP requests and errors, and FTP traffic.\n\nFor more information, see the [Squid Integration Documentation](https://docs.datadoghq.com/integrations/squid)\n  \n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "Gain a comprehensive view of your network's web and cache activities by monitoring detailed Squid Access logs through this dashboard.\n\nSquid Access Logs provide in-depth insights into web access patterns, such as Total Squid Logs and Logs Over Time. Analyze Top Client IPs and Top Users by Error Status Category to identify which clients and users are experiencing the most issues. \n\nOperational metrics provides a comprehensive overview of server performance, caching effectiveness, and client behavior. This helps you monitor key metrics, identify potential issues, and optimize your caching configuration. The dashboard covers CPU and memory usage, HTTP requests and errors, and FTP traffic.\n\nFor more information, see the [Squid Integration Documentation](https://docs.datadoghq.com/integrations/squid)\n  \n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "font_size": "14",
                 "has_padding": true,
                 "show_tick": false,
@@ -153,7 +153,7 @@
                     {
                         "definition": {
                             "background_color": "vivid_blue",
-                            "content": "\nDatadog Cloud SIEM analyzes and correlates Squid logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](https://docs.datadoghq.com/integrations/squid). ",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates Squid logs to detect threats to your environment in real time. If you don't see signals, make sure you've enabled [Datadog Cloud SIEM](https://docs.datadoghq.com/integrations/squid). ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,

@@ -3,7 +3,7 @@
 ## Overview
 [Squid][1] is an open-source caching and forwarding web proxy server that operates as an intermediary between clients and servers on a network. It acts as a gateway, enabling clients to access various internet resources such as websites, files, and other content from servers.
 
-This integration provides enrichment and visualization for Squid logs. It helps to visualize detailed insights into Squid log analysis through the out-of-the-box dashboards and detection rules enhance detection and response capabilities.
+This integration provides enrichment and visualization for Squid logs. It helps you visualize detailed insights into Squid log analysis through the out-of-the-box dashboards and detection rules, enhancing detection and response capabilities.
 
 Additionally, it includes pre-configured monitors for proactive notifications on the following:
 
@@ -109,26 +109,26 @@ logformat common     `%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %Ss:%Sh`
 
 logformat combined   `%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh`
 
-Refer Squid log formats [here][12]
+For more information, refer to [Squid log formats][12].
 
-**Note**: Default logformat is `squid`. you can update the supported log format in `/etc/squid/squid.conf`, then restart Squid. below is example.
+**Note**: The default `logformat` type is `squid`. You can update the supported log format in `/etc/squid/squid.conf`, then restart Squid.
 
-For combined logformat add below line in `/etc/squid/squid.conf`
+To use the `combined` type for `logformat`, add the following lines to your `/etc/squid/squid.conf` file:
 
 ```
 logformat combined   %>a %[ui %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh
 access_log /var/log/squid/access.log combined
 ```
-Then restart th squid service
+Next, restart the `squid` service using the following command:
 
-  ```shell
-  sudo systemctl restart squid
-  ```  
+```shell
+sudo systemctl restart squid
+```  
 
-**NOTE**:
+**Note**:
 
-- `Top Avg Request Duration by URL Host` Panel will be loaded only if Default Squid logformat is configured.
-- `Top Browsers` and `Top HTTP Referrer` Panels will be loaded only if Combined logformat is configured.
+- The `Top Avg Request Duration by URL Host` panel will be loaded only if the default `squid` type of `logformat` is configured.
+- The `Top Browsers` and `Top HTTP Referrer` panels will be loaded only if the `combined` type of `logformat` is configured.
 
 
 ### Metrics

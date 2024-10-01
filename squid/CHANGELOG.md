@@ -10,8 +10,8 @@
 
 ***Added***:
 
-* Added support for different log formats of access logs e.g common and combined.
-* Added OOTB assets dashboard, monitors, detection rule.
+* Added support for different log formats of access logs, such as common and combined.
+* Added an OOTB assets dashboard, monitors, and a detection rule.
 
 ## 2.5.1 / 2024-05-31 / Agent 7.55.0
 
