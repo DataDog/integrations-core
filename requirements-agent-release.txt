@@ -20,7 +20,7 @@ datadog-azure-iot-edge==5.0.0
 datadog-boundary==3.0.0
 datadog-btrfs==3.0.0; sys_platform != 'win32'
 datadog-cacti==3.0.0; sys_platform == 'linux2'
-datadog-calico==2.2.2
+datadog-calico==3.0.0
 datadog-cassandra-nodetool==1.13.0
 datadog-cassandra==1.18.0
 datadog-ceph==2.10.0; sys_platform != 'win32'
