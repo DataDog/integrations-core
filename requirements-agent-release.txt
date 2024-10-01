@@ -150,7 +150,7 @@ datadog-rethinkdb==4.0.0
 datadog-riak==4.0.0
 datadog-riakcs==3.0.0
 datadog-sap-hana==4.0.0
-datadog-scylla==2.7.2
+datadog-scylla==3.0.0
 datadog-sidekiq==1.4.0
 datadog-silk==2.2.1
 datadog-singlestore==2.2.1
