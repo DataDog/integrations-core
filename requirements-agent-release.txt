@@ -165,7 +165,7 @@ datadog-ssh-check==3.0.0
 datadog-statsd==2.0.0
 datadog-strimzi==3.0.0
 datadog-supervisord==3.0.0
-datadog-suricata==1.0.0
+datadog-suricata==2.0.0
 datadog-system-core==2.5.0
 datadog-system-swap==1.19.0
 datadog-tcp-check==4.9.0
