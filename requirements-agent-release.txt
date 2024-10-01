@@ -18,7 +18,7 @@ datadog-avi-vantage==5.0.0
 datadog-aws-neuron==2.0.0
 datadog-azure-iot-edge==5.0.0
 datadog-boundary==3.0.0
-datadog-btrfs==2.4.0; sys_platform != 'win32'
+datadog-btrfs==3.0.0; sys_platform != 'win32'
 datadog-cacti==2.1.1; sys_platform == 'linux2'
 datadog-calico==2.2.2
 datadog-cassandra-nodetool==1.13.0
