@@ -51,7 +51,7 @@ datadog-dns-check==4.0.0
 datadog-dotnetclr==3.0.0; sys_platform == 'win32'
 datadog-druid==3.0.0
 datadog-ecs-fargate==5.0.0
-datadog-eks-fargate==4.2.1
+datadog-eks-fargate==5.0.0
 datadog-elastic==6.3.1
 datadog-envoy==3.6.0
 datadog-esxi==1.2.0
