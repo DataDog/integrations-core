@@ -69,7 +69,7 @@ datadog-gitlab==8.0.0
 datadog-glusterfs==2.0.0; sys_platform == 'linux2'
 datadog-go-expvar==3.0.0
 datadog-gunicorn==3.0.0; sys_platform != 'win32'
-datadog-haproxy==5.2.2
+datadog-haproxy==6.0.0
 datadog-harbor==3.2.2
 datadog-hazelcast==4.1.0
 datadog-hdfs-datanode==4.2.1; sys_platform != 'win32'
