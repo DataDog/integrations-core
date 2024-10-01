@@ -13,13 +13,13 @@ tests:
             "responder_id": "None",
             "due_by": "2024-09-12T21:00:00Z",
             "fr_escalated": False,
-            "deleted": True,
-            "spam": True,
+            "deleted": "True",
+            "spam": "True",
             "email_config_id": "exampl10016@nowhere.com",
             "fwd_emails": ["exampl10014@nowhere.com", "exampl10015@nowhere.com"],
             "reply_cc_emails": ["exampl10011@nowhere.com", "example10012@nowhere.com"],
             "cc_emails": ["exampl10011@nowhere.com", "example10012@nowhere.com"],
-            "is_escalated": True,
+            "is_escalated": "True",
             "fr_due_by": "2024-09-05T18:00:00Z",
             "id": 1001,
             "priority": 1,
@@ -35,23 +35,23 @@ tests:
             "description_text": "This is a test submitted via API...",
             "custom_fields": {
                     "major_incident_type": "Full outage",
-                    "business_impact": None,
-                    "impacted_locations": None,
-                    "no_of_customers_impacted": None
+                    "business_impact": "None",
+                    "impacted_locations": "None",
+                    "no_of_customers_impacted": "None"
                 },
                 "requester": {
                     "email": "test@example.com",
                     "id": 29001862388,
-                    "mobile": None,
+                    "mobile": "None",
                     "name": "Test User",
-                    "phone": None
+                    "phone": "None"
                 },
                 "requested_for": {
                     "email": "test@example.com",
                     "id": 29001862388,
-                    "mobile": None,
+                    "mobile": "None",
                     "name": "Test User",
-                    "phone": None
+                    "phone": "None"
                 },
                 "stats": {
                     "created_at": "2024-09-06T06:42:26Z",
@@ -90,13 +90,13 @@ tests:
               "responder_id": "None",
               "due_by": "2024-09-12T21:00:00Z",
               "fr_escalated": False,
-              "deleted": True,
-              "spam": True,
+              "deleted": "True",
+              "spam": "True",
               "email_config_id": "exampl10016@nowhere.com",
               "fwd_emails": ["exampl10014@nowhere.com", "exampl10015@nowhere.com"],
               "reply_cc_emails": ["exampl10011@nowhere.com", "example10012@nowhere.com"],
               "cc_emails": ["exampl10011@nowhere.com", "example10012@nowhere.com"],
-              "is_escalated": True,
+              "is_escalated": "True",
               "fr_due_by": "2024-09-05T18:00:00Z",
               "id": 1001,
               "priority": 1,
@@ -112,23 +112,23 @@ tests:
               "description_text": "This is a test submitted via API...",
               "custom_fields": {
                       "major_incident_type": "Full outage",
-                      "business_impact": None,
-                      "impacted_locations": None,
-                      "no_of_customers_impacted": None
+                      "business_impact": "None",
+                      "impacted_locations": "None",
+                      "no_of_customers_impacted": "None"
                   },
                   "requester": {
                       "email": "test@example.com",
                       "id": 29001862388,
-                      "mobile": None,
+                      "mobile": "None",
                       "name": "Test User",
-                      "phone": None
+                      "phone": "None"
                   },
                   "requested_for": {
                       "email": "test@example.com",
                       "id": 29001862388,
-                      "mobile": None,
+                      "mobile": "None",
                       "name": "Test User",
-                      "phone": None
+                      "phone": "None"
                   },
                   "stats": {
                       "created_at": "2024-09-06T06:42:26Z",
