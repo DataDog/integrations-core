@@ -96,7 +96,7 @@ requests-unixsocket2==0.4.2; python_version > '3.0'
 requests-unixsocket==0.3.0; python_version < '3.0'
 requests==2.27.1; python_version < '3.0'
 requests==2.32.3; python_version > '3.0'
-rethinkdb==2.4.9
+rethinkdb==2.4.10post1
 scandir==1.10.0; python_version < '3.5'
 securesystemslib[crypto,pynacl]==0.28.0; python_version > '3.0'
 semver==2.13.0; python_version < '3.0'
