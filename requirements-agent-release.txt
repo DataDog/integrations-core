@@ -63,7 +63,7 @@ datadog-fluentd==4.0.0
 datadog-fluxcd==2.0.0
 datadog-fly-io==2.0.0
 datadog-foundationdb==2.0.0
-datadog-gearmand==3.1.0; sys_platform != 'win32'
+datadog-gearmand==4.0.0; sys_platform != 'win32'
 datadog-gitlab-runner==4.2.1
 datadog-gitlab==7.3.2
 datadog-glusterfs==1.8.0; sys_platform == 'linux2'
