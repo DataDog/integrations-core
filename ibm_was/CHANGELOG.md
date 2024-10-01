@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump lxml version for py3.12 E2E tests ([#18637](https://github.com/DataDog/integrations-core/pull/18637))
+
 ## 3.3.2 / 2024-08-28
 
 ***Fixed***:
