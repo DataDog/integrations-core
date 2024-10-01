@@ -77,7 +77,7 @@ datadog-hdfs-namenode==5.0.0; sys_platform != 'win32'
 datadog-hive==2.0.0
 datadog-hivemq==2.0.0
 datadog-http-check==10.0.0
-datadog-hudi==2.3.0
+datadog-hudi==3.0.0
 datadog-hyperv==1.11.1; sys_platform == 'win32'
 datadog-ibm-ace==2.2.2
 datadog-ibm-db2==2.2.0
