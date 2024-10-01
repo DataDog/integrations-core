@@ -112,7 +112,7 @@ datadog-mapr==2.0.0; sys_platform == 'linux2'
 datadog-mapreduce==5.0.0
 datadog-marathon==3.0.0; sys_platform != 'win32'
 datadog-marklogic==5.0.0
-datadog-mcache==4.1.0; sys_platform != 'win32'
+datadog-mcache==5.0.0; sys_platform != 'win32'
 datadog-mesos-master==3.3.1; sys_platform != 'win32'
 datadog-mesos-slave==3.3.1; sys_platform != 'win32'
 datadog-mongo==6.11.0
