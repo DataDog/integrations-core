@@ -18,7 +18,6 @@
 * Fixed excluded host tags for property metrics ([#18601](https://github.com/DataDog/integrations-core/pull/18601))
 * Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
 
-
 ## 7.7.0 / 2024-10-01 / 7.58.0
 
 ***Changed***:
