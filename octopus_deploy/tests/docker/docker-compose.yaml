@@ -1,4 +1,4 @@
-services: 
+services:
 
   octopus-api:
     image: caddy:2.7
