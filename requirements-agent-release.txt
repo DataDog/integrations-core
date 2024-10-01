@@ -105,7 +105,7 @@ datadog-kubernetes-cluster-autoscaler==2.0.0
 datadog-kubernetes-state==9.0.0
 datadog-kyototycoon==3.0.0
 datadog-kyverno==2.0.0
-datadog-lighttpd==3.5.1
+datadog-lighttpd==4.0.0
 datadog-linkerd==4.2.2
 datadog-linux-proc-extras==2.5.0; sys_platform == 'linux2'
 datadog-mapr==1.11.0; sys_platform == 'linux2'
