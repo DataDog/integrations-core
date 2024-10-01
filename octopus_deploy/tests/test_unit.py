@@ -12,9 +12,9 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .conftest import MOCKED_TIMESTAMPS
 from .constants import (
     ALL_METRICS,
+    MOCKED_TIMESTAMPS,
     PROJECT_ALL_METRICS,
     PROJECT_GROUP_ALL_METRICS,
     PROJECT_GROUP_NO_METRICS,

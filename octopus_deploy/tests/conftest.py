@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import datetime
 import json
 import os
 from pathlib import Path
@@ -11,16 +10,23 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.base.utils.time import ensure_aware_datetime
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
 
-BASE_TIME = ensure_aware_datetime(datetime.datetime.strptime("2024-09-23 14:45:58.888492", '%Y-%m-%d %H:%M:%S.%f'))
-MOCKED_TIMESTAMPS = [BASE_TIME] * 20
+from .constants import COMPOSE_FILE, INSTANCE
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    compose_file = COMPOSE_FILE
+    endpoint = INSTANCE["octopus_endpoint"]
+    conditions = [
+        CheckDockerLogs(identifier='octopus-api', patterns=['server running']),
+        CheckEndpoints(f'{endpoint}/spaces'),
+    ]
+    with docker_run(compose_file, conditions=conditions):
+        yield INSTANCE
 
 
 @pytest.fixture
@@ -106,7 +112,7 @@ def mock_http_get(request, monkeypatch, mock_http_call):
             param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
             request_path = f'{url}/{param_string}'
 
-        print(request_path)
+        request_path = request_path.replace(" ")
         if http_error and request_path in http_error:
             return http_error[request_path]
 

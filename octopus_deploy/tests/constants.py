@@ -1,6 +1,19 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime
+import os
+
+from datadog_checks.base.utils.time import ensure_aware_datetime
+from datadog_checks.dev.fs import get_here
+
+COMPOSE_FILE = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
+INSTANCE = {'octopus_endpoint': 'http://localhost:80/api', 'space': 'Default'}
+
+
+BASE_TIME = ensure_aware_datetime(datetime.datetime.strptime("2024-09-23 14:45:58.888492", '%Y-%m-%d %H:%M:%S.%f'))
+MOCKED_TIMESTAMPS = [BASE_TIME] * 20
+
 
 ALL_METRICS = ["octopus_deploy.project_group.count", "octopus_deploy.project.count", "octopus_deploy.task.count"]
 
