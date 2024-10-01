@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Metabase activity log events.",
+    "description": "Gain insights into Metabase activity events.",
     "title": "Metabase",
     "media": [
       {
@@ -77,9 +77,9 @@
       "source": "metabase"
     },
     "monitors": {
-      "High number of user invites" : "assets/monitors/high_number_of_user_invites.json",
-      "High number of API Key regenerations" : "assets/monitors/high_number_of_api_key_regenerations.json",
-      "High number of user deactivations" : "assets/monitors/high_number_of_user_deactivations.json"
+      "[Metabase] High number of user invites" : "assets/monitors/high_number_of_user_invites.json",
+      "[Metabase] High number of API Key regenerations" : "assets/monitors/high_number_of_api_key_regenerations.json",
+      "[Metabase] High number of user deactivations" : "assets/monitors/high_number_of_user_deactivations.json"
     }
   },
   "author": {
