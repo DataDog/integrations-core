@@ -169,7 +169,7 @@ datadog-suricata==2.0.0
 datadog-system-core==3.0.0
 datadog-system-swap==2.0.0
 datadog-tcp-check==5.0.0
-datadog-teamcity==4.3.1
+datadog-teamcity==5.0.0
 datadog-tekton==1.0.2
 datadog-teleport==1.1.0
 datadog-temporal==2.3.0
