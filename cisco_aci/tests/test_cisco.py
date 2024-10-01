@@ -21,19 +21,36 @@ def test_cisco(aggregator):
     api = Api(common.ACI_URLS, cisco_aci_check.http, common.USERNAME, password=common.PASSWORD, log=cisco_aci_check.log)
     api.wrapper_factory = common.FakeSessionWrapper
     cisco_aci_check._api_cache[hash_mutable(common.CONFIG)] = api
-    check_tags = ['cisco']
-    with freeze_time("2012-01-14 03:21:34", auto_tick_seconds=1):
-        cisco_aci_check.check({})
+    cisco_aci_check.check({})
 
+    check_tags = ['cisco']
+    aggregator.assert_metric(
+        'datadog.cisco_aci.check_interval',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        count=1,
+        tags=check_tags,
+    )
+    aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=check_tags)
+
+
+def test_submit_telemetry_metrics(aggregator):
+    cisco_aci_check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG])
+    check_tags = ['cisco']
+
+    start_time = 1326511294  # Saturday, January 14, 2012 3:21:34 AM GMT
+    end_time = 1326511295  # Saturday, January 14, 2012 3:21:35 AM GMT
+
+    with freeze_time("2012-01-14 03:21:35"):
+        cisco_aci_check.submit_telemetry_metrics(start_time, check_tags)
         aggregator.assert_metric(
             'datadog.cisco_aci.check_interval',
-            value=1326511296,
+            value=end_time,
             metric_type=aggregator.MONOTONIC_COUNT,
             count=1,
             tags=check_tags,
         )
         aggregator.assert_metric(
-            'datadog.cisco_aci.check_duration', value=2, metric_type=aggregator.GAUGE, count=1, tags=check_tags
+            'datadog.cisco_aci.check_duration', value=1, metric_type=aggregator.GAUGE, count=1, tags=check_tags
         )
 
 
