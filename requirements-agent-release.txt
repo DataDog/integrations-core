@@ -128,7 +128,7 @@ datadog-openmetrics==5.0.0
 datadog-openstack-controller==7.0.0
 datadog-openstack==3.0.0
 datadog-oracle==6.0.0
-datadog-ossec-security==1.0.0
+datadog-ossec-security==2.0.0
 datadog-palo-alto-panorama==1.0.0
 datadog-pan-firewall==1.2.0
 datadog-pdh-check==2.1.0; sys_platform == 'win32'
