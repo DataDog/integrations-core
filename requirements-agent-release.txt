@@ -182,7 +182,7 @@ datadog-tomcat==3.0.0
 datadog-torchserve==3.0.0
 datadog-traefik-mesh==2.0.0
 datadog-traffic-server==3.0.0
-datadog-twemproxy==1.15.0
+datadog-twemproxy==2.0.0
 datadog-twistlock==3.6.1
 datadog-varnish==2.1.0
 datadog-vault==4.2.1
