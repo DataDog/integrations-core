@@ -90,7 +90,7 @@ datadog-impala==3.0.0
 datadog-istio==7.0.0
 datadog-jboss-wildfly==3.0.0
 datadog-journald==2.0.0
-datadog-kafka-consumer==4.6.1
+datadog-kafka-consumer==5.0.0
 datadog-kafka==3.0.0
 datadog-karpenter==1.6.0
 datadog-kong==3.2.2
