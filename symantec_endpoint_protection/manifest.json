@@ -17,33 +17,33 @@
         "media_type": "image"
       },
       {
-        "caption": "Symantec Endpoint Protection - Scan Logs",
-        "image_url": "images/symantec_endpoint_protection_scan_logs.png",
+        "caption": "Symantec Endpoint Protection - Scan",
+        "image_url": "images/symantec_endpoint_protection_scan.png",
         "media_type": "image"
       },
       {
-        "caption": "Symantec Endpoint Protection - Risk Logs",
-        "image_url": "images/symantec_endpoint_protection_risk_logs.png",
+        "caption": "Symantec Endpoint Protection - Risk",
+        "image_url": "images/symantec_endpoint_protection_risk.png",
         "media_type": "image"
       },
       {
-        "caption": "Symantec Endpoint Protection - Application Control Logs",
-        "image_url": "images/symantec_endpoint_protection_application_control_logs.png",
+        "caption": "Symantec Endpoint Protection - Application Control",
+        "image_url": "images/symantec_endpoint_protection_application_control.png",
         "media_type": "image"
       },
       {
-        "caption": "Symantec Endpoint Protection - Security Logs",
-        "image_url": "images/symantec_endpoint_protection_security_logs.png",
+        "caption": "Symantec Endpoint Protection - Security",
+        "image_url": "images/symantec_endpoint_protection_security.png",
         "media_type": "image"
       },
       {
-        "caption": "Symantec Endpoint Protection - System Logs",
-        "image_url": "images/symantec_endpoint_protection_system_logs.png",
+        "caption": "Symantec Endpoint Protection - System",
+        "image_url": "images/symantec_endpoint_protection_system.png",
         "media_type": "image"
       },
       {
-        "caption": "Symantec Endpoint Protection - Traffic Logs",
-        "image_url": "images/symantec_endpoint_protection_traffic_logs.png",
+        "caption": "Symantec Endpoint Protection - Traffic",
+        "image_url": "images/symantec_endpoint_protection_traffic.png",
         "media_type": "image"
       }
     ],
@@ -74,12 +74,12 @@
     },
     "dashboards": {
       "Symantec Endpoint Protection - Overview": "assets/dashboards/symantec_endpoint_protection_overview.json",
-      "Symantec Endpoint Protection - Scan Logs": "assets/dashboards/symantec_endpoint_protection_scan_logs.json",
-      "Symantec Endpoint Protection - Risk Logs": "assets/dashboards/symantec_endpoint_protection_risk_logs.json",
-      "Symantec Endpoint Protection - Application Control Logs": "assets/dashboards/symantec_endpoint_protection_application_control_logs.json",
-      "Symantec Endpoint Protection - Security Logs": "assets/dashboards/symantec_endpoint_protection_security_logs.json",
-      "Symantec Endpoint Protection - System Logs": "assets/dashboards/symantec_endpoint_protection_system_logs.json",
-      "Symantec Endpoint Protection - Traffic Logs": "assets/dashboards/symantec_endpoint_protection_traffic_logs.json"
+      "Symantec Endpoint Protection - Scan": "assets/dashboards/symantec_endpoint_protection_scan.json",
+      "Symantec Endpoint Protection - Risk": "assets/dashboards/symantec_endpoint_protection_risk.json",
+      "Symantec Endpoint Protection - Application Control": "assets/dashboards/symantec_endpoint_protection_application_control.json",
+      "Symantec Endpoint Protection - Security": "assets/dashboards/symantec_endpoint_protection_security.json",
+      "Symantec Endpoint Protection - System": "assets/dashboards/symantec_endpoint_protection_system.json",
+      "Symantec Endpoint Protection - Traffic": "assets/dashboards/symantec_endpoint_protection_traffic.json"
     },
     "logs":{
       "source": "symantec-endpoint-protection"

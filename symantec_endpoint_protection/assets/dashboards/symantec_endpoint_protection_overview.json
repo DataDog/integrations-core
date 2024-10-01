@@ -1,6 +1,6 @@
 {
     "title": "Symantec Endpoint Protection - Overview",
-    "description": "Symantec Endpoint Protection is a client-server solution that protects laptops, desktops, and servers in your network against malware, risks, and vulnerabilities.\n",
+    "description": "This Dashboard provides a comprehensive summary of Symantec Endpoint Protection logs, allowing quick assess to the each log count by its type and details of those logs.",
     "widgets": [
         {
             "id": 463772227106378,
