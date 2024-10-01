@@ -102,12 +102,11 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 The Squid integration collects access and cache logs.
 
 #### Supported Access Log Formats
-
-logformat squid      `%ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %[un %Sh/%<a %mt`
-
-logformat common     `%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %Ss:%Sh`
-
-logformat combined   `%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh`
+|Name                 | Format Specification|
+|---------------------|------------------------------|
+| squid      |`%ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %[un %Sh/%<a %mt`|
+| common     |`%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st %Ss:%Sh`|
+| combined   |`%>a - %[un [%tl] "%rm %ru HTTP/%rv" %>Hs %<st "%{Referer}>h" "%{User-Agent}>h" %Ss:%Sh`|
 
 For more information, refer to [Squid log formats][12].
 

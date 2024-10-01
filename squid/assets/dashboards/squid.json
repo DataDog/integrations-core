@@ -92,7 +92,7 @@
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
                             "last_triggered_format": "relative",
-                            "query": "tag:squid $Protocol $User $Status_Code $Status_Category $Squid_Status",
+                            "query": "tag:squid",
                             "show_last_triggered": false,
                             "show_priority": false,
                             "show_status": true,
@@ -153,7 +153,7 @@
                     {
                         "definition": {
                             "background_color": "vivid_blue",
-                            "content": "\nDatadog Cloud SIEM analyzes and correlates Squid logs to detect threats to your environment in real time. If you don't see signals, make sure you've enabled [Datadog Cloud SIEM](https://docs.datadoghq.com/integrations/squid). ",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates Squid logs to detect threats to your environment in real time. If you don't see signals, make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Asquid). ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
