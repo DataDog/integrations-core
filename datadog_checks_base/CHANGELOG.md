@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
 ## 36.16.0 / 2024-09-30
 
 ***Security***:
