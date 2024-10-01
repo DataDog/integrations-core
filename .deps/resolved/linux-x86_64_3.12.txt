@@ -20,7 +20,7 @@ clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhou
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6dbcee870c60d9835e5dce1456ab6b9d807e6669246357f4b321ef747b90fa43
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20240402154838-py3-none-manylinux2014_x86_64.whl#sha256=aba3c1683ef1b2099933e030464d29b3ad1c206784ebd15d8a7147ecd6ba24e1
 confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.5.0-20240930185812-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=4826c923dd7f0985af61e5f051430262e36b0c4c37aca0a7ade057c37d727383
-cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-43.0.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=299d3da8e00b7e2b54bb02ef58d73cd5f55fb31f33ebbf33bd00d9aa6807df7e
+cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-43.0.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=58d4e9129985185a06d849aa6df265bdd5a74ca6e1b736a77959b498e0505b85
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=5fc70ac472093093d9908965d95d977206372a3ddc8a2562acf9dfd57c6864d8
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.1.1-py3-none-any.whl#sha256=b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186
@@ -45,7 +45,7 @@ keystoneauth1 @ https://agent-int-packages.datadoghq.com/external/keystoneauth1/
 krb5 @ https://agent-int-packages.datadoghq.com/built/krb5/krb5-0.6.0-20240917155250-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=f90b6b9bf1e964f081525253d1e20ebda0ca15f05df2194a16647d0c89c6293e
 kubernetes @ https://agent-int-packages.datadoghq.com/external/kubernetes/kubernetes-30.1.0-py2.py3-none-any.whl#sha256=e212e8b7579031dd2e512168b617373bc1e03888d41ac4e04039240a292d478d
 ldap3 @ https://agent-int-packages.datadoghq.com/external/ldap3/ldap3-2.9.1-py2.py3-none-any.whl#sha256=5869596fc4948797020d3f03b7939da938778a0f9e2009f7a072ccf92b8e8d70
-lxml @ https://agent-int-packages.datadoghq.com/built/lxml/lxml-4.9.4-20240917155250-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=0c1d96942a08b30d1ae8192b59249d91254eccd4198361eabdcd1ef2e76158dc
+lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-5.1.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=f8682af96b5ad5093aab9eee5e4ff24cb7a9796c78699d914dd456ebfe7484a6
 lz4 @ https://agent-int-packages.datadoghq.com/external/lz4/lz4-4.3.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=bca8fccc15e3add173da91be8f34121578dc777711ffd98d399be35487c934bf
 mmh3 @ https://agent-int-packages.datadoghq.com/external/mmh3/mmh3-4.1.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=3b02268be6e0a8eeb8a924d7db85f28e47344f35c438c1e149878bb1c47b1cd3
 msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.31.0-py3-none-any.whl#sha256=96bc37cff82ebe4b160d5fc0f1196f6ca8b50e274ecd0ec5bf69c438514086e7

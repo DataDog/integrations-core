@@ -19,7 +19,7 @@ clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhou
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-win_amd64.whl#sha256=de6624e28eeffd01668803d28ae89e3d4e359b1bff8b60e4933e1cb3c6f86f18
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20240402154627-py3-none-win_amd64.whl#sha256=1743b32a221d2a0804b4e425ffd53468e8f1754da217fe1e7bd9ff7800fd90f8
 confluent-kafka @ https://agent-int-packages.datadoghq.com/external/confluent-kafka/confluent_kafka-2.5.0-cp312-cp312-win_amd64.whl#sha256=d668b5c426af595271bf6fce2917a6c3a15453656077a59db85f440958b5ccc2
-cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-43.0.0-cp39-abi3-win_amd64.whl#sha256=0663585d02f76929792470451a5ba64424acc3cd5227b03921dab0e2f27b1709
+cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-43.0.1-cp39-abi3-win_amd64.whl#sha256=d75601ad10b059ec832e78823b348bfa1a59f6b8d545db3a24fd44362a1564cb
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-2.10.6-cp312-cp312-win_amd64.whl#sha256=bb183a535e5b24828a45901babd9fd15a1350c9d5096de5ba463287d0c8c64d1
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.1.1-py3-none-any.whl#sha256=b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186
@@ -42,7 +42,7 @@ jsonpointer @ https://agent-int-packages.datadoghq.com/external/jsonpointer/json
 keystoneauth1 @ https://agent-int-packages.datadoghq.com/external/keystoneauth1/keystoneauth1-5.8.0-py3-none-any.whl#sha256=e69dff80c509ab64d4de4494658d914e81f26af720828dc584ceee74ecd666d9
 kubernetes @ https://agent-int-packages.datadoghq.com/external/kubernetes/kubernetes-30.1.0-py2.py3-none-any.whl#sha256=e212e8b7579031dd2e512168b617373bc1e03888d41ac4e04039240a292d478d
 ldap3 @ https://agent-int-packages.datadoghq.com/external/ldap3/ldap3-2.9.1-py2.py3-none-any.whl#sha256=5869596fc4948797020d3f03b7939da938778a0f9e2009f7a072ccf92b8e8d70
-lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-4.9.4-cp312-cp312-win_amd64.whl#sha256=f1faee2a831fe249e1bae9cbc68d3cd8a30f7e37851deee4d7962b17c410dd56
+lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-5.1.1-cp312-cp312-win_amd64.whl#sha256=0e46181d15fae102c53621bed9356b7a599a1e837b978c934a350dd00842b1d9
 lz4 @ https://agent-int-packages.datadoghq.com/external/lz4/lz4-4.3.3-cp312-cp312-win_amd64.whl#sha256=5d35533bf2cee56f38ced91f766cd0038b6abf46f438a80d50c52750088be93f
 mmh3 @ https://agent-int-packages.datadoghq.com/external/mmh3/mmh3-4.1.0-cp312-cp312-win_amd64.whl#sha256=bebc3ecb6ba18292e3d40c8712482b4477abd6981c2ebf0e60869bd90f8ac3a9
 msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.31.0-py3-none-any.whl#sha256=96bc37cff82ebe4b160d5fc0f1196f6ca8b50e274ecd0ec5bf69c438514086e7
