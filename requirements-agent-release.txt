@@ -127,7 +127,7 @@ datadog-openldap==2.0.0
 datadog-openmetrics==5.0.0
 datadog-openstack-controller==7.0.0
 datadog-openstack==3.0.0
-datadog-oracle==5.2.0
+datadog-oracle==6.0.0
 datadog-ossec-security==1.0.0
 datadog-palo-alto-panorama==1.0.0
 datadog-pan-firewall==1.2.0
