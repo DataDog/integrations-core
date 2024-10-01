@@ -631,6 +631,14 @@ FIXTURE_LIST = [
     # 4efe80304d50330f5ed0f79252ef0a84 - Api.get_apps
     '_api_mo_uni_tn_DataDog_json_rsp_subtree_include_stats_no_scoped',
     # c8e9a0dbceac67fb1149684f7fc7772c - Api.get_tenant_stats
+    '_api_node_class_topology_pod_1_node_102_l1PhysIf_json_rsp_subtree_children_rsp_subtree_include_stats_rsp_subtree_class_ethpmPhysIf_eqptEgrTotal5min_eqptIngrTotal5min_eqptEgrDropPkts5min_eqptEgrBytes5min_eqptIngrBytes5min',
+    # fde05c4b654d2d8129c772cd5a20cbce - Api.get_eth_list_and_stats
+    '_api_node_class_topology_pod_1_node_202_l1PhysIf_json_rsp_subtree_children_rsp_subtree_include_stats_rsp_subtree_class_ethpmPhysIf_eqptEgrTotal5min_eqptIngrTotal5min_eqptEgrDropPkts5min_eqptEgrBytes5min_eqptIngrBytes5min',
+    # 6b888a32a5c8fb47d50b8bc94f89642d - Api.get_eth_list_and_stats
+    '_api_node_class_topology_pod_1_node_201_l1PhysIf_json_rsp_subtree_children_rsp_subtree_include_stats_rsp_subtree_class_ethpmPhysIf_eqptEgrTotal5min_eqptIngrTotal5min_eqptEgrDropPkts5min_eqptEgrBytes5min_eqptIngrBytes5min',
+    # 9ec9c2e1bcd513274516713bc3f68724 - Api.get_eth_list_and_stats
+    '_api_node_class_topology_pod_1_node_101_l1PhysIf_json_rsp_subtree_children_rsp_subtree_include_stats_rsp_subtree_class_ethpmPhysIf_eqptEgrTotal5min_eqptIngrTotal5min_eqptEgrDropPkts5min_eqptEgrBytes5min_eqptIngrBytes5min',
+    # 9bd6720132f1eef5ae8ec7d6438d9c6b - Api.get_eth_list_and_stats
 ]
 
 # The map will contain the md5 hash to the fixture
