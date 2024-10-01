@@ -40,7 +40,7 @@ datadog-cockroachdb==4.0.0
 datadog-confluent-platform==2.0.0
 datadog-consul==3.0.0
 datadog-coredns==4.0.0; sys_platform == 'linux2'
-datadog-couch==6.2.1
+datadog-couch==7.0.0
 datadog-couchbase==3.2.1
 datadog-crio==2.6.1
 datadog-datadog-cluster-agent==3.2.0
