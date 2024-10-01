@@ -101,7 +101,7 @@ datadog-kube-metrics-server==4.0.0
 datadog-kube-proxy==7.0.0
 datadog-kube-scheduler==5.0.0
 datadog-kubelet==8.0.0
-datadog-kubernetes-cluster-autoscaler==1.0.1
+datadog-kubernetes-cluster-autoscaler==2.0.0
 datadog-kubernetes-state==8.1.1
 datadog-kyototycoon==2.5.1
 datadog-kyverno==1.0.2
