@@ -53,7 +53,7 @@
                     {
                         "id": 433305625243124,
                         "definition": {
-                            "title": "Security Logs Over Time",
+                            "title": "Security Logs over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,

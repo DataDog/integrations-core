@@ -453,7 +453,7 @@
         {
             "id": 8596788814251738,
             "definition": {
-                "title": "Total Application Control Logs",
+                "title": "Application Control Logs over Time",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -564,7 +564,7 @@
         {
             "id": 2993723138362990,
             "definition": {
-                "title": "Total Traffic Logs",
+                "title": "Traffic Logs over Time",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -674,7 +674,7 @@
         {
             "id": 4316709735215242,
             "definition": {
-                "title": "Total Security Logs",
+                "title": "Security Logs over Time",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
@@ -1425,7 +1425,7 @@
                     {
                         "id": 7958987691224374,
                         "definition": {
-                            "title": "Audit Events Over Time",
+                            "title": "Audit Events over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1685,7 +1685,7 @@
                     {
                         "id": 6156523113227100,
                         "definition": {
-                            "title": "Log Details",
+                            "title": "Audit Log Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
