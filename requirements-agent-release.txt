@@ -178,7 +178,7 @@ datadog-teradata==3.0.0; sys_platform != 'darwin'
 datadog-tibco-ems==2.0.0
 datadog-tls==3.0.0
 datadog-tokumx==3.2.0
-datadog-tomcat==2.0.0
+datadog-tomcat==3.0.0
 datadog-torchserve==2.2.2
 datadog-traefik-mesh==1.0.1
 datadog-traffic-server==2.2.1
