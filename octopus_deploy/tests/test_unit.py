@@ -223,7 +223,7 @@ def test_task_metrics(get_current_datetime, dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/tasks/project=Projects-1/fromCompletedDate=2024-09-23 '
+                    '/api/Spaces-1/tasks/project=Projects-1/fromCompletedDate=2024-09-23'
                     '14:45:58.888492+00:00': MockResponse(status_code=404)
                 }
             },

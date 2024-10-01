@@ -112,7 +112,7 @@ def mock_http_get(request, monkeypatch, mock_http_call):
             param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
             request_path = f'{url}/{param_string}'
 
-        request_path = request_path.replace(" ")
+        request_path = request_path.replace(" ", "")
         if http_error and request_path in http_error:
             return http_error[request_path]
 
