@@ -103,7 +103,7 @@ datadog-kube-scheduler==5.0.0
 datadog-kubelet==8.0.0
 datadog-kubernetes-cluster-autoscaler==2.0.0
 datadog-kubernetes-state==9.0.0
-datadog-kyototycoon==2.5.1
+datadog-kyototycoon==3.0.0
 datadog-kyverno==1.0.2
 datadog-lighttpd==3.5.1
 datadog-linkerd==4.2.2
