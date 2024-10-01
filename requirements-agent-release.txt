@@ -140,7 +140,7 @@ datadog-postgres==21.0.0
 datadog-powerdns-recursor==3.0.0
 datadog-presto==3.0.0
 datadog-process==4.0.0
-datadog-prometheus==3.6.0
+datadog-prometheus==4.0.0
 datadog-proxysql==5.1.1
 datadog-pulsar==2.2.2
 datadog-rabbitmq==5.3.2
