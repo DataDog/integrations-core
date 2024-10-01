@@ -29,15 +29,15 @@ facets:
   - facetType: list
     groups:
       - plivo
-    name: messaging.conversation_id
-    path: messaging.conversation_id
+    name: plivo.messaging.conversation_id
+    path: plivo.messaging.conversation_id
     source: log
     type: string
   - facetType: list
     groups:
       - plivo
-    name: messaging.message_id
-    path: messaging.message_id
+    name: plivo.messaging.message_id
+    path: plivo.messaging.message_id
     source: log
     type: string
   - facetType: range
@@ -139,12 +139,12 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `message_uuid` to `messaging.message_id`
+      name: Map `message_uuid` to `plivo.messaging.message_id`
       enabled: true
       sources:
         - message_uuid
       sourceType: attribute
-      target: messaging.message_id
+      target: plivo.messaging.message_id
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
@@ -215,12 +215,13 @@ pipeline:
         query: "service:whatsapp"
       processors:
         - type: attribute-remapper
-          name: Map `conversation_id` to `messaging.conversation_id`
+          name: Map `conversation_id` to `plivo.messaging.conversation_id`
           enabled: true
           sources:
             - conversation_id
           sourceType: attribute
-          target: messaging.conversation_id
+          target: plivo.messaging.conversation_id
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+

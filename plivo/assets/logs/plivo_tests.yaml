@@ -16,7 +16,7 @@ tests:
         "carrier_fees_rate" : "0.00000",
         "from_number" : "18763009800",
         "conversation_id" : "",
-        "to_number" : "918540877900",
+        "to_number" : "910000000000",
         "error_message" : "",
         "dlt_template_category" : "",
         "dlt_template_id" : "",
@@ -57,8 +57,6 @@ tests:
         message_time: "2024-09-18 11:16:39.845581+05:30"
         message_type: "sms"
         message_updated_time: "2024-09-18 11:16:42.500341+05:30"
-        messaging:
-          message_id: "e8fccb36-6051-4c12-8ff5-493309woxt2d4"
         mnc: "005"
         network:
           client:
@@ -71,11 +69,13 @@ tests:
           error:
             message: ""
             type: "000"
+          messaging:
+            message_id: "e8fccb36-6051-4c12-8ff5-493309woxt2d4"
         replaced_sender: "18763009800"
         resource_uri: "/v1/Account/MOWTXTOIZONQSONGQONS/Message/e8fccb36-6051-4c12-8ff5-493309woxt2d4/"
         status: "info"
         timestamp: 1726638399845
-        to_number: "918540877900"
+        to_number: "910000000000"
         total_rate: "0.08000"
         units: 1
       message: |-
@@ -94,7 +94,7 @@ tests:
           "carrier_fees_rate" : "0.00000",
           "from_number" : "18763009800",
           "conversation_id" : "",
-          "to_number" : "918540877900",
+          "to_number" : "910000000000",
           "error_message" : "",
           "dlt_template_category" : "",
           "dlt_template_id" : "",
@@ -133,7 +133,7 @@ tests:
         "carrier_fees_rate" : "0.01000",
         "from_number" : "18763009800",
         "conversation_id" : "",
-        "to_number" : "918540877900",
+        "to_number" : "910000000000",
         "error_message" : "",
         "error_code": null,
         "dlt_template_category" : "",
@@ -173,8 +173,6 @@ tests:
         message_time: "2024-09-16 23:38:37+05:30"
         message_type: "mms"
         message_updated_time: ""
-        messaging:
-          message_id: "13d7cef0-5521-479e-b2fe-22dd93341708"
         mnc: "650"
         network:
           client:
@@ -186,11 +184,13 @@ tests:
           total_amount: "0.02800"
           error:
             message: ""
+          messaging:
+            message_id: "13d7cef0-5521-479e-b2fe-22dd93341708"
         replaced_sender: "18763009800"
         resource_uri: "/v1/Account/MOWTXTOIZONQSONGQONS/Message/13d7cef0-5521-479e-b2fe-22dd93341708/"
         status: "info"
         tendlc_registration_status: "not_applicable"
-        to_number: "918540877900"
+        to_number: "910000000000"
         total_rate: "0.02700"
         units: 1
       message: |-
@@ -209,7 +209,7 @@ tests:
           "carrier_fees_rate" : "0.01000",
           "from_number" : "18763009800",
           "conversation_id" : "",
-          "to_number" : "918540877900",
+          "to_number" : "910000000000",
           "error_message" : "",
           "dlt_template_category" : "",
           "dlt_template_id" : "",
@@ -247,7 +247,7 @@ tests:
         "carrier_fees_rate" : "",
         "from_number" : "18763009800",
         "conversation_id" : "db344585-2890-38g8-rmu5-cc5f03187127",
-        "to_number" : "918540877900",
+        "to_number" : "910000000000",
         "error_message" : "",
         "dlt_template_category" : "",
         "dlt_template_id" : "",
@@ -285,9 +285,6 @@ tests:
         message_time: "2024-09-18 20:53:51.648519+05:30"
         message_type: "whatsapp"
         message_updated_time: ""
-        messaging:
-          conversation_id: "db344585-2890-38g8-rmu5-cc5f03187127"
-          message_id: "db344858-6436-45b9-9f42-cc5f03fa2do2"
         mnc: "098"
         network:
           client:
@@ -298,11 +295,14 @@ tests:
           error:
             message: ""
             type: "000"
+          messaging:
+            conversation_id: "db344585-2890-38g8-rmu5-cc5f03187127"
+            message_id: "db344858-6436-45b9-9f42-cc5f03fa2do2"
         replaced_sender: "18763009800"
         resource_uri: "/v1/Account/MOWTXTOIZONQSONGQONS/Message/db344858-6436-45b9-9f42-cc5f03fa2do2/"
         status: "info"
         timestamp: 1726673031648
-        to_number: "918540877900"
+        to_number: "910000000000"
         total_rate: "00.00000"
         units: 1
       message: |-
@@ -321,7 +321,7 @@ tests:
           "carrier_fees_rate" : "",
           "from_number" : "18763009800",
           "conversation_id" : "db344585-2890-38g8-rmu5-cc5f03187127",
-          "to_number" : "918540877900",
+          "to_number" : "910000000000",
           "error_message" : "",
           "dlt_template_category" : "",
           "dlt_template_id" : "",
