@@ -27,17 +27,10 @@ datadog-ceph==3.0.0; sys_platform != 'win32'
 datadog-cert-manager==5.0.0
 datadog-checkpoint-quantum-firewall==1.0.0
 datadog-checks-base==37.0.0
-<<<<<<< HEAD
-datadog-checks-dependency-provider==1.4.0
-datadog-checks-downloader==4.7.0
-datadog-cilium==3.6.0
-datadog-cisco-aci==2.12.0
-=======
 datadog-checks-dependency-provider==2.0.0
 datadog-checks-downloader==5.0.0
 datadog-cilium==4.0.0
 datadog-cisco-aci==3.0.0
->>>>>>> 28237f7b86 ([Release] Release integrations with base check bump `v7.58` (#18742))
 datadog-cisco-secure-firewall==1.0.0
 datadog-citrix-hypervisor==4.0.0
 datadog-clickhouse==4.0.0
