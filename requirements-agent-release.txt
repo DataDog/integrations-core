@@ -7,7 +7,7 @@ datadog-activemq==4.0.0
 datadog-aerospike==3.0.0; sys_platform == 'linux2'
 datadog-airflow==6.0.0
 datadog-amazon-msk==5.0.0
-datadog-ambari==4.2.1; sys_platform != 'win32'
+datadog-ambari==5.0.0; sys_platform != 'win32'
 datadog-apache==4.5.1
 datadog-arangodb==2.2.2
 datadog-argo-rollouts==1.0.2
