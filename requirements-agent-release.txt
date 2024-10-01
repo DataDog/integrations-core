@@ -184,7 +184,7 @@ datadog-traefik-mesh==2.0.0
 datadog-traffic-server==3.0.0
 datadog-twemproxy==2.0.0
 datadog-twistlock==4.0.0
-datadog-varnish==2.1.0
+datadog-varnish==3.0.0
 datadog-vault==4.2.1
 datadog-vertica==4.6.0
 datadog-vllm==1.0.0
