@@ -24,7 +24,6 @@ from datadog_checks.sqlserver.deadlocks import (
 from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
 
 from .common import CHECK_NAME
-from .utils import not_windows_ado
 
 try:
     import pyodbc
@@ -32,8 +31,9 @@ except ImportError:
     pyodbc = None
 
 
-@pytest.fixture
-def dbm_instance(instance_docker):
+@pytest.fixture(scope="module")
+def dbm_instance(instance_session_default):
+    instance_docker = instance_session_default
     instance_docker['dbm'] = True
     # set a very small collection interval so the tests go fast
     instance_docker['query_activity'] = {
@@ -47,9 +47,18 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
-def run_check_and_return_deadlock_payloads(dd_run_check, check, aggregator):
+def _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator):
+    dbm_activity = _run_check_and_get_activity_samples(dd_run_check, check, aggregator)
+    return _get_deadlocks_payload(dbm_activity)
+
+
+def _run_check_and_get_activity_samples(dd_run_check, check, aggregator):
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    return dbm_activity
+
+
+def _get_deadlocks_payload(dbm_activity):
     matched = []
     for event in dbm_activity:
         if "sqlserver_deadlocks" in event:
@@ -57,13 +66,16 @@ def run_check_and_return_deadlock_payloads(dd_run_check, check, aggregator):
     return matched
 
 
-def _get_conn_for_user(instance_docker, user, timeout=1, _autocommit=False):
-    # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
-        instance_docker['driver'], instance_docker['host'], user, "Password12!"
+def _get_conn_for_user(instance_docker, user):
+    conn_str = (
+        f"DRIVER={instance_docker['driver']};"
+        f"Server={instance_docker['host']};"
+        "Database=master;"
+        f"UID={user};"
+        "PWD=Password12!;"
+        "TrustServerCertificate=yes;"
     )
-    conn = pyodbc.connect(conn_str, timeout=timeout, autocommit=_autocommit)
-    conn.timeout = timeout
+    conn = pyodbc.connect(conn_str, autocommit=False)
     return conn
 
 
@@ -99,56 +111,41 @@ def _run_second_deadlock_query(conn, event1, event2):
     return exception_text
 
 
-def _create_deadlock(bob_conn, fred_conn):
+@pytest.fixture(scope="module")
+def _create_deadlock(dbm_instance):
+    bob_conn = _get_conn_for_user(dbm_instance, 'bob')
+    fred_conn = _get_conn_for_user(dbm_instance, 'fred')
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
     event1 = Event()
     event2 = Event()
-
     futures_first_query = executor.submit(_run_first_deadlock_query, bob_conn, event1, event2)
     futures_second_query = executor.submit(_run_second_deadlock_query, fred_conn, event1, event2)
     exception_1_text = futures_first_query.result()
     exception_2_text = futures_second_query.result()
     executor.shutdown()
-    return "deadlock" in exception_1_text or "deadlock" in exception_2_text
+    bob_conn.close()
+    fred_conn.close()
+    if "deadlock" in exception_1_text or "deadlock" in exception_2_text:
+        return
+    raise Exception(
+        f"Couldn't create a deadlock | batch output 1: {exception_1_text} | batch output 2: {exception_2_text}"
+    )
 
 
-# TODO: remove @not_windows_ado when the functionality is supported for MSOLEDBSQL
-@not_windows_ado
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
-    sqlserver_check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-
-    deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check, aggregator)
-    assert not deadlock_payloads, "shouldn't have sent an empty payload"
-
-    created_deadlock = False
-    # Rarely instead of creating a deadlock one of the transactions time outs
-    for _ in range(0, 3):
-        bob_conn = _get_conn_for_user(dbm_instance, 'bob', 3)
-        fred_conn = _get_conn_for_user(dbm_instance, 'fred', 3)
-        created_deadlock = _create_deadlock(bob_conn, fred_conn)
-        bob_conn.close()
-        fred_conn.close()
-        if created_deadlock:
-            break
-    try:
-        assert created_deadlock, "Couldn't create a deadlock, exiting"
-    except AssertionError as e:
-        raise e
-
-    dbm_instance_no_dbm = deepcopy(dbm_instance)
-    dbm_instance_no_dbm['dbm'] = False
-    sqlserver_check_no_dbm = SQLServer(CHECK_NAME, init_config, [dbm_instance_no_dbm])
-    deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check_no_dbm, aggregator)
-    assert len(deadlock_payloads) == 0, "deadlock should be behind dbm"
+@pytest.mark.usefixtures('_create_deadlock')
+@pytest.mark.parametrize("convert_xml_to_str", [False, True])
+def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    check.deadlocks._convert_xml_to_str = convert_xml_to_str
 
     dbm_instance['dbm_enabled'] = True
-    deadlock_payloads = run_check_and_return_deadlock_payloads(dd_run_check, sqlserver_check, aggregator)
+    deadlock_payloads = _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator)
     try:
-        assert len(deadlock_payloads) == 1, "Should have collected one deadlock payload, but collected: {}.".format(
-            len(deadlock_payloads)
-        )
+        assert (
+            len(deadlock_payloads) == 1
+        ), f"Should have collected one deadlock payload, but collected: {len(deadlock_payloads)}"
     except AssertionError as e:
         raise e
     deadlocks = deadlock_payloads[0]['sqlserver_deadlocks']
@@ -172,6 +169,34 @@ def test_deadlocks(aggregator, dd_run_check, init_config, dbm_instance):
     except AssertionError as e:
         logging.error("deadlock payload: %s", str(deadlocks))
         raise e
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_no_empty_deadlocks_payloads(dd_run_check, init_config, dbm_instance, aggregator):
+    check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
+    with patch.object(
+        Deadlocks,
+        '_query_deadlocks',
+        return_value=[],
+    ):
+        assert not _run_check_and_get_deadlock_payloads(
+            dd_run_check, check, aggregator
+        ), "shouldn't have sent an empty payload"
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_deadlocks_behind_dbm(dd_run_check, init_config, dbm_instance):
+    dbm_instance_no_dbm = deepcopy(dbm_instance)
+    dbm_instance_no_dbm['dbm'] = False
+    check = SQLServer(CHECK_NAME, init_config, [dbm_instance_no_dbm])
+    xml = _load_test_deadlocks_xml("sqlserver_deadlock_event.xml")
+    with patch.object(
+        Deadlocks,
+        '_query_deadlocks',
+        return_value=[{DEADLOCK_TIMESTAMP_ALIAS: "2024-09-20T12:07:16.647000", DEADLOCK_XML_ALIAS: xml}],
+    ) as mocked_function:
+        dd_run_check(check)
+        mocked_function.assert_not_called()
 
 
 DEADLOCKS_PLAN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deadlocks")
@@ -319,10 +344,3 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         result_string = result_string.replace('\t', '').replace('\n', '')
         result_string = re.sub(r'\s{2,}', ' ', result_string)
         assert expected_xml_string == result_string
-
-
-def test__get_lookback_seconds(deadlocks_collection_instance):
-    deadlocks_obj = get_deadlock_obj(deadlocks_collection_instance)
-    deadlocks_obj._last_deadlock_timestamp = 100
-    lookback_seconds = deadlocks_obj._get_lookback_seconds()
-    assert isinstance(lookback_seconds, float), "Should return a float"
