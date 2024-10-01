@@ -41,7 +41,7 @@ datadog-confluent-platform==2.0.0
 datadog-consul==3.0.0
 datadog-coredns==4.0.0; sys_platform == 'linux2'
 datadog-couch==7.0.0
-datadog-couchbase==3.2.1
+datadog-couchbase==4.0.0
 datadog-crio==2.6.1
 datadog-datadog-cluster-agent==3.2.0
 datadog-dcgm==2.3.2
