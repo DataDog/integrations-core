@@ -258,6 +258,12 @@ class MongoDb(AgentCheck):
         if isinstance(self.deployment_type, ReplicaSetDeployment):
             tags.extend(self.deployment_type.replset_tags)
         return tags
+    
+    def _get_service_check_tags(self):
+        tags = deepcopy(self._config.service_check_tags)
+        if self._resolved_hostname:
+            tags.append(f"database_instance:{self._resolved_hostname}")
+        return tags
 
     def check(self, _):
         try:
