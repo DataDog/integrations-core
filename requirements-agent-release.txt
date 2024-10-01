@@ -93,7 +93,7 @@ datadog-journald==2.0.0
 datadog-kafka-consumer==5.0.0
 datadog-kafka==3.0.0
 datadog-karpenter==2.0.0
-datadog-kong==3.2.2
+datadog-kong==4.0.0
 datadog-kube-apiserver-metrics==4.3.1
 datadog-kube-controller-manager==5.1.1
 datadog-kube-dns==4.4.1
