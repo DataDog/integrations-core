@@ -55,7 +55,7 @@ init_config:
 
 instances:
   - use_openmetrics: true
-    send_histogram_buckets: false
+    send_histograms_buckets: false
     istio_mesh_endpoint: http://%%host%%:15020/stats/prometheus
     tag_by_endpoint: false
 ```
