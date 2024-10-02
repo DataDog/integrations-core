@@ -104,19 +104,19 @@ class Deadlocks(DBMAsyncJob):
 
     def _get_lookback_seconds(self):
         return min(-60, self._last_deadlock_timestamp - time())
-
+    
     def _query_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                self._log.debug("collecting sql server deadlocks")
+                query = get_deadlocks_query(self._convert_xml_to_str)
                 self._log.debug(
                     "Running query [%s] with max deadlocks %s and timestamp %s",
-                    get_deadlocks_query(),
+                    query,
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
                 try:
-                    cursor.execute(get_deadlocks_query(), (self._max_deadlocks, self._get_lookback_seconds()))
+                    cursor.execute(query, (self._max_deadlocks, self._get_lookback_seconds()))
                 except Exception as e:
                     if "Data column of Unknown ADO type" in str(e):
                         raise Exception(f"{str(e)} | cursor.description: {cursor.description}")
