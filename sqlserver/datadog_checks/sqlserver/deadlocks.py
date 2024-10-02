@@ -103,7 +103,7 @@ class Deadlocks(DBMAsyncJob):
 
     def _get_connector(self):
         return self._check.connection.connector
-    
+
     def _query_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
