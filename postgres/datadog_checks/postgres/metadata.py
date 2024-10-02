@@ -446,6 +446,13 @@ class PostgresMetadata(DBMAsyncJob):
         if len(table_info) <= limit:
             return table_info
 
+        self._log.debug(
+            "{table_count} tables found but max_tables is set to {max_tables}."
+            "{missing_count} tables will be missing from this collection".format(
+                table_count=len(table_info), max_tables=limit, missing_count=len(table_info)-limit
+            )
+        )
+
         if not self._config.relations:
             self._check.log.warning(
                 "Number of tables exceeds limit of %d set by max_tables but "
