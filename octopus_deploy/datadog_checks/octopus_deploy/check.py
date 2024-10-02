@@ -62,7 +62,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             completed_time_converted = datetime.fromisoformat(completed_time)
             start_time_converted = datetime.fromisoformat(start_time)
             duration = completed_time_converted - start_time_converted
-            duration_microseconds = duration.total_seconds()
+            duration_seconds = duration.total_seconds()
 
             if completed_time_converted > new_completed_time:
                 new_completed_time = completed_time_converted
@@ -77,7 +77,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             tags = [f'task_name:{task_name}', f'task_id:{task_id}', f'task_state:{state}']
 
             self.gauge(DEPLOY_COUNT_METRIC, 1, tags=self.base_tags + project_tags + tags)
-            self.gauge(DEPLOY_DURATION_METRIC, duration_microseconds, tags=self.base_tags + project_tags + tags)
+            self.gauge(DEPLOY_DURATION_METRIC, duration_seconds, tags=self.base_tags + project_tags + tags)
 
         new_completed_time = new_completed_time + timedelta(milliseconds=1)
         project.last_completed_time = new_completed_time
