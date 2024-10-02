@@ -315,8 +315,9 @@ class PostgresMetadata(DBMAsyncJob):
                                 "{tables}".format(
                                     schema=database["schemas"],
                                     database=dbname,
-                                    tables=[table["name"] for table in tables]
-                                ))
+                                    tables=[table["name"] for table in tables],
+                                )
+                            )
                             table_chunks = list(get_list_chunks(tables, chunk_size))
 
                             buffer_column_count = 0
@@ -449,7 +450,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._log.debug(
             "{table_count} tables found but max_tables is set to {max_tables}."
             "{missing_count} tables will be missing from this collection".format(
-                table_count=len(table_info), max_tables=limit, missing_count=len(table_info)-limit
+                table_count=len(table_info), max_tables=limit, missing_count=len(table_info) - limit
             )
         )
 
