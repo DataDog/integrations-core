@@ -310,6 +310,13 @@ class PostgresMetadata(DBMAsyncJob):
                                 continue
 
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
+                            self._log.debug(
+                                "Tables found for schema '{schema}' in database '{database}':"
+                                "{tables}".format(
+                                    schema=database["schemas"],
+                                    database=dbname,
+                                    tables=[table["name"] for table in tables]
+                                ))
                             table_chunks = list(get_list_chunks(tables, chunk_size))
 
                             buffer_column_count = 0
@@ -415,6 +422,8 @@ class PostgresMetadata(DBMAsyncJob):
         schemas = []
         for row in rows:
             schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
+
+        self._log.debug("Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows))
         return schemas
 
     def _get_table_info(self, cursor, dbname, schema_id):
