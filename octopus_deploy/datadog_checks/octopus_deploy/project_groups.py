@@ -16,5 +16,4 @@ class Project:
         self.id = project_json.get("Id")
         self.name = project_json.get("Name")
         self.project_group = project_group
-        self.last_task_id = None
         self.last_task_time = get_current_datetime()

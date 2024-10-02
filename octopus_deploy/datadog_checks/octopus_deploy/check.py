@@ -11,7 +11,13 @@ from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.models.types import copy_raw
 
 from .config_models import ConfigMixin
-from .constants import API_UP_METRIC, PROJECT_COUNT_METRIC, PROJECT_GROUP_COUNT_METRIC
+from .constants import (
+    API_UP_METRIC,
+    DEPLOY_COUNT_METRIC,
+    DEPLOY_DURATION_METRIC,
+    PROJECT_COUNT_METRIC,
+    PROJECT_GROUP_COUNT_METRIC,
+)
 from .error import handle_error
 from .project_groups import Project, ProjectGroup
 
@@ -51,8 +57,13 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             task_name = task.get("Name")
             state = task.get("State")
             completed_time = task.get("CompletedTime")
+            start_time = task.get("StartTime")
 
             completed_time_converted = datetime.fromisoformat(completed_time)
+            start_time_converted = datetime.fromisoformat(start_time)
+            duration = completed_time_converted - start_time_converted
+            duration_microseconds = duration.total_seconds()
+
             if completed_time_converted > new_completed_time:
                 new_completed_time = completed_time_converted
 
@@ -65,7 +76,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
             tags = [f'task_name:{task_name}', f'task_id:{task_id}', f'task_state:{state}']
 
-            self.gauge("task.count", 1, tags=self.base_tags + project_tags + tags)
+            self.gauge(DEPLOY_COUNT_METRIC, 1, tags=self.base_tags + project_tags + tags)
+            self.gauge(DEPLOY_DURATION_METRIC, duration_microseconds, tags=self.base_tags + project_tags + tags)
 
         new_completed_time = new_completed_time + timedelta(milliseconds=1)
         project.last_completed_time = new_completed_time
