@@ -41,11 +41,7 @@ class Deadlocks(DBMAsyncJob):
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
         self._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
         self.collection_interval = config.deadlocks_config.get("collection_interval", DEFAULT_COLLECTION_INTERVAL)
-        self._convert_xml_to_str = False
-        # MSOLEDB drivers don't properly support SQL Server XML data type,
-        # so we need to convert it to string before returning it to the Agent.
-        if self._check.connection is not None and self._check.connection.connector != "odbc":
-            self._convert_xml_to_str = True
+        self._force_convert_xml_to_str = False
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
@@ -105,10 +101,16 @@ class Deadlocks(DBMAsyncJob):
     def _get_lookback_seconds(self):
         return min(-60, self._last_deadlock_timestamp - time())
 
+    def _get_connector(self):
+        return self._check.connection.connector
+    
     def _query_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                query = get_deadlocks_query(self._convert_xml_to_str)
+                convert_xml_to_str = False
+                if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
+                    convert_xml_to_str = True
+                query = get_deadlocks_query(convert_xml_to_str)
                 self._log.debug(
                     "Running query [%s] with max deadlocks %s and timestamp %s",
                     query,

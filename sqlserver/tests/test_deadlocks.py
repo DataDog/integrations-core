@@ -138,7 +138,7 @@ def _create_deadlock(dd_environment, dbm_instance):
 @pytest.mark.parametrize("convert_xml_to_str", [False, True])
 def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    check.deadlocks._convert_xml_to_str = convert_xml_to_str
+    check.deadlocks._force_convert_xml_to_str = convert_xml_to_str
 
     dbm_instance['dbm_enabled'] = True
     deadlock_payloads = _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator)
@@ -169,8 +169,8 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str):
     except AssertionError as e:
         logging.error("deadlock payload: %s", str(deadlocks))
         raise e
-
-
+    
+    
 @pytest.mark.usefixtures('dd_environment')
 def test_no_empty_deadlocks_payloads(dd_run_check, init_config, dbm_instance, aggregator):
     check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
