@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 1.8.0 / 2024-09-05
+
+***Added***:
+
+* Change the Glusterfs check to use standard subprocess module ([#18464](https://github.com/DataDog/integrations-core/pull/18464))
+
 ## 1.7.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

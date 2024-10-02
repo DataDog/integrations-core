@@ -5,6 +5,7 @@
 import json
 import os
 
+import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -34,12 +35,9 @@ def _assert_mongodb_instance_event(
     shards,
     cluster_type,
     cluster_name,
+    modules,
 ):
     mongodb_instance_event = _get_mongodb_instance_event(aggregator)
-    if not dbm:
-        assert mongodb_instance_event is None
-        return
-
     assert mongodb_instance_event is not None
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
@@ -54,6 +52,7 @@ def _assert_mongodb_instance_event(
         "shards": shards,
         "cluster_type": cluster_type,
         "cluster_name": cluster_name,
+        "modules": modules,
     }
     assert mongodb_instance_event['metadata'] == {
         'dbm': dbm,
@@ -67,6 +66,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     instance_integration_cluster['dbm'] = dbm
     instance_integration_cluster['operation_samples'] = {'enabled': False}
     instance_integration_cluster['slow_operations'] = {'enabled': False}
+    instance_integration_cluster['schemas'] = {'enabled': False}
     mongos_check = check(instance_integration_cluster)
     mongos_check._last_states_by_server = {0: 1, 1: 2, 2: 2}
 
@@ -87,6 +87,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'jumbo',
             'sessions',
             'hostinfo',
+            'sharded-data-distribution',
         ],
         ['sharding_cluster_role:mongos', 'clustername:my_cluster', 'hosting_type:self-hosted'],
     )
@@ -134,6 +135,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
         ],
         cluster_type='sharded_cluster',
         cluster_name='my_cluster',
+        modules=['enterprise'],
     )
 
 
@@ -235,6 +237,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -296,6 +299,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -351,6 +355,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -450,6 +455,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -510,6 +516,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -525,6 +532,8 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -611,6 +620,7 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         shards=None,
         cluster_type='replica_set',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -627,6 +637,8 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -716,6 +728,7 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         shards=None,
         cluster_type='replica_set',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -784,6 +797,7 @@ def test_integration_replicaset_secondary(
         shards=None,
         cluster_type='replica_set',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -838,6 +852,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         shards=None,
         cluster_type='replica_set',
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -888,6 +903,7 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
         shards=None,
         cluster_type=None,
         cluster_name=None,
+        modules=['enterprise'],
     )
 
 
@@ -1078,6 +1094,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         shards=None,
         cluster_type='sharded_cluster',
         cluster_name='my_cluster',
+        modules=['enterprise'],
     )
     aggregator.reset()
 
@@ -1103,6 +1120,8 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         'replset_state:primary',
         'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
         'hosting_type:self-hosted',
+        'replset_nodetype:ELECTABLE',
+        'replset_workloadtype:OPERATIONAL',
     ]
     metrics_categories = [
         'count-dbs',
@@ -1133,3 +1152,23 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         ],
         check_submission_type=True,
     )
+
+
+def test_integration_localhost_process_stats(instance_integration, aggregator, check, dd_run_check):
+    mongo_check = check(instance_integration)
+
+    with mock_pymongo("standalone"):
+        with mock.patch(
+            'datadog_checks.mongo.collectors.process_stats.ProcessStatsCollector.is_localhost',
+            new_callable=mock.PropertyMock,
+        ) as mock_is_localhost:
+            mock_is_localhost.return_value = True
+            with mock.patch('psutil.Process') as mock_process:
+                mock_process.return_value.name.return_value = 'mongos'
+                mock_process.return_value.cpu_percent.return_value = 20.0
+                dd_run_check(mongo_check)
+
+    metrics_categories = [
+        'process-stats',
+    ]
+    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])

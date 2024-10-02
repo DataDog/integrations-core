@@ -400,6 +400,62 @@
         ]
     },
     {
+        "name": "mongodb.metrics.query.plancache.classic.hitsps",
+        "type": 1,
+        "value": 13041302.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.plancache.classic.missesps",
+        "type": 1,
+        "value": 1023350.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.plancache.sbe.hitsps",
+        "type": 1,
+        "value": 444.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.plancache.sbe.missesps",
+        "type": 1,
+        "value": 878.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.sort.spilltodiskps",
+        "type": 1,
+        "value": 18.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.sort.totalbytessortedps",
+        "type": 1,
+        "value": 4808797953.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.sort.totalkeyssortedps",
+        "type": 1,
+        "value": 14394599.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.metrics.queryexecutor.scannedps",
         "type": 1,
         "value": 46.0,

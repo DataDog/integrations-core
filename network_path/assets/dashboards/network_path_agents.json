@@ -1,0 +1,2082 @@
+{
+    "title": "Network Path Agents",
+    "description": "This dashboard provides a high-level overview to help you monitor and troubleshoot the health of your Network Path Agents.",
+    "widgets": [
+        {
+            "id": 2663583616845740,
+            "definition": {
+                "title": "Datadog Network Path Agents",
+                "background_color": "white",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3628964508547190,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard provides a high-level overview to help you monitor and troubleshoot the health of your Network Path Agents.",
+                            "background_color": "white",
+                            "font_size": "18",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 7775029902313268,
+            "definition": {
+                "title": "Agents Overview",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8355921280499490,
+                        "definition": {
+                            "title": "Agents running Network Path ",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "count_nonzero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1716638641405192,
+                        "definition": {
+                            "title": "Host CPU (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU",
+                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:system.cpu.user{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3268004105003002,
+                        "definition": {
+                            "title": "Host Memory (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Used",
+                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                        },
+                                        {
+                                            "alias": "Total",
+                                            "formula": "top(query2, 50, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:system.mem.used{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:system.mem.total{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7022637295997678,
+                        "definition": {
+                            "title": "Agents Running Network Path",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "avg:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$datacenter,$cluster_name} by {agent_host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query5"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3765410346567274,
+                        "definition": {
+                            "title": "Running versions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.agent.running{$AGENT_HOSTNAME,$CUSTOM_TAG,$datacenter,$cluster_name} by {version}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5753872191409390,
+                        "definition": {
+                            "title": "Agent Restarts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.agent.started{$AGENT_HOSTNAME,$CUSTOM_TAG,$datacenter,$cluster_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4224328920172448,
+                        "definition": {
+                            "title": "Processes CPU (per host)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query"
+                                        },
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "limit": 50,
+                                            "name": "query",
+                                            "data_source": "process",
+                                            "query_filter": "service:datadog-agent container_name:agent $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                            "metric": "process.stat.cpu.total_pct",
+                                            "is_normalized_cpu": true
+                                        },
+                                        {
+                                            "limit": 50,
+                                            "name": "query1",
+                                            "data_source": "process",
+                                            "query_filter": "service:datadog-agent container_name:process-agent $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                            "metric": "process.stat.cpu.total_pct",
+                                            "is_normalized_cpu": true
+                                        },
+                                        {
+                                            "limit": 50,
+                                            "name": "query2",
+                                            "data_source": "process",
+                                            "query_filter": "service:datadog-agent container_name:system-probe $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                            "metric": "process.stat.cpu.total_pct",
+                                            "is_normalized_cpu": true
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 4,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8069593951119044,
+                        "definition": {
+                            "title": "Processes Mem (per host)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query"
+                                        },
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "limit": 50,
+                                            "name": "query",
+                                            "data_source": "process",
+                                            "query_filter": "service:datadog-agent container_name:agent $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                            "metric": "process.stat.memory.rss",
+                                            "is_normalized_cpu": true
+                                        },
+                                        {
+                                            "limit": 50,
+                                            "name": "query1",
+                                            "data_source": "process",
+                                            "query_filter": "service:datadog-agent container_name:process-agent $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                            "metric": "process.stat.memory.rss",
+                                            "is_normalized_cpu": true
+                                        },
+                                        {
+                                            "limit": 50,
+                                            "name": "query2",
+                                            "data_source": "process",
+                                            "query_filter": "service:datadog-agent container_name:system-probe $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                            "metric": "process.stat.memory.rss",
+                                            "is_normalized_cpu": true
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 4,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 7
+            }
+        },
+        {
+            "id": 3675319524652854,
+            "definition": {
+                "title": "Network Path Integration",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2839230241220094,
+                        "definition": {
+                            "title": "Check Duration (avg/max)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "avg",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "max",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.check_duration{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$datacenter,$cluster_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "max:datadog.network_path.check_duration{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$datacenter,$cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 546095207376682,
+                        "definition": {
+                            "title": "Check Interval (avg/max)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "avg",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "max",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.check_interval{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$datacenter,$cluster_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "max:datadog.network_path.check_interval{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$datacenter,$cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1984602362442130,
+                        "definition": {
+                            "title": "Check Duration Distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "distribution",
+                            "xaxis": {
+                                "include_zero": true,
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            },
+                            "yaxis": {
+                                "include_zero": true,
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.network_path.check_duration{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$datacenter,$cluster_name} by {destination_hostname,destination_port}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7622529288949374,
+                        "definition": {
+                            "title": "Check Interval Distribution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "distribution",
+                            "xaxis": {
+                                "include_zero": true,
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            },
+                            "yaxis": {
+                                "include_zero": true,
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.network_path.check_interval{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$datacenter,$cluster_name} by {destination_hostname,destination_port}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 7118409270973802,
+            "definition": {
+                "title": "Network Path Collector (Dynamic Paths)",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4608493819338854,
+                        "definition": {
+                            "title": "Schedule Duration (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.collector.schedule_duration{$CUSTOM_TAG,$AGENT_HOSTNAME,$datacenter,$cluster_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 64279523255222,
+                        "definition": {
+                            "title": "Collector Flush Duration (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.collector.flush_duration{$CUSTOM_TAG,$AGENT_HOSTNAME,$datacenter,$cluster_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8457451440583306,
+                        "definition": {
+                            "title": "Collector Store Size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.collector.pathtest_store_size{$CUSTOM_TAG,$AGENT_HOSTNAME,$datacenter,$cluster_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7479358210453102,
+                        "definition": {
+                            "title": "Collector Workers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.collector.workers{$CUSTOM_TAG,$AGENT_HOSTNAME,$datacenter,$cluster_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 7546932790062108,
+            "definition": {
+                "title": "Agents Processes",
+                "background_color": "purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7634267963038258,
+                        "definition": {
+                            "title": "System Probe CPU Seconds (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.system_probe.process_cpu_seconds_total{$AGENT_HOSTNAME,$CUSTOM_TAG}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4432932012962164,
+                        "definition": {
+                            "title": "System Probe RSS mem (bytes)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.system_probe.process_resident_memory_bytes{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5066164287736812,
+                        "definition": {
+                            "title": "Process Agent CPU Seconds (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.process_agent.process_cpu_seconds_total{$AGENT_HOSTNAME,$CUSTOM_TAG}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6804513681404054,
+                        "definition": {
+                            "title": "Process Agent RSS mem (bytes)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.process_agent.process_resident_memory_bytes{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2940073813599580,
+                        "definition": {
+                            "title": "Datadog Agent CPU Seconds (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.agent.process_cpu_seconds_total{$AGENT_HOSTNAME,$CUSTOM_TAG}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5303035866945740,
+                        "definition": {
+                            "title": "Datadog Agent RSS mem (bytes)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 50, 'mean', 'desc')"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.agent.process_resident_memory_bytes{$AGENT_HOSTNAME,$CUSTOM_TAG}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8219626935746052,
+                        "definition": {
+                            "title": "System-probe cpu profiler",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "request_type": "flame_graph",
+                                    "query": {
+                                        "data_source": "profiling_aggregated_profile",
+                                        "family": "go",
+                                        "limit": 100,
+                                        "query_string": "service:system-probe $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                        "profile_scaling_type_id": "complete-profile",
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "function",
+                                                "value": "\"(*Runner).RunTraceroute\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "4e894765-0803-451c-b258-295cb2b03816"
+                                    }
+                                }
+                            ],
+                            "type": "flame_graph"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 132910365665270,
+                        "definition": {
+                            "title": "System-probe memory profiler",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "request_type": "flame_graph",
+                                    "query": {
+                                        "data_source": "profiling_aggregated_profile",
+                                        "family": "go",
+                                        "profile_type_id": "alloc-size",
+                                        "limit": 100,
+                                        "query_string": "service:system-probe $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                        "profile_scaling_type_id": "complete-profile",
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "function",
+                                                "value": "\"(*Runner).RunTraceroute\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "b214d5c0-5d54-494a-8133-718f4f3f90fe"
+                                    }
+                                }
+                            ],
+                            "type": "flame_graph"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1057831897303186,
+                        "definition": {
+                            "title": "Process-agent cpu profiler",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "request_type": "flame_graph",
+                                    "query": {
+                                        "data_source": "profiling_aggregated_profile",
+                                        "family": "go",
+                                        "limit": 100,
+                                        "query_string": "service:process-agent $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                        "profile_scaling_type_id": "complete-profile",
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "package",
+                                                "value": "\"github.com/DataDog/datadog-agent/comp/networkpath/npcollector/npcollectorimpl\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "5c63c12d-5f88-4ae8-a6e7-61a564ec3aa0"
+                                    }
+                                }
+                            ],
+                            "type": "flame_graph"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6441400769905228,
+                        "definition": {
+                            "title": "Process-Agent memory profiler",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "request_type": "flame_graph",
+                                    "query": {
+                                        "data_source": "profiling_aggregated_profile",
+                                        "family": "go",
+                                        "limit": 100,
+                                        "query_string": "service:process-agent $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                                        "profile_scaling_type_id": "complete-profile",
+                                        "filter_operations": [
+                                            {
+                                                "operation": "focus_on",
+                                                "attribute": "package",
+                                                "value": "\"github.com/DataDog/datadog-agent/comp/networkpath/npcollector/npcollectorimpl\""
+                                            }
+                                        ],
+                                        "favorite_query_id": "961932f0-32ae-4833-802f-b180db70dd67"
+                                    }
+                                }
+                            ],
+                            "type": "flame_graph"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 10,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 20,
+                "width": 12,
+                "height": 14
+            }
+        },
+        {
+            "id": 335702625853724,
+            "definition": {
+                "title": "Process-Agent memory profiler",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "request_type": "flame_graph",
+                        "query": {
+                            "data_source": "profiling_aggregated_profile",
+                            "family": "go",
+                            "limit": 100,
+                            "query_string": "service:datadog-agent $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                            "profile_scaling_type_id": "complete-profile",
+                            "filter_operations": [
+                                {
+                                    "operation": "focus_on",
+                                    "attribute": "package",
+                                    "value": "\"github.com/DataDog/datadog-agent/pkg/collector/corechecks/networkpath\""
+                                }
+                            ],
+                            "favorite_query_id": "76cfb040-7661-4452-82b7-718c15b55e63"
+                        }
+                    }
+                ],
+                "type": "flame_graph"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 7652287743547122,
+            "definition": {
+                "title": "Process-agent cpu profiler",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "request_type": "flame_graph",
+                        "query": {
+                            "data_source": "profiling_aggregated_profile",
+                            "family": "go",
+                            "limit": 100,
+                            "query_string": "service:datadog-agent $AGENT_HOSTNAME $CUSTOM_TAG $datacenter $cluster_name",
+                            "profile_scaling_type_id": "complete-profile",
+                            "filter_operations": [
+                                {
+                                    "operation": "focus_on",
+                                    "attribute": "package",
+                                    "value": "\"github.com/DataDog/datadog-agent/pkg/collector/corechecks/networkpath\""
+                                }
+                            ],
+                            "favorite_query_id": "8771ff90-26e9-4114-b908-1c8124389bf9"
+                        }
+                    }
+                ],
+                "type": "flame_graph"
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5216143406272662,
+            "definition": {
+                "title": "Paths",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1562443714832998,
+                        "definition": {
+                            "title": "Monitored Paths",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.monitored{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1473820172877394,
+                        "definition": {
+                            "title": "Reachable Paths",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.reachable{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2259034026965220,
+                        "definition": {
+                            "title": "Monitored Paths",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4937240889340036,
+                        "definition": {
+                            "title": "Unreachable Paths",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.unreachable{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "orange",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6092656383178658,
+                        "definition": {
+                            "title": "Monitored Paths by datacenter",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name} by {datacenter}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1353830448501936,
+                        "definition": {
+                            "title": "Path Origin",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name} by {collector,origin}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1065226145780202,
+                        "definition": {
+                            "title": "Monitored Paths by cluster_name",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name} by {cluster_name,datacenter}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 9,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 5866783490013422,
+            "definition": {
+                "title": "Destinations",
+                "background_color": "orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4733636750812458,
+                        "definition": {
+                            "title": "Destinations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name} by {host,destination_hostname,destination_ip,destination_port}.weighted()"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "label": "Network Path Map (old)",
+                                    "link": "/network-path/map?facets=source.hostname%3A{{host.value}}%20AND%20destination.hostname%3A{{destination_hostname.value}}"
+                                },
+                                {
+                                    "label": "Network Path Map (new)",
+                                    "link": "/network/path?inspected-paths={{host.value}}%257C%257C{{destination_hostname.value}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 6
+                        }
+                    },
+                    {
+                        "id": 4220964112176992,
+                        "definition": {
+                            "title": "Monitored Paths",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.network_path.path.monitored{$AGENT_HOSTNAME,$CUSTOM_TAG,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name} by {host,destination_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 1965339169678804,
+            "definition": {
+                "title": "Hops",
+                "background_color": "orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8002303853733426,
+                        "definition": {
+                            "title": "Hops (avg)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.network_path.path.hops{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1301994721791538,
+                        "definition": {
+                            "title": "Hops",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "distribution",
+                            "xaxis": {
+                                "include_zero": true,
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            },
+                            "yaxis": {
+                                "include_zero": true,
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.network_path.path.hops{$CUSTOM_TAG,$AGENT_HOSTNAME,$destination_hostname,$destination_port,$destination_ip,$datacenter,$cluster_name} by {destination_hostname,destination_port}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 3
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "AGENT_HOSTNAME",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "destination_ip",
+            "prefix": "Destination_Ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "destination_hostname",
+            "prefix": "destination_hostname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "destination_port",
+            "prefix": "destination_port",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "datacenter",
+            "prefix": "datacenter",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster_name",
+            "prefix": "cluster_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "CUSTOM_TAG",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

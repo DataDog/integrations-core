@@ -7,7 +7,6 @@ import pytest
 import pywintypes
 import winerror
 from mock import patch
-from six import PY2
 
 from datadog_checks.windows_service import WindowsService
 
@@ -325,10 +324,7 @@ def test_trigger_count_failure(aggregator, check, instance_trigger_start, caplog
     ):
         c.check(instance_trigger_start)
 
-    if PY2:
-        assert 'WindowsError: [Error 1] Incorrect function' in caplog.text
-    else:
-        assert 'OSError: [WinError 1] Incorrect function' in caplog.text
+    assert 'OSError: [WinError 1] Incorrect function' in caplog.text
 
 
 def test_name_regex_order(aggregator, check, instance_name_regex_prefix):

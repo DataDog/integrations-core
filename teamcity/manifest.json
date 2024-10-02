@@ -64,7 +64,7 @@
       "TeamCity Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Build Status": "assets/monitors/build_status.json"
+      "Builds are failing": "assets/monitors/build_status.json"
     },
     "saved_views": {
       "teamcity_processes": "assets/saved_views/teamcity_processes.json"

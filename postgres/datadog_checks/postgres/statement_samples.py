@@ -10,7 +10,6 @@ from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
-from six import PY2
 
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
@@ -884,6 +883,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         # multi-byte characters that fall on the limit are left out. One caveat is that if a statement's length
         # happens to be greater or equal to the threshold below but isn't actually truncated, this
         # would falsely report it as a truncated statement
-        statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
+        statement_bytes = bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
         return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated

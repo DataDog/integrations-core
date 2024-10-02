@@ -1,0 +1,111 @@
+[
+    {
+        "id": "66d224013287e81dc36ee3a0",
+        "name": "cast_fullplot_genres_title",
+        "type": "search",
+        "status": "READY",
+        "queryable": true,
+        "latestDefinitionVersion": {
+            "version": 1,
+            "createdAt": {
+                "$date": "2024-08-30T20:04:15.147Z"
+            }
+        },
+        "latestDefinition": {
+            "mappings": {
+                "dynamic": true,
+                "fields": {
+                    "highlight": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "statusDetail": [
+            {
+                "hostname": "atlas-dj4qz5-shard-00-00",
+                "status": "READY",
+                "queryable": true,
+                "mainIndex": {
+                    "status": "READY",
+                    "queryable": true,
+                    "definitionVersion": {
+                        "version": 1,
+                        "createdAt": {
+                            "$date": "2024-08-30T20:04:15Z"
+                        }
+                    },
+                    "definition": {
+                        "mappings": {
+                            "dynamic": true,
+                            "fields": {
+                                "highlight": {
+                                    "type": "string",
+                                    "indexOptions": "offsets",
+                                    "store": true,
+                                    "norms": "include"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "hostname": "atlas-dj4qz5-shard-00-01",
+                "status": "READY",
+                "queryable": true,
+                "mainIndex": {
+                    "status": "READY",
+                    "queryable": true,
+                    "definitionVersion": {
+                        "version": 1,
+                        "createdAt": {
+                            "$date": "2024-08-30T20:04:15Z"
+                        }
+                    },
+                    "definition": {
+                        "mappings": {
+                            "dynamic": true,
+                            "fields": {
+                                "highlight": {
+                                    "type": "string",
+                                    "indexOptions": "offsets",
+                                    "store": true,
+                                    "norms": "include"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "hostname": "atlas-dj4qz5-shard-00-02",
+                "status": "READY",
+                "queryable": true,
+                "mainIndex": {
+                    "status": "READY",
+                    "queryable": true,
+                    "definitionVersion": {
+                        "version": 1,
+                        "createdAt": {
+                            "$date": "2024-08-30T20:04:15Z"
+                        }
+                    },
+                    "definition": {
+                        "mappings": {
+                            "dynamic": true,
+                            "fields": {
+                                "highlight": {
+                                    "type": "string",
+                                    "indexOptions": "offsets",
+                                    "store": true,
+                                    "norms": "include"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+]

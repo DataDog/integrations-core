@@ -3,8 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import re
-
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
 

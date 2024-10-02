@@ -7,7 +7,6 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 from dateutil import parser, tz
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.serialization import json
@@ -284,7 +283,7 @@ class TwistlockCheck(AgentCheck):
                 cve_tags += ["package:{}".format(cve['packageName'])]
             self.gauge('{}.cve.details'.format(namespace), float(1), cve_tags)
         # Send counts to avoid no-data on zeroes
-        for severity, count in iteritems(summary):
+        for severity, count in summary.items():
             cve_tags = SEVERITY_TAGS.get(severity, []) + tags
             self.gauge('{}.cve.count'.format(namespace), float(count), cve_tags)
 

@@ -2,13 +2,29 @@
 
 <!-- towncrier release notes start -->
 
-## 2.19.0 / 2024-08-09
+## 3.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+## 2.20.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+## 2.19.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
 * Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
 
-## 2.18.0 / 2024-07-05
+## 2.18.0 / 2024-07-05 / Agent 7.56.0
 
 ***Added***:
 

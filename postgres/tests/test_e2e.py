@@ -20,6 +20,9 @@ def test_e2e(check, dd_agent_check, pg_instance):
         cur.execute("SELECT system_identifier FROM pg_control_system();")
         check.system_identifier = cur.fetchone()[0]
 
+        cur.execute("SHOW cluster_name;")
+        check.cluster_name = cur.fetchone()[0]
+
     expected_tags = _get_expected_tags(check, pg_instance, with_host=False)
     check_bgw_metrics(aggregator, expected_tags)
     check_common_metrics(aggregator, expected_tags=expected_tags, count=None)

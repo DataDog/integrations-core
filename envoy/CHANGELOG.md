@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 3.6.0 / 2024-09-10
+
+***Added***:
+
+* Add support for tls_inspector metrics ([#18536](https://github.com/DataDog/integrations-core/pull/18536))
+
 ## 3.5.1 / 2024-07-05 / Agent 7.55.0
 
 ***Fixed***:

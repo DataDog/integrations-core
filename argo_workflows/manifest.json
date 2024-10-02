@@ -49,7 +49,7 @@
       "Argo Workflows": "assets/dashboards/argo_workflows.json"
     },
     "monitors": {
-      "errors": "assets/monitors/errors.json"
+      "New errors detected in Argo Workflows": "assets/monitors/errors.json"
     },
     "saved_views": {
       "overview": "assets/saved_views/overview.json",

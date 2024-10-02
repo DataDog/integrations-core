@@ -12,7 +12,6 @@ from copy import deepcopy
 
 import pytest
 import requests
-from six import PY2
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -27,10 +26,7 @@ INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
 @pytest.fixture(scope="module")
 def gauges():
     res = defaultdict(list)
-    if PY2:
-        mode = "rb"
-    else:
-        mode = "r"
+    mode = "r"
 
     with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)

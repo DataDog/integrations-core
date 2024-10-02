@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 
-from six import iteritems
-
 MOCK_CONFIG = {'url': 'http://localhost:8500', 'catalog_checks': True}
 MOCK_CONFIG_DISABLE_SERVICE_TAG = {
     'url': 'http://localhost:8500',
@@ -30,7 +28,7 @@ MOCK_CONFIG_NETWORK_LATENCY_CHECKS = {
 
 
 def mock_check(check, mocks):
-    for f_name, m in iteritems(mocks):
+    for f_name, m in mocks.items():
         if not hasattr(check, f_name):
             continue
         else:

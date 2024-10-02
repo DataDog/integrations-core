@@ -4,8 +4,7 @@
 
 import re
 import socket
-
-from six import BytesIO
+from io import BytesIO
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 

@@ -5,14 +5,11 @@ import pytest
 from six import PY3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.testing import requires_py3
 
 if PY3:
     from .config_models import ConfigMixin
 else:
     ConfigMixin = object
-
-pytestmark = [requires_py3]
 
 
 class Check(AgentCheck, ConfigMixin):

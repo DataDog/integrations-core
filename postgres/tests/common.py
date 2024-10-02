@@ -141,7 +141,15 @@ def _get_expected_replication_tags(check, pg_instance, with_host=True, with_db=F
 
 
 def _get_expected_tags(
-    check, pg_instance, with_host=True, with_db=False, with_version=True, with_sys_id=True, role='master', **kwargs
+    check,
+    pg_instance,
+    with_host=True,
+    with_db=False,
+    with_version=True,
+    with_sys_id=True,
+    with_cluster_name=True,
+    role='master',
+    **kwargs,
 ):
     base_tags = pg_instance['tags'] + [f'port:{pg_instance["port"]}']
     if role:
@@ -150,6 +158,8 @@ def _get_expected_tags(
         base_tags.append(f'db:{pg_instance["dbname"]}')
     if with_host:
         base_tags.append(f'dd.internal.resource:database_instance:{check.resolved_hostname}')
+    if with_cluster_name and check.cluster_name:
+        base_tags.append(f'postgresql_cluster_name:{check.cluster_name}')
     if with_sys_id and check.system_identifier:
         base_tags.append(f'system_identifier:{check.system_identifier}')
     if with_version and check.raw_version:

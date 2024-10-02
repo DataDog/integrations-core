@@ -4,11 +4,11 @@
 import mock
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3, requires_windows
+from datadog_checks.dev.testing import requires_windows
 
 from .utils import GLOBAL_TAGS, SERVER, get_check
 
-pytestmark = [requires_py3, requires_windows]
+pytestmark = [requires_windows]
 
 
 def test_default(aggregator, dd_run_check, mock_performance_objects):

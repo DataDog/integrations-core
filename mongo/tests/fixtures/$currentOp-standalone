@@ -304,6 +304,7 @@
                         }
                     }
                 },
+                "comment": "oplogReplay",
                 "batchSize": 13981010,
                 "tailable": true,
                 "awaitData": true,

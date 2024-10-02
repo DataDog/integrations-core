@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 5.7.0 / 2024-08-09
+## 6.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 5.7.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
 * Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
 
-## 5.6.0 / 2024-07-05
+## 5.6.0 / 2024-07-05 / Agent 7.56.0
 
 ***Added***:
 

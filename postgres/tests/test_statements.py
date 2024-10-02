@@ -13,7 +13,6 @@ import psycopg2
 import pytest
 from dateutil import parser
 from semver import VersionInfo
-from six import string_types
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -137,16 +136,16 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
             _run_query(1)
 
         _run_query(0)
-        run_one_check(check, dbm_instance, cancel=False)
+        run_one_check(check, cancel=False)
 
         # Call one query
         _run_query(0)
-        run_one_check(check, dbm_instance, cancel=False)
+        run_one_check(check, cancel=False)
         aggregator.reset()
 
         # Call other query that maps to same query signature
         _run_query(1)
-        run_one_check(check, dbm_instance, cancel=False)
+        run_one_check(check, cancel=False)
 
         obfuscated_param = '?'
         query0 = queries[0] % (obfuscated_param,)
@@ -236,16 +235,16 @@ def test_statement_metrics(
 
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check, dbm_instance, cancel=False)
+    run_one_check(check, cancel=False)
 
     # We can't change track_io_timing at runtime, but we can change what the integration thinks the runtime value is
     # This must be done after the first check since postgres settings are loaded from the database then
     check.pg_settings["track_io_timing"] = "on" if track_io_timing_enabled else "off"
 
     _run_queries()
-    run_one_check(check, dbm_instance, cancel=False)
+    run_one_check(check, cancel=False)
     _run_queries()
-    run_one_check(check, dbm_instance, cancel=False)
+    run_one_check(check, cancel=False)
 
     def _should_catch_query(dbname):
         # we can always catch it if the query originals in the same DB
@@ -416,9 +415,9 @@ def test_statement_metrics_cloud_metadata(
     check._connect()
 
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1, "should capture exactly one metrics payload"
@@ -456,9 +455,9 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     check._connect()
 
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1, "should capture exactly one metrics payload"
@@ -505,7 +504,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
 
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
-                run_one_check(check, dbm_instance)
+                run_one_check(check)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -641,7 +640,7 @@ def test_failed_explain_handling(
         pytest.skip("not relevant for postgres {version}".format(version=POSTGRES_VERSION))
 
     # run check so all internal state is correctly initialized
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
 
     # clear out contents of aggregator so we measure only the metrics generated during this specific part of the test
     aggregator.reset()
@@ -793,12 +792,12 @@ def test_statement_samples_collect(
     # pg_stat_activity
     try:
         conn.cursor().execute(query, (arg,))
-        run_one_check(check, dbm_instance)
+        run_one_check(check)
         tags = _get_expected_tags(check, dbm_instance, with_host=False, db=dbname)
 
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
-        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
+        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, str) else arg)
 
         # Find matching events by checking if the expected query starts with the event statement. Using this
         # instead of a direct equality check covers cases of truncated statements
@@ -902,11 +901,11 @@ def test_statement_metadata(
         cursor.execute(
             query,
         )
-        run_one_check(check, dbm_instance)
+        run_one_check(check)
         cursor.execute(
             query,
         )
-        run_one_check(check, dbm_instance)
+        run_one_check(check)
 
     # Test samples metadata, metadata in samples is an object under `db`.
     samples = aggregator.get_event_platform_events("dbm-samples")
@@ -965,8 +964,8 @@ def test_statement_reported_hostname(
 
     check = integration_check(dbm_instance)
 
-    run_one_check(check, dbm_instance)
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
+    run_one_check(check)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
     assert samples, "should have collected at least one sample"
@@ -1111,7 +1110,7 @@ def test_activity_snapshot_collection(
         # ... now execute the test query
         wait(conn)
         conn.cursor().execute(query, (arg,))
-        run_one_check(check, dbm_instance)
+        run_one_check(check)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
 
         if POSTGRES_VERSION.split('.')[0] == "9" and pg_stat_activity_view == "pg_stat_activity":
@@ -1203,7 +1202,7 @@ def test_activity_snapshot_collection(
         blocking_conn.close()
         # Wait collection interval to make sure dbm events are reported
         time.sleep(dbm_instance['query_activity']['collection_interval'])
-        run_one_check(check, dbm_instance)
+        run_one_check(check)
         dbm_activity_event = aggregator.get_event_platform_events("dbm-activity")
         event = dbm_activity_event[1]
         assert len(event['postgres_activity']) > 0
@@ -1248,8 +1247,8 @@ def test_activity_reported_hostname(
     check = integration_check(dbm_instance)
     check._connect()
 
-    run_one_check(check, dbm_instance)
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
+    run_one_check(check)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert dbm_activity, "should have at least one activity sample"
@@ -1399,9 +1398,9 @@ def test_statement_run_explain_errors(
     check = integration_check(dbm_instance)
     check._connect()
 
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
     _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
 
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err
@@ -1453,9 +1452,9 @@ def test_statement_run_explain_parameterized_queries(
     if check.version < V12:
         return
 
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
     _, explain_err_code, err = check.statement_samples._run_and_track_explain("datadog_test", query, query, query)
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
 
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err
@@ -1475,11 +1474,11 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
         conn.cursor().execute(query, (arg,))
         connections.append(conn)
 
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for _, _, dbname, query, arg in SAMPLE_QUERIES:
-        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
+        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, str) else arg)
         matching = [e for e in dbm_samples if e['db']['statement'] == expected_query]
         if not dbstrict or dbname == dbm_instance['dbname']:
             # when dbstrict=True we expect to only capture those queries for the initial database to which the
@@ -1505,7 +1504,7 @@ def test_async_job_enabled(
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
     if statement_samples_enabled or statement_activity_enabled:
         assert check.statement_samples._job_loop_future is not None
     else:
@@ -1583,6 +1582,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
+@pytest.mark.flaky
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.2
@@ -1633,7 +1633,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, integration_chec
         # repeat the same set of queries multiple times to ensure we're testing the per-query TTL rate limit
         for q in queries:
             cursor.execute(q)
-            run_one_check(check, dbm_instance)
+            run_one_check(check)
     cursor.close()
 
     def _sample_key(e):
@@ -1694,7 +1694,7 @@ def test_disabled_activity_or_explain_plans(
     try:
         conn.autocommit = True
         conn.cursor().execute(query, (arg,))
-        run_one_check(check, dbm_instance)
+        run_one_check(check)
         dbm_activity = aggregator.get_event_platform_events("dbm-activity")
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
@@ -1736,7 +1736,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     dbm_instance['query_metrics']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
     assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
     assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
@@ -1893,7 +1893,7 @@ def test_statement_metrics_database_errors(
         return_value=metric_columns,
         side_effect=error,
     ):
-        run_one_check(check, dbm_instance)
+        run_one_check(check)
 
     expected_tags = _get_expected_tags(
         check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
@@ -1935,7 +1935,7 @@ def test_pg_stat_statements_max_warning(
     dbm_instance['query_metrics']['pg_stat_statements_max_warning_threshold'] = pg_stat_statements_max_threshold
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
 
     assert check.warnings == expected_warnings
 
@@ -1950,7 +1950,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
             cur.execute("select pg_stat_statements_reset();")
 
     check = integration_check(dbm_instance_replica2)
-    run_one_check(check, dbm_instance_replica2)
+    run_one_check(check)
 
     conn = _get_conn(dbm_instance_replica2)
     count_statements = 0
@@ -1974,7 +1974,8 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
             cur.execute("select {};".format(parameters))
 
     aggregator.reset()
-    run_one_check(check, dbm_instance_replica2)
+    check = integration_check(dbm_instance_replica2)
+    run_one_check(check)
     aggregator.assert_metric("postgresql.pg_stat_statements.max", value=100, tags=expected_tags)
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=1, tags=expected_tags)
@@ -2002,9 +2003,9 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     check._connect()
 
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
     _run_queries()
-    run_one_check(check, dbm_instance)
+    run_one_check(check)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1, "should capture exactly one metrics payload"

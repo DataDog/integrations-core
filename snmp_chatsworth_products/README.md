@@ -38,5 +38,5 @@ Additional helpful documentation, links, and articles:
 [3]: https://github.com/DataDog/integrations-core/blob/master/snmp_chatsworth_products/assets/service_checks.json
 [4]: https://docs.datadoghq.com/help/
 [5]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
-[6]: https://docs.datadoghq.com/network_monitoring/devices/#vendor-profiles
+[6]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
 

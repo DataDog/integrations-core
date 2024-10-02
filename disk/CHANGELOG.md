@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
+
+## 5.4.0 / 2024-09-05
+
+***Added***:
+
+* Bump psutil version for python 3.12 support ([#18491](https://github.com/DataDog/integrations-core/pull/18491))
+
 ## 5.3.0 / 2024-03-08 / Agent 7.52.0
 
 ***Added***:

@@ -2,16 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from six import PY3, iteritems
-
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
 from . import Network
 from .const import BSD_TCP_METRICS
-
-if PY3:
-    long = int
 
 
 class BSDNetwork(Network):
@@ -80,15 +75,15 @@ class BSDNetwork(Network):
                     current = iface
 
                 # Filter inactive interfaces
-                if self.parse_long(x[-5]) or self.parse_long(x[-2]):
+                if self.parse_int(x[-5]) or self.parse_int(x[-2]):
                     iface = current
                     metrics = {
-                        'bytes_rcvd': self.parse_long(x[-5]),
-                        'bytes_sent': self.parse_long(x[-2]),
-                        'packets_in.count': self.parse_long(x[-7]),
-                        'packets_in.error': self.parse_long(x[-6]),
-                        'packets_out.count': self.parse_long(x[-4]),
-                        'packets_out.error': self.parse_long(x[-3]),
+                        'bytes_rcvd': self.parse_int(x[-5]),
+                        'bytes_sent': self.parse_int(x[-2]),
+                        'packets_in.count': self.parse_int(x[-7]),
+                        'packets_in.error': self.parse_int(x[-6]),
+                        'packets_out.count': self.parse_int(x[-4]),
+                        'packets_out.error': self.parse_int(x[-3]),
                     }
                     self.submit_devicemetrics(iface, metrics, custom_tags)
         except SubprocessOutputEmptyError:
@@ -139,7 +134,7 @@ class BSDNetwork(Network):
                 # udp6       0      0 :::41458                :::*
 
                 metrics = self.parse_cx_state(lines[2:], self.tcp_states['netstat'], 5)
-                for metric, value in iteritems(metrics):
+                for metric, value in metrics.items():
                     self.gauge(metric, value, tags=custom_tags)
             except SubprocessOutputEmptyError:
                 self.log.exception("Error collecting connection states.")

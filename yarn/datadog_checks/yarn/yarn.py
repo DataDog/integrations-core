@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from urllib.parse import urljoin, urlsplit, urlunsplit
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
-from six import iteritems
-from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.errors import ConfigurationError
@@ -198,7 +198,7 @@ class YarnCheck(AgentCheck):
             app_tags = {}
 
         filtered_app_tags = {}
-        for dd_prefix, yarn_key in iteritems(app_tags):
+        for dd_prefix, yarn_key in app_tags.items():
             if yarn_key in self._ALLOWED_APPLICATION_TAGS:
                 filtered_app_tags[dd_prefix] = yarn_key
         app_tags = filtered_app_tags
@@ -292,7 +292,7 @@ class YarnCheck(AgentCheck):
     def _get_app_tags(self, app_json, app_tags):
         split_app_tags = self.instance.get('split_yarn_application_tags', DEFAULT_SPLIT_YARN_APPLICATION_TAGS)
         tags = []
-        for dd_tag, yarn_key in iteritems(app_tags):
+        for dd_tag, yarn_key in app_tags.items():
             try:
                 val = app_json[yarn_key]
                 if val:
@@ -416,7 +416,7 @@ class YarnCheck(AgentCheck):
         """
         Parse the JSON response and set the metrics
         """
-        for dict_path, metric in iteritems(yarn_metrics):
+        for dict_path, metric in yarn_metrics.items():
             metric_name, metric_type = metric
 
             metric_value = self._get_value_from_json(dict_path, metrics_json)
@@ -465,7 +465,7 @@ class YarnCheck(AgentCheck):
 
         # Add kwargs as arguments
         if kwargs:
-            query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(kwargs)])
+            query = '&'.join(['{}={}'.format(key, value) for key, value in kwargs.items()])
             url = urljoin(url, '?' + query)
 
         try:
