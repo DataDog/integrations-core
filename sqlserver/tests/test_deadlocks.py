@@ -31,9 +31,9 @@ except ImportError:
     pyodbc = None
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def dbm_instance(instance_session_default):
-    instance_docker = instance_session_default
+    instance_docker = deepcopy(instance_session_default)
     instance_docker['dbm'] = True
     # set a very small collection interval so the tests go fast
     instance_docker['query_activity'] = {
@@ -44,7 +44,7 @@ def dbm_instance(instance_session_default):
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
     instance_docker['deadlocks_collection'] = {'enabled': True, 'collection_interval': 0.1}
-    return copy(instance_docker)
+    return instance_docker
 
 
 def _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator):
@@ -111,8 +111,8 @@ def _run_second_deadlock_query(conn, event1, event2):
     return exception_text
 
 
-@pytest.fixture(scope="module")
-def _create_deadlock(dbm_instance):
+@pytest.fixture(scope="session")
+def _create_deadlock(dd_environment, dbm_instance):
     bob_conn = _get_conn_for_user(dbm_instance, 'bob')
     fred_conn = _get_conn_for_user(dbm_instance, 'fred')
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
