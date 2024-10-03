@@ -1967,7 +1967,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "http.url",
+                                            "field": "http.defanged.url",
                                             "width": "auto"
                                         },
                                         {

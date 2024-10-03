@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3, requires_windows
+from datadog_checks.dev.testing import requires_windows
 
 from .utils import GLOBAL_TAGS, SERVER
 
@@ -14,7 +14,7 @@ except Exception:
     PerfCountersBaseCheck = object
     PerfObject = object
 
-pytestmark = [requires_py3, requires_windows]
+pytestmark = [requires_windows]
 
 
 class CustomCheck(PerfCountersBaseCheck):

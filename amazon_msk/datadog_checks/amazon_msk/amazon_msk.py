@@ -4,10 +4,10 @@
 import json
 
 import boto3
-from six import PY2
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
+from .check import AmazonMskCheckV2
 from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 from .utils import construct_boto_config
 
@@ -29,15 +29,6 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
         instance = instances[0]
 
         if is_affirmative(instance.get('use_openmetrics', False)):
-            if PY2:
-                raise ConfigurationError(
-                    "Openmetrics on this integration is only available when using py3. "
-                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information"
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import AmazonMskCheckV2
-
             return AmazonMskCheckV2(name, init_config, instances)
         else:
             return super(AmazonMskCheck, cls).__new__(cls)

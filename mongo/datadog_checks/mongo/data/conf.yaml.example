@@ -182,6 +182,26 @@ instances:
         #
         # collection_interval: 10
 
+    ## Configure collection of MongoDB slow operations.
+    #
+    # slow_operations:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of slow operations. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the slow operations collection interval in seconds. Each collection involves capturing
+        ## profiled slow operations from sys.profile collection or from the Slow Query log.
+        #
+        # collection_interval: 10
+
+        ## @param max_operations - number - optional - default: 1000
+        ## Set the maximum number of slow operations to collect per interval.
+        #
+        # max_operations: 1000
+
     ## Configure collection of MongoDB schemas (inferred) by sampling documents.
     #
     # schemas:

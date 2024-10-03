@@ -1,0 +1,60 @@
+[build-system]
+requires = [
+    "hatchling>=0.13.0",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-{project_name}"
+description = "The {integration_name} check"
+readme = "README.md"
+license = "BSD-3-Clause"
+requires-python = ">=3.11"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "{check_name}",
+]
+authors = [
+    {{ name = "{author}", email = "{email_packages}" }},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "datadog-checks-base>=32.6.0",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+deps = []
+
+[project.urls]
+Source = "https://github.com/DataDog/{repo_name}"
+
+[tool.hatch.version]
+path = "datadog_checks/{check_name}/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/{check_name}",
+]
+dev-mode-dirs = [
+    ".",
+]

@@ -9,7 +9,6 @@ from contextlib import contextmanager
 from urllib.parse import urlparse
 
 from datadog_checks.dev import TempDir
-from datadog_checks.tls.utils import closing
 
 
 @contextmanager
@@ -31,8 +30,8 @@ def download_cert(filepath, host, raw=False):
 
     for _ in range(20):
         try:
-            with closing(socket.create_connection((host, 443))) as sock:
-                with closing(context.wrap_socket(sock, server_hostname=host)) as secure_sock:
+            with socket.create_connection((host, 443)) as sock:
+                with context.wrap_socket(sock, server_hostname=host) as secure_sock:
                     cert = secure_sock.getpeercert(binary_form=True)
         except Exception:  # no cov
             time.sleep(3)

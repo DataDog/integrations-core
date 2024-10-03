@@ -57,6 +57,10 @@ files:
           - lz4hc
       value:
         type: string
+    - name: tls_ca_cert
+      description: The path to the CA certificate file.
+      value:
+        type: string
     - name: tls_verify
       description: Whether or not to connect securely using TLS. The server must also support this.
       value:

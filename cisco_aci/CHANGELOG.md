@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 3.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+## 2.12.0 / 2024-09-06
+
+***Added***:
+
+* Add the ability to tag Cisco ACI device and interface metrics with user-defined tags. ([#18496](https://github.com/DataDog/integrations-core/pull/18496))
+
 ## 2.11.0 / 2024-09-05
 
 ***Added***:
