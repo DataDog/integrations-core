@@ -114,8 +114,7 @@ def test_get_tcp_stats(aggregator):
         check_instance.check({})
         for name, value in expected_mets.items():
             if name in gauge_mets:
-                metric_type = aggregator.GAUGE
-                aggregator.assert_metric(name, value=value, metric_type=metric_type)
+                aggregator.assert_metric(name, value=value, metric_type=aggregator.GAUGE)
             else:
                 aggregator.assert_metric(name, value=value, metric_type=aggregator.RATE)
                 aggregator.assert_metric(name + '.count', value=value, metric_type=aggregator.MONOTONIC_COUNT)
