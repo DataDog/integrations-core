@@ -274,7 +274,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                         row = cursor.fetchone()
                         if row is None:
                             break
-                        rows.append()
+                        rows.append(row)
                     except UnicodeDecodeError:
                         self._log.debug("Invalid unicode in row from pg_stat_activity")
                     except:
