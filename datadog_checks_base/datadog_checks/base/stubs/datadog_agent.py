@@ -158,10 +158,9 @@ class DatadogAgentStub(object):
     def obfuscate_mongodb_string(self, command):
         # Passthrough stub: obfuscation implementation is in Go code.
         return command
-    
+
     def emit_agent_telemetry(self, check_name, metric_name, metric_value, metric_type):
         self._sent_telemetry[(check_name, metric_name, metric_type)].append(metric_value)
-
 
 
 # Use the stub as a singleton
