@@ -69,7 +69,7 @@
             "id": 8714497559125504,
             "definition": {
                 "type": "note",
-                "content": "**[Metabase](https://www.metabase.com/)** is an open-source business intelligence tool that you can connect to many popular databases. Metabase lets you ask questions about your data, and displays answers in formats that make sense, whether that’s a bar chart or a detailed table.\n\nThis dashboard provides a comprehensive analysis of the Metabase activity events. offering a detailed look at each event and its insights.\n\nFor more information, see the [Metabase Integration Documentation](https://docs.datadoghq.com/integrations/metabase/).\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**[Metabase](https://www.metabase.com/cloud/)** is an open-source business intelligence tool that you can connect to many popular databases. Metabase lets you ask questions about your data, and displays answers in formats that make sense, whether that’s a bar chart or a detailed table.\n\nThis dashboard provides a comprehensive analysis of the Metabase activity events, offering a detailed look at each event and its insights.\n\nFor more information, see the [Metabase Integration Documentation](https://docs.datadoghq.com/integrations/metabase/).\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -2173,7 +2173,7 @@
                     {
                         "id": 8245965961875564,
                         "definition": {
-                            "title": "Dashboard Created",
+                            "title": "Dashboards Created",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2231,7 +2231,7 @@
                     {
                         "id": 3489198497189388,
                         "definition": {
-                            "title": "Dashboard Card Added",
+                            "title": "Dashboard Cards Added",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2289,7 +2289,7 @@
                     {
                         "id": 6874890558195188,
                         "definition": {
-                            "title": "Dashboard Card Removed",
+                            "title": "Dashboard Cards Removed",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2550,7 +2550,7 @@
                     {
                         "id": 5873485990954942,
                         "definition": {
-                            "title": "Database Created",
+                            "title": "Databases Created",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2608,7 +2608,7 @@
                     {
                         "id": 4382972012728908,
                         "definition": {
-                            "title": "Database Updated",
+                            "title": "Databases Updated",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2666,7 +2666,7 @@
                     {
                         "id": 6045558861696670,
                         "definition": {
-                            "title": "Database Created by Engine",
+                            "title": "Databases Created by Engine",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2937,7 +2937,7 @@
                     {
                         "id": 7283535476388838,
                         "definition": {
-                            "title": "API Key Created",
+                            "title": "API Keys Created",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2995,7 +2995,7 @@
                     {
                         "id": 2489882613013574,
                         "definition": {
-                            "title": "API Key Updated",
+                            "title": "API Keys Updated",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -3053,7 +3053,7 @@
                     {
                         "id": 948644002676356,
                         "definition": {
-                            "title": "API Key Deleted",
+                            "title": "API Keys Deleted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -3111,7 +3111,7 @@
                     {
                         "id": 1765412403409742,
                         "definition": {
-                            "title": "API Key Regenerated",
+                            "title": "API Keys Regenerated",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -3236,7 +3236,7 @@
                     {
                         "id": 8498416730929434,
                         "definition": {
-                            "title": "Top API Key Created by Group Name",
+                            "title": "Top API Keys Created by Group Name",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
