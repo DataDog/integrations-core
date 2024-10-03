@@ -268,7 +268,17 @@ class PostgresStatementSamples(DBMAsyncJob):
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
-                rows = cursor.fetchall()
+                rows = []
+                while True:
+                    try:
+                        row = cursor.fetchone()
+                        if row is None:
+                            break
+                        rows.append(row)
+                    except UnicodeDecodeError:
+                        self._log.debug("Invalid unicode in row from pg_stat_activity")
+                    except:
+                        self._log.warning("Unknown error fetching row from pg_stat_activity")
 
         self._report_check_hist_metrics(start_time, len(rows), "get_new_pg_stat_activity")
         self._log.debug("Loaded %s rows from %s", len(rows), self._config.pg_stat_activity_view)
