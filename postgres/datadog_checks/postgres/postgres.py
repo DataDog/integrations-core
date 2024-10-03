@@ -646,6 +646,8 @@ class PostgreSql(AgentCheck):
             hostname=self.resolved_hostname,
             raw=True,
         )
+        telemetry_metric = scope_type.replace("_","",1) # remove the first underscore to match telemetry convention
+        datadog_agent.emit_agent_telemetry("postgres", f"{telemetry_metric}_ms", elapsed_ms, "histogram")
         if elapsed_ms > self._config.min_collection_interval * 1000:
             self.record_warning(
                 DatabaseConfigurationError.autodiscovered_metrics_exceeds_collection_interval,

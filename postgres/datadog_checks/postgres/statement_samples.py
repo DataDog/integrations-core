@@ -424,6 +424,19 @@ class PostgresStatementSamples(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
             raw=True,
         )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_ms",
+            (time.time() - start_time) * 1000,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_count",
+            row_len,
+            "histogram",
+        )
+
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code

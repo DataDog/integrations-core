@@ -342,7 +342,7 @@ class PostgresMetadata(DBMAsyncJob):
                 raw=True,
             )
             self._check.gauge(
-                "dd.postgres.schema.tables_total",
+                "dd.postgres.schema.tables_count",
                 total_tables,
                 tags=self._check.tags,
                 hostname=self._check.resolved_hostname,
@@ -356,7 +356,7 @@ class PostgresMetadata(DBMAsyncJob):
             )
             datadog_agent.emit_agent_telemetry(
                 "postgres",
-                "schema_tables_total",
+                "schema_tables_count",
                  total_tables,
                  "gauge"
             )
