@@ -152,7 +152,7 @@ pipeline:
       name: Processing for transactional events
       enabled: true
       filter:
-        query: "service:transactional-events "
+        query: "service:transactional-events"
       processors:
         - type: attribute-remapper
           name: Map `ts_epoch` to `timestamp`
@@ -216,7 +216,7 @@ pipeline:
       name: Processing for marketing events
       enabled: true
       filter:
-        query: "service:marketing-events "
+        query: "service:marketing-events"
       processors:
         - type: arithmetic-processor
           name: Convert `ts_event` from second to millisecond EPOCH UNIX format and map to
