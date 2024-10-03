@@ -590,121 +590,44 @@ tests:
       timestamp: 1604933654
   - sample: |-
       {
-        "date" : "2020-10-09 00:00:00",
-        "X-Mailin-custom" : "some_custom_header",
-        "sending_ip" : "10.10.10.10",
-        "subject" : "My first Transactional",
-        "message-id" : "2022283@abx.abc.com",
-        "template_id" : 22,
-        "id" : 11111,
-        "event" : "delivered",
-        "ts_event" : 1604933654,
-        "email" : "example@domain.com",
-        "ts" : 1604933619,
-        "tags" : [ "transac_messages" ]
-      }
-    service: "transactional-events"
-    result:
-      custom:
-        X-Mailin-custom: "some_custom_header"
-        date: "2020-10-09 00:00:00"
-        evt:
-          name: "delivered"
-        id: 11111
-        message-id: "2022283@abx.abc.com"
-        network:
-          client:
-            geoip: {}
-            ip: "10.10.10.10"
-        status: "Success"
-        subject: "My first Transactional"
-        tags:
-        - "transac_messages"
-        template_id: 22
-        ts: 1604933619
-        ts_event: 1604933654
-        usr:
-          email: "example@domain.com"
-      message: |-
-        {
-          "date" : "2020-10-09 00:00:00",
-          "X-Mailin-custom" : "some_custom_header",
-          "sending_ip" : "10.10.10.10",
-          "subject" : "My first Transactional",
-          "message-id" : "2022283@abx.abc.com",
-          "template_id" : 22,
-          "id" : 11111,
-          "event" : "delivered",
-          "ts_event" : 1604933654,
-          "email" : "example@domain.com",
-          "ts" : 1604933619,
-          "tags" : [ "transac_messages" ]
+            "date": "2024-10-03 11:29:38",
+            "reason": "sent",
+            "subject": "test",
+            "ts_event": 1727935178,
+            "sending_ip": "10.10.10.10",
+            "service": "transactional-events",
+            "message-id": "<20.21@s-ry.mn.fr>",
+            "template_id": 27,
+            "id": 1141551,
+            "tag": "",
+            "event": "delivered",
+            "ts_epoch": 1727935178000,
+            "email": "abc@test.com",
+            "ts": 1727935178,
+            "sender_email": "abc@test.py"
         }
-      service: "transactional-events"
-      status: "ok"
-      tags:
-      - "source:LOGS_SOURCE"
-      timestamp: 1
+    service: "transactional-events"
+    result: {}
   - sample: |-
       {
-        "date" : "2020-10-09 00:00:00",
-        "X-Mailin-custom" : "some_custom_header",
-        "reason" : "server is down",
-        "subject" : "My first Transactional",
-        "ts_event" : 1604933654,
-        "tags" : [ "transac_messages" ],
-        "sending_ip" : "10.10.10.10",
-        "message-id" : "2022283@abx.abc.com",
-        "template_id" : 22,
-        "id" : 11111,
-        "event" : "soft_bounce",
-        "email" : "example@domain.com",
-        "ts" : 1604933619
-      }
-    service: "transactional-events"
-    result:
-      custom:
-        X-Mailin-custom: "some_custom_header"
-        date: "2020-10-09 00:00:00"
-        evt:
-          name: "soft_bounce"
-        id: 11111
-        message-id: "2022283@abx.abc.com"
-        network:
-          client:
-            geoip: {}
-            ip: "10.10.10.10"
-        reason: "server is down"
-        status: "warning"
-        subject: "My first Transactional"
-        tags:
-        - "transac_messages"
-        template_id: 22
-        ts: 1604933619
-        ts_event: 1604933654
-        usr:
-          email: "example@domain.com"
-      message: |-
-        {
-          "date" : "2020-10-09 00:00:00",
-          "X-Mailin-custom" : "some_custom_header",
-          "reason" : "server is down",
-          "subject" : "My first Transactional",
-          "ts_event" : 1604933654,
-          "tags" : [ "transac_messages" ],
-          "sending_ip" : "10.10.10.10",
-          "message-id" : "2022283@abx.abc.com",
-          "template_id" : 22,
-          "id" : 11111,
-          "event" : "soft_bounce",
-          "email" : "example@domain.com",
-          "ts" : 1604933619
+            "date": "2024-10-03 11:30:46",
+            "reason": "Unable to find MX of domain jbsjjsd.com",
+            "subject": "test",
+            "ts_event": 1727935246,
+            "sending_ip": "10.10.10.10",
+            "service": "transactional-events",
+            "message-id": "<20.211@s-rey.mn.r>",
+            "template_id": 27,
+            "id": 1141551,
+            "tag": "",
+            "event": "soft_bounce",
+            "ts_epoch": 1727935246000,
+            "email": "adss@jbsjjsd.com",
+            "ts": 1727935246,
+            "sender_email": "test@abc.com"
         }
-      service: "transactional-events"
-      status: "warn"
-      tags:
-      - "source:LOGS_SOURCE"
-      timestamp: 1
+    service: "transactional-events"
+    result: {}
   - sample: |-
       {
         "date" : "2020-10-09 00:00:00",
