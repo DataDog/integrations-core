@@ -216,20 +216,31 @@ GROUP BY
 
 DEADLOCK_TIMESTAMP_ALIAS = "timestamp"
 DEADLOCK_XML_ALIAS = "event_xml"
-DEADLOCK_QUERY = """
-SELECT TOP(?) xdr.value('@timestamp', 'datetime') AS [{timestamp}],
-    xdr.query('.') AS [{xml}]
-FROM (SELECT CAST([target_data] AS XML) AS Target_Data
-            FROM sys.dm_xe_session_targets AS xt
-            INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
-            WHERE xs.name = N'system_health'
-              AND xt.target_name = N'ring_buffer'
-    ) AS XML_Data
-CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
-WHERE xdr.value('@timestamp', 'datetime') >= DATEADD(SECOND, ?, GETDATE())
-;""".format(
-    **{"timestamp": DEADLOCK_TIMESTAMP_ALIAS, "xml": DEADLOCK_XML_ALIAS}
-)
+
+
+def get_deadlocks_query(convert_xml_to_str=False):
+    """
+    Construct the query to fetch deadlocks from the system_health extended event session
+    :param convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
+        that can't convert XML to str
+    :return: The query to fetch deadlocks
+    """
+    xml_expression = "xdr.query('.')"
+    if convert_xml_to_str:
+        xml_expression = "CAST(xdr.query('.') AS NVARCHAR(MAX))"
+
+    return f"""
+    SELECT TOP(?) xdr.value('@timestamp', 'datetime') AS [{DEADLOCK_TIMESTAMP_ALIAS}],
+        {xml_expression} AS [{DEADLOCK_XML_ALIAS}]
+    FROM (SELECT CAST([target_data] AS XML) AS Target_Data
+                FROM sys.dm_xe_session_targets AS xt
+                INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
+                WHERE xs.name = N'system_health'
+                AND xt.target_name = N'ring_buffer'
+        ) AS XML_Data
+    CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
+    WHERE xdr.value('@timestamp', 'datetime') >= DATEADD(SECOND, ?, GETDATE())
+    ;"""
 
 
 def get_query_ao_availability_groups(sqlserver_major_version):

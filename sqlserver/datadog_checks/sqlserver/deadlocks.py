@@ -11,7 +11,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.queries import DEADLOCK_QUERY, DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
+from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS, get_deadlocks_query
 
 try:
     import datadog_agent
@@ -41,6 +41,7 @@ class Deadlocks(DBMAsyncJob):
         self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
         self._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
         self.collection_interval = config.deadlocks_config.get("collection_interval", DEFAULT_COLLECTION_INTERVAL)
+        self._force_convert_xml_to_str = False
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
@@ -100,21 +101,27 @@ class Deadlocks(DBMAsyncJob):
     def _get_lookback_seconds(self):
         return min(-60, self._last_deadlock_timestamp - time())
 
+    def _get_connector(self):
+        return self._check.connection.connector
+
     def _query_deadlocks(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                self._log.debug("collecting sql server deadlocks")
+                convert_xml_to_str = False
+                if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
+                    convert_xml_to_str = True
+                query = get_deadlocks_query(convert_xml_to_str)
                 self._log.debug(
                     "Running query [%s] with max deadlocks %s and timestamp %s",
-                    DEADLOCK_QUERY,
+                    query,
                     self._max_deadlocks,
                     self._last_deadlock_timestamp,
                 )
                 try:
-                    cursor.execute(DEADLOCK_QUERY, (self._max_deadlocks, self._get_lookback_seconds()))
+                    cursor.execute(query, (self._max_deadlocks, self._get_lookback_seconds()))
                 except Exception as e:
                     if "Data column of Unknown ADO type" in str(e):
-                        raise Exception(f"{str(e)} | cursor.description: {cursor.description}")
+                        raise Exception(f"{str(e)} | cursor.description: {cursor.description} | query: {query}")
                     raise e
 
                 columns = [column[0] for column in cursor.description]
