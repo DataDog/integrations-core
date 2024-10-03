@@ -29,14 +29,14 @@ facets:
   - facetType: list
     groups:
       - plivo
-    name: plivo.messaging.conversation_id
+    name: Conversation ID
     path: plivo.messaging.conversation_id
     source: log
     type: string
   - facetType: list
     groups:
       - plivo
-    name: plivo.messaging.message_id
+    name: Message ID
     path: plivo.messaging.message_id
     source: log
     type: string
