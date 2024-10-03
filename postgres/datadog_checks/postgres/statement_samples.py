@@ -437,7 +437,6 @@ class PostgresStatementSamples(DBMAsyncJob):
             "histogram",
         )
 
-
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith('dd.internal')]

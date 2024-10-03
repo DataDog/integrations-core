@@ -348,18 +348,8 @@ class PostgresMetadata(DBMAsyncJob):
                 hostname=self._check.resolved_hostname,
                 raw=True,
             )
-            datadog_agent.emit_agent_telemetry(
-                "postgres",
-                "schema_tables_elapsed_ms",
-                 elapsed_ms,
-                 "gauge"
-            )
-            datadog_agent.emit_agent_telemetry(
-                "postgres",
-                "schema_tables_count",
-                 total_tables,
-                 "gauge"
-            )
+            datadog_agent.emit_agent_telemetry("postgres", "schema_tables_elapsed_ms", elapsed_ms, "gauge")
+            datadog_agent.emit_agent_telemetry("postgres", "schema_tables_count", total_tables, "gauge")
 
             self._is_schemas_collection_in_progress = False
 
