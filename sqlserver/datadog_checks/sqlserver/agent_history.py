@@ -19,7 +19,7 @@ DEFAULT_ROW_LIMIT = 10000
 
 AGENT_HISTORY_QUERY = """\
 WITH BASE AS (
-    SELECT TOP {history_row_limit_filter}
+    SELECT {history_row_limit_filter}
         j.name AS job_name,
         CAST(sjh.job_id AS CHAR(36)) AS job_id,
         sjh.step_name,
@@ -55,7 +55,7 @@ COMPLETION_CTE AS (
         BASE.*,
         MIN(CASE WHEN BASE.step_id = 0 THEN BASE.step_instance_id END) OVER (
             PARTITION BY BASE.job_id
-            ORDER BY BASE.step_instance_id 
+            ORDER BY BASE.step_instance_id
             ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING
         ) AS completion_instance_id
     FROM BASE
@@ -80,7 +80,17 @@ HISTORY_ENTRIES AS (
         ON c_sjh.instance_id = C.completion_instance_id
 		WHERE C.completion_instance_id IS NOT NULL
 )
-SELECT *
+SELECT
+	job_name,
+	job_id,
+	step_name,
+	step_id,
+	step_instance_id,
+	completion_instance_id,
+	run_epoch_time,
+	run_duration_seconds,
+	step_run_status,
+	message
 FROM HISTORY_ENTRIES
 WHERE
     completion_epoch_time > {last_collection_time_filter};
