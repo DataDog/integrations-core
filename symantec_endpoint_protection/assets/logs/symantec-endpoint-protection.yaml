@@ -1,52 +1,7 @@
 id: symantec-endpoint-protection
 metric_id: symantec-endpoint-protection
 backend_only: false
-facets:
-  - groups:
-      - Geoip
-    name: City Name
-    path: network.client.geoip.city.name
-    source: log
-  - groups:
-      - Geoip
-    name: Continent Code
-    path: network.client.geoip.continent.code
-    source: log
-  - groups:
-      - Geoip
-    name: Continent Name
-    path: network.client.geoip.continent.name
-    source: log
-  - groups:
-      - Geoip
-    name: Country ISO Code
-    path: network.client.geoip.country.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Country Name
-    path: network.client.geoip.country.name
-    source: log
-  - groups:
-      - Geoip
-    name: Subdivision ISO Code
-    path: network.client.geoip.subdivision.iso_code
-    source: log
-  - groups:
-      - Geoip
-    name: Subdivision Name
-    path: network.client.geoip.subdivision.name
-    source: log
-  - groups:
-      - Web Access
-    name: Client IP
-    path: network.client.ip
-    source: log
-  - groups:
-      - User
-    name: User Name
-    path: usr.name
-    source: log
+facets: null
 pipeline:
   type: pipeline
   name: Symantec Endpoint Protection
@@ -55,13 +10,13 @@ pipeline:
     query: source:symantec-endpoint-protection
   processors:
     - type: pipeline
-      name: Processing for Application Logs
+      name: Processing for Application Control Logs
       enabled: true
       filter:
         query: "Device ID"
       processors:
         - type: grok-parser
-          name: Parsing Application Logs
+          name: Parsing Application Control Logs
           enabled: true
           source: message
           samples:
@@ -84,59 +39,40 @@ pipeline:
               172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
               66:77:88:99:00:11,GATEWAY4: 203.0.113.254"
           grok:
-            supportRules: ""
+            supportRules: application_helper_rule %{regex("[^,]*")}
             matchRules: 'application_rule (<%{integer}>)?(%{date("MMM  d
               HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})?
               %{notSpace:syslog.hostname}? SymantecServer:(
-              )?%{regex("(.*?)(?=,)"):syslog.symantecServer}?,(
-              )?%{ip:ip_address}?,( )?%{regex("(.*?)"):action_description}?,(
-              )?%{regex("(.*?)(?=,)"):application_event_description}?,(
-              )?%{regex("(.*?)(?=,)"):api_name}?,Begin:( )?%{date("yyyy-MM-dd
-              HH:mm:ss"):start_time}?,End Time:(
-              )?%{regex("(.*?)(?=,)"):end_time}?,Rule:(
-              )?%{regex("(.*?)(?=,)"):rule_name}?,(
-              )?%{regex("(.*?)(?=,)"):caller_process_id}?,(
-              )?%{regex("(.*?)(?=,)"):called_process_name}?,(
-              )?%{regex("(.*?)(?=,)"):caller_return_address}?,(
-              )?%{regex("(.*?)(?=,)"):caller_return_module_name}?,(
-              )?%{regex("(.*?)(?=,)"):parameters}?,User Name:(
-              )?%{regex("(.*?)(?=,)"):user_name}?,Domain Name:(
-              )?%{regex("(.*?)(?=,)"):domain_name}?,Action Type:(
-              )?%{regex("(.*?)(?=,)"):action_type}?,File size \(bytes\):(
+              )?%{application_helper_rule:syslog.symantecServer}?,(
+              )?%{ip:network.client.ip}?,(
+              )?%{application_helper_rule:action_description}?,(
+              )?%{application_helper_rule:application_event_description}?,(
+              )?%{application_helper_rule:api_name}?,Begin:(
+              )?%{date("yyyy-MM-dd HH:mm:ss"):start_time}?,End Time:(
+              )?%{application_helper_rule:end_time}?,Rule:(
+              )?%{application_helper_rule:rule_name}?,(
+              )?%{application_helper_rule:caller_process_id}?,(
+              )?%{application_helper_rule:called_process_name}?,(
+              )?%{application_helper_rule:caller_return_address}?,(
+              )?%{application_helper_rule:caller_return_module_name}?,(
+              )?%{application_helper_rule:parameters}?,User Name:(
+              )?%{application_helper_rule:usr.name}?,Domain Name:(
+              )?%{application_helper_rule:domain_name}?,Action Type:(
+              )?%{application_helper_rule:action_type}?,File size \(bytes\):(
               )?%{integer:file_size}?,Device ID:( )?%{integer:device_id}?(,IP
               Address:( )?%{ip:ip_Address}?)?(,IP Address1:(
               )?%{ip:ip_address_1}?)?(,MAC Address1:(
-              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY1:(
-              )?%{regex("[^,]*"):gateway1})?(,IP Address2:(
+              )?%{application_helper_rule:mac_address_1})?(,GATEWAY1:(
+              )?%{application_helper_rule:gateway1})?(,IP Address2:(
               )?%{ip:ip_address_2}?)?(,MAC Address2:(
-              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY2:(
-              )?%{regex("[^,]*"):gateway2})?(,IP Address3:
+              )?%{application_helper_rule:mac_address_2})?(,GATEWAY2:(
+              )?%{application_helper_rule:gateway2})?(,IP Address3:
               %{ip:ip_address_3}?)?(,MAC Address3:(
-              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY3:(
-              )?%{regex("[^,]*"):gateway3})?(,IP Address4:(
+              )?%{application_helper_rule:mac_address_3})?(,GATEWAY3:(
+              )?%{application_helper_rule:gateway3})?(,IP Address4:(
               )?%{ip:ip_address_4})?(,MAC Address4:(
-              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
-              )?%{regex("[^,]*"):gateway4}?)?'
-        - type: attribute-remapper
-          name: Map `user_name` to `usr.name`
-          enabled: true
-          sources:
-            - user_name
-          sourceType: attribute
-          target: usr.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `ip_address` to `network.client.ip`
-          enabled: true
-          sources:
-            - ip_address
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+              )?%{application_helper_rule:mac_address_4})?(,GATEWAY4:(
+              )?%{greedyData:gateway4}?)?'
     - type: pipeline
       name: Processing for Security Logs
       enabled: true
@@ -230,71 +166,53 @@ pipeline:
               ,SHA-256: ,MD-5: ,Intensive Protection Level: N/A,URL Risk:
               N/A,URL Category: N/A"
           grok:
-            supportRules: ""
+            supportRules: security_helper_rule %{regex("[^,]*")}
             matchRules: security_log_rule1 (<%{integer}>)?%{date("MMM d
               HH:mm:ss"):timestamp}? %{notSpace:syslog.hostname}
               SymantecServer:(
-              )?%{regex("(.*?)(?=,)"):syslog.symantecServer}?,(")?Event
+              )?%{security_helper_rule:syslog.symantecServer}?,(Event
               Description:(
-              )?%{regex("(.*?)(?=,)"):security_event_description}?,Event Type:(
-              )?%{regex("(.*?)(?=,)"):event_type}?,Local Host IP:(
+              )?%{security_helper_rule:security_event_description}?|"Event
+              Description:(
+              )?%{regex("[^\"]*"):security_event_description}")?,Event Type:(
+              )?%{security_helper_rule:event_type}?,Local Host IP:(
               )?%{ip:local_host_ip}?,Local Host MAC:(
               )?%{notSpace:local_host_mac}?,Remote Host Name:(
-              )?%{regex("(.*?)(?=,)"):remote_host_name}?,Remote Host IP:(
-              )?%{ip:remote_host_ip}?,Remote Host MAC:(
+              )?%{security_helper_rule:remote_host_name}?,Remote Host IP:(
+              )?%{ip:network.client.ip}?,Remote Host MAC:(
               )?%{notSpace:remote_host_mac}?,%{word:traffic_direction}?,%{word:network_protocol}?,%{word:hack_type}?,Begin:(
               )?%{date("yyyy-MM-dd HH:mm:ss"):start_time},End Time:(
               )?%{date("yyyy-MM-dd HH:mm:ss"):end_time}?,Occurrences:(
               )?%{integer:occurrences}?,Application:(
-              )?%{regex("(.*?)(?=,)"):application}?,Location:(
-              )?%{regex("(.*?)(?=,)"):location}?,User Name:(
-              )?%{regex("(.*?)(?=,)"):user_name}?,Domain Name:(
-              )?%{regex("(.*?)(?=,)"):domain_name}?,Local Port:(
+              )?%{security_helper_rule:application}?,Location:(
+              )?%{security_helper_rule:location}?,User Name:(
+              )?%{security_helper_rule:usr.name}?,Domain Name:(
+              )?%{security_helper_rule:domain_name}?,Local Port:(
               )?%{integer:local_port}?,Remote Port:(
               )?%{integer:remote_port}?,CIDS Signature ID:(
               )?%{integer:cids_signature_id}?,CIDS Signature string:(
-              )?%{regex("(.*?)(?=,)"):cids_signature_string}?,CIDS Signature
+              )?%{security_helper_rule:cids_signature_string}?,CIDS Signature
               SubID:( )?%{integer:cids_signature_subid}?,Intrusion URL:(
-              )?%{regex("(.*?)(?=,)"):intrusion_url}?,Intrusion Payload URL:(
-              )?%{regex("(.*?)(?=,)"):intrusion_payload_url}?(,IP Address1:(
+              )?%{security_helper_rule:intrusion_url}?,Intrusion Payload URL:(
+              )?%{security_helper_rule:intrusion_payload_url}?(,IP Address1:(
               )?%{ip:ip_address_1}?)?(,MAC Address1:(
-              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY1:(
-              )?%{regex("[^,]*"):gateway1})?(,IP Address2:(
+              )?%{security_helper_rule:mac_address_1})?(,GATEWAY1:(
+              )?%{security_helper_rule:gateway1})?(,IP Address2:(
               )?%{ip:ip_address_2}?)?(,MAC Address2:(
-              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY2:(
-              )?%{regex("[^,]*"):gateway2})?(,IP Address3:(
+              )?%{security_helper_rule:mac_address_2})?(,GATEWAY2:(
+              )?%{security_helper_rule:gateway2})?(,IP Address3:(
               )?%{ip:ip_address_3}?)?(,MAC Address3:(
-              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY3:(
-              )?%{regex("[^,]*"):gateway3})?(,IP Address4:(
+              )?%{security_helper_rule:mac_address_3})?(,GATEWAY3:(
+              )?%{security_helper_rule:gateway3})?(,IP Address4:(
               )%{ip:ip_address_4}?)?(,MAC Address4:(
-              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
-              )?%{regex("[^,]*"):gateway4})?,SHA-256:(
-              )?%{regex("(.*?)(?=,)"):sha256}?,MD-5:(
-              )?%{regex("(.*?)(?=,)"):md5}?,Intensive Protection Level:(
-              )?%{regex("(.*?)(?=,)"):intensive_protection_level}?,URL Risk:(
-              )?%{regex("(.*?)(?=,)"):url_risk}?,URL Category:(
-              )?%{regex("(.*?)"):url_category}?(,Correlation ID:(
-              )?%{regex("(.*?)"):correlation_id}?)?
-        - type: attribute-remapper
-          name: Map `user_name` to `usr.name`
-          enabled: true
-          sources:
-            - user_name
-          sourceType: attribute
-          target: usr.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `remote_host_ip` to `network.client.ip`
-          enabled: true
-          sources:
-            - remote_host_ip
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+              )?%{security_helper_rule:mac_address_4})?(,GATEWAY4:(
+              )?%{security_helper_rule:gateway4})?,SHA-256:(
+              )?%{security_helper_rule:sha256}?,MD-5:(
+              )?%{security_helper_rule:md5}?,Intensive Protection Level:(
+              )?%{security_helper_rule:intensive_protection_level}?,URL Risk:(
+              )?%{security_helper_rule:url_risk}?,URL Category:(
+              )?%{security_helper_rule:url_category}?(,Correlation ID:(
+              )?%{greedyData:correlation_id}?)?
     - type: pipeline
       name: Processing for Risk Logs
       enabled: true
@@ -365,91 +283,69 @@ pipeline:
               567890ABCDEF1234567890ABCDEF,Signing timestamp:
               1643723400,Certificate serial number: 567890ABCDEF"'
           grok:
-            supportRules: ""
+            supportRules: risk_helper_rule %{regex("[^,]*")}
             matchRules: 'risk_rule (<%{integer}>)?(%{date("MMM  d
               HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})?
               %{notSpace:syslog.hostname}? SymantecServer:(
-              )?%{regex("(.*?)(?=,)"):risk_type}?,IP Address:(
-              )?%{ip:ip_address}?,Computer name:(
-              )?%{regex("(.*?)(?=,)"):computer_name}?,Source:(
-              )?%{regex("(.*?)(?=,)"):scan_source}?,Risk name:(
-              )?%{regex("(.*?)(?=,)"):risk_name}?,Occurrences:(
+              )?%{risk_helper_rule:risk_type}?,IP Address:(
+              )?%{ip:network.client.ip}?,Computer name:(
+              )?%{risk_helper_rule:computer_name}?,Source:(
+              )?%{risk_helper_rule:scan_source}?,Risk name:(
+              )?%{risk_helper_rule:risk_name}?,Occurrences:(
               )?%{integer:occurrences}?,File path:(
-              )?%{regex("(.*?)(?=,)"):file_path}?,Description:(
-              )?%{regex("(.*?)(?=,)"):risk_event_description}?,Actual action:(
-              )?%{regex("(.*?)(?=,)"):actual_action}?,Requested action:(
-              )?%{regex("(.*?)(?=,)"):requested_action}?,Secondary action:(
-              )?%{regex("(.*?)(?=,)"):secondary_action}?,Event time:(
-              )?%{regex("(.*?)(?=,)"):event_time}?,Event Insert Time:(
-              )?%{regex("(.*?)(?=,)"):event_insert_time}?,End Time:(
-              )?%{regex("(.*?)(?=,)"):end_time}?,Last update time:(
-              )?%{regex("(.*?)(?=,)"):last_update_time}?,Domain Name:(
-              )?%{regex("(.*?)(?=,)"):domain_name}?,Group Name:(
-              )?%{regex("(.*?)(?=,)"):group_name}?,Server Name:(
-              )?%{regex("(.*?)(?=,)"):server_name}?,User Name:(
-              )?%{regex("(.*?)(?=,)"):user_name}?,Source Computer Name:(
-              )?%{regex("(.*?)(?=,)"):source_computer_name}?,Source Computer
-              IP:( )?%{regex("(.*?)(?=,)"):source_computer_ip}?(,IP Address 1:(
+              )?%{risk_helper_rule:file_path}?,Description:(
+              )?%{risk_helper_rule:risk_event_description}?,Actual action:(
+              )?%{risk_helper_rule:actual_action}?,Requested action:(
+              )?%{risk_helper_rule:requested_action}?,Secondary action:(
+              )?%{risk_helper_rule:secondary_action}?,Event time:(
+              )?%{risk_helper_rule:event_time}?,Event Insert Time:(
+              )?%{risk_helper_rule:event_insert_time}?,End Time:(
+              )?%{risk_helper_rule:end_time}?,Last update time:(
+              )?%{risk_helper_rule:last_update_time}?,Domain Name:(
+              )?%{risk_helper_rule:domain_name}?,Group Name:(
+              )?%{risk_helper_rule:group_name}?,Server Name:(
+              )?%{risk_helper_rule:server_name}?,User Name:(
+              )?%{risk_helper_rule:usr.name}?,Source Computer Name:(
+              )?%{risk_helper_rule:source_computer_name}?,Source Computer IP:(
+              )?%{risk_helper_rule:source_computer_ip}?(,IP Address 1:(
               )?%{ip:ip_address_1}?)?(,MAC Address 1:(
-              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY IP 1:(
-              )?%{regex("[^,]*"):gateway1})?(,IP Address 2:(
+              )?%{risk_helper_rule:mac_address_1})?(,GATEWAY IP 1:(
+              )?%{risk_helper_rule:gateway1})?(,IP Address 2:(
               )?%{ip:ip_address_2}?)?(,MAC Address 2:(
-              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY IP 2:(
-              )?%{regex("[^,]*"):gateway2})?(,IP Address 3:
+              )?%{risk_helper_rule:mac_address_2})?(,GATEWAY IP 2:(
+              )?%{risk_helper_rule:gateway2})?(,IP Address 3:
               %{ip:ip_address_3}?)?(,MAC Address 3:(
-              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY IP 3:(
-              )?%{regex("[^,]*"):gateway3})?(,IP Address 4:(
+              )?%{risk_helper_rule:mac_address_3})?(,GATEWAY IP 3:(
+              )?%{risk_helper_rule:gateway3})?(,IP Address 4:(
               )?%{ip:ip_address_4})?(,MAC Address 4:(
-              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY IP 4:(
-              )?%{regex("[^,]*"):gateway4})?,Disposition:(
-              )?%{regex("(.*?)(?=,)"):disposition}?,Download site:(
-              )?%{regex("(.*?)(?=,)"):download_site}?,Web domain:(
-              )?%{regex("(.*?)(?=,)"):web_domain}?,Downloaded by:(
-              )?%{regex("(.*?)(?=,)"):downloaded_by}?,Prevalence:(
-              )?%{regex("(.*?)(?=,)"):prevalence}?,Confidence:(
-              )?%{regex("(.*?)(?=,)"):confidence}?,URL Tracking Status:(
-              )?%{regex("(.*?)(?=,)"):url_tracking_status}?,First Seen:(
-              )?%{regex("(.*?)(?=,)"):first_seen}?,Sensitivity:(
-              )?%{regex("(.*?)(?=,)"):sensitivity}?,Allowed application reason:(
-              )?%{regex("(.*?)(?=,)"):allowed_application_reason}?,Application
-              hash:( )?%{regex("(.*?)(?=,)"):application_hash}?,Hash type:(
-              )?%{regex("(.*?)(?=,)"):hash_type}?,Company name:(
-              )?%{regex("(.*?)(?=,)"):company_name}?,Application name:(
-              )?%{regex("(.*?)(?=,)"):application_name}?,Application version:(
-              )?%{regex("(.*?)(?=,)"):application_version}?,Application type:(
-              )?%{regex("(.*?)(?=,)"):application_type}?,File size \(bytes\):(
+              )?%{risk_helper_rule:mac_address_4})?(,GATEWAY IP 4:(
+              )?%{risk_helper_rule:gateway4})?,Disposition:(
+              )?%{risk_helper_rule:disposition}?,Download site:(
+              )?%{risk_helper_rule:download_site}?,Web domain:(
+              )?%{risk_helper_rule:web_domain}?,Downloaded by:(
+              )?%{risk_helper_rule:downloaded_by}?,Prevalence:(
+              )?%{risk_helper_rule:prevalence}?,Confidence:(
+              )?%{risk_helper_rule:confidence}?,URL Tracking Status:(
+              )?%{risk_helper_rule:url_tracking_status}?,First Seen:(
+              )?%{risk_helper_rule:first_seen}?,Sensitivity:(
+              )?%{risk_helper_rule:sensitivity}?,Allowed application reason:(
+              )?%{risk_helper_rule:allowed_application_reason}?,Application
+              hash:( )?%{risk_helper_rule:application_hash}?,Hash type:(
+              )?%{risk_helper_rule:hash_type}?,Company name:(
+              )?%{risk_helper_rule:company_name}?,Application name:(
+              )?%{risk_helper_rule:application_name}?,Application version:(
+              )?%{risk_helper_rule:application_version}?,Application type:(
+              )?%{risk_helper_rule:application_type}?,File size \(bytes\):(
               )?%{integer:file_size}?,Category set:(
-              )?%{regex("(.*?)(?=,)"):category_set}?,Category type:(
-              )?%{regex("(.*?)(?=,)"):category_type}?,Location:(
-              )?%{regex("(.*?)(?=,)"):location}?,Intensive Protection Level:(
-              )?%{regex("(.*?)(?=,)"):intensive_protection_level}?,Certificate
-              issuer:( )?%{regex("(.*?)(?=,)"):certificate_issuer}?,Certificate
-              signer:( )?%{regex("(.*?)(?=,)"):certificate_signer}?,Certificate
-              thumbprint:(
-              )?%{regex("(.*?)(?=,)"):certificate_thumbprint}?,Signing
-              timestamp:(
-              )?%{regex("(.*?)(?=,)"):signing_timestamp}?,Certificate serial
-              number:( )?%{regex("(.*?)"):certificate_serial_number}?'
-        - type: attribute-remapper
-          name: Map `user_name` to `usr.name`
-          enabled: true
-          sources:
-            - user_name
-          sourceType: attribute
-          target: usr.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `ip_address` to `network.client.ip`
-          enabled: true
-          sources:
-            - ip_address
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+              )?%{risk_helper_rule:category_set}?,Category type:(
+              )?%{risk_helper_rule:category_type}?,Location:(
+              )?%{risk_helper_rule:location}?,Intensive Protection Level:(
+              )?%{risk_helper_rule:intensive_protection_level}?,Certificate
+              issuer:( )?%{risk_helper_rule:certificate_issuer}?,Certificate
+              signer:( )?%{risk_helper_rule:certificate_signer}?,Certificate
+              thumbprint:( )?%{risk_helper_rule:certificate_thumbprint}?,Signing
+              timestamp:( )?%{risk_helper_rule:signing_timestamp}?,Certificate
+              serial number:( )?%{greedyData:certificate_serial_number}?'
     - type: pipeline
       name: Processing for Scan Logs
       enabled: true
@@ -511,10 +407,14 @@ pipeline:
               172.16.1.1,IP Address4: 185.245.40.65,MAC Address4:
               66:77:88:99:00:11,GATEWAY4: 203.0.113.254"
           grok:
-            supportRules: scan_results ?((Scan Complete|Scan
+            supportRules: >-
+              scan_results ?((Scan Complete|Scan
               Suspended):?\s+Risks:\s+%{integer:scan_results.risks}\s+Scanned:\s+%{integer:scan_results.scanned}\s+%{notSpace:scan_results.file_path}
               Omitted:\s+%{integer:scan_results.omitted}\s+Trusted Files
               Skipped:\s+%{integer:scan_results.trusted_files_skipped})
+
+
+              scan_helper_rule %{regex("[^,]*")}
             matchRules: scan_rule (<%{integer}>)?(%{date("MMM  d
               HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})
               %{notSpace:syslog.hostname} SymantecServer:( )Scan ID:(
@@ -522,40 +422,30 @@ pipeline:
               HH:mm:ss"):start_time}?,End Time:( )?%{date("yyyy-MM-dd
               HH:mm:ss"):end_time}?,%{word:status}?,Duration \(seconds\):(
               )?%{integer:duration}?,User1:(
-              )?%{regex("(.*?)(?=,)"):user1}?,User2:(
-              )?%{regex("(.*?)(?=,)"):user2}?,%{regex("[^,]*"):scan_description}?,%{scan_results}?,Command:(
-              )?%{regex("(.*?)(?=,)"):command}?,Threats:(
+              )?%{scan_helper_rule:user1}?,User2:(
+              )?%{scan_helper_rule:user2}?,%{scan_helper_rule:scan_description}?,%{scan_results}?,Command:(
+              )?%{scan_helper_rule:command}?,Threats:(
               )%{integer:threats}?,Infected:( )?%{integer:infected}?,Total
               files:( )?%{integer:total_files}?,Omitted:(
               )?%{integer:omitted_files}?,Computer:(
-              )?%{regex("(.*?)(?=,)"):computer}?,IP Address:(
-              )?%{ip:ip_address}?,Domain Name:(
-              )?%{regex("(.*?)(?=,)"):domain_name}?,Group Name:(
-              )?%{regex("(.*?)(?=,)"):group_name}?,Server Name:(
-              )?%{regex("(.*?)(?=,)"):server_name}?,Scan Type:(
-              )?%{regex("[^,]*"):scan_type}?(,IP Address1:(
+              )?%{scan_helper_rule:computer}?,IP Address:(
+              )?%{ip:network.client.ip}?,Domain Name:(
+              )?%{scan_helper_rule:domain_name}?,Group Name:(
+              )?%{scan_helper_rule:group_name}?,Server Name:(
+              )?%{scan_helper_rule:server_name}?,Scan Type:(
+              )?%{scan_helper_rule:scan_type}?(,IP Address1:(
               )?%{ip:ip_address_1}?)?(,MAC Address1:(
-              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY1:(
-              )?%{regex("[^,]*"):gateway1})?(,IP Address2:(
+              )?%{scan_helper_rule:mac_address_1})?(,GATEWAY1:(
+              )?%{scan_helper_rule:gateway1})?(,IP Address2:(
               )?%{ip:ip_address_2}?)?(,MAC Address2:(
-              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY2:(
-              )?%{regex("[^,]*"):gateway2})?(,IP Address3:(
+              )?%{scan_helper_rule:mac_address_2})?(,GATEWAY2:(
+              )?%{scan_helper_rule:gateway2})?(,IP Address3:(
               )?%{ip:ip_address_3}?)?(,MAC Address3:(
-              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY3:(
-              )?%{regex("[^,]*"):gateway3})?(,IP Address4:(
+              )?%{scan_helper_rule:mac_address_3})?(,GATEWAY3:(
+              )?%{scan_helper_rule:gateway3})?(,IP Address4:(
               )?%{ip:ip_address_4}?)?(,MAC Address4:(
-              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
-              )?%{regex("[^,]*"):gateway4})?
-        - type: attribute-remapper
-          name: Map `ip_address` to `network.client.ip`
-          enabled: true
-          sources:
-            - ip_address
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+              )?%{scan_helper_rule:mac_address_4})?(,GATEWAY4:(
+              )?%{greedyData:gateway4})?
     - type: pipeline
       name: Processing for Traffic Logs
       enabled: true
@@ -611,58 +501,38 @@ pipeline:
               4567890987654321098765432109876543210987654321098765432109876543,MD-5:
               3a4a436a436a436a436a436a436a436a
           grok:
-            supportRules: ""
+            supportRules: traffic_helper_rule %{regex("[^,]*")}
             matchRules: 'traffic_rule (<%{integer}>)?(%{date("MMM d HH:mm:ss"):timestamp})?
               %{notSpace:syslog.hostname} SymantecServer:(
-              )?%{regex("(.*?)(?=,)"):syslog.symantecServer}?,Local Host IP:(
+              )?%{traffic_helper_rule:syslog.symantecServer}?,Local Host IP:(
               )?%{ip:local_host_ip}?,Local Port:( )?%{integer:local_port}?,Local
-              Host MAC:( )?%{regex("(.*?)(?=,)"):local_host_mac}?,Remote Host
-              IP:( )?%{ip:remote_host_ip}?,Remote Host Name:(
-              )?%{regex("(.*?)(?=,)"):remote_host_name}?,Remote Port:(
+              Host MAC:( )?%{traffic_helper_rule:local_host_mac}?,Remote Host
+              IP:( )?%{ip:network.client.ip}?,Remote Host Name:(
+              )?%{traffic_helper_rule:remote_host_name}?,Remote Port:(
               )?%{integer:remote_port}?,Remote Host MAC:(
-              )?%{regex("(.*?)(?=,)"):remote_host_mac}?,%{word:network_protocol}?,%{word:traffic_direction}?,Begin:(
+              )?%{traffic_helper_rule:remote_host_mac}?,%{word:network_protocol}?,%{word:traffic_direction}?,Begin:(
               )?%{date("yyyy-MM-dd HH:mm:ss"):start_time},End Time:(
               )?%{date("yyyy-MM-dd HH:mm:ss"):end_time}?,Occurrences:(
               )?%{integer:occurrences}?,Application:(
-              )?%{regex("(.*?)(?=,)"):application}?,Rule:(
-              )?%{regex("(.*?)(?=,)"):traffic_rule}?,Location:(
-              )?%{regex("(.*?)(?=,)"):location}?,User Name:(
-              )?%{regex("(.*?)(?=,)"):user_name}?,Domain Name:(
-              )?%{regex("(.*?)(?=,)"):domain_name}?(,IP Address1:(
+              )?%{traffic_helper_rule:application}?,Rule:(
+              )?%{traffic_helper_rule:traffic_rule}?,Location:(
+              )?%{traffic_helper_rule:location}?,User Name:(
+              )?%{traffic_helper_rule:usr.name}?,Domain Name:(
+              )?%{traffic_helper_rule:domain_name}?(,IP Address1:(
               )?%{ip:ip_address_1}?)?(,MAC Address1:(
-              )?%{regex("[^,]*"):mac_address_1})?(,GATEWAY1:(
-              )?%{regex("[^,]*"):gateway1})?(,IP Address2:(
+              )?%{traffic_helper_rule:mac_address_1})?(,GATEWAY1:(
+              )?%{traffic_helper_rule:gateway1})?(,IP Address2:(
               )?%{ip:ip_address_2}?)?(,MAC Address2:(
-              )?%{regex("[^,]*"):mac_address_2})?(,GATEWAY2:(
-              )?%{regex("[^,]*"):gateway2})?(,IP Address3:
+              )?%{traffic_helper_rule:mac_address_2})?(,GATEWAY2:(
+              )?%{traffic_helper_rule:gateway2})?(,IP Address3:
               %{ip:ip_address_3}?)?(,MAC Address3:(
-              )?%{regex("[^,]*"):mac_address_3})?(,GATEWAY3:(
-              )?%{regex("[^,]*"):gateway3})?(,IP Address4:(
+              )?%{traffic_helper_rule:mac_address_3})?(,GATEWAY3:(
+              )?%{traffic_helper_rule:gateway3})?(,IP Address4:(
               )?%{ip:ip_address_4})?(,MAC Address4:(
-              )?%{regex("[^,]*"):mac_address_4})?(,GATEWAY4:(
-              )?%{regex("[^,]*"):gateway4})?,Action:(
-              )?%{regex("(.*?)(?=,)"):action}?,SHA-256:(
-              )?%{regex("(.*?)(?=,)"):sha_256}?,MD-5:( )?%{regex("(.*?)"):md5}?'
-        - type: attribute-remapper
-          name: Map `user_name` to `usr.name`
-          enabled: true
-          sources:
-            - user_name
-          sourceType: attribute
-          target: usr.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `remote_host_ip` to `network.client.ip`
-          enabled: true
-          sources:
-            - remote_host_ip
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+              )?%{traffic_helper_rule:mac_address_4})?(,GATEWAY4:(
+              )?%{traffic_helper_rule:gateway4})?,Action:(
+              )?%{traffic_helper_rule:action}?,SHA-256:(
+              )?%{traffic_helper_rule:sha_256}?,MD-5:( )?%{greedyData:md5}?'
     - type: pipeline
       name: Processing for Client Activity Logs
       enabled: true
@@ -689,28 +559,29 @@ pipeline:
               E01AF2C1}/240412011/Full.zip,Event time: 2024-09-10 05:42:28,Group
               Name: My Company\\Default Group\t\t\t\t\t\t\t\t\t\t"
           grok:
-            supportRules: ""
+            supportRules: client_helper_rule %{regex("[^,]*")}
             matchRules: client_rule (<%{integer}>)?(%{date("MMM  d
               HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})?
               %{notSpace:syslog.hostname}? SymantecServer:(
-              )?%{regex("(.*?)(?=,)"):syslog.SymantecServer}?,Category:(
+              )?%{client_helper_rule:syslog.SymantecServer}?,Category:(
               )?%{integer:category}?,(
-              )?%{regex("(.*?)(?=,)"):event_source}?,(")?Event Description:(
-              )?%{regex("(.*?)"):client_event_description}?(,IP Address1:(
-              )?%{ip:ip_address_1}?)?(,MAC Address1:(
-              )?%{regex("[^,]"):mac_address_1})?(,GATEWAY1:(
-              )?%{regex("[^,]"):gateway1})?(,IP Address2:(
+              )?%{client_helper_rule:event_source}?,(Event Description:(
+              )?%{client_helper_rule:client_event_description}?|"Event
+              Description:( )?%{regex("[^\"]*"):client_event_description}")?(,IP
+              Address1:( )?%{ip:ip_address_1}?)?(,MAC Address1:(
+              )?%{client_helper_rule:mac_address_1})?(,GATEWAY1:(
+              )?%{client_helper_rule:gateway1})?(,IP Address2:(
               )?%{ip:ip_address_2}?)?(,MAC Address2:(
-              )?%{regex("[^,]"):mac_address_2})?(,GATEWAY2:(
-              )?%{regex("[^,]"):gateway2})?(,IP Address3:(
+              )?%{client_helper_rule:mac_address_2})?(,GATEWAY2:(
+              )?%{client_helper_rule:gateway2})?(,IP Address3:(
               )?%{ip:ip_address_3}?)?(,MAC Address3:(
-              )?%{regex("[^,]"):mac_address_3})?(,GATEWAY3:(
-              )?%{regex("[^,]"):gateway3})?(,IP Address4:(
+              )?%{client_helper_rule:mac_address_3})?(,GATEWAY3:(
+              )?%{client_helper_rule:gateway3})?(,IP Address4:(
               )?%{ip:ip_address_4}?)?(,MAC Address4:(
-              )?%{regex("[^,]"):mac_address_4})?(,GATEWAY4:(
-              )?%{regex("[^,]"):gateway4})?,Event time:(
-              )?%{regex("(.*?)(?=,)"):event_time}?,Group Name:(
-              )?%{regex("(.*?)"):group_name}?
+              )?%{client_helper_rule:mac_address_4})?(,GATEWAY4:(
+              )?%{client_helper_rule:gateway4})?,Event time:(
+              )?%{client_helper_rule:event_time}?,Group Name:(
+              )?%{client_helper_rule:group_name}?
         - type: category-processor
           name: Define `service` for client activity logs
           enabled: true
@@ -753,37 +624,26 @@ pipeline:
               Added shared policy upon system install,Daily Scheduled
               Scan\t\t\t\t"
           grok:
-            supportRules: ""
+            supportRules: system_helper_rule %{regex("[^,]*")}
             matchRules: >-
               client_server_rule (<%{integer}>)?(%{date("MMM  d
               HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})?
-              %{notSpace:syslog.hostname:nullIf("-")}? SymantecServer: Site:
-              %{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:(
-              )%{regex("(.*?)(?=,)"):server_name}?,Domain Name:(
-              )?%{regex("(.*?)(?=,)"):domain_name}?,(
-              )?%{regex("(.*?)(?=,)"):client_server_event_description}?,(
-              )?%{regex("(.*?)(?=,)"):host_name}?,(
-              )?%{regex("(.*?)(?=,)"):user_name}?,(
-              )?%{regex("(.*?)"):Location}?
+              %{notSpace:syslog.hostname}? SymantecServer: Site:(
+              )?%{system_helper_rule:syslog.symantecServer.site}?,Server Name:(
+              )?%{system_helper_rule:server_name}?,Domain Name:(
+              )?%{system_helper_rule:domain_name}?,(
+              )?%{system_helper_rule:client_server_event_description}?,(
+              )?%{system_helper_rule:host_name}?,(
+              )?%{system_helper_rule:usr.name}?,( )?%{greedyData:location}?
 
 
-              audit_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname:nullIf("-")}? SymantecServer: Site: %{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:( )%{regex("(.*?)(?=,)"):server_name}?,Domain Name:( )?%{regex("(.*?)(?=,)"):domain_name}?,Admin:( )?%{regex("(.*?)(?=,)"):audit_admin_name}?,Event Description:( )?%{regex("(.*?)(?=:)"):audit_event_description}?:( )?%{regex("(.*?)(?=,)"):event_type}?,%{regex("(.*?)"):policy_name}?
+              audit_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname}? SymantecServer: Site: %{system_helper_rule:syslog.symantecServer.site}?,Server Name:( )%{system_helper_rule:server_name}?,Domain Name:( )?%{system_helper_rule:domain_name}?,Admin:( )?%{system_helper_rule:audit_admin_name}?,Event Description:( )?%{regex("[^:]*"):audit_event_description}?:( )?%{system_helper_rule:event_type}?,%{greedyData:policy_name}?
 
 
-              admin_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname}? SymantecServer: Site:( )?%{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:( )?%{regex("(.*?)(?=,)"):server_name}?,Domain Name:( )?%{regex("(.*?)(?=,)"):domain_name}?,Admin:( )?%{regex("(.*?)(?=,)"):admin_name}?,Event Description:( )?%{regex("(.*?)"):admin_event_description}?
+              admin_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname}? SymantecServer: Site:( )?%{system_helper_rule:syslog.symantecServer.site}?,Server Name:( )?%{system_helper_rule:server_name}?,Domain Name:( )?%{system_helper_rule:domain_name}?,Admin:( )?%{system_helper_rule:admin_name}?,Event Description:( )?%{greedyData:admin_event_description}?
 
 
-              server_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname}? SymantecServer: Site:( )?%{regex("(.*?)(?=,)"):syslog.symantecServer.site}?,Server Name:( )?%{regex("(.*?)(?=,)"):server_name}?,Event Description:( )?%{regex("(.*?)"):server_event_description}?
-        - type: attribute-remapper
-          name: Map `user_name` to `usr.name`
-          enabled: true
-          sources:
-            - user_name
-          sourceType: attribute
-          target: usr.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+              server_rule (<%{integer}>)?(%{date("MMM  d HH:mm:ss"):timestamp}|%{date("MMM d HH:mm:ss"):timestamp})? %{notSpace:syslog.hostname}? SymantecServer: Site:( )?%{system_helper_rule:syslog.symantecServer.site}?,Server Name:( )?%{system_helper_rule:server_name}?,Event Description:( )?%{greedyData:server_event_description}?
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
@@ -826,15 +686,15 @@ pipeline:
         - filter:
             query: "@server_event_description:*"
           name: server
-        - name: admin
-          filter:
+        - filter:
             query: (@admin_name:* OR @admin_event_description:*)
-        - name: client-server
-          filter:
+          name: admin
+        - filter:
             query: (@client_server_admin_name:* OR @client_server_event_description:*)
+          name: client-server
       target: activity
     - type: geo-ip-parser
-      name: "GeoIp Parser for `network.client.ip` "
+      name: "GeoIp Parser for `network.client.ip`"
       enabled: true
       sources:
         - network.client.ip
