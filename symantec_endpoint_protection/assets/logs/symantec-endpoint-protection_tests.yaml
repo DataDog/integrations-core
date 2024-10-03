@@ -311,11 +311,11 @@ tests:
   sample: "<54>Sep 16 04:25:05 WIN-RQBT7BNE363 SymantecServer: Site: My Site,Server Name: WIN-RQBT7BNE363,Domain Name: Default,The management server received the client log successfully,DESKTOP-GGG3BOO,Test,LocalComputer"
   result:
     custom:
-      Location: "LocalComputer"
       activity: "client-server"
       client_server_event_description: "The management server received the client log successfully"
       domain_name: "Default"
       host_name: "DESKTOP-GGG3BOO"
+      location: "LocalComputer"
       server_name: "WIN-RQBT7BNE363"
       service: "system"
       syslog:
