@@ -1,6 +1,6 @@
 ## Overview
 
-[Trend Micro Vision One XDR][1] collects and automatically correlates data across multiple security layers: email, endpoint, server, cloud workload, and network. This allows for faster detection of threats and improved investigation and response times through security analysis.
+[Trend Micro Vision One XDR][1] collects and automatically correlates data across multiple security layers: email, endpoint, server, cloud workload, and network. This enables faster threat detection, enhances investigation and response times through improved security analysis.
 
 This integration ingests the following logs:
 
@@ -8,8 +8,8 @@ This integration ingests the following logs:
 - **Observed Attack Techniques**: This endpoint contains information about observed attack techniques from Detections, Endpoint Activity, Cloud Activity, Email Activity, Mobile Activity, Network Activity, Container Activity, and Identity Activity data sources.
 
 This integration collects logs from the sources listed above and sends them to Datadog for analysis with our Log Explorer and Cloud SIEM products
-* https://docs.datadoghq.com/logs/explorer/
-* https://www.datadoghq.com/product/cloud-siem/
+* [Log Explorer][3]
+* [Cloud SIEM][4]
 
 ## Setup
 
@@ -17,7 +17,7 @@ This integration collects logs from the sources listed above and sends them to D
 
 #### Create API KEY from Trend Micro Vision One XDR
 
-1. In the Trend Vision One console, go to **Administration > API Keys** .
+1. In the Trend Vision One console, go to > visit **Administration > API Keys** .
 2. Generate a new authentication token. Click **Add API key**. Specify the settings of the new API key with the following:
     - **Name**: A meaningful name that can help you identify the API key
     - **Role**: The user role assigned to the key. Select **SIEM** from dropdown.
@@ -64,4 +64,5 @@ For further assistance, contact [Datadog Support][2].
 
 [1]: https://www.trendmicro.com/en_in/business/products/detection-response/xdr.html
 [2]: https://docs.datadoghq.com/help/
-
+[3]: https://docs.datadoghq.com/logs/explorer/
+[4]: https://www.datadoghq.com/product/cloud-siem/
