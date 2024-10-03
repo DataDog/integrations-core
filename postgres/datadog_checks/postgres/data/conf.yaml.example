@@ -822,6 +822,11 @@ instances:
         #
         # keep_identifier_quotation: false
 
+        ## @param keep_json_path - boolean - optional - default: false
+        ## Set to `true` to keep JSON path expressions (e.g. `data->'key'`) in your normalized SQL statements.
+        #
+        # keep_json_path: false
+
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
     ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.

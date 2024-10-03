@@ -404,6 +404,8 @@ files:
         type: array
         items:
           type: string
+        example: 
+          - '1101'
     - name: message_filters
       description: |
         The `message_filters` filter instructs the check to only capture
