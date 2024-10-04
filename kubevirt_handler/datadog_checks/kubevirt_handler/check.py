@@ -62,7 +62,7 @@ class KubeVirtHandlerCheck(OpenMetricsBaseCheckV2):
             "enable_health_service_check": False,
             "tls_verify": self.tls_verify,
             "rename_labels": {
-                "namespace": "vmi_namespace",
+                "namespace": "vm_namespace",
             },
         }
 
