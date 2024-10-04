@@ -7,7 +7,7 @@ This integration ingests the following types of logs:
 - Access Logs: This records all Web Proxy filtering and scanning activity.
 - L4TM Logs: This records all Layer-4 Traffic Monitor activity.
 
-Visualize detailed insights into Web Proxy filtering and scanning activity and Layer-4 Traffic Monitor activity through the out-of-the-box dashboards.Additionally, out-of-the-box detection rules are available to help you monitor and respond to potential security threats effectively.
+Out-of-the-box dashboards help you to visualize detailed insights into Web Proxy filtering and scanning activity and Layer-4 Traffic Monitor activity. Additionally, out-of-the-box detection rules are available to help you monitor and respond to potential security threats effectively.
 
 ## Setup
 
@@ -93,18 +93,18 @@ L4TM Logs can only be collected by file monitoring using SCP on Remote Server as
 #### Steps to configure Syslog Push for Access Logs:
 
 **Prerequisites:**
-1. Require Syslog server hostname(Your Datadog Agent Server) where you want to push the logs.
+- The Syslog server hostname (your Datadog Agent Server) where you want to push the logs.
 
 **Configuration:**
 
-1. Login to Cisco Secure Web Appliance UI.
+1. Log in to Cisco Secure Web Appliance UI.
 2. Navigate to  System Administration -> Log Subscriptions.
-3. In order to add  Access Logs subscription, click on the Add `Log Subscription` button.
+3. In order to add  Access Logs subscription, click on the **Add Log Subscription** button.
 4. Select Log Type as Access Logs.
 5. Provide Log Name.
-6. Choose `Squid` Option for Log Style.\
-    **Note**: We will support default (squid) log style for access log. 
-7. Select `Syslog Push` Option as Retrieval Method.
+6. Choose the `Squid` option for Log Style.
+    **Note**: The default (squid) log style for access logs is supported. 
+7. Select `Syslog Push` option as the Retrieval Method.
 8. Provide Following Details.
 
     Hostname: \<Datadog-Agent Host Server>
@@ -117,10 +117,10 @@ L4TM Logs can only be collected by file monitoring using SCP on Remote Server as
     
     Facility: \<Default Selected>
 9. Click on Submit. 
-10. Click on Commit Changes at top right-side of Log Subscriptions Page.
-    NOTE: These changes will not go into effect until you commit them.
+10. Click on **Commit Changes** at the top right of the Log Subscriptions page.
+    **Note:** These changes will not go into effect until they are committed.
 
-#### Steps to configure SCP on Remote Server for L4TM Logs.
+#### Configure SCP on Remote Server for L4TM Logs
 
 **Prerequisites:**
 1. Requires SCP Host and Username for the same.
@@ -153,34 +153,31 @@ L4TM Logs can only be collected by file monitoring using SCP on Remote Server as
 1. Requires SCP Host and Username for the same.
 
 **Configuration:**
-1. Go to System Administration -> Log Subscriptions in Cisco Secure Web Appliance UI.
-2. To add a new log subscription for Access Logs, click Add `Log Subscription`  OR edit already configured Access Logs Subscription.
-3. If you are adding a new subscription then follow the steps 4 to 6 mentioned in the configuration of Syslog Push for Access Logs.
-4. If you are editing existing Access Logs Subscription, select SCP on Remote Server as Retrieval Method.
+1. In the Cisco Secure Web Appliance UI, go to System Administration, and then Log Subscriptions.
+2. To add a new log subscription for Access Logs, click **Add Log Subscription** or edit an existing Access Logs Subscription.
+3. If you are adding a new subscription, then follow steps 4 to 6 mentioned in the Syslog Push for Access Logs section.
+4. If you are editing an existing Access Logs Subscription, select SCP on the Remote Server as the Retrieval Method.
 5. Provide following information:
-
     SCP Host: \<SCP Hostname>
-
     SCP Port: \<Default Provided>
     
     Directory: \<Path to store the Log Files>
     
-    **NOTE:** Make sure that Directory does not have any other log files.
+    **Note:** Make sure that Directory does not have any other log files.
 10. Username: \<SCP Server Username>
-11. Click on Submit. Once you click on `Submit`,  SSH key(s) will get generated. Copy the SSH Key and save it somewhere as this will be only displayed once. 
+11. Click **Submit**. Once you click **Submit**,  SSH key(s) are generated. Copy the SSH Key and save it somewhere as this will be only displayed once. 
 12. Place the given SSH key(s) into your `authorized_keys` file on the remote host so that the log files can be uploaded.
-Click on Commit Changes at top right-side of Log Subscriptions Page.
-
-    **NOTE:** These changes will not go into effect until you commit them.
+13. Click **Commit Changes** at top right of Log Subscriptions Page.
+    **Note:** These changes do not go into effect until you commit them.
 
 #### Steps to set time zone to GMT in Cisco Secure Web Appliance 
 
-Since Datadog expects all the logs in GMT timezone by default, if the time zone of your Cisco Secure Web Appliance logs is other than GMT, please change it to GMT. Here are the steps:
-1. Go to System Administration->Time Zone.
-2. Click on `Edit Settings`.
-3. Select GMT Offset as the region.
-4. Select GMT as the Country.
-5. Select GMT (GMT) as the time zone.
+Datadog expects all the logs in GMT time zone by default. If the time zone of your Cisco Secure Web Appliance logs is not GMT, please change it to GMT. Here are the steps:
+1. Go to **System Administration**, and then **Time Zone**.
+2. Click on **Edit Settings**.
+3. Select **GMT Offset** as the region.
+4. Select **GMT** as the country.
+5. Select **GMT (GMT)** as the time zone.
 6. Submit and commit the changes.
 
 
@@ -253,12 +250,9 @@ Make sure that traffic is bypassed from the configured port if the firewall is e
 
 **Port already in use:**
 
-- If you see the **Port \<PORT-NO> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
-
-- On systems using Syslog, if the Agent listens for access_logs logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
-
-- This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps: 
-
+If you see the **Port \<PORT-NO> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
+On systems using Syslog, if the Agent listens for access_logs logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`.
+This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps: 
     - Disable Syslog 
     - Configure the Agent to listen on a different, available port
 
