@@ -131,7 +131,7 @@ datadog-nvidia-triton==2.1.0
 datadog-openldap==3.0.0
 datadog-openmetrics==6.0.0
 datadog-openstack-controller==7.0.0
-datadog-openstack==3.0.0
+datadog-openstack==4.0.0
 datadog-oracle==6.0.0
 datadog-ossec-security==2.0.0
 datadog-palo-alto-panorama==1.0.0
