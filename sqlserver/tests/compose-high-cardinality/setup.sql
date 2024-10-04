@@ -251,6 +251,21 @@ CREATE CLUSTERED INDEX thingsindex ON [datadog_test-1].dbo.ϑings (name);
 DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE [datadog_test-1].dbo.'
 DECLARE @table_columns VARCHAR(500) = ' (id INT NOT NULL IDENTITY, col1_txt TEXT, col2_txt TEXT, col3_txt TEXT, col4_txt TEXT, col5_txt TEXT, col6_txt TEXT, col7_txt TEXT, col8_txt TEXT, col9_txt TEXT, col10_txt TEXT, col11_float FLOAT, col12_float FLOAT, col13_float FLOAT, col14_int INT, col15_int INT, col16_int INT, col17_date DATE, PRIMARY KEY(id));';
 
+-- Create a simple table for deadlocks
+CREATE TABLE [datadog_test-1].dbo.deadlocks (a int PRIMARY KEY not null ,b int null); 
+
+INSERT INTO [datadog_test-1].dbo.deadlocks VALUES (1,10),(2,20),(3,30) 
+
+-- Grant permissions to bob and fred to update the deadlocks table
+GRANT INSERT ON [datadog_test-1].dbo.deadlocks TO bob;
+GRANT UPDATE ON [datadog_test-1].dbo.deadlocks TO bob;
+GRANT DELETE ON [datadog_test-1].dbo.deadlocks TO bob;
+
+GRANT INSERT ON [datadog_test-1].dbo.deadlocks TO fred;
+GRANT UPDATE ON [datadog_test-1].dbo.deadlocks TO fred;
+GRANT DELETE ON [datadog_test-1].dbo.deadlocks TO fred;
+GO
+
 -- Create a main table which contains high cardinality data for testing.
 DECLARE @main_table_query VARCHAR(600) = @table_prefix + 'high_cardinality' + @table_columns;
 EXEC (@main_table_query);
