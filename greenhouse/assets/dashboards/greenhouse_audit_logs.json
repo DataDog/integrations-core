@@ -1,6 +1,6 @@
 {
     "title": "Greenhouse - Audit Logs",
-    "description": "This dashboard provides information about the Audit Logs generated on greenhouse.",
+    "description": "This dashboard provides information about the Audit Logs generated on Greenhouse.",
     "widgets": [
         {
             "id": 3944753043846434,
