@@ -2,7 +2,7 @@
 
 ## Overview
 
-[Greenhouse][1] is a cloud-based hiring platform that helps companies manage their recruitment processes. It provides audit log features for security audits. Also it provides a variety of features, including: job, applications, candidate communications, interview scheduling, offers, bulk actions, etc. Greenhouse's goal is to help companies hire the right people for the right roles at the right time.
+[Greenhouse][1] is a cloud-based hiring platform that helps companies manage their recruitment processes. It features job postings, application tracking, candidate communications, interview scheduling, offers, and bulk actions, all aimed at helping companies hire the right people efficiently.
 
 This integration ingests the following logs:
 - Audit Logs: Audit logs offer a record of important events, empowering your teams to detect and minimize the impact of incidents when they occur, and scrutinize configuration edits.
