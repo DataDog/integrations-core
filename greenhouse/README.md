@@ -19,7 +19,7 @@ By seamlessly collecting these logs and channeling them into Datadog, the Greenh
 
 Steps to create API key on Greenhouse Platform:
 
-1. Login to **[Greenhouse][2]** platform with your credentials.
+1. Log in to **[Greenhouse][2]** with your credentials.
 2. Click on the **Configure** button located in the top right corner.
 3. Navigate to **Dev Center** in the left panel.
 4. Select **API Credentials** from the left panel.
