@@ -39,6 +39,7 @@ tests:
             ip: "10.10.10.10"
         outbound_malware_scanning_policy: "NONE"
         policy_group_name: "DefaultGroup"
+        request_throttled: "0"
         request_throttled_status: "Not Throttled"
         response_size: 8560.0
         routing_policy: "DefaultGroup"
@@ -111,6 +112,7 @@ tests:
         outbound_malware_scanning_policy: "NONE"
         policy_group_name: "DefaultGroup"
         request_side_anti_malware_scanning_verdict: "-Troj/Phish"
+        request_throttled: "0"
         request_throttled_status: "Not Throttled"
         response_size: 8207.0
         routing_policy: "DefaultGroup"
@@ -191,6 +193,7 @@ tests:
             ip: "10.10.10.10"
         outbound_malware_scanning_policy: "NONE"
         policy_group_name: "DefaultGroup"
+        request_throttled: "0"
         request_throttled_status: "Not Throttled"
         response_side_anti_malware_scanning_verdict: "Phishing URL"
         response_size: 8207.0
@@ -262,6 +265,7 @@ tests:
             ip: "10.10.11.12"
         outbound_malware_scanning_policy: "NONE"
         policy_group_name: "DefaultGroup"
+        request_throttled: "0"
         request_throttled_status: "Not Throttled"
         response_size: 8560.0
         routing_policy: "DefaultGroup"
