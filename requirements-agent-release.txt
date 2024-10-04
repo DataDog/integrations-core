@@ -160,7 +160,7 @@ datadog-sidekiq==3.0.0
 datadog-silk==4.0.0
 datadog-singlestore==4.0.0
 datadog-snmp==9.0.0
-datadog-snowflake==6.0.0
+datadog-snowflake==7.0.0
 datadog-solr==2.0.0
 datadog-sonarqube==4.0.0
 datadog-spark==5.0.0
