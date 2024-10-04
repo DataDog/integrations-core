@@ -162,7 +162,7 @@ datadog-singlestore==4.0.0
 datadog-snmp==9.0.0
 datadog-snowflake==7.0.0
 datadog-solr==2.1.0
-datadog-sonarqube==4.0.0
+datadog-sonarqube==5.0.0
 datadog-spark==5.0.0
 datadog-sqlserver==18.0.0
 datadog-squid==3.0.0
