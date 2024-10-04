@@ -18,15 +18,40 @@
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 6,
-                "height": 3
+                "width": 7,
+                "height": 2
+            }
+        },
+        {
+            "id": 8770406996449935,
+            "definition": {
+                "title": "Shopify Monitor Summary",
+                "type": "manage_status",
+                "display_format": "countsAndList",
+                "color_preference": "background",
+                "hide_zero_counts": true,
+                "show_status": true,
+                "last_triggered_format": "relative",
+                "query": "tag:shopify",
+                "sort": "status,asc",
+                "count": 50,
+                "start": 0,
+                "summary_type": "monitors",
+                "show_priority": false,
+                "show_last_triggered": false
+            },
+            "layout": {
+                "x": 7,
+                "y": 0,
+                "width": 5,
+                "height": 4
             }
         },
         {
             "id": 1767411351951850,
             "definition": {
                 "type": "note",
-                "content": "**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform that help individuals to start, manage, and grow a business. It offers a  set of tools to build an online store, manage sales, market to customers, and accept payments in digital and physical locations.\n\nThe **Shopify Product Overview** Dashboard provides an overview of products within your store. It provides  insights into product types, status distribution, inventory details, variant details and pricing details.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
+                "content": "**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform that help individuals to start, manage, and grow a business. It offers a  set of tools to build an online store, manage sales, market to customers, and accept payments in digital and physical locations.\n\nThe **Shopify Product Overview** Dashboard provides an overview of products within your store. It provides  insights into product types, status distribution, inventory and variant details.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -37,10 +62,10 @@
                 "has_padding": true
             },
             "layout": {
-                "x": 6,
-                "y": 0,
-                "width": 6,
-                "height": 3
+                "x": 0,
+                "y": 2,
+                "width": 7,
+                "height": 2
             }
         },
         {
@@ -90,15 +115,15 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
-                "width": 4,
+                "y": 4,
+                "width": 3,
                 "height": 3
             }
         },
         {
             "id": 6613518820826564,
             "definition": {
-                "title": "Top Products by Type",
+                "title": "Top Product Count by Type",
                 "type": "treemap",
                 "requests": [
                     {
@@ -143,9 +168,9 @@
                 ]
             },
             "layout": {
-                "x": 4,
-                "y": 3,
-                "width": 8,
+                "x": 3,
+                "y": 4,
+                "width": 9,
                 "height": 3
             }
         },
@@ -189,9 +214,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 6,
+                "y": 7,
                 "width": 4,
-                "height": 3
+                "height": 2
             }
         },
         {
@@ -234,9 +259,9 @@
             },
             "layout": {
                 "x": 4,
-                "y": 6,
+                "y": 7,
                 "width": 4,
-                "height": 3
+                "height": 2
             }
         },
         {
@@ -279,9 +304,9 @@
             },
             "layout": {
                 "x": 8,
-                "y": 6,
+                "y": 7,
                 "width": 4,
-                "height": 3
+                "height": 2
             }
         },
         {

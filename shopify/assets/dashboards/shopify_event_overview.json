@@ -26,7 +26,7 @@
             "id": 6595375037827088,
             "definition": {
                 "type": "note",
-                "content": "**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform that help individuals to start, manage, and grow a business. It offers a  set of tools to build an online store, manage sales, market to customers, and accept payments in digital and physical locations.\n\nThe **Shopify Event Overview** Dashboard provides an overview of event logs, offering insights into events, type and action distribution, top events, most active users and events overtime.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
+                "content": "**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform that help individuals to start, manage, and grow a business. It offers a  set of tools to build an online store, manage sales, market to customers, and accept payments in digital and physical locations.\n\nThe **Shopify Event Overview** Dashboard provides an overview of event logs, offering insights into events, type and action distribution.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -92,7 +92,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 3,
-                "height": 3
+                "height": 4
             }
         },
         {
@@ -115,6 +115,7 @@
                     {
                         "formulas": [
                             {
+                                "alias": "Events",
                                 "formula": "query1"
                             }
                         ],
@@ -151,7 +152,7 @@
                 "x": 3,
                 "y": 3,
                 "width": 9,
-                "height": 3
+                "height": 4
             }
         },
         {
@@ -203,9 +204,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 6,
-                "width": 6,
-                "height": 3
+                "y": 7,
+                "width": 5,
+                "height": 4
             }
         },
         {
@@ -271,10 +272,10 @@
                 ]
             },
             "layout": {
-                "x": 6,
-                "y": 6,
-                "width": 6,
-                "height": 3
+                "x": 5,
+                "y": 7,
+                "width": 7,
+                "height": 4
             }
         },
         {
@@ -332,9 +333,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 11,
                 "width": 5,
-                "height": 3
+                "height": 4
             }
         },
         {
@@ -401,9 +402,9 @@
             },
             "layout": {
                 "x": 5,
-                "y": 9,
+                "y": 11,
                 "width": 7,
-                "height": 3
+                "height": 4
             }
         },
         {
@@ -481,7 +482,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 15,
                 "width": 5,
                 "height": 4
             }
@@ -550,7 +551,7 @@
             },
             "layout": {
                 "x": 5,
-                "y": 12,
+                "y": 15,
                 "width": 3,
                 "height": 4
             }
@@ -608,7 +609,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:event"
+                                    "query": "source:shopify service:event $event_type $event_action"
                                 },
                                 "storage": "hot"
                             }
@@ -637,7 +638,7 @@
             },
             "layout": {
                 "x": 8,
-                "y": 12,
+                "y": 15,
                 "width": 4,
                 "height": 4
             }
@@ -689,7 +690,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 19,
                 "width": 12,
                 "height": 4
             }

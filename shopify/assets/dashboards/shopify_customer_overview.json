@@ -26,7 +26,7 @@
             "id": 7447057642776924,
             "definition": {
                 "type": "note",
-                "content": "\n**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform designed to help individuals start, manage, and grow their businesses. It provides tools to build an online store, manage sales, market to customers, and accept payments in both digital and physical locations.\n\nThe **Shopify Customer Overview** Dashboard provides an overview of customers within your store. It provides insights into customer details, returning customers, pricing details by currency, SMS and Email marketing details, top customers by order count and customers by default location.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
+                "content": "\n**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform designed to help individuals start, manage, and grow their businesses. It provides tools to build an online store, manage sales, market to customers, and accept payments in both digital and physical locations.\n\nThe **Shopify Customer Overview** Dashboard provides an overview of customers within your store. It provides insights into customer's marketing and order details.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",
@@ -92,7 +92,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 4,
-                "height": 2
+                "height": 3
             }
         },
         {
@@ -137,7 +137,7 @@
                 "x": 4,
                 "y": 3,
                 "width": 4,
-                "height": 2
+                "height": 3
             }
         },
         {
@@ -182,228 +182,7 @@
                 "x": 8,
                 "y": 3,
                 "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 4312648521138476,
-            "definition": {
-                "title": "Amount Spent by First Time Customers (Avg)",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@amountSpent.amount"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@amountSpent.currencyCode",
-                                        "limit": 25,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@amountSpent.amount"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:customer @numberOfOrders:1 $customer_name $customer_id $currency"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "value": 0,
-                                "palette": "white_on_green"
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 5,
-                "width": 4,
-                "height": 4
-            }
-        },
-        {
-            "id": 8540082775305124,
-            "definition": {
-                "title": "Amount Spent by Returning Customers (Avg)",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@amountSpent.amount"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@amountSpent.currencyCode",
-                                        "limit": 25,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@amountSpent.amount"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:customer @numberOfOrders:>1 $customer_name $customer_id $currency"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "value": 0,
-                                "palette": "white_on_yellow"
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
-            },
-            "layout": {
-                "x": 4,
-                "y": 5,
-                "width": 4,
-                "height": 4
-            }
-        },
-        {
-            "id": 6208927249201918,
-            "definition": {
-                "title": "Amount Spent by Currency (Avg)",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@amountSpent.amount"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@amountSpent.currencyCode",
-                                        "limit": 25,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@amountSpent.amount"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
-            },
-            "layout": {
-                "x": 8,
-                "y": 5,
-                "width": 4,
-                "height": 4
+                "height": 3
             }
         },
         {
@@ -475,7 +254,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 6,
                 "width": 4,
                 "height": 4
             }
@@ -558,8 +337,229 @@
             },
             "layout": {
                 "x": 4,
-                "y": 9,
+                "y": 6,
                 "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 4312648521138476,
+            "definition": {
+                "title": "Amount Spent by First Time Customers (Avg)",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@amountSpent.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@amountSpent.currencyCode",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@amountSpent.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer @numberOfOrders:1 $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 8540082775305124,
+            "definition": {
+                "title": "Amount Spent by Returning Customers (Avg)",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@amountSpent.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@amountSpent.currencyCode",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@amountSpent.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer @numberOfOrders:>1 $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_yellow"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 10,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 6208927249201918,
+            "definition": {
+                "title": "Amount Spent by Currency (Avg)",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@amountSpent.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@amountSpent.currencyCode",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@amountSpent.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:customer $customer_name $customer_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 10,
+                "width": 4,
                 "height": 4
             }
         },
@@ -601,13 +601,6 @@
                             }
                         ],
                         "response_format": "scalar",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">=",
-                                "value": 0,
-                                "palette": "white_on_yellow"
-                            }
-                        ],
                         "formulas": [
                             {
                                 "formula": "query1"
@@ -634,7 +627,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 14,
                 "width": 4,
                 "height": 4
             }
@@ -704,7 +697,7 @@
             },
             "layout": {
                 "x": 4,
-                "y": 13,
+                "y": 14,
                 "width": 8,
                 "height": 4
             }
@@ -773,7 +766,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 17,
+                "y": 18,
                 "width": 6,
                 "height": 4
             }
@@ -842,7 +835,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 17,
+                "y": 18,
                 "width": 6,
                 "height": 4
             }
@@ -920,7 +913,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 21,
+                "y": 22,
                 "width": 3,
                 "height": 4
             }
@@ -1002,7 +995,7 @@
             },
             "layout": {
                 "x": 3,
-                "y": 21,
+                "y": 22,
                 "width": 3,
                 "height": 4
             }
@@ -1071,7 +1064,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 21,
+                "y": 22,
                 "width": 6,
                 "height": 4
             }
@@ -1131,7 +1124,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 25,
+                "y": 26,
                 "width": 12,
                 "height": 4
             }
@@ -1139,14 +1132,14 @@
     ],
     "template_variables": [
         {
-            "name": "customer_name",
-            "prefix": "@usr.name",
+            "name": "customer_id",
+            "prefix": "@usr.id",
             "available_values": [],
             "default": "*"
         },
         {
-            "name": "customer_id",
-            "prefix": "@usr.id",
+            "name": "customer_name",
+            "prefix": "@usr.name",
             "available_values": [],
             "default": "*"
         },

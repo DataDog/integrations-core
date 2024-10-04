@@ -12,23 +12,23 @@
     "title": "Shopify",
     "media": [
       {
-        "caption": "Shopify - Event",
-        "image_url": "images/shopify_event.png",
+        "caption": "Shopify - Event Overview",
+        "image_url": "images/shopify_event_overview.png",
         "media_type": "image"
       },
       {
-        "caption": "Shopify - Product",
-        "image_url": "images/shopify_product.png",
+        "caption": "Shopify - Product Overview",
+        "image_url": "images/shopify_product_overview.png",
         "media_type": "image"
       },
       {
-        "caption": "Shopify - Customer",
-        "image_url": "images/shopify_customer.png",
+        "caption": "Shopify - Customer Overview",
+        "image_url": "images/shopify_customer_overview.png",
         "media_type": "image"
       },
       {
-        "caption": "Shopify - Order",
-        "image_url": "images/shopify_order.png",
+        "caption": "Shopify - Order Overview",
+        "image_url": "images/shopify_order_overview.png",
         "media_type": "image"
       }
     ],
