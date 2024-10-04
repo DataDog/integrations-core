@@ -2,6 +2,26 @@
 
 <!-- towncrier release notes start -->
 
+## 18.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump lxml version for py3.12 E2E tests ([#18637](https://github.com/DataDog/integrations-core/pull/18637))
+
+***Fixed***:
+
+* Fix ODBC config handling for Linux ([#18586](https://github.com/DataDog/integrations-core/pull/18586))
+
+## 17.5.3 / 2024-09-17
+
+***Fixed***:
+
+* Fix ODBC config handling for Linux ([#18586](https://github.com/DataDog/integrations-core/pull/18586))
+
 ## 17.5.2 / 2024-08-28 / Agent 7.57.0
 
 ***Fixed***:

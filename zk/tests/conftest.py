@@ -5,9 +5,9 @@ import os
 import sys
 import time
 from copy import deepcopy
+from io import StringIO
 
 import pytest
-from six import StringIO
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run

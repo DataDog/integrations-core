@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 
 def get_gitlab_version(http, log, gitlab_url, api_token):

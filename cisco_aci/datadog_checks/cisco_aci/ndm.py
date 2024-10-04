@@ -2,17 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-from six import PY3
-
-if PY3:
-    from datadog_checks.cisco_aci.models import (
-        DeviceMetadata,
-        InterfaceMetadata,
-        NetworkDevicesMetadata,
-        Node,
-        PhysIf,
-    )
+from datadog_checks.cisco_aci.models import (
+    DeviceMetadata,
+    InterfaceMetadata,
+    NetworkDevicesMetadata,
+    Node,
+    PhysIf,
+)
 
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100

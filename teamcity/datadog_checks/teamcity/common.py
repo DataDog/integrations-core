@@ -5,13 +5,7 @@ import re
 import time
 from collections import OrderedDict
 from copy import deepcopy
-
-from six import PY2
-
-if PY2:
-    from urlparse import urlparse
-else:
-    from urllib.parse import urlparse
+from urllib.parse import urlparse
 
 import requests
 

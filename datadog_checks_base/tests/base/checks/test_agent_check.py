@@ -13,7 +13,6 @@ from six import PY3
 
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.dev.testing import requires_py3
 
 
 def test_instance():
@@ -1068,7 +1067,6 @@ class TestCheckInitializations:
         assert check.initialize.call_count == 2
 
 
-@requires_py3
 def test_load_configuration_models(dd_run_check, mocker):
     instance = {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}}
     init_config = {'proxy': {'https': 'https://1.2.3.4:4242'}}
@@ -1111,7 +1109,6 @@ else:
             pass
 
 
-@requires_py3
 @pytest.mark.parametrize(
     "check_instance_config, default_instance_config, log_lines, unknown_options",
     [

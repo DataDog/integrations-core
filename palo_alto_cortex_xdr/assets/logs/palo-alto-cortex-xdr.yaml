@@ -174,12 +174,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `malicious_urls` to `http.url`
+          name: Map `malicious_urls` to `http.defanged.url`
           enabled: true
           sources:
             - malicious_urls
           sourceType: attribute
-          target: http.url
+          target: http.defanged.url
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false

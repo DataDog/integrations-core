@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pymongo.errors import OperationFailure
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.mongo.collectors.base import MongoCollector
@@ -96,7 +95,7 @@ class CollStatsCollector(MongoCollector):
                 # Submit the indexSizes metrics manually
                 if index_sizes:
                     metric_name_alias = self._normalize("collection.indexSizes", AgentCheck.gauge)
-                    for idx, val in iteritems(index_sizes):
+                    for idx, val in index_sizes.items():
                         # we tag the index
                         idx_tags = self.base_tags + additional_tags + ["index:%s" % idx]
                         self.gauge(metric_name_alias, val, tags=idx_tags)

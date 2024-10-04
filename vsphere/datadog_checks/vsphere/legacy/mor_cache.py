@@ -4,8 +4,6 @@
 import threading
 import time
 
-from six import iteritems
-
 from datadog_checks.vsphere.legacy.common import REALTIME_RESOURCES
 
 
@@ -88,7 +86,7 @@ class MorCache:
         Generator returning all the mors in the cache for the given instance key.
         """
         with self._mor_lock:
-            for k, v in iteritems(self._mor.get(key, {})):
+            for k, v in self._mor.get(key, {}).items():
                 yield k, v
 
     def mors_batch(self, key, batch_size, max_historical_metrics=None):
@@ -111,7 +109,7 @@ class MorCache:
 
             batch = {}
             nb_hist_metrics = 0
-            for mor_name, mor in iteritems(mors_dict):
+            for mor_name, mor in mors_dict.items():
                 if mor['mor_type'] not in REALTIME_RESOURCES and mor.get('metrics'):
                     # Those metrics are historical, let's make sure we don't have too
                     # many of them in the same batch.
@@ -182,7 +180,7 @@ class MorCache:
         with self._mor_lock:
             # Don't change the dict during iteration!
             # First collect the names of the Mors to remove...
-            for name, mor in iteritems(self._mor[key]):
+            for name, mor in self._mor[key].items():
                 age = now - mor['creation_time']
                 if age > ttl:
                     mors_to_purge.append(name)

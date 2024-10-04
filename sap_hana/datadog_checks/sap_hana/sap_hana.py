@@ -18,8 +18,6 @@ try:
     from hdbcli.dbapi import Connection as HanaConnection
 except ImportError:
     HanaConnection = None
-from six import iteritems
-from six.moves import zip
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import total_time_to_temporal_percent
@@ -265,7 +263,7 @@ class SapHanaCheck(AgentCheck):
         for conn in self.iter_rows(queries.GlobalSystemConnectionsStatus(schema=self._schema)):
             db_counts[(conn['db_name'], conn['host'], conn['port'])][conn['status'].lower()] += conn['total']
 
-        for (db, host, port), counts in iteritems(db_counts):
+        for (db, host, port), counts in db_counts.items():
             tags = ['db:{}'.format(db), 'hana_port:{}'.format(port)]
             tags.extend(self._tags)
             tags.append('hana_host:{}'.format(host))

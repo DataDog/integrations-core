@@ -12,8 +12,6 @@ import os
 import subprocess
 from typing import Dict, List  # noqa: F401
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 
@@ -180,7 +178,7 @@ class GlusterfsCheck(AgentCheck):
         Parse a payload with a given metric_mapping and submit metric for valid values.
         Some values contain measurements like `GiB` which should be removed and only submitted if consistent
         """
-        for key, metric in iteritems(metric_mapping):
+        for key, metric in metric_mapping.items():
             if key in payload:
                 value = payload[key]
 

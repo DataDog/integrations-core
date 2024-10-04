@@ -7,7 +7,6 @@ import os
 
 import mock
 import pytest
-from six import PY3, iteritems
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
@@ -221,13 +220,13 @@ def test_cx_state(aggregator):
     with mock.patch('datadog_checks.network.check_linux.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check_instance.check(instance)
-        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+        for metric, value in CX_STATE_GAUGES_VALUES.items():
             aggregator.assert_metric(metric, value=value)
         aggregator.reset()
 
         out.side_effect = netstat_subprocess_mock
         check_instance.check(instance)
-        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+        for metric, value in CX_STATE_GAUGES_VALUES.items():
             aggregator.assert_metric(metric, value=value)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -242,7 +241,7 @@ def test_linux_sys_net(listdir, read_int_file, aggregator):
 
     check_instance.check({})
 
-    for metric, value in iteritems(LINUX_SYS_NET_STATS):
+    for metric, value in LINUX_SYS_NET_STATS.items():
         aggregator.assert_metric(metric, value=value[0], tags=['iface:lo'])
         aggregator.assert_metric(metric, value=value[1], tags=['iface:ens5'])
 
@@ -259,13 +258,13 @@ def test_cx_state_mocked(aggregator):
         check_instance.get_net_proc_base_location = lambda x: FIXTURE_DIR
 
         check_instance.check({})
-        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+        for metric, value in CX_STATE_GAUGES_VALUES.items():
             aggregator.assert_metric(metric, value=value)
 
         aggregator.reset()
         out.side_effect = netstat_subprocess_mock
         check_instance.check({})
-        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+        for metric, value in CX_STATE_GAUGES_VALUES.items():
             aggregator.assert_metric(metric, value=value)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -283,14 +282,13 @@ def test_add_conntrack_stats_metrics(aggregator):
         subprocess.return_value = mocked_conntrack_stats, None, None
         check_instance._add_conntrack_stats_metrics(None, None, ['foo:bar'])
 
-        for metric, value in iteritems(CONNTRACK_STATS):
+        for metric, value in CONNTRACK_STATS.items():
             aggregator.assert_metric(metric, value=value[0], tags=['foo:bar', 'cpu:0'])
             aggregator.assert_metric(metric, value=value[1], tags=['foo:bar', 'cpu:1'])
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-@pytest.mark.skipif(not PY3, reason="mock builtins only works on Python 3")
 def test_proc_permissions_error(aggregator, caplog):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = False
@@ -330,7 +328,7 @@ def test_proc_net_metrics(aggregator):
     check_instance.get_net_proc_base_location = lambda x: FIXTURE_DIR
 
     check_instance.check({})
-    for metric, value in iteritems(PROC_NET_STATS):
+    for metric, value in PROC_NET_STATS.items():
         aggregator.assert_metric(metric, value=value)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

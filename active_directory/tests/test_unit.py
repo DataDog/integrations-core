@@ -4,12 +4,9 @@
 from datadog_checks.active_directory import ActiveDirectoryCheck
 from datadog_checks.active_directory.metrics import DEFAULT_COUNTERS
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import PERFORMANCE_OBJECTS
-
-pytestmark = [requires_py3]
 
 
 def test(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects):

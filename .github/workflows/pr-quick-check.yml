@@ -12,7 +12,7 @@ defaults:
     shell: bash
 
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
   CHECK_SCRIPT: "ddev/src/ddev/utils/scripts/check_pr.py"
 
 jobs:

@@ -120,6 +120,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 **Prerequisites**
 
 * Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
+* Bind above RBAC to application pod by setting Service Account name.
 * Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
    ```shell
@@ -291,6 +292,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 **Prerequisites**
 
 * Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
+* Bind above RBAC to application pod by setting Service Account name.
 * Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
    ```shell
