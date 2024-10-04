@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2024-10-04
+
+***Added***:
+
+* Add new network metrics ([#18764](https://github.com/DataDog/integrations-core/pull/18764))
+
 ## 4.0.0 / 2024-10-01
 
 ***Changed***:
