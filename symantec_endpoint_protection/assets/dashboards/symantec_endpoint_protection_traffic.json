@@ -795,7 +795,7 @@
                     {
                         "id": 5189049338252654,
                         "definition": {
-                            "title": "Top Domain names",
+                            "title": "Top Domains",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1145,7 +1145,7 @@
                     {
                         "id": 6416015596981514,
                         "definition": {
-                            "title": "Traffic Over Time",
+                            "title": "Traffic over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,

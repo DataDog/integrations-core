@@ -710,7 +710,7 @@
                     {
                         "id": 5794879375069322,
                         "definition": {
-                            "title": "Distribution by Traffic direction",
+                            "title": "Distribution by Traffic Direction",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -844,7 +844,7 @@
                     {
                         "id": 2549875657613342,
                         "definition": {
-                            "title": "Top Domain Names",
+                            "title": "Top Domains",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
