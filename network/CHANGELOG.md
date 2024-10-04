@@ -4,7 +4,7 @@
 
 ## 4.1.0 / 2024-10-04
 
-***Added***:
+***Fixed***:
 
 * Fix metric type in new network metrics ([#18764](https://github.com/DataDog/integrations-core/pull/18764))
 
