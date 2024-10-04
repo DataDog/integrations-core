@@ -67,7 +67,7 @@ datadog-foundationdb==3.0.0
 datadog-gearmand==5.0.0; sys_platform != 'win32'
 datadog-gitlab-runner==6.0.0
 datadog-gitlab==9.0.0
-datadog-glusterfs==2.0.0; sys_platform == 'linux2'
+datadog-glusterfs==3.0.0; sys_platform == 'linux2'
 datadog-go-expvar==3.0.0
 datadog-gunicorn==3.0.0; sys_platform != 'win32'
 datadog-haproxy==6.0.0
