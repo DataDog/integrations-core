@@ -93,7 +93,7 @@ L4TM Logs can only be collected by file monitoring using SCP on Remote Server as
 #### Steps to configure Syslog Push for Access Logs:
 
 **Prerequisites:**
-- The Syslog server hostname (your Datadog Agent Server) where you want to push the logs.
+- The datadog-agent server hostname where you want to push the logs.
 
 **Configuration:**
 
@@ -123,7 +123,7 @@ L4TM Logs can only be collected by file monitoring using SCP on Remote Server as
 #### Configure SCP on Remote Server for L4TM Logs
 
 **Prerequisites:**
-1. Requires SCP Host and Username for the same.
+1. Requires hostname and username (admin account username is not necessary) of VM/machine on which datadog-agent is installed.
 
 **Configuration:**
 1. Navigate to  System Administration -> Log Subscriptions in Cisco Secure Web Appliance UI.
@@ -150,7 +150,7 @@ L4TM Logs can only be collected by file monitoring using SCP on Remote Server as
 #### Steps to configure SCP on Remote Server for Access Logs.
 
 **Prerequisites:**
-1. Requires SCP Host and Username for the same.
+1. Requires hostname and username (admin account username is not necessary) of VM/machine on which datadog-agent is installed.
 
 **Configuration:**
 1. In the Cisco Secure Web Appliance UI, go to System Administration, and then Log Subscriptions.
