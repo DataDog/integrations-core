@@ -305,10 +305,10 @@ pipeline:
             36,Outbreak Heuristics
             37,Known Malicious and High-Risk Files
           type: lookup-processor
-        - name: Lookup for `request_throttled` to  `request_throttled` Field
+        - name: Lookup for `request_throttled` to  `request_throttled_status` Field
           enabled: true
           source: request_throttled
-          target: request_throttled
+          target: request_throttled_status
           lookupTable: |-
             0,Not Throttled
             1,Throttled

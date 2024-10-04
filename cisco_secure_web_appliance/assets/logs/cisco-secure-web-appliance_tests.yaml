@@ -39,7 +39,7 @@ tests:
             ip: "10.10.10.10"
         outbound_malware_scanning_policy: "NONE"
         policy_group_name: "DefaultGroup"
-        request_throttled: "Not Throttled"
+        request_throttled_status: "Not Throttled"
         response_size: 8560.0
         routing_policy: "DefaultGroup"
         server_name: "csp.withgoogle.com"
@@ -111,7 +111,7 @@ tests:
         outbound_malware_scanning_policy: "NONE"
         policy_group_name: "DefaultGroup"
         request_side_anti_malware_scanning_verdict: "-Troj/Phish"
-        request_throttled: "Not Throttled"
+        request_throttled_status: "Not Throttled"
         response_size: 8207.0
         routing_policy: "DefaultGroup"
         scanned_file_identifier: "fd5ef49d4213e05f448f11ed9c98253d85829614fba368a421d14e64c426da5e"
@@ -191,7 +191,7 @@ tests:
             ip: "10.10.10.10"
         outbound_malware_scanning_policy: "NONE"
         policy_group_name: "DefaultGroup"
-        request_throttled: "Not Throttled"
+        request_throttled_status: "Not Throttled"
         response_side_anti_malware_scanning_verdict: "Phishing URL"
         response_size: 8207.0
         routing_policy: "DefaultGroup"
@@ -262,7 +262,7 @@ tests:
             ip: "10.10.11.12"
         outbound_malware_scanning_policy: "NONE"
         policy_group_name: "DefaultGroup"
-        request_throttled: "Not Throttled"
+        request_throttled_status: "Not Throttled"
         response_size: 8560.0
         routing_policy: "DefaultGroup"
         server_name: "csp.withgoogle.com"
