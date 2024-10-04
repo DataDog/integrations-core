@@ -3191,6 +3191,65 @@ INTERFACE_METADATA = [
     },
 ]
 
+TOPOLOGY_LINK_METADATA = [
+    {
+        'id': 'default:10.0.200.0:49.1',
+        'local': {
+            'device': {
+                'dd_id': 'default:10.0.200.0',
+            },
+            'interface': {
+                'dd_id': 'default:10.0.200.0:49',
+                'id': 'eth1/49',
+                'id_type': 'interface_name',
+            },
+        },
+        'remote': {
+            'device': {
+                'description': 'topology/pod-1/node-201',
+                'id': '6a:00:21:1f:55:2a',
+                'id_type': 'mac',
+                'ip_address': '10.0.200.5',
+                'name': 'SP201',
+            },
+            'interface': {
+                'description': 'topology/pod-1/paths-201/pathep-[eth5/1]',
+                'id': 'eth5/1',
+                'id_type': 'interface_name',
+            },
+        },
+        'source_type': 'lldp',
+    },
+    {
+        'id': 'default:10.0.200.1:49.2',
+        'local': {
+            'device': {
+                'dd_id': 'default:10.0.200.1',
+            },
+            'interface': {
+                'dd_id': 'default:10.0.200.1:49',
+                'id': 'eth1/49',
+                'id_type': 'interface_name',
+            },
+        },
+        'remote': {
+            'device': {
+                'description': 'topology/pod-1/node-201',
+                'id': '6a:00:21:1f:55:2b',
+                'id_type': 'mac',
+                'ip_address': '10.0.200.5',
+                'name': 'SP201',
+            },
+            'interface': {
+                'description': 'topology/pod-1/paths-201/pathep-[eth5/2]',
+                'id': 'eth5/2',
+                'id_type': 'interface_name',
+            },
+        },
+        'source_type': 'lldp',
+    },
+]
+
 EXPECTED_DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
 
 # "2012-01-14 03:21:34" in seconds
@@ -3211,6 +3270,7 @@ EXPECTED_METADATA_EVENTS = [
     NetworkDevicesMetadata(
         namespace='default',
         interfaces=INTERFACE_METADATA[193::],
+        links=TOPOLOGY_LINK_METADATA,
         collect_timestamp=MOCK_TIME_EPOCH,
     ),
 ]
