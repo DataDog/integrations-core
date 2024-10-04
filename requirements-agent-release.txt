@@ -61,7 +61,7 @@ datadog-exchange-server==4.0.0; sys_platform == 'win32'
 datadog-external-dns==5.0.0
 datadog-flink==3.0.0
 datadog-fluentd==5.0.0
-datadog-fluxcd==2.0.0
+datadog-fluxcd==2.1.0
 datadog-fly-io==2.0.0
 datadog-foundationdb==2.0.0
 datadog-gearmand==4.0.0; sys_platform != 'win32'
