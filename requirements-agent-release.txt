@@ -158,7 +158,7 @@ datadog-sap-hana==5.0.0
 datadog-scylla==4.0.0
 datadog-sidekiq==3.0.0
 datadog-silk==4.0.0
-datadog-singlestore==3.0.0
+datadog-singlestore==4.0.0
 datadog-snmp==8.0.0
 datadog-snowflake==6.0.0
 datadog-solr==2.0.0
