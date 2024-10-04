@@ -161,6 +161,7 @@ BASE_METRICS = {
     "system.memSizeMB": (GAUGE, "system.mem.total"),  # total amount of system memory
     "system.memLimitMB": (GAUGE, "system.mem.limit"),  # memory usage limit
     "system.numCores": (GAUGE, "system.cpu.cores"),  # number of CPU cores
+    'system.cpu_percent': (GAUGE, "system.cpu.percent"),  # total mongo process CPU usage precent
 }
 
 """
