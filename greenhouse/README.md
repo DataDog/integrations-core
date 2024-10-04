@@ -12,6 +12,9 @@ By seamlessly collecting these logs and channeling them into Datadog, the Greenh
 
 ### Configuration
 
+1. [Create an API key from the Greenhouse Platform](#greenhouse-configuration).
+2. [Configure the Datadog endpoint to forward Greenhouse events as logs to Datadog](#greenhouse-integration-configuration).
+
 #### Greenhouse Configuration
 
 Steps to create API key on Greenhouse Platform:
