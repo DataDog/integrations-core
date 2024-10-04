@@ -173,7 +173,7 @@ datadog-supervisord==4.0.0
 datadog-suricata==2.0.0
 datadog-system-core==4.0.0
 datadog-system-swap==3.0.0
-datadog-tcp-check==5.0.0
+datadog-tcp-check==6.0.0
 datadog-teamcity==5.0.0
 datadog-tekton==2.0.0
 datadog-teleport==2.0.0
