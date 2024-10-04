@@ -49,7 +49,7 @@ datadog-dcgm==3.1.0
 datadog-directory==4.0.0
 datadog-disk==7.0.0
 datadog-dns-check==5.0.0
-datadog-dotnetclr==3.0.0; sys_platform == 'win32'
+datadog-dotnetclr==4.0.0; sys_platform == 'win32'
 datadog-druid==3.0.0
 datadog-ecs-fargate==5.0.0
 datadog-eks-fargate==5.0.0
