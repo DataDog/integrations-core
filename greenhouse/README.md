@@ -4,8 +4,7 @@
 
 [Greenhouse][1] is a cloud-based hiring platform that helps companies manage their recruitment processes. It features job postings, application tracking, candidate communications, interview scheduling, offers, and bulk actions, all aimed at helping companies hire the right people efficiently.
 
-This integration ingests the following logs:
-- Audit Logs: Audit logs offer a record of important events, empowering your teams to detect and minimize the impact of incidents when they occur, and scrutinize configuration edits.
+This integration focuses on ingesting audit logs, which document important events and configuration changes, enabling teams to detect incidents and minimize their impact.
 
 The Greenhouse integration seamlessly collects audit logs from Greenhouse, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into activities on the Greenhouse platform through the out-of-the-box dashboards.
 
