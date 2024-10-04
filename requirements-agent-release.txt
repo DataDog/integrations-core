@@ -9,6 +9,7 @@ datadog-airflow==6.0.0
 datadog-amazon-msk==5.0.0
 datadog-ambari==5.0.0; sys_platform != 'win32'
 datadog-apache==5.0.0
+datadog-appgate-sdp==1.0.0; sys_platform != 'win32'
 datadog-arangodb==3.0.0
 datadog-argo-rollouts==2.0.0
 datadog-argo-workflows==2.0.0
@@ -100,9 +101,13 @@ datadog-kube-dns==5.0.0
 datadog-kube-metrics-server==4.0.0
 datadog-kube-proxy==7.0.0
 datadog-kube-scheduler==5.0.0
+datadog-kubeflow==1.0.0
 datadog-kubelet==8.0.0
 datadog-kubernetes-cluster-autoscaler==2.0.0
 datadog-kubernetes-state==9.0.0
+datadog-kubevirt-api==1.0.0
+datadog-kubevirt-controller==1.0.0
+datadog-kubevirt-handler==1.0.0
 datadog-kyototycoon==3.0.0
 datadog-kyverno==2.0.0
 datadog-lighttpd==4.0.0
