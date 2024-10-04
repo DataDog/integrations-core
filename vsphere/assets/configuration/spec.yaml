@@ -387,6 +387,12 @@ files:
         value:
           type: boolean
           example: false
+      - name: collect_vsan_data
+        description: |
+          If true, the integration will collect additional metrics and events about vSAN clusters, hosts, and disks.
+        value:
+          type: boolean
+          example: false
       - name: attributes_prefix
         description: |
           Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
