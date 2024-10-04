@@ -47,7 +47,7 @@ datadog-crio==4.0.0
 datadog-datadog-cluster-agent==5.0.0
 datadog-dcgm==3.1.0
 datadog-directory==4.0.0
-datadog-disk==6.0.0
+datadog-disk==7.0.0
 datadog-dns-check==4.0.0
 datadog-dotnetclr==3.0.0; sys_platform == 'win32'
 datadog-druid==3.0.0
