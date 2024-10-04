@@ -18,7 +18,7 @@ datadog-aspdotnet==4.0.0; sys_platform == 'win32'
 datadog-avi-vantage==5.1.0
 datadog-aws-neuron==2.0.1
 datadog-azure-iot-edge==6.0.0
-datadog-boundary==3.0.0
+datadog-boundary==3.1.0
 datadog-btrfs==3.0.0; sys_platform != 'win32'
 datadog-cacti==3.0.0; sys_platform == 'linux2'
 datadog-calico==3.0.0
