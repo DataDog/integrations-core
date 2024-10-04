@@ -132,16 +132,10 @@ pipeline:
           fw=10.10.10.10 pri=6 c=16 gcat=4 m=1334 usr="admin" msg="User "kavan"
           is added into Group "SonicWALL Administrators"" n=30 fw_action="NA"
       grok:
-        supportRules: ""
-        matchRules: >-
-          rule1 %{date("MMM dd HH:mm:ss"):date} %{ip:ip}
-          %{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
-
-          rule2 %{date("MMM  d HH:mm:ss"):date} %{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
-
-          rule3 (<)?%{number:message_priority}> %{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
-
-          rule4 (%{ip:ip})?%{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
+        supportRules: _space %{regex("[\\s]*")}
+        matchRules: sonicwall_rule (<%{number:message_priority}> )?%{_space}(%{date("MMM
+          d HH:mm:ss"):date} )?(%{date("MMM  d HH:mm:ss"):date} )?(%{ip:ip}
+          )?%{greedyData::keyvalue("=","`~!#$%^&*()+{}\\[\\]|;'?<>:/\" ")}
     - type: grok-parser
       name: Parsing Sonicwall Firewall destination
       enabled: true
@@ -155,22 +149,10 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: >-
-          rule1
-          (%{ip:network.destination.ip})?(:%{number:network.destination.port})?(:%{word:destination.network_interface})?(:%{hostname:destination.resolved_name})?
+          destination_parser_rule_1
+          :(%{number:network.destination.port})?(:)?(%{word:destination.network_interface})?(:)?(%{hostname:destination.resolved_name})?
 
-          rule2 %{ip:network.destination.ip}::%{word:destination.network_interface}
-
-          rule3 %{ip:network.destination.ip}:::%{hostname:destination.resolved_name}
-
-          rule4 %{ip:network.destination.ip}:%{number:network.destination.port}::%{hostname:destination.resolved_name}
-
-          rule5 %{ip:network.destination.ip}::%{word:destination.network_interface}:%{hostname:destination.resolved_name}
-
-          rule6 ::%{word:destination.network_interface}(:%{hostname:destination.resolved_name})?
-
-          rule7 :::%{hostname:destination.resolved_name}
-
-          rule8 :%{number:network.client.port}:%{word:source.network_interface}:%{hostname:source.resolved_name}
+          destination_parser_rule_2 (%{ip:network.destination.ip})?(:)?(%{number:network.destination.port})?(:)?(%{word:destination.network_interface})?(:)?(%{hostname:destination.resolved_name})?
     - type: grok-parser
       name: Parsing Sonicwall Firewall source
       enabled: true
@@ -184,22 +166,10 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: >-
-          rule1
-          %{ip:network.client.ip}(:%{number:network.client.port})?(:%{word:source.network_interface})?(:%{hostname:source.resolved_name})?
+          source_parser_rule_1
+          :(%{number:network.client.port})?(:)?(%{word:source.network_interface})?(:)?(%{hostname:source.resolved_name})?
 
-          rule2 %{ip:network.client.ip}::%{word:source.network_interface}
-
-          rule3 %{ip:network.client.ip}:::%{hostname:source.resolved_name}
-
-          rule4 %{ip:network.client.ip}:%{number:network.client.port}::%{hostname:source.resolved_name}
-
-          rule5 %{ip:network.client.ip}::%{word:source.network_interface}:%{hostname:source.resolved_name}
-
-          rule6 ::%{word:source.network_interface}(:%{hostname:source.resolved_name})?
-
-          rule7 :::%{hostname:source.resolved_name}
-
-          rule8 :%{number:network.client.port}:%{word:source.network_interface}:%{hostname:source.resolved_name}
+          source_parser_rule_2 (%{ip:network.client.ip})?(:)?(%{number:network.client.port})?(:)?(%{word:source.network_interface})?(:)?(%{hostname:source.resolved_name})?
     - type: grok-parser
       name: Parsing Sonicwall Firewall nat source
       enabled: true
@@ -209,7 +179,7 @@ pipeline:
         - 10.10.10.10
       grok:
         supportRules: ""
-        matchRules: example_rule %{ip:source.nat.ip}(:%{number:source.nat.port})?
+        matchRules: natscr_parser_rule %{ip:source.nat.ip}(:%{number:source.nat.port})?
     - type: grok-parser
       name: Parsing Sonicwall Firewall nat destination
       enabled: true
@@ -219,7 +189,8 @@ pipeline:
         - 10.10.10.10:320
       grok:
         supportRules: ""
-        matchRules: example_rule %{ip:destination.nat.ip}(:%{number:destination.nat.port})?
+        matchRules: natdst_parser_rule
+          %{ip:destination.nat.ip}(:%{number:destination.nat.port})?
     - type: grok-parser
       name: Parsing Sonicwall Firewall protocol and service
       enabled: true
@@ -230,14 +201,9 @@ pipeline:
         - ipv6-icmp
         - udp/netbios-ns
       grok:
-        supportRules: >-
-          protocol_rule
-          %{regex("[a-zA-Z0-9_@#$%^&!<>-~!+'\":\\]\\[|\\(\\)\\{\\}]*-?[a-zA-Z0-9_@#$%^&!<>~!+'\":\\]\\[|\\(\\)\\{\\}-]*"):protocol}
-
-          service_rule %{regex("[a-zA-Z0-9_@#$%^&!<>-~!+'\":/\\]\\[|\\(\\)\\{\\}]*-?[a-zA-Z0-9_@#$%^&!<>~!+'\":/\\]\\[|\\(\\)\\{\\}-]*"):service}
-        matchRules: |-
-          rule1 %{protocol_rule}/%{service_rule}
-          rule2 %{protocol_rule}
+        supportRules: protocol_service_parser %{regex("[a-zA-Z0-9-]*")}
+        matchRules: proto_parser_rule
+          %{protocol_service_parser:protocol}(/%{protocol_service_parser:service})?
     - type: grok-parser
       name: Parsing Sonicwall Firewall time
       enabled: true
@@ -246,7 +212,12 @@ pipeline:
         - 2024-09-11 06:30:00 UTC
       grok:
         supportRules: ""
-        matchRules: rule %{date("yyyy-MM-dd HH:mm:ss z"):timestamp}
+        matchRules: time_parser_rule %{date("yyyy-MM-dd HH:mm:ss z"):timestamp}
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
     - type: grok-parser
       name: Parsing Sonicwall Firewall message
       enabled: true
@@ -260,20 +231,14 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: >-
-          rule1 Assigned IP address %{ip:ip_address} to MAC address
-          %{mac:MacAddress}
+          message_parser_rule_1 Assigned IP address %{ip:ip_address} to MAC
+          address %{mac:MacAddress}
 
-          rule2 TCP-Flooding machine %{greedyData:message_value} blacklisted
+          message_parser_rule_2 (TCP|SYN|RST|FIN)-Flooding machine %{greedyData:message_value} blacklisted
 
-          rule3 Possible ARP attack from MAC address %{greedyData:message_value}
+          message_parser_rule_3 Possible ARP attack from MAC address %{greedyData:message_value}
 
-          rule4 SYN-Flooding machine %{greedyData:message_value} blacklisted
-
-          rule5 RST-Flooding machine %{greedyData:message_value} blacklisted
-
-          rule6 FIN-Flooding machine %{greedyData:message_value} blacklisted
-
-          rule7 Possible replay attack with this client IP - %{greedyData:message_value}
+          message_parser_rule_4 Possible replay attack with this client IP - %{greedyData:message_value}
     - type: attribute-remapper
       name: Map `app` to `syslog_appid`
       enabled: true
@@ -1038,11 +1003,6 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
-    - type: date-remapper
-      name: Define `timestamp` as the official date of the log
-      enabled: true
-      sources:
-        - timestamp
     - type: category-processor
       name: Categorise DHCP message
       enabled: true
