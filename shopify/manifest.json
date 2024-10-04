@@ -20,7 +20,7 @@
   "assets": {
     "integration": {
       "auto_install": false,
-      "source_type_id": 25260221,
+      "source_type_id": 622,
       "source_type_name": "Shopify",
       "events": {
         "creates_events": false
