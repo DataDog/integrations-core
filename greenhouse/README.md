@@ -6,7 +6,7 @@
 
 This integration focuses on ingesting audit logs, which document important events and configuration changes, enabling teams to detect incidents and minimize their impact.
 
-The Greenhouse integration seamlessly collects audit logs from Greenhouse, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into activities on the Greenhouse platform through the out-of-the-box dashboards.
+By seamlessly collecting these logs and channeling them into Datadog, the Greenhouse integration allows for comprehensive analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into activities on the Greenhouse platform through the out-of-the-box dashboards.
 
 ## Setup
 
