@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import PY2
+from datadog_checks.base import OpenMetricsBaseCheck
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
-
+from .check import CockroachdbCheckV2
 from .metrics import METRIC_MAP
 
 
@@ -16,15 +15,6 @@ class CockroachdbCheck(OpenMetricsBaseCheck):
         instance = instances[0]
 
         if 'openmetrics_endpoint' in instance:
-            if PY2:
-                raise ConfigurationError(
-                    'This version of the integration is only available when using Python 3. '
-                    'Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3/ '
-                    'for more information or use the older style config.'
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import CockroachdbCheckV2
-
             return CockroachdbCheckV2(name, init_config, instances)
         else:
             return super(CockroachdbCheck, cls).__new__(cls)

@@ -5,6 +5,7 @@
 import json
 import os
 
+import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -37,10 +38,6 @@ def _assert_mongodb_instance_event(
     modules,
 ):
     mongodb_instance_event = _get_mongodb_instance_event(aggregator)
-    if not dbm:
-        assert mongodb_instance_event is None
-        return
-
     assert mongodb_instance_event is not None
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
@@ -1155,3 +1152,23 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         ],
         check_submission_type=True,
     )
+
+
+def test_integration_localhost_process_stats(instance_integration, aggregator, check, dd_run_check):
+    mongo_check = check(instance_integration)
+
+    with mock_pymongo("standalone"):
+        with mock.patch(
+            'datadog_checks.mongo.collectors.process_stats.ProcessStatsCollector.is_localhost',
+            new_callable=mock.PropertyMock,
+        ) as mock_is_localhost:
+            mock_is_localhost.return_value = True
+            with mock.patch('psutil.Process') as mock_process:
+                mock_process.return_value.name.return_value = 'mongos'
+                mock_process.return_value.cpu_percent.return_value = 20.0
+                dd_run_check(mongo_check)
+
+    metrics_categories = [
+        'process-stats',
+    ]
+    assert_metrics(mongo_check, aggregator, metrics_categories, ['hosting_type:self-hosted'])

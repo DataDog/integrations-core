@@ -8,21 +8,16 @@ import re
 import socket
 import time
 from datetime import datetime
+from urllib.parse import urlparse
 
 import requests
 from cryptography import x509
 from requests import Response  # noqa: F401
-from six import PY2, string_types
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path
-
-# Apply thread-safety fix, see https://bugs.python.org/issue7980
-if PY2:
-    import _strptime  # noqa
 
 DEFAULT_EXPIRE_DAYS_WARNING = 14
 DEFAULT_EXPIRE_DAYS_CRITICAL = 7
@@ -132,7 +127,7 @@ class HTTPCheck(AgentCheck):
                 persist=True,
                 stream=stream,
                 json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
-                data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
+                data=data if method.upper() in DATA_METHODS and isinstance(data, str) else None,
             )
         except (
             socket.timeout,

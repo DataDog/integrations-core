@@ -340,6 +340,10 @@ class VSphereCheck(AgentCheck):
             mor_payload["tags"] = tags  # type: Dict[str, Any]
 
             if hostname:
+                if self._config.hostname_transform == 'upper':
+                    hostname = hostname.upper()
+                elif self._config.hostname_transform == 'lower':
+                    hostname = hostname.lower()
                 mor_payload['hostname'] = hostname
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
@@ -901,7 +905,12 @@ class VSphereCheck(AgentCheck):
             )
             return
 
-        base_tags = self._config.base_tags + resource_tags
+        base_tags = []
+        if self._config.excluded_host_tags:
+            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
+        else:
+            base_tags.extend(resource_tags)
+        base_tags.extend(self._config.base_tags)
 
         if resource_type == vim.VirtualMachine:
             object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])

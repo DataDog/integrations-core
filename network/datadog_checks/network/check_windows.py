@@ -7,13 +7,10 @@ from ctypes import Structure, byref, windll
 from ctypes.wintypes import DWORD
 
 import psutil
-from six import PY3, iteritems
 
 from . import Network
 
 Iphlpapi = windll.Iphlpapi
-if PY3:
-    long = int
 
 
 class TCPSTATS(Structure):
@@ -82,7 +79,7 @@ class WindowsNetwork(Network):
             else:
                 metrics[metric] += 1
 
-        for metric, value in iteritems(metrics):
+        for metric, value in metrics.items():
             self.gauge(metric, value, tags=tags)
 
     def _cx_counters_psutil(self, tags=None):
@@ -90,7 +87,7 @@ class WindowsNetwork(Network):
         Collect metrics about interfaces counters using psutil
         """
         tags = [] if tags is None else tags
-        for iface, counters in iteritems(psutil.net_io_counters(pernic=True)):
+        for iface, counters in psutil.net_io_counters(pernic=True).items():
             metrics = {
                 'bytes_rcvd': counters.bytes_recv,
                 'bytes_sent': counters.bytes_sent,

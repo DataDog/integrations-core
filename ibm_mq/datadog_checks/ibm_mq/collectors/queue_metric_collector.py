@@ -4,8 +4,6 @@
 import logging  # noqa: F401
 from typing import Any, Callable, Dict, List, Set  # noqa: F401
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.types import ServiceCheck  # noqa: F401
 from datadog_checks.ibm_mq.metrics import GAUGE
@@ -150,7 +148,7 @@ class QueueMetricCollector(object):
         """
         Get stats from the queue manager
         """
-        for mname, pymqi_value in iteritems(metrics.queue_manager_metrics()):
+        for mname, pymqi_value in metrics.queue_manager_metrics().items():
             try:
                 m = queue_manager.inquire(pymqi_value)
                 mname = '{}.queue_manager.{}'.format(metrics.METRIC_PREFIX, mname)
@@ -198,7 +196,7 @@ class QueueMetricCollector(object):
         return enriched_tags
 
     def _submit_queue_stats(self, queue_info, queue_name, tags):
-        for metric_suffix, mq_attr in iteritems(metrics.queue_metrics()):
+        for metric_suffix, mq_attr in metrics.queue_metrics().items():
             metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, metric_suffix)
             if callable(mq_attr):
                 metric_value = mq_attr(queue_info)
@@ -235,7 +233,7 @@ class QueueMetricCollector(object):
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
-                for mname, values in iteritems(metrics.pcf_metrics()):
+                for mname, values in metrics.pcf_metrics().items():
                     metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
                     try:
                         if callable(values):

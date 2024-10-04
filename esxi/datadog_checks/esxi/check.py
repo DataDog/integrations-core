@@ -11,7 +11,6 @@ from urllib.parse import urlparse
 import socks
 from pyVim import connect
 from pyVmomi import vim, vmodl
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import to_string
@@ -132,7 +131,7 @@ class EsxiCheck(AgentCheck):
     def _parse_metric_regex_filters(self, all_metric_filters):
         allowed_resource_types = RESOURCE_TYPE_TO_NAME.values()
         metric_filters = {}
-        for resource_type, filters in iteritems(all_metric_filters):
+        for resource_type, filters in all_metric_filters.items():
             if resource_type not in allowed_resource_types:
                 self.log.warning(
                     "Ignoring metric_filter for resource '%s'. It should be one of '%s'",
@@ -142,7 +141,7 @@ class EsxiCheck(AgentCheck):
                 continue
             metric_filters[resource_type] = filters
 
-        return {k: [re.compile(r) for r in v] for k, v in iteritems(metric_filters)}
+        return {k: [re.compile(r) for r in v] for k, v in metric_filters.items()}
 
     def _parse_resource_filters(self, all_resource_filters):
         # Keep a list of resource filters ids (tuple of resource, property and type) that are already registered.

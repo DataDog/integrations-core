@@ -4,7 +4,7 @@
 import logging
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3, requires_windows
+from datadog_checks.dev.testing import requires_windows
 
 from .utils import GLOBAL_TAGS, SERVER
 
@@ -14,7 +14,7 @@ try:
 except Exception:
     PerfCountersBaseCheckWithLegacySupport = object
 
-pytestmark = [requires_py3, requires_windows]
+pytestmark = [requires_windows]
 
 
 class CustomCheck(PerfCountersBaseCheckWithLegacySupport):
