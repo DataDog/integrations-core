@@ -203,4 +203,4 @@ datadog-windows-service==6.0.0; sys_platform == 'win32'
 datadog-wmi-check==3.0.0; sys_platform == 'win32'
 datadog-yarn==7.0.0
 datadog-zeek==1.0.0; sys_platform != 'win32'
-datadog-zk==5.0.0; sys_platform != 'win32'
+datadog-zk==6.0.0; sys_platform != 'win32'
