@@ -174,16 +174,24 @@ AutoReclusterHistory = {
 TableStorage = {
     'name': 'table_storage.metrics',
     'query': (
-        'select table_name, table_schema, avg(ACTIVE_BYTES), avg(TIME_TRAVEL_BYTES), avg(FAILSAFE_BYTES), '
-        'avg(RETAINED_FOR_CLONE_BYTES) from table_storage_metrics group by 1, 2'
+        'select table_name, table_schema, table_catalog, deleted, '
+        'avg(ACTIVE_BYTES), avg(TIME_TRAVEL_BYTES), avg(FAILSAFE_BYTES), avg(RETAINED_FOR_CLONE_BYTES), '
+        'sum(ACTIVE_BYTES), sum(TIME_TRAVEL_BYTES), sum(FAILSAFE_BYTES), sum(RETAINED_FOR_CLONE_BYTES) '
+        'from table_storage_metrics group by 1, 2, 3, 4'
     ),
     'columns': [
         {'name': 'table', 'type': 'tag'},
         {'name': 'schema', 'type': 'tag'},
+        {'name': 'database', 'type': 'tag'},
+        {'name': 'deleted', 'type': 'tag'},
         {'name': 'storage.table.active_bytes.avg', 'type': 'gauge'},
         {'name': 'storage.table.time_travel_bytes.avg', 'type': 'gauge'},
         {'name': 'storage.table.failsafe_bytes.avg', 'type': 'gauge'},
         {'name': 'storage.table.retained_bytes.avg', 'type': 'gauge'},
+        {'name': 'storage.table.active_bytes.sum', 'type': 'gauge'},
+        {'name': 'storage.table.time_travel_bytes.sum', 'type': 'gauge'},
+        {'name': 'storage.table.failsafe_bytes.sum', 'type': 'gauge'},
+        {'name': 'storage.table.retained_bytes.sum', 'type': 'gauge'},
     ],
 }
 
