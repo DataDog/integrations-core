@@ -290,6 +290,26 @@ files:
       value:
         type: boolean
         example: false
+    - name: collection_intervals
+      description: |
+        Per query configuration of collection interval (in seconds) of datadog agent's queries.
+        query_name is the name used in the query descriptor found in util.py and relationsmanager.py and should
+        match the source of the metric. For example, pg_class_size, pg_class, pg_stat_database...
+        This is only available for queries using QueryExecutor.
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+            - name: query_name
+              type: string
+            - name: collection_interval
+              type: integer
+        example:
+          - query_name: pg_class
+            collection_interval: 30
+          - query_name: pg_class_size
+            collection_interval: 360
     - name: data_directory
       description: |
         The data directory of your postgres installation
