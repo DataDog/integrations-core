@@ -16,6 +16,7 @@ from .constants import (
     DEPLOY_COUNT_METRIC,
     DEPLOY_DURATION_METRIC,
     DEPLOY_QUEUE_TIME_METRIC,
+    DEPLOY_RERUN_METRIC,
     DEPLOY_SUCCESS_METRIC,
     DEPLOY_SUCCESS_STATE,
     PROJECT_COUNT_METRIC,
@@ -62,6 +63,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             completed_time = task.get("CompletedTime")
             start_time = task.get("StartTime")
             queue_time = task.get("QueueTime")
+            can_rerun = int(task.get("CanRerun", False))
 
             completed_time_converted = datetime.fromisoformat(completed_time)
             start_time_converted = datetime.fromisoformat(start_time)
@@ -76,7 +78,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             if completed_time_converted > new_completed_time:
                 new_completed_time = completed_time_converted
 
-            succeeded = state == DEPLOY_SUCCESS_STATE
+            succeeded = int(state == DEPLOY_SUCCESS_STATE)
 
             project_tags = [
                 f"project_id:{project.id}",
@@ -91,6 +93,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge(DEPLOY_DURATION_METRIC, duration_seconds, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_QUEUE_TIME_METRIC, queue_time_seconds, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_SUCCESS_METRIC, succeeded, tags=self.base_tags + project_tags + tags)
+            self.gauge(DEPLOY_RERUN_METRIC, can_rerun, tags=self.base_tags + project_tags + tags)
 
         new_completed_time = new_completed_time + timedelta(milliseconds=1)
         project.last_completed_time = new_completed_time
