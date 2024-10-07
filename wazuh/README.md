@@ -41,7 +41,7 @@ Linux command
     ```
 2. Add this configuration block to your `wazuh.d/conf.yaml` file to start collecting your logs.
 
-    Use the UDP method to collect the wazuh alerts data.
+    Use the UDP method to collect the Wazuh alerts data.
     See the sample [wazuh.d/conf.yaml][6] for available configuration options.
 
     ```yaml
@@ -57,7 +57,7 @@ Linux command
 
 #### Configure syslog message forwarding from Wazuh
 
-  1. Log in to the Wazuh UI. Navigate to the Left side Menu.
+  1. Log in to the Wazuh UI. Navigate to the left side Menu.
   2. Go to **Server management** > **Settings**.
   3. Click on **Edit configuration**.
   4. Add the following configuration block:
@@ -77,7 +77,7 @@ Linux command
 
       Note: Using JSON format is required, since Wazuh pipeline parses JSON formatted logs only.
   5. Click the **Save** button.
-  6. After saving, Click on the **Restart Manager** button.
+  6. After saving, click on the **Restart Manager** button.
 
 
 ### Validation
@@ -131,16 +131,17 @@ If you see a **Permission denied** error while port binding in the Agent logs:
 
 3. [Restart the Agent][2].
 
+Here is how to troubleshoot some possible issues.
+
 **Data is not being collected:**
 
-Make sure that traffic is bypassed from the configured port if the firewall is enabled.
+Ensure traffic is bypassed from the configured port if the firewall is enabled.
 
 **Port already in use:**
 
-- If you see the **Port <PORT_NUMBER> Already in Use** error, see the following instructions. The example below is for port 514:
+If you see the **Port <PORT_NUMBER> Already in Use** error, see the following instructions. The example below is for port 514:
 
 - On systems using Syslog, if the Agent listens for Wazuh logs on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`. This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps: 
-
     - Disable Syslog.
     - Configure the Agent to listen on a different, available port.
 

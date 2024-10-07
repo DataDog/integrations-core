@@ -2,7 +2,7 @@ id: wazuh
 tests:
   -
     sample: |-
-      <132>Sep 23 05:55:30 ub22-50-1-173 ossec: {"timestamp":"2024-09-23T05:55:30","rule":{"level":5,"description":"Registry Value Integrity Checksum Changed","id":"750","mitre":{"id":["T1565.001","T1112"],"tactic":["Impact","Defense Evasion"],"technique":["Stored Data Manipulation","Modify Registry"]},"firedtimes":11,"mail":false,"groups":["ossec","syscheck","syscheck_entry_modified","syscheck_registry"],"pci_dss":["11.5"],"gpg13":["4.13"],"gdpr":["II_5.1.f"],"hipaa":["164.312.c.1","164.312.c.2"],"nist_800_53":["SI.7"],"tsc":["PI1.4","PI1.5","CC6.1","CC6.8","CC7.2","CC7.3"]},"agent":{"id":"007","name":"WIN11-50-10-210","ip":"10.40.1.245"},"manager":{"name":"ub22-50-1-173"},"id":"1727051130.307309","full_log":"Registry Value '[x32] HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\S-1-5-21-407847833-942180688-1368611096-1010\\\\Device\\HarddiskVolume3\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe' modified
+      <132>Sep 23 05:55:30 ub20 ossec: {"timestamp":"2024-09-23T05:55:30","rule":{"level":5,"description":"Registry Value Integrity Checksum Changed","id":"750","mitre":{"id":["T1565.001","T1112"],"tactic":["Impact","Defense Evasion"],"technique":["Stored Data Manipulation","Modify Registry"]},"firedtimes":11,"mail":false,"groups":["ossec","syscheck","syscheck_entry_modified","syscheck_registry"],"pci_dss":["11.5"],"gpg13":["4.13"],"gdpr":["II_5.1.f"],"hipaa":["164.312.c.1","164.312.c.2"],"nist_800_53":["SI.7"],"tsc":["PI1.4","PI1.5","CC6.1","CC6.8","CC7.2","CC7.3"]},"agent":{"id":"007","name":"ub20","ip":"10.10.10.10"},"manager":{"name":"ub20"},"id":"1727051130.307309","full_log":"Registry Value '[x32] HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\S-1-5-21-407847833-942180688-1368611096-1010\\\\Device\\HarddiskVolume3\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe' modified
       Mode: scheduled
       Changed attributes: md5,sha1,sha256
       Old md5sum was: '4846b4c5616e0c64cb5b8e819ab04f89'
@@ -17,8 +17,8 @@ tests:
       custom:
         agent:
           id: "007"
-          ip: "10.40.1.245"
-          name: "WIN11-50-10-210"
+          ip: "10.10.10.10"
+          name: "ub20"
         decoder:
           name: "syscheck_registry_value_modified"
         full_log: |
@@ -34,7 +34,7 @@ tests:
         id: "1727051130.307309"
         location: "syscheck"
         manager:
-          name: "ub22-50-1-173"
+          name: "ub20"
         rule:
           description: "Registry Value Integrity Checksum Changed"
           firedtimes: 11
@@ -96,10 +96,10 @@ tests:
           value_type: "REG_BINARY"
         syslog:
           appname: "ossec"
-          hostname: "ub22-50-1-173"
+          hostname: "ub20"
         timestamp: "2024-09-23T05:55:30"
       message: |-
-        <132>Sep 23 05:55:30 ub22-50-1-173 ossec: {"timestamp":"2024-09-23T05:55:30","rule":{"level":5,"description":"Registry Value Integrity Checksum Changed","id":"750","mitre":{"id":["T1565.001","T1112"],"tactic":["Impact","Defense Evasion"],"technique":["Stored Data Manipulation","Modify Registry"]},"firedtimes":11,"mail":false,"groups":["ossec","syscheck","syscheck_entry_modified","syscheck_registry"],"pci_dss":["11.5"],"gpg13":["4.13"],"gdpr":["II_5.1.f"],"hipaa":["164.312.c.1","164.312.c.2"],"nist_800_53":["SI.7"],"tsc":["PI1.4","PI1.5","CC6.1","CC6.8","CC7.2","CC7.3"]},"agent":{"id":"007","name":"WIN11-50-10-210","ip":"10.40.1.245"},"manager":{"name":"ub22-50-1-173"},"id":"1727051130.307309","full_log":"Registry Value '[x32] HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\S-1-5-21-407847833-942180688-1368611096-1010\\\\Device\\HarddiskVolume3\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe' modified
+        <132>Sep 23 05:55:30 ub20 ossec: {"timestamp":"2024-09-23T05:55:30","rule":{"level":5,"description":"Registry Value Integrity Checksum Changed","id":"750","mitre":{"id":["T1565.001","T1112"],"tactic":["Impact","Defense Evasion"],"technique":["Stored Data Manipulation","Modify Registry"]},"firedtimes":11,"mail":false,"groups":["ossec","syscheck","syscheck_entry_modified","syscheck_registry"],"pci_dss":["11.5"],"gpg13":["4.13"],"gdpr":["II_5.1.f"],"hipaa":["164.312.c.1","164.312.c.2"],"nist_800_53":["SI.7"],"tsc":["PI1.4","PI1.5","CC6.1","CC6.8","CC7.2","CC7.3"]},"agent":{"id":"007","name":"ub20","ip":"10.10.10.10"},"manager":{"name":"ub20"},"id":"1727051130.307309","full_log":"Registry Value '[x32] HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\bam\\State\\UserSettings\\S-1-5-21-407847833-942180688-1368611096-1010\\\\Device\\HarddiskVolume3\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe' modified
         Mode: scheduled
         Changed attributes: md5,sha1,sha256
         Old md5sum was: '4846b4c5616e0c64cb5b8e819ab04f89'
