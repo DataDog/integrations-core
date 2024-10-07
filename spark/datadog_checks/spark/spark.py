@@ -100,7 +100,7 @@ class SparkCheck(AgentCheck):
         self._spark_job_metrics(spark_apps, tags)
 
         if not self._disable_spark_stage_metrics:
-        # Get the stage metrics
+            # Get the stage metrics
             self._spark_stage_metrics(spark_apps, tags)
 
         # Get the executor metrics
