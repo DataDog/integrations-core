@@ -19,8 +19,8 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.deadlocks import (
     PAYLOAD_QUERY_SIGNATURE,
     PAYLOAD_TIMESTAMP,
-    Deadlocks,
     XE_SESSION_DATADOG,
+    Deadlocks,
 )
 from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
 
@@ -198,7 +198,7 @@ def test_deadlocks_behind_dbm(dd_run_check, init_config, dbm_instance):
     ) as mocked_function:
         dd_run_check(check)
         mocked_function.assert_not_called()
-        
+
 
 @pytest.mark.usefixtures('dd_environment')
 def test_xe_session(dd_run_check, dbm_instance):

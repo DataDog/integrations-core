@@ -11,7 +11,14 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS, get_deadlocks_query, XE_SESSION_DATADOG, XE_SESSION_SYSTEM, XE_SESSIONS_QUERY
+from datadog_checks.sqlserver.queries import (
+    DEADLOCK_TIMESTAMP_ALIAS,
+    DEADLOCK_XML_ALIAS,
+    XE_SESSION_DATADOG,
+    XE_SESSION_SYSTEM,
+    XE_SESSIONS_QUERY,
+    get_deadlocks_query,
+)
 
 try:
     import datadog_agent
@@ -129,7 +136,7 @@ class Deadlocks(DBMAsyncJob):
 
     def _query_deadlocks(self):
         if self._xe_session_name is None:
-            self._set_xe_session_name()                    
+            self._set_xe_session_name()
             self._log.info(f'Using XE session {self._xe_session_name} to collect deadlocks')
 
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
@@ -137,7 +144,9 @@ class Deadlocks(DBMAsyncJob):
                 convert_xml_to_str = False
                 if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
                     convert_xml_to_str = True
-                query = get_deadlocks_query(convert_xml_to_str=convert_xml_to_str, xe_session_name=self._xe_session_name)
+                query = get_deadlocks_query(
+                    convert_xml_to_str=convert_xml_to_str, xe_session_name=self._xe_session_name
+                )
                 self._log.debug(
                     "Running query [%s] with max deadlocks %s and timestamp %s",
                     query,
