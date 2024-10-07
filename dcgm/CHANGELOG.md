@@ -7,7 +7,7 @@
 ***Added***:
 
 * Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
-* Align OMv2 labels with kubernetes agent tags ([#18654](https://github.com/DataDog/integrations-core/pull/18654))
+* Align OMv2 labels with Kubernetes agent tags ([#18654](https://github.com/DataDog/integrations-core/pull/18654))
 
 ***Fixed***:
 
