@@ -73,7 +73,7 @@ Linux command
 
       * The `server` tag should contain the IP address where your Datadog Agent is running.
 
-      * The `port` tag should contain the port on which your Datadog Agent is listening.
+      * The `port` tag should contain the port where your Datadog Agent is listening.
 
       Note: Using JSON format is required, since Wazuh pipeline parses JSON formatted logs only.
   5. Click the **Save** button.
