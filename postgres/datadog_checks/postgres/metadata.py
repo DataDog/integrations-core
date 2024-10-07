@@ -347,26 +347,26 @@ class PostgresMetadata(DBMAsyncJob):
             except Exception as e:
                 self._log.error("Error collecting schema metadata: %s", e)
                 status = "error"
+            finally:
+                elapsed_ms = (time.time() - start_time) * 1000
+                self._check.histogram(
+                    "dd.postgres.schema.time",
+                    elapsed_ms,
+                    tags=self._check.tags + ["status:" + status],
+                    hostname=self._check.resolved_hostname,
+                    raw=True,
+                )
+                self._check.gauge(
+                    "dd.postgres.schema.tables_count",
+                    total_tables,
+                    tags=self._check.tags + ["status:" + status],
+                    hostname=self._check.resolved_hostname,
+                    raw=True,
+                )
+                datadog_agent.emit_agent_telemetry("postgres", "schema_tables_elapsed_ms", elapsed_ms, "gauge")
+                datadog_agent.emit_agent_telemetry("postgres", "schema_tables_count", total_tables, "gauge")
 
-            elapsed_ms = (time.time() - start_time) * 1000
-            self._check.histogram(
-                "dd.postgres.schema.time",
-                elapsed_ms,
-                tags=self._check.tags + ["status:" + status],
-                hostname=self._check.resolved_hostname,
-                raw=True,
-            )
-            self._check.gauge(
-                "dd.postgres.schema.tables_count",
-                total_tables,
-                tags=self._check.tags + ["status:" + status],
-                hostname=self._check.resolved_hostname,
-                raw=True,
-            )
-            datadog_agent.emit_agent_telemetry("postgres", "schema_tables_elapsed_ms", elapsed_ms, "gauge")
-            datadog_agent.emit_agent_telemetry("postgres", "schema_tables_count", total_tables, "gauge")
-
-            self._is_schemas_collection_in_progress = False
+                self._is_schemas_collection_in_progress = False
 
     def _should_collect_metadata(self, name, metadata_type):
         for re_str in self._config.schemas_metadata_config.get(
