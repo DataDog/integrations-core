@@ -156,6 +156,8 @@ def test_fabric_mocked(aggregator):
     assert_fabric_port_egr_metrics(aggregator)
     assert_fabric_port_ingr_metrics(aggregator)
 
+    assert_check_metrics(aggregator)
+
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
 
@@ -654,3 +656,10 @@ def assert_fabric_node_mem_min(aggregator):
 def assert_fabric_node_utilized(aggregator):
     metric_name = 'cisco_aci.capacity.apic.fabric_node.utilized'
     aggregator.assert_metric(metric_name, value=0.0, tags=['cisco', 'project:cisco_aci'], hostname='')
+
+
+def assert_check_metrics(aggregator):
+    aggregator.assert_metric(
+        'datadog.cisco_aci.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=['cisco']
+    )
+    aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=['cisco'])
