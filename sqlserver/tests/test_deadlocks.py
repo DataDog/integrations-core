@@ -20,6 +20,7 @@ from datadog_checks.sqlserver.deadlocks import (
     PAYLOAD_QUERY_SIGNATURE,
     PAYLOAD_TIMESTAMP,
     Deadlocks,
+    XE_SESSION_DATADOG,
 )
 from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
 
@@ -66,13 +67,13 @@ def _get_deadlocks_payload(dbm_activity):
     return matched
 
 
-def _get_conn_for_user(instance_docker, user):
+def _get_conn_for_user(instance_docker, user, password="Password12!"):
     conn_str = (
         f"DRIVER={instance_docker['driver']};"
         f"Server={instance_docker['host']};"
         "Database=master;"
         f"UID={user};"
-        "PWD=Password12!;"
+        f"PWD={password};"
         "TrustServerCertificate=yes;"
     )
     conn = pyodbc.connect(conn_str, autocommit=False)
@@ -197,6 +198,13 @@ def test_deadlocks_behind_dbm(dd_run_check, init_config, dbm_instance):
     ) as mocked_function:
         dd_run_check(check)
         mocked_function.assert_not_called()
+        
+
+@pytest.mark.usefixtures('dd_environment')
+def test_xe_session(dd_run_check, dbm_instance):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    assert check.deadlocks._xe_session_name == XE_SESSION_DATADOG
 
 
 DEADLOCKS_PLAN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deadlocks")
