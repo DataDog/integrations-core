@@ -10,7 +10,32 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into StreamNative metrics data.",
     "title": "StreamNative",
-    "media": [],
+    "media": [    
+      {
+      "caption": "StramNative - Health",
+      "image_url": "images/streamnative_health.png",
+      "media_type": "image"
+    },
+      {
+      "caption": "StramNative - Kafka Connect",
+      "image_url": "images/streamnative_kafka_connect.png",
+      "media_type": "image"
+    },
+      {
+      "caption": "StramNative - Pulsar Resource",
+      "image_url": "images/streamnative_pulsar_resource.png",
+      "media_type": "image"
+    },
+      {
+      "caption": "StramNative - Sink Connector",
+      "image_url": "images/streamnative_sink_connector.png",
+      "media_type": "image"
+    },
+    {
+      "caption": "StramNative - Source Connector",
+      "image_url": "images/streamnativ_source_connector.png",
+      "media_type": "image"
+    }],
     "classifier_tags": [
       "Category::Metrics",
       "Submitted Data Type::Metrics",
@@ -33,6 +58,18 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "StramNative - Health" : "assets/dashboards/streamnative_health.json",
+      "StramNative - Kafka Connect" : "assets/dashboards/streamnative_kafka_connect.json",
+      "StramNative - Pulsar Resource" : "assets/dashboards/streamnative_pulsar_resource.json",
+      "StramNative - Sink Connector" : "assets/dashboards/streamnative_sink_connector.json",
+      "StramNative - Source Connector" : "assets/dashboards/streamnative_source_connector.json"
+    },
+    "monitors": {
+      "[StreamNative] Backlog size is very high" : "assets/monitors/streamnative_backlog_size_is_high.json",
+      "[Streamnative] Messaging service is down" : "assets/monitors/streamnative_messaging_service_down.json",
+      "[Streamnative] Webservice is down" : "assets/monitors/streamnative_webservice_down.json"
     }
   },
   "author": {
