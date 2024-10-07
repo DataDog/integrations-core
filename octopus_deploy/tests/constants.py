@@ -21,6 +21,7 @@ ALL_METRICS = [
     "octopus_deploy.deployment.count",
     "octopus_deploy.deployment.duration",
     "octopus_deploy.deployment.queue_time",
+    "octopus_deploy.deployment.succeeded",
 ]
 
 PROJECT_GROUP_ALL_METRICS = [
@@ -518,6 +519,21 @@ DEPLOYMENT_METRICS = [
         'value': 1,
     },
     {
+        'name': 'octopus_deploy.deployment.succeeded',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1846",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+        'value': 1,
+    },
+    {
         'name': 'octopus_deploy.deployment.duration',
         'tags': [
             "project_group_name:Default Project Group",
@@ -563,6 +579,21 @@ DEPLOYMENT_METRICS = [
         'value': 1,
     },
     {
+        'name': 'octopus_deploy.deployment.succeeded',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1847",
+            "task_name:Deploy",
+            "task_state:Failed",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
         'name': 'octopus_deploy.deployment.duration',
         'tags': [
             "project_group_name:Default Project Group",
@@ -594,6 +625,21 @@ DEPLOYMENT_METRICS = [
     },
     {
         'name': 'octopus_deploy.deployment.count',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test-api",
+            "project_id:Projects-1",
+            "task_id:ServerTasks-1844",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+        'value': 1,
+    },
+    {
+        'name': 'octopus_deploy.deployment.succeeded',
         'tags': [
             "project_group_name:Default Project Group",
             "project_group_id:ProjectGroups-1",
@@ -654,6 +700,7 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Success",
         ],
         'count': 1,
+        'value': 2.073,
     },
     {
         'name': 'octopus_deploy.deployment.queue_time',
@@ -668,6 +715,7 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Success",
         ],
         'count': 1,
+        'value': 0.639,
     },
     {
         'name': 'octopus_deploy.deployment.count',
@@ -682,6 +730,22 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Success",
         ],
         'count': 1,
+        'value': 1,
+    },
+    {
+        'name': 'octopus_deploy.deployment.succeeded',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1846",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+        'value': 1,
     },
     {
         'name': 'octopus_deploy.deployment.duration',
@@ -696,6 +760,7 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Success",
         ],
         'count': 1,
+        'value': 2.134,
     },
     {
         'name': 'octopus_deploy.deployment.queue_time',
@@ -710,6 +775,7 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Success",
         ],
         'count': 1,
+        'value': 0.67,
     },
     {
         'name': 'octopus_deploy.deployment.count',
@@ -724,6 +790,22 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Failed",
         ],
         'count': 1,
+        'value': 1,
+    },
+    {
+        'name': 'octopus_deploy.deployment.succeeded',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1847",
+            "task_name:Deploy",
+            "task_state:Failed",
+        ],
+        'count': 1,
+        'value': 0,
     },
     {
         'name': 'octopus_deploy.deployment.duration',
@@ -738,6 +820,7 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Failed",
         ],
         'count': 1,
+        'value': 6.267,
     },
     {
         'name': 'octopus_deploy.deployment.queue_time',
@@ -752,5 +835,6 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Failed",
         ],
         'count': 1,
+        'value': 0.631,
     },
 ]

@@ -1,8 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 octopus_deploy.api.can_connect,gauge,,,,Whether or not the check can connect to the Octopus Deploy API.,-1,octopus_deploy,octopus_deploy api,,
-octopus_deploy.deployment.count,gauge,,,,Number of deployments monitored.,-1,octopus_deploy,octopus_deploy space count,,
-octopus_deploy.deployment.duration,gauge,,second,,Duration of deployment.,-1,octopus_deploy,octopus_deploy space count,,
-octopus_deploy.deployment.queue_time,gauge,,second,,Time deployment was in queue.,-1,octopus_deploy,octopus_deploy space count,,
+octopus_deploy.deployment.count,gauge,,,,Number of deployments monitored.,-1,octopus_deploy,octopus_deploy deploy count,,
+octopus_deploy.deployment.duration,gauge,,second,,Duration of deployment.,-1,octopus_deploy,octopus_deploy deploy dur,,
+octopus_deploy.deployment.queue_time,gauge,,second,,Time deployment was in queue.,-1,octopus_deploy,octopus_deploy deploy queue,,
+octopus_deploy.deployment.succeeded,gauge,,second,,Whether or not the deployment succeeded.,-1,octopus_deploy,octopus_deploy deploy success,,
 octopus_deploy.project.count,gauge,,,,Number of projects discovered.,-1,octopus_deploy,octopus_deploy projects count,,
 octopus_deploy.project_group.count,gauge,,,,Number of project groups discovered.,-1,octopus_deploy,octopus_deploy project group count,,
 octopus_deploy.space.count,gauge,,,,Number of spaces discovered.,-1,octopus_deploy,octopus_deploy space count,,

@@ -16,6 +16,8 @@ from .constants import (
     DEPLOY_COUNT_METRIC,
     DEPLOY_DURATION_METRIC,
     DEPLOY_QUEUE_TIME_METRIC,
+    DEPLOY_SUCCESS_METRIC,
+    DEPLOY_SUCCESS_STATE,
     PROJECT_COUNT_METRIC,
     PROJECT_GROUP_COUNT_METRIC,
 )
@@ -74,6 +76,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             if completed_time_converted > new_completed_time:
                 new_completed_time = completed_time_converted
 
+            succeeded = state == DEPLOY_SUCCESS_STATE
+
             project_tags = [
                 f"project_id:{project.id}",
                 f"project_name:{project.name}",
@@ -86,6 +90,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge(DEPLOY_COUNT_METRIC, 1, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_DURATION_METRIC, duration_seconds, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_QUEUE_TIME_METRIC, queue_time_seconds, tags=self.base_tags + project_tags + tags)
+            self.gauge(DEPLOY_SUCCESS_METRIC, succeeded, tags=self.base_tags + project_tags + tags)
 
         new_completed_time = new_completed_time + timedelta(milliseconds=1)
         project.last_completed_time = new_completed_time
