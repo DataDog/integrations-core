@@ -12,7 +12,7 @@
 
 * Added deadlock collection feature to the SQL Server integration. ([#18108](https://github.com/DataDog/integrations-core/pull/18108))
 * Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
-* Add the propagate_agent_tags setting. When set to `true`, the tags from the agent host are added to the check's tag for all instances. ([#18557](https://github.com/DataDog/integrations-core/pull/18557))
+* Add the `propagate_agent_tags` setting. When set to `true`, the tags from the agent host are added to the check's tag for all instances. ([#18557](https://github.com/DataDog/integrations-core/pull/18557))
 
 ***Fixed***:
 
