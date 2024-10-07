@@ -10,7 +10,7 @@
 
 ***Added***:
 
-* Add the apiserver_admission_webhook_request_total ([#17690](https://github.com/DataDog/integrations-core/pull/17690))
+* Add the apiserver_admission_webhook_request_total metric ([#17690](https://github.com/DataDog/integrations-core/pull/17690))
 * Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
 ***Fixed***:
