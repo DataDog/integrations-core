@@ -19,6 +19,7 @@ from .constants import (
     DEPLOY_RERUN_METRIC,
     DEPLOY_SUCCESS_METRIC,
     DEPLOY_SUCCESS_STATE,
+    DEPLOY_WARNINGS_METRIC,
     PROJECT_COUNT_METRIC,
     PROJECT_GROUP_COUNT_METRIC,
 )
@@ -64,6 +65,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             start_time = task.get("StartTime")
             queue_time = task.get("QueueTime")
             can_rerun = int(task.get("CanRerun", False))
+            has_warnings = int(task.get("HasWarningsOrErrors", False))
 
             completed_time_converted = datetime.fromisoformat(completed_time)
             start_time_converted = datetime.fromisoformat(start_time)
@@ -94,6 +96,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge(DEPLOY_QUEUE_TIME_METRIC, queue_time_seconds, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_SUCCESS_METRIC, succeeded, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_RERUN_METRIC, can_rerun, tags=self.base_tags + project_tags + tags)
+            self.gauge(DEPLOY_WARNINGS_METRIC, has_warnings, tags=self.base_tags + project_tags + tags)
 
         new_completed_time = new_completed_time + timedelta(milliseconds=1)
         project.last_completed_time = new_completed_time

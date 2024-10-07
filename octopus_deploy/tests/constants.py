@@ -20,6 +20,7 @@ ALL_METRICS = [
     "octopus_deploy.project.count",
     "octopus_deploy.deployment.count",
     "octopus_deploy.deployment.duration",
+    "octopus_deploy.deployment.has_warnings_or_errors",
     "octopus_deploy.deployment.queue_time",
     "octopus_deploy.deployment.succeeded",
     "octopus_deploy.deployment.can_rerun",
@@ -550,6 +551,21 @@ DEPLOYMENT_METRICS = [
         'value': 0,
     },
     {
+        'name': 'octopus_deploy.deployment.has_warnings_or_errors',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1846",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
         'name': 'octopus_deploy.deployment.duration',
         'tags': [
             "project_group_name:Default Project Group",
@@ -625,6 +641,21 @@ DEPLOYMENT_METRICS = [
         'value': 0,
     },
     {
+        'name': 'octopus_deploy.deployment.has_warnings_or_errors',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1847",
+            "task_name:Deploy",
+            "task_state:Failed",
+        ],
+        'count': 1,
+        'value': 1,
+    },
+    {
         'name': 'octopus_deploy.deployment.duration',
         'tags': [
             "project_group_name:Default Project Group",
@@ -686,6 +717,21 @@ DEPLOYMENT_METRICS = [
     },
     {
         'name': 'octopus_deploy.deployment.can_rerun',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test-api",
+            "project_id:Projects-1",
+            "task_id:ServerTasks-1844",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
+        'name': 'octopus_deploy.deployment.has_warnings_or_errors',
         'tags': [
             "project_group_name:Default Project Group",
             "project_group_id:ProjectGroups-1",
@@ -804,6 +850,20 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
         'count': 1,
     },
     {
+        'name': 'octopus_deploy.deployment.has_warnings_or_errors',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1846",
+            "task_name:Deploy",
+            "task_state:Success",
+        ],
+        'count': 1,
+    },
+    {
         'name': 'octopus_deploy.deployment.duration',
         'tags': [
             "project_group_name:Default Project Group",
@@ -861,6 +921,20 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
     },
     {
         'name': 'octopus_deploy.deployment.can_rerun',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_id:ServerTasks-1847",
+            "task_name:Deploy",
+            "task_state:Failed",
+        ],
+        'count': 1,
+    },
+    {
+        'name': 'octopus_deploy.deployment.has_warnings_or_errors',
         'tags': [
             "project_group_name:Default Project Group",
             "project_group_id:ProjectGroups-1",
