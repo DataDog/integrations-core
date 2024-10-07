@@ -259,15 +259,21 @@ class MongoDb(AgentCheck):
             tags.extend(self.deployment_type.replset_tags)
         return tags
 
+    def _get_service_check_tags(self):
+        tags = deepcopy(self._config.service_check_tags)
+        if self._resolved_hostname:
+            tags.append(f"database_instance:{self._resolved_hostname}")
+        return tags
+
     def check(self, _):
         try:
             self._refresh_metadata()
             self._refresh_deployment()
             self._collect_metrics()
+            self._send_database_instance_metadata()
 
             # DBM
             if self._config.dbm_enabled:
-                self._send_database_instance_metadata()
                 self._operation_samples.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._slow_operations.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
