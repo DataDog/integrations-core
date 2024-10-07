@@ -8,7 +8,7 @@ The SQL Server integration tracks the performance of your SQL Server instances. 
 
 Enable [Database Monitoring](https://docs.datadoghq.com/database_monitoring/) (DBM) for enhanced insight into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
-All editions of SQL Server 2012 and above are supported.
+SQL Server 2012, 2014, 2016, 2017, 2019, and 2022 are supported.
 
 ## Setup
 
