@@ -1,0 +1,2 @@
+Add configuration option to disable `stage_id` tag on `spark.job` metrics
+Add configuration option to disable `spark.stage` metrics
