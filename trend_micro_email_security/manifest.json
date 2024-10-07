@@ -10,7 +10,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Trend Micro Email Security logs.",
     "title": "Trend Micro Email Security",
-    "media": [],
+    "media": [
+      {
+        "caption": "Trend Micro Email Security - Mail Tracking",
+        "image_url": "images/trend_micro_email_security_mail_tracking.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Email Security - Policy Events",
+        "image_url": "images/trend_micro_email_security_policy_events.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
@@ -29,6 +40,10 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Trend Micro Email Security - Mail Tracking": "assets/dashboards/trend_micro_email_security_mail_tracking.json",
+      "Trend Micro Email Security - Policy Events": "assets/dashboards/trend_micro_email_security_policy_events.json"
     },
     "logs": {
       "source": "trend-micro-email-security"

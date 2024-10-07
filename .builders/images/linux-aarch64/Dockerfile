@@ -34,10 +34,11 @@ RUN /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script
  && /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m virtualenv /py2
 
 # openssl
-RUN yum install -y perl-IPC-Cmd && \
+RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
+ cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.0.13" \
- SHA256="88525753f79d3bec27d2fa7c66aa0b92b3aa9498dafd93d7cfa4b3780cdae313" \
+ VERSION="3.3.2" \
+ SHA256="2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -53,11 +54,11 @@ RUN yum install -y perl-IPC-Cmd && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.11.8
+ENV PYTHON3_VERSION=3.12.6
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889" \
+ SHA256="85a4c1be906d20e5c5a69f2466b00da769c221d6a684acfd3a514dbf5bf10a66" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON_VERSION} \

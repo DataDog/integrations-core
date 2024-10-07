@@ -56,8 +56,8 @@
       "airflow_overview": "assets/saved_views/airflow_overview.json"
     },
     "monitors": {
-      "Heartbeat Failure": "assets/monitors/heartbeat_failures.json",
-      "Ongoing Duration": "assets/monitors/ongoing_duration.json"
+      "Task instances are failing": "assets/monitors/heartbeat_failures.json",
+      "DAG task ongoing duration is high": "assets/monitors/ongoing_duration.json"
     }
   }
 }

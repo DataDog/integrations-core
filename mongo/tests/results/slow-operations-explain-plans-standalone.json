@@ -42,7 +42,7 @@
                                 "stage": "FETCH",
                                 "filter": {
                                     "age": {
-                                        "$gt": 63
+                                        "$gt": "?"
                                     }
                                 },
                                 "nReturned": 0,
@@ -82,7 +82,7 @@
                                     "direction": "forward",
                                     "indexBounds": {
                                         "name": [
-                                            "[MinKey, MaxKey]"
+                                            "?"
                                         ]
                                     },
                                     "keysExamined": 417,
@@ -94,7 +94,7 @@
                         }
                     }
                 },
-                "signature": "c158c55ee53541f9"
+                "signature": "a0e139ab93266440"
             },
             "query_signature": "7e73a3e6720168b8",
             "application": null,
@@ -153,13 +153,13 @@
                             "$and": [
                                 {
                                     "data": {
-                                        "$gt": 0.6283678507530881
+                                        "$gt": "?"
                                     }
                                 },
                                 {
                                     "message": {
                                         "$regularExpression": {
-                                            "pattern": "log",
+                                            "pattern": "?",
                                             "options": ""
                                         }
                                     }
@@ -177,13 +177,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -206,13 +206,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -234,7 +234,7 @@
                         "allPlansExecution": []
                     }
                 },
-                "signature": "466d69277a94ff1f"
+                "signature": "6f93ef1b4ea189ab"
             },
             "query_signature": "2e0dfc1416f51975",
             "application": null,
@@ -298,13 +298,13 @@
                             "$and": [
                                 {
                                     "data": {
-                                        "$gt": 0.6283678507530881
+                                        "$gt": "?"
                                     }
                                 },
                                 {
                                     "message": {
                                         "$regularExpression": {
-                                            "pattern": "log",
+                                            "pattern": "?",
                                             "options": ""
                                         }
                                     }
@@ -322,13 +322,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -351,13 +351,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -379,7 +379,7 @@
                         "allPlansExecution": []
                     }
                 },
-                "signature": "466d69277a94ff1f"
+                "signature": "6f93ef1b4ea189ab"
             },
             "query_signature": "6f544fbdad56d0dc",
             "application": null,

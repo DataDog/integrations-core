@@ -1,1 +1,0 @@
-Remove `comment` from obfuscate command and send it as a separate field in operation samples and slow operations payload.

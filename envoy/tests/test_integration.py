@@ -15,6 +15,7 @@ from .common import (
     FLAKY_METRICS,
     LOCAL_RATE_LIMIT_METRICS,
     PROMETHEUS_METRICS,
+    TLS_INSPECTOR_METRICS,
     requires_new_environment,
 )
 
@@ -37,7 +38,7 @@ def test_check(aggregator, dd_run_check, check):
     dd_run_check(c)
     dd_run_check(c)
 
-    for metric in PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CONNECTION_LIMIT_METRICS:
+    for metric in PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CONNECTION_LIMIT_METRICS + TLS_INSPECTOR_METRICS:
         formatted_metric = "envoy.{}".format(metric)
         if metric in FLAKY_METRICS:
             aggregator.assert_metric(formatted_metric, at_least=0)

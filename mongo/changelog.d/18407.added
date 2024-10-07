@@ -1,6 +1,0 @@
-Add sharded data distribution metrics (only collected on mongos)
-- `mongodb.sharded_data_distribution.num_orphaned_docs`, - Number of orphaned documents in the shard
-- `mongodb.sharded_data_distribution.num_owned_documents` - Number of owned documents in the shard
-- `mongodb.sharded_data_distribution.orphaned_size_bytes` - Size of orphaned documents in the shard
-- `mongodb.sharded_data_distribution.owned_size_bytes` - Size of owned documents in the shard
-

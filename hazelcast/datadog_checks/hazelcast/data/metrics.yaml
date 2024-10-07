@@ -4,7 +4,6 @@ jmx_metrics:
   - include:
       domain: ManagementCenter
       exclude_tags:
-        - name
         - type
       attribute:
         LicenseExpirationTime:
@@ -18,7 +17,6 @@ jmx_metrics:
       type: HazelcastInstance
       exclude_tags:
         - instance
-        - name
         - type
       tags:
         hazelcast_instance: $instance
@@ -32,12 +30,14 @@ jmx_metrics:
         memberCount:
           alias: hazelcast.instance.member_count
           metric_type: gauge
+        clusterTime:
+          alias: hazelcast.instance.cluster_time
+          metric_type: gauge
   - include:
       domain: com.hazelcast
       type: HazelcastInstance.PartitionServiceMBean
       exclude_tags:
         - instance
-        - name
         - type
       tags:
         hazelcast_instance: $instance
@@ -59,7 +59,6 @@ jmx_metrics:
       type: HazelcastInstance.ManagedExecutorService
       exclude_tags:
         - instance
-        - name
         - type
       tags:
         hazelcast_instance: $instance
@@ -92,7 +91,6 @@ jmx_metrics:
       type: IMap
       exclude_tags:
         - instance
-        - name
         - type
       tags:
         hazelcast_instance: $instance
@@ -179,7 +177,6 @@ jmx_metrics:
       type: MultiMap
       exclude_tags:
         - instance
-        - name
         - type
       tags:
         hazelcast_instance: $instance
@@ -260,7 +257,6 @@ jmx_metrics:
       type: ReplicatedMap
       exclude_tags:
         - instance
-        - name
         - type
       tags:
         hazelcast_instance: $instance
@@ -326,7 +322,6 @@ jmx_metrics:
       type: Metrics
       exclude_tags:
         - instance
-        - name
         - type
         - tag.*
       tags:
@@ -437,9 +432,6 @@ jmx_metrics:
         connectionListenerCount:
           alias: hazelcast.member.connection_listener_count
           metric_type: gauge
-        connectionType:
-          alias: hazelcast.member.connection_type
-          metric_type: gauge
         count:
           alias: hazelcast.member.count
           metric_type: gauge
@@ -548,15 +540,6 @@ jmx_metrics:
         invocationTimeoutMillis:
           alias: hazelcast.member.invocation_timeout_millis
           metric_type: gauge
-        invocations.lastCallId:
-          alias: hazelcast.member.invocations.last_call_id
-          metric_type: gauge
-        invocations.pending:
-          alias: hazelcast.member.invocations.pending
-          metric_type: gauge
-        invocations.usedPercentage:
-          alias: hazelcast.member.invocations.used_percentage
-          metric_type: gauge
         ioThreadId:
           alias: hazelcast.member.io_thread_id
           metric_type: gauge
@@ -629,9 +612,6 @@ jmx_metrics:
         missingMembers:
           alias: hazelcast.member.missing_members
           metric_type: gauge
-        monitorCount:
-          alias: hazelcast.member.monitor_count
-          metric_type: gauge
         nodes:
           alias: hazelcast.member.nodes
           metric_type: gauge
@@ -658,12 +638,6 @@ jmx_metrics:
           metric_type: gauge
         ownerId:
           alias: hazelcast.member.owner_id
-          metric_type: gauge
-        packetsReceived:
-          alias: hazelcast.member.packets_received
-          metric_type: gauge
-        packetsSend:
-          alias: hazelcast.member.packets_send
           metric_type: gauge
         parkQueueCount:
           alias: hazelcast.member.park_queue_count
@@ -785,9 +759,6 @@ jmx_metrics:
         startedMigrations:
           alias: hazelcast.member.started_migrations
           metric_type: gauge
-        stateVersion:
-          alias: hazelcast.member.state_version
-          metric_type: gauge
         syncDeliveryFailureCount:
           alias: hazelcast.member.sync_delivery_failure_count
           metric_type: gauge
@@ -854,9 +825,6 @@ jmx_metrics:
         unknownTime:
           alias: hazelcast.member.unknown_time
           metric_type: gauge
-        unknownCount:
-          alias: hazelcast.member.unknown_count
-          metric_type: gauge
         unloadedClassesCount:
           alias: hazelcast.member.unloaded_classes_count
           metric_type: gauge
@@ -880,4 +848,132 @@ jmx_metrics:
           metric_type: gauge
         writeQueueSize:
           alias: hazelcast.member.write_queue_size
+          metric_type: gauge
+
+        # metrics in 4 and 5 but at different locations
+        # hazelcast 5
+        lastCallId:
+          alias: hazelcast.member.invocations.last_call_id
+          metric_type: gauge
+        pending:
+          alias: hazelcast.member.invocations.pending
+          metric_type: gauge
+        usedPercentage:
+          alias: hazelcast.member.invocations.used_percentage
+          metric_type: gauge
+        unknownCount:
+          alias: hazelcast.member.unknown_count
+          metric_type: gauge
+        # hazelcast 4
+        invocations.lastCallId:
+          alias: hazelcast.member.invocations.last_call_id
+          metric_type: gauge
+        invocations.pending:
+          alias: hazelcast.member.invocations.pending
+          metric_type: gauge
+        invocations.usedPercentage:
+          alias: hazelcast.member.invocations.used_percentage
+          metric_type: gauge
+        unknowsnCount: # typo on hazelcast's side
+          alias: hazelcast.member.unknown_count
+          metric_type: gauge
+
+        # hazelcast 4 only
+        connectionType:
+          alias: hazelcast.member.connection_type
+          metric_type: gauge
+        monitorCount:
+          alias: hazelcast.member.monitor_count
+          metric_type: gauge
+        packetsReceived:
+          alias: hazelcast.member.packets_received
+          metric_type: gauge
+        packetsSend:
+          alias: hazelcast.member.packets_send
+          metric_type: gauge
+        stateVersion:
+          alias: hazelcast.member.state_version
+          metric_type: gauge
+  # Queue
+  - include:
+      domain: com.hazelcast
+      type: IQueue
+      exclude_tags:
+        - instance
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        localMinAge:
+          alias: hazelcast.iqueue.minimum_age
+          metric_type: gauge
+        localMaxAge:
+          alias: hazelcast.iqueue.maximum_age
+          metric_type: gauge
+        localAverageAge:
+          alias: hazelcast.iqueue.average_age
+          metric_type: gauge
+        localOwnedItemCount:
+          alias: hazelcast.iqueue.owned_item_count
+          metric_type: gauge
+        localBackupItemCount:
+          alias: hazelcast.iqueue.backup_item_count
+          metric_type: gauge
+        localOfferOperationCount:
+          alias: hazelcast.iqueue.offer_operation_count
+          metric_type: gauge
+        localRejectedOfferOperationCount:
+          alias: hazelcast.iqueue.rejected_offer_operation_count
+          metric_type: gauge
+        localPollOperationCount:
+          alias: hazelcast.iqueue.poll_operation_count
+          metric_type: gauge
+        localEmptyPollOperationCount:
+          alias: hazelcast.iqueue.empty_poll_operation_count
+          metric_type: gauge
+        localOtherOperationsCount:
+          alias: hazelcast.iqueue.other_operation_count 
+          metric_type: gauge
+        localEventOperationCount:
+          alias: hazelcast.iqueue.event_operation_count
+          metric_type: gauge
+
+  # ReliableTopic
+  - include:
+      domain: com.hazelcast
+      type: ReliableTopic
+      exclude_tags:
+        - instance
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        localCreationTime:
+          alias: hazelcast.reliabletopic.creation_time
+          metric_type: gauge
+        localPublishOperationCount:
+          alias: hazelcast.reliabletopic.publish_operation_count
+          metric_type: gauge
+        localReceiveOperationCount:
+          alias: hazelcast.reliabletopic.receive_operation_count
+          metric_type: gauge
+
+  # Topic
+  - include:
+      domain: com.hazelcast
+      type: ITopic
+      exclude_tags:
+        - instance
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        localCreationTime:
+          alias: hazelcast.topic.creation_time
+          metric_type: gauge
+        localPublishOperationCount:
+          alias: hazelcast.topic.publish_operation_count
+          metric_type: gauge
+        localReceiveOperationCount:
+          alias: hazelcast.topic.receive_operation_count
           metric_type: gauge

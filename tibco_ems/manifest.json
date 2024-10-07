@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "32445b00-582f-4e56-9c4d-87944d5c347b",
   "app_id": "tibco-ems",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -13,7 +13,6 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::Windows",
       "Supported OS::macOS",
       "Submitted Data Type::Metrics",
       "Offering::Integration",
@@ -49,7 +48,7 @@
       "Tibco EMS Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Server Uptime": "assets/monitors/server_uptime.json"
+      "Tibco EMS server uptime": "assets/monitors/server_uptime.json"
     },
     "saved_views": {
       "Tibco EMS Error Logs Overview": "assets/saved_views/error_logs_overview.json",

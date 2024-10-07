@@ -11,4 +11,4 @@ FULL_NAMES = {
 }
 
 # This is automatically maintained
-PYTHON_VERSION = '3.11'
+PYTHON_VERSION = '3.12'

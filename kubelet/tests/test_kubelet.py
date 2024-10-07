@@ -11,7 +11,6 @@ import mock
 import pytest
 import requests
 import requests_mock
-from six import iteritems
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
@@ -466,7 +465,7 @@ def test_bad_config():
 
 
 def test_parse_quantity():
-    for raw, res in iteritems(QUANTITIES):
+    for raw, res in QUANTITIES.items():
         assert KubeletCheck.parse_quantity(raw) == res
 
 

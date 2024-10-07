@@ -5,7 +5,6 @@ import time
 
 import pytest
 from mock import MagicMock
-from six.moves import range
 
 from datadog_checks.vsphere.legacy.mor_cache import MorCache, MorNotFoundError
 

@@ -2,12 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import socket
-
 import pytest
-import six
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.dev.utils import get_active_env
 from datadog_checks.iis import IIS
@@ -22,31 +18,18 @@ def test_e2e(dd_agent_check, aggregator, instance):
     Check should run without error if IIS is installed
     """
     aggregator = dd_agent_check(instance)
-    if six.PY3:
-        aggregator.assert_service_check('iis.windows.perf.health', IIS.OK)
+    aggregator.assert_service_check('iis.windows.perf.health', IIS.OK)
 
 
 @pytest.fixture
 def iis_host(aggregator):
-    if six.PY2:
-        # the python2 version of the check uses the configured hostname,
-        # which is the hostnane of the docker host.
-        return 'iis_host:{}'.format(socket.gethostname())
-    else:
-        # the python3 version of the check uses the perf counter server field,
-        # which is the hostname of the container.
-        result = run_container_command(['hostname'])
-        hostname = result.stdout.strip()
-        return 'iis_host:{}'.format(hostname)
+    result = run_container_command(['hostname'])
+    hostname = result.stdout.strip()
+    return 'iis_host:{}'.format(hostname)
 
 
 def normalize_tags(tags):
-    if six.PY2:
-        # The python2 version of the check calls self.normalize_tag
-        a = AgentCheck()
-        return [a.normalize_tag(tag) for tag in tags]
-    else:
-        return tags
+    return tags
 
 
 def run_container_command(command):

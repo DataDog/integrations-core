@@ -218,7 +218,6 @@ files:
             example: 10
     - name: slow_operations
       description: Configure collection of MongoDB slow operations.
-      hidden: true
       options:
         - name: enabled
           description: |
@@ -247,7 +246,7 @@ files:
             Enable collection of schemas. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collection_interval
           description: |
             Set the schemas collection interval in seconds. Each collection involves sampling documents

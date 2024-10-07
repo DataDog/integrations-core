@@ -2,6 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2024-10-04
+
+***Fixed***:
+
+* Fix metric type in new network metrics ([#18764](https://github.com/DataDog/integrations-core/pull/18764))
+
+## 4.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
+
+## 3.4.0 / 2024-09-05
+
+***Added***:
+
+* Add new TCP metrics for Network integration on Windows ([#18294](https://github.com/DataDog/integrations-core/pull/18294))
+* Bump `psutil`  version to 5.9.6 ([#18491](https://github.com/DataDog/integrations-core/pull/18491))
+
 ## 3.3.0 / 2024-03-08 / Agent 7.52.0
 
 ***Added***:

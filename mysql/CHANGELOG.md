@@ -2,7 +2,27 @@
 
 <!-- towncrier release notes start -->
 
-## 12.7.0 / 2024-08-09
+## 13.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+## 12.8.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+***Fixed***:
+
+* Handles mysql azure flexible server warning bug ([#18450](https://github.com/DataDog/integrations-core/pull/18450))
+
+## 12.7.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 

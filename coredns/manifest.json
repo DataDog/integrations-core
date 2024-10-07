@@ -68,8 +68,8 @@
       "CoreDNS": "assets/dashboards/coredns.json"
     },
     "monitors": {
-      "[CoreDNS] Cache hits count low": "assets/monitors/coredns_cache_hits_low.json",
-      "[CoreDNS] Request duration high": "assets/monitors/coredns_request_duration_high.json"
+      "Cache hits count is low": "assets/monitors/coredns_cache_hits_low.json",
+      "Request duration is high": "assets/monitors/coredns_request_duration_high.json"
     }
   }
 }

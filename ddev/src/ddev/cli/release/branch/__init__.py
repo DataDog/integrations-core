@@ -4,6 +4,7 @@
 import click
 
 from ddev.cli.release.branch.create import create
+from ddev.cli.release.branch.tag import tag
 
 
 @click.group(short_help='Manage release branches')
@@ -14,3 +15,4 @@ def branch():
 
 
 branch.add_command(create)
+branch.add_command(tag)

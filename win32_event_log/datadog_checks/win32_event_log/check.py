@@ -8,20 +8,15 @@ import win32con
 import win32event
 import win32evtlog
 import win32security
-from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.time import get_timestamp
 
+from .config_models import ConfigMixin
 from .filters import construct_xpath_query
 from .legacy import Win32EventLogWMI
-
-if PY2:
-    ConfigMixin = object
-else:
-    from .config_models import ConfigMixin
 
 
 class Win32EventLogCheck(AgentCheck, ConfigMixin):
@@ -91,12 +86,8 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
             )
 
         if use_legacy_mode:
-            # Supports PY2 and PY3
             return Win32EventLogWMI(name, init_config, instances)
         elif use_legacy_mode_v2:
-            # Supports PY3
-            if PY2:
-                raise ConfigurationError("legacy_mode_v2 is not supported on Python2")
             return super(Win32EventLogCheck, cls).__new__(cls)
         else:
             raise SkipInstanceError(

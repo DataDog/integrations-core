@@ -303,7 +303,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "dbm_type": "plan",
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
-            "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
+            "ddtags": ",".join(self._check._get_tags()),
             "timestamp": now * 1000,
             "network": {
                 "client": operation_metadata["client"],
@@ -358,7 +358,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "ddsource": "mongo",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
-            "ddtags": self._check._get_tags(include_deployment_tags=True),
+            "ddtags": self._check._get_tags(),
             "timestamp": now * 1000,
             "mongodb_activity": activities,
         }

@@ -72,9 +72,9 @@
       "NGINX-Overview": "assets/dashboards/NGINX-Overview_dashboard.json"
     },
     "monitors": {
-      "[NGINX] Upstream peers fails": "assets/monitors/upstream_peer_fails.json",
-      "[NGINX] 4xx Errors higher than usual": "assets/monitors/4xx.json",
-      "[NGINX] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+      "Upstream peers are failing": "assets/monitors/upstream_peer_fails.json",
+      "Upstream 4xx errors are high": "assets/monitors/4xx.json",
+      "Upstream 5xx errors are high": "assets/monitors/5xx.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",

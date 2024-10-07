@@ -9,7 +9,9 @@
             "replset_name:replset",
             "replset_state:primary",
             "replset_me:replset-data-0.mongo.default.svc.cluster.local:27017",
-            "hosting_type:self-hosted"
+            "hosting_type:self-hosted",
+            "replset_nodetype:ELECTABLE",
+            "replset_workloadtype:OPERATIONAL"
         ]
     },
     {
@@ -22,7 +24,9 @@
             "replset_name:replset",
             "replset_state:secondary",
             "replset_me:replset-data-0.mongo.default.svc.cluster.local:27017",
-            "hosting_type:self-hosted"
+            "hosting_type:self-hosted",
+            "replset_nodetype:ELECTABLE",
+            "replset_workloadtype:OPERATIONAL"
         ]
     },
     {
@@ -35,7 +39,9 @@
             "replset_name:replset",
             "replset_state:secondary",
             "replset_me:replset-data-0.mongo.default.svc.cluster.local:27017",
-            "hosting_type:self-hosted"
+            "hosting_type:self-hosted",
+            "replset_nodetype:ELECTABLE",
+            "replset_workloadtype:OPERATIONAL"
         ]
     }
 ]

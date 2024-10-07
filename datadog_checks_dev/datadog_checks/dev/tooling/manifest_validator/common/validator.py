@@ -7,8 +7,6 @@ import json
 import os
 from typing import Dict  # noqa: F401
 
-import six
-
 from ...datastructures import JSONDict
 from ...git import git_show_file
 from ...utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
@@ -29,8 +27,7 @@ class ValidationResult(object):
         return str(self)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseManifestValidator(object):
+class BaseManifestValidator(abc.ABC):
     def __init__(
         self,
         is_extras=False,
@@ -64,6 +61,7 @@ class BaseManifestValidator(object):
             return True
         return False
 
+    @abc.abstractmethod
     def validate(self, check_name, manifest, should_fix):
         # type: (str, Dict, bool) -> None
         """Validates the decoded manifest. Will perform inline changes if fix is true"""

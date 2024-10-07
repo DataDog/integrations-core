@@ -10,7 +10,6 @@ from datetime import datetime
 
 import requests
 from openstack.config.loader import OpenStackConfig
-from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
@@ -213,7 +212,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         """
         # Create a dictionary with hypervisor hostname as key and the list of project names as value
         hyp_project_names = defaultdict(set)
-        for server in itervalues(servers):
+        for server in servers.values():
             hypervisor_hostname = server.get('hypervisor_hostname')
             if not hypervisor_hostname:
                 self.log.debug(
@@ -276,7 +275,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         if not collect_hypervisor_metrics:
             return
 
-        for label, val in iteritems(hyp):
+        for label, val in hyp.items():
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{}".format(label)
                 self.gauge(metric_label, val, tags=tags)
@@ -365,7 +364,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         # "tenant_id can also be requested which is alias of project_id but that is not
         # recommended to use as that will be removed in future."
         tenant_to_name = {}
-        for name, p in iteritems(projects):
+        for name, p in projects.items():
             tenant_to_name[p.get('id')] = name
 
         cached_servers = self.servers_cache.get('servers')
@@ -379,7 +378,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
 
         # Filter out excluded servers
         servers = {}
-        for updated_server_id, updated_server in iteritems(updated_servers):
+        for updated_server_id, updated_server in updated_servers.items():
             if not any(re.match(rule, updated_server_id) for rule in exclude_server_id_rules):
                 servers[updated_server_id] = updated_server
 
@@ -717,7 +716,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             projects = self.get_projects(include_project_name_rules, exclude_project_name_rules)
 
             if collect_project_metrics:
-                for project in itervalues(projects):
+                for project in projects.values():
                     self.collect_project_limit(project, custom_tags)
 
             servers = self.populate_servers_cache(projects, exclude_server_id_rules)
@@ -733,16 +732,16 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             if collect_server_diagnostic_metrics or collect_server_flavor_metrics:
                 if collect_server_diagnostic_metrics:
                     self.log.debug("Fetching stats from %s server(s)", len(servers))
-                    for server in itervalues(servers):
+                    for server in servers.values():
                         self.collect_server_diagnostic_metrics(server, tags=custom_tags, use_shortname=use_shortname)
                 if collect_server_flavor_metrics:
-                    if len(servers) >= 1 and 'flavor_id' in next(itervalues(servers)):
+                    if len(servers) >= 1 and 'flavor_id' in next(iter(servers.values())):
                         self.log.debug("Fetching server flavors")
                         # If flavors are not part of servers detail (new in version 2.47) then we need to fetch them
                         flavors = self.get_flavors()
                     else:
                         flavors = None
-                    for server in itervalues(servers):
+                    for server in servers.values():
                         self.collect_server_flavor_metrics(
                             server, flavors, tags=custom_tags, use_shortname=use_shortname
                         )
@@ -790,7 +789,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         """
         self.log.debug("Collecting external_host_tags")
         external_host_tags = []
-        for k, v in iteritems(self.external_host_tags):
+        for k, v in self.external_host_tags.items():
             external_host_tags.append((k, {SOURCE_TYPE: v}))
 
         self.log.debug("Sending external_host_tags: %s", external_host_tags)
@@ -831,7 +830,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         filtered_project_names = pattern_filter(
             list(project_by_name), whitelist=include_project_name_rules, blacklist=exclude_project_name_rules
         )
-        result = {name: v for (name, v) in iteritems(project_by_name) if name in filtered_project_names}
+        result = {name: v for (name, v) in project_by_name.items() if name in filtered_project_names}
         return result
 
     # Neutron Proxy Methods

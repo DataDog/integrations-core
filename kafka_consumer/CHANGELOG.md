@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 4.6.0 / 2024-08-09
+## 5.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 4.6.1 / 2024-09-05
+
+***Fixed***:
+
+* Fix a typo when writing to persistent cache to calculate the estimated consumer lag. ([#18307](https://github.com/DataDog/integrations-core/pull/18307))
+
+## 4.6.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 

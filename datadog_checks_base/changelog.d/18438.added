@@ -1,1 +1,0 @@
-`utils.http.RequestsWrapper` accepts a session at initialization, useful for testing and controlling sessions in general.

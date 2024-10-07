@@ -64,7 +64,7 @@
       "Fluxcd": "assets/dashboards/fluxcd.json"
     },
     "monitors": {
-      "Active Workers": "assets/monitors/active_workers.json",
+      "Active Workers Count": "assets/monitors/active_workers.json",
       "Error Count": "assets/monitors/error_count.json"
     },
     "saved_views": {
