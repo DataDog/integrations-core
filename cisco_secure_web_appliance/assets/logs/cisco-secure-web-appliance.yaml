@@ -175,7 +175,8 @@ pipeline:
             supportRules: |-
               helper_rule_1 %{regex("[^,]*")}
               helper_rule_2 %{regex("[^\"]*")}
-            matchRules: 'access_log_rule (<%{integer:}>%{date("MMM d HH:mm:ss"):}
+            matchRules: 'access_log_rule ((<%{integer:}>)?(%{date("MMM d
+              HH:mm:ss"):}|%{date("MMM  d HH:mm:ss"):})
               %{notSpace:syslog.host} %{regex("[^:]*"):}:
               %{regex("[^:]*"):syslog.severity}:
               )?%{number:timestamp:scale(1000)} %{number:latency}
@@ -402,14 +403,15 @@ pipeline:
 
               DESTINATION_IP_PARSER_RULE (\[?(%{ip:network.destination.ip}|%{regex("[^\\s|^:|^\\]]*"):network.destination.ip})\]?(( )?\(%{notSpace:destination_domain}\))?(:%{integer:network.destination.port})?)
             matchRules: >-
-              firewall_rule_1 (%{number:timestamp:scale(1000)}|%{date("EEE MMM
-              d HH:mm:ss yyyy"):timestamp}) %{word:syslog.severity}: Firewall
+              firewall_rule_1 (%{number:timestamp:scale(1000)}|%{date("EEE MMM d
+              HH:mm:ss yyyy"):timestamp}|%{date("EEE MMM  d HH:mm:ss
+              yyyy"):timestamp}) %{word:syslog.severity}: Firewall
               %{word:action}( %{word:protocol})?(:%{number:protocol_version})?
               data from %{SOURCE_IP_PARSER_RULE:} to
               %{DESTINATION_IP_PARSER_RULE:}.
 
 
-              firewall_rule_2 (%{number:timestamp:scale(1000)}|%{date("EEE MMM dd HH:mm:ss yyyy"):timestamp}) %{word:syslog.severity}: (Address )?%{DESTINATION_IP_PARSER_RULE:} (discovered )?for %{data:sub_domain} \(%{data:domain}\) %{word:firewall_action} (from|to) firewall %{notSpace:firewall_list} list.
+              firewall_rule_2 (%{number:timestamp:scale(1000)}|%{date("EEE MMM d HH:mm:ss yyyy"):timestamp}|%{date("EEE MMM  d HH:mm:ss yyyy"):timestamp}) %{word:syslog.severity}: (Address )?%{DESTINATION_IP_PARSER_RULE:} (discovered )?for %{data:sub_domain} \(%{data:domain}\) %{word:firewall_action} (from|to) firewall %{notSpace:firewall_list} list.
         - type: date-remapper
           name: Define `timestamp` as the official date of the log
           enabled: true
