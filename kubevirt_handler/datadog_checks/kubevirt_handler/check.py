@@ -61,6 +61,9 @@ class KubeVirtHandlerCheck(OpenMetricsBaseCheckV2):
             "namespace": self.__NAMESPACE__,
             "enable_health_service_check": False,
             "tls_verify": self.tls_verify,
+            "rename_labels": {
+                "namespace": "vm_namespace",
+            },
         }
 
         self.scraper_configs.append(instance)

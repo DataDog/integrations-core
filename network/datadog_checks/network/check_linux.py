@@ -304,9 +304,6 @@ class LinuxNetwork(Network):
         )
         return expected_metrics
 
-    def _submit_netmetric_gauge(self, metric, value, tags=None):
-        self.gauge(metric, value, tags=tags)
-
     def _read_int_file(self, file_location):
         try:
             with open(file_location, 'r') as f:
