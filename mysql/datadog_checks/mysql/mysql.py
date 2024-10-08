@@ -1079,7 +1079,10 @@ class MySql(AgentCheck):
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
+            if "You are not using binary logging" in str(e):
+                replica_results.update({'Binlog_enabled': False})
+            else:
+                self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
 
         return replica_results
 
