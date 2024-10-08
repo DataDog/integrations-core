@@ -71,7 +71,7 @@ instances:
     #
     # dbstrict: false
 
-    ## @param ignore_databases - list of strings - optional
+    ## @param ignore_databases - list of strings - optional - default: ['template%','rdsadmin','azure_maintenance','cloudsqladmin','postgres']
     ## A list of database to ignore. No metrics or statement samples will be collected for these databases.
     ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
     ## set collect_default_database to false in addition to adding it to this array.
@@ -82,6 +82,7 @@ instances:
     #   - rdsadmin
     #   - azure_maintenance
     #   - cloudsqladmin
+    #   - postgres
 
     ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
