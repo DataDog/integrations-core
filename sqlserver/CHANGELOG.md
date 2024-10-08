@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 18.0.1 / 2024-10-08
+
+***Fixed***:
+
+* Updated SQL Server Agent job query for completed jobs, significantly reducing query times for large job history logs ([#18760](https://github.com/DataDog/integrations-core/pull/18760))
+
 ## 18.0.0 / 2024-10-01
 
 ***Changed***:
