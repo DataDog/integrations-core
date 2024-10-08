@@ -119,7 +119,7 @@ Need help? Contact [Datadog support][6].
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://github.com/DataDog/go-metro
-[3]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/go-metro/datadog_checks/go-metro/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
 [6]: https://docs.datadoghq.com/help/
