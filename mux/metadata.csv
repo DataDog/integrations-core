@@ -15,7 +15,6 @@ mux.metric.rebuffer_count,gauge,,,,Total number of times the video buffered duri
 mux.metric.rebuffer_duration,gauge,,millisecond,,Total duration of buffering during playback.,1,mux,rebuffer_duration,,
 mux.metric.rebuffer_frequency,gauge,,,minute,Frequency of buffering events per viewer.,1,mux,rebuffer_frequency,,
 mux.metric.rebuffer_percentage,gauge,,percent,,Percentage of time spent buffering during playback.,1,mux,rebuffer_percentage,,
-mux.metric.rebuffer_score,gauge,,,,Score representing the impact of buffering on viewer experience.,1,mux,rebuffer_score,,
 mux.metric.seek_latency,gauge,,millisecond,,Delay experienced when seeking to different parts of the video.,1,mux,seek_latency,,
 mux.metric.smoothness_score,gauge,,,,Score representing smoothness score of the video.,1,mux,smoothness_score,,
 mux.metric.startup_time_score,gauge,,,,Score representing how efficiently videos are starting.,1,mux,startup_time_score,,
