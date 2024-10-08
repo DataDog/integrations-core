@@ -52,7 +52,7 @@
       },
       "metrics": {
         "prefix": "streamnative.",
-        "check": [],
+        "check": ["streamnative.pulsar_resource.pulsar_consumers_count"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
