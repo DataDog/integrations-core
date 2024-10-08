@@ -31,8 +31,6 @@ StreamNative integration requires a StreamNative account and its Client Id, Clie
 9. Click on the 3 dots on the right side of the selected Service Account.
 10. Click on **Download OAuth2 Key**, this file will have required **Client ID** & **Client Secret** to configure in the Integration.
 
-> **Tip**: If the service account does not exist, click on **New -> Service Account** to create a new one, and ensure the **Super Admin** type is enabled.
-
 
 #### StreamNative DataDog integration configuration
 
