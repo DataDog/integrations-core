@@ -26,7 +26,7 @@
       "id": 8907054059342398,
       "definition": {
         "type": "note",
-        "content": "## Overview\n- This dashboard gives insights about Network logs.\n- Network logs displays network traffic details, threat detection, and system events related to network security.\n- DHCP group tracks DHCP logs including lease IP information, total discover, acknowledged and non acknowledged packets etc.\n- L2TP tracks logs related  to VPN connection attempts, successes, and failures. This group allows for detailed tracking of remote access activity.\n- DNS group provides detailed monitoring of DNS traffic, helping to identify potential issues or malicious activity within the network.",
+        "content": "## Overview\n- This dashboard provides insights on network logs.\n- Network logs displays network traffic details, threat detection, and system events related to network security.\n- The DHCP group tracks DHCP logs, including lease IP information and the total discovered, acknowledged and non-acknowledged packets.\n- L2TP tracks logs related to VPN connection attempts, successes, and failures. This group allows for detailed tracking of remote access activity.\n- The DNS group provides detailed monitoring of DNS traffic, helping to identify potential issues or malicious activity within the network.",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
@@ -220,7 +220,7 @@
           {
             "id": 8501494248010598,
             "definition": {
-              "title": "Total Connection Opened",
+              "title": "Total Connections Opened",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -277,7 +277,7 @@
           {
             "id": 7749815108871318,
             "definition": {
-              "title": "Total Connection Closed",
+              "title": "Total Connections Closed",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -650,7 +650,7 @@
           {
             "id": 7864063519032976,
             "definition": {
-              "title": "Events by Protocol ",
+              "title": "Events by Protocol",
               "title_size": "16",
               "title_align": "left",
               "requests": [
@@ -784,7 +784,7 @@
           {
             "id": 268660645109168,
             "definition": {
-              "title": "Top Blacklisted Devices Triggered MAC-IP For Anti-Spoofing Event",
+              "title": "Top Blacklisted Devices that Triggered MAC-IP for Anti-Spoofing Event",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -1794,7 +1794,7 @@
           {
             "id": 4802767918194872,
             "definition": {
-              "title": "Total Offer Recieve Packets",
+              "title": "Offer Received Packets",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -2029,7 +2029,7 @@
           {
             "id": 5196385749415732,
             "definition": {
-              "title": "Distribution of  Event by MAC Address and Lease IPs",
+              "title": "Distribution of Event by MAC Address and Lease IPs",
               "title_size": "16",
               "title_align": "left",
               "requests": [
@@ -2791,7 +2791,7 @@
           {
             "id": 4946151417278448,
             "definition": {
-              "title": "Total  DNS Proxy Packet Received",
+              "title": "Total DNS Proxy Packet Received",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -2838,7 +2838,7 @@
           {
             "id": 770812064818576,
             "definition": {
-              "title": "Total DNS Proxy Request Packet Drop",
+              "title": "Total DNS Proxy Request Packet Dropped",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",

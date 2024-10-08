@@ -164,7 +164,7 @@
       "id": 1107075380441772,
       "definition": {
         "type": "note",
-        "content": "Gain comprehensive visibility into your organization's security and access activities by monitoring SonicWall Firewall Syslog Event logs with this dashboard. \n\nSonicWall Firewall Event logs consolidate all relevant details, actions, and outcomes into a single view, offering a detailed overview of security and access activities. They include information about each event, involved systems and users, IP addresses, user activities, and authentication details, helping security teams manage and track events from initiation to completion.\n\nFor more information, see the [SonicWall Firewall Integration Documentation](https://docs.datadoghq.com/integrations/https://docs.datadoghq.com/integrations/sonicwall_firewall)\n  \n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "content": "Gain comprehensive visibility into your organization's security and access activities by monitoring SonicWall Firewall Syslog Event logs with this dashboard. \n\nSonicWall Firewall Event logs consolidate all relevant details, actions, and outcomes into a single view, offering a detailed overview of security and access activities. They include information about each event, related systems and users, IP addresses, user activities, and authentication details. This helps security teams manage and track events from initiation to completion.\n\nFor more information, see the [SonicWall Firewall Integration Documentation](https://docs.datadoghq.com/integrations/https://docs.datadoghq.com/integrations/sonicwall_firewall)\n  \n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
@@ -1252,7 +1252,7 @@
           {
             "id": 3541796060443396,
             "definition": {
-              "title": "Total Events by Priority  Over time",
+              "title": "Total Events by Priority Over time",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -2210,7 +2210,7 @@
             "id": 2830819343474136,
             "definition": {
               "type": "note",
-              "content": "\nDatadog Cloud SIEM analyzes and correlates SonicWall Firewall Event logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Asonicwall-firewall). ",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates SonicWall Firewall Event logs to detect threats to your environment in real time. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security?query=source%3Asonicwall-firewall). ",
               "background_color": "vivid_blue",
               "font_size": "14",
               "text_align": "left",
@@ -2588,7 +2588,7 @@
           {
             "id": 7820565410491022,
             "definition": {
-              "title": "High Security Signals",
+              "title": "High Severity Security Signals",
               "type": "toplist",
               "requests": [
                 {
@@ -2656,7 +2656,7 @@
           {
             "id": 3620809096696840,
             "definition": {
-              "title": "Medium Security Signals",
+              "title": "Medium Severity Security Signals",
               "type": "toplist",
               "requests": [
                 {

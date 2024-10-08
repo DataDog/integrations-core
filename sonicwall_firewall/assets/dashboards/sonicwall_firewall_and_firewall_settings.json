@@ -26,7 +26,7 @@
       "id": 6474031660100888,
       "definition": {
         "type": "note",
-        "content": "## Overview\n- This dashboard gives insights about Firewall and Firewall Setting logs.\n- Firewall Logs include logs related to application firewall and security policies.\n- Firewall settings include logs for flood attacks, FTP, multicast etc.\n",
+        "content": "## Overview\n- This dashboard provides insights on Firewall and Firewall Setting logs.\n- Firewall logs include logs related to the application firewall and security policies.\n- Firewall Settings include logs for flood attacks, FTP, multicast, and so on.\n",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
@@ -372,7 +372,7 @@
           {
             "id": 8754231207549794,
             "definition": {
-              "title": "Total Access Rule Added",
+              "title": "Total Number of Access Rules Added",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -426,7 +426,7 @@
           {
             "id": 3419154176130290,
             "definition": {
-              "title": "Total Access Rule Deleted",
+              "title": "Total Number of Access Rules Deleted",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -616,7 +616,7 @@
           {
             "id": 2062049705340546,
             "definition": {
-              "title": "Top Users ",
+              "title": "Top Users",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -1268,7 +1268,7 @@
           {
             "id": 2760824977893310,
             "definition": {
-              "title": "Events by Protocol ",
+              "title": "Events by Protocol",
               "title_size": "16",
               "title_align": "left",
               "requests": [
@@ -1530,7 +1530,7 @@
           {
             "id": 3904888047203856,
             "definition": {
-              "title": "Multicast UDP Packet Drop Over Time",
+              "title": "Multicast UDP Packets Dropped Over Time",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1897,7 +1897,7 @@
           {
             "id": 763526985321184,
             "definition": {
-              "title": "Top FTP Port  Bounce Attack",
+              "title": "Top FTP Port Bounce Attack",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",

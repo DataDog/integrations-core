@@ -1,5 +1,5 @@
 {
-  "title": "SonicWall Firewall - Anti Spam",
+  "title": "SonicWall Firewall - Anti-Spam",
   "description": "This dashboard provides information about the Firewall Anti-Spam logs generated in SonicWall Firewall.",
   "widgets": [
     {
@@ -26,7 +26,7 @@
       "id": 25814084312524,
       "definition": {
         "type": "note",
-        "content": "## Overview\n- This dashboard gives insights about Anti-Spam logs.\n- SonicWall logs for Anti-Spam categories typically include information about emails flagged as spam, actions taken (such as blocking or quarantining), source and destination IPs, email addresses, and categories of spam identified.\n",
+        "content": "## Overview\n- This dashboard provides insights on Anti-Spam logs.\n- SonicWall's logs for Anti-Spam categories include information on emails flagged as spam, actions taken (such as blocking or quarantining), source and destination IPs, email addresses, and the categories of spam identified.\n",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
@@ -157,7 +157,7 @@
     {
       "id": 7192538660853662,
       "definition": {
-        "title": "Total Disabled Antispam Services",
+        "title": "Total Disabled Anti-Spam Services",
         "title_size": "16",
         "title_align": "left",
         "type": "query_value",
@@ -212,7 +212,7 @@
     {
       "id": 8979897882829710,
       "definition": {
-        "title": "Total Enabled Antispam Services",
+        "title": "Total Enabled Anti-Spam Services",
         "title_size": "16",
         "title_align": "left",
         "type": "query_value",
@@ -351,7 +351,7 @@
           {
             "formulas": [
               {
-                "alias": "Dropped Outbound Connection",
+                "alias": "Dropped Outbound Connections",
                 "style": {
                   "palette": "dd20",
                   "palette_index": 4
@@ -359,7 +359,7 @@
                 "formula": "query1"
               },
               {
-                "alias": "Dropped Inbound Connection",
+                "alias": "Dropped Inbound Connections",
                 "style": {
                   "palette": "dd20",
                   "palette_index": 0

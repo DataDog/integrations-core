@@ -26,7 +26,7 @@
       "id": 4284048486660124,
       "definition": {
         "type": "note",
-        "content": "## Overview\n- This dashboard gives insights about Security Services logs, includes track of various attacks detected with their source and destination IP addresses. It also includes information such as allowed and blocked websites.\n- SonicWall Security Services logs capture information about traffic that is monitored and controlled by various security services, such as content filtering, intrusion prevention, anti-virus scanning, and anti-spyware\n",
+        "content": "## Overview\n- This dashboard provides insights on Security Services logs, including the various attacks detected and their source and destination IP addresses. It also includes information such as allowed and blocked websites.\n- SonicWall Security Services logs capture information about traffic that is monitored and controlled by various security services, such as content filtering, intrusion prevention, anti-virus scanning, and anti-spyware\n",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
