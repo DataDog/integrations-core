@@ -121,7 +121,7 @@ class Deadlocks(DBMAsyncJob):
                     cursor.execute(XE_SESSIONS_QUERY)
                     rows = cursor.fetchall()
                     if not rows:
-                        raise Exception(NO_XE_SESSION_ERROR)
+                        raise NoXESessionError(NO_XE_SESSION_ERROR)
                     xe_system_found = False
                     for row in rows:
                         if (session := row[0]) in (XE_SESSION_DATADOG):
