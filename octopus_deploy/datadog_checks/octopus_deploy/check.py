@@ -22,6 +22,9 @@ from .constants import (
     DEPLOY_WARNINGS_METRIC,
     PROJECT_COUNT_METRIC,
     PROJECT_GROUP_COUNT_METRIC,
+    SERVER_COUNT_METRIC,
+    SERVER_MAINTENANCE_MODE_METRIC,
+    SERVER_MAX_TASKS_METRIC,
 )
 from .error import handle_error
 from .project_groups import Project, ProjectGroup
@@ -223,11 +226,32 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             ]
         return project_groups
 
+    @handle_error
+    def collect_server_nodes_metrics(self):
+        self.log.debug("Collecting server node metrics.")
+        url = f"{self.config.octopus_endpoint}/octopusservernodes"
+        response = self.http.get(url)
+        response.raise_for_status()
+        server_nodes = response.json().get('Items', [])
+
+        for server_node in server_nodes:
+            node_id = server_node.get("Id")
+            node_name = server_node.get("Name")
+            maintenance_mode = int(server_node.get("IsInMaintenanceMode", False))
+            max_tasks = int(server_node.get("MaxConcurrentTasks", 0))
+            server_tags = [f"server_node_id:{node_id}", f"server_node_name:{node_name}"]
+
+            self.gauge(SERVER_COUNT_METRIC, 1, tags=self.base_tags + server_tags)
+            self.gauge(SERVER_MAINTENANCE_MODE_METRIC, maintenance_mode, tags=self.base_tags + server_tags)
+            self.gauge(SERVER_MAX_TASKS_METRIC, max_tasks, tags=self.base_tags + server_tags)
+
     def check(self, _):
         for _, _, project_group, _ in self.project_groups():
             self.collect_project_metrics(project_group)
             for _, _, project, _ in self.projects(project_group):
                 self._get_new_tasks_for_project(project)
+
+        self.collect_server_nodes_metrics()
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config

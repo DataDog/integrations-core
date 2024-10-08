@@ -25,6 +25,7 @@ from .constants import (
     PROJECT_NO_METRICS,
     PROJECT_ONLY_HI_METRICS,
     PROJECT_ONLY_HI_MY_PROJECT_METRICS,
+    SERVER_NODES_METRICS,
 )
 
 
@@ -244,3 +245,14 @@ def test_exception_when_getting_tasks(get_current_datetime, dd_run_check, aggreg
 
     for metric in PROJECT_GROUP_ALL_METRICS + PROJECT_ALL_METRICS + DEPLOYMENT_METRICS_NO_PROJECT_1:
         aggregator.assert_metric(metric["name"], count=metric["count"], tags=metric["tags"])
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_octopus_server_node_metrics(get_current_datetime, dd_run_check, aggregator, instance, caplog):
+    caplog.set_level(logging.DEBUG)
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    dd_run_check(check)
+
+    for metric in SERVER_NODES_METRICS:
+        aggregator.assert_metric(metric["name"], count=metric["count"], value=metric["value"], tags=metric["tags"])

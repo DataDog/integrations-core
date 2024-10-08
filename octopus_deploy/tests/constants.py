@@ -24,6 +24,9 @@ ALL_METRICS = [
     "octopus_deploy.deployment.queue_time",
     "octopus_deploy.deployment.succeeded",
     "octopus_deploy.deployment.can_rerun",
+    "octopus_deploy.server_node.count",
+    "octopus_deploy.server_node.in_maintenance_mode",
+    "octopus_deploy.server_node.max_concurrent_tasks",
 ]
 
 PROJECT_GROUP_ALL_METRICS = [
@@ -974,5 +977,38 @@ DEPLOYMENT_METRICS_NO_PROJECT_1 = [
             "task_state:Failed",
         ],
         'count': 1,
+    },
+]
+
+SERVER_NODES_METRICS = [
+    {
+        'name': 'octopus_deploy.server_node.count',
+        'tags': [
+            "space_name:Default",
+            "server_node_name:octopus-i8932-79236734bc234-09h234n",
+            "server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n",
+        ],
+        'count': 1,
+        'value': 1,
+    },
+    {
+        'name': 'octopus_deploy.server_node.in_maintenance_mode',
+        'tags': [
+            "space_name:Default",
+            "server_node_name:octopus-i8932-79236734bc234-09h234n",
+            "server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
+        'name': 'octopus_deploy.server_node.max_concurrent_tasks',
+        'tags': [
+            "space_name:Default",
+            "server_node_name:octopus-i8932-79236734bc234-09h234n",
+            "server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n",
+        ],
+        'count': 1,
+        'value': 5,
     },
 ]
