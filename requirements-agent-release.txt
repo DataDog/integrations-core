@@ -9,6 +9,7 @@ datadog-airflow==6.0.0
 datadog-amazon-msk==5.0.0
 datadog-ambari==5.0.0; sys_platform != 'win32'
 datadog-apache==5.0.0
+datadog-appgate-sdp==1.0.0; sys_platform != 'win32'
 datadog-arangodb==3.0.0
 datadog-argo-rollouts==2.0.0
 datadog-argo-workflows==2.0.0
@@ -27,17 +28,10 @@ datadog-ceph==3.0.0; sys_platform != 'win32'
 datadog-cert-manager==5.0.0
 datadog-checkpoint-quantum-firewall==1.0.0
 datadog-checks-base==37.0.0
-<<<<<<< HEAD
-datadog-checks-dependency-provider==1.4.0
-datadog-checks-downloader==4.7.0
-datadog-cilium==3.6.0
-datadog-cisco-aci==2.12.0
-=======
 datadog-checks-dependency-provider==2.0.0
 datadog-checks-downloader==5.0.0
 datadog-cilium==4.0.0
 datadog-cisco-aci==3.0.0
->>>>>>> 28237f7b86 ([Release] Release integrations with base check bump `v7.58` (#18742))
 datadog-cisco-secure-firewall==1.0.0
 datadog-citrix-hypervisor==4.0.0
 datadog-clickhouse==4.0.0
@@ -107,9 +101,13 @@ datadog-kube-dns==5.0.0
 datadog-kube-metrics-server==4.0.0
 datadog-kube-proxy==7.0.0
 datadog-kube-scheduler==5.0.0
+datadog-kubeflow==1.0.0
 datadog-kubelet==8.0.0
 datadog-kubernetes-cluster-autoscaler==2.0.0
 datadog-kubernetes-state==9.0.0
+datadog-kubevirt-api==1.0.0
+datadog-kubevirt-controller==1.0.0
+datadog-kubevirt-handler==1.0.0
 datadog-kyototycoon==3.0.0
 datadog-kyverno==2.0.0
 datadog-lighttpd==4.0.0
@@ -125,7 +123,7 @@ datadog-mesos-slave==4.0.0; sys_platform != 'win32'
 datadog-mongo==7.0.0
 datadog-mysql==13.0.0
 datadog-nagios==2.0.0
-datadog-network==4.0.0
+datadog-network==4.1.0
 datadog-nfsstat==2.0.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==3.0.0
 datadog-nginx==7.0.0
