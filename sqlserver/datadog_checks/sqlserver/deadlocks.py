@@ -132,11 +132,15 @@ class Deadlocks(DBMAsyncJob):
                     if xe_system_found:
                         self._xe_session_name = XE_SESSION_SYSTEM
                         return
-        raise Exception(NO_XE_SESSION_ERROR)
+        raise NoXESessionError(NO_XE_SESSION_ERROR)
 
     def _query_deadlocks(self):
         if self._xe_session_name is None:
-            self._set_xe_session_name()
+            try:
+                self._set_xe_session_name()
+            except NoXESessionError as e:
+                self._log.error(str(e))
+                return
             self._log.info(f'Using XE session {self._xe_session_name} to collect deadlocks')
 
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
@@ -234,3 +238,7 @@ class Deadlocks(DBMAsyncJob):
 
     def run_job(self):
         self.collect_deadlocks()
+
+
+class NoXESessionError(Exception):
+    pass
