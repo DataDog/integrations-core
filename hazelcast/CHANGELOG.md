@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 5.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 4.1.0 / 2024-09-06
+
+***Added***:
+
+* Bump hazalcast-python-client version for Python 3.12 support ([#18520](https://github.com/DataDog/integrations-core/pull/18520))
+
 ## 4.0.0 / 2024-09-05
 
 ***Changed***:
