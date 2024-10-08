@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-20",
+	"last_updated_at": "2024-08-20",
+	"title": "Domain Dropped from Request",
+	"description": "A domain can be dropped from the request. This monitor tracks the status of the domain and triggers an alert when the status changes to \"dropped.\" This helps ensure that appropriate actions are taken promptly to address the dropped domain and prevent any potential disruptions.",
+	"definition": {
+		"id": 150029151,
+		"name": "Domain Dropped from Request",
+		"type": "query alert",
+		"query": "sum(last_1h):max:godaddy.certificate.domain_status{domain_status:dropped} by {domain_name} >= 1",
+		"message": "The domain {{domain_name.name}} has been dropped from the request. Please review and take the necessary actions.",
+		"tags": [
+			"service:domain",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_group_delay": 0,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:godaddy"
+	]
+}

@@ -20,7 +20,7 @@ in-toto==2.0.0
 jellyfish==1.1.0
 kubernetes==30.1.0
 ldap3==2.9.1
-lxml==4.9.4
+lxml==5.1.1
 lz4==4.3.3
 mmh3==4.1.0
 oauthlib==3.2.2
@@ -31,7 +31,7 @@ paramiko==3.4.1
 ply==3.11
 prometheus-client==0.20.0
 protobuf==5.27.3
-psutil==5.9.6
+psutil==6.0.0
 psycopg2-binary==2.9.9
 pyasn1==0.4.8
 pycryptodomex==3.20.0

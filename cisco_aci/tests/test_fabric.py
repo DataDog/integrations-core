@@ -17753,5 +17753,9 @@ def test_fabric_mocked(aggregator):
         hostname=hn201,
     )
 
+    aggregator.assert_metric(
+        'datadog.cisco_aci.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=['cisco']
+    )
+    aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=['cisco'])
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
