@@ -13,14 +13,14 @@
 ## 1. File Monitoring
 ##   - If you want to monitor CSWA logs (access_logs and l4tm_logs) using file monitoring then use type:file stanza.
 ## 2. Syslog
-##   - If you want to monitor CSWA logs using syslog (access_logs) then use type:tcp stanza.
+##   - If you want to monitor CSWA logs using syslog (access_logs) then use type:udp stanza.
 #
 # logs:
 #   - type: file
-#     path: /var/log/named/*.log
+#     path: <Path to Directory Where L4TM would Get Stored>
 #     service: l4tm_logs
 #     source: cisco-secure-web-appliance
 #   - type: udp
-#     port: <PORT>s
+#     port: <PORT>
 #     service: access_logs
 #     source: cisco-secure-web-appliance

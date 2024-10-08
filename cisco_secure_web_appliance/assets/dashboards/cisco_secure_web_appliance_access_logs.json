@@ -1250,7 +1250,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $Destination_IP $Http_Method"
+                                                "query": "source:cisco-secure-web-appliance service:access_logs $Source_IP $ACL_Decision_Tag $Policy_Group_Name $Server_Type $Custom_URL_Category $Http_Method"
                                             },
                                             "storage": "hot"
                                         }

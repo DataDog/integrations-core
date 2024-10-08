@@ -90,7 +90,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @network.destination.ip:* $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @network.destination.ip:* $Source_IP $Destination_IP $Action $Firewall_Action"
                                             },
                                             "storage": "hot"
                                         }
@@ -150,7 +150,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @network.destination.ip:* $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @network.destination.ip:* $Source_IP $Destination_IP $Action $Firewall_Action"
                                             },
                                             "storage": "hot"
                                         }
@@ -239,7 +239,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:critical $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:critical $Source_IP $Destination_IP $Firewall_Action $Action"
                                             }
                                         }
                                     ],
@@ -289,7 +289,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:high $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:high $Source_IP $Destination_IP $Firewall_Action $Action"
                                             }
                                         }
                                     ],
@@ -348,7 +348,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:critical $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:critical $Source_IP $Destination_IP $Firewall_Action $Action"
                                             }
                                         }
                                     ],
@@ -414,7 +414,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:medium $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:medium $Source_IP $Destination_IP $Firewall_Action $Action"
                                             }
                                         }
                                     ],
@@ -465,7 +465,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:low $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:low $Source_IP $Destination_IP $Firewall_Action $Action"
                                             }
                                         }
                                     ],
@@ -508,7 +508,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:info $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:info $Source_IP $Destination_IP $Firewall_Action $Action"
                                             }
                                         }
                                     ],
@@ -567,7 +567,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:high $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:high $Source_IP $Destination_IP $Firewall_Action $Action"
                                             }
                                         }
                                     ],
@@ -641,7 +641,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:medium $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs status:medium $Source_IP $Destination_IP $Firewall_Action $Action"
                                             }
                                         }
                                     ],
@@ -733,7 +733,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @firewall_list:block $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @firewall_list:block $Source_IP $Destination_IP $Firewall_Action"
                                             },
                                             "storage": "hot"
                                         }
@@ -867,7 +867,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @protocol:* $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs $Source_IP $Destination_IP $Action"
                                             },
                                             "storage": "hot"
                                         }
@@ -934,7 +934,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs $Source_IP $Destination_IP $Action $Firewall_Action"
                                             },
                                             "storage": "hot"
                                         }
@@ -1069,7 +1069,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs $Source_IP $Destination_IP $Action $Firewall_Action"
                                             },
                                             "storage": "hot"
                                         }
@@ -1149,7 +1149,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @firewall_list:* $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs @firewall_list:* $Source_IP $Destination_IP $Firewall_Action"
                                             },
                                             "storage": "hot"
                                         }
@@ -1346,7 +1346,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs $Source_IP $Destination_IP $Action"
+                                                "query": "source:cisco-secure-web-appliance service:l4tm_logs $Source_IP $Destination_IP $Firewall_Action"
                                             },
                                             "storage": "hot"
                                         }
@@ -1394,7 +1394,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cisco-secure-web-appliance service:l4tm_logs @network.destination.ip:* $Source_IP $Destination_IP $Action ",
+                                        "query_string": "source:cisco-secure-web-appliance service:l4tm_logs @network.destination.ip:* $Source_IP $Destination_IP $Action $Firewall_Action",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
