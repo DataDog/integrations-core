@@ -17,6 +17,11 @@
 ***Fixed***:
 
 * Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 18.0.1 / 2024-10-08 / Agent 7.58.0
+
+***Fixed***:
+
 * Updated SQL Server Agent job query for completed jobs, significantly reducing query times for large job history logs ([#18760](https://github.com/DataDog/integrations-core/pull/18760))
 
 ## 18.0.0 / 2024-10-01
