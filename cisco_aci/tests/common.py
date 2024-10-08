@@ -115,8 +115,6 @@ FIXTURE_LIST = [
     # b9ec4494d631d05122fd7fb4baf0877d - Api.get_epg_meta
     '_api_node_class_topology_pod_1_node_102_l1PhysIf_json_rsp_subtree_children_rsp_subtree_class_ethpmPhysIf',
     # 79af98fe9c1069b329af3b4828712ddd - Api.get_eth_list -> 9d167692ace22bc1013437072c55a641
-    '_api_node_class_topology_pod_1_node_202_l1PhysIf_json_rsp_subtree_children_rsp_subtree_class_ethpmPhysIf',
-    # 7b06db4060591652e39b305410a03a2a - Api.get_eth_list -> 77987eb09f39a2abbc59e55aaa9d40ab
     '_api_node_class_topology_pod_1_node_201_l1PhysIf_json_rsp_subtree_children_rsp_subtree_class_ethpmPhysIf',
     # ded65ac48170a7a3d8914950607e4e18 - Api.get_eth_list -> 2569ee885cad13ed336e5b4c8bd6dab4
     '_api_node_class_topology_pod_1_node_101_l1PhysIf_json_rsp_subtree_children_rsp_subtree_class_ethpmPhysIf',
