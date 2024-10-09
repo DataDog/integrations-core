@@ -5,6 +5,8 @@ on:
     paths-ignore:
     - datadog_checks_base/datadog_checks/**
     - datadog_checks_dev/datadog_checks/dev/*.py
+  merge_group: # Used by marketplace
+    types: [checks_requested]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
