@@ -23,7 +23,7 @@ This integration collects logs from the sources listed above and sends them to D
     - **Status**: Whether the API key is enabled.
     - **Details**: Extra information about the API key.
 3. Click **Add**.
-4. Copy API Key to the form below along with the Host Region of your Trend Micro Vision One XDR console.
+4. Copy API Key to the form in the integration tile along with the Host Region of your Trend Micro Vision One XDR console.
 
 ## Data Collected
 
