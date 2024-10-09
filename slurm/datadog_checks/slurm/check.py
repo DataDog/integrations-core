@@ -21,7 +21,7 @@ SACCT_PARAMS = [
     "-npo",
     "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
     "--units=M",
-    f"--starttime=now-{time_diff}seconds",
+    f"--starttime=now-15seconds",
 ]
 
 
