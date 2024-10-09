@@ -527,3 +527,13 @@ tests:
         }
       tags:
         - "source:LOGS_SOURCE"
+  - sample: |-
+      {
+          "Time": "2024-08-06 05:16:17",
+          "Username": "abc@test.com",
+          "IP_Address": "10.10.10.10",
+          "Action": "Update folder permissions",
+          "Data": "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'",
+          "timestamp": 1722921377000.0
+      }
+    result: null
