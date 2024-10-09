@@ -70,6 +70,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             can_rerun = int(task.get("CanRerun", False))
             has_warnings = int(task.get("HasWarningsOrErrors", False))
 
+            self.log.debug("Found task id=%s, name=%s", task_id, task_name)
+
             completed_time_converted = datetime.fromisoformat(completed_time)
             start_time_converted = datetime.fromisoformat(start_time)
             queue_time_converted = datetime.fromisoformat(queue_time)
@@ -92,7 +94,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 f"project_group_name:{project.project_group.name}",
             ]
 
-            tags = [f'task_name:{task_name}', f'task_id:{task_id}', f'task_state:{state}']
+            tags = [f'task_name:{task_name}', f'task_state:{state}']
 
             self.gauge(DEPLOY_COUNT_METRIC, 1, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_DURATION_METRIC, duration_seconds, tags=self.base_tags + project_tags + tags)
