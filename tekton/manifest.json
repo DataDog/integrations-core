@@ -47,9 +47,9 @@
       "Tekton Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Tekton] High number of throttled TaskRuns": "assets/monitors/throttled_taskruns.json",
-      "[Tekton] Increasing number of failed TaskRuns": "assets/monitors/increasing_failed_taskruns.json",
-      "[Tekton] Increasing number of failed PieplineRuns": "assets/monitors/increasing_failed_pipelineruns.json"
+      "TaskRuns are throttled": "assets/monitors/throttled_taskruns.json",
+      "Increasing number of failed TaskRuns": "assets/monitors/increasing_failed_taskruns.json",
+      "Increasing number of failed PipelineRuns": "assets/monitors/increasing_failed_pipelineruns.json"
     },
     "saved_views": {
       "tekton_overview": "assets/saved_views/tekton_overview.json",

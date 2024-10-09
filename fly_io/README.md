@@ -1,5 +1,9 @@
 # Agent Check: Fly.io
 
+<div class="alert alert-warning">
+This integration is in public beta. Use caution if enabling it on production workloads.
+</div>
+
 ## Overview
 
 This check monitors [Fly.io][1] metrics through the Datadog Agent.
@@ -28,7 +32,6 @@ The Fly.io check is included in the [Datadog Agent][2] package. We recommend run
     ```
     instances:
     - empty_default_hostname: true
-      min_collection_interval: 10
       headers:
           Authorization: Bearer <YOUR_FLY_TOKEN>
       machines_api_endpoint: http://_api.internal:4280

@@ -7,7 +7,6 @@ import re
 import pywintypes
 import win32service
 import winerror
-from six import raise_from
 
 from datadog_checks.base import AgentCheck
 
@@ -42,7 +41,7 @@ class ServiceFilter(object):
                 pattern = self.name
                 self._name_re = re.compile(pattern, SERVICE_PATTERN_FLAGS)
         except re.error as e:
-            raise_from(Exception("Regular expression syntax error in '{}': {}".format(pattern, str(e))), None)
+            raise Exception("Regular expression syntax error in '{}': {}".format(pattern, str(e))) from None
 
     def match(self, service_view):
         if self.name is not None:

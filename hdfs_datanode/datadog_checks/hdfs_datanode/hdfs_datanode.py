@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from urllib.parse import urljoin
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
-from six import iteritems
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
 
@@ -87,7 +87,7 @@ class HDFSDataNode(AgentCheck):
 
         self.log.debug("Bean name retrieved: %s", bean_name)
 
-        for metric, (metric_name, metric_type) in iteritems(self.HDFS_METRICS):
+        for metric, (metric_name, metric_type) in self.HDFS_METRICS.items():
             metric_value = bean.get(metric)
             if metric_value is not None:
                 self._set_metric(metric_name, metric_type, metric_value, tags)
@@ -110,7 +110,7 @@ class HDFSDataNode(AgentCheck):
 
         # Add query_params as arguments
         if query_params:
-            query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(query_params)])
+            query = '&'.join(['{}={}'.format(key, value) for key, value in query_params.items()])
             url = urljoin(url, '?' + query)
 
         self.log.debug('Attempting to connect to "%s"', url)

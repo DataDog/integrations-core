@@ -9,7 +9,6 @@ import re
 from xml.etree import ElementTree as ET
 
 import psutil
-from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
@@ -151,7 +150,7 @@ class Disk(AgentCheck):
             self.log.debug('Passed: %s', part.device)
 
             tags = self._get_tags(part)
-            for metric_name, metric_value in iteritems(self._collect_part_metrics(part, disk_usage)):
+            for metric_name, metric_value in self._collect_part_metrics(part, disk_usage).items():
                 self.gauge(metric_name, metric_value, tags=tags)
 
             # Add in a disk read write or read only check
@@ -324,7 +323,7 @@ class Disk(AgentCheck):
         return metrics
 
     def collect_latency_metrics(self):
-        for disk_name, disk in iteritems(psutil.disk_io_counters(perdisk=True)):
+        for disk_name, disk in psutil.disk_io_counters(perdisk=True).items():
             self.log.debug('IO Counters: %s -> %s', disk_name, disk)
             try:
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
@@ -389,7 +388,7 @@ class Disk(AgentCheck):
     def _compile_valid_patterns(self, patterns, casing=IGNORE_CASE, extra_patterns=None):
         valid_patterns = []
 
-        if isinstance(patterns, string_types):
+        if isinstance(patterns, str):
             patterns = [patterns]
         else:
             patterns = list(patterns)
@@ -419,7 +418,7 @@ class Disk(AgentCheck):
         Compile regex strings from device_tag_re option and return list of compiled regex/tag pairs
         """
         device_tag_list = []
-        for regex_str, tags in iteritems(self._device_tag_re):
+        for regex_str, tags in self._device_tag_re.items():
             try:
                 device_tag_list.append([re.compile(regex_str, IGNORE_CASE), [t.strip() for t in tags.split(',')]])
             except TypeError:

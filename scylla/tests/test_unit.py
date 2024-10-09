@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
@@ -22,7 +21,6 @@ from .common import (
 )
 
 
-@pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 def test_instance_default_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     check = ScyllaCheck('scylla', {}, [instance])
 
@@ -36,7 +34,6 @@ def test_instance_default_check_omv2(aggregator, mock_db_data, dd_run_check, ins
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 def test_instance_additional_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     # add additional metric groups for validation
     additional_metric_groups = ['scylla.alien', 'scylla.sstables']
@@ -62,7 +59,6 @@ def test_instance_additional_check_omv2(aggregator, mock_db_data, dd_run_check, 
     aggregator.assert_service_check('scylla.openmetrics.health', status=AgentCheck.OK)
 
 
-@pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 def test_instance_full_additional_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     inst = deepcopy(instance)
     inst['metric_groups'] = INSTANCE_ADDITIONAL_GROUPS
@@ -83,7 +79,6 @@ def test_instance_full_additional_check_omv2(aggregator, mock_db_data, dd_run_ch
     aggregator.assert_service_check('scylla.openmetrics.health', status=AgentCheck.OK)
 
 
-@pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
@@ -97,7 +92,6 @@ def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, dd_run_chec
     aggregator.assert_service_check('scylla.openmetrics.health', count=0)
 
 
-@pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 def test_invalid_instance_omv2(aggregator, mock_db_data, instance):
     inst = deepcopy(instance)
     inst.pop('openmetrics_endpoint')

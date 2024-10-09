@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 10.2.0 / 2024-09-05
+
+***Added***:
+
+* Add command to tag the Agent release branch. It supports both RC and final tags, see `ddev release branch tag --help` for more details. ([#18413](https://github.com/DataDog/integrations-core/pull/18413))
+
 ## 10.1.0 / 2024-08-15
 
 ***Added***:

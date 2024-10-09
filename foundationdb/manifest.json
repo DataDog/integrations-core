@@ -56,15 +56,15 @@
     },
     "monitors": {
       "FoundationDB Status Check": "assets/monitors/service_check.json",
-      "FoundationDB Errors Logged": "assets/monitors/errors_logged.json",
-      "FoundationDB High Durability Lag": "assets/monitors/high_durability_lag.json",
-      "FoundationDB Log Queue Reaching Spill Threshold": "assets/monitors/log_queue_spill.json",
-      "FoundationDB Low Disk Space": "assets/monitors/low_disk_space.json",
-      "FoundationDB High Level Of Conflicted Transactions": "assets/monitors/conflicts.json",
-      "FoundationDB High Level Of Rejected Transactions": "assets/monitors/rejections.json",
-      "FoundationDB Read Latency Probe": "assets/monitors/read_latency_probe.json",
-      "FoundationDB Transaction Commit Latency Probe": "assets/monitors/transaction_commit_latency.json",
-      "FoundationDB Transaction Start Latency Probe": "assets/monitors/transaction_start_latency.json"
+      "High severity errors logs are found": "assets/monitors/errors_logged.json",
+      "High durability lag is detected": "assets/monitors/high_durability_lag.json",
+      "Log queue is approaching the limit": "assets/monitors/log_queue_spill.json",
+      "Disk space is low": "assets/monitors/low_disk_space.json",
+      "Transactions are conflicting": "assets/monitors/conflicts.json",
+      "Transactions are rejected": "assets/monitors/rejections.json",
+      "Read operation took a long time": "assets/monitors/read_latency_probe.json",
+      "Transaction commit latency is high": "assets/monitors/transaction_commit_latency.json",
+      "Transaction start latency is high": "assets/monitors/transaction_start_latency.json"
     },
     "saved_views": {
       "errors": "assets/saved_views/errors.json",

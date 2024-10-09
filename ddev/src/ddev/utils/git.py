@@ -40,11 +40,26 @@ class GitRepository:
         sha, subject = self.capture('log', '-1', '--format=%H%n%s').splitlines()
         return GitCommit(sha, subject=subject)
 
+    def pull(self, ref):
+        return self.capture('pull', 'origin', ref)
+
+    def push(self, ref):
+        return self.capture('push', 'origin', ref)
+
+    def tag(self, value, message=None):
+        """
+        Create a tag with an optional message.
+        """
+        cmd = ['tag', value]
+        if message is not None:
+            cmd.extend(['--message', value])
+        return self.capture(*cmd)
+
     def tags(self, glob_pattern=None) -> list[str]:
         """
         List the repo's tags and sort them.
 
-        If provided, `glob_pattern` filters tags just like the pattern argument to `git tag --list`.
+        If not None, we pass `glob_pattern` as the pattern argument to `git tag --list`.
         """
 
         cmd = ['tag', '--list']

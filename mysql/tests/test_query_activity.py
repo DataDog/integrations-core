@@ -447,7 +447,7 @@ def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, agg
         cursor.execute("UPDATE performance_schema.setup_consumers SET enabled='NO' WHERE name = 'events_waits_current'")
 
     dd_run_check(check)
-    # force query activity to run once, expect it to exist immediately with a warning
+    # force query activity to run once, expect it to exit immediately with a warning
     check._query_activity.run_job()
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert check.events_wait_current_enabled is False
@@ -475,6 +475,47 @@ def test_events_wait_current_disabled(dbm_instance, dd_run_check, root_conn, agg
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert check.warnings == []
     assert dbm_activity, "should have collected at least one activity"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "cloud_metadata",
+    [
+        {
+            'azure': {
+                'deployment_type': 'flexible_server',
+                'name': 'my-instance',
+            },
+        },
+    ],
+)
+def test_events_wait_current_disabled_no_warning_azure_flexible_server(
+    dbm_instance, dd_run_check, root_conn, aggregator, cloud_metadata
+):
+    '''
+    This test verifies that the check will not emit a warning
+    if the events_waits_current is disabled and Azure deployment_type is flexible_server.
+    '''
+    if cloud_metadata:
+        for k, v in cloud_metadata.items():
+            dbm_instance[k] = v
+    dbm_instance['options']['extra_performance_metrics'] = False
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+
+    # disable events_waits_current, expect events_wait_current_enabled to be set to False
+    with closing(root_conn.cursor()) as cursor:
+        cursor.execute("UPDATE performance_schema.setup_consumers SET enabled='NO' WHERE name = 'events_waits_current'")
+
+    dd_run_check(check)
+
+    # force query activity to run once, expect it to collect nothing
+    check._query_activity.run_job()
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+
+    assert check.events_wait_current_enabled is False
+    assert check.warnings == []
+    assert not dbm_activity, "should not have collected any activity"
 
 
 # the inactive job metrics are emitted from the main integrations

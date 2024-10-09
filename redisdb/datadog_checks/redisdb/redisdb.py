@@ -9,7 +9,6 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 
 import redis
-from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
@@ -266,7 +265,7 @@ class Redis(AgentCheck):
             elif info_name in self.RATE_KEYS:
                 self.rate(self.RATE_KEYS[info_name], info[info_name], tags=tags)
 
-        for config_key, value in iteritems(config):
+        for config_key, value in config.items():
             metric_name = self.CONFIG_GAUGE_KEYS.get(config_key)
             if metric_name is not None:
                 self.gauge(metric_name, value, tags=tags)
@@ -404,7 +403,7 @@ class Redis(AgentCheck):
                     lengths[text_key]["key_type"] = key_type
 
             # Send the metrics for each db in the redis instance.
-            for key, total in iteritems(lengths):
+            for key, total in lengths.items():
                 # Only send non-zeros if tagged per db.
                 if total["length"] > 0:
                     self.gauge(
@@ -416,7 +415,7 @@ class Redis(AgentCheck):
 
         # Warn if a key is missing from the entire redis instance.
         # Send 0 if the key is missing/empty from the entire redis instance.
-        for key, total in iteritems(lengths_overall):
+        for key, total in lengths_overall.items():
             if total == 0:
                 key_tags = ['key:{}'.format(key)]
                 if instance_db:
@@ -552,7 +551,7 @@ class Redis(AgentCheck):
             self.warning('Could not retrieve command stats from Redis. INFO COMMANDSTATS only works with Redis >= 2.6.')
             return
 
-        for key, stats in iteritems(command_stats):
+        for key, stats in command_stats.items():
             command = key.split('_', 1)[1]
             command_tags = tags + ['command:{}'.format(command)]
 
@@ -572,11 +571,8 @@ class Redis(AgentCheck):
             self.set_metadata('version', info['redis_version'])
 
 
-_timer = time.time if PY2 else time.perf_counter
-
-
 def _call_and_time(func):
-    start_time = _timer()
+    start_time = time.perf_counter()
     rv = func()
-    end_time = _timer()
+    end_time = time.perf_counter()
     return rv, round_value((end_time - start_time) * 1000, 2)

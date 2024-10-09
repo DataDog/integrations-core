@@ -2,6 +2,59 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* [NDM] [Cisco ACI] Add check metrics ([#18748](https://github.com/DataDog/integrations-core/pull/18748))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 3.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+## 2.12.0 / 2024-09-06
+
+***Added***:
+
+* Add the ability to tag Cisco ACI device and interface metrics with user-defined tags. ([#18496](https://github.com/DataDog/integrations-core/pull/18496))
+
+## 2.11.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Use name instead of node ID as device hostname ([#18375](https://github.com/DataDog/integrations-core/pull/18375))
+
+## 2.10.2 / 2024-09-02 / Agent 7.57.0
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Use actual int for interface index ([#18414](https://github.com/DataDog/integrations-core/pull/18414))
+
+## 2.10.1 / 2024-08-20
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Refactor batched payloads to fix incorrect status + use interface ID if name not available ([#18360](https://github.com/DataDog/integrations-core/pull/18360))
+
 ## 2.10.0 / 2024-08-09
 
 ***Added***:
@@ -11,7 +64,7 @@
 * [NDM] [Cisco ACI] Add config flag for enabling sending metadata to NDM ([#18099](https://github.com/DataDog/integrations-core/pull/18099))
 * Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
 
-## 2.9.0 / 2024-07-05
+## 2.9.0 / 2024-07-05 / Agent 7.56.0
 
 ***Added***:
 

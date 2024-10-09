@@ -4,10 +4,10 @@
 import time
 
 import requests
-from six import PY2
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
 
+from .check import VaultCheckV2
 from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
 from .errors import ApiUnreachable
 from .metrics import METRIC_MAP, METRIC_ROLLBACK_COMPAT_MAP, ROUTE_METRICS_TO_TRANSFORM
@@ -38,14 +38,6 @@ class Vault(OpenMetricsBaseCheck):
         instance = instances[0]
 
         if is_affirmative(instance.get('use_openmetrics', False)):
-            if PY2:
-                raise ConfigurationError(
-                    'This version of the integration is only available when using Python 3. '
-                    'Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3/ '
-                    'for more information or use the older style config.'
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import VaultCheckV2
 
             return VaultCheckV2(name, init_config, instances)
         else:
@@ -278,9 +270,6 @@ class Vault(OpenMetricsBaseCheck):
         return json_data
 
     def parse_config(self):
-        if PY2 and not self._api_url:
-            raise ConfigurationError('Vault setting `api_url` is required')
-
         api_version = self._api_url[-1]
         if api_version not in ('1',):
             self.log.warning('Unknown Vault API version `%s`, using version `%s`', api_version, DEFAULT_API_VERSION)

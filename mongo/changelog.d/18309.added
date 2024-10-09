@@ -1,3 +1,0 @@
-Collecting Explain Plans for Slow Operations:
-- For slow operations captured by the database profiler, the `execStats` from the profiler documents are directly used and emitted.
-- For slow operations identified in the logs, the integration now explicitly explains the operation and emits the resulting explain plan.

@@ -42,7 +42,7 @@
                                 "stage": "FETCH",
                                 "filter": {
                                     "age": {
-                                        "$gt": 63
+                                        "$gt": "?"
                                     }
                                 },
                                 "nReturned": 0,
@@ -82,7 +82,7 @@
                                     "direction": "forward",
                                     "indexBounds": {
                                         "name": [
-                                            "[MinKey, MaxKey]"
+                                            "?"
                                         ]
                                     },
                                     "keysExamined": 417,
@@ -94,12 +94,12 @@
                         }
                     }
                 },
-                "signature": "c158c55ee53541f9"
+                "signature": "a0e139ab93266440"
             },
-            "query_signature": "6fef821a212dde0b",
+            "query_signature": "7e73a3e6720168b8",
             "application": null,
             "user": "",
-            "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by age\", \"limit\": 34, \"$db\": \"integration\"}",
+            "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"limit\": 34, \"$db\": \"integration\"}",
             "operation_metadata": {
                 "op": "query",
                 "ns": "integration.customers",
@@ -153,13 +153,13 @@
                             "$and": [
                                 {
                                     "data": {
-                                        "$gt": 0.6283678507530881
+                                        "$gt": "?"
                                     }
                                 },
                                 {
                                     "message": {
                                         "$regularExpression": {
-                                            "pattern": "log",
+                                            "pattern": "?",
                                             "options": ""
                                         }
                                     }
@@ -177,13 +177,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -206,13 +206,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -234,12 +234,12 @@
                         "allPlansExecution": []
                     }
                 },
-                "signature": "466d69277a94ff1f"
+                "signature": "6f93ef1b4ea189ab"
             },
-            "query_signature": "55e31aa78c5bbf26",
+            "query_signature": "2e0dfc1416f51975",
             "application": null,
             "user": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 151, \"$db\": \"test\"}",
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"test\"}",
             "operation_metadata": {
                 "op": "command",
                 "ns": "test.customers",
@@ -269,7 +269,8 @@
             },
             "cursor": {
                 "cursor_id": 5170666760900931828,
-                "originating_command": null
+                "originating_command": null,
+                "comment": null
             }
         }
     },
@@ -297,13 +298,13 @@
                             "$and": [
                                 {
                                     "data": {
-                                        "$gt": 0.6283678507530881
+                                        "$gt": "?"
                                     }
                                 },
                                 {
                                     "message": {
                                         "$regularExpression": {
-                                            "pattern": "log",
+                                            "pattern": "?",
                                             "options": ""
                                         }
                                     }
@@ -321,13 +322,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -350,13 +351,13 @@
                                 "$and": [
                                     {
                                         "data": {
-                                            "$gt": 0.6283678507530881
+                                            "$gt": "?"
                                         }
                                     },
                                     {
                                         "message": {
                                             "$regularExpression": {
-                                                "pattern": "log",
+                                                "pattern": "?",
                                                 "options": ""
                                             }
                                         }
@@ -378,12 +379,12 @@
                         "allPlansExecution": []
                     }
                 },
-                "signature": "466d69277a94ff1f"
+                "signature": "6f93ef1b4ea189ab"
             },
-            "query_signature": "70f67e80ce895c57",
+            "query_signature": "6f544fbdad56d0dc",
             "application": null,
             "user": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 183, \"$db\": \"test\"}",
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"test\"}",
             "operation_metadata": {
                 "op": "command",
                 "ns": "test.customers",

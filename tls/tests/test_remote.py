@@ -3,10 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from six import PY2
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,
     SERVICE_CHECK_EXPIRATION,
@@ -216,14 +214,10 @@ def test_cert_expired(aggregator, instance_remote_cert_expired):
 
     aggregator.assert_service_check(SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
     aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=c.CRITICAL, tags=c._tags, count=1)
-    if PY2:
-        aggregator.assert_service_check(SERVICE_CHECK_VERSION, count=0)
-        aggregator.assert_service_check(SERVICE_CHECK_EXPIRATION, count=0)
-    else:
-        aggregator.assert_service_check(SERVICE_CHECK_VERSION, count=0)
-        aggregator.assert_service_check(
-            SERVICE_CHECK_EXPIRATION, status=c.CRITICAL, tags=c._tags, message='Certificate has expired', count=1
-        )
+    aggregator.assert_service_check(SERVICE_CHECK_VERSION, count=0)
+    aggregator.assert_service_check(
+        SERVICE_CHECK_EXPIRATION, status=c.CRITICAL, tags=c._tags, message='Certificate has expired', count=1
+    )
 
     aggregator.assert_all_metrics_covered()
 
@@ -343,7 +337,6 @@ def test_mysql_ok(aggregator, instance_remote_mysql_valid):
     aggregator.assert_all_metrics_covered()
 
 
-@requires_py3
 def test_valid_version_with_critical_certificate_validation_and_critial_certificate_expiration(
     aggregator, instance_remote_ok
 ):
@@ -375,7 +368,6 @@ def test_valid_version_with_critical_certificate_validation_and_critial_certific
     aggregator.assert_all_metrics_covered()
 
 
-@requires_py3
 def test_valid_version_and_critical_certificate_validation_due_to_socket_exception(aggregator, instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
@@ -404,7 +396,6 @@ def test_valid_version_and_critical_certificate_validation_due_to_socket_excepti
     aggregator.assert_all_metrics_covered()
 
 
-@requires_py3
 def test_valid_version_and_critical_certificate_validation_due_to_parsing_error(aggregator, instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)

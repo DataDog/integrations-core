@@ -66,13 +66,13 @@
       "Kubernetes CPU & Memory usage": "assets/dashboards/kubernetes_cpu_memory.json"
     },
     "monitors": {
-      "[kubernetes] Monitor Kubernetes Deployments Replica Pods": "assets/monitors/monitor_deployments_replicas.json",
-      "[kubernetes] Monitor Unschedulable Kubernetes Nodes": "assets/monitors/monitor_node_unavailable.json",
-      "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}": "assets/monitors/monitor_pod_crashloopbackoff.json",
-      "[kubernetes] Pod {{pod_name.name}} is ImagePullBackOff on namespace {{kube_namespace.name}}": "assets/monitors/monitor_pod_imagepullbackoff.json",
-      "[kubernetes] Monitor Kubernetes Failed Pods in Namespaces": "assets/monitors/monitor_pods_failed_state.json",
-      "[kubernetes] Monitor Kubernetes Pods Restarting": "assets/monitors/monitor_pods_restarting.json",
-      "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json"
+      "Kubernetes Deployment Replicas are failing": "assets/monitors/monitor_deployments_replicas.json",
+      "Nodes are unavailable": "assets/monitors/monitor_node_unavailable.json",
+      "Pod is in a CrashloopBackOff state": "assets/monitors/monitor_pod_crashloopbackoff.json",
+      "Pod is in an ImagePullBackOff state": "assets/monitors/monitor_pod_imagepullbackoff.json",
+      "Pods are failing": "assets/monitors/monitor_pods_failed_state.json",
+      "Pods are restarting": "assets/monitors/monitor_pods_restarting.json",
+      "Kubernetes Statefulset Replicas are failing": "assets/monitors/monitor_statefulset_replicas.json"
     },
     "saved_views": {
       "non_ok_pods": "assets/saved_views/non_ok_pods.json",

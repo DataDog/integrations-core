@@ -5,6 +5,7 @@
 from pymongo.errors import OperationFailure
 
 from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.metrics import INDEX_METRICS
 
 
 class IndexStatsCollector(MongoCollector):
@@ -14,6 +15,7 @@ class IndexStatsCollector(MongoCollector):
         super(IndexStatsCollector, self).__init__(check, tags)
         self.coll_names = coll_names
         self.db_name = db_name
+        self.max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
 
     def compatible_with(self, deployment):
         # Can only be run once per cluster.
@@ -22,23 +24,33 @@ class IndexStatsCollector(MongoCollector):
     def _get_collections(self, api):
         if self.coll_names:
             return self.coll_names
-        return api.list_authorized_collections(self.db_name)
+        return api.list_authorized_collections(self.db_name, limit=self.max_collections_per_database)
 
     def collect(self, api):
         coll_names = self._get_collections(api)
         for coll_name in coll_names:
             try:
                 for stats in api.index_stats(self.db_name, coll_name):
-                    idx_tags = self.base_tags + [
-                        "name:{0}".format(stats.get('name', 'unknown')),
-                        "collection:{0}".format(coll_name),
-                        "db:{0}".format(self.db_name),
+                    idx_name = stats.get('name', 'unknown')
+                    additional_tags = [
+                        f"name:{idx_name}",  # deprecated but kept for backward compatability, use index instead
+                        f"index:{idx_name}",
+                        f"collection:{coll_name}",
+                        f"db:{self.db_name}",
                     ]
-                    val = int(stats.get('accesses', {}).get('ops', 0))
-                    self.gauge('mongodb.collection.indexes.accesses.ops', val, idx_tags)
+                    if stats.get('shard'):
+                        additional_tags.append(f"shard:{stats['shard']}")
+                    self._submit_payload({"indexes": stats}, additional_tags, INDEX_METRICS, "collection")
             except OperationFailure as e:
                 # Atlas restricts $indexStats on system collections
-                self.log.warning("Could not collect index stats for collection %s: %s", coll_name, e)
+                if e.code == 13:
+                    self.log.warning("Unauthorized to run $indexStats on collection %s.%s", self.db_name, coll_name)
+                else:
+                    self.log.warning(
+                        "Could not collect index stats for collection %s.%s: %s", self.db_name, coll_name, e.details
+                    )
             except Exception as e:
-                self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
+                self.log.error(
+                    "Unexpected error when fetch indexes stats for collection %s.%s: %s", self.db_name, coll_name, e
+                )
                 raise e

@@ -54,7 +54,7 @@
       "Helm - Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[helm] Monitor Helm failed releases": "assets/monitors/monitor_failed_releases.json"
+      "Release is failed": "assets/monitors/monitor_failed_releases.json"
     }
   }
 }

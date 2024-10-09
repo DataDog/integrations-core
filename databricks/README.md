@@ -47,6 +47,7 @@ partial -->
 A global init script runs on every cluster created in your workspace. Global init scripts are useful when you want to enforce organization-wide library configurations or security screens. 
 
 <div class="alert alert-info">Only workspace admins can manage global init scripts.</div>
+<div class="alert alert-info">Global init scripts only run on clusters configured with single user or legacy no-isolation shared access mode. Therefore, Databricks recommends configuring all init scripts as cluster-scoped and managing them across your workspace using cluster policies.</div>
 
 Use the Databricks UI to edit the global init scripts:
 

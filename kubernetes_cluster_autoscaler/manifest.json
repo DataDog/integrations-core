@@ -51,9 +51,9 @@
       "source": "kubernetes_cluster_autoscaler"
     },
     "monitors": {
-      "Not safe to autoscale": "assets/monitors/KCA_not_safe_to_autosclae.json",
-      "Reporting Errors": "assets/monitors/KCA_reporting_errors.json",
-      "Unused Nodes Forcast": "assets/monitors/KCA_unused_nodes_forecast.json"
+      "Kubernetes Cluster Autoscaler is not safe to autoscale": "assets/monitors/KCA_not_safe_to_autosclae.json",
+      "Kubernetes Cluster Autoscaler too many unused nodes forecast": "assets/monitors/KCA_reporting_errors.json",
+      "Kubernetes Cluster Autoscaler reporting errors": "assets/monitors/KCA_unused_nodes_forecast.json"
     }
   },
   "author": {

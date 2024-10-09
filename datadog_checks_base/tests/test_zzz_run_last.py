@@ -8,12 +8,10 @@ This file must be named such that it comes last lexicographically.
 import sys
 
 import pytest
-from six import PY2
 
 pytestmark = [pytest.mark.unit]
 
 
-@pytest.mark.skipif(PY2, reason='BoringSSL patching only available on Python 3')
 def test_use_boringssl(datadog_agent, mocker):
     import datadog_checks.base
 

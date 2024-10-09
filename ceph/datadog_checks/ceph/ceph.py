@@ -7,7 +7,6 @@ import os
 import re
 
 import simplejson as json
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
@@ -149,7 +148,7 @@ class Ceph(AgentCheck):
             # so we won't send the metric osd.pct_used
             if 'checks' in raw['health_detail']:
                 checks = raw['health_detail']['checks']
-                for check_name, check_detail in iteritems(checks):
+                for check_name, check_detail in checks.items():
                     if check_name == 'OSD_NEARFULL':
                         health['num_near_full_osds'] = len(check_detail['detail'])
                     if check_name == 'OSD_FULL':

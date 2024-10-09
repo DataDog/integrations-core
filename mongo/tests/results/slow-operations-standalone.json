@@ -18,9 +18,10 @@
                 "op": "update",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
-                "query_signature": "1f6ad13d7f6175f0",
+                "query_signature": "e03d659625514901",
                 "user": "",
-                "statement": "{\"q\": {\"age\": {\"$gt\": 20}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 20}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
                 "mills": 10,
                 "num_yields": 0,
                 "response_length": 0,
@@ -77,12 +78,13 @@
                 "op": "query",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { name: 1 }",
-                "query_signature": "6fef821a212dde0b",
+                "query_signature": "7e73a3e6720168b8",
                 "user": "",
-                "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by age\", \"limit\": 34, \"$db\": \"integration\"}",
+                "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"limit\": 34, \"$db\": \"integration\"}",
                 "query_hash": "F286520C",
                 "plan_cache_key": "4AFF4016",
                 "query_framework": "classic",
+                "comment": "query customers by age",
                 "mills": 85,
                 "num_yields": 1,
                 "response_length": 110,
@@ -114,9 +116,10 @@
                 "op": "update",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
-                "query_signature": "3719fe0a5548dd23",
+                "query_signature": "38b472e7c8044e58",
                 "user": "",
-                "statement": "{\"q\": {\"age\": {\"$gt\": 20}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 20}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
                 "mills": 21,
                 "num_yields": 1,
                 "response_length": 0,
@@ -173,12 +176,13 @@
                 "op": "query",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { name: 1 }",
-                "query_signature": "6fef821a212dde0b",
+                "query_signature": "7e73a3e6720168b8",
                 "user": "",
-                "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by age\", \"limit\": 34, \"$db\": \"integration\"}",
+                "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"limit\": 34, \"$db\": \"integration\"}",
                 "query_hash": "F286520C",
                 "plan_cache_key": "4AFF4016",
                 "query_framework": "classic",
+                "comment": "query customers by age",
                 "mills": 14,
                 "num_yields": 1,
                 "response_length": 110,
@@ -212,8 +216,9 @@
                 "op": "update",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
-                "query_signature": "a81f9d3c17192d68",
-                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "query_signature": "28f4ba1885941f76",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
                 "mills": 74,
                 "num_yields": 4,
                 "response_length": 0,
@@ -260,6 +265,16 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 5
+                },
+                "queues": {
+                    "ingress": {
+                        "admissions": 7,
+                        "total_time_queued_micros": 0
+                    },
+                    "execution": {
+                        "admissions": 328,
+                        "total_time_queued_micros": 2109
+                    }
                 }
             },
             {
@@ -267,8 +282,9 @@
                 "dbname": "test",
                 "op": "command",
                 "ns": "test.$cmd",
-                "query_signature": "c5b7bcd45c4d9e9",
-                "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+                "query_signature": "c1df6c33f6b6c258",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"test\"}",
+                "comment": "update customers subscription status by age",
                 "mills": 74,
                 "num_yields": 4,
                 "response_length": 60,
@@ -320,8 +336,9 @@
                 "op": "update",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
-                "query_signature": "ec24a2e9aacce5a0",
-                "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "query_signature": "5390ab4d2f009230",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
                 "mills": 27,
                 "num_yields": 2,
                 "response_length": 0,
@@ -368,6 +385,17 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 3
+                },
+                "working_millis": 20,
+                "queues": {
+                    "ingress": {
+                        "admissions": 7,
+                        "total_time_queued_micros": 0
+                    },
+                    "execution": {
+                        "admissions": 328,
+                        "total_time_queued_micros": 2109
+                    }
                 }
             },
             {
@@ -375,8 +403,9 @@
                 "dbname": "test",
                 "op": "command",
                 "ns": "test.$cmd",
-                "query_signature": "c5b7bcd45c4d9e9",
-                "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+                "query_signature": "c1df6c33f6b6c258",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"test\"}",
+                "comment": "update customers subscription status by age",
                 "mills": 27,
                 "num_yields": 2,
                 "response_length": 60,
@@ -423,13 +452,76 @@
                 }
             },
             {
+                "timestamp": 32479987545009.0,
+                "dbname": "test",
+                "op": "command",
+                "ns": "test.myview",
+                "query_signature": "c1df6c33f6b6c258",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"test\"}",
+                "comment": "update customers subscription status by age",
+                "mills": 27,
+                "num_yields": 2,
+                "response_length": 60,
+                "cpu_nanos": 27721625,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 4
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 3
+                },
+                "resolved_views": [
+                    {
+                        "view_namespace": "test.myview",
+                        "dependency_chain": [
+                            "myView",
+                            "myCollection"
+                        ]
+                    }
+                ]
+            },
+            {
                 "timestamp": 32479987545040.0,
                 "dbname": "test",
                 "op": "update",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
-                "query_signature": "a81f9d3c17192d68",
-                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "query_signature": "28f4ba1885941f76",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
                 "mills": 14,
                 "num_yields": 0,
                 "response_length": 0,
@@ -483,8 +575,9 @@
                 "dbname": "test",
                 "op": "command",
                 "ns": "test.$cmd",
-                "query_signature": "c5b7bcd45c4d9e9",
-                "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+                "query_signature": "c1df6c33f6b6c258",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"test\"}",
+                "comment": "update customers subscription status by age",
                 "mills": 15,
                 "num_yields": 0,
                 "response_length": 60,
@@ -536,11 +629,12 @@
                 "op": "command",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { name: 1 }",
-                "query_signature": "55e31aa78c5bbf26",
-                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 151, \"$db\": \"test\"}",
+                "query_signature": "2e0dfc1416f51975",
+                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"test\"}",
                 "query_hash": "A9774B9D",
                 "plan_cache_key": "0D12DCDF",
                 "query_framework": "classic",
+                "comment": "query customers by subscription status",
                 "mills": 12,
                 "num_yields": 0,
                 "response_length": 14089,
@@ -554,7 +648,8 @@
                 },
                 "cursor": {
                     "cursor_id": 5170666760900931828,
-                    "originating_command": null
+                    "originating_command": null,
+                    "comment": null
                 },
                 "lock_stats": {
                     "feature_compatibility_version": {
@@ -575,11 +670,12 @@
                 "op": "command",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { name: 1 }",
-                "query_signature": "70f67e80ce895c57",
-                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 183, \"$db\": \"test\"}",
+                "query_signature": "6f544fbdad56d0dc",
+                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"test\"}",
                 "query_hash": "A9774B9D",
                 "plan_cache_key": "0D12DCDF",
                 "query_framework": "classic",
+                "comment": "query customers by subscription status",
                 "mills": 14,
                 "num_yields": 0,
                 "response_length": 110,

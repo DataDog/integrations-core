@@ -2,7 +2,49 @@
 
 <!-- towncrier release notes start -->
 
-## 19.1.0 / 2024-08-09
+## 22.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Add `keep_json_path` to `obfuscator_options` to allow users to control whether JSON paths following JSON operators in SQL statements should be obfuscated. By default, these paths are treated as literals and are obfuscated to `?`. ([#18726](https://github.com/DataDog/integrations-core/pull/18726))
+* Add additional debug logging to help with schema collection investigations ([#18754](https://github.com/DataDog/integrations-core/pull/18754))
+* Add Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
+***Fixed***:
+
+* Parse each row of `pg_stat_activity` separately inside a `try`/`catch` to avoid crashing on bad UTF8 data. ([#18762](https://github.com/DataDog/integrations-core/pull/18762))
+
+## 21.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 20.0.0 / 2024-09-05
+
+***Changed***:
+
+* When password and `aws.region` are set and `aws.managed_authentication` is not set, password authentication will be used. IAM Token authentication used to be prioritized. ([#18331](https://github.com/DataDog/integrations-core/pull/18331))
+
+***Added***:
+
+* Added an option to specify default db agent uses to perform autodiscovery operations ([#18037](https://github.com/DataDog/integrations-core/pull/18037))
+* Update the propagate_agent_tags setting. When set to `true`, the tags from the agent host are now added to the check's tags for all instances. ([#18358](https://github.com/DataDog/integrations-core/pull/18358))
+* Add cluster_name as tag to PG metrics ([#18402](https://github.com/DataDog/integrations-core/pull/18402))
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+***Fixed***:
+
+* Fix errors resulting from certain ignore_databases settings
+  Clarified documentation on ignore_databases ([#18287](https://github.com/DataDog/integrations-core/pull/18287))
+* Set the default port to 5432 when user don't provide one, this corrects the issue where the generated IAM authentication token is invalid when a port isn't provided. ([#18386](https://github.com/DataDog/integrations-core/pull/18386))
+
+## 19.1.0 / 2024-08-09 / Agent 7.57.0
 
 ***Added***:
 
@@ -21,7 +63,7 @@
 * Remove schema collection and dependency on relation metrics. Instead a warning is issued when the missing metrics will impact which tables are collected.
   Removed the autodiscovery dependency on relation metrics; autodiscovery should now work even if relation metrics are not configured. ([#18144](https://github.com/DataDog/integrations-core/pull/18144))
 
-## 19.0.1 / 2024-07-31
+## 19.0.1 / 2024-07-31 / Agent 7.56.0
 
 ***Fixed***:
 

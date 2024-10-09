@@ -19,7 +19,8 @@
       "Supported OS::macOS",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
-      "Offering::Integration"
+      "Offering::Integration",
+      "Product::Data Streams Monitoring"
     ],
     "resources": [
       {
@@ -76,9 +77,9 @@
       "kafka": "assets/dashboards/kafka_dashboard.json"
     },
     "monitors": {
-      "[Kafka] High produce latency on broker": "assets/monitors/broker_produce_latency.json",
-      "[Kafka] High producer request rate": "assets/monitors/kafka_high_producer_request_rate.json",
-      "[Kafka] Offline partition": "assets/monitors/kafka_offline_partition.json"
+      "Produce latency is high": "assets/monitors/broker_produce_latency.json",
+      "Produce request rate is high": "assets/monitors/kafka_high_producer_request_rate.json",
+      "Partition is offline": "assets/monitors/kafka_offline_partition.json"
     },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",

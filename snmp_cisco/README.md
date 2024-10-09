@@ -51,7 +51,7 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
 [4]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [5]: https://docs.datadoghq.com/help/
-[6]: https://docs.datadoghq.com/network_monitoring/devices/#vendor-profiles
+[6]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
 [7]: https://docs.datadoghq.com/integrations/crest_data_systems_cisco_asa/
 [8]: https://docs.datadoghq.com/integrations/meraki/
 [9]: https://docs.datadoghq.com/integrations/cisco_sdwan/

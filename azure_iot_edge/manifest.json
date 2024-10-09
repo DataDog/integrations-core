@@ -58,10 +58,10 @@
       "azure_iot_edge": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Disk usage": "assets/monitors/disk_usage.json",
-      "Memory usage": "assets/monitors/memory_usage.json",
-      "IoT Hub syncs": "assets/monitors/iothub_syncs.json",
-      "Edge Hub retries": "assets/monitors/edgehub_retries.json"
+      "Device is running out of disk space": "assets/monitors/disk_usage.json",
+      "Device is running out of memory": "assets/monitors/memory_usage.json",
+      "Unsuccessful syncs are high": "assets/monitors/iothub_syncs.json",
+      "Edge Hub operation retries is higher than usual": "assets/monitors/edgehub_retries.json"
     }
   }
 }

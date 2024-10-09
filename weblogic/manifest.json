@@ -54,8 +54,8 @@
       "metrics": "assets/dashboards/metrics.json"
     },
     "monitors": {
-      "active_threads": "assets/monitors/active_threads.json",
-      "stuck_threads": "assets/monitors/stuck_threads.json"
+      "Number of active thread is high": "assets/monitors/active_threads.json",
+      "Number of stuck thread is high": "assets/monitors/stuck_threads.json"
     },
     "saved_views": {
       "weblogic_error_logs": "assets/saved_views/error_logs.json",

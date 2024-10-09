@@ -17,14 +17,15 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 
 @mock_now(1715911398.1112723)
 @common.standalone
-def test_mongo_slow_operations_standalone(aggregator, instance_integration_cluster, check, dd_run_check):
-    instance_integration_cluster['reported_database_hostname'] = "mongohost"
-    instance_integration_cluster['dbm'] = True
-    instance_integration_cluster['slow_operations'] = {'enabled': True, 'run_sync': True}
-    instance_integration_cluster['database_autodiscovery'] = {'enabled': True, 'include': ['integration$', 'test$']}
-    instance_integration_cluster['operation_samples'] = {'enabled': False}
+def test_mongo_slow_operations_standalone(aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check):
+    instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
 
-    mongo_check = check(instance_integration_cluster)
+    mongo_check = check(instance_integration_cluster_autodiscovery)
     aggregator.reset()
     with mock_pymongo("standalone"):
         run_check_once(mongo_check, dd_run_check)
@@ -34,6 +35,8 @@ def test_mongo_slow_operations_standalone(aggregator, instance_integration_clust
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     slow_operation_explain_plans_payload = [event for event in dbm_samples if event['dbm_type'] == 'plan']
+
+    print(json.dumps(slow_operation_payload))
 
     with open(os.path.join(HERE, "results", "slow-operations-standalone.json"), 'r') as f:
         expected_slow_operation_payload = json.load(f)
@@ -52,14 +55,15 @@ def test_mongo_slow_operations_standalone(aggregator, instance_integration_clust
 
 @mock_now(1715911398.1112723)
 @common.shard
-def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster, check, dd_run_check):
-    instance_integration_cluster['reported_database_hostname'] = "mongohost"
-    instance_integration_cluster['dbm'] = True
-    instance_integration_cluster['slow_operations'] = {'enabled': True, 'run_sync': True}
-    instance_integration_cluster['database_autodiscovery'] = {'enabled': True, 'include': ['integration$', 'test$']}
-    instance_integration_cluster['operation_samples'] = {'enabled': False}
+def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check):
+    instance_integration_cluster_autodiscovery['reported_database_hostname'] = "mongohost"
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster_autodiscovery['database_autodiscovery']['include'] = ['integration$', 'test$']
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
 
-    mongo_check = check(instance_integration_cluster)
+    mongo_check = check(instance_integration_cluster_autodiscovery)
     aggregator.reset()
     with mock_pymongo("mongos"):
         run_check_once(mongo_check, dd_run_check)
@@ -85,6 +89,7 @@ def test_mongo_slow_operations_arbiter(aggregator, instance_arbiter, check, dd_r
     instance_arbiter['cluster_name'] = 'my_cluster'
     instance_arbiter['slow_operations'] = {'enabled': True, 'run_sync': True}
     instance_arbiter['operation_samples'] = {'enabled': False}
+    instance_arbiter['schemas'] = {'enabled': False}
 
     mongo_check = check(instance_arbiter)
     aggregator.reset()

@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from urllib.parse import urlparse
 
 import mock
 import pytest
 import requests
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.vault import Vault
