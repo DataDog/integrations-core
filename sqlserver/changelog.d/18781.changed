@@ -1,0 +1,1 @@
+Use ``datadog`` XE session as the default for deadlock monitoring. Fall back to ``system_health`` if unavailable.

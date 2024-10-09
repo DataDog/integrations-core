@@ -219,7 +219,7 @@ FIXTURE_LIST = [
     # 1592af41e69b692cb9ea41c2082c6324 - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_101_sys_phys__eth101_1_25__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # 09307f3bd50af43e2a42115352a9667f - Api.get_eth_stats
-    '_api_mo_topology_pod_1_node_201_sys_phys__eth1_1__json_rsp_subtree_include_stats_no_scoped_page_size_50',
+    '_api_mo_topology_pod_1_node_201_sys_phys__eth5_1__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # 9663cbb28348a8cbaf0cd22fd1f37664 - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_201_sys_phys__eth1_14__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # 3cbee8654509c3cd43e50967079d636d - Api.get_eth_stats
@@ -403,7 +403,7 @@ FIXTURE_LIST = [
     # 97c9b38cfda14c9218b0d97ac45e2635 - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_102_sys_phys__eth1_4__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # 784ecd089e2b648809a8e00fd5a11e82 - Api.get_eth_stats
-    '_api_mo_topology_pod_1_node_201_sys_phys__eth1_2__json_rsp_subtree_include_stats_no_scoped_page_size_50',
+    '_api_mo_topology_pod_1_node_201_sys_phys__eth5_2__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # c74287938370abba1fbb7deb6f1afcdc - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_102_sys_phys__eth1_33__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # ea3bdd6b0a08e2e5227bfc5e9bed1077 - Api.get_eth_stats
@@ -453,7 +453,7 @@ FIXTURE_LIST = [
     # 97dbf9f15408eecaa3fd4d45ba7dbaab - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_201_sys_phys__eth1_31__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # f71145d337d6c9a9b241c1c976ced0d1 - Api.get_eth_stats
-    '_api_mo_topology_pod_1_node_201_sys_phys__eth1_3__json_rsp_subtree_include_stats_no_scoped_page_size_50',
+    '_api_mo_topology_pod_1_node_201_sys_phys__eth7_1__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # c73e82f5cdc241fc509a0bbf6d4a7d51 - Api.get_eth_stats
     '_api_mo_topology_pod_1_node_102_sys_phys__eth1_53__json_rsp_subtree_include_stats_no_scoped_page_size_50',
     # b7ca7e3bf57d9bd268742155051c4b81 - Api.get_eth_stats
@@ -571,8 +571,6 @@ FIXTURE_LIST = [
     # b9ec4494d631d05122fd7fb4baf0877d - Api.get_epg_meta
     '_api_node_class_topology_pod_1_node_102_l1PhysIf_json_rsp_subtree_children_rsp_subtree_class_ethpmPhysIf',
     # 79af98fe9c1069b329af3b4828712ddd - Api.get_eth_list -> 9d167692ace22bc1013437072c55a641
-    '_api_node_class_topology_pod_1_node_202_l1PhysIf_json_rsp_subtree_children_rsp_subtree_class_ethpmPhysIf',
-    # 7b06db4060591652e39b305410a03a2a - Api.get_eth_list -> 77987eb09f39a2abbc59e55aaa9d40ab
     '_api_node_class_topology_pod_1_node_201_l1PhysIf_json_rsp_subtree_children_rsp_subtree_class_ethpmPhysIf',
     # ded65ac48170a7a3d8914950607e4e18 - Api.get_eth_list -> 2569ee885cad13ed336e5b4c8bd6dab4
     '_api_node_class_topology_pod_1_node_101_l1PhysIf_json_rsp_subtree_children_rsp_subtree_class_ethpmPhysIf',
