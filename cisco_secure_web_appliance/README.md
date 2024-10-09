@@ -8,6 +8,7 @@ This integration ingests the following types of logs:
 - L4TM Logs: This records all Layer-4 Traffic Monitor activity.
 
 Out-of-the-box dashboards help you to visualize detailed insights into Web Proxy filtering and scanning activity and Layer-4 Traffic Monitor activity. Additionally, out-of-the-box detection rules are available to help you monitor and respond to potential security threats effectively.
+
 **Disclaimer**: Your use of this integration, which may collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security or integrity of any end-user information, including personal data, transmitted through your use of the integration.
 
 ## Setup
