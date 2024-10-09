@@ -29,8 +29,7 @@ files:
       port: <PORT>
       service: access_logs
       source: cisco-secure-web-appliance
-##  example stanza of access log file monitoring 
-    # - type: file
-    #   port: <Path to Directory Where access log would Get Stored>
-    #   service: access_logs
-    #   source: cisco-secure-web-appliance
+    - type: file
+      port: <Path to Directory Where access log would Get Stored>
+      service: access_logs
+      source: cisco-secure-web-appliance

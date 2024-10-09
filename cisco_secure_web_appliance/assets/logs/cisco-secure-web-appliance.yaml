@@ -406,7 +406,7 @@ pipeline:
               firewall_rule_1 (%{number:timestamp:scale(1000)}|%{date("EEE MMM d
               HH:mm:ss yyyy"):timestamp}|%{date("EEE MMM  d HH:mm:ss
               yyyy"):timestamp}) %{word:syslog.severity}: Firewall
-              %{word:action}( %{word:protocol})?(:%{number:protocol_version})?
+              %{word:action}( %{word:protocol})?(:%{notSpace:protocol_version})?
               data from %{SOURCE_IP_PARSER_RULE:} to
               %{DESTINATION_IP_PARSER_RULE:}.
 
