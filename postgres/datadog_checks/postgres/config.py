@@ -12,7 +12,8 @@ SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'
 TABLE_COUNT_LIMIT = 200
 
 DEFAULT_IGNORE_DATABASES = [
-    'template%',
+    'template0',
+    'template1',
     'rdsadmin',
     'azure_maintenance',
     'cloudsqladmin',
