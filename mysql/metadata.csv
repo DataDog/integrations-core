@@ -34,8 +34,8 @@ mysql.innodb.buffer_pool_pages_total,gauge,,page,,"The total size of the InnoDB 
 mysql.innodb.buffer_pool_read_ahead,gauge,,page,second,The number of pages read into the InnoDB buffer pool by the read-ahead background thread.,0,mysql,mysql innodb buffer_pool_read_ahead,
 mysql.innodb.buffer_pool_read_ahead_evicted,gauge,,page,second,The number of pages read into the InnoDB buffer pool by the read-ahead background thread that were subsequently evicted without having been accessed by queries.,0,mysql,mysql innodb buffer_pool_read_ahead_evicted,
 mysql.innodb.buffer_pool_read_ahead_rnd,gauge,,operation,,The number of random read-aheads initiated by InnoDB. This happens when a query scans a large portion of a table but in random order.,0,mysql,mysql innodb buffer_pool_read_ahead_rnd,
-mysql.innodb.buffer_pool_read_requests,gauge,,read,second,The number of logical read requests.,0,mysql,mysql innodb buffer_pool_read_requests,
-mysql.innodb.buffer_pool_reads,gauge,,read,second,"The number of logical reads that InnoDB could not satisfy from the buffer pool, and had to read directly from disk.",0,mysql,mysql innodb buffer_pool_reads,
+mysql.innodb.buffer_pool_read_requests,rate,,read,second,The number of logical read requests.,0,mysql,mysql innodb buffer_pool_read_requests,
+mysql.innodb.buffer_pool_reads,rate,,read,second,"The number of logical reads that InnoDB could not satisfy from the buffer pool, and had to read directly from disk.",0,mysql,mysql innodb buffer_pool_reads,
 mysql.innodb.buffer_pool_total,gauge,,byte,,The total number of bytes in the InnoDB Buffer Pool.,0,mysql,innodb buf pool total,
 mysql.innodb.buffer_pool_used,gauge,,byte,,The number of used bytes in the InnoDB Buffer Pool.,-1,mysql,innodb buf pool used,memory
 mysql.innodb.buffer_pool_utilization,gauge,,fraction,,The utilization of the InnoDB Buffer Pool.,-1,mysql,innodb buf pool usage,memory
