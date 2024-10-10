@@ -10,7 +10,6 @@ import pytest
 from kubernetes.client.models.v1_lease import V1Lease
 from kubernetes.client.models.v1_lease_spec import V1LeaseSpec
 from kubernetes.config.dateutil import format_rfc3339
-from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation, ElectionRecordLease
@@ -86,7 +85,7 @@ def mock_read_configmap():
 
 def make_record(holder=None, duration=None, transitions=None, acquire=None, renew=None):
     def format_time(date_time):
-        if isinstance(date_time, string_types):
+        if isinstance(date_time, str):
             return date_time
         return format_rfc3339(date_time)
 
@@ -170,7 +169,7 @@ class TestElectionRecord:
             ): "Invalid record: bad format for acquireTime field",
         }
 
-        for raw, expected_reason in iteritems(cases):
+        for raw, expected_reason in cases.items():
             valid, reason = ElectionRecordAnnotation("endpoints", raw).validate()
             assert reason == expected_reason
             if expected_reason is None:

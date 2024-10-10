@@ -9,10 +9,11 @@ from typing import Any  # noqa: F401
 
 import mock
 import pytest
-from six import PY3
 
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
+
+from .utils import BaseModelTest
 
 
 def test_instance():
@@ -668,11 +669,7 @@ class TestTags:
 
         assert normalized_tags is not tags
 
-        if PY3:
-            assert normalized_tag == tag.decode('utf-8')
-        else:
-            # Ensure no new allocation occurs
-            assert normalized_tag is tag
+        assert normalized_tag == tag.decode('utf-8')
 
     def test_unicode_string(self):
         check = AgentCheck()
@@ -683,12 +680,7 @@ class TestTags:
         normalized_tag = normalized_tags[0]
 
         assert normalized_tags is not tags
-
-        if PY3:
-            # Ensure no new allocation occurs
-            assert normalized_tag is tag
-        else:
-            assert normalized_tag == tag.encode('utf-8')
+        assert normalized_tag is tag
 
     def test_unicode_device_name(self):
         check = AgentCheck()
@@ -698,7 +690,7 @@ class TestTags:
         normalized_tags = check._normalize_tags_type(tags, device_name)
         normalized_device_tag = normalized_tags[0]
 
-        assert isinstance(normalized_device_tag, str if PY3 else bytes)
+        assert isinstance(normalized_device_tag, str)
 
     def test_duplicated_device_name(self):
         check = AgentCheck()
@@ -731,11 +723,7 @@ class TestTags:
         external_host_tags = [(u'hostnam\xe9', {'src_name': ['key1:val1']})]
         check.set_external_tags(external_host_tags)
 
-        if PY3:
-            datadog_agent.assert_external_tags(u'hostnam\xe9', {'src_name': ['key1:val1']})
-        else:
-            datadog_agent.assert_external_tags('hostnam\xc3\xa9', {'src_name': ['key1:val1']})
-
+        datadog_agent.assert_external_tags(u'hostnam\xe9', {'src_name': ['key1:val1']})
         datadog_agent.assert_external_tags_count(1)
 
     @pytest.mark.parametrize(
@@ -1096,17 +1084,6 @@ def test_load_configuration_models(dd_run_check, mocker):
 
     assert check._config_model_instance is instance_config
     assert check._config_model_shared is shared_config
-
-
-if PY3:
-
-    from .utils import BaseModelTest
-
-else:
-
-    class BaseModelTest:
-        def __init__(self, **kwargs):
-            pass
 
 
 @pytest.mark.parametrize(

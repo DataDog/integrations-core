@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List, Optional, Tuple
 
-from six import iteritems
-
 from ... import AgentCheck
 from .sampler import WMISampler
 from .types import TagQuery, WMIFilter, WMIMetric, WMIObject, WMIProperties
@@ -177,7 +175,7 @@ class WinWMICheck(AgentCheck):
                 except TagQueryUniquenessFailure:
                     continue
 
-            for wmi_property, wmi_value in iteritems(wmi_obj):
+            for wmi_property, wmi_value in wmi_obj.items():
                 # skips any property not in arguments since SWbemServices.ExecQuery will return key prop properties
                 # https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
 
