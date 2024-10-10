@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 20.0.0 / 2024-10-10
+
+***Changed***:
+
+* Use ``datadog`` XE session as the default for deadlock monitoring. Fall back to ``system_health`` if unavailable. ([#18781](https://github.com/DataDog/integrations-core/pull/18781))
+
 ## 19.0.0 / 2024-10-04
 
 ***Removed***:
