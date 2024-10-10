@@ -142,6 +142,7 @@ To configure this check for an Agent running on a host:
         # port: 5432
         username: datadog
         password: '<PASSWORD>'
+        dbname: '<DB_NAME>'
         relations:
           - relation_name: products
           - relation_name: external_seller_products
@@ -149,6 +150,7 @@ To configure this check for an Agent running on a host:
         # port: 5432
         username: datadog
         password: '<PASSWORD>'
+        dbname: '<DB_NAME>'
         relations:
           - relation_regex: inventory_.*
             relkind:
@@ -158,6 +160,7 @@ To configure this check for an Agent running on a host:
         # port: 5432
         username: datadog
         password: '<PASSWORD>'
+        dbname: '<DB_NAME>'
         relations:
           - relation_regex: .*
     ```
