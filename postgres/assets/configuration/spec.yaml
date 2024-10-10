@@ -71,12 +71,14 @@ files:
         items:
           type: string
         example:
-          - 'template%'
+          - 'template0'
+          - 'template1'
           - rdsadmin
           - azure_maintenance
           - cloudsqladmin
         default:
-          - 'template%'
+          - 'template0'
+          - 'template1'
           - rdsadmin
           - azure_maintenance
           - cloudsqladmin
