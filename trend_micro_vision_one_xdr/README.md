@@ -23,7 +23,8 @@ This integration collects logs from the sources listed above and sends them to D
     - **Status**: Whether the API key is enabled.
     - **Details**: Extra information about the API key.
 3. Click **Add**.
-4. Copy API Key to the form in the integration tile along with the Host Region of your Trend Micro Vision One XDR console.
+5. To identify the Host Region of your Trend Micro Vision One XDR console please refer [here][5].
+4. Add your API Key and Host Region.
 
 ## Data Collected
 
@@ -50,3 +51,4 @@ For further assistance, contact [Datadog Support][2].
 [2]: https://docs.datadoghq.com/help/
 [3]: https://docs.datadoghq.com/logs/explorer/
 [4]: https://www.datadoghq.com/product/cloud-siem/
+[5]: https://success.trendmicro.com/en-US/solution/ka-0015959#:~:text=You%20can%20determine%20the%20Trend,Trend%20Vision%20One%20portal%20URL.&text=Without%20postfix%20between%20%22portal%22%20and,%22xdr%22%20means%20US%20site.
