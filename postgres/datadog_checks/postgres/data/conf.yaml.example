@@ -162,7 +162,7 @@ instances:
     ## * p = partitioned table
     ##
     ## Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
-    ## the list of table names. All schemas are included and regex are not supported.
+    ## the list of table names. All schemas are included.
     ## relations:
     #
     # relations:
