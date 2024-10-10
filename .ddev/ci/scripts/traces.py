@@ -12,8 +12,10 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 def capture(*, record_file: str, port: int) -> None:
+    print(f'Capturing traces on http://localhost:{port}')
     class RequestHandler(BaseHTTPRequestHandler):
         def do_PUT(self):
+            print(f'Trace PUT {self.path} {self.headers["Content-Length"]} bytes')
             content_length = int(self.headers['Content-Length'])
             body = b64encode(self.rfile.read(content_length)).decode('ascii')
 

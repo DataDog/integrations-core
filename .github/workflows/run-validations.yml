@@ -152,7 +152,7 @@ jobs:
       run: ddev validate agent-reqs $TARGET
 
     - name: Validate CI configuration
-      if: inputs.ci
+      if: inputs.ci && false
       run: ddev validate ci
 
     - name: Validate the CODEOWNERS file

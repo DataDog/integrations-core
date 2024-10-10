@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - master
+    - nubtron/fix-ci-trace-uploading
 
 jobs:
   cache:
