@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Add the apiserver_admission_webhook_request_total metric ([#17690](https://github.com/DataDog/integrations-core/pull/17690))
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
 ## 5.0.0 / 2024-10-01
 
 ***Changed***:

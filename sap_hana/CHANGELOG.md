@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 5.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
 ## 4.0.0 / 2024-10-01
 
 ***Changed***:
