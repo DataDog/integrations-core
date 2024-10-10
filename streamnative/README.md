@@ -45,11 +45,6 @@ Configure the Datadog endpoint to forward StreamNative metrics to Datadog.
 | Instance Name                   | Instance name of the desired organization.     |
 | Client ID                   | Client ID of your service account.     |
 | Client Secret                   | Client Secret of your service account.     |
-| Get Pulsar Resource Metrics                   | Enable to collect Pulsar Resource Metrics from StreamNative. Default value is True.     |
-| Get Source Connector Metrics                   | Enable to collect Source Connector Metrics from StreamNative. Default value is True.     |
-| Get Sink Connector Metrics                   | Enable to collect Sink Connector Metrics from StreamNative. Default value is True.     |
-| Get Kafka Connect Metrics                   | Enable to collect Kafka Connect Metrics from StreamNative. Default value is True.     |
-| Get Health Metrics                   | Enable to collect Health Metrics from StreamNative. Default value is True.     |
 
 
 
