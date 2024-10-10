@@ -1,0 +1,52 @@
+name: Octopus Deploy
+files:
+- name: octopus_deploy.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/http
+  - template: instances
+    options:
+    - name: octopus_endpoint
+      description: |
+        Octopus API endpoint.
+        See https://octopus.com/docs/octopus-rest-api/getting-started#authentication for more details.
+      value:
+        example: http://localhost:80/api
+        type: string
+      required: true
+    - name: space
+      description: |
+        Space to monitor
+      value:
+        example: Default
+        type: string
+        enabled: true
+      required: true
+    - name: project_groups
+      description: |
+        filter your integration by project groups and projects.
+      value:
+        type: object
+        properties:
+          - name: limit
+            description: |
+              Maximum number of project groups to be processed.
+            type: integer
+          - name: include
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
+    - template: instances/default
+    - template: instances/http
+

@@ -1,0 +1,10 @@
+services:
+
+  octopus-api:
+    image: caddy:2.7
+    container_name: octopus-api
+    ports:
+      - "80:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/:/usr/share/caddy
