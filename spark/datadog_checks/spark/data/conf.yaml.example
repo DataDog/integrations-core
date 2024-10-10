@@ -145,6 +145,16 @@ instances:
     #
     # enable_query_name_tag: true
 
+    ## @param disable_spark_job_stage_tags - boolean - optional - default: false
+    ## Enable to stop submitting the tag `stage_id` for Spark jobs.
+    #
+    # disable_spark_job_stage_tags: true
+
+    ## @param disable_spark_stage_metrics - boolean - optional - default: false
+    ## Enable to stop collecting Spark stage metrics.
+    #
+    # disable_spark_stage_metrics: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
