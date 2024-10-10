@@ -2,16 +2,11 @@
 
 <!-- towncrier release notes start -->
 
-## 3.0.0 / 2023-09-12 / Agent 7.57.0
+## 3.0.0 / 2024-10-01
 
 ***Changed***:
 
-* Updated pipeline and standard remappers.
-
-***Added***:
-
-* Added support for different log formats of access logs, such as common and combined.
-* Added an OOTB assets dashboard, monitors, and a detection rule.
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
 
 ## 2.5.1 / 2024-05-31 / Agent 7.55.0
 

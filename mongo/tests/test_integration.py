@@ -38,10 +38,6 @@ def _assert_mongodb_instance_event(
     modules,
 ):
     mongodb_instance_event = _get_mongodb_instance_event(aggregator)
-    if not dbm:
-        assert mongodb_instance_event is None
-        return
-
     assert mongodb_instance_event is not None
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname

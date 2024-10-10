@@ -148,6 +148,8 @@ class MongoConfig(object):
             main_host, main_port = main_host.split(':')
 
         service_check_tags = ["db:%s" % self.db_name, "host:%s" % main_host, "port:%s" % main_port] + self._base_tags
+        if self.cluster_name:
+            service_check_tags.append('clustername:%s' % self.cluster_name)
         return service_check_tags
 
     def _compute_metric_tags(self):
