@@ -555,6 +555,8 @@ integration/voltdb:
 - voltdb/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/wazuh:
+- wazuh/**/*
 integration/weaviate:
 - weaviate/**/*
 integration/weblogic:
