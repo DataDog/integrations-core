@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.0.1 / 2024-10-10
+
+***Fixed***:
+
+* Fix cmd as a string instead of a list ([#18808](https://github.com/DataDog/integrations-core/pull/18808))
+
 ## 3.0.0 / 2024-10-04
 
 ***Removed***:
