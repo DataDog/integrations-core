@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.1.0 / 2024-10-04
+
+***Added***:
+
+* Added Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
 ## 37.0.0 / 2024-09-19
 
 ***Removed***:

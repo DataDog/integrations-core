@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-kubevirt_api.can_connect,gauge,,,,Whether the check can connect to the KubeVirt API or not.,0,kubevirt_api,api connect,,
+kubevirt_api.can_connect,gauge,,,,"Value of 1 if the agent can connect to the KubeVirt Handler, and 0 otherwise.",0,kubevirt_api,api connect,,
 kubevirt_api.process.cpu_seconds.count,count,,second,,Total user and system CPU time spent in seconds.,0,kubevirt_api,cpu time total,,
 kubevirt_api.process.max_fds,gauge,,file,,Maximum number of open file descriptors.,0,kubevirt_api,max fds,,
 kubevirt_api.process.open_fds,gauge,,file,,Number of open file descriptors.,0,kubevirt_api,open fds,,
