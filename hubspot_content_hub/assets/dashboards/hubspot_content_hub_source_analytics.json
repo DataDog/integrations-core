@@ -26,7 +26,7 @@
             "id": 6693616382254052,
             "definition": {
                 "type": "note",
-                "content": "**[HubSpot Content Hub](https://www.hubspot.com/)** is an all-in-one content marketing software that helps marketers create and manage content at scale. It helps create rich, expertise-backed content, in many formats, for many channels.\n\nThis HubSpot Content Hub **Source Analytics** Dashboard provides quick insights into user engagement by analyzing sessions, bounces, and views across various sources. It facilitates precise evaluation and optimization of your content strategy through detailed performance analysis of traffic origins and referral sources.\n\nFor more information, see the [HubSpot Content Hub Integration Documentation](https://docs.datadoghq.com/integrations/hubspot_content_hub/).",
+                "content": "**[HubSpot Content Hub](https://www.hubspot.com/)** is an all-in-one content marketing software that helps marketers create and manage content at scale. It helps create rich, expertise-backed content across various formats and channels.\n\nThis HubSpot Content Hub **Source Analytics** Dashboard provides quick insights into user engagement by analyzing sessions, bounces, and views across various sources. It facilitates precise evaluation and optimization of your content strategy through detailed performance analysis of traffic origins and referral sources.\n\nFor more information, see the [HubSpot Content Hub Integration Documentation](https://docs.datadoghq.com/integrations/hubspot_content_hub/).",
                 "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
@@ -47,7 +47,7 @@
             "id": 4242702316646086,
             "definition": {
                 "type": "note",
-                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured based on source.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Note**:\n- The dashboard widgets display the most recent metric values captured based on source.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "yellow",
                 "font_size": "14",
                 "text_align": "left",

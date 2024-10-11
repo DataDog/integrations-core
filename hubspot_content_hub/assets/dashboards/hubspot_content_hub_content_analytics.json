@@ -51,7 +51,7 @@
             "id": 4824735510772800,
             "definition": {
                 "type": "note",
-                "content": "**[HubSpot Content Hub](https://www.hubspot.com/)** is an all-in-one content marketing software that helps marketers create and manage content at scale. It helps create rich, expertise-backed content, in many formats, for many channels.\n\nThis HubSpot Content Hub **Content Analytics** Dashboard provides a comprehensive view of essential metrics, including entrances, exits, page views, bounce rates, and time spent on pages. It delivers an in-depth analysis of content engagement and performance trends, enabling you to refine your content strategy and enhance overall results.\n\nFor more information, see the [HubSpot Content Hub Integration Documentation](https://docs.datadoghq.com/integrations/hubspot_content_hub/).",
+                "content": "**[HubSpot Content Hub](https://www.hubspot.com/)** is an all-in-one content marketing software that helps marketers create and manage content at scale. It helps create rich, expertise-backed content across various formats and channels.\n\nThis HubSpot Content Hub **Content Analytics** Dashboard provides a comprehensive view of essential metrics, including entrances, exits, page views, bounce rates, and time spent on pages. It delivers an in-depth analysis of content engagement and performance trends, enabling you to refine your content strategy and enhance overall results.\n\nFor more information, see the [HubSpot Content Hub Integration Documentation](https://docs.datadoghq.com/integrations/hubspot_content_hub/).",
                 "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
@@ -72,7 +72,7 @@
             "id": 4293739895159934,
             "definition": {
                 "type": "note",
-                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured for content available.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Note**:\n- The dashboard widgets display the most recent metric values captured for available content.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "yellow",
                 "font_size": "14",
                 "text_align": "left",
