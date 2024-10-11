@@ -18,8 +18,6 @@ The Cisco Secure Email Threat Defense integration provides out-of-the-box dashbo
 3. Click on **Add New Client**.
 4. Enter a **Client Name** and an optional description.
 5. Click on **Submit**. This generates your **Client ID** and **Client Password**.
-    
-    **Note**: Be sure to save the Client Password, as it will only be displayed once.
 6. Retrieve the API key from the **API Key** section.
 
 ## Data Collected
