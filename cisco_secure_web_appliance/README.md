@@ -3,13 +3,13 @@
 [Cisco Secure Web Appliance][4] protects your organization by automatically blocking risky sites and testing unknown sites before allowing users access. It intercepts and monitors Internet traffic and applies policies to help keep your internal network secure from malware, sensitive data loss, productivity loss, and other Internet-based threats.
 
 
-This integration ingests the following types of logs:
+This integration ingests the following log types:
 - Access Logs: This records all Web Proxy filtering and scanning activity.
-- L4TM Logs: This records all Layer-4 Traffic Monitor activity.
+- L4TM Logs: This records all Layer 4 Traffic Monitor activity.
 
-Out-of-the-box dashboards help you to visualize detailed insights into Web Proxy filtering and scanning activity and Layer-4 Traffic Monitor activity. Additionally, out-of-the-box detection rules are available to help you monitor and respond to potential security threats effectively.
+Out-of-the-box (OOTB) dashboards help you to visualize detailed insights into Web Proxy filtering and scanning activity and Layer-4 Traffic Monitor activity. Additionally, (OOTB) detection rules are available to help you monitor and respond to potential security threats effectively.
 
-**Disclaimer**: Your use of this integration, which may collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security or integrity of any end-user information, including personal data, transmitted through your use of the integration.
+**Disclaimer**: Use of this integration might collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security, or integrity of any end-user information, including personal data, transmitted through your use of the integration.
 
 ## Setup
 
@@ -60,7 +60,7 @@ L4TM Logs can only be collected by file monitoring using SCP on Remote Server as
         service: access_logs
         source: cisco-secure-web-appliance
     ```
-    **NOTE**: Please make sure that `path` value should be similar to the Directory configured in `Configure SCP on Remote Server for L4TM Logs` and `Configure SCP on Remote Server for Access Logs` section respectively, forwarding /*.s
+    **NOTE**: Please make sure that `path` value is similar to the Directory configured in the `Configure SCP on Remote Server for L4TM Logs` and `Configure SCP on Remote Server for Access Logs` sections respectively, forwarding /*.s
 
 4. [Restart the Agent][3].
 
@@ -95,7 +95,7 @@ L4TM Logs can only be collected by file monitoring using SCP on Remote Server as
 ### Configuration on Cisco Secure Web Appliance portal
 
 #### Steps to set time zone to GMT
-Datadog expects all the logs in GMT time zone by default. Please make sure that timezone configured in your Cisco Secure Web Appliance portal must be in GMT. Here are the steps to change the timzone:
+Datadog expects that all logs are in the GMT time zone by default. Please ensure that the time zone configured in your Cisco Secure Web Appliance portal is GMT. Here are the steps to change the time zone:
 1. Go to **System Administration**, and then **Time Zone**.
 2. Click on **Edit Settings**.
 3. Select **GMT Offset** as the region.
@@ -112,15 +112,15 @@ Datadog expects all the logs in GMT time zone by default. Please make sure that 
 
 **Configuration:**
 
-1. Log in to Cisco Secure Web Appliance UI.
-2. Navigate to  **System Administration -> Log Subscriptions**.
-3. In order to add  Access Logs subscription, click on the **Add Log Subscription** button.
-4. Select Log Type as Access Logs.
-5. Provide Log Name.
-6. Choose the `Squid` option for Log Style.
+1. Log in to the Cisco Secure Web Appliance UI.
+2. Navigate to  **System Administration** > **Log Subscriptions**.
+3. In order to add an Access Logs subscription, click **Add Log Subscription**.
+4. Select **Log Type** as **Access Logs**.
+5. Provide a Log Name.
+6. Choose the **Squid** option for **Log Style**.
     **Note**: The default (squid) log style for access logs is supported. 
-7. Select `Syslog Push` option as the Retrieval Method.
-8. Provide Following Details.
+7. Select the **Syslog Push** option as the **Retrieval Method**.
+8. Provide the following details.
 
     Hostname: \<Datadog-Agent Host Server>
 
@@ -131,23 +131,23 @@ Datadog expects all the logs in GMT time zone by default. Please make sure that 
     Maximum message size: \<Valid values for UDP are 1024 to 9216>
     
     Facility: \<Default Selected>
-9. Click on Submit. 
-10. Click on **Commit Changes** at the top right of the Log Subscriptions page.
+9. Click **Submit**. 
+10. Click **Commit Changes** at the top right of the **Log Subscriptions** page.
     **Note:** These changes will not go into effect until they are committed.
 
 #### Configure SCP on Remote Server for L4TM Logs
 
 **Prerequisites:**
-1. Requires hostname and username (admin account username is not necessary) of VM/machine on which datadog-agent is installed.
+- Requires the hostname and username (admin account username is not necessary) of VM/machine where the Datadog Agent is installed.
 
 **Configuration:**
-1. Navigate to  **System Administration -> Log Subscriptions** in Cisco Secure Web Appliance UI.
-2. To add a log subscription for Traffic Monitor Logs, click on  Add **Log Subscription**.  
-3. Select Traffic Monitor Logs as Log Type.
-4. Provide appropriate Log Name.
-5. For FileName, provide a new name or keep the default added name.
-6. Choose SCP on Remote Server as Retrieval Method.
-7. Provide Following Information.
+1. Navigate to  **System Administration** > **Log Subscriptions** in the Cisco Secure Web Appliance UI.
+2. To add a log subscription for Traffic Monitor Logs, click **Add Log Subscription**.  
+3. Select **Traffic Monitor Logs** as **Log Type**.
+4. Provide the appropriate log name.
+5. For **FileName**, provide a new name or keep the default name.
+6. Choose **SCP on Remote Server** as **Retrieval Method**.
+7. Provide the following information.
 
     SCP Host: \<SCP Host IP Address>
 
@@ -157,23 +157,23 @@ Datadog expects all the logs in GMT time zone by default. Please make sure that 
     SCP Port: \<Default Port>
 
     Username: \<SCP Host Username>
-8. Click on Submit. After submitting, SSH key(s)  will get generated. Copy and save both the SSH key(s) as it is only visible once.
-9. Place the given SSH key(s) into your `authorized_keys` file on the remote host so that the log files can be uploaded.
-10. Click on Commit Changes at top right-side of Log Subscriptions Page.
+8. Click **Submit**. After submitting, SSH key(s) are generated. Copy and save the SSH key(s) as it is only visible once.
+9. Place the SSH key(s) into your `authorized_keys` file on the remote host so that the log files can be uploaded.
+10. Click **Commit Changes** at top right of **Log Subscriptions** page.
 
     **NOTE:** These changes will not go into effect until you commit them.
 
 #### Configure SCP on Remote Server for Access Logs.
 
 **Prerequisites:**
-1. Requires hostname and username (admin account username is not necessary) of VM/machine on which datadog-agent is installed.
+- Requires the hostname and username (admin account username is not necessary) of VM/machine where the Datadog Agent is installed.
 
 **Configuration:**
-1. In the Cisco Secure Web Appliance UI, go to System Administration, and then Log Subscriptions.
+1. In the Cisco Secure Web Appliance UI, go to **System Administration** > **Log Subscriptions**.
 2. To add a new log subscription for Access Logs, click **Add Log Subscription** or edit an existing Access Logs Subscription.
-3. If you are adding a new subscription, then follow steps 4 to 6 mentioned in the `Configure Syslog Push for Access Logs` section.
-4. If you are editing an existing Access Logs Subscription, select SCP on the Remote Server as the Retrieval Method.
-5. Provide following information:
+3. If you are adding a new subscription, then follow steps 4 to 6 mentioned in the Configure Syslog Push for Access Logs section or this topic.
+4. If you are editing an existing Access Logs Subscription, select **SCP on the Remote Server** as the **Retrieval Method**.
+5. Provide the following information:
 
     SCP Host: \<SCP Hostname>
 
@@ -183,13 +183,13 @@ Datadog expects all the logs in GMT time zone by default. Please make sure that 
     **Note:** Make sure that Directory does not have any other log files.
     
     Username: \<SCP Server Username>
-6. Click **Submit**. Once you click **Submit**,  SSH key(s) are generated. Copy the SSH Key and save it somewhere as this will be only displayed once. 
-7. Place the given SSH key(s) into your `authorized_keys` file on the remote host so that the log files can be uploaded.
-8. Click **Commit Changes** at top right of Log Subscriptions Page.
+6. Click **Submit**. Once you click **Submit**,  SSH key(s) are generated. Copy the SSH Key and save it somewhere as it is only displayed once. 
+7. Place the SSH key(s) into your `authorized_keys` file on the remote host so log files can be uploaded.
+8. Click **Commit Changes** at top right of the **Log Subscriptions** page.
     **Note:** These changes do not go into effect until you commit them.
 
 
-##### For more information, Visit this [Cisco Secure Web Appliance official documentation for configuration][8]
+For more information on configuration, visit the [Cisco Secure Web Appliance official documentation][8].
 
 ### Validation
 
@@ -255,7 +255,7 @@ If you see a **Permission denied** error while monitoring the log files, give th
 
 **Data is not being collected:**
 
-Make sure that traffic is bypassed from the configured port if the firewall is enabled.
+Ensure that traffic is bypassed from the configured port if the firewall is enabled.
 
 **Port already in use:**
 
