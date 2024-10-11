@@ -777,7 +777,7 @@ files:
         type: boolean
     - name: deadlocks_collection
       description: |
-        Configure the collection of deadlock data. The feature is supported for odbc connector only.
+        Configure the collection of deadlock data.
       options:
         - name: enabled
           description: |
