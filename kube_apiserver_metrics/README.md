@@ -14,9 +14,36 @@ The Kube_apiserver_metrics check is included in the [Datadog Agent][3] package, 
 
 ### Configuration
 
-The main use case to run the kube_apiserver_metrics check is as a Cluster Level Check.
-See the documentation for [Cluster Level Checks][4].
+- The main use case to run the kube_apiserver_metrics check is as a [Cluster Level Check][4]. 
+- To collect metrics, set the following parameters and values in an [Autodiscovery][12] template. 
+- You can do this with [annotations on your service](#annotate-service), or by using a [local file](#local-file) through the Datadog Operator, Helm Chart or manually. 
+
+| Parameter         | Value                                                                 |
+|-------------------|-----------------------------------------------------------------------|
+| `<INTEGRATION_NAME>`| `["kube_apiserver_metrics"]`                                            |
+| `<INIT_CONFIG>`     | `[{}]`                                                                  |
+| `<INSTANCE_CONFIG>` | [{ `"prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true"` }] |
+
+You can review all available configuration options in the [kube_apiserver_metrics.yaml][7].
+
+#### Annotate service
 You can annotate the service of your apiserver with the following:
+
+{{< tabs >}}
+{{% tab "Annotations v2 (for Datadog Agent v7.36+)" %}}
+
+```yaml
+ad.datadoghq.com/service.checks: |
+  {
+    "["kube_apiserver_metrics"]": {
+      "init_config": [{}],
+      "instances": [{ "prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true" }]
+    }
+  }  
+
+```
+{{% /tab %}}
+{{% tab "Annotations v1 (for Datadog Agent < v7.36)" %}}
 
 ```yaml
 annotations:
@@ -25,15 +52,84 @@ annotations:
   ad.datadoghq.com/endpoints.instances:
     '[{ "prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true" }]'
 ```
+{{% /tab %}}
+{{< /tabs >}}
 
 Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s). 
 
+#### Local file
+
 You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5].
-You must add `cluster_check: true` to your [configuration file][6] when using a static configuration file or ConfigMap to configure cluster checks. See the [sample kube_apiserver_metrics.d/conf.yaml][7] for all available configuration options.
+
+**Note**: You must add `cluster_check: true` to your configuration file, if using a local file or ConfigMap to configure Cluster Checks.
 
 By default the Agent running the check tries to get the service account bearer token to authenticate against the APIServer. If you are not using RBACs, set `bearer_token_auth` to `false`.
 
-Finally, if you run the Datadog Agent on the master nodes, you can rely on [Autodiscovery][8] to schedule the check. It is automatic if you are running the official image `registry.k8s.io/kube-apiserver`.
+If your Kubernetes clusters have master nodes and is running a pod and container for the `kube-apiserver` image, the Datadog Agent  [automatically discovers][8] this pod and configures the integration relative to its `kube_apiserver_metrics.d/auto_conf.yaml` file. 
+
+However, if you are using a managed Kubernetes distribution like GKE, EKS, or AKS you may not have a running `kube-apiserver` pod present for the Agent to discover. In this case, you can setup the integration against the Kubernetes service in the `default` namespace. 
+
+To do this you can add annotations to this Service:
+
+```yaml
+ad.datadoghq.com/service.checks: |
+  {
+    "kube_apiserver_metrics": {
+      "instances": [
+        {
+          "prometheus_url": "https://%%host%%:%%port%%/metrics", 
+          "bearer_token_auth": "true"
+        }
+      ]
+    }
+  }  
+```
+
+Or, provide a [configuration][13] to your Cluster Agent to setup a Cluster Check:
+
+{{< tabs >}}
+{{% tab "Helm" %}}
+
+```yaml
+clusterAgent:
+  confd:
+    kube_apiserver_metrics.yaml: |-
+      advanced_ad_identifiers:
+        - kube_service:
+            name: "kubernetes"
+            namespace: "default"
+      cluster_check: true
+      init_config:
+      instances:
+        - prometheus_url: "https://%%host%%:%%port%%/metrics"
+          bearer_token_auth: "true"
+```
+{{% /tab %}}
+
+
+{{% tab "Operator" %}}
+
+```yaml
+spec:
+#(...)
+  override:
+    clusterAgent:
+      extraConfd:
+        configDataMap:
+          kube_apiserver_metrics.yaml: |-
+            advanced_ad_identifiers:
+              - kube_service:
+                  name: "kubernetes"
+                  namespace: "default"
+            cluster_check: true
+            init_config:
+            instances:
+              - prometheus_url: "https://%%host%%:%%port%%/metrics"
+                bearer_token_auth: "true"
+```
+
+{{% /tab %}}
+{{< /tabs >}}
 
 ### Validation
 
@@ -68,3 +164,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/metadata.csv
 [11]: https://docs.datadoghq.com/help/
+[12]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=annotations
+[13]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
