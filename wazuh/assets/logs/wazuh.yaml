@@ -461,7 +461,7 @@ pipeline:
               Aug 20 12:45:56 Updated: perl.i386 4:5.8.8-10.el5_2.3
           grok:
             supportRules: |-
-              DATETIME (%{date("MMM  d HH:mm:ss"):}|%{date("MMM dd HH:mm:ss"):})
+              DATETIME (%{date("MMM  d HH:mm:ss"):}|%{date("MMM d HH:mm:ss"):})
               SKIPHEADER %{regex("[^:]*"):}
             matchRules: >-
               yum_package_parsing_rule %{DATETIME} %{SKIPHEADER}:
