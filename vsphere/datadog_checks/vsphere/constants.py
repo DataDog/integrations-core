@@ -6,6 +6,7 @@ from pyVmomi import vim
 SOURCE_TYPE = 'vsphere'
 
 BOTH = 'both'
+NONE = 'None'
 HISTORICAL = 'historical'
 REALTIME = 'realtime'
 
@@ -216,6 +217,13 @@ PER_RESOURCE_EVENTS = [
     'GeneralUserEvent',
     'PermissionEvent',
     'ScheduledTaskEvent',
+]
+
+VSAN_EVENT_IDS = [
+    'vsan.health.test.cloudhealth.diskusage.event',
+    'vsan.health.test.cluster.consistentconfig.event',
+    'vsan.health.test.network.hostdisconnected.event',
+    'vsan.health.test.physicaldisks.diskusage.event',
 ]
 
 HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']
