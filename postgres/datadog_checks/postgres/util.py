@@ -430,6 +430,7 @@ JOIN pg_replication_slots ON pg_replication_slots.slot_name = stat.slot_name
 }
 
 CONNECTION_METRICS = {
+    'name': 'pg_stat_database_connections',
     'descriptors': [],
     'metrics': {
         'MAX(setting) AS max_connections': ('max_connections', AgentCheck.gauge),
@@ -441,10 +442,10 @@ WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connec
 SELECT {metrics_columns}
   FROM pg_stat_database, max_con
 """,
-    'name': 'connections_metrics',
 }
 
 SLRU_METRICS = {
+    'name': 'pg_stat_slru',
     'descriptors': [('name', 'slru_name')],
     'metrics': {
         'blks_zeroed': ('slru.blks_zeroed', AgentCheck.monotonic_count),
@@ -460,11 +461,10 @@ SLRU_METRICS = {
 SELECT name, {metrics_columns}
   FROM pg_stat_slru
 """,
-    'name': 'slru_metrics',
 }
 
 SNAPSHOT_TXID_METRICS = {
-    'name': 'pg_snapshot',
+    'name': 'pg_current_snapshot',
     # Use CTE to only do a single call to pg_current_snapshot
     # FROM LATERAL was necessary given that pg_snapshot_xip returns a setof xid8
     'query': """
@@ -484,7 +484,7 @@ select pg_snapshot_xmin(pg_current_snapshot), pg_snapshot_xmax(pg_current_snapsh
 
 # Use txid_current_snapshot for PG < 13
 SNAPSHOT_TXID_METRICS_LT_13 = {
-    'name': 'pg_snapshot_lt_13',
+    'name': 'txid_current_snapshot',
     'query': """
 WITH snap AS (
     SELECT * from txid_current_snapshot()
@@ -502,7 +502,7 @@ select txid_snapshot_xmin(txid_current_snapshot), txid_snapshot_xmax(txid_curren
 
 # Requires PG10+
 VACUUM_PROGRESS_METRICS = {
-    'name': 'vacuum_progress_metrics',
+    'name': 'pg_stat_progress_vacuum',
     'query': """
 SELECT v.datname, c.relname, v.phase,
        v.heap_blks_total, v.heap_blks_scanned, v.heap_blks_vacuumed,
@@ -525,7 +525,7 @@ SELECT v.datname, c.relname, v.phase,
 
 # Requires PG13+
 ANALYZE_PROGRESS_METRICS = {
-    'name': 'analyze_progress_metrics',
+    'name': 'pg_stat_progress_analyze',
     'query': """
 SELECT r.datname, c.relname, child.relname, r.phase,
        r.sample_blks_total, r.sample_blks_scanned,
@@ -551,7 +551,7 @@ SELECT r.datname, c.relname, child.relname, r.phase,
 
 # Requires PG12+
 CLUSTER_VACUUM_PROGRESS_METRICS = {
-    'name': 'cluster_vacuum_progress_metrics',
+    'name': 'pg_stat_progress_cluster',
     'query': """
 SELECT
        v.datname, c.relname, v.command, v.phase,
@@ -577,7 +577,7 @@ SELECT
 
 # Requires PG12+
 INDEX_PROGRESS_METRICS = {
-    'name': 'index_progress_metrics',
+    'name': 'pg_stat_progress_create_index',
     'query': """
 SELECT
        p.datname, c.relname, i.relname, p.command, p.phase,
@@ -607,7 +607,7 @@ SELECT
 }
 
 WAL_FILE_METRICS = {
-    'name': 'wal_metrics',
+    'name': 'pg_ls_waldir',
     'query': """
 SELECT
 count(*),
@@ -623,7 +623,7 @@ EXTRACT (EPOCH FROM now() - min(modification))
 }
 
 STAT_WAL_METRICS = {
-    'name': 'stat_wal_metrics',
+    'name': 'pg_stat_wal',
     'query': """
 SELECT wal_records, wal_fpi,
        wal_bytes, wal_buffers_full,
@@ -701,7 +701,7 @@ ACTIVITY_METRICS_10 = [
 # This is more efficient than the cte-less version which will rely on a merge join and thus
 # sort the output of pg_buffercache.
 BUFFERCACHE_METRICS = {
-    'name': 'buffercache_metrics',
+    'name': 'pg_buffercache',
     'query': """
 WITH buffer_by_relfilenode AS (
     SELECT reldatabase, relfilenode,
@@ -820,7 +820,7 @@ GROUP BY datid {aggregation_columns_group}
 
 # Requires PG10+
 STAT_SUBSCRIPTION_METRICS = {
-    'name': 'stat_subscription_metrics',
+    'name': 'pg_stat_subscription',
     'query': """
 SELECT  subname,
         EXTRACT(EPOCH FROM (age(current_timestamp, last_msg_send_time))),
@@ -840,7 +840,7 @@ FROM pg_stat_subscription
 # While pg_subscription is available since PG10,
 # pg_subscription.oid is only publicly accessible starting PG14.
 SUBSCRIPTION_STATE_METRICS = {
-    'name': 'subscription_state_metrics',
+    'name': 'pg_subscription',
     'query': """
 select
     pg_subscription.subname,
@@ -865,7 +865,7 @@ join pg_subscription ON pg_subscription.oid = pg_subscription_rel.srsubid""".str
 
 # Requires PG15+
 STAT_SUBSCRIPTION_STATS_METRICS = {
-    'name': 'stat_subscription_stats_metrics',
+    'name': 'pg_stat_subscription_stats',
     'query': """
 SELECT subname,
        apply_error_count,
@@ -882,7 +882,7 @@ FROM pg_stat_subscription_stats
 # Requires PG16+
 # Capping at 200 rows for caution. This should always return less data points than that. Adjust if needed
 STAT_IO_METRICS = {
-    'name': 'stat_io_metrics',
+    'name': 'pg_stat_io',
     'query': """
 SELECT backend_type,
        object,
