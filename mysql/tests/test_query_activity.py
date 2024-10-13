@@ -159,6 +159,8 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
 )
 def test_activity_reported_hostname(aggregator, dbm_instance, dd_run_check, reported_hostname, expected_hostname):
     dbm_instance['reported_hostname'] = reported_hostname
+    dbm_instance['read_timeout'] = 0.001
+    dbm_instance['query_activity'] = {'enabled': False}
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(check)
