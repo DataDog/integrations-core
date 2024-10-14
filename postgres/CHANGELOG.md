@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.0.1 / 2024-10-14
+
+***Fixed***:
+
+* Wrap schema collection attempt in try/except block to catch collection exceptions ([#18788](https://github.com/DataDog/integrations-core/pull/18788))
+
 ## 22.0.0 / 2024-10-04
 
 ***Removed***:
