@@ -6,6 +6,10 @@ on:
     - datadog_checks_base/datadog_checks/**
     - datadog_checks_dev/datadog_checks/dev/*.py
   merge_group:
+    # We require this workflow to pass in order to merge a PR to master.
+    # This means Github's Merge Queue also requires it to pass.
+    # We must add the Merge Queue trigger in this configuration, otherwise Merge Queue
+    # times out waiting for this check that never triggers.
     types: [checks_requested]
 
 concurrency:
@@ -14,6 +18,11 @@ concurrency:
 
 jobs:
   test:
+    # In integrations-core repo the tests are flaky enough that it would be a pain
+    # to merge PRs with the Merge Queue enabled.
+    # While we work on the tests, we skip the job if it's triggered by Merge Queue.
+    # Github treats skipped jobs as successful, thus we unblock the Merge Queue.
+    if: 'github.repository != "DataDog/integrations-core"  || github.event_name != "merge_group"'
     uses: ./.github/workflows/pr-test.yml
     with:
       repo: core
