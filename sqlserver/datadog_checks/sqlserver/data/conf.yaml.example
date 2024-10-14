@@ -692,7 +692,7 @@ instances:
     #
     # propagate_agent_tags: false
 
-    ## Configure the collection of deadlock data. The feature is supported for odbc connector only.
+    ## Configure the collection of deadlock data.
     #
     # deadlocks_collection:
 
