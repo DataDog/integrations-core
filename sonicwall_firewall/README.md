@@ -87,11 +87,9 @@ To change the time zone for the SonicWall Firewall pipeline:
           rule %{date("yyyy-MM-dd HH:mm:ss", "Asia/Calcutta"):timestamp}
           ```
 
-      - Additional step
-      
-        - Under **log samples**:
-          - Remove UTC from the existing value.
-          - For example, if the existing value is:
+      - To update the existing log sample, under **log samples**:
+        - Remove UTC from the existing value.
+        - For example, if the existing value is:
 
               ```shell
               2024-09-11 06:30:00 UTC
