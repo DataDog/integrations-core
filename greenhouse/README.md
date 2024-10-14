@@ -6,7 +6,7 @@
 
 This integration focuses on ingesting audit logs, which document important events and configuration changes, enabling teams to detect incidents and minimize their impact.
 
-By seamlessly collecting these logs and channeling them into Datadog, the Greenhouse integration allows for comprehensive analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into activities on the Greenhouse platform through the out-of-the-box dashboards.
+The Greenhouse integration collects these logs and sends them to Datadog. These logs are parsed and enriched through the built-in logs pipeline, which enables search and analysis. The integration also provides insight into activities on the Greenhouse platform through the out-of-the-box dashboards.
 
 ## Setup
 
@@ -17,7 +17,7 @@ By seamlessly collecting these logs and channeling them into Datadog, the Greenh
 
 #### Greenhouse Configuration
 
-Steps to create API key on Greenhouse Platform:
+Steps to create an API key on the Greenhouse Platform:
 
 1. Log in to **[Greenhouse][2]** with your credentials.
 2. Click **Configure** located in the top right corner.
@@ -30,7 +30,7 @@ Steps to create API key on Greenhouse Platform:
 9. Click **Manage permissions**.
 10. Copy and paste the API key as it cannot be retrieved later.
 11. Under **Manage permissions**, check "Audit Log V1".
-(**Note**: If this option is not available, contact Greenhouse support to enable the audit log feature.)
+(**Note**: If this option is not available, contact **[Greenhouse support][4]** to enable the audit log feature.)
 12. Click **Save**.
 
 #### Greenhouse Integration Configuration
@@ -69,3 +69,4 @@ Need help? Contact [Datadog support][3].
 [1]: https://www.greenhouse.com/
 [2]: https://app.greenhouse.io/
 [3]: https://docs.datadoghq.com/help/
+[4]: https://support.greenhouse.io/hc/en-us
