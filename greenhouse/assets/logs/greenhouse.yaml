@@ -54,11 +54,6 @@ pipeline:
       enabled: true
       sources:
         - event_time
-    - type: service-remapper
-      name: Define `service` as the official service of the log
-      enabled: true
-      sources:
-        - service
     - type: attribute-remapper
       name: Map `performer.ip_address` to `network.client.ip`
       enabled: true
