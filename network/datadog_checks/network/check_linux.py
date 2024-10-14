@@ -139,9 +139,9 @@ class LinuxNetwork(Network):
                 meta_tags = []
                 speed_path = os.path.join(sys_net_location, iface, 'speed')
                 mtu_path = os.path.join(sys_net_location, iface, 'mtu')
-                if (speed_value := self._read_int_file(speed_path)):
+                if speed_value := self._read_int_file(speed_path):
                     meta_tags.extend(['speed:' + str(speed_value)])
-                if (mtu_value := self._read_int_file(mtu_path)):
+                if mtu_value := self._read_int_file(mtu_path):
                     meta_tags.extend(['mtu:' + str(mtu_value)])
 
                 metrics = {
