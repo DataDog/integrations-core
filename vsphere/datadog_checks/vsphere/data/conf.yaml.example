@@ -277,7 +277,7 @@ instances:
     ## then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
     ## and 'Green to Gray' will be included.
     ##
-    ## Currently, events can only be collected if their event type id is in the vim.event class:
+    ## Events can only be collected if their event type ID is in the 'vim.event' class:
     ## https://vdc-repo.vmware.com/vmwb-repository/dcr-public/d1902b0e-d479-46bf-8ac9-cee0e31e8ec0/
     ## 07ce8dbd-db48-4261-9b8f-c6d3ad8ba472/vim.event.Event.html
     ##
