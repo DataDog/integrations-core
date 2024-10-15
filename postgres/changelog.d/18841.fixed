@@ -1,0 +1,1 @@
+Apply the `service` option from config as a `service:<SERVICE>` tag to metrics, and service checks emitted by the integration.
