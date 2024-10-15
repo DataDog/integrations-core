@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.1.0 / 2024-10-04
+
+***Added***:
+
+* Added Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
 ## 37.0.0 / 2024-09-19
 
 ***Removed***:
@@ -11,6 +17,12 @@
 ***Added***:
 
 * Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+## 36.16.0 / 2024-09-30 / Agent 7.58.0
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
 
 ## 36.15.0 / 2024-09-05
 

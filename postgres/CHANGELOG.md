@@ -2,6 +2,35 @@
 
 <!-- towncrier release notes start -->
 
+## 22.0.1 / 2024-10-14
+
+***Fixed***:
+
+* Wrap schema collection attempt in try/except block to catch collection exceptions ([#18788](https://github.com/DataDog/integrations-core/pull/18788))
+
+## 22.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Add `keep_json_path` to `obfuscator_options` to allow users to control whether JSON paths following JSON operators in SQL statements should be obfuscated. By default, these paths are treated as literals and are obfuscated to `?`. ([#18726](https://github.com/DataDog/integrations-core/pull/18726))
+* Add additional debug logging to help with schema collection investigations ([#18754](https://github.com/DataDog/integrations-core/pull/18754))
+* Add Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
+***Fixed***:
+
+* Parse each row of `pg_stat_activity` separately inside a `try`/`catch` to avoid crashing on bad UTF8 data. ([#18762](https://github.com/DataDog/integrations-core/pull/18762))
+
+## 21.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
 ## 20.0.0 / 2024-09-05
 
 ***Changed***:

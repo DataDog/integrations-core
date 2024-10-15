@@ -21,6 +21,7 @@ from datadog_checks.mongo.collectors import (
     FsyncLockCollector,
     HostInfoCollector,
     IndexStatsCollector,
+    ProcessStatsCollector,
     ReplicaCollector,
     ReplicationOpLogCollector,
     ServerStatusCollector,
@@ -134,6 +135,7 @@ class MongoDb(AgentCheck):
             FsyncLockCollector(self, tags),
             ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
             HostInfoCollector(self, tags),
+            ProcessStatsCollector(self, tags),
         ]
         if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
@@ -257,15 +259,21 @@ class MongoDb(AgentCheck):
             tags.extend(self.deployment_type.replset_tags)
         return tags
 
+    def _get_service_check_tags(self):
+        tags = deepcopy(self._config.service_check_tags)
+        if self._resolved_hostname:
+            tags.append(f"database_instance:{self._resolved_hostname}")
+        return tags
+
     def check(self, _):
         try:
             self._refresh_metadata()
             self._refresh_deployment()
             self._collect_metrics()
+            self._send_database_instance_metadata()
 
             # DBM
             if self._config.dbm_enabled:
-                self._send_database_instance_metadata()
                 self._operation_samples.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._slow_operations.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))

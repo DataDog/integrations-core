@@ -2,6 +2,30 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 7.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
+
 ## 6.4.0 / 2024-09-05
 
 ***Added***:

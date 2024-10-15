@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 14.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Update the `propagate_agent_tags` setting. When set to `true`, the tags from the agent host are now added to the check's tags for all instances. ([#18400](https://github.com/DataDog/integrations-core/pull/18400))
+
+***Fixed***:
+
+* Fix a bug in MySQL 8.4 where `SHOW MASTER STATUS` would fail ([#18571](https://github.com/DataDog/integrations-core/pull/18571))
+
+## 13.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
 ## 12.8.0 / 2024-09-05
 
 ***Added***:
