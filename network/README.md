@@ -18,8 +18,6 @@ To collect metrics with this integration, make sure the conntrack module is acti
 
 ```shell
 sudo modprobe nf_conntrack
-sudo modprobe nf_conntrack_ipv4
-sudo modprobe nf_conntrack_ipv6
 ```
 
 *Note*: You may need to install the conntrack binary in the Agent image.
