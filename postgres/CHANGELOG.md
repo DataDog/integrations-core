@@ -25,7 +25,7 @@
 
 * Parse each row of `pg_stat_activity` separately inside a `try`/`catch` to avoid crashing on bad UTF8 data. ([#18762](https://github.com/DataDog/integrations-core/pull/18762))
 
-## 21.0.0 / 2024-10-01
+## 21.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
