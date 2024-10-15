@@ -12,7 +12,7 @@
 
 * Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
-## 2.0.0 / 2024-10-01
+## 2.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 

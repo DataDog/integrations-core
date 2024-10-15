@@ -17,7 +17,7 @@
 
 * Fix a bug in MySQL 8.4 where `SHOW MASTER STATUS` would fail ([#18571](https://github.com/DataDog/integrations-core/pull/18571))
 
-## 13.0.0 / 2024-10-01
+## 13.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 

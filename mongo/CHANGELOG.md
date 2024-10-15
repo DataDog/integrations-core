@@ -20,7 +20,7 @@
   - working_millis: the amount of time that MongoDB spends working on the operation (MongoDB 8.0+)
   - queues: contains information about the operation's queues (MongoDB 8.0+) ([#18761](https://github.com/DataDog/integrations-core/pull/18761))
 
-## 7.0.0 / 2024-10-01
+## 7.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
