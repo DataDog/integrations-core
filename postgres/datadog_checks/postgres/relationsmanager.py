@@ -29,6 +29,7 @@ RELKIND = 'relkind'
 
 # The view pg_locks provides access to information about the locks held by active processes within the database server.
 LOCK_METRICS = {
+    'name': 'lock_metrics',
     'descriptors': [
         ('mode', 'lock_mode'),
         ('locktype', 'lock_type'),
@@ -57,7 +58,6 @@ SELECT mode,
    AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
  GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted, fastpath""",
     'relation': True,
-    'name': 'lock_metrics',
 }
 
 
@@ -372,9 +372,34 @@ INDEX_BLOAT = {
     'name': 'index_bloat_metrics',
 }
 
-RELATION_METRICS = [LOCK_METRICS, IDX_METRICS, STATIO_METRICS]
-DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE]
+QUERY_TABLE_STATISTICS = {
+    'name': 'table_statistics',
+    'descriptors': [('schemaname', 'schema'), ('tablename', 'table'), ('attname', 'column'), ('inherited', 'inherited')],
+    'metrics': {
+        'null_frac': ('postgresql.statistics.null_frac', AgentCheck.gauge),
+        'avg_width': ('postgresql.statisics.avg_width', AgentCheck.gauge),
+        'n_distinct': ('postgresql.statistics.n_distinct', AgentCheck.gauge),
+        'correlation': ('postgresql.statistics.correlation', AgentCheck.gauge),
+    },
+    'query': """
+SELECT
+    null_frac,
+    avg_width,
+    n_distinct,
+    correlation,
+    schemaname,
+    tablename,
+    attname,
+    inherited
+FROM pg_stats
+WHERE {relations} {limits}
+""",
+    'relation': True,
+    'use_global_db_tag': True,
+}
 
+RELATION_METRICS = [LOCK_METRICS, IDX_METRICS, STATIO_METRICS]
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, QUERY_TABLE_STATISTICS]
 
 class RelationsManager(object):
     """Builds queries to collect metrics about relations"""
@@ -386,16 +411,16 @@ class RelationsManager(object):
         self.max_relations = max_relations
         self.has_relations = len(self.config) > 0
 
-    def filter_relation_query(self, query, schema_field):
+    def filter_relation_query(self, query, schema_field, relation_field):
         # type (str, str) -> str
         """Build a WHERE clause filtering relations based on relations_config and applies it to the given query"""
         relations_filter = []
         for r in self.config:
             relation_filter = []
             if r.get(RELATION_NAME):
-                relation_filter.append("( relname = '{}'".format(r[RELATION_NAME]))
+                relation_filter.append("( {} = '{}'".format(relation_field, r[RELATION_NAME]))
             elif r.get(RELATION_REGEX):
-                relation_filter.append("( relname ~ '{}'".format(r[RELATION_REGEX]))
+                relation_filter.append("( {} ~ '{}'".format(relation_field, r[RELATION_REGEX]))
 
             if ALL_SCHEMAS not in r[SCHEMAS]:
                 schema_filter = ','.join("'{}'".format(s) for s in r[SCHEMAS])
