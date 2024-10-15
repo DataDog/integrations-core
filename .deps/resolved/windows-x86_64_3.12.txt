@@ -14,7 +14,7 @@ cachetools @ https://agent-int-packages.datadoghq.com/external/cachetools/cachet
 cattrs @ https://agent-int-packages.datadoghq.com/external/cattrs/cattrs-24.1.2-py3-none-any.whl#sha256=67c7495b760168d931a10233f979b28dc04daf853b30752246f4f8471c6d68d0
 certifi @ https://agent-int-packages.datadoghq.com/external/certifi/certifi-2024.8.30-py3-none-any.whl#sha256=922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8
 cffi @ https://agent-int-packages.datadoghq.com/external/cffi/cffi-1.17.1-cp312-cp312-win_amd64.whl#sha256=51392eae71afec0d0c8fb1a53b204dbb3bcabcb3c9b807eedf3e1e6ccf2de903
-charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-normalizer/charset_normalizer-3.3.2-cp312-cp312-win_amd64.whl#sha256=96b02a3dc4381e5494fad39be677abcb5e6634bf7b4fa83a6dd3112607547001
+charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-normalizer/charset_normalizer-3.4.0-cp312-cp312-win_amd64.whl#sha256=b197e7094f232959f8f20541ead1d9862ac5ebea1d58e9849c1bf979255dfac9
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp312-cp312-win_amd64.whl#sha256=0409917be29f5ad80a6772712fce954b5e81450555636e8523290ee9740a2dbb
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-win_amd64.whl#sha256=de6624e28eeffd01668803d28ae89e3d4e359b1bff8b60e4933e1cb3c6f86f18
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20240402154627-py3-none-win_amd64.whl#sha256=1743b32a221d2a0804b4e425ffd53468e8f1754da217fe1e7bd9ff7800fd90f8
@@ -100,7 +100,7 @@ requests-unixsocket2 @ https://agent-int-packages.datadoghq.com/external/request
 requestsexceptions @ https://agent-int-packages.datadoghq.com/external/requestsexceptions/requestsexceptions-1.4.0-py2.py3-none-any.whl#sha256=3083d872b6e07dc5c323563ef37671d992214ad9a32b0ca4a3d7f5500bf38ce3
 rethinkdb @ https://agent-int-packages.datadoghq.com/external/rethinkdb/rethinkdb-2.4.10.post1-py2.py3-none-any.whl#sha256=a8c3644a35beb7bc857887808d267e6124623b32dc1f54608e7729a14617a431
 rsa @ https://agent-int-packages.datadoghq.com/external/rsa/rsa-4.9-py3-none-any.whl#sha256=90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7
-s3transfer @ https://agent-int-packages.datadoghq.com/external/s3transfer/s3transfer-0.10.2-py3-none-any.whl#sha256=eca1c20de70a39daee580aef4986996620f365c4e0fda6a86100231d62f1bf69
+s3transfer @ https://agent-int-packages.datadoghq.com/external/s3transfer/s3transfer-0.10.3-py3-none-any.whl#sha256=263ed587a5803c6c708d3ce44dc4dfedaab4c1a32e8329bab818933d79ddcf5d
 securesystemslib @ https://agent-int-packages.datadoghq.com/external/securesystemslib/securesystemslib-0.28.0-py3-none-any.whl#sha256=9e6b9abe36a511d4f52c759069db8f6f650362ba82d6efc7bc7466a458b3f499
 semver @ https://agent-int-packages.datadoghq.com/external/semver/semver-3.0.2-py3-none-any.whl#sha256=b1ea4686fe70b981f85359eda33199d60c53964284e0cfb4977d243e37cf4bf4
 service-identity @ https://agent-int-packages.datadoghq.com/external/service-identity/service_identity-24.1.0-py3-none-any.whl#sha256=a28caf8130c8a5c1c7a6f5293faaf239bbfb7751e4862436920ee6f2616f568a
@@ -110,7 +110,7 @@ six @ https://agent-int-packages.datadoghq.com/external/six/six-1.16.0-py2.py3-n
 snowflake-connector-python @ https://agent-int-packages.datadoghq.com/external/snowflake-connector-python/snowflake_connector_python-3.12.1-cp312-cp312-win_amd64.whl#sha256=b06c63ec0381df1f4da6c4326330a1a40c8fc21fd3dcc2f58df4de395d676893
 sortedcontainers @ https://agent-int-packages.datadoghq.com/external/sortedcontainers/sortedcontainers-2.4.0-py2.py3-none-any.whl#sha256=a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0
 soupsieve @ https://agent-int-packages.datadoghq.com/external/soupsieve/soupsieve-2.6-py3-none-any.whl#sha256=e72c4ff06e4fb6e4b5a9f0f55fe6e81514581fca1515028625d0f299c602ccc9
-sspilib @ https://agent-int-packages.datadoghq.com/external/sspilib/sspilib-0.1.0-cp312-cp312-win_amd64.whl#sha256=b83825a2c43ff84ddff72d09b098057efaabf3841d3c42888078e154cf8e9595
+sspilib @ https://agent-int-packages.datadoghq.com/external/sspilib/sspilib-0.2.0-cp312-cp312-win_amd64.whl#sha256=40a97ca83e503a175d1dc9461836994e47e8b9bcf56cab81a2c22e27f1993079
 stevedore @ https://agent-int-packages.datadoghq.com/external/stevedore/stevedore-5.3.0-py3-none-any.whl#sha256=1efd34ca08f474dad08d9b19e934a22c68bb6fe416926479ba29e5013bcc8f78
 supervisor @ https://agent-int-packages.datadoghq.com/external/supervisor/supervisor-4.2.5-py2.py3-none-any.whl#sha256=2ecaede32fc25af814696374b79e42644ecaba5c09494c51016ffda9602d0f08
 tomlkit @ https://agent-int-packages.datadoghq.com/external/tomlkit/tomlkit-0.13.2-py3-none-any.whl#sha256=7a974427f6e119197f670fbbbeae7bef749a6c14e793db934baefc1b5f03efde
@@ -123,5 +123,5 @@ urllib3 @ https://agent-int-packages.datadoghq.com/external/urllib3/urllib3-2.2.
 vertica-python @ https://agent-int-packages.datadoghq.com/external/vertica-python/vertica_python-1.4.0-py3-none-any.whl#sha256=50fecd7687f4b0b9f6dee6e2b35c195af2a4f702ece01bd12e080b51756e000b
 websocket-client @ https://agent-int-packages.datadoghq.com/external/websocket-client/websocket_client-1.8.0-py3-none-any.whl#sha256=17b44cc997f5c498e809b22cdf2d9c7a9e71c02c8cc2b6c56e7c2d1239bfa526
 wrapt @ https://agent-int-packages.datadoghq.com/external/wrapt/wrapt-1.16.0-cp312-cp312-win_amd64.whl#sha256=dcdba5c86e368442528f7060039eda390cc4091bfd1dca41e8046af7c910dda8
-xmltodict @ https://agent-int-packages.datadoghq.com/external/xmltodict/xmltodict-0.13.0-py2.py3-none-any.whl#sha256=aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852
+xmltodict @ https://agent-int-packages.datadoghq.com/external/xmltodict/xmltodict-0.14.1-py2.py3-none-any.whl#sha256=3ef4a7b71c08f19047fcbea572e1d7f4207ab269da1565b5d40e9823d3894e63
 zipp @ https://agent-int-packages.datadoghq.com/external/zipp/zipp-3.20.2-py3-none-any.whl#sha256=a817ac80d6cf4b23bf7f2828b7cabf326f15a001bea8b1f9b49631780ba28350
