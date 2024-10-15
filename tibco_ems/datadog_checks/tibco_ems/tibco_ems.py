@@ -223,7 +223,9 @@ class TibcoEMSCheck(AgentCheck):
             if metric_name in metric_data:
                 if isinstance(metric_info, dict):
                     self.gauge(
-                        f"{prefix}.{metric_name}", (metric_info['value'] * TO_BYTES[metric_info['unit'].lower()]), tags=tags
+                        f"{prefix}.{metric_name}",
+                        (metric_info['value'] * TO_BYTES[metric_info['unit'].lower()]),
+                        tags=tags,
                     )
                 else:
                     self.gauge(f"{prefix}.{metric_name}", metric_info, tags=tags)
