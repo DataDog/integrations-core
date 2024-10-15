@@ -63,6 +63,7 @@ class PostgresConfig:
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+            service_tag=self._get_service_tag(instance, init_config),
         )
 
         ssl = instance.get('ssl', "allow")
@@ -167,7 +168,7 @@ class PostgresConfig:
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
 
-    def _build_tags(self, custom_tags, propagate_agent_tags):
+    def _build_tags(self, custom_tags, propagate_agent_tags, service_tag):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
@@ -198,6 +199,12 @@ class PostgresConfig:
                 raise ConfigurationError(
                     'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
                 )
+            
+        if service_tag:
+            # append the service tag if `service:<service>` is not already in the tags
+            if not any(tag.startswith('service:') for tag in tags):
+                tags.append(f'service:{service_tag}')
+
         return tags
 
     @staticmethod
@@ -291,3 +298,12 @@ class PostgresConfig:
             return init_config_propagate_agent_tags
         # if neither the instance nor the init_config has set the value, return False
         return False
+
+    def _get_service_tag(instance, init_config):
+        '''
+        return the service tag
+        '''
+        service = instance.get('service')
+        if service is not None:
+            return service
+        return init_config.get('service')
