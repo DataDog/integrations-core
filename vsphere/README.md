@@ -83,7 +83,7 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 - VmSuspendedEvent
 - VmPoweredOffEvent
 
-Additoinal events can be collected from the `vim.event` class using `include_events` parameter section in the [sample vsphere.d/conf.yaml][4].
+Additional events can be collected from the `vim.event` class using `include_events` parameter section in the [sample vsphere.d/conf.yaml][4].
 
 ### Service Checks
 
