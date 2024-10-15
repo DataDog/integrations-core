@@ -22,7 +22,7 @@ jobs:
     # it would be a pain to merge PRs with the Merge Queue enabled.
     # While we work on the tests, we skip the job if it's triggered by Merge Queue.
     # Github treats skipped jobs as successful, thus we unblock the Merge Queue.
-    if: 'github.repository == "DataDog/marketplace" || github.event_name != "merge_group"'
+    if: ${{ github.repository == "DataDog/marketplace" || github.event_name != "merge_group" }}
     uses: ./.github/workflows/pr-test.yml
     with:
       repo: core
