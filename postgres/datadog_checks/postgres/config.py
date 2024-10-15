@@ -199,7 +199,7 @@ class PostgresConfig:
                 raise ConfigurationError(
                     'propagate_agent_tags enabled but there was an error fetching agent tags {}'.format(e)
                 )
-            
+
         if service_tag:
             # append the service tag if `service:<service>` is not already in the tags
             if not any(tag.startswith('service:') for tag in tags):
@@ -299,9 +299,11 @@ class PostgresConfig:
         # if neither the instance nor the init_config has set the value, return False
         return False
 
+    @staticmethod
     def _get_service_tag(instance, init_config):
         '''
-        return the service tag
+        return the service tag defined in the instance or the init_config,
+        to be applied as `service:<service>` tag to the check
         '''
         service = instance.get('service')
         if service is not None:

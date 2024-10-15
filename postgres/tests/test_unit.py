@@ -133,10 +133,13 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
 
 
 @pytest.mark.parametrize(
-    'disable_generic_tags, expected_tags',
+    'disable_generic_tags, init_config_service_tag, instance_service_tag, custom_tags, expected_tags',
     [
         (
             True,
+            None,
+            None,
+            None,
             {
                 'db:datadog_test',
                 'port:5432',
@@ -146,6 +149,9 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
         ),
         (
             False,
+            None,
+            None,
+            None,
             {
                 'db:datadog_test',
                 'foo:bar',
@@ -154,12 +160,77 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'dd.internal.resource:database_instance:stubbed.hostname',
             },
         ),
+        (
+            False,
+            'my_service',
+            None,
+            None,
+            {
+                'db:datadog_test',
+                'foo:bar',
+                'port:5432',
+                'server:localhost',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+                'service:my_service',
+            },
+        ),
+        (
+            False,
+            None,
+            'my_service',
+            None,
+            {
+                'db:datadog_test',
+                'foo:bar',
+                'port:5432',
+                'server:localhost',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+                'service:my_service',
+            },
+        ),
+        (
+            False,
+            'my_service_1',
+            'my_service',
+            None,
+            {
+                'db:datadog_test',
+                'foo:bar',
+                'port:5432',
+                'server:localhost',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+                'service:my_service',
+            },
+        ),
+        (
+            False,
+            'my_service_1',
+            'my_service',
+            ['service:my_service_2'],
+            {
+                'db:datadog_test',
+                'foo:bar',
+                'port:5432',
+                'server:localhost',
+                'dd.internal.resource:database_instance:stubbed.hostname',
+                'service:my_service_2',
+            },
+        ),
     ],
 )
-def test_server_tag_(disable_generic_tags, expected_tags, pg_instance):
+def test_server_tag_(
+    disable_generic_tags, init_config_service_tag, instance_service_tag, custom_tags, expected_tags, pg_instance
+):
     instance = copy.deepcopy(pg_instance)
+    init_config = {}
     instance['disable_generic_tags'] = disable_generic_tags
-    check = PostgreSql('test_instance', {}, [instance])
+    if init_config_service_tag:
+        init_config['service'] = init_config_service_tag
+    if instance_service_tag:
+        instance['service'] = instance_service_tag
+    if custom_tags:
+        instance['tags'].extend(custom_tags)
+    check = PostgreSql('test_instance', init_config, [instance])
     assert set(check.tags) == expected_tags
 
 
