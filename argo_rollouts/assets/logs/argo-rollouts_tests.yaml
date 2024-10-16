@@ -1,4 +1,4 @@
-id: "argo_rollouts"
+id: "argo-rollouts"
 tests:
  -
   sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Start processing\" resource=default/rollouts-demo"
