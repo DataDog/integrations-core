@@ -71,7 +71,7 @@ class Deadlocks(DBMAsyncJob):
 
     def is_deadlock_collection_enabled(self):
         return is_affirmative(self._config.deadlocks_config.get('enabled', False))
-    
+
     def obfuscate_no_except_wrapper(self, sql_text):
         try:
             sql_text = obfuscate_sql_with_metadata(

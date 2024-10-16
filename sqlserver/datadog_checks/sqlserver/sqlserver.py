@@ -548,11 +548,12 @@ class SQLServer(AgentCheck):
                     "tags": self.tags,
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-                
+
         # Load extended events metrics, if enabled
-        if is_affirmative(
-            self.instance.get("include_xe_metrics", False)
-        ) or self.deadlocks.is_deadlock_collection_enabled():
+        if (
+            is_affirmative(self.instance.get("include_xe_metrics", False))
+            or self.deadlocks.is_deadlock_collection_enabled()
+        ):
             for name, table, column in XE_METRICS:
                 cfg = {"name": name, "table": table, "column": column, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
