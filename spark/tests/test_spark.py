@@ -361,6 +361,15 @@ STANDALONE_CONFIG = {
     'executor_level_metrics': True,
 }
 
+STANDALONE_CONFIG_STAGE_DISABLED = {
+    'spark_url': 'http://localhost:8080',
+    'cluster_name': CLUSTER_NAME,
+    'spark_cluster_mode': 'spark_standalone_mode',
+    'executor_level_metrics': True,
+    'disable_spark_stage_metrics': True,
+    'disable_spark_job_stage_tags': True,
+}
+
 STANDALONE_CONFIG_PRE_20 = {
     'spark_url': 'http://localhost:8080',
     'cluster_name': CLUSTER_NAME,
@@ -412,6 +421,11 @@ SPARK_JOB_RUNNING_METRIC_TAGS = [
     'stage_id:1',
 ] + COMMON_TAGS
 
+SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS = [
+    'status:running',
+    'job_id:0',
+] + COMMON_TAGS
+
 SPARK_JOB_SUCCEEDED_METRIC_VALUES = {
     'spark.job.count': 3,
     'spark.job.num_tasks': 1000,
@@ -430,6 +444,11 @@ SPARK_JOB_SUCCEEDED_METRIC_TAGS = [
     'job_id:0',
     'stage_id:0',
     'stage_id:1',
+] + COMMON_TAGS
+
+SPARK_JOB_SUCCEEDED_NO_STAGE_METRIC_TAGS = [
+    'status:succeeded',
+    'job_id:0',
 ] + COMMON_TAGS
 
 SPARK_STAGE_RUNNING_METRIC_VALUES = {
@@ -886,6 +905,54 @@ def test_standalone_unit(aggregator, dd_run_check):
                 (SPARK_STAGE_RUNNING_METRIC_VALUES, SPARK_STAGE_RUNNING_METRIC_TAGS),
                 # Check the complete stage metrics
                 (SPARK_STAGE_COMPLETE_METRIC_VALUES, SPARK_STAGE_COMPLETE_METRIC_TAGS),
+                # Check the driver metrics
+                (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional driver metrics
+                (SPARK_DRIVER_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the executor level metrics
+                (SPARK_EXECUTOR_LEVEL_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the optional executor level metrics
+                (SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES, SPARK_EXECUTOR_LEVEL_METRIC_TAGS),
+                # Check the executor metrics
+                (SPARK_EXECUTOR_METRIC_VALUES, COMMON_TAGS),
+                # Check the optional summary executor metrics
+                (SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES, COMMON_TAGS),
+                # Check the RDD metrics
+                (SPARK_RDD_METRIC_VALUES, COMMON_TAGS),
+                # Check the streaming statistics metrics
+                (SPARK_STREAMING_STATISTICS_METRIC_VALUES, COMMON_TAGS),
+                # Check the structured streaming metrics
+                (SPARK_STRUCTURED_STREAMING_METRIC_VALUES, COMMON_TAGS),
+            ],
+        )
+        # Check the service tests
+        for sc in aggregator.service_checks(STANDALONE_SERVICE_CHECK):
+            assert sc.status == SparkCheck.OK
+            assert sc.tags == ['url:http://localhost:8080'] + CLUSTER_TAGS
+        for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
+            assert sc.status == SparkCheck.OK
+            assert sc.tags == ['url:http://localhost:4040'] + CLUSTER_TAGS
+
+        # Assert coverage for this check on this instance
+        aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.unit
+def test_standalone_stage_disabled_unit(aggregator, dd_run_check):
+    with mock.patch('requests.get', standalone_requests_get_mock):
+        c = SparkCheck('spark', {}, [STANDALONE_CONFIG_STAGE_DISABLED])
+        dd_run_check(c)
+
+        _assert(
+            aggregator,
+            [
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS),
+                # Check the running job metrics
+                (SPARK_JOB_RUNNING_METRIC_VALUES, SPARK_JOB_RUNNING_NO_STAGE_METRIC_TAGS),
+                # Check the succeeded job metrics
+                (SPARK_JOB_SUCCEEDED_METRIC_VALUES, SPARK_JOB_SUCCEEDED_NO_STAGE_METRIC_TAGS),
                 # Check the driver metrics
                 (SPARK_DRIVER_METRIC_VALUES, COMMON_TAGS),
                 # Check the optional driver metrics
