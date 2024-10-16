@@ -10,7 +10,6 @@ Integrate Mux with Datadog to gain insights into mux video performance data.
 
 ### Configuration
 
-#### Get API credentials for Mux
 1. Login to [MUX account][2].
 2. In the sidebar, click on **Settings**.
 3. Click on **Access Tokens**.
@@ -20,19 +19,7 @@ Integrate Mux with Datadog to gain insights into mux video performance data.
 7. Enter the access token name.
 8. Click on **Generate Token**.
 9. Save the Access Token ID and Secret Key from the **Here's your new Access Token** tab.
-
-
-#### Mux DataDog integration configuration
-
-Configure the Datadog endpoint to forward  Mux metrics to Datadog.
-
-1. Navigate to the `Mux` integration tile in Datadog.
-2. Add your Mux credentials.
-
-| Mux parameters | Description  |
-| -------------------- | ------------ |
-| Access Token ID    | Access Token ID of MUX account.  |
-| Secret Key        | Secret Key of MUX account.  |
+10. In the Datadog integration configuration, add your Access Token ID and Secret Key.
 
 ## Data Collected
 
