@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.0 / 2024-10-16
+
+***Added***:
+
+* Apply `timeoutMS` to integration connection to ensure client-side operation timeouts terminate the server processes. ([#18843](https://github.com/DataDog/integrations-core/pull/18843))
+
 ## 8.0.0 / 2024-10-04
 
 ***Removed***:
