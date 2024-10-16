@@ -214,6 +214,49 @@ GROUP BY
     FK.name, FK.parent_object_id, FK.referenced_object_id;
 """
 
+XE_SESSION_DATADOG = "datadog"
+XE_SESSION_SYSTEM = "system_health"
+XE_SESSIONS_QUERY = f"""
+SELECT
+    s.name AS session_name
+FROM
+    sys.dm_xe_sessions s
+JOIN
+    sys.dm_xe_session_targets t
+    ON s.address = t.event_session_address
+WHERE
+    t.target_name = 'ring_buffer'
+    AND s.name IN ('{XE_SESSION_DATADOG}', '{XE_SESSION_SYSTEM}');
+"""
+
+DEADLOCK_TIMESTAMP_ALIAS = "timestamp"
+DEADLOCK_XML_ALIAS = "event_xml"
+
+
+def get_deadlocks_query(convert_xml_to_str=False, xe_session_name="datadog"):
+    """
+    Construct the query to fetch deadlocks from the system_health extended event session
+    :param convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
+        that can't convert XML to str
+    :return: The query to fetch deadlocks
+    """
+    xml_expression = "xdr.query('.')"
+    if convert_xml_to_str:
+        xml_expression = "CAST(xdr.query('.') AS NVARCHAR(MAX))"
+
+    return f"""
+    SELECT TOP(?) xdr.value('@timestamp', 'datetime') AS [{DEADLOCK_TIMESTAMP_ALIAS}],
+        {xml_expression} AS [{DEADLOCK_XML_ALIAS}]
+    FROM (SELECT CAST([target_data] AS XML) AS Target_Data
+                FROM sys.dm_xe_session_targets AS xt
+                INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
+                WHERE xs.name = N'{xe_session_name}'
+                AND xt.target_name = N'ring_buffer'
+        ) AS XML_Data
+    CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
+    WHERE xdr.value('@timestamp', 'datetime') >= DATEADD(SECOND, ?, GETDATE())
+    ;"""
+
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """

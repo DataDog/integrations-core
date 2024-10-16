@@ -78,7 +78,8 @@ instances:
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
     #
     # ignore_databases:
-    #   - template%
+    #   - template0
+    #   - template1
     #   - rdsadmin
     #   - azure_maintenance
     #   - cloudsqladmin
@@ -821,6 +822,11 @@ instances:
         ## Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
         #
         # keep_identifier_quotation: false
+
+        ## @param keep_json_path - boolean - optional - default: false
+        ## Set to `true` to keep JSON path expressions (e.g. `data->'key'`) in your normalized SQL statements.
+        #
+        # keep_json_path: false
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.

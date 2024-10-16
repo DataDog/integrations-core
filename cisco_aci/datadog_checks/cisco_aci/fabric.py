@@ -128,15 +128,14 @@ class Fabric:
         pod_id = helpers.get_pod_from_dn(node['dn'])
         common_tags = ndm.common_tags(node.get('address', ''), device_hostname, self.namespace)
         try:
-            eth_list = self.api.get_eth_list(pod_id, node['id'])
+            eth_list_and_stats = self.api.get_eth_list_and_stats(pod_id, node['id'])
         except (exceptions.APIConnectionException, exceptions.APIParsingException):
             pass
         interfaces = []
-        for e in eth_list:
-            eth_attrs = helpers.get_attributes(e)
-            eth_id = eth_attrs['id']
+        for e in eth_list_and_stats:
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
             tags.extend(common_tags)
+
             if self.ndm_enabled():
                 interface_metadata = ndm.create_interface_metadata(e, node.get('address', ''), self.namespace)
                 interfaces.append(interface_metadata)
@@ -152,11 +151,8 @@ class Fabric:
                     tags,
                     device_hostname,
                 )
-            try:
-                stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
-                self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
-            except (exceptions.APIConnectionException, exceptions.APIParsingException):
-                pass
+            stats = e.get('l1PhysIf', {}).get('children', [])
+            self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
         self.log.info("finished processing ethernet ports for %s", node['id'])
         return interfaces
 
