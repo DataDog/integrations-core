@@ -5,6 +5,7 @@
 import xml.etree.ElementTree as ET
 from time import time
 
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
@@ -68,6 +69,9 @@ class Deadlocks(DBMAsyncJob):
     def _close_db_conn(self):
         pass
 
+    def is_deadlock_collection_enabled(self):
+        return is_affirmative(self._config.deadlocks_config.get('enabled', False))
+    
     def obfuscate_no_except_wrapper(self, sql_text):
         try:
             sql_text = obfuscate_sql_with_metadata(

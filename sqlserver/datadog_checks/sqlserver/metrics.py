@@ -1040,6 +1040,65 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
+class SqlExtendedEventsNotInXml(BaseSqlServerMetric):
+    TABLE = 'sys.dm_xe_session_targets'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = f"""SELECT name session_name, 
+    target_data.value('(RingBufferTarget/@eventCount)[1]', 'int') -
+    target_data.value('count(RingBufferTarget/event)', 'int') AS events_not_in_xml
+    FROM
+    ( SELECT s.name, CAST(target_data AS XML) AS target_data 
+        FROM sys.dm_xe_sessions as s
+        INNER JOIN {TABLE} AS st
+           ON s.address = st.event_session_address
+       WHERE st.target_name = N'ring_buffer' ) AS n"""
+    OPERATION_NAME = 'xe_events_not_in_xml_metrics'
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
+        return cls._fetch_generic_values(cursor, None, logger)
+    
+    def fetch_metric(self, rows, columns, values_cache=None):
+        value_column_index = columns.index(self.column)
+        session_name_index = columns.index('session_name')
+        for row in rows:
+            metric_name = f'{self.metric_name}'
+            column_val = row[value_column_index]
+            session_name = row[session_name_index]
+            metric_tags = [f'session_name:{session_name}']
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
+class SqlExtendedEventsSessionState(BaseSqlServerMetric):
+    TABLE = 'sys.dm_xe_sessions'
+    DEFAULT_METRIC_TYPE = 'gauge'
+    QUERY_BASE = f"""SELECT 
+    s.name as session_name, 
+    CASE 
+        WHEN r.event_session_id IS NULL THEN 0 
+        ELSE 1 
+    END AS session_status
+    FROM {TABLE} as s 
+    LEFT OUTER JOIN sys.server_event_sessions r
+        ON s.name = r.name"""
+    OPERATION_NAME = 'xe_session_status_metrics'
+
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
+        return cls._fetch_generic_values(cursor, None, logger)
+    
+    def fetch_metric(self, rows, columns, values_cache=None):
+        value_column_index = columns.index(self.column)
+        session_name_index = columns.index('session_name')
+        for row in rows:
+            metric_name = f'{self.metric_name}'
+            column_val = row[value_column_index]
+            session_name = row[session_name_index]
+            metric_tags = [f'session_name:{session_name}']
+            self.log.debug(f"ReportingXE {self.metric_name} for session {session_name}")
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+
 DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
 VALID_TABLES = {cls.TABLE for cls in BaseSqlServerMetric.__subclasses__() if cls.CUSTOM_QUERIES_AVAILABLE}
 TABLE_MAPPING = {

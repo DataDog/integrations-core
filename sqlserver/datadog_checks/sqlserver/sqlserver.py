@@ -76,6 +76,7 @@ from datadog_checks.sqlserver.const import (
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
+    XE_METRICS,
     expected_sys_databases_columns,
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
@@ -546,6 +547,14 @@ class SQLServer(AgentCheck):
                     "instance_name": "tempdb",
                     "tags": self.tags,
                 }
+                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+                
+        # Load extended events metrics, if enabled
+        if is_affirmative(
+            self.instance.get("include_xe_metrics", False)
+        ) or self.deadlocks.is_deadlock_collection_enabled():
+            for name, table, column in XE_METRICS:
+                cfg = {"name": name, "table": table, "column": column, "tags": self.tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
