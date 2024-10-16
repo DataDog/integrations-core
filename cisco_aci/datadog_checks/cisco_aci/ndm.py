@@ -49,7 +49,7 @@ def create_interface_metadata(phys_if, address, namespace):
     interface = InterfaceMetadata(
         device_id='{}:{}'.format(namespace, address),
         raw_id=eth.attributes.id,
-        id_tags=['interface:{}'.format(eth.attributes.id)],
+        id_tags=['interface:{}'.format(eth.attributes.name)],
         index=eth.attributes.id,
         name=eth.attributes.name,
         alias=eth.attributes.id,
