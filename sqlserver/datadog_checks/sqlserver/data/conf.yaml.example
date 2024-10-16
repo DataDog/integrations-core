@@ -692,6 +692,25 @@ instances:
     #
     # propagate_agent_tags: false
 
+    ## Configure the collection of deadlock data.
+    #
+    # deadlocks_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_deadlocks - number - optional - default: 100
+        ## Set the maximum number of deadlocks to retrieve per collection.
+        #
+        # max_deadlocks: 100
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
