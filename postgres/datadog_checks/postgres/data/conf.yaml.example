@@ -78,7 +78,8 @@ instances:
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
     #
     # ignore_databases:
-    #   - template%
+    #   - template0
+    #   - template1
     #   - rdsadmin
     #   - azure_maintenance
     #   - cloudsqladmin

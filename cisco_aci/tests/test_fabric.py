@@ -150,27 +150,202 @@ def test_fabric_mocked(aggregator):
     assert_fabric_node_mem_free_min(aggregator)
     assert_fabric_node_mem_max(aggregator)
     assert_fabric_node_mem_min(aggregator)
-
     assert_fabric_node_utilized(aggregator)
 
     ### Fabric Port Metrics ###
     assert_fabric_port_egr_metrics(aggregator)
     assert_fabric_port_ingr_metrics(aggregator)
-    assert_fabric_port_fault_counters(aggregator)
 
-    ### Check Metrics ###
-    aggregator.assert_metric(
-        'datadog.cisco_aci.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=['cisco']
-    )
-    aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=['cisco'])
+    assert_check_metrics(aggregator)
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
 
 
+def assert_fabric_port_ingr_metrics(aggregator):
+    metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.cum'
+    aggregator.assert_metric(metric_name, value=1675297119938.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(metric_name, value=1671489933399.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(metric_name, value=1672846899143.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(metric_name, value=1670820627869.0, tags=interface_tags_102_eth2, hostname=hn102)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_bytes.flood'
+    aggregator.assert_metric(metric_name, value=72037037.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(metric_name, value=40530849.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(metric_name, value=95792629.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(metric_name, value=86137773.0, tags=interface_tags_102_eth2, hostname=hn102)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_bytes.flood.cum'
+    aggregator.assert_metric(metric_name, value=1675362699996.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(metric_name, value=1666006928703.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(metric_name, value=1684600000562.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(metric_name, value=1672454392057.0, tags=interface_tags_102_eth2, hostname=hn102)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_bytes.multicast'
+    aggregator.assert_metric(name=metric_name, value=52378511.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=65700640.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=11168323.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=54999085.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=58960634.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=85858244.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_bytes.multicast.cum'
+    aggregator.assert_metric(name=metric_name, value=1683545926517.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1670381374528.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1660441184789.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=1676380152464.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=89806584162.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=90202911073.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_bytes.unicast'
+    aggregator.assert_metric(name=metric_name, value=50443812.0, tags=interface_tags_101_eth1, hostname=hn101),
+    aggregator.assert_metric(name=metric_name, value=70147142.0, tags=interface_tags_101_eth2, hostname=hn101),
+    aggregator.assert_metric(name=metric_name, value=32704715.0, tags=interface_tags_102_eth1, hostname=hn102),
+    aggregator.assert_metric(name=metric_name, value=23770059.0, tags=interface_tags_102_eth2, hostname=hn102),
+    aggregator.assert_metric(name=metric_name, value=105702610.0, tags=interface_tags_201_eth1, hostname=hn201),
+    aggregator.assert_metric(name=metric_name, value=29485355.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_bytes.unicast.cum'
+    aggregator.assert_metric(name=metric_name, value=1675139222191.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1672360868187.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1670246291096.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=1671433541603.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=91884083475.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=89489460623.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.rate'
+    aggregator.assert_metric(name=metric_name, value=6956222.344972, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=5982729.140943, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=6364450.663467, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=6306235.087953, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=6856048.66832, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=8136970.057186, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_total.pkts'
+    aggregator.assert_metric(name=metric_name, value=6134790.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=9417736.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1283587.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=2523746.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=4395152.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=8179023.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.ingr_total.pkts.rate'
+    aggregator.assert_metric(name=metric_name, value=668161.02377, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=535540.893299, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=659485.489255, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=539835.180155, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=663144.955211, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=491355.434696, tags=interface_tags_201_eth2, hostname=hn201)
+
+
+def assert_fabric_port_egr_metrics(aggregator):
+    metric_name = 'cisco_aci.fabric.port.egr_bytes.flood'
+    aggregator.assert_metric(name=metric_name, value=104004695.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=56064447.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=104445269.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=56895557.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=113990420.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=94615739.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_bytes.flood.cum'
+    aggregator.assert_metric(name=metric_name, value=1676377889535.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1670589187638.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1679981059227.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=1670301584332.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=92087744539.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=90271151687.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_bytes.multicast'
+    aggregator.assert_metric(name=metric_name, value=71889611.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=106111131.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=27578882.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=37234011.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=34219648.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=13281532.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_bytes.multicast.cum'
+    aggregator.assert_metric(name=metric_name, value=1680127522943.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1676144173003.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1676466708628.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=1666025595868.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=89826571867.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=91603890026.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_bytes.unicast'
+    aggregator.assert_metric(name=metric_name, value=72418019.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=73098992.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=20751017.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=75906220.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=107694686.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=83932303.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_bytes.unicast.cum'
+    aggregator.assert_metric(name=metric_name, value=1670890020444.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1670549333856.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1670486675842.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=1666001799571.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=90218859190.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=89849409871.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_drop_pkts.buffer'
+    aggregator.assert_metric(name=metric_name, value=270.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=47.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=53.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=48.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=79.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=212.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_drop_pkts.buffer.cum'
+    aggregator.assert_metric(name=metric_name, value=5642170.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=5627840.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=5635225.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=5624957.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=309747.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=316071.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_drop_pkts.errors'
+    aggregator.assert_metric(name=metric_name, value=5628789.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=5620169.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=5603128.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=5616188.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=300591.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=304779.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_total.bytes.cum'
+    aggregator.assert_metric(name=metric_name, value=1675133556076.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1666659548273.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=1670187404090.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=1675540544688.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=88024859871.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=91306228204.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_total.bytes.rate'
+    aggregator.assert_metric(name=metric_name, value=5912983.438726, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=4571615.606489, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=5993816.23426, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=6111042.629652, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=7441353.135248, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=5641867.661761, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_total.pkts'
+    aggregator.assert_metric(name=metric_name, value=4276778.0, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=6653961.0, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=6550971.0, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=2521895.0, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=617161.0, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=10110431.0, tags=interface_tags_201_eth2, hostname=hn201)
+
+    metric_name = 'cisco_aci.fabric.port.egr_total.pkts.rate'
+    aggregator.assert_metric(name=metric_name, value=544477.282611, tags=interface_tags_101_eth1, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=522656.617261, tags=interface_tags_101_eth2, hostname=hn101)
+    aggregator.assert_metric(name=metric_name, value=644033.870439, tags=interface_tags_102_eth1, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=561897.727715, tags=interface_tags_102_eth2, hostname=hn102)
+    aggregator.assert_metric(name=metric_name, value=481008.637927, tags=interface_tags_201_eth1, hostname=hn201)
+    aggregator.assert_metric(name=metric_name, value=609451.091738, tags=interface_tags_201_eth2, hostname=hn201)
+
+
 def assert_fabric_node_cpu_avg(aggregator):
     metric_name = 'cisco_aci.fabric.node.cpu.avg'
-
     aggregator.assert_metric(metric_name, value=5.099699999999999, tags=tagsleaf101, hostname=hn101)
     aggregator.assert_metric(metric_name, value=4.6183149999999955, tags=tagsleaf101, hostname=hn101)
     aggregator.assert_metric(metric_name, value=4.986987999999997, tags=tagsleaf101, hostname=hn101)
@@ -207,24 +382,7 @@ def assert_fabric_node_cpu_avg(aggregator):
     aggregator.assert_metric(metric_name, value=17.827544000000003, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=19.068934999999996, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=17.649720000000002, tags=tagsspine201, hostname=hn201)
-    aggregator.assert_metric(
-        metric_name,
-        value=10.0,
-        tags=[
-            'apic_role:controller',
-            'node_id:1',
-            'fabric_state:unknown',
-            'device_hostname:apic1',
-            'device_id:default:10.0.200.4',
-            'device_ip:10.0.200.4',
-            'device_namespace:default',
-            'fabric_pod_id:1',
-            'cisco',
-            'project:cisco_aci',
-            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
-        ],
-        hostname='pod-1-node-1',
-    )
+    aggregator.assert_metric(metric_name, value=10.0, tags=tagsapic1, hostname=hn1)
 
 
 def assert_fabric_node_cpu_idle_avg(aggregator):
@@ -373,24 +531,6 @@ def assert_fabric_node_cpu_max(aggregator):
     aggregator.assert_metric(metric_name, value=3.388972999999993, tags=tagsleaf102, hostname=hn102)
     aggregator.assert_metric(metric_name, value=3.5001259999999945, tags=tagsleaf102, hostname=hn102)
     aggregator.assert_metric(metric_name, value=3.4704689999999943, tags=tagsleaf102, hostname=hn102)
-    aggregator.assert_metric(
-        metric_name,
-        value=14.0,
-        tags=[
-            'apic_role:controller',
-            'node_id:1',
-            'fabric_state:unknown',
-            'device_hostname:apic1',
-            'device_id:default:10.0.200.4',
-            'device_ip:10.0.200.4',
-            'device_namespace:default',
-            'fabric_pod_id:1',
-            'cisco',
-            'project:cisco_aci',
-            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
-        ],
-        hostname='pod-1-node-1',
-    )
     aggregator.assert_metric(metric_name, value=11.881692999999999, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=12.369293999999996, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=11.892583000000002, tags=tagsspine201, hostname=hn201)
@@ -403,6 +543,7 @@ def assert_fabric_node_cpu_max(aggregator):
     aggregator.assert_metric(metric_name, value=11.755685999999997, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=11.997952999999995, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=12.017387, tags=tagsspine201, hostname=hn201)
+    aggregator.assert_metric(metric_name, value=14.0, tags=tagsapic1, hostname=hn1)
 
 
 def assert_fabric_node_cpu_min(aggregator):
@@ -431,24 +572,6 @@ def assert_fabric_node_cpu_min(aggregator):
     aggregator.assert_metric(metric_name, value=6.2168980000000005, tags=tagsleaf102, hostname=hn102)
     aggregator.assert_metric(metric_name, value=14.110971000000006, tags=tagsleaf102, hostname=hn102)
     aggregator.assert_metric(metric_name, value=6.203505000000007, tags=tagsleaf102, hostname=hn102)
-    aggregator.assert_metric(
-        metric_name,
-        value=10.0,
-        tags=[
-            'apic_role:controller',
-            'node_id:1',
-            'fabric_state:unknown',
-            'device_hostname:apic1',
-            'device_id:default:10.0.200.4',
-            'device_ip:10.0.200.4',
-            'device_namespace:default',
-            'fabric_pod_id:1',
-            'cisco',
-            'project:cisco_aci',
-            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
-        ],
-        hostname='pod-1-node-1',
-    )
     aggregator.assert_metric(metric_name, value=40.487681, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=31.577607999999998, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=40.411481, tags=tagsspine201, hostname=hn201)
@@ -461,6 +584,7 @@ def assert_fabric_node_cpu_min(aggregator):
     aggregator.assert_metric(metric_name, value=32.221090000000004, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=39.074027, tags=tagsspine201, hostname=hn201)
     aggregator.assert_metric(metric_name, value=31.365031000000002, tags=tagsspine201, hostname=hn201)
+    aggregator.assert_metric(metric_name, value=10.0, tags=tagsapic1, hostname=hn1)
 
 
 def assert_fabric_node_health_cur(aggregator):
@@ -488,25 +612,8 @@ def assert_fabric_node_mem_avg(aggregator):
     metric_name = 'cisco_aci.fabric.node.mem.avg'
     aggregator.assert_metric(metric_name, value=10559963.0, tags=tagsleaf101, hostname=hn101)
     aggregator.assert_metric(metric_name, value=10491187.0, tags=tagsleaf102, hostname=hn102)
-    aggregator.assert_metric(
-        metric_name,
-        value=43008145.0,
-        tags=[
-            'apic_role:controller',
-            'node_id:1',
-            'fabric_state:unknown',
-            'device_hostname:apic1',
-            'device_id:default:10.0.200.4',
-            'device_ip:10.0.200.4',
-            'device_namespace:default',
-            'fabric_pod_id:1',
-            'cisco',
-            'project:cisco_aci',
-            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
-        ],
-        hostname='pod-1-node-1',
-    )
     aggregator.assert_metric(metric_name, value=10814699.0, tags=tagsspine201, hostname=hn201)
+    aggregator.assert_metric(metric_name, value=43008145.0, tags=tagsapic1, hostname=hn1)
 
 
 def assert_fabric_node_mem_free_avg(aggregator):
@@ -534,50 +641,16 @@ def assert_fabric_node_mem_max(aggregator):
     metric_name = 'cisco_aci.fabric.node.mem.max'
     aggregator.assert_metric(metric_name, value=10570520.0, tags=tagsleaf101, hostname=hn101)
     aggregator.assert_metric(metric_name, value=10509680.0, tags=tagsleaf102, hostname=hn102)
-    aggregator.assert_metric(
-        metric_name,
-        value=43199760.0,
-        tags=[
-            'apic_role:controller',
-            'node_id:1',
-            'fabric_state:unknown',
-            'device_hostname:apic1',
-            'device_id:default:10.0.200.4',
-            'device_ip:10.0.200.4',
-            'device_namespace:default',
-            'fabric_pod_id:1',
-            'cisco',
-            'project:cisco_aci',
-            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
-        ],
-        hostname='pod-1-node-1',
-    )
     aggregator.assert_metric(metric_name, value=10823444.0, tags=tagsspine201, hostname=hn201)
+    aggregator.assert_metric(metric_name, value=43199760.0, tags=tagsapic1, hostname=hn1)
 
 
 def assert_fabric_node_mem_min(aggregator):
     metric_name = 'cisco_aci.fabric.node.mem.min'
     aggregator.assert_metric(metric_name, value=10534296.0, tags=tagsleaf101, hostname=hn101)
     aggregator.assert_metric(metric_name, value=10462616.0, tags=tagsleaf102, hostname=hn102)
-    aggregator.assert_metric(
-        metric_name,
-        value=42962460.0,
-        tags=[
-            'apic_role:controller',
-            'node_id:1',
-            'fabric_state:unknown',
-            'device_hostname:apic1',
-            'device_id:default:10.0.200.4',
-            'device_ip:10.0.200.4',
-            'device_namespace:default',
-            'fabric_pod_id:1',
-            'cisco',
-            'project:cisco_aci',
-            'dd.internal.resource:ndm_device_user_tags:default:10.0.200.4',
-        ],
-        hostname='pod-1-node-1',
-    )
     aggregator.assert_metric(metric_name, value=10788240.0, tags=tagsspine201, hostname=hn201)
+    aggregator.assert_metric(metric_name, value=42962460.0, tags=tagsapic1, hostname=hn1)
 
 
 def assert_fabric_node_utilized(aggregator):
@@ -585,157 +658,8 @@ def assert_fabric_node_utilized(aggregator):
     aggregator.assert_metric(metric_name, value=0.0, tags=['cisco', 'project:cisco_aci'], hostname='')
 
 
-def assert_fabric_port_fault_counters(aggregator):
-    metric_name = 'cisco_aci.fabric.port.fault_counter.crit'
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.fault_counter.warn'
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-
-def assert_fabric_port_ingr_metrics(aggregator):
-    metric_name = 'cisco_aci.fabric.port.ingr_bytes.flood'
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.ingr_bytes.flood.cum'
-    aggregator.assert_metric(metric_name, value=94.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=188.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=94.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(metric_name, value=188.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.ingr_bytes.multicast'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.ingr_bytes.multicast.cum'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.ingr_bytes.unicast'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101),
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101),
-    aggregator.assert_metric(name=metric_name, value=572700.0, tags=interface_tags_102_eth1, hostname=hn102),
-    aggregator.assert_metric(name=metric_name, value=830768.0, tags=interface_tags_102_eth2, hostname=hn102),
-
-    metric_name = 'cisco_aci.fabric.port.ingr_bytes.unicast.cum'
-    aggregator.assert_metric(name=metric_name, value=348576910354.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=261593756336.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=163927500335.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=156170003449.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.cum'
-    aggregator.assert_metric(metric_name, value=348576910448.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=261593756524.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(metric_name, value=163927500429.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(metric_name, value=156170003637.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.rate'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=73281.118519, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=101114.177778, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.ingr_total.pkts'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=3240.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=4750.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.ingr_total.pkts.rate'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=401.2, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=583.388889, tags=interface_tags_102_eth2, hostname=hn102)
-
-
-def assert_fabric_port_egr_metrics(aggregator):
-    metric_name = 'cisco_aci.fabric.port.egr_bytes.flood'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_bytes.flood.cum'
-    aggregator.assert_metric(name=metric_name, value=3196.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=3196.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=2992.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=2992.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_bytes.multicast'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_bytes.multicast.cum'
-    aggregator.assert_metric(name=metric_name, value=236383592.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=236450478.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=236470350.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=236534244.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_bytes.unicast'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=758598.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=770134.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_bytes.unicast.cum'
-    aggregator.assert_metric(name=metric_name, value=370475792067.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=263131271762.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=134113229564.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=203653209556.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_drop_pkts.buffer'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_drop_pkts.buffer.cum'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_drop_pkts.errors'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_total.bytes.cum'
-    aggregator.assert_metric(name=metric_name, value=370712178855.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=263367725436.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=134349702906.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=203889746792.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_total.bytes.rate'
-    aggregator.assert_metric(name=metric_name, value=12.69, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=12.69, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=91797.314815, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=127111.525926, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_total.pkts'
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.0, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=4491.0, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=3611.0, tags=interface_tags_102_eth2, hostname=hn102)
-
-    metric_name = 'cisco_aci.fabric.port.egr_total.pkts.rate'
-    aggregator.assert_metric(name=metric_name, value=0.03, tags=interface_tags_101_eth1, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=0.03, tags=interface_tags_101_eth2, hostname=hn101)
-    aggregator.assert_metric(name=metric_name, value=535.933333, tags=interface_tags_102_eth1, hostname=hn102)
-    aggregator.assert_metric(name=metric_name, value=480.72963, tags=interface_tags_102_eth2, hostname=hn102)
+def assert_check_metrics(aggregator):
+    aggregator.assert_metric(
+        'datadog.cisco_aci.check_interval', metric_type=aggregator.MONOTONIC_COUNT, count=1, tags=['cisco']
+    )
+    aggregator.assert_metric('datadog.cisco_aci.check_duration', metric_type=aggregator.GAUGE, count=1, tags=['cisco'])

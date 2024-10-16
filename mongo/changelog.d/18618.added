@@ -1,2 +1,0 @@
-Add `mongodb.system.cpu.percent` metric to track total CPU usage of the MongoDB process on self-hosted instances (only available on self-hosted MongoDB running on the same host as the Agent).
-
