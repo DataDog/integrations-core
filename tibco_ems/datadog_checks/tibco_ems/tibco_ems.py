@@ -11,7 +11,7 @@ from .constants import SHOW_METRIC_DATA, UNIT_PATTERN
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 7222
-TO_BYTES = {'B': 1, 'Kb': 1e3, 'Mb': 1e6, 'Gb': 1e9, 'Tb': 1e12}
+TO_BYTES = {'b': 1, 'kb': 1e3, 'mb': 1e6, 'gb': 1e9, 'tb': 1e12}
 CONNECTION_STRING = 'tcp://{}:{}'
 
 
@@ -112,7 +112,7 @@ class TibcoEMSCheck(AgentCheck):
                 if version_match:
                     server_data['version'] = version_match.group()
                 server_data[key] = value
-            elif key in ['topics', 'queues']:
+            elif key in ['topics', 'queues', 'client_connections']:
                 server_data[key] = int(value.split(' ')[0])
             elif "rate" in key:
                 parse_rate(server_data, key, value)
@@ -223,7 +223,9 @@ class TibcoEMSCheck(AgentCheck):
             if metric_name in metric_data:
                 if isinstance(metric_info, dict):
                     self.gauge(
-                        f"{prefix}.{metric_name}", (metric_info['value'] * TO_BYTES[metric_info['unit']]), tags=tags
+                        f"{prefix}.{metric_name}",
+                        (metric_info['value'] * TO_BYTES[metric_info['unit'].lower()]),
+                        tags=tags,
                     )
                 else:
                     self.gauge(f"{prefix}.{metric_name}", metric_info, tags=tags)
