@@ -310,6 +310,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags()),
             "timestamp": slow_operation["ts"] * 1000,
+            "service": self._check._config.service,
             "network": {
                 "client": self._get_slow_operation_client(slow_operation),
             },
@@ -405,6 +406,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(),
             "timestamp": time.time() * 1000,
+            "service": self._check._config.service,
             "mongodb_slow_queries": slow_operation_events,
         }
         self._check.database_monitoring_query_activity(json_util.dumps(payload))

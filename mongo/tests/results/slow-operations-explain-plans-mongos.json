@@ -6,6 +6,7 @@
         "ddsource": "mongo",
         "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
         "timestamp": 32479987545338.0,
+        "service": "my_service",
         "network": {
             "client": {
                 "hostname": "192.168.65.1:58133"
@@ -730,6 +731,7 @@
         "ddsource": "mongo",
         "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
         "timestamp": 32479987545521.0,
+        "service": "my_service",
         "network": {
             "client": {
                 "hostname": "192.168.65.1:58133"
@@ -1449,6 +1451,7 @@
         "ddsource": "mongo",
         "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
         "timestamp": 32479987545338.0,
+        "service": "my_service",
         "network": {
             "client": {
                 "hostname": "192.168.65.1:58133"
@@ -2173,6 +2176,7 @@
         "ddsource": "mongo",
         "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
         "timestamp": 32479987545521.0,
+        "service": "my_service",
         "network": {
             "client": {
                 "hostname": "192.168.65.1:58133"
