@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import iteritems
 
 from datadog_checks.mesos_master import MesosMaster
 
@@ -37,7 +36,7 @@ def assert_metric_coverage(aggregator):
         check.CLUSTER_FRAMEWORK_METRICS,
         check.STATS_METRICS,
     ):
-        for _, m in iteritems(d):
+        for m in d.values():
             metrics.append(m[0])
 
     for m in metrics:

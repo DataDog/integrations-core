@@ -7,9 +7,6 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3
-
-pytestmark = [requires_py3]
 
 
 class ReplayCheck(AgentCheck):

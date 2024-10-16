@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-20",
+	"last_updated_at": "2024-08-20",
+	"title": "SSL Certificate Revoked",
+	"description": "An issued SSL certificate has been revoked. This monitor tracks the status of the SSL certificate and triggers an alert when the status changes to revoked. This will help ensure that appropriate actions are taken promptly to address the revocation and secure the affected systems.",
+	"definition": {
+		"id": 149116202,
+		"name": "SSL Certificate Revoked",
+		"type": "query alert",
+		"query": "sum(last_1h):max:godaddy.certificate.certificate_status{status:revoked} by {certificateid} >= 1",
+		"message": "The certificate {{certificateid.name}} has been revoked. Please review and take the necessary actions.",
+		"tags": [
+			"service:certificate",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_group_delay": 0,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:godaddy"
+	]
+}

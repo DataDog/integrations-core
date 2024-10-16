@@ -8,8 +8,6 @@ from collections import namedtuple
 from subprocess import Popen
 from tempfile import TemporaryFile
 
-from six import string_types
-
 from .errors import SubprocessError
 from .utils import NEED_SHELL, ON_WINDOWS, mock_context_manager
 
@@ -42,7 +40,7 @@ def run_command(command, capture=None, check=False, encoding='utf-8', shell=Fals
     if shell == 'detect':
         shell = NEED_SHELL
 
-    if isinstance(command, string_types) and not ON_WINDOWS:
+    if isinstance(command, str) and not ON_WINDOWS:
         command = shlex.split(command)
 
     if capture:

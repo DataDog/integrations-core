@@ -4,19 +4,15 @@
 import re
 from datetime import datetime
 from itertools import chain
+from urllib.parse import urljoin, urlparse
 
 import simplejson as json
-from six import PY3, iteritems, text_type
-from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, to_native_string
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import PLUS_API_ENDPOINTS, PLUS_API_STREAM_ENDPOINTS, TAGGED_KEYS
 from .metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM, VTS_METRIC_MAP
-
-if PY3:
-    long = int
 
 if hasattr(datetime, 'fromisoformat'):
     fromisoformat = datetime.fromisoformat
@@ -133,7 +129,7 @@ class Nginx(AgentCheck):
 
             supported_endpoints = self._supported_endpoints(available_endpoints)
             self.log.debug("Supported endpoints are %s", supported_endpoints)
-            return chain(iteritems(supported_endpoints))
+            return chain(supported_endpoints.items())
         except Exception as e:
             self.log.warning(
                 "Could not determine available endpoints from the API, "
@@ -250,13 +246,13 @@ class Nginx(AgentCheck):
         Returns all of either stream or default endpoints that the integration supports
         collecting metrics from based on the Plus API version
         """
-        endpoints = iteritems({})
+        endpoints = iter([])
 
         available_plus_endpoints = PLUS_API_STREAM_ENDPOINTS if use_stream else PLUS_API_ENDPOINTS
 
         for earliest_version, new_endpoints in available_plus_endpoints.items():
             if int(self.plus_api_version) >= int(earliest_version):
-                endpoints = chain(endpoints, iteritems(new_endpoints))
+                endpoints = chain(endpoints, new_endpoints.items())
         return endpoints
 
     def _get_all_plus_api_endpoints(self):
@@ -370,10 +366,10 @@ class Nginx(AgentCheck):
                 if tags is None:
                     tags = []
                 tags = tags + [server]
-            for key, val2 in iteritems(val):
+            for key, val2 in val.items():
                 if key in TAGGED_KEYS:
                     metric_name = '%s.%s' % (metric_base, TAGGED_KEYS[key])
-                    for tag_val, data in iteritems(val2):
+                    for tag_val, data in val2.items():
                         tag = '%s:%s' % (TAGGED_KEYS[key], tag_val)
                         output.extend(cls._flatten_json(metric_name, data, tags + [tag]))
                 else:
@@ -387,10 +383,10 @@ class Nginx(AgentCheck):
         elif isinstance(val, bool):
             output.append((metric_base, int(val), tags, 'gauge'))
 
-        elif isinstance(val, (int, float, long)):
+        elif isinstance(val, (int, float)):
             output.append((metric_base, val, tags, 'gauge'))
 
-        elif isinstance(val, (text_type, str)) and val[-1] == "Z":
+        elif isinstance(val, str) and val[-1] == "Z":
             try:
                 # In the new Plus API, timestamps are now formatted
                 # strings, some include microseconds, some don't...

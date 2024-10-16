@@ -2,6 +2,34 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Bump datadog-checks-base dependency ([#18583](https://github.com/DataDog/integrations-core/pull/18583))
+* Add `mongodb.system.cpu.percent` metric to track total CPU usage of the MongoDB process on self-hosted instances (only available on self-hosted MongoDB running on the same host as the Agent). ([#18618](https://github.com/DataDog/integrations-core/pull/18618))
+* Always emit `database_instance` metadata regardless of DBM status; previously emitted only when DBM was enabled. ([#18750](https://github.com/DataDog/integrations-core/pull/18750))
+* Include tag `clustername` & `database_instance` in mongo service check tags ([#18751](https://github.com/DataDog/integrations-core/pull/18751))
+* Add `resolved_views`, `working_millis`, and `queues` fields to the slow query (dbm only) event payload
+  - resolved_views: contains view details for slow queries on views (MongoDB 5.0+)
+  - working_millis: the amount of time that MongoDB spends working on the operation (MongoDB 8.0+)
+  - queues: contains information about the operation's queues (MongoDB 8.0+) ([#18761](https://github.com/DataDog/integrations-core/pull/18761))
+
+## 7.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
+
 ## 6.11.0 / 2024-09-10
 
 ***Added***:

@@ -4,12 +4,8 @@
 import pytest
 
 from datadog_checks.base.stubs import datadog_agent
-from datadog_checks.dev.testing import requires_py3
 
 from .utils import get_check
-
-pytestmark = [requires_py3]
-
 
 test_use_process_start_time_data = """\
 # HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.

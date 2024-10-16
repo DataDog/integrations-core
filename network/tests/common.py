@@ -3,8 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-from six import PY3
-
 from datadog_checks.dev import get_here
 
 HERE = get_here()
@@ -159,16 +157,5 @@ ETHTOOL_IOCTL_INPUTS_OUTPUTS = {
 }
 
 
-if PY3:
-    long = int
-    ESCAPE_ENCODING = 'unicode-escape'
-
-    def decode_string(s):
-        return s.decode(ESCAPE_ENCODING)
-
-else:
-    ESCAPE_ENCODING = 'string-escape'
-
-    def decode_string(s):
-        s.decode(ESCAPE_ENCODING)
-        return s.decode("utf-8")
+def decode_string(s):
+    return s.decode('unicode-escape')

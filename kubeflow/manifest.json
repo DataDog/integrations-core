@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "0db7b333-38a1-4e09-af1b-317da2f9f413",
   "app_id": "kubeflow",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -40,7 +40,16 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "katib-controller",
+        "katib-db-manager",
+        "katib-ui",
+        "kserve-controller-manager",
+        "ml-pipeline-api-server",
+        "ml-pipeline-scheduledworkflow",
+        "ml-pipeline-persistenceagent"
+      ]
     },
     "monitors": {
       "Kubeflow Monitor": "assets/monitors/kubeflow.json"

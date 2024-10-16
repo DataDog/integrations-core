@@ -2,6 +2,37 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* [NDM] [Cisco ACI] Add check metrics ([#18748](https://github.com/DataDog/integrations-core/pull/18748))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+## 2.12.0 / 2024-09-06
+
+***Added***:
+
+* Add the ability to tag Cisco ACI device and interface metrics with user-defined tags. ([#18496](https://github.com/DataDog/integrations-core/pull/18496))
+
 ## 2.11.0 / 2024-09-05
 
 ***Added***:
