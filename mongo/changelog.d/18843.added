@@ -1,0 +1,1 @@
+Apply `timeoutMS` to integration connection to ensure client-side operation timeouts terminate the server processes.
