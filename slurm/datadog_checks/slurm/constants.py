@@ -8,7 +8,6 @@ SACCT_PARAMS = [
     "-npo",
     "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
     "--units=M",
-    "--starttime=now-15seconds",
 ]
 
 PARTITION_MAP = {

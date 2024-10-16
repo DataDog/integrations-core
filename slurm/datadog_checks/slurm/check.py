@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import subprocess
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck  # noqa: F401
@@ -59,6 +59,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.sdiag_cmd = self.get_slurm_command('sdiag', 'sdiag', [])
         self.sshare_cmd = self.get_slurm_command('sshare', 'sshare', SSHARE_PARAMS)
         self.tags = self.instance.get('tags', [])
+        self.last_run_time = None
 
         # Metric and Tag configuration
         self.gpu_stats = self.instance.get('gpu_stats', False)
@@ -75,13 +76,21 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 self.sinfo_node_cmd[-1] += GPU_PARAMS
 
     def check(self, _):
+        if self.last_run_time is not None:
+            self._update_sacct_params()
+
         commands = [
             ('sinfo', self.sinfo_partition_cmd, self.process_sinfo_partition),
             ('squeue', self.squeue_cmd, self.process_squeue),
-            ('sacct', self.sacct_cmd, self.process_sacct),
             ('sdiag', self.sdiag_cmd, self.process_sdiag),
             ('sshare', self.sshare_cmd, self.process_sshare),
         ]
+
+        if self.last_run_time is not None:
+            commands.append(('sacct', self.sacct_cmd, self.process_sacct))
+        else:
+            # Set a timestamp to remember what time we need to query from
+            self.last_run_time = datetime.now()
 
         if self.sinfo_collection_level > 1:
             commands.append(('snode', self.sinfo_node_cmd, self.process_sinfo_node))
@@ -268,3 +277,18 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 continue
 
             self.gauge(metric_info["name"], metric_value, tags)
+
+    def _update_sacct_params(self):
+        if self.last_run_time is not None:
+            now = datetime.now()
+            delta = now - self.last_run_time
+            start_time_param = f"--starttime=now-{int(delta.total_seconds())}seconds"
+            SACCT_PARAMS.append(start_time_param)
+        else:
+            return False
+
+        self.last_run_time = datetime.now()
+
+        # Update the sacct command with the dynamic SACCT_PARAMS
+        self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
+        self.sacct_cmd = self.get_slurm_command('sacct', 'sacct', SACCT_PARAMS)
