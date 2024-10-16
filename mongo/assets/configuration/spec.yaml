@@ -287,8 +287,8 @@ files:
         example: true
     - name: timeout
       description: |
-        Controls connectTimeoutMS, serverSelectionTimeoutMS and socketTimeoutMS
-        see http://api.mongodb.com/python/3.4.0/api/pymongo/mongo_client.html
+        Controls connectTimeoutMS, serverSelectionTimeoutMS, socketTimeoutMS and timeoutMS
+        see https://pymongo.readthedocs.io/en/stable/api/pymongo/mongo_client.html
       value:
         type: integer
         example: 30
