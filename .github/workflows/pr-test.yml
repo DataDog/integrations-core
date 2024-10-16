@@ -30,7 +30,7 @@ jobs:
   test:
     needs:
     - compute-matrix
-    if: needs.compute-matrix.outputs.matrix != '[]'
+    if: needs.compute-matrix.outputs.matrix != '[]' && github.event_name != 'merge_group'
     strategy:
       fail-fast: false
       matrix:
