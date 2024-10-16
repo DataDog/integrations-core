@@ -62,7 +62,9 @@ UNEXPLAINABLE_PIPELINE_STAGES = frozenset(
         "$collStats",
         "$currentOp",
         "$indexStats",
+        "$listSearchIndexes",
         "$sample",
+        "$shardedDataDistribution",
     ]
 )
 
