@@ -249,8 +249,7 @@ def test_exception_when_getting_tasks(get_current_datetime, dd_run_check, aggreg
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
-def test_octopus_server_node_metrics(get_current_datetime, dd_run_check, aggregator, instance, caplog):
-    caplog.set_level(logging.DEBUG)
+def test_octopus_server_node_metrics(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     dd_run_check(check)
 

@@ -107,26 +107,25 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         project.last_completed_time = new_completed_time
 
     def _initialize_projects(self, project_group, project_group_config):
-        if not self._projects_discovery.get(project_group.name):
-            normalized_projects = normalize_discover_config_include(
-                self.log, project_group_config.get("projects") if project_group_config else None
+        normalized_projects = normalize_discover_config_include(
+            self.log, project_group_config.get("projects") if project_group_config else None
+        )
+        self.log.debug(
+            "Projects discovery for project_group %s: %s",
+            project_group.name,
+            normalized_projects,
+        )
+        if normalized_projects:
+            self._projects_discovery[project_group.name] = Discovery(
+                lambda: self._get_new_projects(project_group),
+                limit=project_group_config.get('projects').get('limit') if project_group_config else None,
+                include=normalized_projects,
+                exclude=project_group_config.get('projects').get('exclude') if project_group_config else None,
+                interval=(project_group_config.get('projects').get('interval') if project_group_config else None),
+                key=lambda project: project.name,
             )
-            self.log.debug(
-                "Projects discovery for project_group %s: %s",
-                project_group.name,
-                normalized_projects,
-            )
-            if normalized_projects:
-                self._projects_discovery[project_group.name] = Discovery(
-                    lambda: self._get_new_projects(project_group),
-                    limit=project_group_config.get('projects').get('limit') if project_group_config else None,
-                    include=normalized_projects,
-                    exclude=project_group_config.get('projects').get('exclude') if project_group_config else None,
-                    interval=(project_group_config.get('projects').get('interval') if project_group_config else None),
-                    key=lambda project: project.name,
-                )
-            else:
-                self._projects_discovery[project_group.name] = None
+        else:
+            self._projects_discovery[project_group.name] = None
 
         self.log.debug("Discovered projects: %s", self._projects_discovery)
 
