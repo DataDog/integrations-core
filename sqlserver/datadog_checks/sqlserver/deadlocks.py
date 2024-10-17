@@ -42,6 +42,7 @@ def agent_check_getter(self):
 
 class Deadlocks(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
+        #comment to enforce the CI
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self._check = check
         self._log = self._check.log
