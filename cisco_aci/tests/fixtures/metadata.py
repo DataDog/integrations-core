@@ -137,6 +137,8 @@ DEVICE_METADATA = [
 INTERFACE_METADATA = [
     {
         'admin_status': 1,
+        'alias': 'eth1/1',
+        'raw_id': 'eth1/1',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'interface:eth1/1',
@@ -150,6 +152,8 @@ INTERFACE_METADATA = [
     },
     {
         'admin_status': 1,
+        'alias': 'eth1/2',
+        'raw_id': 'eth1/2',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'interface:eth1/2',
@@ -163,6 +167,8 @@ INTERFACE_METADATA = [
     },
     {
         'admin_status': 1,
+        'alias': 'eth1/3',
+        'raw_id': 'eth1/3',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'interface:eth1/3',
@@ -176,6 +182,8 @@ INTERFACE_METADATA = [
     },
     {
         'admin_status': 1,
+        'alias': 'eth1/1',
+        'raw_id': 'eth1/1',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'interface:eth1/1',
@@ -189,6 +197,8 @@ INTERFACE_METADATA = [
     },
     {
         'admin_status': 1,
+        'alias': 'eth1/2',
+        'raw_id': 'eth1/2',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'interface:eth1/2',
@@ -202,6 +212,8 @@ INTERFACE_METADATA = [
     },
     {
         'admin_status': 1,
+        'alias': 'eth1/3',
+        'raw_id': 'eth1/3',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'interface:eth1/3',
@@ -215,6 +227,8 @@ INTERFACE_METADATA = [
     },
     {
         'admin_status': 1,
+        'alias': 'eth5/1',
+        'raw_id': 'eth5/1',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'interface:eth5/1',
@@ -228,6 +242,8 @@ INTERFACE_METADATA = [
     },
     {
         'admin_status': 1,
+        'alias': 'eth5/2',
+        'raw_id': 'eth5/2',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'interface:eth5/2',
@@ -241,6 +257,8 @@ INTERFACE_METADATA = [
     },
     {
         'admin_status': 1,
+        'alias': 'eth7/1',
+        'raw_id': 'eth7/1',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'interface:eth7/1',
