@@ -11,7 +11,7 @@ from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
 
 
 class MongoConfig(object):
-    def __init__(self, instance, log):
+    def __init__(self, instance, log, init_config):
         self.log = log
         self.min_collection_interval = int(instance.get('min_collection_interval', 15))
 
@@ -119,6 +119,7 @@ class MongoConfig(object):
         # TODO: service check and metric tags should be updated to be dynamic with auto-discovered databases
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
+        self.service = instance.get('service') or init_config.get('service') or ''
 
     def _get_clean_server_name(self):
         try:

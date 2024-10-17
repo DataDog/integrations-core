@@ -232,6 +232,7 @@ class Deadlocks(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
+            'service': self._config.service,
             "sqlserver_deadlocks": deadlock_rows,
         }
         return event
