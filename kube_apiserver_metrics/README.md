@@ -18,7 +18,7 @@ If your Kubernetes clusters have master nodes and is running a pod and container
 
 However, if you are using a managed Kubernetes distribution like GKE, EKS, or AKS you may not have a running `kube-apiserver` pod present for the Agent to discover. 
 
-In this case, you can setup the integration against the Kubernetes Service in the `default` namespace.
+In this case, you can setup the integration against the `kubernetes` Service in the `default` namespace.
 
 - The main use case to run the kube_apiserver_metrics check is as a [Cluster Level Check][4]. 
 - You can do this with [annotations on your service](#annotate-service), or by using a [local file](#local-file) through the Datadog Operator, Helm Chart or manually. 
@@ -28,7 +28,7 @@ In this case, you can setup the integration against the Kubernetes Service in th
 |-------------------|-----------------------------------------------------------------------|
 | `<INTEGRATION_NAME>`| `["kube_apiserver_metrics"]`                                            |
 | `<INIT_CONFIG>`     | `[{}]`                                                                  |
-| `<INSTANCE_CONFIG>` | [{ `"prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true"` }] |
+| `<INSTANCE_CONFIG>` | `[{"prometheus_url": "https://%%host%%:%%port%%/metrics"}]` |
 
 You can review all available configuration options in the [kube_apiserver_metrics.yaml][7].
 
@@ -69,7 +69,7 @@ Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Dat
 
 #### Local file
 
-You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5] to dispatch as a [Cluster Check][14].
+You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5] to dispatch as a [Cluster Check][14].
 
 **Note**: You must add `cluster_check: true` to your configuration file if using a local file or ConfigMap to configure Cluster Checks.
 
@@ -82,7 +82,7 @@ clusterAgent:
   confd:
     kube_apiserver_metrics.yaml: |-
       advanced_ad_identifiers:
-        - kube_endpoins:
+        - kube_endpoints:
             name: "kubernetes"
             namespace: "default"
       cluster_check: true
@@ -114,7 +114,7 @@ spec:
 {{% /tab %}}
 {{< /tabs >}}
 
-These configurations will have the Agent make a request to the kubernetes service in the default namespace at its Cluster IP Address and defined port. 
+These configurations will have the Agent make a request to the `kubernetes` service in the `default` namespace at its defined Endpoint IP Addresses and defined port. 
 
 ### Validation
 
