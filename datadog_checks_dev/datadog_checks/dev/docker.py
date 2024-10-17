@@ -251,6 +251,7 @@ class ComposeFileUp(LazyFunction):
             compose_logs = run_command(log_command, check=True)
             raise SubprocessError(f"compose error: {compose_error} |  compose logs: {compose_logs}")
 
+
 class ComposeFileLogs(LazyFunction):
     def __init__(self, compose_file, check=True):
         self.compose_file = compose_file
