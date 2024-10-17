@@ -1,0 +1,43 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b6d1ad60-e67f-4612-92fd-4fe4b4182b22",
+  "app_id": "plivo",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Plivo Messages.",
+    "title": "Plivo",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Collaboration",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 25490639,
+      "source_type_name": "Plivo",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "logs":{
+      "source": "plivo"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
