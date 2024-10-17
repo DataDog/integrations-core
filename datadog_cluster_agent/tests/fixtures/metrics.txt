@@ -11,6 +11,9 @@ admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="age
 admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="agent_sidecar",status="success"} 1
 admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="cws_pod_instrumentation",status="success"} 2
 admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="lib_injection",status="success"} 1
+# HELP admission_webhooks_validation_attempts Number of pod validation attempts by validation type
+# TYPE admission_webhooks_validation_attempts gauge
+admission_webhooks_validation_attempts{error="",validated="true",webhook_name="kubernetes_audit",status="success"} 1
 # HELP admission_webhooks_reconcile_errors Number of reconcile errors per controller.
 # TYPE admission_webhooks_reconcile_errors gauge
 admission_webhooks_reconcile_errors{controller="secrets"} 5
