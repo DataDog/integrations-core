@@ -117,6 +117,14 @@
         rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-3/projects/response.json
         file_server
     }
+    @get_octopusservernodes {
+        method GET
+        path /api/octopusservernodes
+    }
+    route @get_octopusservernodes {
+        rewrite * /GET/api/octopusservernodes/response.json
+        file_server
+    }
     
     file_server browse
 }
