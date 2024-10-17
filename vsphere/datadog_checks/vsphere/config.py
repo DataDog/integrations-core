@@ -37,7 +37,7 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.metrics import RESOURCES_WITH_HISTORICAL_METRICS, RESOURCES_WITH_REALTIME_METRICS
 from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter  # noqa: F401
-from datadog_checks.vsphere.types import (  # noqa: F401
+from vsphere.datadog_checks.vsphere.type import (  # noqa: F401
     InstanceConfig,
     MetricFilterConfig,
     MetricFilters,

@@ -18,7 +18,7 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     UNLIMITED_HIST_METRICS_PER_QUERY,
 )
-from datadog_checks.vsphere.types import InfrastructureData
+from vsphere.datadog_checks.vsphere.type import InfrastructureData
 from datadog_checks.vsphere.utils import properties_to_collect
 
 CallableT = TypeVar('CallableT', bound=Callable)
