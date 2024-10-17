@@ -10,7 +10,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import using_windows_containers
 from datadog_checks.sqlserver.const import SWITCH_DB_STATEMENT
@@ -328,5 +328,11 @@ def dd_environment(full_e2e_config):
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 
-    with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3):
-        yield full_e2e_config, E2E_METADATA
+    try:
+        with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3):
+            yield full_e2e_config, E2E_METADATA
+    except Exception as SubprocessError:
+        compose_error = str(SubprocessError)
+        log_command = ['docker', 'compose', '-f', compose_file, 'logs']
+        compose_logs = run_command(log_command, check=True)
+        raise SubprocessError(f"compose error: {compose_error} |  compose logs: {compose_logs}")
