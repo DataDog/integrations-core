@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
-from .errors import SubprocessError
 from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
