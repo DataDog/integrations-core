@@ -242,7 +242,6 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
-        ret_value = None
         try:
             return run_command(self.command, check=True)
         except Exception as SubprocessError:
