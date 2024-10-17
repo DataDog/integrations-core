@@ -244,11 +244,11 @@ class ComposeFileUp(LazyFunction):
 
     def __call__(self):
         try:
-            return run_command(self.command, check=True, capture = True)
+            return run_command(self.command, check=True, capture=True)
         except SubprocessError as e:
             compose_error = str(e)
             log_command = ['docker', 'compose', '-f', self.compose_file, 'logs']
-            compose_logs = run_command(log_command, check=True, capture = True)
+            compose_logs = run_command(log_command, check=True, capture=True)
             raise SubprocessError(f"compose error: {compose_error} |  compose logs: {compose_logs}")
 
 
