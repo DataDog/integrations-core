@@ -268,6 +268,14 @@ TEMPDB_FILE_SPACE_USAGE_METRICS = [
     ('sqlserver.tempdb.file_space_usage.mixed_extent_space', 'sys.dm_db_file_space_usage', 'mixed_extent_space'),
 ]
 
+XE_MISSING_EVENTS_METRICS = [
+    ('sqlserver.xe.events_not_in_xml', 'sys.dm_xe_session_targets', 'events_not_in_xml'),
+]
+XE_SESSION_STATUS_METRICS = [
+    ('sqlserver.xe.session_status', 'sys.dm_xe_sessions', 'session_status'),
+]
+XE_METRICS = XE_MISSING_EVENTS_METRICS + XE_SESSION_STATUS_METRICS
+
 PROC_CHAR_LIMIT = 500
 
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
