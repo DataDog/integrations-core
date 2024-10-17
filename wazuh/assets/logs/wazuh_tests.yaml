@@ -450,14 +450,14 @@ tests:
           id: "80305"
           level: 3
           mail: false
-        service: "amazon"
+        service: "wazuh-amazon"
         status: "information"
         syslog:
           appname: "ossec"
           hostname: "Debian"
         timestamp: "2024-09-16T16:58:16.015398+05:30"
       message: "<132>Sep 16 16:58:16 Debian ossec: {\"@sampledata\": true, \"timestamp\": \"2024-09-16T16:58:16.015398+05:30\", \"rule\": {\"firedtimes\": 27, \"mail\": false, \"level\": 3, \"description\": \"AWS GuardDuty: PORT_PROBE - Unprotected port on EC2 instance i-0b0b8b34a48c8f1c4 is being probed. [IP: 10.10.10.10] [Port: 80]\", \"groups\": [\"amazon\", \"aws\", \"aws_guardduty\"], \"id\": \"80305\"}, \"agent\": {\"id\": \"007\", \"name\": \"Debian\", \"ip\": \"10.10.10.10\"}, \"manager\": {\"name\": \"ub20\"}, \"cluster\": {\"name\": \"wazuh\"}, \"id\": \"1580123327.49031\", \"predecoder\": {}, \"decoder\": {\"name\": \"json\"}, \"data\": {\"aws\": {\"severity\": \"2\", \"schemaVersion\": \"2.0\", \"resource\": {\"resourceType\": \"Instance\", \"instanceDetails\": {\"launchTime\": \"2019-03-22T14:15:41Z\", \"instanceId\": \"i-0cab4a083d57dc400\", \"networkInterfaces\": {\"networkInterfaceId\": \"eni-0bb465b2d939dbda6\", \"subnetId\": \"subnet-6b1d6203\", \"vpcId\": \"vpc-921e61fa\", \"privateDnsName\": \"ip-10-0-0-1.ec2.internal\", \"publicIp\": \"10.10.10.10\", \"publicDnsName\": \"ec2-10.10.10.10.compute-1.amazonaws.com\", \"privateIpAddress\": \"10.0.0.1\"}, \"instanceState\": \"running\", \"imageId\": \"ami-09ae67bbfcd740875\", \"instanceType\": \"a1.medium\", \"imageDescription\": \"Canonical, Ubuntu, 18.04 LTS, UNSUPPORTED daily arm64 bionic image build on 2019-02-12\", \"productCodes\": {\"productCodeId\": \"zud1u4kjmxu2j2jf0n36bqa\", \"productCodeType\": \"marketplace\"}, \"iamInstanceProfile\": {\"id\": \"AIPAJGAZMFPZHKIBOUFGA\", \"arn\": \"arn:aws:iam::150447125201:instance-profile/opsworks-web-production\"}, \"availabilityZone\": \"us-east-1e\"}}, \"description\": \"EC2 instance has an unprotected port which is being probed by a known malicious host.\", \"source\": \"guardduty\", \"type\": \"Recon:EC2/PortProbeUnprotectedPort\", \"title\": \"Unprotected port on EC2 instance i-0cab4a083d57dc400 is being probed.\", \"partition\": \"aws\", \"service\": {\"archived\": \"false\", \"resourceRole\": \"TARGET\", \"detectorId\": \"cab38390b400c06fb2897dfcebffb80d\", \"additionalInfo\": {\"threatListName\": \"ProofPoint\", \"threatName\": \"Scanner\"}, \"count\": \"2115\", \"action\": {\"actionType\": \"PORT_PROBE\", \"portProbeAction\": {\"blocked\": \"false\", \"portProbeDetails\": {\"localPortDetails\": {\"port\": \"80\", \"portName\": \"HTTP\"}, \"remoteIpDetails\": {\"country\": {\"countryName\": \"Mexico\"}, \"city\": {\"cityName\": \"M\\u00e9rida\"}, \"geoLocation\": {\"lon\": \"-89.616700\", \"lat\": \"20.950000\"}, \"organization\": {\"asnOrg\": \"Internet Mexico Company\", \"org\": \"Internet Mexico Company\", \"isp\": \"Internet Mexico Company\", \"asn\": \"4257\"}, \"ipAddressV4\": \"10.10.10.10\"}}}}, \"serviceName\": \"guardduty\", \"eventFirstSeen\": \"2024-08-28T05:41:44.820Z\", \"eventLastSeen\": \"2024-08-31T05:41:44.820Z\"}, \"region\": \"eu-west-1\", \"accountId\": \"18773455640\", \"log_info\": {\"s3bucket\": \"aws-sample-bucket-2\", \"log_file\": \"guardduty/2024/08/31/05/firehose_guardduty-1-2024-08-31-05-41-44-820b5b9b-ec62-4a07-85d7-b1699b9c031e.zip\"}, \"createdAt\": \"2024-08-28T05:41:44.820Z\"}, \"integration\": \"aws\"}, \"location\": \"Wazuh-AWS\", \"input\": {\"type\": \"log\"}, \"GeoLocation\": {\"country_name\": \"Germany\", \"location\": {\"lat\": 52.524, \"lon\": 13.411}, \"region_name\": \"Berlin\", \"city_name\": \"Berlin\"}}"
-      service: "amazon"
+      service: "wazuh-amazon"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
@@ -501,7 +501,7 @@ tests:
           id: "91160"
           level: 3
           mail: false
-        service: "github"
+        service: "wazuh-github"
         status: "information"
         syslog:
           appname: "ossec"
@@ -510,7 +510,7 @@ tests:
         usr:
           name: "User1"
       message: "<132>Sep 17 10:25:49 Amazon ossec: {\"@sampledata\": true, \"timestamp\": \"2024-09-17T10:25:49.352657+05:30\", \"rule\": {\"level\": 3, \"description\": \"GitHub Git push.\", \"id\": \"91160\", \"firedtimes\": 2, \"mail\": false, \"groups\": [\"github\", \"git\", \"git_git\"]}, \"agent\": {\"id\": \"002\", \"name\": \"Amazon\", \"ip\": \"10.10.10.10\"}, \"manager\": {\"name\": \"ub20\"}, \"cluster\": {\"name\": \"wazuh\"}, \"id\": \"1580123327.49031\", \"predecoder\": {}, \"decoder\": {\"name\": \"json\"}, \"data\": {\"github\": {\"actor\": \"User1\", \"@timestamp\": \"2024-08-30T17:23:47.725+0000\", \"org\": \"Organization1\", \"repo\": \"Organization1/Repo7\", \"actor_location\": {\"country_code\": \"DE\"}, \"action\": \"git.push\", \"transport_protocol_name\": \"http\", \"transport_protocol\": \"1\", \"repository\": \"Organization1/Repo1\", \"repository_public\": \"false\"}}, \"location\": \"github\"}"
-      service: "github"
+      service: "wazuh-github"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
@@ -644,14 +644,14 @@ tests:
           id: "65010"
           level: 5
           mail: true
-        service: "google-cloud"
+        service: "wazuh-google-cloud"
         status: "information"
         syslog:
           appname: "ossec"
           hostname: "Ubuntu"
         timestamp: "2024-09-17T11:30:16.015304+05:30"
       message: "<132>Sep 16 16:17:37 Ubuntu ossec: {\"@sampledata\": true, \"timestamp\": \"2024-09-17T11:30:16.015304+05:30\", \"rule\": {\"level\": 5, \"description\": \"GCP notice event with source IP 10.10.10.10 from europe-west1 with response code NXDOMAIN\", \"id\": \"65010\", \"firedtimes\": 2, \"mail\": true, \"groups\": [\"gcp\"]}, \"agent\": {\"id\": \"004\", \"name\": \"Ubuntu\", \"ip\": \"10.10.10.10\"}, \"manager\": {\"name\": \"ub20\"}, \"cluster\": {\"name\": \"wazuh\"}, \"id\": \"1580123327.49031\", \"predecoder\": {}, \"decoder\": {}, \"data\": {\"integration\": \"gcp\", \"gcp\": {\"insertId\": \"uk1zpe23xcj\", \"jsonPayload\": {\"authAnswer\": \"true\", \"protocol\": \"UDP\", \"queryName\": \"41.212.95.203.in-addr.arpa\", \"queryType\": \"A\", \"responseCode\": \"NXDOMAIN\", \"sourceIP\": \"10.10.10.10\", \"vmInstanceId\": \"4980113928800839680.000000\", \"vmInstanceName\": \"531339229531.instance-1\"}, \"logName\": \"projects/wazuh-dev/logs/dns.googleapis.com%2Fdns_queries\", \"receiveTimestamp\": \"2019-11-11T02:42:05.05853152Z\", \"resource\": {\"labels\": {\"location\": \"us-central1\", \"project_id\": \"wazuh-test\", \"source_type\": \"gce-vm\", \"target_type\": \"external\"}, \"type\": \"dns_query\"}, \"severity\": \"CRITICAL\", \"timestamp\": \"2019-11-11T02:42:04.34921449Z\"}}, \"location\": \"\", \"GeoLocation\": {\"country_name\": \"Australia\", \"location\": {\"lat\": -33.8678513, \"lon\": 151.2073212}, \"region_name\": \"Sydney\", \"city_name\": \"Sydney\"}}"
-      service: "google-cloud"
+      service: "wazuh-google-cloud"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
@@ -714,7 +714,7 @@ tests:
           id: "91580"
           level: 3
           mail: false
-        service: "office365"
+        service: "wazuh-office365"
         status: "information"
         syslog:
           appname: "ossec"
@@ -723,7 +723,7 @@ tests:
         usr:
           email: "frank@wazuh.com"
       message: "<132>Sep 17 12:09:39 ub20 ossec: {\"@sampledata\": true, \"timestamp\": \"2024-09-17T12:09:39.565041+05:30\", \"rule\": {\"level\": 3, \"description\": \"Office 365: Data Insights REST API events.\", \"id\": \"91580\", \"mail\": false, \"firedtimes\": 4, \"groups\": [\"office365\", \"DataInsightsRestApiAudit\", \"hipaa_164.312.b\", \"pci_dss_10.6.2\"]}, \"agent\": {\"id\": \"000\", \"ip\": \"10.10.10.10\", \"name\": \"ub20\"}, \"manager\": {\"name\": \"ub20\"}, \"cluster\": {\"name\": \"wazuh\"}, \"id\": \"1580123327.49031\", \"predecoder\": {}, \"decoder\": {\"name\": \"json\"}, \"data\": {\"integration\": \"Office365\", \"office365\": {\"CreationTime\": \"2024-08-29T20:06:43.482Z\", \"Id\": \"a0995136-91d8-4acf-8449-28c275ffb7e3\", \"Operation\": \"ValidaterbacAccessCheck\", \"OrganizationId\": \"ce013f05-a783-4186-9d85-5a14998b6111\", \"RecordType\": 52, \"UserKey\": \"d36253fb-24a1-481c-a199-f778534ccb5f\", \"UserType\": 0, \"Version\": 1, \"Workload\": \"SecurityComplianceCenter\", \"UserId\": \"frank@wazuh.com\", \"AadAppId\": \"d6fdaa33-e821-4211-83d0-cf74736489e1\", \"DataType\": \"rbacAccessCheck\", \"RelativeUrl\": \"/DataInsights/DataInsightsService.svc/validate/rbacAccessCheck?tenantid=0fea4e03-8146-453b-b889-54b4bd11565b\", \"ResultCount\": \"0\", \"Subscription\": \"Audit.General\", \"ResultStatus\": \"Failed\", \"ObjectId\": \"d14aa5cb-b070-42f8-8709-0f8afd942fc0\", \"ClientIP\": \"10.10.10.10\"}}, \"location\": \"office365\", \"GeoLocation\": {\"country_name\": \"England\", \"location\": {\"lat\": 51.5085297, \"lon\": -0.12574}, \"region_name\": \"London\", \"city_name\": \"London\"}}"
-      service: "office365"
+      service: "wazuh-office365"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
@@ -765,14 +765,14 @@ tests:
           id: "87928"
           level: 3
           mail: false
-        service: "docker"
+        service: "wazuh-docker"
         status: "information"
         syslog:
           appname: "ossec"
           hostname: "Debian"
         timestamp: "2024-09-17T12:37:36.093817+05:30"
       message: "<132>Sep 17 12:37:36 Debian ossec: {\"@sampledata\": true, \"timestamp\": \"2024-09-17T12:37:36.093817+05:30\", \"rule\": {\"firedtimes\": 1, \"mail\": false, \"level\": 3, \"description\": \"Docker: Network bridge connected\", \"groups\": [\"docker\"], \"id\": \"87928\"}, \"agent\": {\"id\": \"007\", \"name\": \"Debian\", \"ip\": \"10.10.10.10\"}, \"manager\": {\"name\": \"ub20\"}, \"cluster\": {\"name\": \"wazuh\"}, \"id\": \"1580123327.49031\", \"predecoder\": {}, \"decoder\": {}, \"data\": {\"integration\": \"docker\", \"docker\": {\"Action\": \"connect\", \"Type\": \"network\", \"Actor\": {\"Attributes\": {\"container\": \"4d193284273eda41a869c2ef22091d7e0492323b91d654f1bea09fcefde50c08\", \"name\": \"bridge\", \"type\": \"bridge\"}, \"ID\": \"128075e00d6a056b6454afaa183c3a2714f0307a848ee4dba0e095e0a29f086a\"}, \"scope\": \"local\", \"timeNano\": \"1587084599776133888.000000\", \"time\": \"1587084599\"}}, \"location\": \"\"}"
-      service: "docker"
+      service: "wazuh-docker"
       status: "info"
       tags:
       - "source:LOGS_SOURCE"
