@@ -21,6 +21,7 @@ METRICS = [
     'admission_webhooks.library_injection_attempts',
     'admission_webhooks.library_injection_errors',
     'admission_webhooks.mutation_attempts',
+    'admission_webhooks.validation_attempts',
     'admission_webhooks.patcher.attempts',
     'admission_webhooks.patcher.completed',
     'admission_webhooks.patcher.errors',
