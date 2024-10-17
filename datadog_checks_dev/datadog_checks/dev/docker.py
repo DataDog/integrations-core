@@ -242,8 +242,14 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
-        return run_command(self.command, check=True)
-
+        ret_value = None
+        try:
+            return run_command(self.command, check=True)
+        except Exception as SubprocessError:
+            compose_error = str(SubprocessError)
+            log_command = ['docker', 'compose', '-f', self.compose_file, 'logs']
+            compose_logs = run_command(log_command, check=True)
+            raise SubprocessError(f"compose error: {compose_error} |  compose logs: {compose_logs}")
 
 class ComposeFileLogs(LazyFunction):
     def __init__(self, compose_file, check=True):
