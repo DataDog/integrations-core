@@ -527,3 +527,43 @@ tests:
         }
       tags:
         - "source:LOGS_SOURCE"
+  - sample: |-
+      {
+          "Action" : "Update folder permissions",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+      }
+    result:
+      custom:
+        Data: "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'"
+        Time: "2024-08-06 05:16:17"
+        evt:
+          name: "Update folder permissions"
+        network:
+          client:
+            geoip: {}
+            ip: "10.10.10.10"
+        shared_folder:
+          modified_user: "cdd@test.com"
+          name: "SF5"
+          permissions:
+            hide_password: "yes"
+            is_admin: "yes"
+            read_only: "yes"
+        timestamp: 1.722921377E12
+        usr:
+          name: "abc@test.com"
+      message: |-
+        {
+          "Action" : "Update folder permissions",
+          "Username" : "abc@test.com",
+          "Time" : "2024-08-06 05:16:17",
+          "Data" : "'SF5' 'cdd@test.com' 'Read only:yes Admin:yes Hide PW:yes'",
+          "IP_Address" : "10.10.10.10",
+          "timestamp" : 1.722921377E12
+        }
+      tags:
+       - "source:LOGS_SOURCE"
