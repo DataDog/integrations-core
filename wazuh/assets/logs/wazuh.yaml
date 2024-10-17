@@ -243,21 +243,6 @@ pipeline:
             query: "@rule.groups:syscheck"
           name: file-integrity-monitoring
         - filter:
-            query: "@rule.groups:github"
-          name: github
-        - filter:
-            query: "@rule.groups:gcp"
-          name: google-cloud
-        - filter:
-            query: "@rule.groups:amazon"
-          name: amazon
-        - filter:
-            query: "@rule.groups:office365"
-          name: office365
-        - filter:
-            query: "@rule.groups:docker"
-          name: docker
-        - filter:
             query: "@rule.groups:vulnerability-detector"
           name: vulnerability-detector
         - filter:
@@ -267,16 +252,31 @@ pipeline:
             query: "@rule.groups:(sshd OR pam OR wazuh OR ossec OR su OR sudo OR adduser OR
               ftpd OR windows OR dpkg OR yum OR syslog)"
           name: system
+        - filter:
+            query: "@rule.groups:github"
+          name: wazuh-github
+        - filter:
+            query: "@rule.groups:gcp"
+          name: wazuh-google-cloud
+        - filter:
+            query: "@rule.groups:amazon"
+          name: wazuh-amazon
+        - filter:
+            query: "@rule.groups:office365"
+          name: wazuh-office365
+        - filter:
+            query: "@rule.groups:docker"
+          name: wazuh-docker
       target: service
     - type: category-processor
       name: Define `service` value as `other` for other rule groups
       enabled: true
       categories:
-        - filter:
+        - name: other
+          filter:
             query: -@service:(file-integrity-monitoring OR vulnerability-detector OR
-              malware-detector OR github OR google-cloud OR amazon OR office365
-              OR docker OR system)
-          name: other
+              malware-detector OR wazuh-github OR wazuh-google-cloud OR
+              wazuh-amazon OR wazuh-office365 OR wazuh-docker OR system)
       target: service
     - type: service-remapper
       name: Define `service` as the official service of the log
