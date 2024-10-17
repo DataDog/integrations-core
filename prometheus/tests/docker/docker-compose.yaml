@@ -1,9 +1,0 @@
-version: '3'
-
-services:
-  prometheus:
-    image: prom/prometheus
-    volumes:
-     - ./config:/etc/prometheus
-    ports:
-     - 9090:9090
