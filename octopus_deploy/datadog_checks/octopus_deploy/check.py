@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 from datetime import datetime, timedelta
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -9,6 +10,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.models.types import copy_raw
+from datadog_checks.base.utils.time import get_timestamp
 
 from .config_models import ConfigMixin
 from .constants import (
@@ -95,16 +97,28 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             ]
 
             tags = [f'task_name:{task_name}', f'task_state:{state}']
+            task_tags = project_tags + tags
 
-            self.gauge(DEPLOY_COUNT_METRIC, 1, tags=self.base_tags + project_tags + tags)
-            self.gauge(DEPLOY_DURATION_METRIC, duration_seconds, tags=self.base_tags + project_tags + tags)
-            self.gauge(DEPLOY_QUEUE_TIME_METRIC, queue_time_seconds, tags=self.base_tags + project_tags + tags)
-            self.gauge(DEPLOY_SUCCESS_METRIC, succeeded, tags=self.base_tags + project_tags + tags)
-            self.gauge(DEPLOY_RERUN_METRIC, can_rerun, tags=self.base_tags + project_tags + tags)
-            self.gauge(DEPLOY_WARNINGS_METRIC, has_warnings, tags=self.base_tags + project_tags + tags)
+            self.gauge(DEPLOY_COUNT_METRIC, 1, tags=self.base_tags + task_tags)
+            self.gauge(DEPLOY_DURATION_METRIC, duration_seconds, tags=self.base_tags + task_tags)
+            self.gauge(DEPLOY_QUEUE_TIME_METRIC, queue_time_seconds, tags=self.base_tags + task_tags)
+            self.gauge(DEPLOY_SUCCESS_METRIC, succeeded, tags=self.base_tags + task_tags)
+            self.gauge(DEPLOY_RERUN_METRIC, can_rerun, tags=self.base_tags + task_tags)
+            self.gauge(DEPLOY_WARNINGS_METRIC, has_warnings, tags=self.base_tags + task_tags)
+
+            if self.logs_enabled:
+                self._collect_task_logs(task_id, task_tags)
 
         new_completed_time = new_completed_time + timedelta(milliseconds=1)
         project.last_completed_time = new_completed_time
+
+    @handle_error
+    def _collect_task_logs(self, task_id, task_tags):
+        url = f"{self.config.octopus_endpoint}/{self.space_id}/tasks/{task_id}/details"
+        response = self.http.get(url)
+        response.raise_for_status()
+        logs = response.json().get('ActivityLogs', [])
+        self._submit_activity_logs(logs, self.base_tags + task_tags)
 
     def _initialize_projects(self, project_group, project_group_config):
         normalized_projects = normalize_discover_config_include(
@@ -253,6 +267,22 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 self._get_new_tasks_for_project(project)
 
         self.collect_server_nodes_metrics()
+
+    def _submit_activity_logs(self, activity_logs, tags):
+        for log in activity_logs:
+            name = log.get("Name")
+            log_elements = log.get("LogElements", [])
+            children = log.get("Children", [])
+
+            for log_element in log_elements:
+                payload = {"ddtags": copy.deepcopy(tags)}
+                payload['message'] = log_element.get("MessageText")
+                payload['timestamp'] = get_timestamp(datetime.fromisoformat(log_element.get("OccurredAt")))
+                payload['status'] = log_element.get("Category")
+                payload['stage_name'] = name
+                self.send_log(payload)
+
+            self._submit_activity_logs(children, tags)
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
