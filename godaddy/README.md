@@ -18,23 +18,18 @@ The GoDaddy integration collects metrics from SSL certificates and their domains
 - Provide a name for your API.
 - Select "Production" under Environment.
 - Click "Next." Your API Key is now created.
-- Copy these credentials for the following configuration steps. Ensure they are stored securely and not exposed in public repositories or insecure locations.
+- Copy these credentials for the following configuration steps.
 - After storing your API Key and Secret, click on "Got It."
 
 #### Find your GoDaddy customer number
 
 - Go to your GoDaddy [Login & PIN page][2]. You might be prompted to sign in.
-Under **Login Info**, find your **Customer number** (also known as your **shopper ID**).
+- Under **Login Info**, find your **Customer number** (also known as your **shopper ID**).
 
-### GoDaddy Datadog Integration Configuration
-
-Configure the Datadog endpoint to forward GoDaddy metrics to Datadog.
-
-1. Navigate to `GoDaddy`.
-2. Add your GoDaddy credentials.
-   - GoDaddy API key
-   - GoDaddy secret key
-   - GoDaddy customer number (or shopper ID)
+### Add your GoDaddy Credentials
+- GoDaddy API key
+- GoDaddy secret key
+- GoDaddy customer number (or shopper ID)
 
 ## Data Collected
 
