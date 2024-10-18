@@ -242,8 +242,7 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
-        # force ci
-        return run_command(self.command, check=True)
+        return run_command(self.command, check=True, capture=True)
 
 
 class ComposeFileLogs(LazyFunction):
