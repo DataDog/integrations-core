@@ -46,7 +46,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     @cached_property
     def mypy_args(self):
-        return self.config.get('mypy-args', [])
+        return self.config.get('mypy-args', []) + ['--install-types', '--non-interactive']
 
     @cached_property
     def mypy_deps(self):
@@ -157,19 +157,6 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 f'mypy --config-file=../pyproject.toml {" ".join(self.mypy_args)}'.rstrip()
             ]
             lint_env['scripts']['all'].append('typing')
-            lint_env['dependencies'].extend(
-                [
-                    # TODO: remove extra when we drop Python 2
-                    'mypy[python2]==0.910; python_version<"3"',
-                    'mypy[python2]==1.3.0; python_version>"3"',
-                    # TODO: remove these when drop Python 2 and replace with --install-types --non-interactive
-                    'types-python-dateutil==2.8.2',
-                    'types-pyyaml==5.4.10',
-                    'types-requests==2.25.11',
-                    'types-simplejson==3.17.5',
-                    'types-six==1.16.2',
-                ]
-            )
             lint_env['dependencies'].extend(self.mypy_deps)
 
         return config

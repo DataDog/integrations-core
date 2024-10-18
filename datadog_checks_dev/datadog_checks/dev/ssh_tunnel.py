@@ -7,8 +7,6 @@ import os
 import subprocess
 from contextlib import contextmanager
 
-import psutil
-
 from .conditions import WaitForPortListening
 from .env import environment_run
 from .structures import LazyFunction, TempDir
@@ -141,7 +139,5 @@ class KillProcess(LazyFunction):
         with TempDir(self.temp_name) as temp_dir:
             with open(os.path.join(temp_dir, self.pid_file)) as pid_file:
                 pid = int(pid_file.read())
-                # TODO: Remove psutil as a dependency when we drop Python 2, on Python 3 os.kill supports Windows
-                process = psutil.Process(pid)
-                process.kill()
+                os.kill(pid)
                 return 0
