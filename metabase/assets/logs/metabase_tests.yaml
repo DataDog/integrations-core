@@ -1,0 +1,106 @@
+id: "metabase"
+tests:
+ -
+  sample: |-
+    {
+      "entity_qualified_id" : "dashboard_11",
+      "entity_type" : "dashboard",
+      "user_id" : 1,
+      "topic" : "dashboard-add-cards",
+      "details" : {
+        "dashcards" : [ {
+          "name" : "Client, Filtered by Client ID is abc",
+          "id" : 118,
+          "card_id" : 120
+        } ],
+        "name" : "CDS-Views",
+        "id" : 11
+      },
+      "id" : "178",
+      "entity_id" : 11,
+      "timestamp" : "2024-09-30T11:47:26.247269+05:30"
+    }
+  result:
+    custom:
+      details:
+        dashcards:
+         -
+          name: "Client, Filtered by Client ID is abc"
+          id: 118
+          card_id: 120
+        id: 11
+        name: "CDS-Views"
+      entity_id: 11
+      entity_qualified_id: "dashboard_11"
+      entity_type: "dashboard"
+      evt:
+        name: "dashboard-add-cards"
+      id: "178"
+      timestamp: "2024-09-30T11:47:26.247269+05:30"
+      usr:
+        id: 1
+    message: |-
+      {
+        "entity_qualified_id" : "dashboard_11",
+        "entity_type" : "dashboard",
+        "user_id" : 1,
+        "topic" : "dashboard-add-cards",
+        "details" : {
+          "dashcards" : [ {
+            "name" : "Client, Filtered by Client ID is abc",
+            "id" : 118,
+            "card_id" : 120
+          } ],
+          "name" : "CDS-Views",
+          "id" : 11
+        },
+        "id" : "178",
+        "entity_id" : 11,
+        "timestamp" : "2024-09-30T11:47:26.247269+05:30"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1727677046247
+ -
+  sample: |-
+    {
+      "entity_type" : "setting",
+      "user_id" : 1,
+      "topic" : "setting-update",
+      "details" : {
+        "previous-value" : "UCT",
+        "key" : "report-timezone",
+        "new-value" : "UTC"
+      },
+      "id" : "188",
+      "timestamp" : "2024-09-30T12:37:04.133904+05:30"
+    }
+  result:
+    custom:
+      details:
+        key: "report-timezone"
+        new-value: "UTC"
+        previous-value: "UCT"
+      entity_type: "setting"
+      evt:
+        name: "setting-update"
+      id: "188"
+      timestamp: "2024-09-30T12:37:04.133904+05:30"
+      usr:
+        id: 1
+    message: |-
+      {
+        "entity_type" : "setting",
+        "user_id" : 1,
+        "topic" : "setting-update",
+        "details" : {
+          "previous-value" : "UCT",
+          "key" : "report-timezone",
+          "new-value" : "UTC"
+        },
+        "id" : "188",
+        "timestamp" : "2024-09-30T12:37:04.133904+05:30"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1727680024133
