@@ -49,4 +49,9 @@ files:
         example: {}
     - template: instances/default
     - template: instances/http
+  - template: logs
+    example:
+    - type: integration
+      source: octopus-deploy
+      service: <SERVICE_NAME>
 

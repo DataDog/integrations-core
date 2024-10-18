@@ -13,10 +13,12 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
 from .constants import (
+    ALL_DEPLOYMENT_LOGS,
     ALL_METRICS,
     DEPLOYMENT_METRICS,
     DEPLOYMENT_METRICS_NO_PROJECT_1,
     MOCKED_TIMESTAMPS,
+    ONLY_TEST_LOGS,
     PROJECT_ALL_METRICS,
     PROJECT_GROUP_ALL_METRICS,
     PROJECT_GROUP_NO_METRICS,
@@ -255,3 +257,37 @@ def test_octopus_server_node_metrics(get_current_datetime, dd_run_check, aggrega
 
     for metric in SERVER_NODES_METRICS:
         aggregator.assert_metric(metric["name"], count=metric["count"], value=metric["value"], tags=metric["tags"])
+
+
+@pytest.mark.parametrize(
+    ('logs_enabled, project_groups, expected_logs'),
+    [
+        pytest.param(True, None, ALL_DEPLOYMENT_LOGS, id='logs enabled'),
+        pytest.param(False, None, [], id='logs disabled'),
+        pytest.param(
+            True,
+            {'include': [{'.*': {'projects': {'include': [r'^test$']}}}]},
+            ONLY_TEST_LOGS,
+            id='logs enabled only test',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+def test_deployment_logs(
+    get_current_datetime,
+    datadog_agent,
+    dd_run_check,
+    instance,
+    logs_enabled,
+    project_groups,
+    expected_logs,
+    caplog,
+):
+    project_instance = copy.deepcopy(instance)
+    project_instance['project_groups'] = project_groups
+    datadog_agent._config['logs_enabled'] = logs_enabled
+    caplog.set_level(logging.DEBUG)
+    check = OctopusDeployCheck('octopus_deploy', {}, [project_instance])
+    dd_run_check(check)
+    datadog_agent.assert_logs(check.check_id, expected_logs)
