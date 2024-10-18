@@ -50,7 +50,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
 
     @cached_property
     def mypy_deps(self):
-        return self.config.get('mypy-deps', [])
+        return self.config.get('mypy-deps', []) + ['mypy']
 
     @cached_property
     def test_package_install_command(self):
