@@ -1,0 +1,49 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "c5da80c1-8219-4aa0-bbd9-07c05b94edeb",
+  "app_id": "hubspot-content-hub",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into HubSpot Content Hub Activity and Analytics data.",
+    "title": "HubSpot Content Hub",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 25347309,
+      "source_type_name": "HubSpot Content Hub",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hubspot.content_hub.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "logs": {
+      "source": "hubspot-content-hub"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
