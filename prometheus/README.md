@@ -1,5 +1,11 @@
 # Prometheus Integration
 
+<div class="alert alert-warning">
+This page describes a deprecated integration.
+Agents 7.60 and above do not ship it.
+Upgrade to the [OpenMetrics check][1] to monitor services with Prometheus/OpenMetrics endpoints.
+</div>
+
 ## Overview
 
 Connect to Prometheus to:
@@ -70,7 +76,7 @@ Send Prometheus Alertmanager alerts in the event stream. Natively, Alertmanager 
 ```
 receivers:
 - name: datadog
-  webhook_configs: 
+  webhook_configs:
   - send_resolved: true
     url: https://app.datadoghq.com/intake/webhook/prometheus?api_key=<DATADOG_API_KEY>
 route:
