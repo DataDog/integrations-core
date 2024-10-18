@@ -454,6 +454,7 @@ class MySQLStatementSamples(DBMAsyncJob):
                     }
                 },
                 "cloud_metadata": self._config.cloud_metadata,
+                'service': self._config.service,
                 "db": {
                     "instance": row['current_schema'],
                     "plan": {
