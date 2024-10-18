@@ -1,1 +1,0 @@
-Revert "Parse each row of pg_stat_activity separately inside a try/catch (#18762)"
