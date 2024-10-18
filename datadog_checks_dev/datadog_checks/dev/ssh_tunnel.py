@@ -4,6 +4,7 @@
 from __future__ import absolute_import
 
 import os
+import signal
 import subprocess
 from contextlib import contextmanager
 
@@ -139,5 +140,5 @@ class KillProcess(LazyFunction):
         with TempDir(self.temp_name) as temp_dir:
             with open(os.path.join(temp_dir, self.pid_file)) as pid_file:
                 pid = int(pid_file.read())
-                os.kill(pid)
+                os.kill(pid, signal.SIGKILL if os.name == 'posix' else signal.SIGTERM)
                 return 0
