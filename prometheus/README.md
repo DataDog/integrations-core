@@ -1,9 +1,9 @@
 # Prometheus Integration
 
 <div class="alert alert-warning">
-We no longer actively develop this integration.
-Agents 7.60 and above do not include it. Agent 6 bugfix releases will continue to include it.
-Please upgrade to the [OpenMetrics check][1].
+This page describes a deprecated integration.
+Agents 7.60 and above do not ship it.
+Upgrade to the [OpenMetrics check][1] to monitor services with Prometheus/OpenMetrics endpoints.
 </div>
 
 ## Overview
