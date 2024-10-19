@@ -36,11 +36,21 @@ class TestComposeFileActive:
 
 
 class TestDockerRun:
-    def test_compose_file(self):
+    @pytest.mark.parametrize(
+        "capture",
+        [
+            None,
+            True,
+        ],
+    )
+    def test_compose_file(self, capture):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
 
         try:
-            with docker_run(compose_file):
+            args = {}
+            if capture is not None:
+                args['capture'] = capture
+            with docker_run(compose_file, **args):
                 assert compose_file_active(compose_file) is True
             assert compose_file_active(compose_file) is False
         finally:
