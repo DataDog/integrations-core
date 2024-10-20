@@ -11,4 +11,7 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return {
+        'sinfo_collection_level': 3,
+        'gpu_stats': True,
+    }

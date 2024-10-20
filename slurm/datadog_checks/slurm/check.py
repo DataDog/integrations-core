@@ -6,7 +6,7 @@ import subprocess
 from datetime import datetime, timedelta
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
 
 from .config_models import ConfigMixin
 from .constants import (
@@ -44,56 +44,80 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'slurm'
 
-    def get_slurm_command(self, cmd_name, default_path, params):
-        cmd_path = self.instance.get(f'{cmd_name}_path', os.path.join(self.slurm_binaries_path, default_path))
+    def get_slurm_command(self, cmd_name, params):
+        cmd_path = self.instance.get(f'{cmd_name}_path', os.path.join(self.slurm_binaries_dir, cmd_name))
         return [cmd_path] + params
 
     def __init__(self, name, init_config, instances):
         super(SlurmCheck, self).__init__(name, init_config, instances)
 
+        # What should be collected
+        self.collect_sinfo_stats = is_affirmative(self.instance.get('collect_sinfo_stats', True))
+        self.collect_squeue_stats = is_affirmative(self.instance.get('collect_squeue_stats', True))
+        self.collect_sdiag_stats = is_affirmative(self.instance.get('collect_sdiag_stats', True))
+        self.collect_sshare_stats = is_affirmative(self.instance.get('collect_sshare_stats', True))
+        self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
+        self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
+        self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
+        
         # Binary paths
-        self.slurm_binaries_path = self.init_config.get('slurm_binaries_path', '/usr/bin/')
-        self.sinfo_partition_cmd = self.get_slurm_command('sinfo', 'sinfo', SINFO_PARTITION_PARAMS)
-        self.squeue_cmd = self.get_slurm_command('squeue', 'squeue', SQUEUE_PARAMS)
-        self.sacct_cmd = self.get_slurm_command('sacct', 'sacct', SACCT_PARAMS)
-        self.sdiag_cmd = self.get_slurm_command('sdiag', 'sdiag', [])
-        self.sshare_cmd = self.get_slurm_command('sshare', 'sshare', SSHARE_PARAMS)
-        self.tags = self.instance.get('tags', [])
-        self.last_run_time = None
+        self.slurm_binaries_dir = self.init_config.get('slurm_binaries_dir', '/usr/bin/')
+
+        # CMD compilation
+        if self.collect_sinfo_stats:
+            self.sinfo_partition_cmd = self.get_slurm_command('sinfo', SINFO_PARTITION_PARAMS)
+            self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
+            if self.sinfo_collection_level > 1:
+                self.sinfo_node_cmd = self.get_slurm_command('sinfo', SINFO_NODE_PARAMS)
+                if self.sinfo_collection_level > 2:
+                    self.sinfo_node_cmd[-1] += SINFO_ADDITIONAL_NODE_PARAMS
+                if self.gpu_stats:
+                    self.sinfo_node_cmd[-1] += GPU_PARAMS
+            if self.gpu_stats:
+                self.sinfo_partition_cmd[-1] += GPU_PARAMS
+        
+        if self.collect_squeue_stats:
+            self.squeue_cmd = self.get_slurm_command('squeue', SQUEUE_PARAMS)
+
+        if self.collect_sacct_stats:
+            self.sacct_cmd = self.get_slurm_command('sacct', SACCT_PARAMS)
+
+        if self.collect_sdiag_stats:
+            self.sdiag_cmd = self.get_slurm_command('sdiag', [])
+
+        if self.collect_sshare_stats:
+            self.sshare_cmd = self.get_slurm_command('sshare', SSHARE_PARAMS)
+
 
         # Metric and Tag configuration
-        self.gpu_stats = self.instance.get('gpu_stats', False)
-        self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
-
-        if self.gpu_stats:
-            self.sinfo_partition_cmd[-1] += GPU_PARAMS
-
-        if self.sinfo_collection_level > 1:
-            self.sinfo_node_cmd = self.get_slurm_command('sinfo', 'sinfo', SINFO_NODE_PARAMS)
-            if self.sinfo_collection_level > 2:
-                self.sinfo_node_cmd[-1] += SINFO_ADDITIONAL_NODE_PARAMS
-            if self.gpu_stats:
-                self.sinfo_node_cmd[-1] += GPU_PARAMS
+        self.last_run_time = None
+        self.tags = self.instance.get('tags', [])
 
     def check(self, _):
+        self.collect_metadata()
         if self.last_run_time is not None:
             self._update_sacct_params()
 
-        commands = [
-            ('sinfo', self.sinfo_partition_cmd, self.process_sinfo_partition),
-            ('squeue', self.squeue_cmd, self.process_squeue),
-            ('sdiag', self.sdiag_cmd, self.process_sdiag),
-            ('sshare', self.sshare_cmd, self.process_sshare),
-        ]
+        commands = []
 
-        if self.last_run_time is not None:
+        if self.collect_sinfo_stats:
+            commands.append(('sinfo', self.sinfo_partition_cmd, self.process_sinfo_partition))
+            if self.sinfo_collection_level > 1:
+                commands.append(('snode', self.sinfo_node_cmd, self.process_sinfo_node))
+                
+        if self.collect_squeue_stats:
+            commands.append(('squeue', self.squeue_cmd, self.process_squeue))
+
+        if self.collect_sdiag_stats:
+            commands.append(('sdiag', self.sdiag_cmd, self.process_sdiag))
+
+        if self.collect_sshare_stats:
+            commands.append(('sshare', self.sshare_cmd, self.process_sshare))
+
+        if self.collect_sacct_stats and self.last_run_time is not None:
             commands.append(('sacct', self.sacct_cmd, self.process_sacct))
-        else:
-            # Set a timestamp to remember what time we need to query from
+        elif self.last_run_time is None:
             self.last_run_time = datetime.now()
-
-        if self.sinfo_collection_level > 1:
-            commands.append(('snode', self.sinfo_node_cmd, self.process_sinfo_node))
 
         for name, cmd, process_func in commands:
             out, err, ret = get_subprocess_out(cmd)
@@ -284,11 +308,33 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             delta = now - self.last_run_time
             start_time_param = f"--starttime=now-{int(delta.total_seconds())}seconds"
             SACCT_PARAMS.append(start_time_param)
-        else:
-            return False
 
         self.last_run_time = datetime.now()
 
         # Update the sacct command with the dynamic SACCT_PARAMS
         self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
         self.sacct_cmd = self.get_slurm_command('sacct', 'sacct', SACCT_PARAMS)
+
+    @AgentCheck.metadata_entrypoint
+    def collect_metadata(self):
+        try:
+            # slurm 21.08.6\n
+            out, err, ret = get_subprocess_out([self.sinfo_partition_cmd[0], '--version']).split(' ')[1].strip()
+            if ret != 0:
+                self.log.error("Error running sinfo --version: %s", err)
+            elif out:
+                version_out = out.split(' ')[1].strip()
+                if version_out:
+                    version_parts = version_out.split('.')
+                    version = {
+                        "major": version_parts[0],
+                        "minor": version_parts[1],
+                        "mod": version_parts[2] if len(version_parts) > 2 else "0",
+                    }
+                    raw_version = f'{version["major"]}.{version["minor"]}.{version["mod"]}'
+                    self.set_metadata('version', raw_version, scheme='parts', part_map=version)
+                    self.log.debug('Found slurm version: %s', raw_version)
+            else:
+                self.log.debug("No output from sinfo --version")
+        except Exception as e:
+            self.log.error("Error collecting metadata: %s", e)
