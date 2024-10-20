@@ -59,7 +59,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
         self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
-        
+
         # Binary paths
         self.slurm_binaries_dir = self.init_config.get('slurm_binaries_dir', '/usr/bin/')
 
@@ -75,7 +75,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                     self.sinfo_node_cmd[-1] += GPU_PARAMS
             if self.gpu_stats:
                 self.sinfo_partition_cmd[-1] += GPU_PARAMS
-        
+
         if self.collect_squeue_stats:
             self.squeue_cmd = self.get_slurm_command('squeue', SQUEUE_PARAMS)
 
@@ -87,7 +87,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         if self.collect_sshare_stats:
             self.sshare_cmd = self.get_slurm_command('sshare', SSHARE_PARAMS)
-
 
         # Metric and Tag configuration
         self.last_run_time = None
@@ -104,7 +103,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             commands.append(('sinfo', self.sinfo_partition_cmd, self.process_sinfo_partition))
             if self.sinfo_collection_level > 1:
                 commands.append(('snode', self.sinfo_node_cmd, self.process_sinfo_node))
-                
+
         if self.collect_squeue_stats:
             commands.append(('squeue', self.squeue_cmd, self.process_squeue))
 
@@ -192,6 +191,16 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             tags = []
             tags.extend(self.tags)
 
+            # Process the JobID
+            job_id_full = job_data[0].strip()
+            if '.' in job_id_full:
+                job_id, job_id_suffix = job_id_full.split('.', 1)
+                tags.append(f"slurm_job_id:{job_id}")
+                tags.append(f"slurm_job_id_suffix:{job_id_suffix}")
+            else:
+                job_id = job_id_full
+                tags.append(f"slurm_job_id:{job_id}")
+
             tags = self._process_tags(job_data, SACCT_MAP["tags"], tags)
 
             # Submit job info metric
@@ -250,8 +259,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.gauge(f'{namespace}.cpu.total', total, tags)
 
     def _process_sinfo_gpu(self, gres, gres_used, namespace, tags):
-        used_gpu_used_idx = "N/A"
-        gpu_type = "N/A"
+        used_gpu_used_idx = "null"
+        gpu_type = "null"
         total_gpu = 0
         used_gpu_count = 0
         # gpu:tesla:4(IDX:0-3)
@@ -279,9 +288,17 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def _process_tags(self, data, map, tags):
         for tag_info in map:
             value = data[tag_info["index"]]
+
+            # Strip parantheses
+            if value.startswith('(') and value.endswith(')'):
+                value = value[1:-1].strip()
+
+            # Replace empty values with 'null'. This makes it distinguishable in the UI that the tag is being
+            # submitted, but the value is empty.
             if not value:
-                self.log.debug("Empty value for tag '%s'. Assigning 'N/A'.", tag_info["name"])
-                value = "N/A"
+                self.log.debug("Empty value for tag '%s'. Assigning 'null'.", tag_info["name"])
+                value = "null"
+
             tags.append(f'{tag_info["name"]}:{value}')
 
         return tags
