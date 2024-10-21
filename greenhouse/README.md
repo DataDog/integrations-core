@@ -1,25 +1,54 @@
-# Agent Check: greenhouse
+# Greenhouse Integration For Datadog
 
 ## Overview
 
-This check monitors [greenhouse][1].
+[Greenhouse][1] is a cloud-based hiring platform that helps companies manage their recruitment processes. It features job postings, application tracking, candidate communications, interview scheduling, offers, and bulk actions, all aimed at helping companies hire the right people efficiently.
+
+This integration focuses on ingesting audit logs, which document important events and configuration changes, enabling teams to detect incidents and minimize their impact.
+
+The Greenhouse integration collects these logs and sends them to Datadog. These logs are parsed and enriched through the built-in logs pipeline, which enables search and analysis. The integration also provides insight into activities on the Greenhouse platform through the out-of-the-box dashboards.
 
 ## Setup
 
-### Installation
-
-The Greenhouse check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
-
 ### Configuration
 
-!!! Add list of steps to set up this integration !!!
+1. [Create an API key from the Greenhouse Platform](#greenhouse-configuration).
+2. [Configure the Datadog endpoint to forward Greenhouse events as logs to Datadog](#greenhouse-integration-configuration).
 
-### Validation
+#### Greenhouse Configuration
 
-!!! Add steps to validate integration is functioning as expected !!!
+Steps to create an API key on the Greenhouse Platform:
+
+1. Log in to **[Greenhouse][2]** with your credentials.
+2. Click **Configure** located in the top right corner.
+3. Navigate to **Dev Center** in the left panel.
+4. Select **API Credentials**.
+5. Click **Create new API key**.
+6. Choose **Harvest** for API type.
+7. Select **Unlisted vendor** for Partner (if your name is not in the list).
+8. Add a description for your API key.
+9. Click **Manage permissions**.
+10. Copy and paste the API key as it cannot be retrieved later.
+11. Under **Manage permissions**, check "Audit Log V1".
+(**Note**: If this option is not available, contact **[Greenhouse support][4]** to enable the audit log feature.)
+12. Click **Save**.
+
+#### Greenhouse Integration Configuration
+
+Configure the Datadog endpoint to forward Greenhouse events as logs to Datadog.
+
+1. Navigate to Greenhouse.
+2. Add your Greenhouse API Key.
+
+| Greenhouse Parameters | Description                                                                |
+| ----------------------- | --------------------------------------------------------------------------|
+| API Key                 | The Personal API key of Greenhouse  to authenticate the request          |
 
 ## Data Collected
+
+### Logs
+
+The integration collects and forwards Greenhouse audit logs to Datadog.
 
 ### Metrics
 
@@ -33,10 +62,11 @@ Greenhouse does not include any service checks.
 
 Greenhouse does not include any events.
 
-## Troubleshooting
+## Support
 
 Need help? Contact [Datadog support][3].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
+[1]: https://www.greenhouse.com/
+[2]: https://app.greenhouse.io/
 [3]: https://docs.datadoghq.com/help/
+[4]: https://support.greenhouse.io/hc/en-us
