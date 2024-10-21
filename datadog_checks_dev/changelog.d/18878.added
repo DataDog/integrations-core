@@ -1,0 +1,1 @@
+Add ``capture`` parameter to ``docker_run`` to capture ``docker compose`` output.
