@@ -1,0 +1,9 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+databricks.model_serving.latency,gauge,,millisecond,,Median and 99th percentile round-trip latency times within Databricks. This does not include additional Databricks-related latencies like authentication and rate limiting.,0,databricks,latency,
+databricks.model_serving.request_rate,rate,,request,,Measures the number of requests processed per second. Calculated by totaling the number of requests within a minute and dividing by 60.,0,databricks,request rate,
+databricks.model_serving.request_error_rate,rate,,request,,Tracks the rate of 4xx and 5xx HTTP error responses per second. Calculated by totaling the number of errors within a minute and dividing by 60.,0,databricks,request error rate,
+databricks.model_serving.cpu_usage,gauge,,percent,,"Average CPU utilization percentage across all server replicas, where a replica refers to virtual machine nodes.",0,databricks,request success rate,
+databricks.model_serving.memory_usage,gauge,,percent,,Average memory utilization percentage across all server replicas.,0,databricks,memory usage,
+databricks.model_serving.provisioned_concurrency,gauge,,unit,,Maximum number of parallel requests the system can handle. Provisioned concurrency dynamically adjusts within the min and max limits of the compute.,0,databricks,provisioned concurrency,
+databricks.model_serving.gpu_usage,gauge,,percent,,"Average GPU utilization, as reported by the NVIDIA DCGM exporter. Averaged across all replicas and sampled every minute.",0,databricks,gpu usage,
+databricks.model_serving.gpu_memory_usage,gauge,,percent,,Average percentage of utilized frame buffer memory on each GPU based on NVIDIA DCGM exporter. Averaged across all replicas and sampled every minute.,0,databricks,gpu memory usage,
