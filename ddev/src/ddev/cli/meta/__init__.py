@@ -12,6 +12,7 @@ from datadog_checks.dev.tooling.commands.meta.prometheus import prom
 from datadog_checks.dev.tooling.commands.meta.snmp import snmp
 from datadog_checks.dev.tooling.commands.meta.windows import windows
 
+from ddev.cli.meta.monitor import monitor
 from ddev.cli.meta.scripts import scripts
 
 
@@ -34,3 +35,4 @@ meta.add_command(prom)
 meta.add_command(scripts)
 meta.add_command(snmp)
 meta.add_command(windows)
+meta.add_command(monitor)
