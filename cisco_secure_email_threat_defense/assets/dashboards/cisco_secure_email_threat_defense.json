@@ -1,0 +1,2978 @@
+{
+  "title": "Cisco Secure Email Threat Defense",
+  "description": "This dashboard provides in-depth insights on identified threats, remediation actions taken against threats, and detailed event logs for comprehensive analysis.",
+  "widgets": [
+    {
+      "id": 4754803841087712,
+      "definition": {
+        "type": "image",
+        "url": "https://www.cisco.com/c/en/us/products/security/secure-sign-on/index/jcr:content/Grid/category_atl_7a41/layout-category-atl/blade_2979/bladeContents2/tile_1139_copy.img.png/1681878479238.png",
+        "url_dark_theme": "https://www.cisco.com/c/en/us/products/security/secure-sign-on/index/jcr:content/Grid/category_atl_7a41/layout-category-atl/blade_2979/bladeContents2/tile_1139_copy.img.png/1681878479238.png",
+        "sizing": "contain",
+        "margin": "md",
+        "has_background": true,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 7,
+        "height": 4
+      }
+    },
+    {
+      "id": 1396276919527960,
+      "definition": {
+        "title": "Event Logs Overview",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7287761062575824,
+            "definition": {
+              "title": "Events Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Events",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 6205579462035490,
+            "definition": {
+              "title": "Total Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "text_align": "center",
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 5,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 7,
+        "y": 0,
+        "width": 5,
+        "height": 8
+      }
+    },
+    {
+      "id": 7368651598732064,
+      "definition": {
+        "type": "note",
+        "content": "Cisco Secure Email Threat Defense is an integrated cloud-native security solution for Microsoft 365 that focuses on simple deployment, easy attack remediation, and superior visibility.\n\nGain a comprehensive understanding of your organization's email security posture by monitoring Cisco Secure Email Threat Defense messages with this dashboard.\n\nFor more information, see the [Cisco Secure Email Threat Defense Integration Documentation](https://docs.datadoghq.com/integrations/cisco_secure_email_threat_defense/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 7,
+        "height": 4
+      }
+    },
+    {
+      "id": 4095854872655154,
+      "definition": {
+        "title": "Datadog Cloud SIEM",
+        "title_align": "center",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5695359814344638,
+            "definition": {
+              "type": "note",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates Cisco Secure Email Threat Defense logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8240249358608954,
+            "definition": {
+              "title": "CRITICALs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message status:critical $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 784120760854102,
+            "definition": {
+              "title": "MEDIUMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#e5a21c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message status:medium $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3530407921023602,
+            "definition": {
+              "title": "Critical Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message status:critical $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 8,
+              "height": 4
+            }
+          },
+          {
+            "id": 2491037229821244,
+            "definition": {
+              "title": "HIGHs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#d33043",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message status:high $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8204924914123364,
+            "definition": {
+              "title": "LOWs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#ffb52b",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message status:low $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 4870072164485532,
+            "definition": {
+              "title": "INFOs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#84c1e0",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message status:info $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 8352832592776530,
+            "definition": {
+              "title": "High Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#d33043",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message status:high $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4116388008201394,
+            "definition": {
+              "title": "Medium Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#e5a21c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message status:medium $SenderIP $Direction $LatestVerdict $ReceiverAddress $SenderAddress"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 10
+      }
+    },
+    {
+      "id": 1787754965389928,
+      "definition": {
+        "title": "Events by Verdict Type",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7754513579541864,
+            "definition": {
+              "title": "Total Scam Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:scam $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red",
+                      "custom_bg_color": "#1588f4"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 1729336149212470,
+            "definition": {
+              "title": "Total Phishing Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:phishing $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red",
+                      "custom_bg_color": "#1588f4"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2892785420847614,
+            "definition": {
+              "title": "Total BEC Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:bec $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red",
+                      "custom_bg_color": "#1588f4"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 6065472801899374,
+            "definition": {
+              "title": "Total Malicious Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:malicious $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red",
+                      "custom_bg_color": "#1588f4"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5856227851981620,
+            "definition": {
+              "title": "Threat Events Over Time by Verdict Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@verdict.latestVerdict",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 5411680892635952,
+            "definition": {
+              "title": "Total Spam Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:spam $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow",
+                      "custom_bg_color": "#1588f4"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 2959196437040798,
+            "definition": {
+              "title": "Total Graymail Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:graymail $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow",
+                      "custom_bg_color": "#1588f4"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 7,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 7257561076065664,
+            "definition": {
+              "title": "Unwanted Events Over Time by Verdict Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@verdict.latestVerdict",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(graymail OR spam) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 7,
+              "width": 8,
+              "height": 4
+            }
+          },
+          {
+            "id": 6709498881181866,
+            "definition": {
+              "title": "Total Neutral Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:neutral $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow",
+                      "custom_bg_color": "#1588f4"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 1211059208381044,
+            "definition": {
+              "title": "Neutral Events Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@verdict.latestVerdict",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:neutral $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 11,
+              "width": 10,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 18,
+        "width": 12,
+        "height": 1
+      }
+    },
+    {
+      "id": 8856097643899598,
+      "definition": {
+        "title": "Threat Events",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4049706201072298,
+            "definition": {
+              "type": "note",
+              "content": "In Cisco Secure Email Threat Defense, a **threat** refers to any malicious or suspicious activity detected within email traffic, such as phishing attempts, malware attachments, or spam. An event that is classified with a verdict of **scam, malicious, phishing,** or **BEC** is known as a **threat** event.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 1910293466175730,
+            "definition": {
+              "title": "Total Threat Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6218926532818698,
+            "definition": {
+              "title": "Threat Events Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Threat Messages",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 3121048952181836,
+            "definition": {
+              "title": "Distribution of Threat Events By Verdict Type ",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@verdict.latestVerdict",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 3651615190062720,
+            "definition": {
+              "title": "Top 10 Threat Event Senders",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@fromAddress",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 5286977373382396,
+            "definition": {
+              "title": "Top 10 Threat Event Sender IPs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@network.client.ip",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2618622114443708,
+            "definition": {
+              "title": "Top 10 Threat Event Sender Domains",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@senderDomain",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1224855898101648,
+            "definition": {
+              "title": "Top 10 Threat Event Internal Senders",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@fromAddress",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) @direction:(internal OR outgoing) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 11,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1722101232140952,
+            "definition": {
+              "title": "Top 10 Threat Event Receivers",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@toAddresses",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2720825304326304,
+            "definition": {
+              "title": "Attachments in Threat Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@attachments.filename",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(scam OR malicious OR phishing OR bec) $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 14,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 12,
+        "height": 18
+      }
+    },
+    {
+      "id": 346464706075494,
+      "definition": {
+        "title": "Event Details ",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2829814920022400,
+            "definition": {
+              "type": "note",
+              "content": "This group includes all the events(messages) logs with following verdicts: BEC, Scam, Phishing, Malicious, Spam, Gray mail, Neutral. ",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 1245788426258388,
+            "definition": {
+              "title": "Total Events with Retrospective Verdict",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.isRetroVerdict:true $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 4285700737698270,
+            "definition": {
+              "type": "note",
+              "content": "A retrospective verdict is one that was applied to a message sometime after the message was first scanned by Cisco Secure Email Threat Defense.",
+              "background_color": "vivid_orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 3970876269226358,
+            "definition": {
+              "title": "Top 10 Sender IPs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@network.client.ip",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3714540252128998,
+            "definition": {
+              "title": "Top 10 Senders",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@fromAddress",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7615166107058316,
+            "definition": {
+              "title": "Top 10 Receivers",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@toAddresses",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 490928481922264,
+            "definition": {
+              "title": "Top 10 Active Domains",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@senderDomain",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6719778263710572,
+            "definition": {
+              "title": "Attachment List",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@attachments.filename",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $Direction $SenderIP $LatestVerdict $ReceiverAddress $SenderAddress"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3921988303899522,
+            "definition": {
+              "title": "Distribution of Events By Direction",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@direction",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 6312953617616908,
+            "definition": {
+              "title": "Distribution of Events by Rule Type",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@rule.type",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 8818889012372398,
+            "definition": {
+              "title": "Distribution of Unwanted Events by Verdict Type",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@verdict.latestVerdict",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @verdict.latestVerdict:(graymail OR spam) $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 19,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 3368364619549570,
+            "definition": {
+              "title": "Geo-Distribution of Sender IPs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 23,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 1861464099969554,
+            "definition": {
+              "title": "Event Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@verdict.latestVerdict",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "direction",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "subject",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "fromAddress",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "toAddresses",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 28,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 37,
+        "width": 12,
+        "height": 33,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 4111499786579268,
+      "definition": {
+        "title": "Techniques and Remediation Actions",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7389303372738632,
+            "definition": {
+              "title": "Distribution of Remediated Events by Action Type and Folder",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@action.type",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        },
+                        {
+                          "facet": "@action.folder",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message @action.type:* $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 6012785976722818,
+            "definition": {
+              "title": "Top 10 Techniques Detected from Threat Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@verdict.techniques.type",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-email-threat-defense service:message $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 5880736090230596,
+            "definition": {
+              "title": "Event Wise Technique Details",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:cisco-secure-email-threat-defense service:message @verdict.techniques.type:* $SenderAddress $ReceiverAddress $LatestVerdict $Direction $SenderIP",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "subject",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@verdict.latestVerdict",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "fromAddress",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "toAddresses",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "verdict.techniques",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 70,
+        "width": 12,
+        "height": 12
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "SenderAddress",
+      "prefix": "@fromAddress",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "ReceiverAddress",
+      "prefix": "@toAddresses",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "LatestVerdict",
+      "prefix": "@verdict.latestVerdict",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Direction",
+      "prefix": "@direction",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "SenderIP",
+      "prefix": "@network.client.ip",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
