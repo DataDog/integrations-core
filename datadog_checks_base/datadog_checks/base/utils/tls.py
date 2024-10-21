@@ -7,8 +7,6 @@ import ssl
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict  # noqa: F401
 
-from six import iteritems
-
 from ..config import is_affirmative
 
 if TYPE_CHECKING:
@@ -44,12 +42,12 @@ class TlsContextWrapper(object):
         instance = deepcopy(instance)
 
         if overrides:
-            for overridden_field, data in iteritems(overrides):
+            for overridden_field, data in overrides.items():
                 if instance.get(overridden_field):
                     instance[overridden_field] = data
 
         # Populate with the default values
-        config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
+        config = {field: instance.get(field, value) for field, value in default_fields.items()}
         for field in STANDARD_FIELDS:
             unique_name = UNIQUE_FIELD_PREFIX + field
             if unique_name in instance:
@@ -58,7 +56,7 @@ class TlsContextWrapper(object):
         if remapper is None:
             remapper = {}
 
-        for remapped_field, data in iteritems(remapper):
+        for remapped_field, data in remapper.items():
             field = data.get('name')
 
             if field.startswith(UNIQUE_FIELD_PREFIX):

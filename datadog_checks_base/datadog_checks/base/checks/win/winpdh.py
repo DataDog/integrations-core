@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+import winreg
 from collections import defaultdict
 
 import win32pdh
-from six import iteritems, text_type
-from six.moves import winreg
 
 DATA_TYPE_INT = win32pdh.PDH_FMT_LONG
 DATA_TYPE_DOUBLE = win32pdh.PDH_FMT_DOUBLE
@@ -98,7 +97,7 @@ class WinPDHCounter(object):
         # names in the class "network interface"
         win32pdh.CollectQueryData(self.hq)
 
-        for inst, counter_handle in iteritems(self.counterdict):
+        for inst, counter_handle in self.counterdict.items():
             try:
                 t, val = win32pdh.GetFormattedCounterValue(counter_handle, self._precision)
                 ret[inst] = val
@@ -183,7 +182,7 @@ class WinPDHCounter(object):
             # check to see if this counter is in the list of counters for this class
             if c not in counters:
                 try:
-                    self.logger.debug("Index %s counter %s not in counter list", index, text_type(c))
+                    self.logger.debug("Index %s counter %s not in counter list", index, str(c))
                 except:  # noqa: E722, B001
                     # some unicode characters are not translatable here.  Don't fail just
                     # because we couldn't log
@@ -197,7 +196,7 @@ class WinPDHCounter(object):
                 break
             except:  # noqa: E722, B001
                 try:
-                    self.logger.info("Unable to make path with counter %s, trying next available", text_type(c))
+                    self.logger.info("Unable to make path with counter %s, trying next available", str(c))
                 except:  # noqa: E722, B001
                     self.logger.info("Unable to make path with counter index %s, trying next available", index)
         return path

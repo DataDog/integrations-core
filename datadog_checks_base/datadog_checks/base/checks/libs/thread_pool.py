@@ -25,8 +25,7 @@
 import sys
 import threading
 import traceback
-
-from six.moves import queue, range
+import queue
 
 # Item pushed on the work queue to tell the worker threads to terminate
 SENTINEL = "QUIT"
