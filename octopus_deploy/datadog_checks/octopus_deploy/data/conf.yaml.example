@@ -65,7 +65,7 @@ instances:
       X-Octopus-ApiKey: <OCTOPUS_API_KEY>
 
     ## @param project_groups - mapping - optional
-    ## filter your integration by project groups and projects.
+    ## Filter your integration by project groups and projects.
     #
     # project_groups: {}
 

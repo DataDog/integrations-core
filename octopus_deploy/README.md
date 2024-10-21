@@ -2,12 +2,7 @@
 
 ## Overview
 
-This check monitors [Octopus Deploy][1] through the Datadog Agent. 
-
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+This check monitors your [Octopus Deploy][1] deployments through the Datadog Agent. Track information such as average deployment time per Environment, and deployment failure rate for a Project.
 
 ## Setup
 
@@ -20,7 +15,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `octopus_deploy.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your octopus_deploy performance data. See the [sample octopus_deploy.d/conf.yaml][4] for all available configuration options.
+1. Edit the `octopus_deploy.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `octopus_deploy` performance data. See the [sample `octopus_deploy.d/conf.yaml`][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -41,8 +36,6 @@ The Octopus Deploy integration does not include any events.
 ### Service Checks
 
 The Octopus Deploy integration does not include any service checks.
-
-See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 

@@ -29,7 +29,7 @@ files:
     - name: project_groups
       display_priority: 5
       description: |
-        filter your integration by project groups and projects.
+        Filter your integration by project groups and projects.
       value:
         type: object
         properties:
