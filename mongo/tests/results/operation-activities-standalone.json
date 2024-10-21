@@ -11,6 +11,7 @@
             "hosting_type:self-hosted"
         ],
         "timestamp": 1715911398111.2722,
+        "service": "my_service",
         "mongodb_activity": [
             {
                 "now": 1715911398.1112723,
