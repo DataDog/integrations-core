@@ -251,8 +251,6 @@ INIT_CONFIG_ALT_TABLES = {
 OPERATION_TIME_METRICS = [
     'simple_metrics',
     'fraction_metrics',
-    'db_file_space_usage_metrics',
-    'database_file_stats_metrics',
     'incr_fraction_metrics',
 ]
 
@@ -322,11 +320,4 @@ def get_operation_time_metrics(instance):
     Return a list of all operation time metrics
     """
     operation_time_metrics = deepcopy(OPERATION_TIME_METRICS)
-    if instance.get('include_task_scheduler_metrics', False):
-        operation_time_metrics.append('os_schedulers_metrics')
-        operation_time_metrics.append('os_tasks_metrics')
-    if instance.get('include_ao_metrics', False):
-        operation_time_metrics.append('availability_groups_metrics')
-    if instance.get('include_master_files_metrics', False):
-        operation_time_metrics.append('master_database_file_stats_metrics')
     return operation_time_metrics

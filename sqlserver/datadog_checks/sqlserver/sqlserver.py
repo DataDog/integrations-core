@@ -160,11 +160,8 @@ class SQLServer(AgentCheck):
 
         # Query declarations
         self._query_manager = None
-        self._dynamic_queries = None  # DEPRECATED, new metrics should use database_metrics
-        self.server_state_queries = None
-        self.sqlserver_incr_fraction_metric_previous_values = {}
-
         self._database_metrics = None
+        self.sqlserver_incr_fraction_metric_previous_values = {}
 
         self._schemas = Schemas(self, self._config)
 
@@ -736,210 +733,66 @@ class SQLServer(AgentCheck):
         else:
             self.log.debug("Skipping check")
 
+    def _new_database_metric_executor(self, database_metric_class, db_names=None):
+        return database_metric_class(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=db_names,
+        )
+
     @property
-    def dynamic_queries(self):
-        """
-        Initializes dynamic queries which depend on static information loaded from the database
-        """
-        if self._dynamic_queries:
-            return self._dynamic_queries
-
-        # list of database names to collect metrics for
-        db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
-
-        # instance level metrics
-        server_state_metrics = SqlserverServerStateMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-
-        file_stats_metrics = SqlserverFileStatsMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        ao_metrics = SqlserverAoMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        availability_groups_metrics = SqlserverAvailabilityGroupsMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        availability_replicas_metrics = SqlserverAvailabilityReplicasMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        database_replication_stats_metrics = SqlserverDatabaseReplicationStatsMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        fci_metrics = SqlserverFciMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        primary_log_shipping_metrics = SqlserverPrimaryLogShippingMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        secondary_log_shipping_metrics = SqlserverSecondaryLogShippingMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        os_tasks_metrics = SqlserverOsTasksMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        os_schedulers_metrics = SqlserverOsSchedulersMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        master_files_metrics = SqlserverMasterFilesMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        database_stats_metrics = SqlserverDatabaseStatsMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        database_backup_metrics = SqlserverDatabaseBackupMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-
-        # database level metrics
-        tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-        index_usage_metrics = SqlserverIndexUsageMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-            databases=db_names,
-        )
-        db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-            databases=db_names,
-        )
-        database_files_metrics = SqlserverDatabaseFilesMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-            databases=db_names,
-        )
-
-        # create a list of dynamic queries to execute
-        self._dynamic_queries = [
-            # instance level metrics
-            server_state_metrics,
-            file_stats_metrics,
-            ao_metrics,
-            availability_groups_metrics,
-            availability_replicas_metrics,
-            database_replication_stats_metrics,
-            fci_metrics,
-            primary_log_shipping_metrics,
-            secondary_log_shipping_metrics,
-            os_tasks_metrics,
-            os_schedulers_metrics,
-            master_files_metrics,
-            database_stats_metrics,
-            database_backup_metrics,
-            # database level metrics
-            tempdb_file_space_usage_metrics,
-            index_usage_metrics,
-            db_fragmentation_metrics,
-            database_files_metrics,
+    def _instance_level_database_metrics(self):
+        # return the list of database metrics that are collected once at the instance level
+        return [
+            SqlserverServerStateMetrics,
+            SqlserverFileStatsMetrics,
+            SqlserverAoMetrics,
+            SqlserverAvailabilityGroupsMetrics,
+            SqlserverAvailabilityReplicasMetrics,
+            SqlserverDatabaseReplicationStatsMetrics,
+            SqlserverFciMetrics,
+            SqlserverPrimaryLogShippingMetrics,
+            SqlserverSecondaryLogShippingMetrics,
+            SqlserverOsTasksMetrics,
+            SqlserverOsSchedulersMetrics,
+            SqlserverMasterFilesMetrics,
+            SqlserverDatabaseStatsMetrics,
+            SqlserverDatabaseBackupMetrics,
+            SqlserverAgentMetrics,
         ]
-        self.log.debug("initialized dynamic queries")
-        return self._dynamic_queries
+
+    @property
+    def _database_level_database_metrics(self):
+        # return the list of database metrics that are collected for each database
+        return [
+            SqlserverTempDBFileSpaceUsageMetrics,
+            SqlserverIndexUsageMetrics,
+            SqlserverDBFragmentationMetrics,
+            SqlserverDatabaseFilesMetrics,
+        ]
 
     @property
     def database_metrics(self):
         """
-        Initializes database metrics which depend on static information loaded from the database
+        Initializes dynamic queries which depend on static information loaded from the database
         """
         if self._database_metrics:
             return self._database_metrics
 
+        self._database_metrics = []
         # list of database names to collect metrics for
-        db_names = [d.name for d in self.databases] or [self.instance.get("database", self.connection.DEFAULT_DATABASE)]
+        db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
 
         # instance level metrics
-        database_backup_metrics = SqlserverDatabaseBackupMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
+        for database_metric_class in self._instance_level_database_metrics:
+            self._database_metrics.append(self._new_database_metric_executor(database_metric_class))
 
         # database level metrics
-        index_usage_metrics = SqlserverIndexUsageMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-            databases=db_names,
-        )
-        db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-            databases=db_names,
-        )
+        for database_metric_class in self._database_level_database_metrics:
+            self._database_metrics.append(self._new_database_metric_executor(database_metric_class, db_names))
 
-        database_agent_metrics = SqlserverAgentMetrics(
-            instance_config=self.instance,
-            new_query_executor=self._new_query_executor,
-            server_static_info=self.static_info_cache,
-            execute_query_handler=self.execute_query_raw,
-        )
-
-        # create a list of dynamic queries to execute
-        self._database_metrics = [
-            # instance level metrics
-            database_backup_metrics,
-            database_agent_metrics,
-            # database level metrics
-            index_usage_metrics,
-            db_fragmentation_metrics,
-        ]
         self.log.debug("initialized dynamic queries")
         return self._database_metrics
 
@@ -1006,9 +859,9 @@ class SQLServer(AgentCheck):
                 # restore the current database after executing dynamic queries
                 # this is to ensure the current database context is not changed
                 with self.connection.restore_current_database_context():
-                    if self.dynamic_queries:
-                        for dynamic_query in self.dynamic_queries:
-                            dynamic_query.execute()
+                    if self.database_metrics:
+                        for database_metric in self.database_metrics:
+                            database_metric.execute()
 
                 # reuse connection for any custom queries
                 self._query_manager.execute()

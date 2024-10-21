@@ -82,11 +82,11 @@ def test_sqlserver_file_stats_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [file_stats_metrics]
+    sqlserver_check._database_metrics = [file_stats_metrics]
 
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
     for result in mocked_results:
         db, state, logical_name, file_location, *metric_values = result
         metrics = zip(file_stats_metrics.metric_names()[0], metric_values)
@@ -158,14 +158,14 @@ def test_sqlserver_ao_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [ao_metrics]
+    sqlserver_check._database_metrics = [ao_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_ao_metrics:
         assert ao_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_ao_availability_groups:
             (
                 replica_role,
@@ -272,14 +272,14 @@ def test_sqlserver_availability_groups_metrics(
             f" where resource_group_id = '{availability_group}'"
         )
 
-    sqlserver_check._dynamic_queries = [availability_groups_metrics]
+    sqlserver_check._database_metrics = [availability_groups_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_ao_metrics:
         assert availability_groups_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             ag, availability_group_name, synchronization_health_desc, *metric_values = result
             metrics = zip(availability_groups_metrics.metric_names()[0], metric_values)
@@ -361,14 +361,14 @@ def test_sqlserver_database_replication_stats_metrics(
     if only_emit_local:
         assert "is_local = 1" in database_replication_stats_metrics.queries[0]['query']
 
-    sqlserver_check._dynamic_queries = [database_replication_stats_metrics]
+    sqlserver_check._database_metrics = [database_replication_stats_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_ao_metrics:
         assert database_replication_stats_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             ag, availability_group_name, replica_server_name, synchronization_state_desc, *metric_values = result
             metrics = zip(database_replication_stats_metrics.metric_names()[0], metric_values)
@@ -497,14 +497,14 @@ def test_sqlserver_availability_replicas_metrics(
     if ao_database:
         assert f"database_name = '{ao_database}'" in availability_replicas_metrics.queries[0]['query']
 
-    sqlserver_check._dynamic_queries = [availability_replicas_metrics]
+    sqlserver_check._database_metrics = [availability_replicas_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_ao_metrics:
         assert availability_replicas_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             (
                 database_name,
@@ -560,14 +560,14 @@ def test_sqlserver_fci_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [fci_metrics]
+    sqlserver_check._database_metrics = [fci_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_fci_metrics:
         assert fci_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             node_name, status, failover_cluster, *metric_values = result
             metrics = zip(fci_metrics.metric_names()[0], metric_values)
@@ -607,14 +607,14 @@ def test_sqlserver_primary_log_shipping_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [primary_log_shipping_metrics]
+    sqlserver_check._database_metrics = [primary_log_shipping_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_primary_log_shipping_metrics:
         assert primary_log_shipping_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             primary_id, primary_server, primary_db, *metric_values = result
             metrics = zip(primary_log_shipping_metrics.metric_names()[0], metric_values)
@@ -666,14 +666,14 @@ def test_sqlserver_secondary_log_shipping_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [primary_log_shipping_metrics]
+    sqlserver_check._database_metrics = [primary_log_shipping_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_secondary_log_shipping_metrics:
         assert primary_log_shipping_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             secondary_server, secondary_db, secondary_id, primary_server, primary_db, *metric_values = result
             metrics = zip(primary_log_shipping_metrics.metric_names()[0], metric_values)
@@ -712,11 +712,11 @@ def test_sqlserver_server_state_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [server_state_metrics]
+    sqlserver_check._database_metrics = [server_state_metrics]
 
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
     for result in mocked_results:
         metrics = zip(server_state_metrics.metric_names()[0], result)
         for metric_name, metric_value in metrics:
@@ -752,14 +752,14 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [tempdb_file_space_usage_metrics]
+    sqlserver_check._database_metrics = [tempdb_file_space_usage_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_tempdb_file_space_usage_metrics:
         assert tempdb_file_space_usage_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             database_id, *metric_values = result
             metrics = zip(tempdb_file_space_usage_metrics.metric_names()[0], metric_values)
@@ -1016,14 +1016,14 @@ def test_sqlserver_os_schedulers_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [os_schedulers_metrics]
+    sqlserver_check._database_metrics = [os_schedulers_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_task_scheduler_metrics:
         assert os_schedulers_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             scheduler_id, parent_node_id, *metric_values = result
             metrics = zip(os_schedulers_metrics.metric_names()[0], metric_values)
@@ -1080,14 +1080,14 @@ def test_sqlserver_os_tasks_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [os_tasks_metrics]
+    sqlserver_check._database_metrics = [os_tasks_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_task_scheduler_metrics:
         assert os_tasks_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             scheduler_id, *metric_values = result
             metrics = zip(os_tasks_metrics.metric_names()[0], metric_values)
@@ -1145,14 +1145,14 @@ def test_sqlserver_master_files_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [master_files_metrics]
+    sqlserver_check._database_metrics = [master_files_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_master_files_metrics:
         assert master_files_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             db, database, file_id, file_type, file_location, database_files_state_desc, size, state = result
             size *= 8  # size is in pages, 1 page = 8 KB
@@ -1216,11 +1216,11 @@ def test_sqlserver_database_files_metrics(
         databases=AUTODISCOVERY_DBS,
     )
 
-    sqlserver_check._dynamic_queries = [database_files_metrics]
+    sqlserver_check._database_metrics = [database_files_metrics]
 
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
     for db, result in zip(AUTODISCOVERY_DBS, mocked_results):
         for row in result:
             file_id, file_type, file_location, file_name, database_files_state_desc, size, space_used, state = row
@@ -1270,11 +1270,11 @@ def test_sqlserver_database_stats_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    sqlserver_check._dynamic_queries = [database_stats_metrics]
+    sqlserver_check._database_metrics = [database_stats_metrics]
 
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
     for result in mocked_results:
         db, database, database_state_desc, database_recovery_model_desc, *metric_values = result
         metrics = zip(database_stats_metrics.metric_names()[0], metric_values)

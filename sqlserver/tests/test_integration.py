@@ -817,7 +817,7 @@ def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
     instance_docker['database'] = 'master'
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     dd_run_check(sqlserver_check)
-    expected_tags = instance_docker.get('tags', []) + [
+    expected_tags = sqlserver_check._config.tags + [
         'database_recovery_model_desc:SIMPLE',
         'database_state_desc:ONLINE',
         'database:{}'.format(instance_docker['database']),
