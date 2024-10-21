@@ -1,0 +1,20 @@
+Migrate following dynamic metrics to database_metrics for better maintainability and testability.
+- SQLServer AlwaysOn metrics
+- SQLServer FCI metrics
+- SQLServer file stats metrics
+- SQLServer primary log shipping metrics
+- SQLServer secondary log shipping metrics
+- SQLServer server state metrics
+- SQLServer tempdb file space usage metrics
+- SQLServer index usage metrics
+- SQLServer database index fragmentation metrics
+- SQLServer os tasks metrics
+- SQLServer master files metrics
+- SQLServer database files metrics
+- SQLServer database stats metrics
+- SQLServer database backup metrics
+- SQLServer os schedulers metrics
+- SQLServer database replication stats metrics
+- SQLServer availability replicas metrics
+- SQLServer availability groups metrics
+Increase database backup metrics and index fragmentation metrics collection interval to 5 minutes.
