@@ -13,11 +13,11 @@ def dd_environment():
 def instance():
     return {
         'sinfo_collection_level': 3,
-        'gpu_stats': True,
-        'collect_sinfo_stats': True,
-        'collect_squeue_stats': True,
-        'collect_sdiag_stats': True,
-        'collect_sshare_stats': True,
-        'collect_sacct_stats': True,
-        'collect_gpu_stats': True,
+        'gpu_stats': False,
+        'collect_sinfo_stats': False,
+        'collect_squeue_stats': False,
+        'collect_sdiag_stats': False,
+        'collect_sshare_stats': False,
+        'collect_sacct_stats': False,
+        'collect_gpu_stats': False,
     }

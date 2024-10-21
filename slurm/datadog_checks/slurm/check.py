@@ -334,9 +334,11 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
+        # Leaving this one as a try because the metadata version collection isn't all that important
+        # even if it fails and thus should not stop the check from running.
         try:
             # slurm 21.08.6\n
-            out, err, ret = get_subprocess_out([self.sinfo_partition_cmd[0], '--version']).split(' ')[1].strip()
+            out, err, ret = get_subprocess_out([self.sinfo_partition_cmd[0], '--version'])
             if ret != 0:
                 self.log.error("Error running sinfo --version: %s", err)
             elif out:
