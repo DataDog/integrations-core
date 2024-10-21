@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.1.0 / 2024-10-18
+
+***Added***:
+
+* Fix metric size unit parsing ([#18840](https://github.com/DataDog/integrations-core/pull/18840))
+
 ## 2.0.1 / 2024-10-04
 
 ***Fixed***:
