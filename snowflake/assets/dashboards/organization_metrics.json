@@ -16,7 +16,7 @@
             "prefix": ""
         }
     ],
-    "title": "Snowflake Organization Metrics",
+    "title": "Snowflake Organization Metrics (Agent-based)",
     "widgets": [
         {
             "definition": {

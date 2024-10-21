@@ -1,0 +1,38 @@
+{
+    "targets": [
+        {
+            "boot_index": 0,
+            "links": [
+                {
+                    "href": "http://127.0.0.1:6385/v1/volume/targets/bd4d008c-7d31-463d-abf9-6c23d9d55f7f",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1:6385/volume/targets/bd4d008c-7d31-463d-abf9-6c23d9d55f7f",
+                    "rel": "bookmark"
+                }
+            ],
+            "node_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
+            "uuid": "bd4d008c-7d31-463d-abf9-6c23d9d55f7f",
+            "volume_id": "04452bed-5367-4202-8bf5-de4335ac56d2",
+            "volume_type": "iscsi"
+        },
+        {
+            "uuid": "8fea1a69-3e0d-4825-9776-a10bf2815b75",
+            "boot_index": 0,
+            "volume_id": "04452bed-5367-4202-8bf5-de4335ac56d2",
+            "volume_type": "iscsi",
+            "links": [
+                {
+                    "href": "http://127.0.0.1/baremetal/v1/volume/targets/8fea1a69-3e0d-4825-9776-a10bf2815b75",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/baremetal/volume/targets/8fea1a69-3e0d-4825-9776-a10bf2815b75",
+                    "rel": "bookmark"
+                }
+            ],
+            "node_uuid": "a27588a6-518d-49b4-a23c-3d51255a7e8b"
+        }
+    ]
+}

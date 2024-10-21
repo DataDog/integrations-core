@@ -3,10 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 import re
+from urllib.parse import urlparse
 
 import mock
 from pyVmomi import vim, vmodl
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.dev.http import MockResponse
@@ -887,6 +887,19 @@ VM_PROPERTIES_EX = mock.MagicMock(
                     vmodl.DynamicProperty(
                         name='summary.capacity',
                         val=100,
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.Datacenter(moId="dc2"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='dc2',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.Folder(moId="folder_1"),
                     ),
                 ],
             ),

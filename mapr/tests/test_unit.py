@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mapr import MaprCheck
@@ -29,7 +28,7 @@ def test_metrics_constants():
 
 @pytest.mark.unit
 def test_get_stream_id():
-    for (text, rng), value in iteritems(STREAM_ID_FIXTURE):
+    for (text, rng), value in STREAM_ID_FIXTURE.items():
         assert get_stream_id_for_topic(text, rng=rng) == value
 
 

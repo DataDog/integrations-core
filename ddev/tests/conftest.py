@@ -117,7 +117,7 @@ def config_file(tmp_path, monkeypatch, local_repo) -> ConfigFile:
         'DD_ENV',
         'DD_SERVICE',
         'DD_SITE',
-        'DD_LOGS_CONFIG_DD_URL',
+        'DD_LOGS_CONFIG_LOGS_DD_URL',
         'DD_DD_URL',
         'DD_API_KEY',
         'DD_APP_KEY',

@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   kyototycoon-standalone:
     image: "datadog/docker-library:kyototycoon_0_9_56"

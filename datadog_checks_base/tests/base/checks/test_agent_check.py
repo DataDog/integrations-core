@@ -13,7 +13,6 @@ from six import PY3
 
 from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.dev.testing import requires_py3
 
 
 def test_instance():
@@ -541,6 +540,111 @@ class TestServiceChecks:
         aggregator.assert_service_check('service_check', status=AgentCheck.OK)
 
 
+class TestLogSubmission:
+    def test_cursor(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+        check.send_log({'message': 'bar'}, cursor={'data': '2'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor() == {'data': '2'}
+
+    def test_no_cursor(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'})
+        check.send_log({'message': 'bar'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor() is None
+
+    def test_tags(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{'tags': ['foo:bar', 'baz:qux']}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'})
+        check.send_log({'message': 'bar', 'ddtags': 'bar:baz'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo', 'ddtags': 'baz:qux,foo:bar'},
+                {'message': 'bar', 'ddtags': 'bar:baz'},
+                {'message': 'baz', 'ddtags': 'baz:qux,foo:bar'},
+            ],
+        )
+
+    def test_stream(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'}, cursor={'data': '1'}, stream='stream1')
+        check.send_log({'message': 'bar'}, cursor={'data': '2'}, stream='stream2')
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor(stream='stream1') == {'data': '1'}
+        assert check.get_log_cursor(stream='stream2') == {'data': '2'}
+
+    def test_timestamp(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo', 'timestamp': 1722958617.2842212})
+        check.send_log({'message': 'bar', 'timestamp': 1722958619.2358432})
+        check.send_log({'message': 'baz', 'timestamp': 1722958620.5963688})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo', 'timestamp': 1722958617284},
+                {'message': 'bar', 'timestamp': 1722958619235},
+                {'message': 'baz', 'timestamp': 1722958620596},
+            ],
+        )
+        assert check.get_log_cursor() is None
+
+
+class TestLogsEnabledDetection:
+    def test_default(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+
+        assert check.logs_enabled is False
+
+    def test_enabled(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        datadog_agent._config['logs_enabled'] = True
+
+        assert check.logs_enabled is True
+
+
 class TestTags:
     def test_default_string(self):
         check = AgentCheck()
@@ -963,7 +1067,6 @@ class TestCheckInitializations:
         assert check.initialize.call_count == 2
 
 
-@requires_py3
 def test_load_configuration_models(dd_run_check, mocker):
     instance = {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}}
     init_config = {'proxy': {'https': 'https://1.2.3.4:4242'}}
@@ -1006,7 +1109,6 @@ else:
             pass
 
 
-@requires_py3
 @pytest.mark.parametrize(
     "check_instance_config, default_instance_config, log_lines, unknown_options",
     [

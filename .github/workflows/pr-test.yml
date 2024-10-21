@@ -15,6 +15,11 @@ on:
         required: false
         default: ""
         type: string
+      pytest-args:
+        description: "Arguments to pass to pytest"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   compute-matrix:
@@ -25,7 +30,7 @@ jobs:
   test:
     needs:
     - compute-matrix
-    if: needs.compute-matrix.outputs.matrix != '[]'
+    if: needs.compute-matrix.outputs.matrix != '[]' && github.event_name != 'merge_group'
     strategy:
       fail-fast: false
       matrix:
@@ -47,6 +52,7 @@ jobs:
       # For other repositories
       setup-env-vars: "${{ inputs.setup-env-vars }}"
       python-version: "${{ inputs.python-version }}"
+      pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
 
   save-event:
@@ -67,7 +73,11 @@ jobs:
   check:
     needs:
     - test
-    if: always()
+    # In integrations-core and integrations-extras repos the tests are flaky enough that
+    # it would be a pain to merge PRs with the Merge Queue enabled.
+    # While we work on the tests, we skip the job if it's triggered by Merge Queue.
+    # Github treats skipped jobs as successful, thus we unblock the Merge Queue.
+    if: always() && github.event_name != 'merge_group'
     runs-on: ubuntu-latest
 
     steps:

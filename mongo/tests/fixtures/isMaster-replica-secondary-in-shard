@@ -1,0 +1,103 @@
+{
+    "hosts": [
+        "mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+        "mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017"
+    ],
+    "arbiters": ["mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017"],
+    "setName": "mongo-mongodb-sharded-shard-0",
+    "setVersion": 1,
+    "ismaster": false,
+    "secondary": true,
+    "primary": "mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+    "me": "mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+    "electionId": {
+        "$oid": "7fffffff000000000000000b"
+    },
+    "lastWrite": {
+        "opTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1600348939,
+                    "i": 85
+                }
+            },
+            "t": 11
+        },
+        "lastWriteDate": {
+            "$date": 1600348939000
+        },
+        "majorityOpTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1600348939,
+                    "i": 85
+                }
+            },
+            "t": 11
+        },
+        "majorityWriteDate": {
+            "$date": 1600348939000
+        }
+    },
+    "maxBsonObjectSize": 16777216,
+    "maxMessageSizeBytes": 48000000,
+    "maxWriteBatchSize": 100000,
+    "localTime": {
+        "$date": 1600348939653
+    },
+    "logicalSessionTimeoutMinutes": 30,
+    "connectionId": 801,
+    "minWireVersion": 0,
+    "maxWireVersion": 8,
+    "readOnly": false,
+    "ok": 1.0,
+    "$gleStats": {
+        "lastOpTime": {
+            "$timestamp": {
+                "t": 0,
+                "i": 0
+            }
+        },
+        "electionId": {
+            "$oid": "7fffffff000000000000000b"
+        }
+    },
+    "lastCommittedOpTime": {
+        "$timestamp": {
+            "t": 1600348939,
+            "i": 85
+        }
+    },
+    "$configServerState": {
+        "opTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1600348939,
+                    "i": 46
+                }
+            },
+            "t": 17
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600348939,
+                "i": 85
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    },
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600348939,
+            "i": 85
+        }
+    }
+}

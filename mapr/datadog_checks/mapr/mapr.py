@@ -6,8 +6,6 @@ import json
 import os
 import re
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.errors import CheckException
 
@@ -191,7 +189,7 @@ class MaprCheck(AgentCheck):
     def submit_metric(self, metric):
         metric_name = metric['metric']
         tags = copy.deepcopy(self.custom_tags)
-        for k, v in iteritems(metric['tags']):
+        for k, v in metric['tags'].items():
             if k == 'clustername':
                 tags.append("{}:{}".format('mapr_cluster', v))
                 if not self._disable_legacy_cluster_tag:

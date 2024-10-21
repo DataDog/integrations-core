@@ -1,7 +1,5 @@
 # CHANGELOG - kubernetes
 
-<!-- towncrier release notes start -->
-
 ## 1.7.0 / 2020-05-17
 
 ***Added***:

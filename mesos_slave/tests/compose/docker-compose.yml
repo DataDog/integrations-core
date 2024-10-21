@@ -1,4 +1,4 @@
-version: "3.5"
+
 # References:
 # - https://github.com/bobrik/mesos-compose
 # - https://github.com/mesosphere/docker-containers/tree/master/mesos

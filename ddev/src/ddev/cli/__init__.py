@@ -33,6 +33,7 @@ from ddev.utils.fs import Path
 @click.option('--marketplace', '-m', is_flag=True, help='Work on `marketplace`.')
 @click.option('--agent', '-a', is_flag=True, help='Work on `datadog-agent`.')
 @click.option('--here', '-x', is_flag=True, help='Work on the current location.')
+@click.option('--org', '-o', default=None, help='Override org config field for this invocation.')
 @click.option(
     '--color/--no-color',
     default=None,
@@ -69,7 +70,9 @@ from ddev.utils.fs import Path
 )
 @click.version_option(version=__version__, prog_name='ddev')
 @click.pass_context
-def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, interactive, verbose, quiet, config_file):
+def ddev(
+    ctx: click.Context, core, extras, marketplace, agent, here, org, color, interactive, verbose, quiet, config_file
+):
     """
     \b
          _     _
@@ -105,6 +108,8 @@ def ddev(ctx: click.Context, core, extras, marketplace, agent, here, color, inte
             app.abort(
                 f'Unable to create config file located at `{str(app.config_file.path)}`. Please check your permissions.'
             )
+    if org is not None:
+        app.config.org = org
 
     if not ctx.invoked_subcommand:
         app.display_info(ctx.get_help(), highlight=False)

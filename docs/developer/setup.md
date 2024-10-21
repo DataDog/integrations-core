@@ -11,7 +11,7 @@ you intend to work on.
 
 ## Python
 
-To work on any integration you must install Python 3.11.
+To work on any integration you must install Python 3.12.
 
 After installation, restart your terminal and ensure that your newly installed Python comes first in your `PATH`.
 
@@ -25,7 +25,7 @@ After installation, restart your terminal and ensure that your newly installed P
     then install Python:
 
     ```
-    brew install python@3.11
+    brew install python@3.12
     ```
 
     After it completes, check the output to see if it asked you to run any extra commands and if so, execute them.
@@ -39,7 +39,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Windows"
     Windows users have it the easiest.
 
-    Download the [Python 3.11 64-bit executable installer](https://www.python.org/downloads/release/python-3115/) and run it.
+    Download the [Python 3.12 64-bit executable installer](https://www.python.org/downloads/release/python-3124/) and run it.
     When prompted, be sure to select the option to add to your `PATH`. Also, it is recommended that you choose the per-user installation method.
 
     Verify successful `PATH` modification:
@@ -51,7 +51,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Linux"
     Ah, you enjoy difficult things. Are you using Gentoo?
 
-    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.11. Whatever you do, never modify the system Python.
+    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github] to install Python 3.12. Whatever you do, never modify the system Python.
 
     Verify successful `PATH` modification:
 
@@ -127,7 +127,7 @@ You have 4 options to install the CLI.
         1. Download the file using the `curl` command. The `-o` option specifies the file name that the downloaded package is written to. In this example, the file is written to `ddev-<docs-insert-ddev-version>.pkg` in the current directory.
 
             ```
-            curl -o ddev-<docs-insert-ddev-version>.pkg https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>.pkg
+            curl -L -o ddev-<docs-insert-ddev-version>.pkg https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>.pkg
             ```
         2. Run the standard macOS [`installer`](https://ss64.com/osx/installer.html) program, specifying the downloaded `.pkg` file as the source. Use the `-pkg` parameter to specify the name of the package to install, and the `-target /` parameter for the drive in which to install the package. The files are installed to `/usr/local/ddev`, and an entry is created at `/etc/paths.d/ddev` that instructs shells to add the `/usr/local/ddev` directory to. You must include sudo on the command to grant write permissions to those folders.
 
@@ -242,11 +242,11 @@ This is if you cloned [integrations-core][] and want to always use the version b
 
     === "ARM"
         ```
-        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.11/bin/python3.11
+        pipx install -e /path/to/integrations-core/ddev --python /opt/homebrew/opt/python@3.12/bin/python3.12
         ```
     === "Intel"
         ```
-        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.11/bin/python3.11
+        pipx install -e /path/to/integrations-core/ddev --python /usr/local/opt/python@3.12/bin/python3.12
         ```
 
     !!! warning
@@ -282,7 +282,7 @@ pipx upgrade ddev
     Also be aware that this method does not get any changes from `datadog_checks_dev`, so if you have unreleased changes from `datadog_checks_dev` that may affect `ddev`, you will need to run the following to get the most recent changes from `datadog_checks_dev` to your `ddev`:
 
     ```
-    pipx inject ddev -e "/path/to/datadog_checks_dev"
+    pipx inject -e ddev "/path/to/datadog_checks_dev"
     ```
 
 ### Configuration

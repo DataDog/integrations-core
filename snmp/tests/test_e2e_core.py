@@ -88,7 +88,11 @@ def test_e2e_user_profiles(dd_agent_check):
         'ups_name:testIdentName',
         'device_namespace:default',
     ]
-    tags = profile_tags + ["snmp_device:{}".format(device_ip)]
+    tags = profile_tags + [
+        "snmp_device:{}".format(device_ip),
+        "device_ip:{}".format(device_ip),
+        "device_id:default:{}".format(device_ip),
+    ]
 
     aggregator.assert_metric('snmp.upsAdvBatteryNumOfBattPacks', metric_type=aggregator.GAUGE, tags=tags, count=2)
     aggregator.assert_metric(
@@ -116,6 +120,8 @@ def test_e2e_user_profiles(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.318.1.999',
         'tags': [
             'device_namespace:default',
+            "device_id:default:" + device_ip,
+            "device_ip:" + device_ip,
             'firmware_version:2.0.3-test',
             'model:APC Smart-UPS 600',
             'serial_num:test_serial',
@@ -126,6 +132,7 @@ def test_e2e_user_profiles(dd_agent_check):
         'vendor': 'apc',
         'version': '2.0.3-test',
         'device_type': 'ups',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -146,7 +153,11 @@ def test_e2e_user_profiles_that_extend_profile_with_same_name(dd_agent_check):
         'snmp_profile:palo-alto',
         'device_namespace:default',
     ]
-    tags = profile_tags + ["snmp_device:{}".format(device_ip)]
+    tags = profile_tags + [
+        "snmp_device:{}".format(device_ip),
+        "device_ip:{}".format(device_ip),
+        "device_id:default:{}".format(device_ip),
+    ]
 
     aggregator.assert_metric('snmp.panSessionUtilization', metric_type=aggregator.GAUGE, tags=tags, count=2)
     aggregator.assert_metric('snmp.panSessionUtilization_user', metric_type=aggregator.GAUGE, tags=tags, count=2)
@@ -166,12 +177,15 @@ def test_e2e_user_profiles_that_extend_profile_with_same_name(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
         'tags': [
             'device_namespace:default',
+            "device_id:default:" + device_ip,
+            "device_ip:" + device_ip,
             'snmp_device:' + device_ip,
             'snmp_profile:palo-alto',
         ],
         'vendor': 'paloaltonetworks',
         'version': '9.0.5',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -190,7 +204,13 @@ def assert_apc_ups_metrics(dd_agent_check, config):
         'device_vendor:apc',
         'device_namespace:default',
     ]
-    tags = profile_tags + ["snmp_device:{}".format(instance['ip_address'])]
+    device_ip = instance['ip_address']
+
+    tags = profile_tags + [
+        "snmp_device:{}".format(device_ip),
+        "device_ip:{}".format(device_ip),
+        "device_id:default:{}".format(device_ip),
+    ]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
     aggregator.assert_metric(
@@ -235,9 +255,16 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
         'device_namespace:default',
         'device_vendor:f5',
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'device_hostname:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
         'snmp_profile:f5-big-ip',
     ]
-    tags += ['snmp_device:{}'.format(instance['ip_address'])]
+    device_ip = instance['ip_address']
+
+    tags += [
+        "snmp_device:{}".format(device_ip),
+        "device_ip:{}".format(device_ip),
+        "device_id:default:{}".format(device_ip),
+    ]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
@@ -283,6 +310,8 @@ def test_e2e_core_discovery(dd_agent_check):
         # autodiscovery
         'autodiscovery_subnet:' + network,
         'snmp_device:' + ip_address,
+        "device_ip:" + ip_address,
+        "device_id:default:" + ip_address,
     ]
 
     tags_with_loader = tags + ['loader:core']
@@ -356,6 +385,7 @@ def test_e2e_regex_match(dd_agent_check):
     ]
     config['init_config']['loader'] = 'core'
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+    device_ip = instance['ip_address']
 
     # raw sysName: 41ba948911b9
     aggregator.assert_metric(
@@ -366,7 +396,9 @@ def test_e2e_regex_match(dd_agent_check):
             'letter1:4',
             'letter2:1',
             'loader:core',
-            'snmp_device:' + instance['ip_address'],
+            'snmp_device:' + device_ip,
+            'device_ip:' + device_ip,
+            'device_id:default:' + device_ip,
             'device_namespace:default',
         ],
     )
@@ -388,9 +420,12 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     common_tags = [
         'snmp_profile:meraki-cloud-controller',
         'snmp_host:dashboard.meraki.com',
+        'device_hostname:dashboard.meraki.com',
         'device_vendor:meraki',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        "device_ip:" + ip_address,
+        "device_id:default:" + ip_address,
     ]
 
     common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader='core')
@@ -484,9 +519,16 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
         'ups_name:testIdentName',
         # metric_tags from _base.yaml
         'snmp_host:APC_UPS_NAME',
+        'device_hostname:APC_UPS_NAME',
     ]
+    device_ip = instance['ip_address']
 
-    tags = global_metric_tags + ['device_namespace:default', "snmp_device:{}".format(instance['ip_address'])]
+    tags = global_metric_tags + [
+        'device_namespace:default',
+        "snmp_device:{}".format(device_ip),
+        "device_ip:{}".format(device_ip),
+        "device_id:default:{}".format(device_ip),
+    ]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 
@@ -534,12 +576,15 @@ def test_e2e_core_cisco_csr(dd_agent_check):
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+    device_ip = instance['ip_address']
 
     global_tags = [
         'snmp_profile:cisco-csr1000v',
         'device_vendor:cisco',
         'device_namespace:default',
-        "snmp_device:{}".format(instance['ip_address']),
+        "snmp_device:{}".format(device_ip),
+        "device_ip:{}".format(device_ip),
+        "device_id:default:{}".format(device_ip),
     ]
 
     common.assert_common_metrics(aggregator, global_tags, is_e2e=True, loader='core')
@@ -570,13 +615,17 @@ def test_e2e_cisco_nexus(dd_agent_check):
     config['init_config']['loader'] = 'core'
     instance = config['instances'][0]
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
+    device_ip = instance['ip_address']
 
     common_tags = [
         'snmp_profile:cisco-nexus',
         'device_vendor:cisco',
         'device_namespace:default',
-        "snmp_device:{}".format(instance['ip_address']),
+        "snmp_device:{}".format(device_ip),
+        "device_ip:{}".format(device_ip),
+        "device_id:default:{}".format(device_ip),
         'snmp_host:Nexus-eu1.companyname.managed',
+        'device_hostname:Nexus-eu1.companyname.managed',
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
@@ -785,7 +834,10 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
         'snmp_profile:cisco-legacy-wlc',
         'device_vendor:cisco',
         'snmp_host:DDOGWLC',
+        'device_hostname:DDOGWLC',
         'snmp_device:' + ip_address,
+        "device_ip:" + ip_address,
+        "device_id:default:" + ip_address,
     ]
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 

@@ -6,8 +6,6 @@ import datetime
 import re
 import time
 
-from six import iteritems
-
 from . import exceptions, helpers
 
 
@@ -112,10 +110,10 @@ class Tenant:
 
             tenant_metrics = self.tenant_metrics.get(obj_type, {})
 
-            for n, ms in iteritems(tenant_metrics):
+            for n, ms in tenant_metrics.items():
                 if n not in name:
                     continue
-                for cisco_metric, dd_metric in iteritems(ms):
+                for cisco_metric, dd_metric in ms.items():
                     mval = s.get(name, {}).get("attributes", {}).get(cisco_metric)
                     json_attrs = s.get(name, {}).get("attributes", {})
                     if mval and helpers.check_metric_can_be_zero(cisco_metric, mval, json_attrs):

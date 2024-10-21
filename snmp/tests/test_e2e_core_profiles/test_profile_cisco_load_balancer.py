@@ -29,8 +29,11 @@ def test_e2e_profile_cisco_load_balancer(dd_agent_check):
     common_tags = [
         'snmp_profile:cisco-load-balancer',
         'snmp_host:cisco-load-balancer.device.name',
+        'device_hostname:cisco-load-balancer.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
@@ -172,6 +175,7 @@ def test_e2e_profile_cisco_load_balancer(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.9.1.824',
         'vendor': 'cisco',
         'device_type': 'load_balancer',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

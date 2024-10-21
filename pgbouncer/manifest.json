@@ -15,7 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -55,9 +56,6 @@
       "instance_overview": "assets/saved_views/instance_overview.json",
       "user_overview": "assets/saved_views/user_overview.json",
       "pgbouncer_processes": "assets/saved_views/pgbouncer_processes.json"
-    },
-    "logs": {
-      "source": "pgbouncer"
     }
   }
 }

@@ -4,6 +4,7 @@
 from .ao_metrics import SqlserverAoMetrics
 from .availability_groups_metrics import SqlserverAvailabilityGroupsMetrics
 from .availability_replicas_metrics import SqlserverAvailabilityReplicasMetrics
+from .database_agent_metrics import SqlserverAgentMetrics
 from .database_backup_metrics import SqlserverDatabaseBackupMetrics
 from .database_files_metrics import SqlserverDatabaseFilesMetrics
 from .database_replication_stats_metrics import SqlserverDatabaseReplicationStatsMetrics

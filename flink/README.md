@@ -23,7 +23,7 @@ No additional installation is needed on your server.
     ```yaml
     metrics.reporter.dghttp.factory.class: org.apache.flink.metrics.datadog.DatadogHttpReporterFactory
     metrics.reporter.dghttp.apikey: <DATADOG_API_KEY>
-    metrics.reporter.dghttp.dataCenter: {{< region-param key="dd_datacenter" >}}
+    metrics.reporter.dghttp.dataCenter: US #(optional) The data center (EU/US) to connect to, defaults to US.
     ```
 
 2. Re-map system scopes in your `<FLINK_HOME>/conf/flink-conf.yaml`.

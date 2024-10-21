@@ -33,6 +33,10 @@ requires_over_15 = pytest.mark.skipif(
     POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 15,
     reason='This test is for over 15 only (make sure POSTGRES_VERSION is set)',
 )
+requires_over_16 = pytest.mark.skipif(
+    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 16,
+    reason='This test is for over 16 only (make sure POSTGRES_VERSION is set)',
+)
 
 
 def _get_conn(db_instance, dbname=None, user=None, password=None, application_name='test'):
@@ -117,12 +121,12 @@ def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
     return run_query_thread(pg_instance, vacuum_query, application_name, init_stmts)
 
 
-def run_one_check(check, db_instance, cancel=True):
+def run_one_check(check, cancel=True):
     """
     Run check and immediately cancel.
     Waits for all threads to close before continuing.
     """
-    check.check(db_instance)
+    check.run()
     if cancel:
         check.cancel()
     if check.statement_samples._job_loop_future is not None:

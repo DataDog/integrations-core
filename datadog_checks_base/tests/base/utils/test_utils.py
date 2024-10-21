@@ -8,7 +8,6 @@ from decimal import ROUND_HALF_DOWN
 
 import mock
 import pytest
-from six import PY2, PY3
 
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
 from datadog_checks.base.utils.containers import hash_mutable, iter_unique
@@ -167,10 +166,6 @@ class TestContainers:
         h = hash_mutable(value)
         assert isinstance(h, int)
 
-    @pytest.mark.skipif(
-        PY2,
-        reason="In Python 2, a < b when a and b are of different types returns `False` (does not raise `TypeError`)",
-    )
     @pytest.mark.parametrize(
         'value',
         [
@@ -204,11 +199,6 @@ class TestContainers:
 
 
 class TestBytesUnicode:
-    @pytest.mark.skipif(PY3, reason="Python 3 does not support explicit bytestring with special characters")
-    def test_ensure_bytes_py2(self):
-        assert ensure_bytes('éâû') == 'éâû'
-        assert ensure_bytes(u'éâû') == 'éâû'
-
     def test_ensure_bytes(self):
         assert ensure_bytes('qwerty') == b'qwerty'
 
@@ -220,10 +210,7 @@ class TestBytesUnicode:
         # type: () -> None
         text = u'éâû'
         binary = text.encode('utf-8')
-        if PY3:
-            assert to_native_string(binary) == text
-        else:
-            assert to_native_string(binary) == binary
+        assert to_native_string(binary) == text
 
 
 class TestSecretsSanitizer:

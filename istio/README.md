@@ -12,9 +12,9 @@ To learn more about monitoring your Istio environment with Datadog, [see the Mon
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying these instructions.
+For general instructions on configuring integrations in containerized environments, see [Configure integrations with Autodiscovery on Kubernetes][4] or [Configure integrations with Autodiscovery on Docker][26].
 
-This OpenMetrics-based integration has a latest mode (`use_openmetrics`: true) and a legacy mode (`use_openmetrics`: false). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][25].
+This OpenMetrics-based integration has a _latest_ mode (`use_openmetrics: true`) and a _legacy_ mode (`use_openmetrics: false`). To get all the most up-to-date features, Datadog recommends enabling _latest_ mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][25].
 
 If you have multiple instances of Datadog collecting Istio metrics, make sure you are using the same mode for all of them. Otherwise, metrics data may fluctuate on the Datadog site.
 
@@ -30,50 +30,58 @@ If you want to monitor the Envoy proxies in Istio, configure the [Envoy integrat
 
 ### Configuration
 
-Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][7]) to connect to Istio. See the [sample istio.d/conf.yaml][8] for all available configuration options.
-
 #### Metric collection
-To monitor the `istiod` deployment and `istio-proxy` in Istio `v1.5+` there are two key components involved to collect the Prometheus-formatted metrics. Aligning with the [Istio architecture][23], there is the **data plane** (the `istio-proxy` sidecar containers) and the **control plane** (the `istiod` service managing the proxies). These are both run as `istio` Agent checks, but have different responsibilities, and they are configured separately, as described below.
+To monitor Istio v1.5+ there are two key components matching the [Istio architecture][23] for the Prometheus-formatted metrics:
+
+- **Data plane**: The `istio-proxy` sidecar containers
+- **Control plane**: The `istiod` service managing the proxies
+
+These are both run as `istio` Agent checks, but they have different responsibilities and are configured separately.
 
 ##### Data plane configuration
-To monitor the Istio data plane, the Agent includes an [`istio.d/auto_conf.yaml`][9] file to automatically set up the monitoring for each of the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it detects automatically. This configuration enables the reporting of `istio.mesh.*` metrics for the data exposed by each of these sidecar containers.
 
-To customize the data plane portion of the integration, create an equivalent [configuration file][24] for Istio. Set `ad_identifiers` and `istio_mesh_endpoint` appropriately to set up the integration when an `istio-proxy` sidecar container is discovered. Refer to the provided [`istio.d/auto_conf.yaml`][9] and the [example configuration file][8] for all available configuration options. When you customize, set `use_openmetrics: true` and the `exclude_labels` to the following configuration:
+The default [`istio.d/auto_conf.yaml`][9] file automatically sets up monitoring for each of the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it detects automatically. This configuration enables the reporting of `istio.mesh.*` metrics for the data exposed by each of these sidecar containers.
+
+To customize the data plane portion of the integration, create a custom Istio configuration file `istio.yaml`. See [Configure integrations on Kubernetes][4] or [Configure integrations with Autodiscovery on Docker][26] for options in creating this file.
+
+This file must contain:
+
 ```yaml
-    exclude_labels:
-      - source_version
-      - destination_version
-      - source_canonical_revision
-      - destination_canonical_revision
-      - source_principal
-      - destination_principal
-      - source_cluster
-      - destination_cluster
-      - source_canonical_service
-      - destination_canonical_service
-      - source_workload_namespace
-      - destination_workload_namespace
-      - request_protocol
-      - connection_security_policy
+ad_identifiers:
+  - proxyv2
+  - proxyv2-rhel8
+
+init_config:
+
+instances:
+  - use_openmetrics: true
+    send_histograms_buckets: false
+    istio_mesh_endpoint: http://%%host%%:15020/stats/prometheus
+    tag_by_endpoint: false
 ```
+
+Customize this file with any additional configurations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 ##### Control plane configuration
-To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio v1.5 or later, apply the following Autodiscovery Annotations as pod annotations for the deployment `istiod` in the `istio-system` namespace:
+To monitor the Istio control plane and report the `mixer`, `galley`, `pilot`, and `citadel` metrics, you must configure the Agent to monitor the `istiod` deployment. In Istio v1.5 or later, apply the following pod annotations for the deployment `istiod` in the `istio-system` namespace:
 
 ```yaml
-ad.datadoghq.com/discovery.check_names: '["istio"]'
-ad.datadoghq.com/discovery.init_configs: '[{}]'
-ad.datadoghq.com/discovery.instances: |
-     [
-       {
-         "istiod_endpoint": "http://%%host%%:15014/metrics",
-         "use_openmetrics": "true"
-       }
-     ]
+ad.datadoghq.com/discovery.checks: |
+  {
+    "istio": {
+      "instances": [
+        {
+          "istiod_endpoint": "http://%%host%%:15014/metrics",
+          "use_openmetrics": "true"
+        }
+      ]
+    }
+  }
 ```
-The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the [Istio documentation][23] for the proper method to apply these pod annotations.
 
-These annotations reference `discovery` as the `<CONTAINER_IDENTIFIER>` to match the default container name of the pods for the `istiod` deployment. If your container name is different, adjust accordingly.
+This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
+
+The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
 #### Disable sidecar injection for Datadog Agent pods
 
@@ -121,16 +129,48 @@ kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"anno
 
 #### Log collection
 
-Istio contains two types of logs: Envoy access logs that are collected with the [Envoy integration][11] and [Istio logs][12].
-
 _Available for Agent versions >6.0_
 
-See the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
+First, enable the Datadog Agent to perform log collection in Kubernetes. See [Kubernetes Log Collection][13].
 
-| Parameter      | Value                                                |
-| -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "istio", "service": "<SERVICE_NAME>"}`   |
+#### Istio logs
+
+To collect Istio logs from your control plane (`istiod`), apply the following pod annotations for the deployment `istiod` in the `istio-system` namespace:
+
+```yaml
+ad.datadoghq.com/discovery.logs: |
+  [
+    {
+      "source": "istio",
+      "service": "<SERVICE_NAME>"
+    }
+  ]
+```
+
+This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
+
+Replace `<SERVICE_NAME>` with your desired Istio service name.
+
+#### Envoy access logs
+
+To collect Envoy access logs from your data plane (`istio-proxy`):
+
+1. Enable [Envoy access logging within Istio][27]
+2. Apply the following annotation to the pod where the `istio-proxy` container was injected
+
+```yaml
+ad.datadoghq.com/istio-proxy.logs: |
+  [
+    {
+      "source": "envoy",
+      "service": "<SERVICE_NAME>"
+    }
+  ]
+```
+
+This annotation specifies the container `istio-proxy` to match the default container name of the injected Istio sidecar container. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs` with the name (`.spec.containers[i].name`) of your Istio sidecar container if yours differs.
+
+Replace `<SERVICE_NAME>` with your desired Istio proxy service name.
 
 ### Validation
 
@@ -182,7 +222,8 @@ Be sure to exclude Istio and Envoy metrics from your configuration to avoid high
 #
 instances:
   - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
-    metrics: [*]
+    metrics:
+    - '.*'
     exclude_metrics:
       - istio_*
       - envoy_*
@@ -197,7 +238,7 @@ Be sure to exclude Istio and Envoy metrics from your configuration to avoid high
 instances:
   - prometheus_url: <PROMETHEUS_URL>
     metrics:
-      - *
+      - '*'
     ignore_metrics:
       - istio_*
       - envoy_*
@@ -216,7 +257,7 @@ Additional helpful documentation, links, and articles:
 [1]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
 [2]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [3]: https://www.datadoghq.com/blog/istio-datadog/
-[4]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[4]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [5]: https://app.datadoghq.com/account/settings/agent/latest
 [6]: https://github.com/DataDog/integrations-core/tree/master/envoy#istio
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -238,3 +279,5 @@ Additional helpful documentation, links, and articles:
 [23]: https://istio.io/latest/docs/ops/deployment/architecture/
 [24]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file#configuration
 [25]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[26]: https://docs.datadoghq.com/containers/docker/integrations/
+[27]: https://istio.io/latest/docs/tasks/observability/logs/access-log/

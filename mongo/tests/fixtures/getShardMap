@@ -1,0 +1,38 @@
+{
+    "map": {
+        "shard01": "shard01/shard01a:27018,shard01b:27019",
+        "shard02": "shard02/shard02a:27019,shard02b:27019",
+        "shard03": "shard03/shard03a:27020,shard03b:27020",
+        "config": "configserver/config01:27017,config02:27017,config03:27017"
+    },
+    "hosts": {
+        "shard01a:27018": "shard01",
+        "shard01b:27019": "shard01",
+        "shard01c:27020": "shard01",
+        "shard03b:27020": "shard03",
+        "shard03a:27020": "shard03",
+        "shard02a:27019": "shard02",
+        "shard02b:27019": "shard02",
+        "config02:27017": "config",
+        "config01:27017": "config",
+        "config03:27017": "config"
+    },
+    "connStrings": {
+        "shard01/shard01a:27018": "shard01",
+        "shard01/shard01a:27018,shard01b:27019": "shard01",
+        "shard02/shard02a:27019,shard02b:27019": "shard02",
+        "shard03/shard03a:27020": "shard03",
+        "shard03/shard03a:27020,shard03b:27020": "shard03",
+        "configserver/config01:27017,config02:27017,config03:27017": "config"
+    },
+    "ok": 1,
+    "$clusterTime": {
+      "clusterTime": "Timestamp({ t: 1715024297, i: 1 })",
+      "signature": {
+        "hash": "Binary.createFromBase64('AAAAAAAAAAAAAAAAAAAAAAAAAAA=', 0)",
+        "keyId": "Long('0')"
+      }
+    },
+    "operationTime": "Timestamp({ t: 1715024297, i: 1 })"
+  }
+  

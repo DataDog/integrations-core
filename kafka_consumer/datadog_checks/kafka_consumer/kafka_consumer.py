@@ -49,15 +49,16 @@ class KafkaCheck(AgentCheck):
         highwater_offsets = {}
         broker_timestamps = defaultdict(dict)
         cluster_id = ""
+        persistent_cache_key = "broker_timestamps_"
         try:
             if len(consumer_offsets) < self._context_limit:
                 # Fetch highwater offsets
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.client.get_highwater_offsets(consumer_offsets)
                 if self._data_streams_enabled:
-                    broker_timestamps = self._load_broker_timestamps()
+                    broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
-                    self._save_broker_timestamps(broker_timestamps)
+                    self._save_broker_timestamps(broker_timestamps, persistent_cache_key)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
         except Exception:
@@ -94,11 +95,11 @@ class KafkaCheck(AgentCheck):
         if self.config._close_admin_client:
             self.client.close_admin_client()
 
-    def _load_broker_timestamps(self):
+    def _load_broker_timestamps(self, persistent_cache_key):
         """Loads broker timestamps from persistent cache."""
         broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(self.read_persistent_cache("broker_timestamps_")).items():
+            for topic_partition, content in json.loads(self.read_persistent_cache(persistent_cache_key)).items():
                 for offset, timestamp in content.items():
                     broker_timestamps[topic_partition][int(offset)] = timestamp
         except Exception as e:
@@ -113,9 +114,9 @@ class KafkaCheck(AgentCheck):
             if len(timestamps) > self._max_timestamps:
                 del timestamps[min(timestamps)]
 
-    def _save_broker_timestamps(self, broker_timestamps):
+    def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
         """Saves broker timestamps to persistent cache."""
-        self.write_persistent_cache("broker_timestamps", json.dumps(broker_timestamps))
+        self.write_persistent_cache(persistent_cache_key, json.dumps(broker_timestamps))
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
@@ -138,6 +139,7 @@ class KafkaCheck(AgentCheck):
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
+            consumer_group_state = self.client.get_consumer_group_state(consumer_group)
             if reported_contexts >= contexts_limit:
                 self.log.debug(
                     "Reported contexts number %s greater than or equal to contexts limit of %s, returning",
@@ -151,6 +153,7 @@ class KafkaCheck(AgentCheck):
                 'partition:%s' % partition,
                 'consumer_group:%s' % consumer_group,
                 'kafka_cluster_id:%s' % cluster_id,
+                'consumer_group_state:%s' % consumer_group_state,
             ]
             consumer_group_tags.extend(self.config._custom_tags)
 

@@ -25,6 +25,7 @@ ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 STATIC_INFO_VERSION = 'version'
 STATIC_INFO_MAJOR_VERSION = 'major_version'
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'
+STATIC_INFO_RDS = 'is_rds'
 AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
 AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
     # azure sql database has a special case, where we should emit
@@ -56,7 +57,7 @@ expected_sys_databases_columns = [
 ]
 
 DATABASE_SERVICE_CHECK_QUERY = """SELECT 1;"""
-SWITCH_DB_STATEMENT = """USE {};"""
+SWITCH_DB_STATEMENT = """USE [{}];"""
 
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
@@ -268,3 +269,5 @@ TEMPDB_FILE_SPACE_USAGE_METRICS = [
 ]
 
 PROC_CHAR_LIMIT = 500
+
+DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600

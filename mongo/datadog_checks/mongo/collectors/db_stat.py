@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.mongo.collectors.base import MongoCollector
-from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
+from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
 
 class DbStatCollector(MongoCollector):
@@ -23,14 +23,14 @@ class DbStatCollector(MongoCollector):
         # i.e Arbiters are ruled out
         if self.db_name == 'local':
             if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
-                self.log.debug("DbStatCollector can only be run on mongod nodes, arbiter node detected.")
+                self.log.debug("DbStatCollector can not be run on arbiter nodes.")
                 return False
             if isinstance(deployment, MongosDeployment):
                 self.log.debug("DbStatCollector can only be run on mongod nodes, mongos deployment detected.")
                 return False
             return True
         else:
-            return deployment.is_principal()
+            return isinstance(deployment, (StandaloneDeployment, MongosDeployment)) or deployment.is_primary
 
     def collect(self, api):
         db = api[self.db_name]
@@ -43,5 +43,5 @@ class DbStatCollector(MongoCollector):
             ]
         else:
             additional_tags = None
-        stats = {'stats': db.command('dbstats')}
+        stats = {'stats': db.command({'dbStats': 1, 'freeStorage': 1})}
         return self._submit_payload(stats, additional_tags)

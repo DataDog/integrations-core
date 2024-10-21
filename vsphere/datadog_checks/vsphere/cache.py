@@ -6,7 +6,6 @@ from contextlib import contextmanager
 from typing import Any, Dict, Generator, Iterator, List, Type  # noqa: F401
 
 from pyVmomi import vim  # noqa: F401
-from six import iterkeys
 
 from datadog_checks.vsphere.types import CounterId, MetricName, ResourceTags  # noqa: F401
 
@@ -140,7 +139,7 @@ class InfrastructureCache(VSphereCache):
 
     def get_mors(self, resource_type):
         # type: (Type[vim.ManagedEntity]) -> Iterator[vim.ManagedEntity]
-        return iterkeys(self._mors.get(resource_type, {}))
+        return iter(self._mors.get(resource_type, {}).keys())
 
     def set_mor_props(self, mor, mor_data):
         # type: (vim.ManagedEntity, Dict[str, Any]) -> None

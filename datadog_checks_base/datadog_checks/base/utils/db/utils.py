@@ -18,17 +18,13 @@ from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 from cachetools import TTLCache
 
 from datadog_checks.base import is_affirmative
+from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
 
 from ..common import to_native_string
-
-try:
-    import datadog_agent
-except ImportError:
-    from ....stubs import datadog_agent
 
 logger = logging.getLogger(__file__)
 
@@ -44,6 +40,7 @@ SUBMISSION_METHODS = {
     # These submission methods require more configuration than just a name
     # and a value and therefore must be defined as a custom transformer.
     'service_check': '__service_check',
+    'send_log': '__send_log',
 }
 
 
@@ -121,13 +118,20 @@ class ConstantRateLimiter:
         self.period_s = 1.0 / self.rate_limit_s if self.rate_limit_s > 0 else 0
         self.last_event = 0
 
-    def sleep(self):
+    def update_last_time_and_sleep(self):
         """
         Sleeps long enough to enforce the rate limit
         """
         elapsed_s = time.time() - self.last_event
         sleep_amount = max(self.period_s - elapsed_s, 0)
         time.sleep(sleep_amount)
+        self.update_last_time()
+
+    def shall_execute(self):
+        elapsed_s = time.time() - self.last_event
+        return elapsed_s >= self.period_s
+
+    def update_last_time(self):
         self.last_event = time.time()
 
 
@@ -178,6 +182,28 @@ def resolve_db_host(db_host):
         )
 
     return db_host
+
+
+def get_agent_host_tags():
+    """
+    Get the tags from the agent host and return them as a list of strings.
+    """
+    result = []
+    host_tags = datadog_agent.get_host_tags()
+    if not host_tags:
+        return result
+    try:
+        tags_dict = json.loads(host_tags) or {}
+        for key, value in tags_dict.items():
+            if isinstance(value, list):
+                result.extend(value)
+            else:
+                raise ValueError(
+                    'Failed to parse {} tags from the agent host because {} is not a list'.format(key, value)
+                )
+    except Exception as e:
+        raise ValueError('Failed to parse tags from the agent host: {}. Error: {}'.format(host_tags, str(e)))
+    return result
 
 
 def default_json_event_encoding(o):
@@ -298,7 +324,7 @@ class DBMAsyncJob(object):
         self._last_check_run = time.time()
         if self._run_sync or is_affirmative(os.environ.get('DBM_THREADED_JOB_RUN_SYNC', "false")):
             self._log.debug("Running threaded job synchronously. job=%s", self._job_name)
-            self._run_job_rate_limited()
+            self._run_sync_job_rate_limited()
         elif self._job_loop_future is None or not self._job_loop_future.running():
             self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
@@ -363,10 +389,21 @@ class DBMAsyncJob(object):
         if self._rate_limiter.rate_limit_s != rate_limit:
             self._rate_limiter = ConstantRateLimiter(rate_limit)
 
+    def _run_sync_job_rate_limited(self):
+        if self._rate_limiter.shall_execute():
+            self._rate_limiter.update_last_time()
+            self._run_job_traced()
+
     def _run_job_rate_limited(self):
-        self._run_job_traced()
-        if not self._cancel_event.isSet():
-            self._rate_limiter.sleep()
+        try:
+            self._run_job_traced()
+        except:
+            raise
+        finally:
+            if not self._cancel_event.isSet():
+                self._rate_limiter.update_last_time_and_sleep()
+            else:
+                self._rate_limiter.update_last_time()
 
     @_traced_dbm_async_job_method
     def _run_job_traced(self):

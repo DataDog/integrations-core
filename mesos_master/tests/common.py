@@ -38,7 +38,17 @@ BASIC_METRICS = [
     'mesos.stats.system.mem_total_bytes',
     'mesos.stats.elected',
     'mesos.stats.uptime_secs',
-    'mesos.role.frameworks.count',
     'mesos.cluster.total_frameworks',
+]
+
+# With github actions updating its runner machine's docker to v26 not all versions of
+#   mesos-master docker images were available, so we had to limit the versions to test
+#   against. This results in some metrics not being available in the docker image used
+#   for testing. Hence the following metrics are marked as optional.
+OPTIONAL_METRICS = [
+    'mesos.role.frameworks.count',
     'mesos.role.weight',
+    'mesos.role.mem',
+    'mesos.role.disk',
+    'mesos.role.cpu',
 ]

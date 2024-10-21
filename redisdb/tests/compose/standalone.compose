@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   redis-standalone:
     image: "redis:${REDIS_VERSION}"

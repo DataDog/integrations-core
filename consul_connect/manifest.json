@@ -17,7 +17,8 @@
       "Supported OS::Windows",
       "Category::Network",
       "Category::Log Collection",
-      "Category::Containers"
+      "Category::Containers",
+      "Offering::Integration"
     ]
   },
   "author": {

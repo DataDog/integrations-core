@@ -2,6 +2,38 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+## 5.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 4.7.0 / 2024-07-05 / Agent 7.55.0
+
+***Security***:
+
+* Bump TUF dependency to address GHSA-77hh-43cm-v8j6 ([#17848](https://github.com/DataDog/integrations-core/pull/17848))
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+## 4.6.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+
 ## 4.5.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

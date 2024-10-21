@@ -4,9 +4,7 @@
 import time
 from datetime import datetime
 
-import pytest
 from dateutil import tz
-from six import PY2
 
 from datadog_checks.base.utils.time import (
     EPOCH,
@@ -89,7 +87,6 @@ class TestPreciseTime:
         assert delta < 0.5
 
 
-@pytest.mark.skipif(PY2, reason='Using Python 3 features')
 class TestConstants:
     def test_epoch(self):
         from datetime import timezone

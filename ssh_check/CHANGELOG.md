@@ -2,6 +2,38 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 2.10.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+## 2.9.0 / 2024-08-09 / Agent 7.57.0
+
+***Added***:
+
+* Allow forcing SHA1 encryption for older SSH servers. Set `force_sha1: true` in conf.yaml. ([#18086](https://github.com/DataDog/integrations-core/pull/18086))
+
 ## 2.8.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

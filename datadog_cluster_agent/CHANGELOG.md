@@ -2,7 +2,46 @@
 
 <!-- towncrier release notes start -->
 
-## 3.0.0 / 2024-03-22
+## 5.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 4.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 3.2.0 / 2024-08-09 / Agent 7.57.0
+
+***Added***:
+
+* Add tagger and workloadmeta metrics ([#18030](https://github.com/DataDog/integrations-core/pull/18030))
+* Add telemetry scraping for Autoscaling ([#18265](https://github.com/DataDog/integrations-core/pull/18265))
+
+## 3.1.1 / 2024-05-31 / Agent 7.55.0
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 3.1.0 / 2024-05-07 / Agent 7.54.0
+
+***Added***:
+
+* [datadog-cluster-agent] Add CWS Instrumentation metrics ([#17530](https://github.com/DataDog/integrations-core/pull/17530))
+
+## 3.0.0 / 2024-03-22 / Agent 7.53.0
 
 ***Removed***:
 

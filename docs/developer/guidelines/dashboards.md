@@ -21,7 +21,7 @@ ddev meta dash export <URL_OF_DASHBOARD> <INTEGRATION>
 ```
 
 !!! tip
-    If the dashboard is for a contributor-maintained integration in the `integration-extras` repo, run the command with the `--extras` or `-e` flag.
+    If the dashboard is for a contributor-maintained integration in the `integration-extras` repo, run `ddev --extras meta ...` instead of `ddev meta ...`.
 
 The command will add the dashboard definition to the `manifest.json` file of the integration.
 The dashboard JSON payload will be available in `/assets/dashboards/<DASHBOARD_TITLE>.json`.
@@ -46,7 +46,7 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
 
 A dashboard that follows best practices helps users consume data quickly. Best practices reduce friction when figuring out where to search for specific information or how to interpret data and find meaning. Additionally, guidelines give dashboard makers a starting point when creating a new dashboard.
 
-### Visual Style Guidelines Checklist 
+### Visual Style Guidelines Checklist
 
 ![Full length example](../assets/images/example_full_length.png)
 
@@ -58,7 +58,7 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 - [x] All widgets are placed within a group based on thematic organization, rather than directly on the background of the dashboard
    ![Group titles](../assets/images/group_titles.png)
 - [x] *Query value* widgets have a timeseries background (e.g. "Bars") instead of being blank
-- [x] Visualizations with obvious thresholds or zones use semantic formatting for graphs or custom red/green/yellow text formatting for query values. 
+- [x] Visualizations with obvious thresholds or zones use semantic formatting for graphs or custom red/green/yellow text formatting for query values.
 - [x] Color coordination between group headers, notes within groups, and graphs within groups (e.g. all group headers or note widgets the same color). If you've applied a vivid green to all group headers, try making its notes light green.
        ![Header color usage](../assets/images/header_color_usage.png)
 - [x] Legends for each graph. Legends make it easy to read a graph without having to hover over each series or maximize the widget. Make sure you use aliases so the legend is easy to read. Automatic mode for legends is a great option that hides legends when space is tight and shows them when there's room.
@@ -80,33 +80,33 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 1. Add a logo to the dashboard header. The integration logo will automatically appear in the header if the icon exists [here](https://druids.datadoghq.com/logos/logo-gallery) and the `integration_id` matches the icon name. That means it will only appear when the dashboard you're working on is made into the official integration board.
    ![Logo in header](../assets/images/logo_header.png)
 
-1. Include the integration name in the dashboard title. (e.g. "Elasticsearch Overview Dashboard"). 
-    
+1. Include the integration name in the dashboard title. (e.g. "Elasticsearch Overview Dashboard").
+
     !!! warning
         Avoid using ++hyphen++ (hyphen) in the dashboard title as the dashboard URL is generated from the title.
-        
+
 
 ### Standard Groups to Include
 
-1. Always include an *About* group for the integration containing a brief description and helpful links. Edit the *About* group and select the "banner" display option (with the "Show Title" option unchecked), then link to a banner image like this: `/static/images/integration_dashboard/your-image.png`. For instructions on how to create and upload a banner image, go to the [DRUIDS logo gallery](https://druids.datadoghq.com/logos/logo-gallery), click the relevant logo, and click the *Dashboard Banner* tab. The *About* section should contain content, not data; avoid making the *About* section full-width. Consider copying the content in the *About* section into the hovercard that appears when hovering over the dashboard title. 
+1. Always include an *About* group for the integration containing a brief description and helpful links. Edit the *About* group and select the "banner" display option (with the "Show Title" option unchecked), then link to a banner image like this: `/static/images/integration_dashboard/your-image.png`. For instructions on how to create and upload a banner image, go to the [DRUIDS logo gallery](https://druids.datadoghq.com/logos/logo-gallery), click the relevant logo, and click the *Dashboard Banner* tab. The *About* section should contain content, not data; avoid making the *About* section full-width. Consider copying the content in the *About* section into the hovercard that appears when hovering over the dashboard title.
 
-1. Also include an *Overview* group containing service checks (e.g. liveness or readiness checks), a few of the most important metrics, and a monitor summary if you have pre-existing monitors for this integration, and place it at the top of the dashboard. The *Overview* section should contain data. 
+1. Also include an *Overview* group containing service checks (e.g. liveness or readiness checks), a few of the most important metrics, and a monitor summary if you have pre-existing monitors for this integration, and place it at the top of the dashboard. The *Overview* section should contain data.
    ![About and overview groups](../assets/images/about_and_overview_groups.png)
 
 1. If log collection is enabled, make a *Logs* group. Insert a timeseries widget showing a bar graph of logs by status over time. Also include a log stream of logs with the "Error" or "Critical" status.
 
 !!! tip
-        Consider turning groups into powerpacks if they appear repeatedly in dashboards irrespective of the integration type, so that you can insert the entire group with the correct formatting with a few clicks rather than adding the same widgets from scratch each time. 
+        Consider turning groups into powerpacks if they appear repeatedly in dashboards irrespective of the integration type, so that you can insert the entire group with the correct formatting with a few clicks rather than adding the same widgets from scratch each time.
 
 ### Design Guidelines
-   
+
 1. Research the metrics supported by the integration and consider grouping them in relevant categories. Groups containing prioritized metrics that are key to the performance and overview of the integration should be closer to the top. Some considerations when deciding which widgets should be grouped together:
     - Go from macro to micro levels within the system (e.g. for a database integration's dashboard, you could group node metrics in one group, index metrics in the next group, shard metrics in the third group)
     - Go from upstream to downstream sections within the system (e.g. for a data streams integration's dashboard, you could group producer metrics in one group, broker metrics in the next group, and consumer metrics in the third group)
-    - Group together metrics that lead to the same actionable insights (e.g. all indexing metrics that reveal which indexes/shards should be optimized could all go in one group, while resource utilization metrics like disk space or memory usage that inform allocation and redistribution decisions should be grouped together in a separate group). 
+    - Group together metrics that lead to the same actionable insights (e.g. all indexing metrics that reveal which indexes/shards should be optimized could all go in one group, while resource utilization metrics like disk space or memory usage that inform allocation and redistribution decisions should be grouped together in a separate group).
 
 
-1. [Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Make sure all relevant graphs are listening to the relevant template variable filters. Template variables should be customized based on the type of technology. 
+1. [Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard. Template variables must be universal and accessible by any user or account using the monitored service. Make sure all relevant graphs are listening to the relevant template variable filters. Template variables should be customized based on the type of technology.
 
     | Type of integration technology | Typical Template Variable |
     | - | - |
@@ -157,11 +157,10 @@ A dashboard that follows best practices helps users consume data quickly. Best p
 
 1. Stream widgets should be at least 6 columns wide (half the dashboard width) for readability. You should place them at the end of a dashboard so they don't "trap" scrolling. It's useful to put stream widgets in a group by themselves so they can be collapsed. Add an event stream only if the service monitored by the dashboard is reporting events. Use `sources:service_name`.
    ![Stream widgets](../assets/images/stream_widgets.png)
-   
+
 1. Always check a dashboard at 1280px wide and 2560px wide to see how it looks on a smaller laptop and a larger monitor. The most common screen widths for dashboards are 1920, 1680, 1440, 2560, and 1280px, making up more than half of all dashboard page views combined.
 
     !!! tip
         If your monitor isn't large enough for high density mode, use the browser zoom controls to zoom out.
 
    ![QA at different widths](../assets/images/qa_widths.png)
-

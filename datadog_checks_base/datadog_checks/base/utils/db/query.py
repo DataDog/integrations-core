@@ -188,8 +188,12 @@ class Query(object):
             if not isinstance(extra, dict):
                 raise ValueError('extra #{} of {} is not a mapping'.format(i, query_name))
 
+            extra_type = extra.get('type')  # type: str
             extra_name = extra.get('name')  # type: str
-            if not extra_name:
+            if extra_type == 'log':
+                # The name is unused
+                extra_name = 'log'
+            elif not extra_name:
                 raise ValueError('field `name` for extra #{} of {} is required'.format(i, query_name))
             elif not isinstance(extra_name, str):
                 raise ValueError('field `name` for extra #{} of {} must be a string'.format(i, query_name))
@@ -202,7 +206,6 @@ class Query(object):
 
             sources[extra_name] = {'type': 'extra', 'index': i}
 
-            extra_type = extra.get('type')  # type: str  # Is the key in a transformers dict
             if not extra_type:
                 if 'expression' in extra:
                     extra_type = 'expression'

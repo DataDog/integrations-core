@@ -5,7 +5,6 @@ import os
 
 import pytest
 from datadog_test_libs.utils.mock_dns import mock_local
-from six import iteritems
 
 from datadog_checks.dev import TempDir, docker_run
 from datadog_checks.tls.utils import days_to_seconds
@@ -51,11 +50,11 @@ def certs(dd_environment):
     }
     certs = {}
     with TempDir('certs') as tmp_dir:
-        for address, name in iteritems(downloads):
+        for address, name in downloads.items():
             filepath = os.path.join(tmp_dir, name)
             download_cert(filepath, address)
             certs[name] = filepath
-        for address, name in iteritems(raw_downloads):
+        for address, name in raw_downloads.items():
             filepath = os.path.join(tmp_dir, name)
             certs[name] = download_cert(filepath, address, raw=True)
             certs[name] = filepath

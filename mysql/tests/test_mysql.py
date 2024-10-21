@@ -17,6 +17,7 @@ from datadog_checks.mysql.const import (
     BINLOG_VARS,
     GALERA_VARS,
     GROUP_REPLICATION_VARS,
+    GROUP_REPLICATION_VARS_8_0_2,
     INNODB_VARS,
     OPTIONAL_STATUS_VARS,
     OPTIONAL_STATUS_VARS_5_6_6,
@@ -166,12 +167,16 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
     operation_time_metrics = variables.SIMPLE_OPERATION_TIME_METRICS + variables.COMPLEX_OPERATION_TIME_METRICS
 
     if MYSQL_REPLICATION == 'group':
+
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
+        additional_tags = ['channel_name:group_replication_applier', 'member_state:ONLINE']
+        if MYSQL_VERSION_PARSED >= parse_version('8.0'):
+            testable_metrics.extend(variables.GROUP_REPLICATION_VARS_8_0_2)
+            additional_tags.append('member_role:PRIMARY')
         aggregator.assert_service_check(
             'mysql.replication.group.status',
             status=MySql.OK,
-            tags=service_check_tags
-            + ['channel_name:group_replication_applier', 'member_role:PRIMARY', 'member_state:ONLINE'],
+            tags=service_check_tags + additional_tags,
             count=1,
         )
         operation_time_metrics.extend(variables.GROUP_REPLICATION_OPERATION_TIME_METRICS)
@@ -531,6 +536,10 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries):
         GROUP_REPLICATION_VARS,
         variables.QUERY_EXECUTOR_METRIC_SETS,
     ]
+
+    if MYSQL_VERSION_PARSED >= parse_version('8.0.2'):
+        standard_metric_sets.append(GROUP_REPLICATION_VARS_8_0_2)
+
     for metric_set in standard_metric_sets:
         for metric_def in metric_set.values():
             metric = metric_def[0]
@@ -737,7 +746,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     assert event['dbms'] == "mysql"
     assert event['tags'].sort() == tags.METRIC_TAGS.sort()
     assert event['integration_version'] == __version__
-    assert event['collection_interval'] == 1800
+    assert event['collection_interval'] == 300
     assert event['metadata'] == {
         'dbm': dbm_enabled,
         'connection_host': instance_complex['host'],
@@ -750,3 +759,59 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is None
+
+
+@pytest.mark.parametrize(
+    'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
+    [
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+    ],
+)
+@pytest.mark.integration
+def test_propagate_agent_tags(
+    aggregator,
+    dd_run_check,
+    instance_basic,
+    instance_propagate_agent_tags,
+    init_config_propagate_agent_tags,
+    should_propagate_agent_tags,
+):
+    instance_basic['propagate_agent_tags'] = instance_propagate_agent_tags
+    init_config = {}
+    if init_config_propagate_agent_tags is not None:
+        init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
+
+    agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
+    expected_tags = (
+        instance_basic.get('tags', [])
+        + [
+            'server:{}'.format(HOST),
+            'port:{}'.format(PORT),
+            'dd.internal.resource:database_instance:forced_hostname',
+            "dd.internal.resource:aws_rds_instance:foo.aws.com",
+            "dd.internal.resource:azure_mysql_server:my-instance",
+            'dd.internal.resource:gcp_sql_database_instance:foo-project:bar',
+        ]
+        + agent_tags
+    )
+
+    with mock.patch('datadog_checks.mysql.config.get_agent_host_tags', return_value=agent_tags):
+        check = MySql(common.CHECK_NAME, init_config, [instance_basic])
+        assert check._config._should_propagate_agent_tags(instance_basic, init_config) == should_propagate_agent_tags
+        if should_propagate_agent_tags:
+            assert all(tag in check.tags for tag in agent_tags)
+            dd_run_check(check)
+            aggregator.assert_service_check(
+                'mysql.can_connect',
+                count=1,
+                status=MySql.OK,
+                tags=expected_tags,
+            )

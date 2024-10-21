@@ -26,7 +26,7 @@ def fix(app: Application):
     """
     from ddev.utils.scripts.check_pr import changelog_entry_suffix, get_noncore_repo_changelog_errors
 
-    latest_commit = app.repo.git.latest_commit
+    latest_commit = app.repo.git.latest_commit()
     pr = app.github.get_pull_request(latest_commit.sha)
     if pr is not None:
         if 'changelog/no-changelog' in pr.labels:

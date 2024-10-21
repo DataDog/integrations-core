@@ -1,0 +1,69 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "125b7209-7617-4bf5-a88c-a4e1f0fa211d",
+  "app_id": "kyverno",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of Kyverno",
+    "title": "Kyverno",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Category::Kubernetes",
+      "Category::Security",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 17459094,
+      "source_type_name": "kyverno",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kyverno.",
+        "check": [
+          "kyverno.policy.results.count",
+          "kyverno.policy.rule.info"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "kyverno"
+      ],
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "monitors": {
+      "Controller element is dropped": "assets/monitors/controller_drops.json"
+    },
+    "saved_views": {
+      "Kyverno Logs Overview": "assets/saved_views/logs_overview.json",
+      "Kyverno Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    },
+    "dashboards": {
+      "Kyverno Overview": "assets/dashboards/overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

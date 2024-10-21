@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4b6b8ef9-e079-4ee4-877e-8f4aafbf8a1d",
   "app_id": "checkpoint-quantum-firewall",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -93,9 +93,6 @@
       "Checkpoint Quantum Firewall: HTTPS Inspection": "assets/dashboards/checkpoint_quantum_firewall_https_inspection.json",
       "Checkpoint Quantum Firewall: Anti Bot": "assets/dashboards/checkpoint_quantum_firewall_anti_bot.json",
       "Checkpoint Quantum Firewall: Anti Malware": "assets/dashboards/checkpoint_quantum_firewall_anti_malware.json"
-    },
-    "logs": {
-      "source": "checkpoint-quantum-firewall"
     }
   },
   "author": {

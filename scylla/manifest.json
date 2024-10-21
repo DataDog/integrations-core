@@ -17,7 +17,8 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -50,10 +51,7 @@
       "Scylla Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Scylla] Server is shutting down": "assets/monitors/instance_down.json"
-    },
-    "logs": {
-      "source": "scylla"
+      "Node State is abnormal": "assets/monitors/instance_down.json"
     }
   }
 }

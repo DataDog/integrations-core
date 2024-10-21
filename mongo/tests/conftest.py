@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import functools
 import os
 import time
 from contextlib import contextmanager
@@ -118,10 +119,43 @@ def instance_custom_queries():
 @pytest.fixture
 def instance_integration(instance_custom_queries):
     instance = copy.deepcopy(instance_custom_queries)
-    instance["additional_metrics"] = ["metrics.commands", "tcmalloc", "collection", "top", "jumbo_chunks"]
+    instance["additional_metrics"] = [
+        "metrics.commands",
+        "tcmalloc",
+        "collection",
+        "top",
+        "jumbo_chunks",
+        "sharded_data_distribution",
+    ]
     instance["collections"] = ["foo", "bar"]
     instance["collections_indexes_stats"] = True
     instance["add_node_tag_to_events"] = False
+    return instance
+
+
+@pytest.fixture
+def instance_integration_autodiscovery(instance_integration):
+    instance = copy.deepcopy(instance_integration)
+    instance["database_autodiscovery"] = {
+        "enabled": True,
+    }
+    return instance
+
+
+@pytest.fixture
+def instance_integration_cluster(instance_integration):
+    instance = copy.deepcopy(instance_integration)
+    instance["cluster_name"] = "my_cluster"
+    return instance
+
+
+@pytest.fixture
+def instance_integration_cluster_autodiscovery(instance_integration_cluster):
+    instance = copy.deepcopy(instance_integration_cluster)
+    instance["database_autodiscovery"] = {
+        "enabled": True,
+        "max_collections_per_database": 5,
+    }
     return instance
 
 
@@ -134,11 +168,16 @@ def mock_local_tls_dns():
 @contextmanager
 def mock_pymongo(deployment):
     mocked_client = MockedPyMongoClient(deployment=deployment)
-    with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
-        'pymongo.collection.Collection'
-    ), mock.patch('pymongo.command_cursor') as cur:
-        cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
-        yield mocked_client
+    with mock.patch(
+        'datadog_checks.mongo.collectors.process_stats.ProcessStatsCollector.is_localhost',
+        new_callable=mock.PropertyMock,
+    ) as mock_is_localhost:
+        mock_is_localhost.return_value = False
+        with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)), mock.patch(
+            'pymongo.collection.Collection'
+        ), mock.patch('pymongo.command_cursor') as cur:
+            cur.CommandCursor = lambda *args, **kwargs: args[1]['firstBatch']
+            yield mocked_client
 
 
 @pytest.fixture
@@ -285,3 +324,20 @@ class InitializeAuthDB(LazyFunction):
             ],
         )
         auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
+
+
+def mock_now(static_time):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            monkeypatch = pytest.MonkeyPatch()
+            monkeypatch.setattr(time, 'time', lambda: static_time)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                monkeypatch.undo()
+            return result
+
+        return wrapper
+
+    return decorator

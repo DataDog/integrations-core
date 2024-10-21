@@ -7,35 +7,24 @@ Collects network metrics.
 """
 
 import re
+import shutil
 import socket
 
 import psutil
-from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.platform import Platform
 
+# fcntl only available on Unix systems
 try:
     import fcntl
 except ImportError:
     fcntl = None
 
-if PY3:
-    long = int
 
-
-# Use a different find_executable implementation depending on Python version,
-# because we want to avoid depending on distutils.
-if PY3:
-    import shutil
-
-    def find_executable(name):
-        return shutil.which(name)
-
-else:
-    # Fallback to distutils for Python 2 as shutil.which was added on Python 3.3
-    from distutils.spawn import find_executable
+def find_executable(name):
+    return shutil.which(name)
 
 
 class Network(AgentCheck):
@@ -257,7 +246,7 @@ class Network(AgentCheck):
         )
 
         count = 0
-        for metric, val in iteritems(vals_by_metric):
+        for metric, val in vals_by_metric.items():
             self.rate('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network metrics for interface %s", count, iface)
@@ -273,9 +262,9 @@ class Network(AgentCheck):
         ]
         return expected_metrics
 
-    def parse_long(self, v):
+    def parse_int(self, v):
         try:
-            return long(v)
+            return int(v)
         except ValueError:
             return 0
 
@@ -285,13 +274,16 @@ class Network(AgentCheck):
         if self._collect_count_metrics:
             self.monotonic_count('{}.count'.format(metric), value, tags=tags)
 
+    def _submit_netmetric_gauge(self, metric, value, tags=None):
+        self.gauge(metric, value, tags=tags)
+
     def submit_regexed_values(self, output, regex_list, tags):
         lines = output.splitlines()
         for line in lines:
             for regex, metric in regex_list:
                 value = re.match(regex, line)
                 if value:
-                    self.submit_netmetric(metric, self.parse_long(value.group(1)), tags=tags)
+                    self.submit_netmetric(metric, self.parse_int(value.group(1)), tags=tags)
 
     def is_collect_cx_state_runnable(self, proc_location):
         """
@@ -325,7 +317,7 @@ class Network(AgentCheck):
         return net_proc_base_location
 
     def _get_metrics(self):
-        return {val: 0 for val in itervalues(self.cx_state_gauge)}
+        return {val: 0 for val in self.cx_state_gauge.values()}
 
     def parse_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """

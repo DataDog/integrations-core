@@ -180,7 +180,7 @@ OPTIONAL_INNODB_VARS = {
     'Innodb_ibuf_merges': ('mysql.innodb.ibuf_merges', RATE),
     'Innodb_ibuf_segment_size': ('mysql.innodb.ibuf_segment_size', GAUGE),
     'Innodb_ibuf_size': ('mysql.innodb.ibuf_size', GAUGE),
-    'Innodb_lock_structs': ('mysql.innodb.lock_structs', RATE),
+    'Innodb_lock_structs': ('mysql.innodb.lock_structs', GAUGE),
     'Innodb_locked_tables': ('mysql.innodb.locked_tables', GAUGE),
     'Innodb_locked_transactions': ('mysql.innodb.locked_transactions', GAUGE),
     'Innodb_log_waits': ('mysql.innodb.log_waits', RATE),
@@ -290,6 +290,10 @@ GROUP_REPLICATION_VARS = {
     'Transactions_check': ('mysql.replication.group.transactions_check', GAUGE),
     'Conflict_detected': ('mysql.replication.group.conflicts_detected', GAUGE),
     'Transactions_row_validating': ('mysql.replication.group.transactions_validating', GAUGE),
+}
+
+# Metrics added to MySQL in 8.0.2
+GROUP_REPLICATION_VARS_8_0_2 = {
     'Transactions_remote_applier_queue': ('mysql.replication.group.transactions_in_applier_queue', GAUGE),
     'Transactions_remote_applied': ('mysql.replication.group.transactions_applied', GAUGE),
     'Transactions_local_proposed': ('mysql.replication.group.transactions_proposed', GAUGE),

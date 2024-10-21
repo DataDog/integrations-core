@@ -60,7 +60,7 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def db_fragmentation_object_names(self):
-        return self.instance_config.get('db_fragmentation_object_names', [])
+        return self.instance_config.get('db_fragmentation_object_names', []) or []
 
     @property
     def enabled(self):
@@ -111,7 +111,9 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
             f"include_db_fragmentation_metrics={self.include_db_fragmentation_metrics}, "
-            f"db_fragmentation_object_names={self.db_fragmentation_object_names})"
+            f"include_db_fragmentation_metrics_tempdb={self.include_db_fragmentation_metrics_tempdb}, "
+            f"db_fragmentation_object_names={self.db_fragmentation_object_names}, "
+            f"collection_interval={self.collection_interval})"
         )
 
     def _build_query_executors(self):
@@ -128,6 +130,7 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
                 queries,
                 executor=functools.partial(self.execute_query_handler, db=database),
                 extra_tags=['db:{}'.format(database)],
+                track_operation_time=self.track_operation_time,
             )
             executor.compile_queries()
             executors.append(executor)

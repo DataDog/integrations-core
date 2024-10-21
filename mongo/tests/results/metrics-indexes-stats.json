@@ -6,7 +6,9 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "name:_id_",
-            "collection:foo"
+            "index:_id_",
+            "collection:foo",
+            "db:test"
         ]
     },
     {
@@ -16,7 +18,33 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "name:_id_",
-            "collection:bar"
+            "index:_id_",
+            "collection:bar",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:test"
         ]
     }
 ]

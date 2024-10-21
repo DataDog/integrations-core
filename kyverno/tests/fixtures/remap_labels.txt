@@ -1,0 +1,3 @@
+# HELP go_info This line is heavily modified to test label_remapping in the integration
+# TYPE go_info gauge
+go_info{version="go1.21.10", namespace="foo", name="baz"} 1

@@ -17,7 +17,8 @@
       "Category::OS & System",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -52,7 +53,7 @@
       "OpenTelemetry Collector Metrics Dashboard": "assets/dashboards/otel_collector_metrics_dashboard.json"
     },
     "monitors": {
-      "OpenTelemetry Refused Spans": "assets/monitors/otel_refused_spans.json"
+      "Refused Spans": "assets/monitors/otel_refused_spans.json"
     }
   }
 }

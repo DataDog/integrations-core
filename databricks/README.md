@@ -1,5 +1,10 @@
 # Agent Check: Databricks
 
+<div class="alert alert-warning">
+<a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
+This page is limited to documentation for ingesting Databricks cluster utilization metrics and logs.
+</div>
+
 ![Databricks default dashboard][21]
 
 ## Overview
@@ -42,6 +47,7 @@ partial -->
 A global init script runs on every cluster created in your workspace. Global init scripts are useful when you want to enforce organization-wide library configurations or security screens. 
 
 <div class="alert alert-info">Only workspace admins can manage global init scripts.</div>
+<div class="alert alert-info">Global init scripts only run on clusters configured with single user or legacy no-isolation shared access mode. Therefore, Databricks recommends configuring all init scripts as cluster-scoped and managing them across your workspace using cluster policies.</div>
 
 Use the Databricks UI to edit the global init scripts:
 
@@ -239,23 +245,28 @@ chmod a+x /tmp/start_datadog.sh
 
 #### With a cluster-scoped init script 
 
-Cluster-scoped init scripts are init scripts defined in a cluster configuration. Cluster-scoped init scripts apply to both clusters you create and those created to run jobs.
+Cluster-scoped init scripts are init scripts defined in a cluster configuration. Cluster-scoped init scripts apply to both clusters you create and those created to run jobs. Databricks supports configuration and storage of init scripts through:
+- Workspace Files
+- Unity Catalog Volumes
+- Cloud Object Storage
 
 Use the Databricks UI to edit the cluster to run the init script:
 
 1. Choose one of the following scripts to install the Agent on the driver or on the driver and worker nodes of the cluster.
 2. Modify the script to suit your needs. For example, you can add tags or define a specific configuration for the integration.
-3. Save the script into your workspace with the **Workspace** menu on the left.
+3. Save the script into your workspace with the **Workspace** menu on the left. If using **Unity Catalog Volume**, save the script in your **Volume** with the **Catalog** menu on the left.
 4. On the cluster configuration page, click the **Advanced** options toggle.
 5. In the **Environment variables**, specify the `DD_API_KEY` environment variable and, optionally, the `DD_ENV` and the `DD_SITE` environment variables.
 6. Go to the **Init Scripts** tab.
-7. In the **Destination** dropdown, select the `Workspace` destination type.
-8. Specify a path to the init script.
+7. In the **Destination** dropdown, select the `Workspace` destination type. If using **Unity Catalog Volume**, in the **Destination** dropdown, select the `Volume` destination type.
+8. Specify a path to the init script. 
 9. Click on the **Add** button.
 
 If you stored your `datadog_init_script.sh` directly in the `Shared` workspace, you can access the file at the following path: `/Shared/datadog_init_script.sh`.
 
 If you stored your `datadog_init_script.sh` directly in a user workspace, you can access the file at the following path: `/Users/$EMAIL_ADDRESS/datadog_init_script.sh`.
+
+If you stored your `datadog_init_script.sh` directly in a `Unity Catalog Volume`, you can access the file at the following path: `/Volumes/$VOLUME_PATH/datadog_init_script.sh`.
 
 More information on cluster init scripts can be found in the [Databricks official documentation][16].
 
@@ -455,7 +466,9 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-{{< partial name="whats-next/whats-next.html" >}}
+Additional helpful documentation, links, and articles:
+
+- [Uploading a Script to Unity Catalog Volume][24]
 
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
@@ -478,3 +491,4 @@ Need help? Contact [Datadog support][10].
 [21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
 [22]: https://www.datadoghq.com/blog/databricks-monitoring-datadog/
 [23]: https://app.datadoghq.com/integrations/spark
+[24]: https://docs.databricks.com/en/ingestion/add-data/upload-to-volume.html#upload-files-to-a-unity-catalog-volume

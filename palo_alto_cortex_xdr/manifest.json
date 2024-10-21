@@ -1,0 +1,58 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "156afdc8-d8e9-4544-92fd-d8da87278671",
+  "app_id": "palo-alto-cortex-xdr",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into palo alto cortex xdr logs",
+    "title": "Palo Alto Cortex XDR",
+    "media": [
+      {
+        "caption": "Palo Alto Cortex XDR - Incidents",
+        "image_url": "images/palo_alto_cortex_xdr_incidents.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Cortex XDR - Alerts",
+        "image_url": "images/palo_alto_cortex_xdr_alerts.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 20766332,
+      "source_type_name": "Palo Alto Cortex XDR",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Palo Alto Cortex XDR - Incidents" : "assets/dashboards/palo_alto_cortex_xdr_incidents.json",
+      "Palo Alto Cortex XDR - Alerts" : "assets/dashboards/palo_alto_cortex_xdr_alerts.json"
+    },
+    "logs": {
+      "source": "palo-alto-cortex-xdr"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

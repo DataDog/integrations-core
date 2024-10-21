@@ -61,5 +61,8 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}(" f"enabled={self.enabled}, " f"collection_interval={self.collection_interval})"
+            f"{self.__class__.__name__}("
+            f"enabled={self.enabled}, "
+            f"engine_edition={self.engine_edition}, "
+            f"collection_interval={self.collection_interval})"
         )

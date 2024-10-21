@@ -14,7 +14,8 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::OS & System"
+      "Category::OS & System",
+      "Offering::Integration"
     ]
   },
   "author": {

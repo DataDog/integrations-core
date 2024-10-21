@@ -16,7 +16,8 @@
       "Category::OS & System",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -47,9 +48,6 @@
     },
     "dashboards": {
       "IBM_WAS": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "ibm_was"
     }
   }
 }

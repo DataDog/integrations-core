@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   mock-msk-endpoint-jmx:
     image: caddy:2.1.1-alpine

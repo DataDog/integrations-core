@@ -16,7 +16,8 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -52,13 +53,10 @@
       "VoltDB - Overview": "assets/dashboards/voltdb_overview.json"
     },
     "monitors": {
-      "CPU load": "assets/monitors/cpu_load.json"
+      "Voltdb Node CPU is high": "assets/monitors/cpu_load.json"
     },
     "saved_views": {
       "voltdb_processes": "assets/saved_views/voltdb_processes.json"
-    },
-    "logs": {
-      "source": "voltdb"
     }
   }
 }

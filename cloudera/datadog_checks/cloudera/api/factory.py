@@ -19,6 +19,10 @@ def make_api(check) -> Api:
             'workload_username': check.shared_config.workload_username,
             'workload_password': check.shared_config.workload_password,
             'max_parallel_requests': check.config.max_parallel_requests,
+            'verify_ssl': check.config.verify_ssl,
+            'ssl_ca_cert': check.config.ssl_ca_cert,
+            'cert_file': check.config.cert_file,
+            'key_file': check.config.key_file,
         },
     )
     if not client:

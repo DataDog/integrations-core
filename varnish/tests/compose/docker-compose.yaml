@@ -1,4 +1,3 @@
-version: '3.5'
 services:
   varnish:
     image: varnish:6.5.1

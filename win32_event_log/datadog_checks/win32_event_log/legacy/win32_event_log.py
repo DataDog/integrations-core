@@ -38,6 +38,7 @@ class Win32EventLogWMI(WinWMICheck):
         'timeout',
         'payload_size',
         'bookmark_frequency',
+        'dd_security_events',
     )
 
     def __init__(self, name, init_config, instances):

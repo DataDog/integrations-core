@@ -9,7 +9,8 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from types import MappingProxyType
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -25,6 +26,7 @@ class SharedConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    global_custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     propagate_agent_tags: Optional[bool] = None
     service: Optional[str] = None
 

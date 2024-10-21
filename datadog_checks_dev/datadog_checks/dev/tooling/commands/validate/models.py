@@ -219,24 +219,24 @@ def models(ctx, check, sync, verbose):
                 for func, message in queue:
                     func(message, indent=True)
 
-    specs_failed = len(specs_failed)
-    files_failed = len(files_failed)
-    files_passed = num_files - files_failed
+    specs_failed_count = len(specs_failed)
+    files_failed_count = len(files_failed)
+    files_passed_count = num_files - files_failed_count
 
-    if specs_failed or files_failed:
+    if specs_failed_count or files_failed_count:
         click.echo()
 
-    if specs_failed:
+    if specs_failed_count:
         echo_failure(f'Specs with errors: {specs_failed}')
 
-    if files_failed:
-        echo_failure(f'Files with errors: {files_failed}')
+    if files_failed_count:
+        echo_failure(f'Files with errors: {files_failed_count}')
 
-    if files_passed:
-        if specs_failed or files_failed:
-            echo_success(f'Files valid: {files_passed}')
+    if files_passed_count:
+        if specs_failed_count or files_failed_count:
+            echo_success(f'Files valid: {files_passed_count}')
         else:
             echo_success(f'All {num_files} data model files are in sync!')
 
-    if specs_failed or files_failed:
+    if specs_failed_count or files_failed_count:
         abort()

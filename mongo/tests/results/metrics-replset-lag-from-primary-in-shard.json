@@ -8,7 +8,9 @@
             "member:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
             "replset_name:mongo-mongodb-sharded-shard-0",
             "replset_state:primary",
-            "sharding_cluster_role:shardsvr"
+            "replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "sharding_cluster_role:shardsvr",
+            "hosting_type:self-hosted"
         ]
     },
     {
@@ -20,7 +22,9 @@
             "member:mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
             "replset_name:mongo-mongodb-sharded-shard-0",
             "replset_state:secondary",
-            "sharding_cluster_role:shardsvr"
+            "replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "sharding_cluster_role:shardsvr",
+            "hosting_type:self-hosted"
         ]
     },
     {
@@ -32,7 +36,9 @@
             "member:mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
             "replset_name:mongo-mongodb-sharded-shard-0",
             "replset_state:secondary",
-            "sharding_cluster_role:shardsvr"
+            "replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "sharding_cluster_role:shardsvr",
+            "hosting_type:self-hosted"
         ]
     }
 ]

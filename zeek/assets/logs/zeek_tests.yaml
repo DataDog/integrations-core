@@ -366,24 +366,25 @@ tests:
       conn_uids:
        - "CALvyD1AyopngTm5Xh"
       depth: 0
+      dest_host:
+       - "10.10.10.10"
       fuid: "FJcjJV2mrRbxT0TWi"
       is_orig: false
       local_orig: true
       md5: "e335c05220a3858e858d2026071e3se2"
-      network:
-        client:
-          ip:
-           - "10.10.10.10"
-        destination:
-          ip:
-           - "20.20.20.20"
       num: 1
+      orig_host:
+       - "20.20.20.20"
+      rx_hosts:
+       - "20.20.20.20"
       sha1: "8514de756fa993adb449c282affe84c752bab495"
       sha256: "2733c2e83762f8a9542ebacf40642505fee0247295161ced264b44d2ad6f9456"
       source: "HTTP"
       timedout: false
       ts:
        - "2024-03-07T02:12:12.099810Z"
+      tx_hosts:
+       - "10.10.10.10"
       zeek:
         missing_bytes: 0
         overflow_bytes: 0
@@ -421,3 +422,35 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1709786320085
+ -
+  sample: "<134>Nov 19 22:36:37 machine-name {\"_path\":\"etc_viz\",\"_system_name\":\"machine-name\",\"_write_ts\":\"2024-03-28T00:01:04.742415Z\",\"c2s_viz.clr_frac\":0.0,\"c2s_viz.enc_dev\":0.30151134457776363,\"c2s_viz.enc_frac\":1.0,\"c2s_viz.pdu1_enc\":true,\"c2s_viz.size\":198,\"err\":null,\"s2c_viz.clr_frac\":0.0,\"s2c_viz.enc_dev\":0.6957566520492713,\"s2c_viz.enc_frac\":1.0,\"s2c_viz.pdu1_enc\":true,\"s2c_viz.size\":818,\"server_a\":\"10.10.10.10\",\"server_p\":443,\"service\":[],\"ts\":\"2024-03-28T00:00:52.656388Z\",\"uid\":\"CV79JD7onkfdf7WDa\",\"viz_stat\":\"Ee!!\"}"
+  service: "corelight"
+  result:
+    custom:
+      _path: "etc_viz"
+      _system_name: "machine-name"
+      _write_ts: "2024-03-28T00:01:04.742415Z"
+      c2s_viz:
+        clr_frac: 0.0
+        enc_dev: 0.30151134457776363
+        enc_frac: 1.0
+        pdu1_enc: true
+        size: 198
+      network:
+        client:
+          ip: "10.10.10.10"
+          port: 443
+      s2c_viz:
+        clr_frac: 0.0
+        enc_dev: 0.6957566520492713
+        enc_frac: 1.0
+        pdu1_enc: true
+        size: 818
+      ts: "2024-03-28T00:00:52.656388Z"
+      uid: "CV79JD7onkfdf7WDa"
+      viz_stat: "Ee!!"
+    message: "<134>Nov 19 22:36:37 machine-name {\"_path\":\"etc_viz\",\"_system_name\":\"machine-name\",\"_write_ts\":\"2024-03-28T00:01:04.742415Z\",\"c2s_viz.clr_frac\":0.0,\"c2s_viz.enc_dev\":0.30151134457776363,\"c2s_viz.enc_frac\":1.0,\"c2s_viz.pdu1_enc\":true,\"c2s_viz.size\":198,\"err\":null,\"s2c_viz.clr_frac\":0.0,\"s2c_viz.enc_dev\":0.6957566520492713,\"s2c_viz.enc_frac\":1.0,\"s2c_viz.pdu1_enc\":true,\"s2c_viz.size\":818,\"server_a\":\"10.10.10.10\",\"server_p\":443,\"service\":[],\"ts\":\"2024-03-28T00:00:52.656388Z\",\"uid\":\"CV79JD7onkfdf7WDa\",\"viz_stat\":\"Ee!!\"}"
+    service: "etc_viz"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1711584052656

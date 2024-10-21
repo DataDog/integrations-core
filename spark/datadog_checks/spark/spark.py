@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
-from six import iteritems, itervalues
-from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
@@ -74,6 +73,8 @@ class SparkCheck(AgentCheck):
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
         self._enable_query_name_tag = is_affirmative(self.instance.get('enable_query_name_tag', False))
+        self._disable_spark_job_stage_tags = is_affirmative(self.instance.get('disable_spark_job_stage_tags', False))
+        self._disable_spark_stage_metrics = is_affirmative(self.instance.get('disable_spark_stage_metrics', False))
 
         # Get the cluster name from the instance configuration
         self.cluster_name = self.instance.get('cluster_name')
@@ -98,8 +99,9 @@ class SparkCheck(AgentCheck):
         # Get the job metrics
         self._spark_job_metrics(spark_apps, tags)
 
-        # Get the stage metrics
-        self._spark_stage_metrics(spark_apps, tags)
+        if not self._disable_spark_stage_metrics:
+            # Get the stage metrics
+            self._spark_stage_metrics(spark_apps, tags)
 
         # Get the executor metrics
         self._spark_executor_metrics(spark_apps, tags)
@@ -114,7 +116,7 @@ class SparkCheck(AgentCheck):
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
-            _, (_, tracking_url) = next(iteritems(spark_apps))
+            _, (_, tracking_url) = next(iter(spark_apps.items()))
             base_url = self._get_request_url(tracking_url)
             am_address = self._get_url_base(base_url)
 
@@ -372,7 +374,7 @@ class SparkCheck(AgentCheck):
         """
         spark_apps = {}
         version_set = False
-        for app_id, (app_name, tracking_url) in iteritems(running_apps):
+        for app_id, (app_name, tracking_url) in running_apps.items():
             try:
                 if not version_set:
                     version_set = self._collect_version(tracking_url, tags)
@@ -394,7 +396,7 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each Spark job.
         """
-        for app_id, (app_name, tracking_url) in iteritems(running_apps):
+        for app_id, (app_name, tracking_url) in running_apps.items():
 
             base_url = self._get_request_url(tracking_url)
             response = self._rest_request_to_json(
@@ -413,8 +415,9 @@ class SparkCheck(AgentCheck):
                 if job_id is not None:
                     tags.append('job_id:{}'.format(job_id))
 
-                for stage_id in job.get('stageIds', []):
-                    tags.append('stage_id:{}'.format(stage_id))
+                if not self._disable_spark_job_stage_tags:
+                    for stage_id in job.get('stageIds', []):
+                        tags.append('stage_id:{}'.format(stage_id))
 
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', COUNT, 1, tags)
@@ -423,7 +426,7 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each Spark stage.
         """
-        for app_id, (app_name, tracking_url) in iteritems(running_apps):
+        for app_id, (app_name, tracking_url) in running_apps.items():
 
             base_url = self._get_request_url(tracking_url)
             response = self._rest_request_to_json(
@@ -449,7 +452,7 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each Spark executor.
         """
-        for app_id, (app_name, tracking_url) in iteritems(running_apps):
+        for app_id, (app_name, tracking_url) in running_apps.items():
 
             base_url = self._get_request_url(tracking_url)
             response = self._rest_request_to_json(
@@ -479,7 +482,7 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each Spark RDD.
         """
-        for app_id, (app_name, tracking_url) in iteritems(running_apps):
+        for app_id, (app_name, tracking_url) in running_apps.items():
 
             base_url = self._get_request_url(tracking_url)
             response = self._rest_request_to_json(
@@ -499,7 +502,7 @@ class SparkCheck(AgentCheck):
         """
         Get metrics for each application streaming statistics.
         """
-        for app_id, (app_name, tracking_url) in iteritems(running_apps):
+        for app_id, (app_name, tracking_url) in running_apps.items():
             try:
                 base_url = self._get_request_url(tracking_url)
                 response = self._rest_request_to_json(
@@ -525,7 +528,7 @@ class SparkCheck(AgentCheck):
         - `SET spark.sql.streaming.metricsEnabled=true` in the app
         """
 
-        for app_name, tracking_url in itervalues(running_apps):
+        for app_name, tracking_url in running_apps.values():
             try:
                 base_url = self._get_request_url(tracking_url)
                 response = self._rest_request_to_json(
@@ -534,10 +537,10 @@ class SparkCheck(AgentCheck):
                 self.log.debug('Structured streaming metrics: %s', response)
                 response = {
                     metric_name: v['value']
-                    for metric_name, v in iteritems(response.get('gauges'))
+                    for metric_name, v in response.get('gauges').items()
                     if 'streaming' in metric_name and 'value' in v
                 }
-                for gauge_name, value in iteritems(response):
+                for gauge_name, value in response.items():
                     match = STRUCTURED_STREAMS_METRICS_REGEX.match(gauge_name)
                     if not match:
                         self.log.debug("No regex match found for gauge: '%s'", str(gauge_name))
@@ -576,7 +579,7 @@ class SparkCheck(AgentCheck):
         if metrics_json is None:
             return
 
-        for status, (metric_name, metric_type) in iteritems(metrics):
+        for status, (metric_name, metric_type) in metrics.items():
             # Metrics defined with a dot `.` are exposed in a nested dictionary.
             # {"foo": {"bar": "baz", "qux": "quux"}}
             #   foo.bar -> baz
@@ -625,7 +628,7 @@ class SparkCheck(AgentCheck):
 
         # Add kwargs as arguments
         if kwargs:
-            query = '&'.join(['{0}={1}'.format(key, value) for key, value in iteritems(kwargs)])
+            query = '&'.join(['{0}={1}'.format(key, value) for key, value in kwargs.items()])
             url = urljoin(url, '?' + query)
 
         try:

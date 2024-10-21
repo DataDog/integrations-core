@@ -1,0 +1,74 @@
+{
+    "system": {
+        "currentTime": {
+            "$date": "2024-08-05T17:42:54.851Z"
+        },
+        "hostname": "db791f00c73a",
+        "cpuAddrSize": 64,
+        "memSizeMB": 32046,
+        "memLimitMB": 16023,
+        "numCores": 10,
+        "numPhysicalCores": 1,
+        "numCpuSockets": 1,
+        "cpuArch": "aarch64",
+        "numaEnabled": false,
+        "numNumaNodes": 1
+    },
+    "os": {
+        "type": "Linux",
+        "name": "Ubuntu",
+        "version": "22.04"
+    },
+    "extra": {
+        "versionString": "Linux version 6.10.0-linuxkit (root@buildkitsandbox) (gcc (Alpine 13.2.1_git20240309) 13.2.1 20240309, GNU ld (GNU Binutils) 2.42) #1 SMP Wed Jul 17 10:51:09 UTC 2024",
+        "libcVersion": "2.35",
+        "kernelVersion": "6.10.0-linuxkit",
+        "cpuFrequencyMHz": "",
+        "cpuFeatures": "",
+        "pageSize": 4096,
+        "numPages": 8203893,
+        "maxOpenFiles": 1048576,
+        "mountInfo": [
+            {
+                "mountId": 691,
+                "parentId": 461,
+                "major": 0,
+                "minor": 170,
+                "root": "/",
+                "mountPoint": "/",
+                "options": "rw,relatime",
+                "fields": "master:55",
+                "type": "overlay",
+                "source": "overlay",
+                "superOpt": "rw,lowerdir=/var/lib/docker/overlay2/l/L6NKWQJS2LISYNZARZZVQLKTVJ:/var/lib/docker/overlay2/l/LZHVIM2Z32WXMJ3EU3QNYRQ4GU:/var/lib/docker/overlay2/l/3ZCLBANGSGUYTNQIIURU4FLM6X:/var/lib/docker/overlay2/l/KLWH34TUHXO53BUIOEOLGGO6TG:/var/lib/docker/overlay2/l/YEMRSH2GCUZZU4SLCGSDRKFVCG:/var/lib/docker/overlay2/l/TGMBJ3PV7CKC3DJ4IWYFOMNFWG:/var/lib/docker/overlay2/l/UZDPYNEHNFT52V3F3UDM3RHA3G:/var/lib/docker/overlay2/l/RPCVTYKERCDNLW7QEDIJOYBW4V:/var/lib/docker/overlay2/l/ODO7QBBVJFJ2462QQXYVGLUKFV,upperdir=/var/lib/docker/overlay2/dde2d2ebad8ccd2ad27cf8c794e6543188e50f7caf8140532d5d420b27bf7cb3/diff,workdir=/var/lib/docker/overlay2/dde2d2ebad8ccd2ad27cf8c794e6543188e50f7caf8140532d5d420b27bf7cb3/work"
+            },
+            {
+                "mountId": 699,
+                "parentId": 691,
+                "major": 254,
+                "minor": 1,
+                "root": "/docker/volumes/ea48a0bdf446c390d6e5d37dc4db93638f1267e51abded8bc0ef06351c767e15/_data",
+                "mountPoint": "/data/configdb",
+                "options": "rw,relatime",
+                "fields": "master:25",
+                "type": "ext4",
+                "source": "/dev/vda1",
+                "superOpt": "rw,discard"
+            },
+            {
+                "mountId": 700,
+                "parentId": 691,
+                "major": 254,
+                "minor": 1,
+                "root": "/docker/volumes/edc4e24ea2f65bdf657c1d5cdd6edcf598073cf9d4e11bd947b8da240edad6e1/_data",
+                "mountPoint": "/data/db",
+                "options": "rw,relatime",
+                "fields": "master:25",
+                "type": "ext4",
+                "source": "/dev/vda1",
+                "superOpt": "rw,discard"
+            }
+        ]
+    },
+    "ok": 1.0
+}

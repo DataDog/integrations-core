@@ -17,7 +17,18 @@
       "Category::SNMP",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-snmp-with-datadog/"
+      },
+      {
+        "resource_type": "guide",
+        "url": "https://datadoghq.dev/integrations-core/tutorials/snmp/introduction/"
+      }
     ]
   },
   "author": {
@@ -50,19 +61,19 @@
       "Interface Performance": "assets/dashboards/interface_performance.json",
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json",
       "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json",
-      "Datadog NDM Environment": "assets/dashboards/datadog_ndm_environment.json",
+      "Datadog NDM Environment": "assets/dashboards/ndm_troubleshooting.json",
       "BGP & OSPF Overview": "assets/dashboards/bgp_ospf_overview.json"
     },
     "monitors": {
-      "[SNMP] Device Down Alert": "assets/monitors/device_down.json",
-      "[SNMP] Device Unreachable Alert": "assets/monitors/device_unreachable.json",
-      "[SNMP] Interface Down Alert": "assets/monitors/interface_down.json",
-      "[SNMP] LinkDown Trap Alert": "assets/monitors/traps_linkDown.json",
-      "[SNMP] CPU usage high for {{snmp_device.name}} in namespace {{device_namespace.name}}": "assets/monitors/high_cpu.json",
-      "[SNMP] High memory usage for device {{snmp_device.name}} in namespace {{device_namespace.name}}": "assets/monitors/high_memory.json",
-      "[SNMP] High interface bandwidth usage for incoming traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}": "assets/monitors/high_interface_bandwidth_usage_in.json",
-      "[SNMP] High interface bandwidth usage for outgoing traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}": "assets/monitors/high_interface_bandwidth_usage_out.json",
-      "[SNMP] BGP peer state between {{snmp_device.name}} and neighbor {{neighbor.name}} is stuck in an unestablished state": "assets/monitors/bgp_peer_state_stuck.json"
+      "Device is down": "assets/monitors/device_down.json",
+      "SNMP Device is unreachable": "assets/monitors/device_unreachable.json",
+      "Interface is down on SNMP device": "assets/monitors/interface_down.json",
+      "LinkDown Trap Interface is down on SNMP device": "assets/monitors/traps_linkDown.json",
+      "SNMP device CPU usage is high": "assets/monitors/high_cpu.json",
+      "SNMP device memory usage is high": "assets/monitors/high_memory.json",
+      "Interface bandwidth usage for incoming traffic is high": "assets/monitors/high_interface_bandwidth_usage_in.json",
+      "Interface bandwidth usage for outgoing traffic is high": "assets/monitors/high_interface_bandwidth_usage_out.json",
+      "BGP peer state is stuck in an unestablished state": "assets/monitors/bgp_peer_state_stuck.json"
     }
   }
 }

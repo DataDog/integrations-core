@@ -2,7 +2,79 @@
 
 <!-- towncrier release notes start -->
 
-## 6.4.0 / 2024-03-22
+## 8.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 7.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 6.9.0 / 2024-08-09 / Agent 7.57.0
+
+***Added***:
+
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 6.8.1 / 2024-07-24 / Agent 7.56.0
+
+***Fixed***:
+
+* Fixed the heat endpoint for the Openstack Controller ([#17996](https://github.com/DataDog/integrations-core/pull/17996))
+
+## 6.8.0 / 2024-06-21
+
+***Added***:
+
+* Added handling for new exception: 'CatalogEndPointFailure' and clearer log messages for exception handling ([#17904](https://github.com/DataDog/integrations-core/pull/17904))
+
+## 6.7.0 / 2024-06-20
+
+***Added***:
+
+* Handle more exceptions by lowering severity of logs ([#17773](https://github.com/DataDog/integrations-core/pull/17773))
+* Add 'all_projects' option for compute servers ([#17871](https://github.com/DataDog/integrations-core/pull/17871))
+
+***Fixed***:
+
+* Fix uninitialized variables ([#17771](https://github.com/DataDog/integrations-core/pull/17771))
+* Remove baremetal allocations microversion check ([#17791](https://github.com/DataDog/integrations-core/pull/17791))
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+## 6.6.0 / 2024-05-31
+
+***Added***:
+
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424))
+* Adding new glance image metrics ([#17492](https://github.com/DataDog/integrations-core/pull/17492))
+* Adding new Ironic metrics ([#17541](https://github.com/DataDog/integrations-core/pull/17541))
+* Added Heat Component ([#17573](https://github.com/DataDog/integrations-core/pull/17573))
+* Added Swift component ([#17640](https://github.com/DataDog/integrations-core/pull/17640))
+* Added volume_type tag to cinder volumes for ceph monitoring ([#17643](https://github.com/DataDog/integrations-core/pull/17643))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 6.5.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Added new cinder metrics ([#17422](https://github.com/DataDog/integrations-core/pull/17422))
+
+## 6.4.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

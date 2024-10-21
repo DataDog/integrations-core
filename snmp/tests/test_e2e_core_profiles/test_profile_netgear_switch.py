@@ -27,8 +27,11 @@ def test_e2e_profile_netgear_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:netgear-switch',
         'snmp_host:netgear-switch.device.name',
+        'device_hostname:netgear-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'agent_inventory_machine_model:their quaintly but acted oxen oxen their Jaded acted',
         'agent_inventory_software_version:kept but their zombies quaintly but driving',
@@ -53,6 +56,7 @@ def test_e2e_profile_netgear_switch(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.4526.100.1.28',
         'vendor': 'netgear',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

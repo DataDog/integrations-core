@@ -28,8 +28,11 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
     common_tags = [
         'snmp_profile:alcatel-lucent-omni-access-wlc',
         'snmp_host:alcatel-lucent-omni-access-wlc.device.name',
+        'device_hostname:alcatel-lucent-omni-access-wlc.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'wlsx_model_name:quaintly Jaded oxen oxen',
         'wlsx_switch_license_serial_number:quaintly oxen their',
@@ -83,6 +86,7 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.6486.800.1.1.2.2.2.1.1.4',
         'vendor': 'alcatel-lucent',
         'device_type': 'wlc',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

@@ -1,0 +1,27 @@
+Command: show server
+  Server:                   tibemsd (version: 10.1.0 V4)
+  Hostname:                 d3ce69f9df4f
+  Process Id:               1
+  State:                    active
+  Runtime Module Path:      /opt/tibco/ems/10.1/bin/lib:/opt/tibco/ems/10.1/lib
+  Topics:                   3 (0 dynamic, 0 temporary)
+  Queues:                   9 (0 dynamic, 2 temporary)
+  Client Connections:       0 of 1000 maximum
+  Admin Connections:        2
+  Sessions:                 2
+  Producers:                2
+  Consumers:                2
+  Durables:                 1
+  Log File Size:            19.4 Kb out of 1MB
+  Pending Messages:         0
+  Pending Message Size:     0.0 Kb
+  Message Memory Usage:     25.4 Kb out of 512MB
+  Message Memory Pooled:    53.0 Kb
+  Synchronous Storage:      1.5 Kb
+  Asynchronous Storage:     3.5 Kb
+  Fsync for Sync Storage:   disabled
+  Inbound Message Rate:     0 msgs/sec,  0.0 Kb per second
+  Outbound Message Rate:    0 msgs/sec,  0.0 Kb per second
+  Storage Read Rate:        0 reads/sec,  0.0 Kb per second
+  Storage Write Rate:       0 writes/sec, 0.0 Kb per second
+  Uptime:                   4 days 6 hours 19 minutes

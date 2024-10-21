@@ -18,7 +18,8 @@
       "Category::Network",
       "Category::Orchestration",
       "Category::Provisioning",
-      "Supported OS::Linux"
+      "Supported OS::Linux",
+      "Offering::Integration"
     ]
   },
   "author": {

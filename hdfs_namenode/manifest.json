@@ -15,7 +15,26 @@
       "Category::Log Collection",
       "Category::OS & System",
       "Supported OS::Linux",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/hadoop-architecture-overview"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-hadoop-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collecting-hadoop-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog"
+      }
     ]
   },
   "author": {
@@ -46,9 +65,6 @@
     },
     "dashboards": {
       "hdfs_namenode": "assets/dashboards/hdfs_namenode_dashboard.json"
-    },
-    "logs": {
-      "source": "hdfs_namenode"
     }
   }
 }

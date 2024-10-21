@@ -79,6 +79,9 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'status': 1,
                     u'sys_object_id': u'1.3.6.1.4.1.3375.2.1.3.4.43',
                     u'tags': [
+                        u'device_hostname:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+                        u'device_id:' + device_id,
+                        u'device_ip:' + device_ip,
                         u'device_namespace:default',
                         u'device_vendor:f5',
                         u'snmp_device:' + device_ip,
@@ -93,6 +96,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'os_name': u'Linux',
                     u'os_version': u'3.10.0-862.14.4.el7.ve.x86_64',
                     u'device_type': u'load_balancer',
+                    u'integration': u'snmp',
                 },
             ],
             u'diagnoses': [
@@ -192,13 +196,16 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
     pprint.pprint(event1['devices'])
     assert len(event1['devices']) == 1
     actual_device = event1['devices'][0]
+
+    device_id = 'default:' + device_ip
+
     device = {
         u'description': u'Cisco IOS Software, IOS-XE Software, Catalyst L3 Switch '
         u'Software (CAT3K_CAA-UNIVERSALK9-M), Version 03.06.06E RELEASE '
         u'SOFTWARE (fc1) Technical Support: '
         u'http://www.cisco.com/techsupport Copyright (c) 1986-2016 by '
         u'Cisco Systems, Inc. Compiled Sat 17-Dec-',
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [u'device_namespace:default', u'snmp_device:' + device_ip],
         u'ip_address': device_ip,
         u'location': u'4th floor',
@@ -208,6 +215,9 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
         u'status': 1,
         u'sys_object_id': u'1.3.6.1.4.1.9.1.1745',
         u'tags': [
+            u'device_hostname:Cat-3850-4th-Floor.companyname.local',
+            u'device_id:' + device_id,
+            u'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:cisco',
             u'snmp_device:' + device_ip,
@@ -219,6 +229,7 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
         u'serial_number': u'FOCXXXXXXXX',
         u'model': u'CAT3K_CAA-UNIVERSALK9-M',
         u'device_type': u'switch',
+        u'integration': u'snmp',
     }
     assert device == actual_device
 
@@ -252,9 +263,10 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -265,15 +277,19 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
         u'status': 1,
         u'sys_object_id': u'1.3.6.1.4.1.9.1.241',
         u'tags': [
+            u'device_id:' + device_id,
+            u'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:cisco',
             u'snmp_device:' + device_ip,
             u'snmp_host:catalyst-6000.example',
+            u'device_hostname:catalyst-6000.example',
             u'snmp_profile:cisco-catalyst',
         ],
         u'vendor': u'cisco',
         u'serial_number': u'SCA044001J9',
         u'device_type': u'switch',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -291,9 +307,10 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -309,15 +326,19 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
         u'sys_object_id': u'1.3.6.1.4.1.232.9.4.10',
         u'version': u'A04-08/12/2018',
         u'tags': [
+            u'device_id:' + device_id,
+            u'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:hp',
             u'snmp_device:' + device_ip,
             u'snmp_host:hp-ilo4.example',
+            u'device_hostname:hp-ilo4.example',
             u'snmp_profile:hp-ilo4',
         ],
         u'vendor': u'hp',
         u'serial_number': u'dXPEdPBE5yKtjW9xx3',
         u'device_type': u'server',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -335,9 +356,10 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -353,15 +375,19 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
         u'version': u'A04-08/12/2019',
         u'sys_object_id': u'1.3.6.1.4.1.232.1.2',
         u'tags': [
+            u'device_id:' + device_id,
+            u'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:hp',
             u'snmp_device:' + device_ip,
             u'snmp_host:hpe-proliant.example',
+            u'device_hostname:hpe-proliant.example',
             u'snmp_profile:hpe-proliant',
         ],
         u'vendor': u'hp',
         u'serial_number': u'dLPEdPBE5yKtjW9xx3',
         u'device_type': u'other',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -379,13 +405,14 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'APC Web/SNMP Management Card (MB:v3.9.2 PF:v3.9.2 '
         'PN:apc_hw02_aos_392.bin AF1:v3.7.2 AN1:apc_hw02_sumx_372.bin '
         'MN:AP9619 HR:A10 SN: 5A1827E00000 MD:12/04/2007) (Embedded '
         'PowerNet SNMP Agent SW v2.2 compatible)',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -400,6 +427,8 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.318.1.1.1',
         'tags': [
+            u'device_id:' + device_id,
+            u'device_ip:' + device_ip,
             'device_namespace:default',
             'device_vendor:apc',
             'firmware_version:2.0.3-test',
@@ -411,7 +440,8 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         ],
         'vendor': 'apc',
         'version': '2.0.3-test',
-        u'device_type': u'ups',
+        'device_type': 'ups',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -430,11 +460,12 @@ def test_e2e_core_metadata_juniper_ex(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     expected_device = {
         u'description': u'Juniper Networks, Inc. ex2200-24t-4g internet router, kernel '
         + u'JUNOS 10.2R1.8 #0: 2010-05-27 20:13:49 UTC',
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -449,6 +480,8 @@ def test_e2e_core_metadata_juniper_ex(dd_agent_check):
         u'sys_object_id': u'1.3.6.1.4.1.2636.1.1.1.2.30',
         u'serial_number': u'dXPEdPBE5yKtjW9xx3',
         u'tags': [
+            u'device_id:' + device_id,
+            u'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:juniper-networks',
             u'snmp_device:' + device_ip,
@@ -457,6 +490,7 @@ def test_e2e_core_metadata_juniper_ex(dd_agent_check):
         u'vendor': u'juniper-networks',
         u'version': u'version-1.0',
         u'device_type': u'switch',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, expected_device)
 
@@ -475,11 +509,12 @@ def test_e2e_core_metadata_juniper_mx(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     expected_device = {
         u'description': u'Juniper Networks, Inc. mx480 internet router, kernel JUNOS 11.2R1.10 '
         + u'#0: 2011-07-29 07:15:34 UTC',
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -494,6 +529,8 @@ def test_e2e_core_metadata_juniper_mx(dd_agent_check):
         u'sys_object_id': u'1.3.6.1.4.1.2636.1.1.1.2.25',
         u'serial_number': u'dXPEdPBE5yKtjW9xx4',
         u'tags': [
+            u'device_id:' + device_id,
+            u'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:juniper-networks',
             u'snmp_device:' + device_ip,
@@ -502,6 +539,7 @@ def test_e2e_core_metadata_juniper_mx(dd_agent_check):
         u'vendor': u'juniper-networks',
         u'version': u'version-1.1',
         u'device_type': u'router',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, expected_device)
 
@@ -520,11 +558,12 @@ def test_e2e_core_metadata_juniper_srx(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     expected_device = {
         u'description': u'Juniper Networks, Inc. srx3400 internet router, kernel JUNOS '
         + u'10.4R3.4 #0: 2011-03-19 22:06:23 UTC',
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -539,6 +578,8 @@ def test_e2e_core_metadata_juniper_srx(dd_agent_check):
         u'sys_object_id': u'1.3.6.1.4.1.2636.1.1.1.2.35',
         u'serial_number': u'dXPEdPBE5yKtjW9xx5',
         u'tags': [
+            u'device_id:' + device_id,
+            u'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:juniper-networks',
             u'snmp_device:' + device_ip,
@@ -547,6 +588,7 @@ def test_e2e_core_metadata_juniper_srx(dd_agent_check):
         u'vendor': u'juniper-networks',
         u'version': u'version-1.2',
         u'device_type': u'firewall',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, expected_device)
 
@@ -564,10 +606,11 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'ArubaOS (MODEL: Aruba7210), Version 8.6.0.4 (74969)',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -583,15 +626,19 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.14823.1.1.36',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'device_namespace:default',
             'device_vendor:aruba',
             'snmp_device:' + device_ip,
             'snmp_host:aruba-switch.device.name',
+            'device_hostname:aruba-switch.device.name',
             'snmp_profile:aruba-switch',
         ],
         'vendor': 'aruba',
         'version': '8.6.0.4',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -609,10 +656,11 @@ def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'ArubaOS (MODEL: 335), Version 6.5.4.3-6.5.4.3',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -626,15 +674,19 @@ def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.14823.1.2.80',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'device_namespace:default',
             'device_vendor:aruba',
             'snmp_device:' + device_ip,
             'snmp_host:aruba-335-name',
+            'device_hostname:aruba-335-name',
             'snmp_profile:aruba-access-point',
         ],
         'vendor': 'aruba',
         'version': '6.5.4.3-6.5.4.3',
         'device_type': 'access_point',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -652,10 +704,11 @@ def test_e2e_core_metadata_arista(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'Arista Networks EOS version 4.20.11.1M running on an Arista Networks DCS-7504',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -671,15 +724,19 @@ def test_e2e_core_metadata_arista(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.30065.1.3011.7504',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'device_namespace:default',
             'device_vendor:arista',
             'snmp_device:' + device_ip,
             'snmp_host:DCS-7504-name',
+            'device_hostname:DCS-7504-name',
             'snmp_profile:arista',
         ],
         'vendor': 'arista',
         'version': '12.00',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -697,10 +754,11 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'Palo Alto Networks PA-3000 series firewall',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -715,6 +773,8 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.25461.2.3.18',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'device_namespace:default',
             'snmp_device:' + device_ip,
             'snmp_profile:palo-alto',
@@ -722,6 +782,7 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
         'vendor': 'paloaltonetworks',
         'version': '9.0.5',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -739,10 +800,11 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'NetApp Release 9.3P7: Wed Jul 25 10:11:10 UTC 2018',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -758,15 +820,19 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.789.2.5',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'device_namespace:default',
             'device_vendor:netapp',
             'snmp_device:' + device_ip,
             'snmp_host:example-datacenter.company',
+            'device_hostname:example-datacenter.company',
             'snmp_profile:netapp',
         ],
         'vendor': 'netapp',
         'version': '9.3P7:',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -784,10 +850,11 @@ def test_e2e_core_metadata_checkpoint(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'Linux host1 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -803,15 +870,19 @@ def test_e2e_core_metadata_checkpoint(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.2620.1.1',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'device_namespace:default',
             'device_vendor:checkpoint',
             'snmp_device:' + device_ip,
             'snmp_host:checkpoint.device.name',
+            'device_hostname:checkpoint.device.name',
             'snmp_profile:checkpoint',
         ],
         'vendor': 'checkpoint',
         'version': 'R80.10',
         'device_type': 'firewall',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -830,10 +901,11 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'Linux host1 3.10.0-957.21.3cpx86_64 #1 SMP Tue Jan 28 17:26:12 IST 2020 x86_64',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -849,15 +921,19 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.2620.1.1',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'device_namespace:default',
             'device_vendor:checkpoint',
             'snmp_device:' + device_ip,
             'snmp_host:checkpoint.device.name',
+            'device_hostname:checkpoint.device.name',
             'snmp_profile:checkpoint-firewall',
         ],
         'vendor': 'checkpoint',
         'version': 'R80.10',
         'device_type': 'firewall',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -875,9 +951,10 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -893,15 +970,19 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.12356.101.1.1',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'device_namespace:default',
             'device_vendor:fortinet',
             'snmp_device:' + device_ip,
             'snmp_host:fortinet-fortigate.device.name',
+            'device_hostname:fortinet-fortigate.device.name',
             'snmp_profile:fortinet-fortigate',
         ],
         'vendor': 'fortinet',
         'version': 'v5.6.4,build1575b1575,180425 (GA)',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -919,9 +1000,10 @@ def test_e2e_core_metadata_dell_idrac(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -936,6 +1018,8 @@ def test_e2e_core_metadata_dell_idrac(dd_agent_check):
         u'version': u'2.5.4',
         u'sys_object_id': u'1.3.6.1.4.1.674.10892.2',
         u'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:dell',
             u'snmp_device:' + device_ip,
@@ -944,6 +1028,7 @@ def test_e2e_core_metadata_dell_idrac(dd_agent_check):
         u'vendor': u'dell',
         u'serial_number': u'acted quaintly driving',
         u'device_type': u'server',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -961,10 +1046,11 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         'description': 'device-name-3 263829375 Isilon OneFS v8.2.0.0',
-        'id': 'default:' + device_ip,
+        'id': device_id,
         'id_tags': [
             'device_namespace:default',
             'snmp_device:' + device_ip,
@@ -979,6 +1065,8 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.12325.1.1.2.1.1',
         'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             'cluster_name:testcluster1',
             'device_namespace:default',
             'device_vendor:dell',
@@ -990,6 +1078,7 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'vendor': 'dell',
         'version': '8.2.0.0',
         'device_type': 'storage',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1057,12 +1146,13 @@ def test_e2e_core_metadata_cisco_asr_1001x(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         u'description': u'Cisco IOS Software [Bengaluru], ASR1000 Software '
         '(X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 17.6.4, RELEASE '
         'SOFTWARE (fc1)',
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -1074,6 +1164,8 @@ def test_e2e_core_metadata_cisco_asr_1001x(dd_agent_check):
         u'status': 1,
         u'sys_object_id': u'1.3.6.1.4.1.9.1.1861',
         u'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:cisco',
             u'snmp_device:' + device_ip,
@@ -1082,6 +1174,7 @@ def test_e2e_core_metadata_cisco_asr_1001x(dd_agent_check):
         u'vendor': u'cisco',
         u'version': u'17.6.4',
         u'device_type': u'router',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1099,10 +1192,11 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         u'description': u'Cisco IOS XR Software (Cisco ASR9K Series),  Version ' '6.4.2[Default]',
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -1114,6 +1208,8 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
         u'status': 1,
         u'sys_object_id': u'1.3.6.1.4.1.9.1.1639',
         u'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:cisco',
             u'snmp_device:' + device_ip,
@@ -1122,6 +1218,7 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
         u'vendor': u'cisco',
         u'version': u'6.4.2',
         u'device_type': u'router',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1139,11 +1236,12 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         u'description': u'Cisco IOS XR Software (ASR9K), Version 7.1.3  Copyright (c) '
         '2013-2020 by Cisco Systems, Inc.',
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -1155,6 +1253,8 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
         u'status': 1,
         u'sys_object_id': u'1.3.6.1.4.1.9.1.2658',
         u'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:cisco',
             u'snmp_device:' + device_ip,
@@ -1163,6 +1263,7 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
         u'vendor': u'cisco',
         u'version': u'7.1.3',
         u'device_type': u'router',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1281,10 +1382,11 @@ def test_e2e_core_metadata_cisco_wlc(dd_agent_check):
     aggregator = dd_agent_check(config, rate=False)
 
     device_ip = instance['ip_address']
+    device_id = 'default:' + device_ip
 
     device = {
         u'description': u'Cisco Controller',
-        u'id': u'default:' + device_ip,
+        u'id': device_id,
         u'id_tags': [
             u'device_namespace:default',
             u'snmp_device:' + device_ip,
@@ -1296,13 +1398,17 @@ def test_e2e_core_metadata_cisco_wlc(dd_agent_check):
         u'status': 1,
         u'sys_object_id': u'1.3.6.1.4.1.9.1.1069',
         u'tags': [
+            'device_id:' + device_id,
+            'device_ip:' + device_ip,
             u'device_namespace:default',
             u'device_vendor:cisco',
             u'snmp_device:' + device_ip,
             u'snmp_host:DDOGWLC',
+            'device_hostname:DDOGWLC',
             u'snmp_profile:cisco-legacy-wlc',
         ],
         u'vendor': u'cisco',
         u'device_type': u'wlc',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)

@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "**This Dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Flux Integration**\n\n# Flux Documentation\n- [Flux Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Flux Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
+    "description": "This dashboard provides an overview of your Flux CD instance. It monitors the performance of your continuous delivery and deployment processes for your containerized applications.\n\n### Useful Links\n- [Flux CD Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Blog on Flux CD and other Container-native Integrations&nbsp;\u2197](https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux)\n- [Flux CD Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux CD Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -28,24 +28,42 @@
             "prefix": "kind"
         }
     ],
-    "title": "Flux",
+    "title": "Flux CD Overview",
     "widgets": [
         {
             "definition": {
-                "banner_img": "/static/images/logos/fluxcd_large.svg",
                 "layout_type": "ordered",
-                "show_title": false,
-                "title": "About Flux",
+                "show_title": true,
+                "title": "",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
+                            "has_background": true,
+                            "has_border": true,
+                            "horizontal_align": "center",
+                            "sizing": "cover",
+                            "type": "image",
+                            "url": "/static/images/logos/fluxcd_small.svg",
+                            "url_dark_theme": "/static/images/logos/fluxcd_reversed_small.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 2999094163935830,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
                             "background_color": "transparent",
-                            "content": "**This dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Flux Integration**\n",
+                            "content": "**Flux CD**\n\nThis dashboard provides an overview of your Flux CD instance. It monitors the performance of your continuous delivery and deployment processes for your containerized applications.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
-                            "text_align": "center",
+                            "text_align": "left",
                             "tick_edge": "left",
                             "tick_pos": "50%",
                             "type": "note",
@@ -56,17 +74,17 @@
                             "height": 2,
                             "width": 3,
                             "x": 0,
-                            "y": 0
+                            "y": 2
                         }
                     },
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "# Useful Links\n- [Flux Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Flux Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
+                            "content": "### Useful Links\n- [Flux CD Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Blog on Flux CD and other Container-native Integrations&nbsp;\u2197](https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux)\n- [Flux CD Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux CD Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": true,
-                            "text_align": "center",
+                            "text_align": "left",
                             "tick_edge": "left",
                             "tick_pos": "50%",
                             "type": "note",
@@ -77,7 +95,7 @@
                             "height": 2,
                             "width": 3,
                             "x": 3,
-                            "y": 0
+                            "y": 2
                         }
                     }
                 ]
@@ -101,7 +119,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "This section provides you with an overview of your system activity.  The monitor summary notifies you of Flux alerts. ",
+                            "content": "This section provides you with an overview of your system activity. The monitor summary notifies you of Flux CD alerts. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -113,9 +131,28 @@
                         },
                         "id": 6499557150759586,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
+                            "height": 1,
+                            "width": 4,
                             "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "cilium.prometheus.health",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "title": "Service Checks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 83983289591112,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 4,
                             "y": 0
                         }
                     },
@@ -130,42 +167,16 @@
                             "show_priority": false,
                             "sort": "status,asc",
                             "start": 0,
-                            "summary_type": "groups",
+                            "summary_type": "monitors",
                             "title": "Monitor Summary",
                             "type": "manage_status"
                         },
                         "id": 3331110254153362,
                         "layout": {
-                            "height": 4,
-                            "width": 4,
-                            "x": 2,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "check": "fluxcd.openmetrics.health",
-                            "group_by": [
-                                "endpoint"
-                            ],
-                            "grouping": "cluster",
-                            "tags": [
-                                "$controller",
-                                "$namespace",
-                                "$name",
-                                "$kind"
-                            ],
-                            "title": "Service Checks",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "check_status"
-                        },
-                        "id": 83983289591112,
-                        "layout": {
-                            "height": 2,
-                            "width": 2,
+                            "height": 3,
+                            "width": 6,
                             "x": 0,
-                            "y": 2
+                            "y": 1
                         }
                     }
                 ]

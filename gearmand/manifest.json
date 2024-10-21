@@ -14,7 +14,8 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -52,9 +53,6 @@
     },
     "saved_views": {
       "gearman_processes": "assets/saved_views/gearman_processes.json"
-    },
-    "logs": {
-      "source": "gearman"
     }
   }
 }

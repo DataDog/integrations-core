@@ -28,8 +28,11 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:brocade-fc-switch',
         'snmp_host:brocade-fc-switch.device.name',
+        'device_hostname:brocade-fc-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
@@ -114,6 +117,7 @@ def test_e2e_profile_brocade_fc_switch(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.1588.2.1.1.32',
         'vendor': 'brocade',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

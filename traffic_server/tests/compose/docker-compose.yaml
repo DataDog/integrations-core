@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   trafficserver:
     image: shaker/trafficserver:${TRAFFIC_SERVER_VERSION}

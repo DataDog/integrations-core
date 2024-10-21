@@ -1,0 +1,13 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+datadog.network_path.check_duration,gauge,,second,,"The duration of a check run in seconds. The time needed for the network_path integration to traceroute one endpoint, including time to collect snmp data, processing and submitting metrics/events/etc.",0,network_path,,,
+datadog.network_path.check_interval,gauge,,second,,"The interval between check runs in seconds. The time delta between current check run and last check run.",0,network_path,,,
+datadog.network_path.collector.flush_duration,gauge,,second,,"The time needed to flush pathtest contexts.",0,network_path,,,
+datadog.network_path.collector.flush_interval,gauge,,second,,"The interval between flushes of pathtest contexts.",0,network_path,,,
+datadog.network_path.collector.pathtest_flushed_count,gauge,,,,"The number of pathtest contexts flushed.",0,network_path,,,
+datadog.network_path.collector.pathtest_store_size,gauge,,,,"The number of pathtest contexts currently stored.",0,network_path,,,
+datadog.network_path.collector.schedule_duration,gauge,,second,,"The time needed to schedule new connections that will be monitored via network path collector.",0,network_path,,,
+datadog.network_path.collector.workers,gauge,,,,"The number of workers used to process pathtests concurrently.",0,network_path,,,
+datadog.network_path.path.hops,gauge,,,,"The number of hops of the collected pathtrace (traceroute).",0,network_path,,,
+datadog.network_path.path.monitored,gauge,,,,"Paths monitored count. Make 'sum by {X}' queries to count all the Paths with the tag X",0,network_path,,,
+datadog.network_path.path.reachable,gauge,,,,"The value is 1 if the path is reachable, 0 otherwise. Reachability is determined by the status of the destination/target of the pathtest.",0,network_path,,,
+datadog.network_path.path.unreachable,gauge,,,,"The value is 1 if the path is unreachable, 0 otherwise. Reachability is determined by the status of the destination/target of the pathtest.",0,network_path,,,

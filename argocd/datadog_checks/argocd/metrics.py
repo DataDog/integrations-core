@@ -64,9 +64,9 @@ APPLICATION_CONTROLLER = {
 APPSET_CONTROLLER = {
     'controller_runtime_active_workers': 'active.workers',
     'controller_runtime_max_concurrent_reconciles': 'max.concurrent.reconciles',
-    'controller_runtime_reconcile_errors_total': 'reconcile.errors.total',
+    'controller_runtime_reconcile_errors': 'reconcile.errors',
     'controller_runtime_reconcile_time_seconds': 'reconcile.time_seconds',
-    'controller_runtime_reconcile_total': 'runtime.reconcile.total',
+    'controller_runtime_reconcile': 'runtime.reconcile',
 }
 
 API_SERVER = {

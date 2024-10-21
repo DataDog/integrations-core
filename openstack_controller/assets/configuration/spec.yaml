@@ -14,14 +14,6 @@ files:
             service.hidden: true
     - template: instances
       options:
-        - name: use_legacy_check_version
-          display_priority: 1
-          description: |
-            For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
-            integration by setting this field to "true".
-          value:
-              type: boolean
-              example: false
         - name: name
           hidden: true
           description: |
@@ -42,6 +34,7 @@ files:
           value:
             example: <PASSWORD>
             type: string
+
         - name: domain_id
           description: |
            The domain ID used to connect to Openstack. If not specified, the check will
@@ -65,6 +58,14 @@ files:
                 id: <DOMAIN_ID>
             type: object
           enabled: true
+        - name: use_legacy_check_version
+          description: |
+            For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+            integration by setting this field to "true".
+          enabled: true
+          value:
+              type: boolean
+              example: false
         - name: whitelist_project_names
           hidden: true
           description: |
@@ -182,6 +183,18 @@ files:
             example: "2.93"
             type: string
             display_default: null
+        - name: cinder_microversion
+          description: |
+           The microversion of the Rest API to call.
+           It is recommended to set this parameter to the latest microversion supported by your Openstack version.
+
+           View this page for more about microvoersion compatibility:
+              https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html
+          enabled: true
+          value:
+            example: "volume 3.70"
+            type: string
+            display_default: null
         - name: collect_hypervisor_load
           hidden: true
           description: |
@@ -265,6 +278,13 @@ files:
            The region_id that will be used to filter the endpoints to use for each component.
           value:
             type: string
+        - name: all_projects
+          description: |
+           List compute servers across all projects (admin only).
+          value:
+            example: false
+            display_default: false
+            type: boolean
         - name: components
           description: |
             General configuration that we want to apply to each of the components and their different metric blocks.
@@ -394,6 +414,17 @@ files:
                 anyOf:
                   - type: boolean
                   - type: object
+                    properties:
+                      - name: volumes
+                        type: boolean
+                      - name: transfers
+                        type: boolean
+                      - name: snapshots
+                        type: boolean
+                      - name: pools
+                        type: boolean
+                      - name: clusters
+                        type: boolean
               - name: baremetal
                 anyOf:
                   - type: boolean
@@ -425,7 +456,26 @@ files:
                                   type: string
                               - name: interval
                                 type: integer
+                              - name: portgroups
+                                anyOf:
+                                  - type: boolean
+                                  - type: object
                       - name: conductors
+                        type: boolean
+                      - name: volumes
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: connectors
+                                type: boolean
+                              - name: targets
+                                type: boolean
+                      - name: ports
+                        type: boolean  
+                      - name: drivers
+                        type: boolean
+                      - name: allocations
                         type: boolean
               - name: load-balancer
                 anyOf:
@@ -606,6 +656,25 @@ files:
                   - type: object
                     properties:
                       - name: images
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: members
+                                type: boolean
+              - name: heat
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: stacks
+                        type: boolean
+              - name: swift
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: containers
                         type: boolean
             example:
               compute: false

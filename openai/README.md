@@ -2,10 +2,9 @@
 
 ## Overview
 
-Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, and Node.js library requests using Datadog metrics, APM, and logs.
+Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics, APM, and logs.
 
 ## Setup
-
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
@@ -14,9 +13,23 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ### Installation
 
+#### Web: Get Account-level Usage and Cost Metrics
+
+**Note**: This setup method only collects `openai.api.usage*` metrics, and if you enable OpenAI in Cloud Cost Management, you will also get cost metrics, no additional permissions or setup required. Use the agent setup below for additional metrics.
+
+1. Login to your [OpenAI Account][10].
+2. Navigate to **View API Keys** under account settings.
+3. Click the **Create a new secret key** button.
+4. Copy the created API Key to your clipboard.
+5. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
+6. Enter an account name and OpenAI API key copied above in the accounts configuration.
+7. If you use [Cloud Cost Management][14] and enable collecting cost data, it will be visible in Cloud Cost Management within 24 hours. ([collected data][15])
+
 <!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
 <!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
 <!-- effect on the tile. -->
+
+#### APM: Get Usage Metrics for Python and Node.js Applications
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
@@ -41,14 +54,14 @@ docker run -d
 pip install ddtrace
 ```
 
-
-3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below: 
+3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below:
 
 ```shell
 DD_SERVICE="my-service" DD_ENV="staging" ddtrace-run python <your-app>.py
 ```
 
 **Notes**:
+
 <!-- partial
 {{% site-region region="us3,us5,eu,gov,ap1" %}}
 - Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
@@ -58,11 +71,9 @@ partial -->
 
 See the [APM Python library documentation][2] for more advanced usage.
 
-
 ### Configuration
 
 See the [APM Python library documentation][3] for all the available configuration options.
-
 
 #### Log Prompt & Completion Sampling
 
@@ -71,7 +82,6 @@ To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="t
 To adjust the log sample rate, see the [APM library documentation][3].
 
 **Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
-
 
 ### Validation
 
@@ -149,7 +159,6 @@ See the [APM Node.js OpenAI documentation][8] for more advanced usage.
 
 See the [APM Node.js library documentation][9] for all the available configuration options.
 
-
 #### Log prompt and completion sampling
 
 To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests emit logs containing the prompts and completions.
@@ -157,7 +166,6 @@ To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1`
 To adjust the log sample rate, see the [APM library documentation][3].
 
 **Note**: Logs submission requires `DD_API_KEY` to be specified.
-
 
 ### Validation
 
@@ -188,6 +196,64 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 [3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
 
 <!-- xxz tab xxx -->
+<!-- xxx tab "PHP" xxx -->
+
+**Note**: To collect `openai.api.usage.*` metrics, follow the API key setup instructions.
+
+### Installation
+
+1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
+
+```shell
+docker run -d
+  --cgroupns host \
+  --pid host \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /proc/:/host/proc/:ro \
+  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+  -e DD_API_KEY=<DATADOG_API_KEY> \
+  -p 127.0.0.1:8126:8126/tcp \
+  -p 127.0.0.1:8125:8125/udp \
+  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+  -e DD_APM_ENABLED=true \
+  gcr.io/datadoghq/agent:latest
+```
+
+2. [Install the Datadog APM PHP library][16].
+
+3. The library is automatically injected into your OpenAI PHP application.
+
+**Notes**:
+
+<!-- partial
+{{% site-region region="us3,us5,eu,gov,ap1" %}}
+- Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
+partial -->
+
+- If the Agent is using a non-default hostname or port, set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
+
+See the [APM PHP library documentation][17] for more advanced usage.
+
+### Configuration
+
+See the [APM PHP library documentation][17] for all the available configuration options.
+
+#### Log prompt and completion sampling (Beta) 
+
+To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="true"` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
+
+To adjust the log sample rate, see the [APM library documentation][17].
+
+**Note**: To ensure logs are correlated with traces, Datadog recommends you enable `DD_LOGS_INJECTION`.
+
+### Validation
+
+To validate that the APM PHP library can communicate with your Agent, examine the phpinfo output of your service. Under the `ddtrace` section, `Diagnostic checks` should be `passed`.
+
+[16]:https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/php/#install-the-extension
+[17]:https://docs.datadoghq.com/tracing/trace_collection/library_config/php/
+
+<!-- xxz tab xxx -->
 <!-- xxx tab "API Key" xxx -->
 
 **Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
@@ -196,11 +262,10 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 
 1. Login to your [OpenAI Account][10].
 2. Navigate to **View API Keys** under account settings.
-3. Click the **Create a new secret key** button.
+3. Click **Create a new secret key**.
 4. Copy the created API Key to your clipboard.
 
 ### Configuration
-
 1. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
 2. Enter an account name and OpenAI API key copied above in the accounts configuration.
 
@@ -222,7 +287,6 @@ The OpenAI integration does not include any events.
 ### Service Checks
 
 The OpenAI integration does not include any service checks.
-
 
 ## Troubleshooting
 
@@ -247,3 +311,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://app.datadoghq.com/integrations/openai
 [12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
 [13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
+[14]: https://app.datadoghq.com/cost
+[15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected

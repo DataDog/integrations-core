@@ -17,7 +17,14 @@
       "Category::Notifications",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog"
+      }
     ]
   },
   "author": {
@@ -57,13 +64,10 @@
       "TeamCity Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Build Status": "assets/monitors/build_status.json"
+      "Builds are failing": "assets/monitors/build_status.json"
     },
     "saved_views": {
       "teamcity_processes": "assets/saved_views/teamcity_processes.json"
-    },
-    "logs": {
-      "source": "teamcity"
     }
   }
 }

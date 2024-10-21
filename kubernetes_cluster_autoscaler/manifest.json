@@ -1,0 +1,66 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "3a3fc186-af02-48e5-8b68-ee9ef37ea566",
+  "app_id": "kubernetes-cluster-autoscaler",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Integration for Kubernetes Cluster Autoscaler",
+    "title": "Kubernetes Cluster Autoscaler",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Category::Kubernetes",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 14391189,
+      "source_type_name": "Kubernetes Cluster Autoscaler",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kubernetes_cluster_autoscaler.",
+        "check": "kubernetes_cluster_autoscaler.nodes.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "cluster-autoscaler"
+      ]
+    },
+    "dashboards": {
+      "Kubernetes Cluster Autoscaler Overview": "assets/dashboards/kubernetes_cluster_autoscaler_overview.json"
+    },
+    "logs": {
+      "source": "kubernetes_cluster_autoscaler"
+    },
+    "monitors": {
+      "Kubernetes Cluster Autoscaler is not safe to autoscale": "assets/monitors/KCA_not_safe_to_autosclae.json",
+      "Kubernetes Cluster Autoscaler too many unused nodes forecast": "assets/monitors/KCA_reporting_errors.json",
+      "Kubernetes Cluster Autoscaler reporting errors": "assets/monitors/KCA_unused_nodes_forecast.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

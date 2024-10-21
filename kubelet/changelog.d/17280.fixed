@@ -1,1 +1,0 @@
-Fixes pod resources requests/limits with exponent notation correctly, e.g. `129e6` for memory is `129M` / `123Mi`

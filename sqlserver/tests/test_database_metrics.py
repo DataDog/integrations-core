@@ -41,7 +41,7 @@ from .common import (
 )
 
 INCR_FRACTION_METRICS = {'sqlserver.latches.latch_wait_time'}
-AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test']
+AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test-1']
 
 STATIC_SERVER_INFO = {
     STATIC_INFO_MAJOR_VERSION: SQLSERVER_MAJOR_VERSION,
@@ -801,8 +801,8 @@ def test_sqlserver_index_usage_metrics(
             ('msdb', 'PK__backupse__21F79AAB9439648C', 'backupset', 0, 1, 0, 0),
         ],
         [
-            ('datadog_test', 'idx_something', 'some_table', 10, 60, 12, 18),
-            ('datadog_test', 'idx_something_else', 'some_table', 20, 30, 40, 50),
+            ('datadog_test-1', 'idx_something', 'some_table', 10, 60, 12, 18),
+            ('datadog_test-1', 'idx_something_else', 'some_table', 20, 30, 40, 50),
         ],
     ]
     mocked_results_tempdb = [
@@ -828,14 +828,14 @@ def test_sqlserver_index_usage_metrics(
     expected_collection_interval = index_usage_stats_interval or index_usage_metrics._default_collection_interval
     assert index_usage_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
-    sqlserver_check._dynamic_queries = [index_usage_metrics]
+    sqlserver_check._database_metrics = [index_usage_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_index_usage_metrics:
         assert index_usage_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
                 db, index_name, table, *metric_values = row
@@ -893,7 +893,7 @@ def test_sqlserver_db_fragmentation_metrics(
             ('msdb', 'syscachedcredentials', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
             ('msdb', 'syscollector_blobs_internal', 1, 'PK_syscollector_blobs_internal_paremeter_name', 0, 0.0, 0, 0.0),
         ],
-        [('datadog_test', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
+        [('datadog_test-1', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
     ]
     mocked_results_tempdb = [
         [('tempdb', '#TempExample__000000000008', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
@@ -936,14 +936,14 @@ def test_sqlserver_db_fragmentation_metrics(
     )
     assert db_fragmentation_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
-    sqlserver_check._dynamic_queries = [db_fragmentation_metrics]
+    sqlserver_check._database_metrics = [db_fragmentation_metrics]
 
     dd_run_check(sqlserver_check)
 
     if not include_db_fragmentation_metrics:
         assert db_fragmentation_metrics.enabled is False
     else:
-        tags = instance_docker_metrics.get('tags', [])
+        tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
                 database_name, object_name, index_id, index_name, *metric_values = row
@@ -1307,7 +1307,7 @@ def test_sqlserver_database_backup_metrics(
         ('model', 'model', 2),
         ('msdb', 'msdb', 0),
         ('tempdb', 'tempdb', 0),
-        ('datadog_test', 'datadog_test', 10),
+        ('datadog_test-1', 'datadog_test-1', 10),
     ]
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
@@ -1327,10 +1327,10 @@ def test_sqlserver_database_backup_metrics(
     )
     assert database_backup_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
-    sqlserver_check._dynamic_queries = [database_backup_metrics]
+    sqlserver_check._database_metrics = [database_backup_metrics]
 
     dd_run_check(sqlserver_check)
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
     for result in mocked_results:
         db, database, *metric_values = result
         metrics = zip(database_backup_metrics.metric_names()[0], metric_values)

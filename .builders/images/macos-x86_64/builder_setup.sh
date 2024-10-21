@@ -6,10 +6,6 @@ set -euxo pipefail
 "${DD_PYTHON3}" -m pip install --no-warn-script-location virtualenv
 "${DD_PYTHON3}" -m virtualenv py3
 
-"${DD_PYTHON2}" -m pip install --no-warn-script-location --upgrade pip
-"${DD_PYTHON2}" -m pip install --no-warn-script-location virtualenv
-"${DD_PYTHON2}" -m virtualenv py2
-
 # Install always with our own prefix path
 mkdir -p "${DD_PREFIX_PATH}"
 cp "${DD_MOUNT_DIR}/build_context/install-from-source.sh" .
@@ -27,8 +23,8 @@ cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
-VERSION="3.0.12" \
-SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
+VERSION="3.3.2" \
+SHA256="2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281" \
 RELATIVE_PATH="openssl-{{version}}" \
 CONFIGURE_SCRIPT="./config" \
   install-from-source \
@@ -45,9 +41,9 @@ RELATIVE_PATH="zlib-{{version}}" \
   install-from-source
 
 # libxml & libxslt for lxml
-DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.10/libxml2-{{version}}.tar.xz" \
-VERSION="2.10.3" \
-SHA256="5d2cc3d78bec3dbe212a9d7fa629ada25a7da928af432c93060ff5c17ee28a9c" \
+DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
+VERSION="2.12.6" \
+SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
 RELATIVE_PATH="libxml2-{{version}}" \
   install-from-source \
     --without-iconv \
@@ -62,8 +58,8 @@ RELATIVE_PATH="libxml2-{{version}}" \
     --disable-static
 
 DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
-VERSION="1.1.37" \
-SHA256="3a4b27dc8027ccd6146725950336f1ec520928f320f144eb5fa7990ae6123ab4" \
+VERSION="1.1.39" \
+SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
 RELATIVE_PATH="libxslt-{{version}}" \
   install-from-source \
     --with-libxml-prefix="${DD_PREFIX_PATH}" \
@@ -75,8 +71,8 @@ RELATIVE_PATH="libxslt-{{version}}" \
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
-VERSION="8.4.0" \
-SHA256="816e41809c043ff285e8c0f06a75a1fa250211bbfb2dc0a037eeef39f1a9e427" \
+VERSION="8.9.1" \
+SHA256="291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5" \
 RELATIVE_PATH="curl-{{version}}" \
   install-from-source \
     --disable-manual \

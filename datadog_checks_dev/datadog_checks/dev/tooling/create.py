@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from datetime import datetime
+from operator import attrgetter
 from uuid import uuid4
 
 from ..fs import (
@@ -20,6 +21,7 @@ from .utils import (
     get_config_models_documentation,
     get_license_header,
     kebab_case_name,
+    normalize_display_name,
     normalize_package_name,
     normalize_project_name,
 )
@@ -30,9 +32,43 @@ SIMPLE_NAME = r'^\w+$'
 EXCLUDE_TEMPLATES = {"marketplace"}
 
 
+class TemplateType(object):
+    def __init__(self, name, templates_dir):
+        self.name = name
+        self.path = os.path.join(templates_dir, name)
+        readme_path = os.path.join(self.path, "README.md")
+        if os.path.exists(readme_path):
+            with open(readme_path) as fh:
+                self.description = fh.read().strip()
+        else:
+            self.description = "No description yet. Please reach out to agent-integrations to add one."
+
+
 def get_valid_templates():
-    templates = [template for template in os.listdir(TEMPLATES_DIR) if template not in EXCLUDE_TEMPLATES]
-    return sorted(templates)
+    templates = [
+        TemplateType(template, TEMPLATES_DIR)
+        for template in os.listdir(TEMPLATES_DIR)
+        if template not in EXCLUDE_TEMPLATES
+    ]
+    return sorted(templates, key=attrgetter('name'))
+
+
+def prefill_template_fields_for_check_only(manifest: dict, normalized_integration_name: str) -> dict:
+    author = manifest.get("author", {}).get("name")
+    if author is not None:
+        author = normalize_display_name(author)
+    check_name = normalize_package_name(f"{author}_{normalized_integration_name}") if author is not None else None
+    return {
+        k: v
+        for k, v in {
+            'author_name': author,
+            'check_name': check_name,
+            'email': manifest.get("author", {}).get("support_email"),
+            'homepage': manifest.get("author", {}).get("homepage"),
+            'sales_email': manifest.get("author", {}).get("sales_email"),
+        }.items()
+        if v is not None
+    }
 
 
 def construct_template_fields(integration_name, repo_choice, integration_type, **kwargs):
@@ -54,7 +90,17 @@ To install the {integration_name} check on your host:
 4. Upload the build artifact to any host with an Agent and
  run `datadog-agent integration install -w
  path/to/{normalized_integration_name}/dist/<ARTIFACT_NAME>.whl`."""
-
+    if integration_type == 'check_only':
+        # check_name, author, email come from kwargs due to prefill
+        check_name = ''
+        author = ''
+        email = ''
+        email_packages = ''
+        install_info = third_party_install_info
+        # Static fields
+        license_header = ''
+        support_type = 'partner'
+        integration_links = ''
     if repo_choice == 'core':
         check_name = normalized_integration_name
         author = 'Datadog'
@@ -146,6 +192,8 @@ def create_template_files(template_name, new_root, config, repo_choice, read=Fal
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
             if template_file.endswith('1.added') and repo_choice != 'core':
+                continue
+            if template_root == root and template_file == "README.md":
                 continue
             if not template_file.endswith(('.pyc', '.pyo')):
                 if template_file == 'README.md' and config.get('support_type') in ('partner', 'contrib'):

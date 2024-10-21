@@ -11,7 +11,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Type, cast  # noqa: F401
 
 from pyVmomi import vim, vmodl
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
@@ -26,6 +25,7 @@ from datadog_checks.vsphere.constants import (
     HOST_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
+    PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
     UNLIMITED_HIST_METRICS_PER_QUERY,
 )
@@ -181,7 +181,7 @@ class VSphereCheck(AgentCheck):
         resource_filters_without_tags = [f for f in self._config.resource_filters if not isinstance(f, TagFilter)]
         filtered_infra_data = {
             mor: props
-            for mor, props in iteritems(infrastructure_data)
+            for mor, props in infrastructure_data.items()
             if isinstance(mor, tuple(self._config.collected_resource_types))
             and is_resource_collected_by_filters(mor, infrastructure_data, resource_filters_without_tags)
         }
@@ -233,7 +233,7 @@ class VSphereCheck(AgentCheck):
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
-        for mor, properties in iteritems(infrastructure_data):
+        for mor, properties in infrastructure_data.items():
             if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
                 continue
@@ -340,6 +340,10 @@ class VSphereCheck(AgentCheck):
             mor_payload["tags"] = tags  # type: Dict[str, Any]
 
             if hostname:
+                if self._config.hostname_transform == 'upper':
+                    hostname = hostname.upper()
+                elif self._config.hostname_transform == 'lower':
+                    hostname = hostname.lower()
                 mor_payload['hostname'] = hostname
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
@@ -486,7 +490,7 @@ class VSphereCheck(AgentCheck):
                 counters = self.metrics_metadata_cache.get_metadata(resource_type)
                 metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
                 is_historical_batch = metric_type == HISTORICAL
-                for counter_key, metric_name in iteritems(counters):
+                for counter_key, metric_name in counters.items():
                     # PerformanceManager.MetricId `instance` kwarg:
                     # - An asterisk (*) to specify all instances of the metric for the specified counterId
                     # - Double-quotes ("") to specify aggregated statistics
@@ -503,7 +507,7 @@ class VSphereCheck(AgentCheck):
 
                 for batch in self.make_batch(mors, metric_ids, resource_type, is_historical_batch=is_historical_batch):
                     query_specs = []
-                    for mor, metrics in iteritems(batch):
+                    for mor, metrics in batch.items():
                         query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
                         query_spec.entity = mor
                         query_spec.metricId = metrics
@@ -612,6 +616,7 @@ class VSphereCheck(AgentCheck):
                 mor_tags = mor_props['tags'] + mor_tags
                 tags = [t for t in mor_tags if t.split(':')[0] not in self._config.excluded_host_tags]
                 tags.extend(self._config.base_tags)
+                self.log.debug("Submitting host tags for %s: %s", hostname, tags)
                 external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
 
         if external_host_tags:
@@ -639,7 +644,11 @@ class VSphereCheck(AgentCheck):
                     "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
                 )
                 normalized_event = VSphereEvent(
-                    event, event_config, self._config.base_tags, self._config.event_resource_filters
+                    event,
+                    event_config,
+                    self._config.base_tags,
+                    self._config.event_resource_filters,
+                    self._config.exclude_filters,
                 )
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
@@ -889,10 +898,20 @@ class VSphereCheck(AgentCheck):
 
         all_properties = mor_props.get('properties', None)
         if not all_properties:
-            self.log.warning('Could not retrieve properties for resource %s hostname=%s', mor_name, hostname)
+            self.log.debug(
+                'Could not retrieve properties for %s resource %s hostname=%s',
+                resource_metric_suffix,
+                mor_name,
+                hostname,
+            )
             return
 
-        base_tags = self._config.base_tags + resource_tags
+        base_tags = []
+        if self._config.excluded_host_tags:
+            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
+        else:
+            base_tags.extend(resource_tags)
+        base_tags.extend(self._config.base_tags)
 
         if resource_type == vim.VirtualMachine:
             object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])
@@ -985,7 +1004,14 @@ class VSphereCheck(AgentCheck):
 
             # Submit property metrics after the cache is refreshed
             if self._config.collect_property_metrics:
-                for resource_type in self._config.collected_resource_types:
+
+                resources_with_property_metrics = [
+                    resource
+                    for resource in self._config.collected_resource_types
+                    if MOR_TYPE_AS_STRING[resource] in PROPERTY_METRICS_BY_RESOURCE_TYPE.keys()
+                ]
+
+                for resource_type in resources_with_property_metrics:
                     for mor in self.infrastructure_cache.get_mors(resource_type):
                         mor_props = self.infrastructure_cache.get_mor_props(mor)
                         resource_tags = mor_props.get('tags', [])

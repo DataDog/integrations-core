@@ -73,35 +73,17 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.11.7"
+ENV PYTHON_VERSION="3.12.6"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash 'c117c6444494bbe4cc937e8a5a61899d53f7f5c5bc573c5d130304e457d54024'; `
+      -Hash '5914748e6580e70bedeb7c537a0832b3071de9e09a2e4e7e3d28060616045e0a'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
-    & 'C:\Program Files\Python311\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
-    & 'C:\Program Files\Python311\python.exe' -m pip install --no-warn-script-location virtualenv; `
-    & 'C:\Program Files\Python311\python.exe' -m virtualenv 'C:\py3'; `
-    Add-ToPath -Append 'C:\Program Files\Python311'
-
-# Install Python 2
-ENV PYTHON_VERSION="2.7.18"
-RUN Get-RemoteFile `
-      -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION.amd64.msi `
-      -Path python-$Env:PYTHON_VERSION.amd64.msi `
-      -Hash 'b74a3afa1e0bf2a6fc566a7b70d15c9bfabba3756fb077797d16fffa27800c05'; `
-    Start-Process -Wait -FilePath msiexec -ArgumentList '/i', python-$Env:PYTHON_VERSION.amd64.msi, '/quiet', '/norestart', 'InstallAllUsers=1'; `
-    Remove-Item python-$Env:PYTHON_VERSION.amd64.msi; `
-    & 'C:\Python27\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
-    & 'C:\Python27\python.exe' -m pip install --no-python-version-warning --no-warn-script-location virtualenv; `
-    & 'C:\Python27\python.exe' -m virtualenv 'C:\py2'
-RUN Get-RemoteFile `
-      -Uri https://s3.amazonaws.com/dd-agent-omnibus/VCForPython27.msi `
-      -Path VCForPython27.msi `
-      -Hash '070474db76a2e625513a5835df4595df9324d820f9cc97eab2a596dcbc2f5cbf'; `
-    Start-Process -Wait -FilePath msiexec -ArgumentList '/i', VCForPython27.msi, '/quiet'; `
-    Remove-Item VCForPython27.msi
+    & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
+    & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location virtualenv; `
+    & 'C:\Program Files\Python312\python.exe' -m virtualenv 'C:\py3'; `
+    Add-ToPath -Append 'C:\Program Files\Python312'
 
 # Install IBM MQ
 ENV IBM_MQ_VERSION="9.2.4.0"

@@ -97,6 +97,16 @@ CHECK_LINKS = """\
 [9]: https://docs.datadoghq.com/help/
 """
 
+CHECK_ONLY_LINKS = """\
+[1]: **LINK_TO_INTEGRATION_SITE**
+[2]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[4]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://docs.datadoghq.com/help/
+"""
+
 LOGS_LINKS = """\
 [1]: https://docs.datadoghq.com/help/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -132,6 +142,7 @@ TILE_LINKS = """\
 
 integration_type_links = {
     'check': CHECK_LINKS,
+    'check_only': CHECK_ONLY_LINKS,
     'logs': LOGS_LINKS,
     'jmx': JMX_LINKS,
     'snmp_tile': SNMP_TILE_LINKS,
@@ -200,7 +211,7 @@ def get_agent_requirements():
     Return the full path to the requirements file listing all the dependencies
     needed by the embedded Python environment
     """
-    return os.path.join(get_root(), 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in')
+    return os.path.join(get_root(), 'agent_requirements.in')
 
 
 def get_agent_integrations_file():

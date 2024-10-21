@@ -13,6 +13,7 @@ import pytest
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import using_windows_containers
+from datadog_checks.sqlserver.const import SWITCH_DB_STATEMENT
 
 from .common import (
     DOCKER_SERVER,
@@ -198,7 +199,7 @@ class SelfHealingConnection:
                 logging.info("executing query with retries. query='%s' params=%s attempt=%s", query, params, attempt)
                 with self.conn.cursor() as cursor:
                     if database:
-                        cursor.execute("USE {}".format(database))
+                        cursor.execute(SWITCH_DB_STATEMENT.format(database))
                     cursor.execute(query, params)
                     if return_result:
                         return cursor.fetchall()
@@ -327,5 +328,7 @@ def dd_environment(full_e2e_config):
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 
-    with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3):
+    with docker_run(
+        compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3, capture=True
+    ):
         yield full_e2e_config, E2E_METADATA

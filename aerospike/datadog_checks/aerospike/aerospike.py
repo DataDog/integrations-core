@@ -10,10 +10,10 @@ import re
 from collections import defaultdict
 from typing import List  # noqa: F401
 
-from six import PY2, iteritems
-
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+
+from .check import AerospikeCheckV2
 
 try:
     import aerospike
@@ -78,15 +78,6 @@ class AerospikeCheck(AgentCheck):
         instance = instances[0]
 
         if 'openmetrics_endpoint' in instance:
-            if PY2:
-                raise ConfigurationError(
-                    "This version of the integration is only available when using py3. "
-                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information or use the older style config."
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import AerospikeCheckV2
-
             return AerospikeCheckV2(name, init_config, instances)
 
         else:
@@ -232,7 +223,7 @@ class AerospikeCheck(AgentCheck):
                 self.log.warning('Exceeded cap `%s` for metric type `%s` - please contact support', cap, metric_type)
                 return
 
-        for key, value in iteritems(required_data):
+        for key, value in required_data.items():
             self.send(metric_type, key, value, tags)
 
     def get_namespaces(self):
@@ -491,7 +482,7 @@ class AerospikeCheck(AgentCheck):
 
             ns_latencies[ns].setdefault("metric_names", []).extend(metric_names)
 
-        for ns, v in iteritems(ns_latencies):
+        for ns, v in ns_latencies.items():
             metric_names = v.get("metric_names", [])
             metric_values = v.get("metric_values", [])
             namespace_tags = ['namespace:{}'.format(ns)] if ns else []

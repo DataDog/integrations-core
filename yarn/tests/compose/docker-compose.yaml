@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   resourcemanager:
     image: apache/hadoop:${YARN_VERSION}

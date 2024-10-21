@@ -20,6 +20,16 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class AgentJobs(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    history_row_limit: Optional[int] = None
+
+
 class Aws(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -56,6 +66,16 @@ class CustomQuery(BaseModel):
     metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+
+
+class DeadlocksCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_deadlocks: Optional[float] = None
 
 
 class Gcp(BaseModel):
@@ -139,6 +159,16 @@ class QueryMetrics(BaseModel):
     samples_per_hour_per_query: Optional[int] = None
 
 
+class SchemasCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -146,6 +176,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     adoprovider: Optional[str] = None
+    agent_jobs: Optional[AgentJobs] = None
     ao_database: Optional[str] = None
     autodiscovery_db_service_check: Optional[bool] = None
     autodiscovery_exclude: Optional[tuple[str, ...]] = None
@@ -164,6 +195,7 @@ class InstanceConfig(BaseModel):
     database_instance_collection_interval: Optional[float] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
+    deadlocks_collection: Optional[DeadlocksCollection] = None
     disable_generic_tags: Optional[bool] = None
     driver: Optional[str] = None
     dsn: Optional[str] = None
@@ -196,9 +228,11 @@ class InstanceConfig(BaseModel):
     proc_only_if: Optional[str] = None
     proc_only_if_database: Optional[str] = None
     procedure_metrics: Optional[ProcedureMetrics] = None
+    propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     reported_hostname: Optional[str] = None
+    schemas_collection: Optional[SchemasCollection] = None
     server_version: Optional[str] = None
     service: Optional[str] = None
     stored_procedure: Optional[str] = None

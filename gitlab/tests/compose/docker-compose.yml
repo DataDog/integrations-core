@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   gitlab:
     image: ${GITLAB_IMAGE:-gitlab/gitlab-ce}:${GITLAB_VERSION}

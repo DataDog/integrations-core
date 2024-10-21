@@ -13,12 +13,15 @@
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
+      "Category::Developer Tools",
+      "Category::Cost Management",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Submitted Data Type::Traces",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -43,8 +46,8 @@
       "LangChain Overview Dashboard": "assets/dashboards/overview_dashboard.json"
     },
     "monitors": {
-      "Request Latency": "assets/monitors/request_duration.json",
-      "Error Rate": "assets/monitors/error_rate.json"
+      "Request duration is increasing": "assets/monitors/request_duration.json",
+      "Error rate is high": "assets/monitors/error_rate.json"
     }
   },
   "author": {

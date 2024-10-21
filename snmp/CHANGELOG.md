@@ -2,6 +2,55 @@
 
 <!-- towncrier release notes start -->
 
+## 9.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 8.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+## 7.5.0 / 2024-09-05
+
+***Added***:
+
+* Bump pysnmp for asyncore and py3.12 compatibility ([#18457](https://github.com/DataDog/integrations-core/pull/18457))
+
+***Fixed***:
+
+* Bump pysnmp version to 4.9.10 ([#18245](https://github.com/DataDog/integrations-core/pull/18245))
+* Use forced metric type of gauge for nasuni-filer filerCacheTotal, filerCacheUsed, and filerCacheFree so they are not incorrectly inferred to be rate types. ([#18501](https://github.com/DataDog/integrations-core/pull/18501))
+
+## 7.4.0 / 2024-08-09 / Agent 7.57.0
+
+***Added***:
+
+* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+
+## 7.3.1 / 2024-06-05 / Agent 7.55.0
+
+***Fixed***:
+
+* Use a forced metric type of gauge for ccmRejectedPhones and ccmUnregisteredPhones so they are not incorrectly inferred to be rate types. ([#17722](https://github.com/DataDog/integrations-core/pull/17722))
+
+## 7.3.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* [SNMP] Add device_hostname tag ([#17433](https://github.com/DataDog/integrations-core/pull/17433))
+
 ## 7.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

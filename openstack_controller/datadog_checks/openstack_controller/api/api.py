@@ -97,3 +97,7 @@ class Api(ABC):
     @abstractmethod
     def get_baremetal_nodes(self):
         pass  # pragma: no cover
+
+    @abstractmethod
+    def get_heat_stacks(self):
+        pass  # pragma: no cover

@@ -20,6 +20,14 @@ def instance_connection_scheme():
     return 'mongodb'
 
 
+def instance_database_instance_collection_interval():
+    return False
+
+
+def instance_dbm():
+    return False
+
+
 def instance_dbstats_tag_dbname():
     return True
 

@@ -1,23 +1,29 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from __future__ import division
 
 import copy
 import time
 from collections import defaultdict
 
-import six
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
-from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
+from datadog_checks.base.utils.db.utils import (
+    default_json_event_encoding,
+    resolve_db_host,
+    tracked_query,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
+    SqlserverAgentMetrics,
     SqlserverAoMetrics,
     SqlserverAvailabilityGroupsMetrics,
     SqlserverAvailabilityReplicasMetrics,
@@ -37,7 +43,9 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverServerStateMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
 )
+from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
+from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
@@ -71,6 +79,7 @@ from datadog_checks.sqlserver.const import (
     SERVICE_CHECK_NAME,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_RDS,
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
     VALID_METRIC_TYPES,
@@ -93,13 +102,13 @@ except ImportError:
     pyodbc = None
 
 if adodbapi is None and pyodbc is None:
-    raise ImportError('adodbapi or pyodbc must be installed to use this check.')
+    raise ImportError("adodbapi or pyodbc must be installed to use this check.")
 
 set_default_driver_conf()
 
 
 class SQLServer(AgentCheck):
-    __NAMESPACE__ = 'sqlserver'
+    __NAMESPACE__ = "sqlserver"
 
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
@@ -120,13 +129,15 @@ class SQLServer(AgentCheck):
         self._ad_last_check = 0
         self._index_usage_last_check_ts = 0
         self._sql_counter_types = {}
-        self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
+        self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
 
         # DBM
         self.statement_metrics = SqlserverStatementMetrics(self, self._config)
         self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
         self.sql_metadata = SqlserverMetadata(self, self._config)
         self.activity = SqlserverActivity(self, self._config)
+        self.agent_history = SqlserverAgentHistory(self, self._config)
+        self.deadlocks = Deadlocks(self, self._config)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -140,7 +151,7 @@ class SQLServer(AgentCheck):
         )  # type: TTLCache
         # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
-        self._non_internal_tags = copy.deepcopy(self.tags)
+        self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -149,20 +160,27 @@ class SQLServer(AgentCheck):
 
         # Query declarations
         self._query_manager = None
-        self._dynamic_queries = None
+        self._dynamic_queries = None  # DEPRECATED, new metrics should use database_metrics
+        self.server_state_queries = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
+
+        self._database_metrics = None
+
+        self._schemas = Schemas(self, self._config)
 
     def cancel(self):
         self.statement_metrics.cancel()
         self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
+        self._schemas.cancel()
+        self.deadlocks.cancel()
 
     def config_checks(self):
-        if self._config.autodiscovery and self.instance.get('database'):
+        if self._config.autodiscovery and self.instance.get("database"):
             self.log.warning(
-                'sqlserver `database_autodiscovery` and `database` options defined in same instance - '
-                'autodiscovery will take precedence.'
+                "sqlserver `database_autodiscovery` and `database` options defined in same instance - "
+                "autodiscovery will take precedence."
             )
         if not self._config.autodiscovery and (
             self._config.autodiscovery_include or self._config.autodiscovery_exclude
@@ -183,7 +201,7 @@ class SQLServer(AgentCheck):
         )
 
     def set_resolved_hostname_metadata(self):
-        self.set_metadata('resolved_hostname', self.resolved_hostname)
+        self.set_metadata("resolved_hostname", self.resolved_hostname)
 
     def set_resource_tags(self):
         if self._config.cloud_metadata.get("gcp") is not None:
@@ -215,7 +233,7 @@ class SQLServer(AgentCheck):
             # some `deployment_type`s map to multiple `resource_type`s
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
-                if 'azure_sql_server_database' in r_type and db_instance:
+                if "azure_sql_server_database" in r_type and db_instance:
                     self.tags.append("dd.internal.resource:{}:{}".format(r_type, db_instance))
                 else:
                     self.tags.append("dd.internal.resource:{}:{}".format(r_type, name))
@@ -233,18 +251,18 @@ class SQLServer(AgentCheck):
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
             else:
-                host, _ = split_sqlserver_host_port(self.instance.get('host'))
+                host, _ = split_sqlserver_host_port(self.instance.get("host"))
                 self._resolved_hostname = resolve_db_host(host)
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
-                    configured_database = self.instance.get('database', None)
+                    configured_database = self.instance.get("database", None)
                     if not configured_database:
-                        configured_database = 'master'
+                        configured_database = "master"
                         self.warning(
                             "Missing 'database' in instance configuration."
                             "For Azure SQL Database a non-master application database must be specified."
                         )
-                    elif configured_database == 'master':
+                    elif configured_database == "master":
                         self.warning(
                             "Wrong 'database' configured."
                             "For Azure SQL Database a non-master application database must be specified."
@@ -264,7 +282,7 @@ class SQLServer(AgentCheck):
         return self._resolved_hostname
 
     def load_static_information(self):
-        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION}
+        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
             with self.connection.open_managed_default_connection():
@@ -295,13 +313,19 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
                         else:
                             self.log.warning("failed to load version static information due to empty results")
-
+                    if STATIC_INFO_RDS not in self.static_info_cache:
+                        cursor.execute("SELECT name FROM sys.databases WHERE name = 'rdsadmin'")
+                        result = cursor.fetchone()
+                        if result:
+                            self.static_info_cache[STATIC_INFO_RDS] = True
+                        else:
+                            self.static_info_cache[STATIC_INFO_RDS] = False
             # re-initialize resolved_hostname to ensure we take into consideration the static information
             # after it's loaded
             self._resolved_hostname = None
 
     def debug_tags(self):
-        return self.tags + ['agent_hostname:{}'.format(self.agent_hostname)]
+        return self.tags + ["agent_hostname:{}".format(self.agent_hostname)]
 
     def debug_stats_kwargs(self, tags=None):
         tags = tags if tags else []
@@ -344,7 +368,7 @@ class SQLServer(AgentCheck):
                         self.do_check = False
                         self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
                         return
-            if self.instance.get('stored_procedure') is None:
+            if self.instance.get("stored_procedure") is None:
                 with self.connection.open_managed_default_connection():
                     with self.connection.get_managed_cursor() as cursor:
                         self.autodiscover_databases(cursor)
@@ -355,17 +379,16 @@ class SQLServer(AgentCheck):
             self.log.exception("Initialization exception %s", e)
 
     def handle_service_check(self, status, connection_host, database, message=None, is_default=True):
-        custom_tags = self.instance.get("tags", [])
-        disable_generic_tags = self.instance.get('disable_generic_tags', False)
+        disable_generic_tags = self.instance.get("disable_generic_tags", False)
         service_check_tags = [
-            'sqlserver_host:{}'.format(self.resolved_hostname),
-            'db:{}'.format(database),
-            'connection_host:{}'.format(connection_host),
+            "sqlserver_host:{}".format(self.resolved_hostname),
+            "db:{}".format(database),
+            "connection_host:{}".format(connection_host),
         ]
         if not disable_generic_tags:
-            service_check_tags.append('host:{}'.format(self.resolved_hostname))
-        if custom_tags is not None:
-            service_check_tags.extend(custom_tags)
+            service_check_tags.append("host:{}".format(self.resolved_hostname))
+        if self.tags is not None:
+            service_check_tags.extend(self.tags)
         service_check_tags = list(set(service_check_tags))
 
         if status is AgentCheck.OK:
@@ -382,7 +405,7 @@ class SQLServer(AgentCheck):
 
         now = time.time()
         if now - self._ad_last_check > self._config.autodiscovery_interval:
-            self.log.info('Performing database autodiscovery')
+            self.log.info("Performing database autodiscovery")
             query = self._get_autodiscovery_query_cached(cursor)
             cursor.execute(query)
             rows = list(cursor.fetchall())
@@ -394,16 +417,16 @@ class SQLServer(AgentCheck):
             included_dbs = {d for d in all_dbs if self._config._include_patterns.match(d.name)}
 
             self.log.debug(
-                'Autodiscovered databases: %s, excluding: %s, including: %s', all_dbs, excluded_dbs, included_dbs
+                "Autodiscovered databases: %s, excluding: %s, including: %s", all_dbs, excluded_dbs, included_dbs
             )
 
             # keep included dbs but remove any that were explicitly excluded
             filtered_dbs = all_dbs.intersection(included_dbs) - excluded_dbs
 
-            self.log.debug('Resulting filtered databases: %s', filtered_dbs)
+            self.log.debug("Resulting filtered databases: %s", filtered_dbs)
             self._ad_last_check = now
             if filtered_dbs != self.databases:
-                self.log.debug('Databases updated from previous autodiscovery check.')
+                self.log.debug("Databases updated from previous autodiscovery check.")
                 self.databases = filtered_dbs
                 return True
         return False
@@ -412,7 +435,7 @@ class SQLServer(AgentCheck):
         if self.autodiscovery_query:
             return self.autodiscovery_query
         available_columns = self._get_available_sys_database_columns(cursor, expected_sys_databases_columns)
-        self.autodiscovery_query = AUTODISCOVERY_QUERY.format(columns=', '.join(available_columns))
+        self.autodiscovery_query = AUTODISCOVERY_QUERY.format(columns=", ".join(available_columns))
         return self.autodiscovery_query
 
     def _get_available_sys_database_columns(self, cursor, all_expected_columns):
@@ -433,12 +456,11 @@ class SQLServer(AgentCheck):
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         metrics_to_collect = []
-        tags = self.instance.get('tags', [])
 
         # Load instance-level (previously Performance metrics)
         # If several check instances are querying the same server host, it can be wise to turn these off
         # to avoid sending duplicate metrics
-        if is_affirmative(self.instance.get('include_instance_metrics', True)):
+        if is_affirmative(self.instance.get("include_instance_metrics", True)):
             common_metrics = list(INSTANCE_METRICS)
             if major_version and major_version >= 2016:
                 common_metrics.extend(INSTANCE_METRICS_NEWER_2016)
@@ -448,7 +470,7 @@ class SQLServer(AgentCheck):
                 # if autodiscovery is enabled, we report metrics from the
                 # INSTANCE_METRICS_DATABASE struct below, so do not double report here
                 common_metrics.extend(INSTANCE_METRICS_DATABASE)
-            self._add_performance_counters(common_metrics, metrics_to_collect, tags, db=None)
+            self._add_performance_counters(common_metrics, metrics_to_collect, self.tags, db=None)
 
             # populated through autodiscovery
             if self.databases:
@@ -456,7 +478,7 @@ class SQLServer(AgentCheck):
                     self._add_performance_counters(
                         INSTANCE_METRICS_DATABASE,
                         metrics_to_collect,
-                        tags,
+                        self.tags,
                         db=db.name,
                         physical_database_name=db.physical_db_name,
                     )
@@ -466,33 +488,33 @@ class SQLServer(AgentCheck):
             sql_counter_type = None
             base_name = None
 
-            custom_tags = tags + cfg.get('tags', [])
-            cfg['tags'] = custom_tags
+            custom_tags = self.tags + cfg.get("tags", [])
+            cfg["tags"] = custom_tags
 
-            db_table = cfg.get('table', DEFAULT_PERFORMANCE_TABLE)
+            db_table = cfg.get("table", DEFAULT_PERFORMANCE_TABLE)
             if db_table not in VALID_TABLES:
-                self.log.error('%s has an invalid table name: %s', cfg['name'], db_table)
+                self.log.error("%s has an invalid table name: %s", cfg["name"], db_table)
                 continue
 
-            if cfg.get('database', None) and cfg.get('database') != self.instance.get('database'):
+            if cfg.get("database", None) and cfg.get("database") != self.instance.get("database"):
                 self.log.debug(
-                    'Skipping custom metric %s for database %s, check instance configured for database %s',
-                    cfg['name'],
-                    cfg.get('database'),
-                    self.instance.get('database'),
+                    "Skipping custom metric %s for database %s, check instance configured for database %s",
+                    cfg["name"],
+                    cfg.get("database"),
+                    self.instance.get("database"),
                 )
                 continue
 
             if db_table == DEFAULT_PERFORMANCE_TABLE:
-                user_type = cfg.get('type')
+                user_type = cfg.get("type")
                 if user_type is not None and user_type not in VALID_METRIC_TYPES:
-                    self.log.error('%s has an invalid metric type: %s', cfg['name'], user_type)
+                    self.log.error("%s has an invalid metric type: %s", cfg["name"], user_type)
                 sql_counter_type = None
                 try:
                     if user_type is None:
-                        sql_counter_type, base_name = self.get_sql_counter_type(cfg['counter_name'])
+                        sql_counter_type, base_name = self.get_sql_counter_type(cfg["counter_name"])
                 except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", cfg['name'], exc_info=True)
+                    self.log.warning("Can't load the metric %s, ignoring", cfg["name"], exc_info=True)
                     continue
 
                 metrics_to_collect.append(
@@ -506,7 +528,7 @@ class SQLServer(AgentCheck):
                 )
 
             else:
-                for column in cfg['columns']:
+                for column in cfg["columns"]:
                     metrics_to_collect.append(
                         self.typed_metric(
                             cfg_inst=cfg,
@@ -532,17 +554,17 @@ class SQLServer(AgentCheck):
 
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
         if db is not None:
-            tags = tags + ['database:{}'.format(db)]
+            tags = tags + ["database:{}".format(db)]
         for name, counter_name, instance_name, object_name in metrics:
             try:
                 sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
                 cfg = {
-                    'name': name,
-                    'counter_name': counter_name,
-                    'instance_name': db or instance_name,
-                    'object_name': object_name,
-                    'physical_db_name': physical_database_name,
-                    'tags': tags,
+                    "name": name,
+                    "counter_name": counter_name,
+                    "instance_name": db or instance_name,
+                    "object_name": object_name,
+                    "physical_db_name": physical_database_name,
+                    "tags": tags,
                 }
 
                 metrics_to_collect.append(
@@ -633,7 +655,7 @@ class SQLServer(AgentCheck):
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
             metric_type = getattr(self, metric_type_str)
 
-        cfg_inst['hostname'] = self.resolved_hostname
+        cfg_inst["hostname"] = self.resolved_hostname
 
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
@@ -669,6 +691,16 @@ class SQLServer(AgentCheck):
                 # Switch DB back to MASTER
                 cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
 
+    def get_databases(self):
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if not is_azure_sql_database(engine_edition):
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            ]
+        else:
+            db_names = [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+        return db_names
+
     def _check_database_conns(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if is_azure_sql_database(engine_edition):
@@ -686,18 +718,21 @@ class SQLServer(AgentCheck):
                     self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
                 )
                 self._query_manager.compile_queries()
+            self._send_database_instance_metadata()
             if self._config.proc:
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
-            self._send_database_instance_metadata()
             if self._config.dbm_enabled:
+                self.agent_history.run_job_loop(self.tags)
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
+                self._schemas.run_job_loop(self.tags)
+                self.deadlocks.run_job_loop(self.tags)
         else:
             self.log.debug("Skipping check")
 
@@ -854,11 +889,65 @@ class SQLServer(AgentCheck):
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
 
+    @property
+    def database_metrics(self):
+        """
+        Initializes database metrics which depend on static information loaded from the database
+        """
+        if self._database_metrics:
+            return self._database_metrics
+
+        # list of database names to collect metrics for
+        db_names = [d.name for d in self.databases] or [self.instance.get("database", self.connection.DEFAULT_DATABASE)]
+
+        # instance level metrics
+        database_backup_metrics = SqlserverDatabaseBackupMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+
+        # database level metrics
+        index_usage_metrics = SqlserverIndexUsageMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=db_names,
+        )
+        db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=db_names,
+        )
+
+        database_agent_metrics = SqlserverAgentMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+
+        # create a list of dynamic queries to execute
+        self._database_metrics = [
+            # instance level metrics
+            database_backup_metrics,
+            database_agent_metrics,
+            # database level metrics
+            index_usage_metrics,
+            db_fragmentation_metrics,
+        ]
+        self.log.debug("initialized dynamic queries")
+        return self._database_metrics
+
     def log_missing_metric(self, metric_name, major_version, engine_version):
         if major_version <= 2012:
-            self.log.warning('%s metrics are not supported on version 2012', metric_name)
+            self.log.warning("%s metrics are not supported on version 2012", metric_name)
         else:
-            self.log.warning('%s metrics are not supported on Azure engine version: %s', metric_name, engine_version)
+            self.log.warning("%s metrics are not supported on Azure engine version: %s", metric_name, engine_version)
 
     def collect_metrics(self):
         """Fetch the metrics from all the associated database tables."""
@@ -870,19 +959,24 @@ class SQLServer(AgentCheck):
                     self._make_metric_list_to_collect(self._config.custom_metrics)
 
                 instance_results = {}
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
                 # Execute the `fetch_all` operations first to minimize the database calls
-                for cls, metric_names in six.iteritems(self.instance_per_type_metrics):
+                for cls, metric_names in self.instance_per_type_metrics.items():
                     if not metric_names:
                         instance_results[cls] = None, None
                     else:
                         try:
                             db_names = [d.name for d in self.databases] or [
-                                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+                                self.instance.get("database", self.connection.DEFAULT_DATABASE)
                             ]
                             metric_cls = getattr(metrics, cls)
                             with tracked_query(self, operation=metric_cls.OPERATION_NAME):
                                 rows, cols = metric_cls.fetch_all_values(
-                                    cursor, list(metric_names), self.log, databases=db_names
+                                    cursor,
+                                    list(metric_names),
+                                    self.log,
+                                    databases=db_names,
+                                    engine_edition=engine_edition,
                                 )
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
@@ -897,7 +991,7 @@ class SQLServer(AgentCheck):
                     else:
                         rows, cols = instance_results[key]
                         if rows is not None:
-                            if key == 'SqlIncrFractionMetric':
+                            if key == "SqlIncrFractionMetric":
                                 metric.fetch_metric(rows, cols, self.sqlserver_incr_fraction_metric_previous_values)
                             else:
                                 metric.fetch_metric(rows, cols)
@@ -937,8 +1031,7 @@ class SQLServer(AgentCheck):
         """
 
         proc = self._config.proc
-        guardSql = self.instance.get('proc_only_if')
-        custom_tags = self.instance.get("tags", [])
+        guardSql = self.instance.get("proc_only_if")
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
             self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
@@ -946,26 +1039,26 @@ class SQLServer(AgentCheck):
 
             try:
                 self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection.connector == 'adodbapi':
+                if self.connection.connector == "adodbapi":
                     cursor.callproc(proc)
                 else:
                     # pyodbc does not support callproc; use execute instead.
                     # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
-                    call_proc = '{{CALL {}}}'.format(proc)
+                    call_proc = "{{CALL {}}}".format(proc)
                     cursor.execute(call_proc)
 
                 rows = cursor.fetchall()
                 self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
 
                 for row in rows:
-                    tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
-                    tags.extend(custom_tags)
+                    tags = [] if row.tags is None or row.tags == "" else row.tags.split(",")
+                    tags.extend(self.tags)
 
                     if row.type.lower() in self.proc_type_mapping:
                         self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
                     else:
                         self.log.warning(
-                            '%s is not a recognised type from procedure %s, metric %s', row.type, proc, row.metric
+                            "%s is not a recognised type from procedure %s, metric %s", row.type, proc, row.metric
                         )
 
             except Exception as e:
@@ -1005,12 +1098,12 @@ class SQLServer(AgentCheck):
                 "dbms": "sqlserver",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
-                'dbms_version': "{},{}".format(
+                "dbms_version": "{},{}".format(
                     self.static_info_cache.get(STATIC_INFO_VERSION, ""),
                     self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                 ),
-                'integration_version': __version__,
-                "tags": self._non_internal_tags,
+                "integration_version": __version__,
+                "tags": self.non_internal_tags,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {

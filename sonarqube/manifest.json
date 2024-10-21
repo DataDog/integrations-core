@@ -17,7 +17,8 @@
       "Category::Security",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -54,13 +55,10 @@
       "Sonarqube Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "SonarQube vulnerabilities": "assets/monitors/vulnerabilities.json"
+      "Sonarqube has vulnerabilities": "assets/monitors/vulnerabilities.json"
     },
     "saved_views": {
       "status_overview": "assets/saved_views/status_overview.json"
-    },
-    "logs": {
-      "source": "sonarqube"
     }
   }
 }

@@ -1,0 +1,4 @@
+http.foo_buz_shadow.rbac.shadow_allowed: 0
+http.foo_buz_shadow.rbac.shadow_denied: 1
+http.foo_buz_shadow.rbac.shadow_rule_prefix.shadow_allowed: 2
+http.foo_buz_shadow.rbac.shadow_rule_prefix.shadow_denied: 3

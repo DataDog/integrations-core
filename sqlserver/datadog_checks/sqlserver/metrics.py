@@ -49,7 +49,7 @@ class BaseSqlServerMetric(object):
         self.instance = cfg_instance.get('instance_name', '')
         self.physical_db_name = cfg_instance.get('physical_db_name', '')
         self.object_name = cfg_instance.get('object_name', '')
-        self.tags = cfg_instance.get('tags', [])
+        self.tags = cfg_instance.get('tags', []) or []
         self.tag_by = cfg_instance.get('tag_by', None)
         self.column = column
         self.instances = None
@@ -78,7 +78,7 @@ class BaseSqlServerMetric(object):
         return rows, columns
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         raise NotImplementedError
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -96,7 +96,7 @@ class SqlSimpleMetric(BaseSqlServerMetric):
     OPERATION_NAME = 'simple_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -134,7 +134,7 @@ class SqlFractionMetric(BaseSqlServerMetric):
     OPERATION_NAME = 'fraction_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         placeholders = ', '.join('?' for _ in counters_list)
         query = cls.QUERY_BASE.format(placeholders=placeholders)
 
@@ -255,7 +255,7 @@ class SqlOsWaitStat(BaseSqlServerMetric):
     OPERATION_NAME = 'os_wait_stat_metric'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -287,7 +287,7 @@ class SqlIoVirtualFileStat(BaseSqlServerMetric):
     OPERATION_NAME = 'io_virtual_file_stats_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         # since we want the database name we need to update the SQL query at runtime with our custom columns
         # multiple formats on a string are harmless
         extra_cols = ', '.join(col for col in counters_list)
@@ -347,7 +347,7 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
     OPERATION_NAME = 'os_memory_clerks_stat_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, counters_list, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
