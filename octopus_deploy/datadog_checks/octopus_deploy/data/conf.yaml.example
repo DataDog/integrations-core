@@ -56,10 +56,57 @@ instances:
     #
     space: Default
 
+    ## @param headers - mapping - optional
+    ## Headers to use for every request. An Authorization header including the Octopus Deploy API key token is required
+    ## for authentication for the REST API.
+    ## You can alternatively use the `auth_token` option.
+    #
+    headers:
+      X-Octopus-ApiKey: <OCTOPUS_API_KEY>
+
     ## @param project_groups - mapping - optional
     ## filter your integration by project groups and projects.
     #
     # project_groups: {}
+
+    ## @param auth_token - mapping - optional
+    ## This allows for the use of authentication information from dynamic sources.
+    ## Both a reader and writer must be configured.
+    ##
+    ## The available readers are:
+    ##
+    ##   - type: file
+    ##     path (required): The absolute path for the file to read from.
+    ##     pattern: A regular expression pattern with a single capture group used to find the
+    ##              token rather than using the entire file, for example: Your secret is (.+)
+    ##   - type: oauth
+    ##     url (required): The token endpoint.
+    ##     client_id (required): The client identifier.
+    ##     client_secret (required): The client secret.
+    ##     basic_auth: Whether the provider expects credentials to be transmitted in
+    ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
+    ##
+    ## The available writers are:
+    ##
+    ##   - type: header
+    ##     name (required): The name of the field, for example: Authorization
+    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
+    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
+    #
+    # auth_token:
+    #   reader:
+    #     type: <READER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
+    #   writer:
+    #     type: <WRITER_TYPE>
+    #     <OPTION_1>: <VALUE_1>
+    #     <OPTION_2>: <VALUE_2>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -239,45 +286,6 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
-    ## @param auth_token - mapping - optional
-    ## This allows for the use of authentication information from dynamic sources.
-    ## Both a reader and writer must be configured.
-    ##
-    ## The available readers are:
-    ##
-    ##   - type: file
-    ##     path (required): The absolute path for the file to read from.
-    ##     pattern: A regular expression pattern with a single capture group used to find the
-    ##              token rather than using the entire file, for example: Your secret is (.+)
-    ##   - type: oauth
-    ##     url (required): The token endpoint.
-    ##     client_id (required): The client identifier.
-    ##     client_secret (required): The client secret.
-    ##     basic_auth: Whether the provider expects credentials to be transmitted in
-    ##                 an HTTP Basic Auth header. The default is: false
-    ##     options: Mapping of additional options to pass to the provider, such as the audience
-    ##              or the scope. For example:
-    ##                 options:
-    ##                   audience: https://example.com
-    ##                   scope: read:example
-    ##
-    ## The available writers are:
-    ##
-    ##   - type: header
-    ##     name (required): The name of the field, for example: Authorization
-    ##     value: The template value, for example `Bearer <TOKEN>`. The default is: <TOKEN>
-    ##     placeholder: The substring in `value` to replace with the token, defaults to: <TOKEN>
-    #
-    # auth_token:
-    #   reader:
-    #     type: <READER_TYPE>
-    #     <OPTION_1>: <VALUE_1>
-    #     <OPTION_2>: <VALUE_2>
-    #   writer:
-    #     type: <WRITER_TYPE>
-    #     <OPTION_1>: <VALUE_1>
-    #     <OPTION_2>: <VALUE_2>
-
     ## @param aws_region - string - optional
     ## If your services require AWS Signature Version 4 signing, set the region.
     ##
@@ -356,17 +364,6 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
-
-    ## @param headers - mapping - optional
-    ## The headers parameter allows you to send specific headers with every request.
-    ## You can use it for explicitly specifying the host header or adding headers for
-    ## authorization purposes.
-    ##
-    ## This overrides any default headers.
-    #
-    # headers:
-    #   Host: <ALTERNATIVE_HOSTNAME>
-    #   X-Auth-Token: <AUTH_TOKEN>
 
     ## @param extra_headers - mapping - optional
     ## Additional headers to send with every request.

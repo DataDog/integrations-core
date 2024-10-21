@@ -9,6 +9,7 @@ files:
   - template: instances
     options:
     - name: octopus_endpoint
+      display_priority: 8
       description: |
         Octopus API endpoint.
         See https://octopus.com/docs/octopus-rest-api/getting-started#authentication for more details.
@@ -17,6 +18,7 @@ files:
         type: string
       required: true
     - name: space
+      display_priority: 7
       description: |
         Space to monitor
       value:
@@ -25,6 +27,7 @@ files:
         enabled: true
       required: true
     - name: project_groups
+      display_priority: 5
       description: |
         filter your integration by project groups and projects.
       value:
@@ -49,4 +52,15 @@ files:
         example: {}
     - template: instances/default
     - template: instances/http
+      overrides:
+        headers.display_priority: 6
+        headers.enabled: true
+        headers.description: |
+          Headers to use for every request. An Authorization header including the Octopus Deploy API key token is required
+          for authentication for the REST API.
+          You can alternatively use the `auth_token` option.
+
+        headers.value.example:
+          X-Octopus-ApiKey: "<OCTOPUS_API_KEY>"
+        auth_token.display_priority: 4
 

@@ -7,8 +7,19 @@ import os
 from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.fs import get_here
 
+USE_OCTOPUS_LAB = os.environ.get("USE_OCTOPUS_LAB")
+OCTOPUS_LAB_ENDPOINT = os.environ.get('OCTOPUS_LAB_ENDPOINT')
+OCTOPUS_API_KEY = os.environ.get('OCTOPUS_API_KEY')
+OCTOPUS_SPACE = os.environ.get('OCTOPUS_SPACE', 'Default')
+
 COMPOSE_FILE = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
 INSTANCE = {'octopus_endpoint': 'http://localhost:80/api', 'space': 'Default'}
+
+LAB_INSTANCE = {
+    'octopus_endpoint': OCTOPUS_LAB_ENDPOINT,
+    'space': OCTOPUS_SPACE,
+    'headers': {'X-Octopus-ApiKey': OCTOPUS_API_KEY},
+}
 
 
 BASE_TIME = ensure_aware_datetime(datetime.datetime.strptime("2024-09-23 14:45:58.888492", '%Y-%m-%d %H:%M:%S.%f'))

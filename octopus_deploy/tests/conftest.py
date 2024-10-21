@@ -14,19 +14,22 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
 
-from .constants import COMPOSE_FILE, INSTANCE
+from .constants import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_OCTOPUS_LAB
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = COMPOSE_FILE
-    endpoint = INSTANCE["octopus_endpoint"]
-    conditions = [
-        CheckDockerLogs(identifier='octopus-api', patterns=['server running']),
-        CheckEndpoints(f'{endpoint}/spaces'),
-    ]
-    with docker_run(compose_file, conditions=conditions):
-        yield INSTANCE
+    if USE_OCTOPUS_LAB:
+        yield LAB_INSTANCE
+    else:
+        compose_file = COMPOSE_FILE
+        endpoint = INSTANCE["octopus_endpoint"]
+        conditions = [
+            CheckDockerLogs(identifier='octopus-api', patterns=['server running']),
+            CheckEndpoints(f'{endpoint}/spaces'),
+        ]
+        with docker_run(compose_file, conditions=conditions):
+            yield INSTANCE
 
 
 @pytest.fixture
