@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from decimal import Decimal
 from copy import deepcopy
+from decimal import Decimal
 from unittest import mock
 
 import pytest
