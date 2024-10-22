@@ -116,3 +116,6 @@ def _merge_duplicate_rows(rows, metrics, key):
             queries_by_key[query_key] = row
 
     return queries_by_key, dropped_metrics
+
+
+# TODO: remove me later
