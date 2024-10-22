@@ -277,7 +277,12 @@ class InnoDBMetrics(object):
                 # Total memory allocated 29642194944; in additional pool allocated 0
                 # Total memory allocated by read views 96
                 results['Innodb_mem_total'] = int(row[3])
+                # Additional pool is deprecated in MySQL 5.6 and removed in 5.7
                 results['Innodb_mem_additional_pool'] = int(row[8])
+            elif line.find("Total large memory allocated") == 0:
+                # For MySQL 5.7 and above
+                # Total large memory allocated 754974720
+                results['Innodb_mem_total'] = int(row[4])
             elif line.find('Adaptive hash index ') == 0:
                 #   Adaptive hash index 1538240664     (186998824 + 1351241840)
                 results['Innodb_mem_adaptive_hash'] = int(row[3])
