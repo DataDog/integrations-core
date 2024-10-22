@@ -285,6 +285,7 @@ class TestStatementMetrics:
             return
 
         tracemalloc.start()
+        tracemalloc.reset_peak()
 
         _, peak_before = tracemalloc.get_traced_memory()
         sm = StatementMetrics()
