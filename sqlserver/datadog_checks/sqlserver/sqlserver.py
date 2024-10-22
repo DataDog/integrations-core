@@ -27,6 +27,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverDatabaseBackupMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverIndexUsageMetrics,
+    SQLServerXESessionMetrics,
 )
 from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
@@ -869,6 +870,12 @@ class SQLServer(AgentCheck):
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
         )
+        xe_session_metrics = SQLServerXESessionMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
 
         # database level metrics
         index_usage_metrics = SqlserverIndexUsageMetrics(
@@ -898,6 +905,7 @@ class SQLServer(AgentCheck):
             # instance level metrics
             database_backup_metrics,
             database_agent_metrics,
+            xe_session_metrics,
             # database level metrics
             index_usage_metrics,
             db_fragmentation_metrics,
