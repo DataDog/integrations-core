@@ -93,6 +93,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.tags = self.instance.get('tags', [])
 
     def check(self, _):
+        # breakpoint()
         self.collect_metadata()
         if self.last_run_time is not None:
             self._update_sacct_params()
@@ -117,7 +118,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             commands.append(('sacct', self.sacct_cmd, self.process_sacct))
         elif self.last_run_time is None:
             self.last_run_time = datetime.now()
-
+        # breakpoint()
         for name, cmd, process_func in commands:
             out, err, ret = get_subprocess_out(cmd)
             if ret != 0:
@@ -161,6 +162,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 tags = self._process_tags(node_data, NODE_MAP["extended_tags"], tags)
 
             if self.gpu_stats:
+                # if node_data[-2] != "(null)":
+                #     breakpoint()
                 gpu_tags = self._process_sinfo_gpu(node_data[-2], node_data[-1], "node", tags)
                 tags.extend(gpu_tags)
 
@@ -263,27 +266,25 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         gpu_type = "null"
         total_gpu = 0
         used_gpu_count = 0
-        # gpu:tesla:4(IDX:0-3)
+        # gpu:tesla:4(IDX:0-3) -> ["gpu","tesla","4(IDX","0-3)"]
         gres_used_parts = gres_used.split(':')
-        # gpu:tesla:4
+        # gpu:tesla:4 -> ["gpu","tesla","4"]
         gres_total_parts = gres.split(':')
 
-        if len(gres_used_parts) == 3 and "gpu" in gres_used_parts:
-            # ["gpu","tesla","4(IDX:0-3)"]
-            used_gpu = gres_used_parts[2].split('(')
-            used_gpu_count = int(used_gpu[0])
-            used_gpu_used_idx = used_gpu[1].rstrip(')').split(':')[1]
-            gpu_type = gres_used_parts[1]
+        if len(gres_used_parts) == 4 and gres_used_parts[0] == "gpu":
+            _, gpu_type, used_gpu_count_part, used_gpu_used_idx_part = gres_used_parts
+            used_gpu_count = int(used_gpu_count_part.split('(')[0])
+            used_gpu_used_idx = used_gpu_used_idx_part.rstrip(')')
 
-        if len(gres_total_parts) == 3 and "gpu" in gres_total_parts:
-            # ["gpu","tesla","4"]
-            total_gpu = int(gres_total_parts[2])
+        if len(gres_total_parts) == 3 and gres_total_parts[0] == "gpu":
+            _, _, total_gpu_part = gres_total_parts
+            total_gpu = int(total_gpu_part)
 
-        tags = [f"slurm_partition_gpu_type:{gpu_type}", f"slurm_partition_gpu_used_idx:{used_gpu_used_idx}"]
-        self.gauge(f'{namespace}.gpu_total', total_gpu, tags)
-        self.gauge(f'{namespace}.gpu_used', used_gpu_count, tags)
-
-        return tags
+        gpu_tags = [f"slurm_partition_gpu_type:{gpu_type}", f"slurm_partition_gpu_used_idx:{used_gpu_used_idx}"]
+        _tags = tags + gpu_tags
+        self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
+        self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
+        return gpu_tags
 
     def _process_tags(self, data, map, tags):
         for tag_info in map:
@@ -330,7 +331,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         # Update the sacct command with the dynamic SACCT_PARAMS
         self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
-        self.sacct_cmd = self.get_slurm_command('sacct', 'sacct', SACCT_PARAMS)
+        self.sacct_cmd = self.get_slurm_command('sacct', SACCT_PARAMS)
 
     @AgentCheck.metadata_entrypoint
     def collect_metadata(self):

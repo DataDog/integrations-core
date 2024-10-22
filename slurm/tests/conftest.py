@@ -19,5 +19,5 @@ def instance():
         'collect_sdiag_stats': False,
         'collect_sshare_stats': False,
         'collect_sacct_stats': False,
-        'collect_gpu_stats': False,
+        'collect_gpu_stats': True,
     }

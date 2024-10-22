@@ -3,15 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from typing import Any, Callable, Dict  # noqa: F401
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.slurm import SlurmCheck
-from unittest.mock import patch
 
-from .common import SLURM_VERSION, mock_output
-
+from .common import SACCT_MAP, SDIAG_MAP, SINFO_MAP, SLURM_VERSION, SQUEUE_MAP, SSHARE_MAP, mock_output
 
 # def test_check(dd_run_check, aggregator, instance):
 #     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
@@ -21,6 +22,45 @@ from .common import SLURM_VERSION, mock_output
 #     aggregator.assert_all_metrics_covered()
 #     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
+
+@pytest.mark.parametrize(
+    "expected_metrics, binary",
+    [
+        (SINFO_MAP, 'sinfo'),
+        (SQUEUE_MAP, 'squeue'),
+        (SACCT_MAP, 'sacct'),
+        (SSHARE_MAP, 'sshare'),
+        (SDIAG_MAP, 'sdiag'),
+    ],
+    ids=['sinfo with full params', 'squeue output', 'sacct output', 'sshare output', 'sdiag output'],
+)
+@patch('datadog_checks.slurm.check.get_subprocess_out')
+def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregator, expected_metrics, binary):
+    instance[f'collect_{binary}_stats'] = True
+
+    # Metadata collection happens before the main collection so I'm mocking a failed call for it.
+    mock_output_main = (mock_output(f'{binary}.txt'), "", 0)
+
+    if binary == 'sinfo':
+        # sinfo has 3 subprocess calls. It collects metadata, partition and node data. So I'm mocking all of them.
+        mock_output_metadata = ("", "", 1)
+        mock_output_partition = (mock_output('sinfo_partition.txt'), "", 0)
+        mock_get_subprocess_output.side_effect = [mock_output_metadata, mock_output_partition, mock_output_main]
+    else:
+        mock_get_subprocess_output.side_effect = [mock_output_main]
+
+    check = SlurmCheck('slurm', {}, [instance])
+
+    check.check(None)
+    if binary == 'sacct':
+        check.check(None)
+
+    for metric in expected_metrics['metrics']:
+        aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
+
+    aggregator.assert_all_metrics_covered()
+
+
 @patch('datadog_checks.slurm.check.get_subprocess_out')
 def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check):
     instance['collect_sinfo_stats'] = True
@@ -29,7 +69,7 @@ def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check
     check.check_id = 'test:123'
 
     mock_sinfo_output = mock_output('sinfo_version.txt')
-    
+
     # First return for the metadata, the second one is for the sinfo partition
     # metric collection. But we don't care about that here.
     mock_get_subprocess_out.side_effect = [

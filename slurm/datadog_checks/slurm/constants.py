@@ -1,7 +1,7 @@
-SINFO_PARTITION_PARAMS = ["-hO", "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:|,"]
-SINFO_NODE_PARAMS = ["-hNO", "PartitionName:|,Available:|,NodeList:|,NodeAIOT:|,Memory:|,Cluster:|,"]
-SINFO_ADDITIONAL_NODE_PARAMS = "CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:|,"
-GPU_PARAMS = "Gres:|,GresUsed:|,"
+SINFO_PARTITION_PARAMS = ["-hO", "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:"]
+SINFO_NODE_PARAMS = ["-hNO", "PartitionName:|,Available:|,NodeList:|,NodeAIOT:|,Memory:|,Cluster:"]
+SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:"
+GPU_PARAMS = "|,Gres:|,GresUsed:"
 SQUEUE_PARAMS = ["-ho", "%A|%u|%j|%T|%N|%C|%R|%m"]
 SSHARE_PARAMS = ["-lnpU"]
 SACCT_PARAMS = [
@@ -31,7 +31,7 @@ NODE_MAP = {
     ],
     "extended_tags": [
         {"name": "slurm_node_state", "index": 9},
-        {"name": "slurm_node_reason", "index": 10},
+        {"name": "slurm_node_state_reason", "index": 10},
         {"name": "slurm_node_active_features", "index": 11},
         {"name": "slurm_node_threads", "index": 12},
     ],
@@ -57,7 +57,6 @@ SQUEUE_MAP = {
 
 SACCT_MAP = {
     "tags": [
-        {"name": "slurm_job_id", "index": 0},
         {"name": "slurm_job_name", "index": 1},
         {"name": "slurm_job_partition", "index": 2},
         {"name": "slurm_job_account", "index": 3},
@@ -66,15 +65,13 @@ SACCT_MAP = {
         {"name": "slurm_job_maxvm", "index": 9},
         {"name": "slurm_job_state", "index": 12},
         {"name": "slurm_job_exitcode", "index": 13},
-        # {"name": "slurm_job_start", "index": 14},
-        # {"name": "slurm_job_end", "index": 15},
         {"name": "slurm_job_node_list", "index": 16},
     ],
     "metrics": [
-        {"name": "slurm_job_cputime", "index": 7},
-        {"name": "slurm_job_maxrss", "index": 8},
-        {"name": "slurm_job_avgcpu", "index": 10},
-        {"name": "slurm_job_avgrss", "index": 11},
+        {"name": "sacct.slurm_job_cputime", "index": 7},
+        {"name": "sacct.slurm_job_maxrss", "index": 8},
+        {"name": "sacct.slurm_job_avgcpu", "index": 10},
+        {"name": "sacct.slurm_job_avgrss", "index": 11},
     ],
 }
 
@@ -98,12 +95,12 @@ SSHARE_MAP = {
 
 SDIAG_MAP = {
     'main_stats': {
+        'dbd_agent_queue_size': 'DBD Agent queue size:',
         'server_thread_count': 'Server thread count:',
         'agent_queue_size': 'Agent queue size:',
         'agent_count': 'Agent count:',
         'agent_thread_count': 'Agent thread count:',
-        'queue_size': 'Last queue length:',
-        'dbd_agent_queue_size': 'DBD Agent queue size:',
+        'last_queue_length': 'Last queue length:',
         'jobs_submitted': 'Jobs submitted:',
         'jobs_started': 'Jobs started:',
         'jobs_completed': 'Jobs completed:',
@@ -114,18 +111,17 @@ SDIAG_MAP = {
         'last_cycle': 'Last cycle:',
         'max_cycle': 'Max cycle:',
         'total_cycles': 'Total cycles:',
+        'mean_depth_cycle': 'Mean depth cycle:',
         'mean_cycle': 'Mean cycle:',
-        'mean_cycle_depth': 'Mean cycle depth:',
         'cycles_per_minute': 'Cycles per minute:',
-        'last_queue_length': 'Last queue length:',
     },
     "backfill_stats": {
         'backfill.total_jobs_since_start': 'Total backfilled jobs (since last slurm start):',
         'backfill.total_jobs_since_cycle_start': 'Total backfilled jobs (since last stats cycle start):',
         'backfill.total_heterogeneous_components': 'Total backfilled heterogeneous job components:',
         'backfill.total_cycles': 'Total cycles:',
-        'backfill.last_cycles': 'Last cycle:',
-        'backfill.max_cycles': 'Max cycle:',
+        'backfill.last_cycle': 'Last cycle:',
+        'backfill.max_cycle': 'Max cycle:',
         'backfill.last_depth_cycle': 'Last depth cycle:',
         'backfill.last_depth_try_schedule': 'Last depth cycle (try sched):',
         'backfill.last_queue_length': 'Last queue length:',
