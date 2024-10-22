@@ -282,6 +282,13 @@ files:
       value:
         type: boolean
         example: true
+    - name: include_xe_metrics
+      description: |
+        Include extended events (XE) metrics. The collection of XE metrics is automatically enabled
+        when `deadlocks_collection` is enabled.
+      value:
+        type: boolean
+        example: true
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider
