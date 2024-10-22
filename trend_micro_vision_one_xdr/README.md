@@ -23,8 +23,8 @@ This integration collects logs from the sources listed above and sends them to D
     - **Status**: Whether the API key is enabled.
     - **Details**: Extra information about the API key.
 3. Click **Add**.
-5. To identify the Host Region of your Trend Micro Vision One XDR console please refer [here][5].
-4. Add your API Key and Host Region.
+4. To identify the Host Region of your Trend Micro Vision One XDR console please refer [here][5].
+5. Add your API Key and Host Region.
 
 ## Data Collected
 
