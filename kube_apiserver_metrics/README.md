@@ -14,13 +14,13 @@ The Kube_apiserver_metrics check is included in the [Datadog Agent][3] package, 
 
 ### Configuration
 
-If your Kubernetes clusters have master nodes and is running a pod and container for the `kube-apiserver` image, the Datadog Agent  [automatically discovers][8] this pod and configures the integration relative to its `kube_apiserver_metrics.d/auto_conf.yaml` file. 
+If your Kubernetes clusters have master nodes and is running a pod and container for the `kube-apiserver` image, the Datadog Agent [automatically discovers][8] this pod and configures the integration relative to its `kube_apiserver_metrics.d/auto_conf.yaml` file. 
 
 However, if you are using a managed Kubernetes distribution like GKE, EKS, or AKS you may not have a running `kube-apiserver` pod present for the Agent to discover. 
 
 In this case, you can setup the integration against the `kubernetes` Service in the `default` namespace.
 
-- The main use case to run the kube_apiserver_metrics check is as a [Cluster Level Check][4]. 
+- The main use case to run the `kube_apiserver_metrics` check is as a [Cluster Level Check][4]. 
 - You can do this with [annotations on your service](#annotate-service), or by using a [local file](#local-file) through the Datadog Operator, Helm Chart or manually. 
 - To collect metrics, set the following parameters and values in an [Autodiscovery][8] template. 
 
@@ -114,7 +114,7 @@ spec:
 {{% /tab %}}
 {{< /tabs >}}
 
-These configurations will have the Agent make a request to the `kubernetes` service in the `default` namespace at its defined Endpoint IP Addresses and defined port. 
+These configurations trigger the Agent make a request to the `kubernetes` service in the `default` namespace at its defined Endpoint IP Addresses and defined port.
 
 ### Validation
 
