@@ -4,6 +4,7 @@
 
 
 from decimal import Decimal
+from copy import deepcopy
 from unittest import mock
 
 import pytest
@@ -1346,3 +1347,29 @@ def test_sqlserver_database_backup_metrics(
     dd_run_check(sqlserver_check)
     for metric_name in database_backup_metrics.metric_names()[0]:
         aggregator.assert_metric(metric_name, count=0)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'config_options',
+    [
+        {'include_xe_metrics': True},
+        {'deadlocks_collection': {'enabled': True}},
+    ],
+)
+def test_sqlserver_xe_session_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    config_options,
+):
+    modified_instance = deepcopy(instance_docker_metrics)
+    for key, value in config_options.items():
+        modified_instance[key] = value
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [modified_instance])
+    dd_run_check(sqlserver_check)
+    expected_tags = sqlserver_check._config.tags
+    expected_tags.append('session_name:datadog')
+    aggregator.assert_metric("sqlserver.xe.session_status", value=1, tags=expected_tags)
