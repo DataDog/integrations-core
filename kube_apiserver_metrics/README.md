@@ -114,7 +114,7 @@ spec:
 {{% /tab %}}
 {{< /tabs >}}
 
-These configurations trigger the Agent make a request to the `kubernetes` service in the `default` namespace at its defined Endpoint IP Addresses and defined port.
+These configurations trigger the Agent to make a request to the `kubernetes` service in the `default` namespace at its defined Endpoint IP Addresses and defined port.
 
 ### Validation
 
