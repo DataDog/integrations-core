@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into ExtraHop logs.",
-    "title": "Extrahop",
+    "title": "ExtraHop",
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
@@ -22,7 +22,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 28531528,
-      "source_type_name": "Extrahop",
+      "source_type_name": "ExtraHop",
       "events": {
         "creates_events": false
       },

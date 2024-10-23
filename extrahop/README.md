@@ -2,13 +2,13 @@
 
 ## Overview
 
-This check monitors [extrahop][1].
+This check monitors [ExtraHop][1].
 
 ## Setup
 
 ### Installation
 
-The extrahop check is included in the [Datadog Agent][2] package.
+The ExtraHop check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -23,15 +23,15 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-extrahop does not include any metrics.
+ExtraHop does not include any metrics.
 
 ### Service Checks
 
-extrahop does not include any service checks.
+ExtraHop does not include any service checks.
 
 ### Events
 
-extrahop does not include any events.
+ExtraHop does not include any events.
 
 ## Troubleshooting
 
