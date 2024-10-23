@@ -48,4 +48,4 @@ For any further assistance, contact [Datadog support][2].
 
 [1]: https://www.trendmicro.com/en_in/business/products/user-protection/sps/email-and-collaboration/email-security.html
 [2]: https://docs.datadoghq.com/help/
-[3]: https://success.trendmicro.com/en-US/solution/KA-0016673#:~:text=hostname%20of%20your-,Trend%20Micro%20Email%20Security,-admin%20console.
+[3]: https://success.trendmicro.com/en-US/solution/KA-0016673#:~:text=Trend%20micro%20email%20security
