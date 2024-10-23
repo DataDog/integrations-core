@@ -32,7 +32,6 @@
 		}
 	},
 	"tags": [
-		"integration:metabase",
-		"service:activity-events"
+		"integration:metabase"
 	]
 }

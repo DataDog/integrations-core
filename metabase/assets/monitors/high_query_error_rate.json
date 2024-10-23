@@ -64,7 +64,6 @@
 		}
 	},
 	"tags": [
-		"integration:metabase",
-		"service:query-logs"
+		"integration:metabase"
 	]
 }
