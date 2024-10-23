@@ -17,33 +17,33 @@ files:
     - name: collect_sinfo_stats
       description: Whether or not to collect statistics from the sinfo command.
       value:
-        type: string
-        example: 'true'
+        type: boolean
+        example: True
     - name: collect_sdiag_stats
       description: Whether or not to collect statistics from the sdiag command.
       value:
-        type: string
-        example: 'true'
+        type: boolean
+        example: True
     - name: collect_squeue_stats
       description: Whether or not to collect statistics from the squeue command.
       value:
-        type: string
-        example: 'true'
+        type: boolean
+        example: True
     - name: collect_sacct_stats
       description: Whether or not to collect statistics from the sacct command.
       value:
-        type: string
-        example: 'true'
+        type: boolean
+        example: True
     - name: collect_sshare_stats
       description: Whether or not to collect statistics from the sshare command.
       value:
-        type: string
-        example: 'true'
+        type: boolean
+        example: True
     - name: collect_gpu_stats
       description: Whether or not to collect GPU statistics when Slurm is configured to use GPUs.
       value:
-        type: string
-        example: 'false'
+        type: boolean
+        example: False
     - name: sinfo_collection_level
       description: |
         The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
@@ -51,8 +51,8 @@ files:
         collects data from from individual nodes as well but will be more verbose and include data such as CPU and 
         memory usage as reported from the OS as well as additional tags.
       value:
-        type: string
-        example: '1'
+        type: integer
+        example: 1
     - name: sinfo_path
       description: Full path to the sinfo binary.
       value:
@@ -73,11 +73,51 @@ files:
       value:
         type: string
         example: /usr/bin/sshare
-    - name: sqeuue_path
+    - name: squeue_path
       description: Full path to the squeue binary.
       value:
         type: string
         example: /usr/bin/squeue
+    - name: debug_sinfo_stats
+      description: |
+        Whether or not to enable debug logging for the sinfo command. This will log the output of the sinfo command
+        to the agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_sdiag_stats
+      description: |
+        Whether or not to enable debug logging for the sdiag command. This will log the output of the sdiag command
+        to the agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_squeue_stats
+      description: |
+        Whether or not to enable debug logging for the squeue command. This will log the output of the squeue command
+        to the agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_sshare_stats
+      description: |
+        Whether or not to enable debug logging for the sshare command. This will log the output of the sshare command
+        to the agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_sacct_stats
+      description: |
+        Whether or not to enable debug logging for the sacct command. This will log the output of the sacct command
+        to the agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
     - template: instances/default
       overrides:
         min_collection_interval.description: |
@@ -91,4 +131,3 @@ files:
         min_collection_interval.value.default: 60
         min_collection_interval.value.example: 60
         min_collection_interval.enabled: true
-

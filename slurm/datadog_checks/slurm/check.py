@@ -26,17 +26,21 @@ from .constants import (
 )
 
 
-def get_subprocess_out(cmd):
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    return result.stdout, result.stderr, result.returncode
+def get_subprocess_output(cmd):
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return result.stdout, result.stderr, result.returncode
+    except Exception as e:
+        return None, f"Error running {cmd}: {e}", 1
 
 
 def parse_duration(time_str):
-    hours, minutes, seconds = map(int, time_str.split(':'))
-    duration = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-    total_seconds = duration.total_seconds()
-
-    return total_seconds
+    try:
+        hours, minutes, seconds = map(int, time_str.split(':'))
+        duration = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+        return duration.total_seconds()
+    except Exception:
+        return None
 
 
 class SlurmCheck(AgentCheck, ConfigMixin):
@@ -57,6 +61,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sdiag_stats = is_affirmative(self.instance.get('collect_sdiag_stats', True))
         self.collect_sshare_stats = is_affirmative(self.instance.get('collect_sshare_stats', True))
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
+
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
         self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
 
@@ -92,10 +97,17 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.last_run_time = None
         self.tags = self.instance.get('tags', [])
 
+        # Debug only
+        self.debug_sinfo_stats = is_affirmative(self.instance.get('debug_sinfo_stats', False))
+        self.debug_squeue_stats = is_affirmative(self.instance.get('debug_squeue_stats', False))
+        self.debug_sdiag_stats = is_affirmative(self.instance.get('debug_sdiag_stats', False))
+        self.debug_sshare_stats = is_affirmative(self.instance.get('debug_sshare_stats', False))
+        self.debug_sacct_stats = is_affirmative(self.instance.get('debug_sacct_stats', False))
+
     def check(self, _):
         self.collect_metadata()
         if self.last_run_time is not None:
-            self._update_sacct_params()
+            self.update_sacct_params()
 
         commands = []
 
@@ -119,17 +131,23 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.last_run_time = datetime.now()
 
         for name, cmd, process_func in commands:
-            out, err, ret = get_subprocess_out(cmd)
+            self.log.debug("Running %s command: %s", name, cmd)
+            out, err, ret = get_subprocess_output(cmd)
             if ret != 0:
                 self.log.error("Error running %s: %s", name, err)
             elif out:
+                self.log.debug("Processing %s output", name)
                 process_func(out)
             else:
                 self.log.debug("No output from %s", name)
 
-    def process_sinfo_partition(self, output: str):
+    def process_sinfo_partition(self, output):
         # normal*|c[1-2]|1|up|1000|N/A|0/2/0/2|(null)|
         lines = output.strip().split('\n')
+
+        if self.debug_sinfo_stats:
+            self.log.debug("Processing sinfo partition line: %s", lines)
+
         for line in lines:
             partition_data = line.split('|')
 
@@ -148,8 +166,12 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def process_sinfo_node(self, output):
         # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES      |GRES_USED | # noqa: E501
         # normal    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.84 |    5440 |       0 |idle  |none   |(null)          |      1 |(null)    |(null)    | # noqa: E501
+        lines = output.strip().split('\n')
 
-        for line in output.strip().split('\n'):
+        if self.debug_sinfo_stats:
+            self.log.trace("Processing sinfo node payload: %s", lines)
+
+        for line in lines:
             node_data = line.split('|')
 
             tags = []
@@ -172,7 +194,12 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def process_squeue(self, output):
         # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY # noqa: E501
         #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M # noqa: E501
-        for line in output.strip().split('\n'):
+        lines = output.strip().split('\n')
+
+        if self.debug_squeue_stats:
+            self.log.debug("Processing squeue output: %s", lines)
+
+        for line in lines:
             job_data = line.split('|')
 
             tags = []
@@ -186,7 +213,12 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList   | # noqa: E501
         # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         | # noqa: E501
         # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         | # noqa: E501
-        for line in output.strip().split('\n'):
+        lines = output.strip().split('\n')
+
+        if self.debug_sacct_stats:
+            self.log.debug("Processing sacct output: %s", lines)
+
+        for line in lines:
             job_data = line.split('|')
             tags = []
             tags.extend(self.tags)
@@ -205,15 +237,24 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             # Submit job info metric
             self._process_metrics(job_data, SACCT_MAP, tags)
+
             duration = parse_duration(job_data[6])
+            if not duration:
+                self.log.debug("Invalid duration for job '%s'. Skipping. Assigning duration as 0.", job_id)
+                duration = 0
+
             self.gauge('sacct.job.duration', duration, tags=tags)
             self.gauge('sacct.job.info', 1, tags=tags)
 
     def process_sshare(self, output):
         # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                    | # noqa: E501
         # root    |root |        1 |           |       0 |          |    0.000000 | 0.000000 |0.000000 |            |cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0 | # noqa: E501
+        lines = output.strip().split('\n')
 
-        for line in output.strip().split('\n'):
+        if self.debug_sshare_stats:
+            self.log.debug("Processing sshare output: %s", lines)
+
+        for line in lines:
             sshare_data = line.split('|')
 
             tags = []
@@ -227,11 +268,17 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         metrics = {}
         backfill_section = False
 
-        for line in output.split('\n'):
+        lines = output.split('\n')
+
+        if self.debug_sdiag_stats:
+            self.log.debug("Processing sdiag output: %s", lines)
+
+        for line in lines:
             line = line.strip()
 
             if 'Backfilling stats' in line:
                 backfill_section = True
+                self.log.debug("Switching to backfilling stats section")
 
             # Some patterns overlap so we need such as Total Cycles. We need to switch between the two maps once
             # we see the 'Backfilling stats' line.
@@ -250,9 +297,27 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         for name, value in metrics.items():
             self.gauge(f'sdiag.{name}', value, tags=self.tags)
 
-    def _process_sinfo_cpu_state(self, cpus_state: str, namespace, tags):
+    def update_sacct_params(self):
+        if self.last_run_time is not None:
+            now = datetime.now()
+            delta = now - self.last_run_time
+            start_time_param = f"--starttime=now-{int(delta.total_seconds())}seconds"
+            SACCT_PARAMS.append(start_time_param)
+
+        self.last_run_time = datetime.now()
+
+        # Update the sacct command with the dynamic SACCT_PARAMS
+        self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
+        self.sacct_cmd = self.get_slurm_command('sacct', SACCT_PARAMS)
+
+    def _process_sinfo_cpu_state(self, cpus_state, namespace, tags):
         # "0/2/0/2"
-        allocated, idle, other, total = cpus_state.split('/')
+        try:
+            allocated, idle, other, total = cpus_state.split('/')
+        except ValueError as e:
+            self.log.debug("Invalid CPU state '%s'. Skipping. Error: %s", cpus_state, e)
+            return
+
         self.gauge(f'{namespace}.cpu.allocated', allocated, tags)
         self.gauge(f'{namespace}.cpu.idle', idle, tags)
         self.gauge(f'{namespace}.cpu.other', other, tags)
@@ -263,24 +328,37 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         gpu_type = "null"
         total_gpu = 0
         used_gpu_count = 0
-        # gpu:tesla:4(IDX:0-3) -> ["gpu","tesla","4(IDX","0-3)"]
-        gres_used_parts = gres_used.split(':')
-        # gpu:tesla:4 -> ["gpu","tesla","4"]
-        gres_total_parts = gres.split(':')
 
-        if len(gres_used_parts) == 4 and gres_used_parts[0] == "gpu":
-            _, gpu_type, used_gpu_count_part, used_gpu_used_idx_part = gres_used_parts
-            used_gpu_count = int(used_gpu_count_part.split('(')[0])
-            used_gpu_used_idx = used_gpu_used_idx_part.rstrip(')')
+        try:
+            # gpu:tesla:4(IDX:0-3) -> ["gpu","tesla","4(IDX","0-3)"]
+            gres_used_parts = gres_used.split(':')
+            # gpu:tesla:4 -> ["gpu","tesla","4"]
+            gres_total_parts = gres.split(':')
 
-        if len(gres_total_parts) == 3 and gres_total_parts[0] == "gpu":
-            _, _, total_gpu_part = gres_total_parts
-            total_gpu = int(total_gpu_part)
+            # Ensure gres_used_parts has the correct format for GPU usage
+            if len(gres_used_parts) == 4 and gres_used_parts[0] == "gpu":
+                _, gpu_type, used_gpu_count_part, used_gpu_used_idx_part = gres_used_parts
+                used_gpu_count = int(used_gpu_count_part.split('(')[0])
+                used_gpu_used_idx = used_gpu_used_idx_part.rstrip(')')
+
+            # Ensure gres_total_parts has the correct format for total GPUs
+            if len(gres_total_parts) == 3 and gres_total_parts[0] == "gpu":
+                _, _, total_gpu_part = gres_total_parts
+                total_gpu = int(total_gpu_part)
+        except (ValueError, IndexError) as e:
+            self.log.debug(
+                "Invalid GPU data: gres:'%s', gres_used:'%s'. Skipping GPU metric submission. Error: %s",
+                gres,
+                gres_used,
+                e,
+            )
+            return
 
         gpu_tags = [f"slurm_partition_gpu_type:{gpu_type}", f"slurm_partition_gpu_used_idx:{used_gpu_used_idx}"]
         _tags = tags + gpu_tags
         self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
         self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
+
         return gpu_tags
 
     def _process_tags(self, data, map, tags):
@@ -310,25 +388,12 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 continue
 
             try:
-                metric_value = float(metric_value_str) if '.' in metric_value_str else int(metric_value_str)
+                metric_value = float(metric_value_str)
             except ValueError:
                 self.log.debug("Invalid metric value '%s' for '%s'. Skipping.", metric_value_str, metric_info["name"])
                 continue
 
             self.gauge(metric_info["name"], metric_value, tags)
-
-    def _update_sacct_params(self):
-        if self.last_run_time is not None:
-            now = datetime.now()
-            delta = now - self.last_run_time
-            start_time_param = f"--starttime=now-{int(delta.total_seconds())}seconds"
-            SACCT_PARAMS.append(start_time_param)
-
-        self.last_run_time = datetime.now()
-
-        # Update the sacct command with the dynamic SACCT_PARAMS
-        self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
-        self.sacct_cmd = self.get_slurm_command('sacct', SACCT_PARAMS)
 
     @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
@@ -336,10 +401,11 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # even if it fails and thus should not stop the check from running.
         try:
             # slurm 21.08.6\n
-            out, err, ret = get_subprocess_out([self.sinfo_partition_cmd[0], '--version'])
+            out, err, ret = get_subprocess_output([self.sinfo_partition_cmd[0], '--version'])
             if ret != 0:
                 self.log.error("Error running sinfo --version: %s", err)
             elif out:
+                self.log.debug("Processing sinfo --version output: %s", out)
                 version_out = out.split(' ')[1].strip()
                 if version_out:
                     version_parts = version_out.split('.')

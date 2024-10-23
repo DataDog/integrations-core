@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from typing import Any, Callable, Dict  # noqa: F401
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -13,14 +11,6 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.slurm import SlurmCheck
 
 from .common import SACCT_MAP, SDIAG_MAP, SINFO_MAP, SLURM_VERSION, SQUEUE_MAP, SSHARE_MAP, mock_output
-
-# def test_check(dd_run_check, aggregator, instance):
-#     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-#     check = SlurmCheck('slurm', {}, [instance])
-#     dd_run_check(check)
-
-#     aggregator.assert_all_metrics_covered()
-#     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(
@@ -34,7 +24,7 @@ from .common import SACCT_MAP, SDIAG_MAP, SINFO_MAP, SLURM_VERSION, SQUEUE_MAP, 
     ],
     ids=['sinfo with full params', 'squeue output', 'sacct output', 'sshare output', 'sdiag output'],
 )
-@patch('datadog_checks.slurm.check.get_subprocess_out')
+@patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregator, expected_metrics, binary):
     instance[f'collect_{binary}_stats'] = True
 
@@ -53,6 +43,7 @@ def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregato
 
     check.check(None)
     if binary == 'sacct':
+        # This one doesn't collect anything on the first run. It only collects on the second run.
         check.check(None)
 
     for metric in expected_metrics['metrics']:
@@ -61,7 +52,7 @@ def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregato
     aggregator.assert_all_metrics_covered()
 
 
-@patch('datadog_checks.slurm.check.get_subprocess_out')
+@patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check):
     instance['collect_sinfo_stats'] = True
     instance['sinfo_collection_level'] = 1
@@ -89,3 +80,6 @@ def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check
         'version.raw': raw_version,
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+# def test_metric_parsing():

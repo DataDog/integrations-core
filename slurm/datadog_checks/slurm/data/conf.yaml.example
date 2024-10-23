@@ -20,43 +20,43 @@ init_config:
 instances:
 
   -
-    ## @param collect_sinfo_stats - string - optional - default: true
+    ## @param collect_sinfo_stats - boolean - optional - default: true
     ## Whether or not to collect statistics from the sinfo command.
     #
-    # collect_sinfo_stats: 'true'
+    # collect_sinfo_stats: true
 
-    ## @param collect_sdiag_stats - string - optional - default: true
+    ## @param collect_sdiag_stats - boolean - optional - default: true
     ## Whether or not to collect statistics from the sdiag command.
     #
-    # collect_sdiag_stats: 'true'
+    # collect_sdiag_stats: true
 
-    ## @param collect_squeue_stats - string - optional - default: true
+    ## @param collect_squeue_stats - boolean - optional - default: true
     ## Whether or not to collect statistics from the squeue command.
     #
-    # collect_squeue_stats: 'true'
+    # collect_squeue_stats: true
 
-    ## @param collect_sacct_stats - string - optional - default: true
+    ## @param collect_sacct_stats - boolean - optional - default: true
     ## Whether or not to collect statistics from the sacct command.
     #
-    # collect_sacct_stats: 'true'
+    # collect_sacct_stats: true
 
-    ## @param collect_sshare_stats - string - optional - default: true
+    ## @param collect_sshare_stats - boolean - optional - default: true
     ## Whether or not to collect statistics from the sshare command.
     #
-    # collect_sshare_stats: 'true'
+    # collect_sshare_stats: true
 
-    ## @param collect_gpu_stats - string - optional - default: false
+    ## @param collect_gpu_stats - boolean - optional - default: false
     ## Whether or not to collect GPU statistics when Slurm is configured to use GPUs.
     #
-    # collect_gpu_stats: 'false'
+    # collect_gpu_stats: false
 
-    ## @param sinfo_collection_level - string - optional - default: 1
+    ## @param sinfo_collection_level - integer - optional - default: 1
     ## The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
     ## 3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3 
     ## collects data from from individual nodes as well but will be more verbose and include data such as CPU and 
     ## memory usage as reported from the OS as well as additional tags.
     #
-    # sinfo_collection_level: '1'
+    # sinfo_collection_level: 1
 
     ## @param sinfo_path - string - optional - default: /usr/bin/sinfo
     ## Full path to the sinfo binary.
@@ -78,10 +78,10 @@ instances:
     #
     # sshare_path: /usr/bin/sshare
 
-    ## @param sqeuue_path - string - optional - default: /usr/bin/squeue
+    ## @param squeue_path - string - optional - default: /usr/bin/squeue
     ## Full path to the squeue binary.
     #
-    # sqeuue_path: /usr/bin/squeue
+    # squeue_path: /usr/bin/squeue
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
