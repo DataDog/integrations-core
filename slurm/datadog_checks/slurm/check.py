@@ -97,7 +97,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.last_run_time = None
         self.tags = self.instance.get('tags', [])
 
-        # Debug only
+        # Debug only. QOL feature for troubleshooting in the future. Allows me to dump specific
+        # debugging logs depending on what the issue is.
         self.debug_sinfo_stats = is_affirmative(self.instance.get('debug_sinfo_stats', False))
         self.debug_squeue_stats = is_affirmative(self.instance.get('debug_squeue_stats', False))
         self.debug_sdiag_stats = is_affirmative(self.instance.get('debug_sdiag_stats', False))
