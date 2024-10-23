@@ -15,6 +15,7 @@ This integration collects logs from the sources listed above and sends them to D
 
 ### Configuration
 
+#### Get Credentials of Trend Micro Vision One XDR
 1. In the Trend Vision One console, go to on the left side-bar menu and visit **Administration > API Keys** .
 2. Generate a new authentication token. Click **Add API key**. Specify the settings of the new API key with the following:
     - **Name**: A meaningful name that can help you identify the API key
@@ -23,7 +24,11 @@ This integration collects logs from the sources listed above and sends them to D
     - **Status**: Whether the API key is enabled.
     - **Details**: Extra information about the API key.
 3. Click **Add**.
-4. Copy API Key to the form below along with the Host Region of your Trend Micro Vision One XDR console.
+4. To identify the Host Region of your Trend Micro Vision One XDR console please refer [here][5].
+
+#### Add your Trend Micro Vision One XDR Credentials
+- API Key
+- Host Region
 
 ## Data Collected
 
@@ -50,3 +55,4 @@ For further assistance, contact [Datadog Support][2].
 [2]: https://docs.datadoghq.com/help/
 [3]: https://docs.datadoghq.com/logs/explorer/
 [4]: https://www.datadoghq.com/product/cloud-siem/
+[5]: https://success.trendmicro.com/en-US/solution/ka-0015959
