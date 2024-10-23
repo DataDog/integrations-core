@@ -65,5 +65,4 @@ def test_get_stats_from_innodb_status(caplog, version):
     mocked_cursor.rowcount = 1
     mocked_cursor.fetchone.return_value = ('InnoDB', '', innodb_status)
     result = idb.get_stats_from_innodb_status(db)
-    print(json.dumps(result))
     assert result == exepcted_result
