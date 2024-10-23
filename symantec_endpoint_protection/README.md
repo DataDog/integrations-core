@@ -2,17 +2,17 @@
 
 [Symantec Endpoint Protection][5] is a client-server solution that protects laptops, desktops, and servers in your network against malware, risks, and vulnerabilities. Symantec Endpoint Protection combines virus protection with advanced threat protection to proactively secure your client computers against known and unknown threats, such as viruses, worms, Trojan horses, and adware. Symantec Endpoint Protection provides protection against even the most sophisticated attacks that evade traditional security measures, such as rootkits, zero-day attacks, and spyware that mutates.
 
-This integration enrich and ingests the following logs from Symantec Endpoint Protection:
+This integration enriches and ingests the following logs from Symantec Endpoint Protection:
 
-- Audit Logs: Record changes to policies such as Policy updates, Policy assignments, etc.
-- Risk Logs: Track and record potential security risks detected on endpoints, including malware, vulnerabilities, and suspicious activities.
-- Scan Logs: Record the results of antivirus scans, including detected malware, scan settings and user information.
-- System Logs: Record all administrative activities, client activities, server activities and client_server activities.
-- Security Logs: Record security-related events including attacks, compliance and device control.
-- Application Control Logs: Record events related to application control, such as blocked or allowed applications.
-- Traffic Logs: Record network traffic events, including incoming and outgoing connections, protocols, and ports.
+- **Audit logs**: Record changes to policies such as policy updates, policy assignments, etc.
+- **Risk logs**: Track and record potential security risks detected on endpoints, including malware, vulnerabilities, and suspicious activities.
+- **Scan logs**: Record the results of antivirus scans, including detected malware, scan settings and user information.
+- **System logs**: Record all administrative activities, client activities, server activities and `client_server` activities.
+- **Security logs**: Record security-related events, including attacks, compliance, and device control.
+- **Application control logs**: Record events related to application control, such as blocked or allowed applications.
+- **Traffic logs**: Record network traffic events, including incoming and outgoing connections, protocols, and ports.
 
-Visualize detailed insights into above mentioned logs with the out-of-the-box dashboards.
+You can also visualize detailed insights into the above-mentioned logs with the out-of-the-box dashboards. Once you've installed the integration, you can find the dashboards by searching for "symantec-endpoint-protection" in the dashboards list.
 
 ## Setup
 
@@ -62,7 +62,7 @@ Linux command:
     6. Enable Transmission of Logs to a Syslog Server.
     7. Provide your **syslog server IP**.
     8. Select network protocol as **UDP**.
-    9. Provide **PORT** where you want to forward logs.
+    9. Provide the **PORT** where you want to forward logs.
 
 ### Validation
 
@@ -72,7 +72,7 @@ Linux command:
 
 ### Logs
 
-The Symantec Endpoint Protection integration collects audit, risk, scan, security, traffic, application control and system logs.
+The Symantec Endpoint Protection integration collects audit, risk, scan, security, traffic, application control, and system logs.
 
 ### Metrics
 
@@ -88,9 +88,7 @@ The Symantec Endpoint Protection integration does not include any service checks
 
 ## Troubleshooting
 
-### Symantec Endpoint Protection
-
-**Permission denied while port binding:**
+### Permission denied while port binding
 
 If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
 
@@ -118,11 +116,11 @@ If you see a **Permission denied** error while port binding in the Agent logs, s
 
    2. [Restart the Agent][1].
 
-**Data is not being collected:**
+### Data is not being collected
 
 Make sure that traffic is bypassed from the configured port if the firewall is enabled.
 
-**Port already in use:**
+### Port already in use
 
 If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
 
@@ -133,7 +131,7 @@ This error occurs because by default, Syslog listens on port 514. To resolve thi
 - Disable Syslog.
 - Configure the Agent to listen on a different, available port.
 
-For any further assistance, contact [Datadog support][3].
+Need help? Contact [Datadog support][3].
 
 [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
