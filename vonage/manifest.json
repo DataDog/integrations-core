@@ -1,0 +1,49 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a9a9e56e-e46a-489e-a9c0-00d8f1b5cdb2",
+  "app_id": "vonage",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Vonage Reports Logs.",
+    "title": "Vonage",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Vonage Overview",
+        "image_url": "images/vonage_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Vonage SMS Details",
+        "image_url": "images/vonage_sms_details.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Vonage Voice Details",
+        "image_url": "images/vonage_voice_details.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "dashboards": {
+        "Vonage Overview": "assets/dashboards/vonage_overview.json"
+    },
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
