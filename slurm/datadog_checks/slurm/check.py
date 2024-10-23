@@ -93,7 +93,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.tags = self.instance.get('tags', [])
 
     def check(self, _):
-        # breakpoint()
         self.collect_metadata()
         if self.last_run_time is not None:
             self._update_sacct_params()
@@ -118,7 +117,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             commands.append(('sacct', self.sacct_cmd, self.process_sacct))
         elif self.last_run_time is None:
             self.last_run_time = datetime.now()
-        # breakpoint()
+
         for name, cmd, process_func in commands:
             out, err, ret = get_subprocess_out(cmd)
             if ret != 0:
@@ -162,8 +161,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 tags = self._process_tags(node_data, NODE_MAP["extended_tags"], tags)
 
             if self.gpu_stats:
-                # if node_data[-2] != "(null)":
-                #     breakpoint()
                 gpu_tags = self._process_sinfo_gpu(node_data[-2], node_data[-1], "node", tags)
                 tags.extend(gpu_tags)
 
