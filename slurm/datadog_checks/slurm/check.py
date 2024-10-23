@@ -4,7 +4,6 @@
 import os
 import subprocess
 from datetime import datetime, timedelta
-from typing import Any  # noqa: F401
 
 from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
 
@@ -62,6 +61,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sshare_stats = is_affirmative(self.instance.get('collect_sshare_stats', True))
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
 
+        # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
         self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
 
@@ -106,8 +106,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def check(self, _):
         self.collect_metadata()
-        if self.last_run_time is not None:
-            self.update_sacct_params()
 
         commands = []
 
@@ -126,8 +124,11 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             commands.append(('sshare', self.sshare_cmd, self.process_sshare))
 
         if self.collect_sacct_stats and self.last_run_time is not None:
+            self.update_sacct_params()
             commands.append(('sacct', self.sacct_cmd, self.process_sacct))
         elif self.last_run_time is None:
+            # Set timestamp here so we can use it for the next run and collect sacct stats only
+            # between the 2 runs.
             self.last_run_time = datetime.now()
 
         for name, cmd, process_func in commands:

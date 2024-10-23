@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics # noqa: F401
 from datadog_checks.slurm import SlurmCheck
 
 from .common import SACCT_MAP, SDIAG_MAP, SINFO_MAP, SLURM_VERSION, SQUEUE_MAP, SSHARE_MAP, mock_output
@@ -82,4 +82,3 @@ def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-# def test_metric_parsing():
