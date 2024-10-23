@@ -15,6 +15,7 @@ This integration collects logs from the sources listed above and sends them to D
 
 ### Configuration
 
+#### Get Credentials of Trend Micro Vision One XDR
 1. In the Trend Vision One console, go to on the left side-bar menu and visit **Administration > API Keys** .
 2. Generate a new authentication token. Click **Add API key**. Specify the settings of the new API key with the following:
     - **Name**: A meaningful name that can help you identify the API key
@@ -24,7 +25,10 @@ This integration collects logs from the sources listed above and sends them to D
     - **Details**: Extra information about the API key.
 3. Click **Add**.
 4. To identify the Host Region of your Trend Micro Vision One XDR console please refer [here][5].
-5. Add your API Key and Host Region.
+
+#### Add your Trend Micro Vision One XDR Credentials
+- API Key
+- Host Region
 
 ## Data Collected
 
