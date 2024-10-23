@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.0 / 2024-10-16
+
+***Added***:
+
+* Apply `timeoutMS` to integration connection to ensure client-side operation timeouts terminate the server processes. ([#18843](https://github.com/DataDog/integrations-core/pull/18843))
+
 ## 8.0.0 / 2024-10-04
 
 ***Removed***:
@@ -20,7 +26,7 @@
   - working_millis: the amount of time that MongoDB spends working on the operation (MongoDB 8.0+)
   - queues: contains information about the operation's queues (MongoDB 8.0+) ([#18761](https://github.com/DataDog/integrations-core/pull/18761))
 
-## 7.0.0 / 2024-10-01
+## 7.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 

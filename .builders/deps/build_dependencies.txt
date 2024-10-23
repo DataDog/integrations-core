@@ -9,5 +9,5 @@ setuptools-scm==5.0.2; python_version < '3.0'
 setuptools-rust>=1.7.0; python_version > '3.0'
 maturin; python_version > '3.0'
 cffi>=1.12
-cython<3.0.0
+cython==3.0.11
 tomli>=2.0.1; python_version > '3.0'

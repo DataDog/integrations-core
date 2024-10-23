@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.0 / 2024-10-22
+
+***Added***:
+
+* [cloudera] Configure the number of connection pools to cache ([#18886](https://github.com/DataDog/integrations-core/pull/18886))
+
 ## 3.1.0 / 2024-10-04
 
 ***Added***:
@@ -12,7 +18,7 @@
 
 * Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
 
-## 3.0.0 / 2024-10-01
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
