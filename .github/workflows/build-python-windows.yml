@@ -7,7 +7,6 @@ on:
         required: true
         type: string
         description: 'The version of CPython to build (e.g., 3.12)'
-    secrets: inherit
 
 jobs:
   build_cpython:
