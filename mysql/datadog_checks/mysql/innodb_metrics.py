@@ -79,6 +79,7 @@ class InnoDBMetrics(object):
 
             # SEMAPHORES
             if line.find('Mutex spin waits') == 0:
+                # MySQL 5.6 & 5.7 only
                 # Mutex spin waits 79626940, rounds 157459864, OS waits 698719
                 # Mutex spin waits 0, rounds 247280272495, OS waits 316513438
                 results['Innodb_mutex_spin_waits'] = int(row[3])
@@ -116,8 +117,13 @@ class InnoDBMetrics(object):
                 # Trx id counter 861B144C
                 txn_seen = True
             elif line.find('History list length') == 0:
+                # MySQL 5.7 and above
                 # History list length 132
                 results['Innodb_history_list_length'] = int(row[3])
+            elif line.find('idle History list length') == 0:
+                # MySQL 5.6 only
+                # idle History list length 123
+                results['Innodb_history_list_length'] += int(row[4])
             elif txn_seen and line.find('---TRANSACTION') == 0:
                 # ---TRANSACTION 0, not started, process no 13510, OS thread id 1170446656
                 results['Innodb_current_transactions'] += 1
@@ -257,7 +263,13 @@ class InnoDBMetrics(object):
                 # syncs, 2980893 checkpoints
                 results['Innodb_log_writes'] = int(row[0])
             elif line.find(" pending log writes, ") > 0:
+                # MySQL 5.6 only
                 # 0 pending log writes, 0 pending chkp writes
+                results['Innodb_pending_log_writes'] = int(row[0])
+                results['Innodb_pending_checkpoint_writes'] = int(row[4])
+            elif line.find(" pending log flushes, ") > 0:
+                # MySQL 5.7 only
+                # 0 pending log flushes, 0 pending chkp writes
                 results['Innodb_pending_log_writes'] = int(row[0])
                 results['Innodb_pending_checkpoint_writes'] = int(row[4])
             elif line.find("Log sequence number") == 0:
