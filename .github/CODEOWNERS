@@ -298,6 +298,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /snowflake/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /snowflake/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
+/sonicwall_firewall/                                                  @DataDog/saas-integrations
+/sonicwall_firewall/*.md                                              @DataDog/saas-integrations @DataDog/documentation
+/sonicwall_firewall/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
+/sonicwall_firewall/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /sophos_central_cloud/                                               @DataDog/saas-integrations
 /sophos_central_cloud/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /sophos_central_cloud/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
