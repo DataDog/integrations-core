@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Metabase activity events.",
+    "description": "Gain insights into Metabase activity events, view logs and query logs.",
     "title": "Metabase",
     "media": [
       {
@@ -50,6 +50,31 @@
         "caption": "Metabase - Activity Overview 8",
         "image_url": "images/metabase_activity_overview_8.png",
         "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Views Overview 1",
+        "image_url": "images/metabase_views_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Views Overview 2",
+        "image_url": "images/metabase_views_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Views Overview 3",
+        "image_url": "images/metabase_views_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Query Overview 1",
+        "image_url": "images/metabase_query_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Metabase - Query Overview 2",
+        "image_url": "images/metabase_query_overview_2.png",
+        "media_type": "image"
       }
     ],
     "classifier_tags": [
@@ -71,7 +96,9 @@
       }
     },
     "dashboards": {
-      "Metabase - Activity Overview": "assets/dashboards/metabase_activity_overview.json"
+      "Metabase - Activity Overview": "assets/dashboards/metabase_activity_overview.json",
+      "Metabase - Views Overview": "assets/dashboards/metabase_views_overview.json",
+      "Metabase - Query Overview": "assets/dashboards/metabase_query_overview.json"
     },
     "logs": {
       "source": "metabase"
@@ -79,7 +106,10 @@
     "monitors": {
       "[Metabase] High number of user invites" : "assets/monitors/high_number_of_user_invites.json",
       "[Metabase] High number of API Key regenerations" : "assets/monitors/high_number_of_api_key_regenerations.json",
-      "[Metabase] High number of user deactivations" : "assets/monitors/high_number_of_user_deactivations.json"
+      "[Metabase] High number of user deactivations" : "assets/monitors/high_number_of_user_deactivations.json",
+      "[Metabase] High query error rate": "assets/monitors/high_query_error_rate.json",
+      "[Metabase] High query execution time": "assets/monitors/high_query_execution_time.json",
+      "[Metabase] Low cache hit percentage": "assets/monitors/low_cache_hit_percentage.json"
     }
   },
   "author": {

@@ -2,7 +2,7 @@
 
 [Metabase][1] is a business intelligence analytics platform that can be used to ask questions about your data, or can be embedded in your apps to let your customers explore their data on their own.
 
-Integrate Metabase with Datadog to gain insights into activity event logs through the Metabase API. The data is normalized and enriched before ingestion. Pre-built dashboard visualizations provide immediate insights into Metabase activity events.
+Integrate Metabase with Datadog to gain insights into activity event logs, view logs and query logs through the Metabase API. The data is normalized and enriched before ingestion. Pre-built dashboard visualizations provide immediate insights into Metabase activity events.
 
 ## Setup
 
@@ -39,7 +39,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs throug
 
 #### Configure the Metabase and Datadog integration
 
-Configure the Metabase endpoint to forward Metabase activity logs to Datadog.
+Configure the Metabase endpoint to forward Metabase logs to Datadog.
 
 1. Navigate to `Metabase` integration on Datadog platform.
 2. Add your Metabase credentials.
@@ -53,7 +53,7 @@ Configure the Metabase endpoint to forward Metabase activity logs to Datadog.
 
 ### Logs
 
-The Metabase integration collects and forwards Metabase activity event logs to Datadog.
+The Metabase integration collects and forwards Metabase activity event logs, view logs and query logs to Datadog.
 
 ### Metrics
 

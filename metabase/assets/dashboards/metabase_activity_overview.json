@@ -41,7 +41,7 @@
                             "hide_zero_counts": true,
                             "show_status": true,
                             "last_triggered_format": "relative",
-                            "query": "tag:(integration:metabase)",
+                            "query": "tag:(integration:metabase) service:activity-events",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -159,7 +159,6 @@
                             "title": "Event Distribution",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -288,7 +287,7 @@
                 "x": 0,
                 "y": 5,
                 "width": 12,
-                "height": 1
+                "height": 9
             }
         },
         {
@@ -1025,9 +1024,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 6,
+                "y": 14,
                 "width": 12,
-                "height": 1
+                "height": 23
             }
         },
         {
@@ -1402,9 +1401,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 7,
+                "y": 37,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -1779,9 +1778,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 8,
+                "y": 49,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -2098,9 +2097,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 61,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -2475,9 +2474,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 73,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -2862,9 +2861,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 11,
+                "y": 85,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -3365,9 +3364,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 12,
+                "y": 97,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -3858,9 +3857,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 109,
                 "width": 12,
-                "height": 1
+                "height": 12
             }
         },
         {
@@ -4066,9 +4065,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 121,
                 "width": 12,
-                "height": 1
+                "height": 8
             }
         }
     ],

@@ -11,7 +11,8 @@
 		"query": "logs(\"source:metabase service:activity-events @evt.name:user-invited\").index(\"*\").rollup(\"count\").last(\"1d\") > 15",
 		"message": "{{#is_alert}}\n\nThis indicates a significant increase in the number of user invites sent within the Metabase account.\n\n{{/is_alert}}\n\n@example@example.com",
 		"tags": [
-			"integration:metabase"
+			"integration:metabase",
+			"service:activity-events"
 		],
 		"options": {
 			"thresholds": {
@@ -21,7 +22,8 @@
 			"notify_audit": false,
 			"on_missing_data": "default",
 			"include_tags": false,
-			"silenced": {}
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false
 		},
 		"priority": 5,
 		"restriction_policy": {
@@ -29,6 +31,7 @@
 		}
 	},
 	"tags": [
-		"integration:metabase"
+		"integration:metabase",
+		"service:activity-events"
 	]
 }

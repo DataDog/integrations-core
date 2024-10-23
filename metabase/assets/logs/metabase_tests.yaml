@@ -1,106 +1,100 @@
 id: "metabase"
 tests:
- -
-  sample: |-
-    {
-      "entity_qualified_id" : "dashboard_11",
-      "entity_type" : "dashboard",
-      "user_id" : 1,
-      "topic" : "dashboard-add-cards",
-      "details" : {
-        "dashcards" : [ {
-          "name" : "Client, Filtered by Client ID is abc",
-          "id" : 118,
-          "card_id" : 120
-        } ],
-        "name" : "CDS-Views",
-        "id" : 11
-      },
-      "id" : "178",
-      "entity_id" : 11,
-      "timestamp" : "2024-09-30T11:47:26.247269+05:30"
-    }
-  result:
-    custom:
-      details:
-        dashcards:
-         -
-          name: "Client, Filtered by Client ID is abc"
-          id: 118
-          card_id: 120
-        id: 11
-        name: "CDS-Views"
-      entity_id: 11
-      entity_qualified_id: "dashboard_11"
-      entity_type: "dashboard"
-      evt:
-        name: "dashboard-add-cards"
-      id: "178"
-      timestamp: "2024-09-30T11:47:26.247269+05:30"
-      usr:
-        id: 1
-    message: |-
+  - sample: |-
       {
-        "entity_qualified_id" : "dashboard_11",
-        "entity_type" : "dashboard",
-        "user_id" : 1,
-        "topic" : "dashboard-add-cards",
-        "details" : {
-          "dashcards" : [ {
-            "name" : "Client, Filtered by Client ID is abc",
-            "id" : 118,
-            "card_id" : 120
-          } ],
-          "name" : "CDS-Views",
-          "id" : 11
+        "entity_qualified_id": "dashboard_11",
+        "entity_type": "dashboard",
+        "user_id": 1,
+        "topic": "dashboard-add-cards",
+        "details": {
+          "dashcards": [
+            {
+              "name": "Client, Filtered by Client ID is abc",
+              "id": 118,
+              "card_id": 120
+            }
+          ],
+          "name": "Views",
+          "id": 11
         },
-        "id" : "178",
-        "entity_id" : 11,
-        "timestamp" : "2024-09-30T11:47:26.247269+05:30"
+        "id": "178",
+        "entity_id": 11,
+        "timestamp": "2024-09-30T11:47:26.247269+05:30"
       }
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1727677046247
- -
-  sample: |-
-    {
-      "entity_type" : "setting",
-      "user_id" : 1,
-      "topic" : "setting-update",
-      "details" : {
-        "previous-value" : "UCT",
-        "key" : "report-timezone",
-        "new-value" : "UTC"
-      },
-      "id" : "188",
-      "timestamp" : "2024-09-30T12:37:04.133904+05:30"
-    }
-  result:
-    custom:
-      details:
-        key: "report-timezone"
-        new-value: "UTC"
-        previous-value: "UCT"
-      entity_type: "setting"
-      evt:
-        name: "setting-update"
-      id: "188"
-      timestamp: "2024-09-30T12:37:04.133904+05:30"
-      usr:
-        id: 1
-    message: |-
+    result: null
+  - sample: |-
       {
-        "entity_type" : "setting",
-        "user_id" : 1,
-        "topic" : "setting-update",
-        "details" : {
-          "previous-value" : "UCT",
-          "key" : "report-timezone",
-          "new-value" : "UTC"
+        "entity_type": "setting",
+        "user_id": 1,
+        "topic": "setting-update",
+        "details": {
+          "previous-value": "UCT",
+          "key": "report-timezone",
+          "new-value": "UTC"
         },
-        "id" : "188",
-        "timestamp" : "2024-09-30T12:37:04.133904+05:30"
+        "id": "188",
+        "timestamp": "2024-09-30T12:37:04.133904+05:30"
       }
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1727680024133
+    result: null
+  - sample: >-
+      {
+        "id": "12",
+        "timestamp": "2024-09-05T11:59:10.181879Z",
+        "user_id": 1,
+        "entity_type": "dashboard",
+        "entity_id": 1,
+        "entity_qualified_id": "dashboard_1",
+        "user_email": "abc.xyz@something.com",
+        "user_full_name": "Abc Xyz",
+        "user_type": "personal",
+        "entity_name": "E-commerce insights",
+        "entity_description": "Quickly take an overview of an e-commerce reseller business and dive into separate tabs that focus on top selling products and demographic insights. Each vendor can log in as a tenant and see their own data sandboxed from all the others.",
+        "table_name": "ACCOUNTS",
+        "table_display_name": "Accounts",
+        "table_description": "Information on customer accounts registered with Piespace. Each account represents a new organization signing up for on-demand pies.",
+        "database_name": "Sample Database",
+        "database_description": "Some example data for you to play around with."
+      }
+    result: null
+  - sample: >-
+      {
+        "entity_id": "306",
+        "started_at": "2024-09-10T10:37:35.965619Z",
+        "running_time_seconds": 0.169,
+        "result_rows": 2,
+        "is_native": false,
+        "query_source": "dashboard",
+        "error": "Error in query, something is invalid",
+        "user_id": "1",
+        "card_id": 85,
+        "card_qualified_id": "card_85",
+        "dashboard_id": 5,
+        "dashboard_qualified_id": "dashboard_5",
+        "pulse_id": 6,
+        "database_id": 13371337,
+        "database_qualified_id": "database_1",
+        "cache_hit": false,
+        "action_id": 7,
+        "action_qualified_id": "action_7",
+        "query": {
+          "constraints": {
+            "max-results": 10000,
+            "max-results-bare-rows": 2000
+          }
+        },
+        "card_name": "Last downloads",
+        "card_description": "Most recently downloaded content.",
+        "dashboard_name": "Question overview",
+        "dashboard_description": "Views, performance, activity, and other data for a particular question.",
+        "user_email": "abc.xyz@something.com",
+        "user_full_name": "Abc Xyz",
+        "user_type": "personal",
+        "database_name": "Sample Database",
+        "database_description": "Some example data for you to play around with."
+      }
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.

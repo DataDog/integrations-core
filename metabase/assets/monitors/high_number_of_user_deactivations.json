@@ -11,7 +11,8 @@
 		"query": "logs(\"source:metabase service:activity-events @evt.name:user-deactivated\").index(\"*\").rollup(\"count\").last(\"12h\") > 10",
 		"message": "{{#is_alert}}\n\nThis indicates a significant rise in user account deactivations, potentially highlighting policy violations, insider threats or security risk.\n\n{{/is_alert}}\n\n{{#is_warning}}\n\nThis indicates a significant increase in user account deactivations. Immediate attention is required to address this trend.\n\n{{/is_warning}}\n\n@example@example.com",
 		"tags": [
-			"integration:metabase"
+			"integration:metabase",
+			"service:activity-events"
 		],
 		"options": {
 			"thresholds": {
@@ -22,7 +23,8 @@
 			"notify_audit": false,
 			"on_missing_data": "default",
 			"include_tags": false,
-			"silenced": {}
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false
 		},
 		"priority": 1,
 		"restriction_policy": {
@@ -30,6 +32,7 @@
 		}
 	},
 	"tags": [
-		"integration:metabase"
+		"integration:metabase",
+		"service:activity-events"
 	]
 }
