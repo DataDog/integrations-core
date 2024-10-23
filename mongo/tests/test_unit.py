@@ -612,6 +612,7 @@ def test_when_collections_indexes_stats_to_true_then_index_stats_metrics_reporte
 
 def test_when_version_lower_than_3_2_then_no_index_stats_metrics_reported(aggregator, check, instance, dd_run_check):
     # Given
+    instance["reported_database_hostname"] = "test-hostname:27017"
     instance["collections_indexes_stats"] = True
     instance["collections"] = ['bar', 'foo']
     check = check(instance)
@@ -625,6 +626,7 @@ def test_when_version_lower_than_3_2_then_no_index_stats_metrics_reported(aggreg
 
 def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator, check, instance, dd_run_check):
     # Given
+    instance["reported_database_hostname"] = "test-hostname:27017"
     check = check(instance)
     # When
     mocked_client = mock.MagicMock()
@@ -738,6 +740,7 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     Ideally we should be asserting that we emit an event for a change of role. That's the behavior users care about.
     It requires more mocking work though.
     """
+    instance_shard["reported_database_hostname"] = "test-hostname:27018"
     mongo_check = check(instance_shard)
     mc = seed_mock_client()
     mc.replset_get_status.return_value = load_json_fixture('replSetGetStatus-replica-primary-in-shard')

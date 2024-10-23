@@ -26,6 +26,7 @@ class ClickhouseCheck(AgentCheck):
         self._read_timeout = float(self.instance.get('read_timeout', 10))
         self._compression = self.instance.get('compression', False)
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
+        self._tls_ca_cert = self.instance.get('tls_ca_cert', None)
         self._tags = self.instance.get('tags', [])
 
         # Add global tags
@@ -108,6 +109,7 @@ class ClickhouseCheck(AgentCheck):
                 sync_request_timeout=self._connect_timeout,
                 compression=self._compression,
                 secure=self._tls_verify,
+                ca_certs=self._tls_ca_cert,
                 settings={},
                 # Make every client unique for server logs
                 client_name='datadog-{}'.format(self.check_id),
