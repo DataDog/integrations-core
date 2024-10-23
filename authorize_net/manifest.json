@@ -8,12 +8,14 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Settled and Unsettled Transactions",
+    "description": "Gain insights into Settled and Unsettled Transactions of Authorize.Net",
     "title": "Authorize.Net",
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
+      "Category::Metrics",
       "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
       "Offering::Integration"
     ]
   },
