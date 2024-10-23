@@ -10,7 +10,6 @@ from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
-from six import PY2
 
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
@@ -286,17 +285,45 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                cursor.execute(
-                    "select * from {pg_stat_activity_view} LIMIT 0".format(
-                        pg_stat_activity_view=self._config.pg_stat_activity_view
+                try:
+                    cursor.execute(
+                        "select * from {pg_stat_activity_view} LIMIT 0".format(
+                            pg_stat_activity_view=self._config.pg_stat_activity_view
+                        )
                     )
-                )
-                all_columns = {i[0] for i in cursor.description}
-                available_columns = [c for c in all_expected_columns if c in all_columns]
-                missing_columns = set(all_expected_columns) - set(available_columns)
-                if missing_columns:
-                    self._log.debug("missing the following expected columns from pg_stat_activity: %s", missing_columns)
-                self._log.debug("found available pg_stat_activity columns: %s", available_columns)
+                    all_columns = {i[0] for i in cursor.description}
+                    available_columns = [c for c in all_expected_columns if c in all_columns]
+                    missing_columns = set(all_expected_columns) - set(available_columns)
+                    if missing_columns:
+                        self._log.debug(
+                            "missing the following expected columns from pg_stat_activity: %s", missing_columns
+                        )
+                    self._log.debug("found available pg_stat_activity columns: %s", available_columns)
+                except psycopg2.errors.InvalidSchemaName as e:
+                    self._log.warning(
+                        "cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e)
+                    )
+                    return None
+                except psycopg2.DatabaseError as e:
+                    # if the schema is valid then it's some problem with the function (missing, or invalid permissions,
+                    # incorrect definition)
+                    self._check.record_warning(
+                        DatabaseConfigurationError.undefined_explain_function,
+                        warning_with_tags(
+                            "Unable to collect activity columns in dbname=%s. Check that the function "
+                            "%s exists in the database. See "
+                            "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting "
+                            "for more details: %s",
+                            self._config.dbname,
+                            self._config.pg_stat_activity_view,
+                            str(e),
+                            host=self._check.resolved_hostname,
+                            dbname=self._config.dbname,
+                            code=DatabaseConfigurationError.undefined_activity_view.value,
+                        ),
+                    )
+                    return None
+
         return available_columns
 
     def _filter_and_normalize_statement_rows(self, rows):
@@ -373,7 +400,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         if self._config.dbstrict:
             extra_filters = " AND datname = %s"
             params = params + (self._config.dbname,)
-        else:
+        elif len(self._config.ignore_databases) > 0:
             extra_filters = " AND " + " AND ".join("datname NOT ILIKE %s" for _ in self._config.ignore_databases)
             params = params + tuple(self._config.ignore_databases)
         if filter_stale_idle_conn and self._activity_last_query_start:
@@ -397,6 +424,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
             raw=True,
         )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_ms",
+            (time.time() - start_time) * 1000,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_count",
+            row_len,
+            "histogram",
+        )
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -409,6 +448,17 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _collect_statement_samples(self):
         start_time = time.time()
         pg_activity_cols = self._get_pg_stat_activity_cols_cached(PG_STAT_ACTIVITY_COLS)
+        # If we couldn't get activity columns it's likely we're missing schema access
+        # Or critical functions are missing
+        if pg_activity_cols is None:
+            self._check.count(
+                "dd.postgres.statement_samples.error",
+                1,
+                tags=self.tags + ["error:explain-no_plans_possible"] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+                raw=True,
+            )
+            return
         rows = self._get_new_pg_stat_activity(pg_activity_cols)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
@@ -430,6 +480,13 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self.tags,
                 raw=True,
             )
+            datadog_agent.emit_agent_telemetry(
+                "postgres",
+                "collect_activity_snapshot_ms",
+                (time.time() - start_time) * 1000,
+                "histogram",
+            )
+
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
@@ -465,6 +522,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
             raw=True,
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            "collect_statement_samples_ms",
+            elapsed_ms,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            "collect_statement_samples_count",
+            submitted_count,
+            "gauge",
         )
 
     @staticmethod
@@ -845,6 +914,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         # multi-byte characters that fall on the limit are left out. One caveat is that if a statement's length
         # happens to be greater or equal to the threshold below but isn't actually truncated, this
         # would falsely report it as a truncated statement
-        statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
+        statement_bytes = bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
         return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated

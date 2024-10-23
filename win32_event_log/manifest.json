@@ -15,6 +15,7 @@
       "Supported OS::Windows",
       "Category::OS & System",
       "Category::Log Collection",
+      "Category::Windows",
       "Offering::Integration"
     ],
     "resources": [

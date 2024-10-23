@@ -18,6 +18,7 @@ from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
     default_json_event_encoding,
+    get_agent_host_tags,
     obfuscate_sql_with_metadata,
     resolve_db_host,
     tracked_query,
@@ -44,6 +45,37 @@ def test_resolve_db_host(db_host, agent_hostname, want):
     datadog_agent.set_hostname(agent_hostname)
     assert resolve_db_host(db_host) == want
     datadog_agent.reset_hostname()
+
+
+def test_get_agent_host_tags():
+    # happy path
+    datadog_agent._set_host_tags(
+        {
+            "system": ["tag1:value1", "tag2:value2"],
+            "google cloud platform": ["tag3:value3", "tag4:value4"],
+        }
+    )
+    want = ["tag1:value1", "tag2:value2", "tag3:value3", "tag4:value4"]
+    got = get_agent_host_tags()
+    assert got == want
+
+    # invalid tags json
+    datadog_agent._set_host_tags("{")
+    with pytest.raises(ValueError):
+        get_agent_host_tags()
+
+    # invalid tags value
+    datadog_agent._set_host_tags(
+        {
+            "system": ["tag1:value1", "tag2:value2"],
+            "google cloud platform": "tag3:value3",
+        }
+    )
+    with pytest.raises(ValueError):
+        get_agent_host_tags()
+
+    # clean up
+    datadog_agent._reset_host_tags()
 
 
 def test_constant_rate_limiter():

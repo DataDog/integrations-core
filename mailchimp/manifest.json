@@ -1,0 +1,44 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "ec79b5f5-df6b-4603-bdd1-399284f2093d",
+  "app_id": "mailchimp",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the performance and usage of Mailchimp Campaigns and Audiences.",
+    "title": "Mailchimp",
+    "media": [],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 21603492,
+      "source_type_name": "Mailchimp",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mailchimp.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

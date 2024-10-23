@@ -57,7 +57,7 @@ def test_check_server_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -83,7 +83,7 @@ def test_check_instance_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, False
@@ -119,7 +119,7 @@ def test_check_instance_metrics_autodiscovery(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, True
@@ -167,7 +167,7 @@ def test_check_database_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, database_autodiscovery
@@ -246,7 +246,7 @@ def test_check_index_usage_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -272,7 +272,7 @@ def test_check_task_scheduler_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -300,7 +300,7 @@ def test_check_master_files_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -339,7 +339,7 @@ def test_check_db_fragmentation_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(
         aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, database_autodiscovery
@@ -369,7 +369,7 @@ def test_check_tempdb_file_space_usage_metrics(
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
@@ -423,7 +423,7 @@ def test_check_incr_fraction_metrics(
     sqlserver_check.run()
     cursor.close()
 
-    tags = instance_docker_metrics.get('tags', [])
+    tags = sqlserver_check._config.tags
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 

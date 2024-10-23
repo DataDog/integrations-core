@@ -5,11 +5,8 @@ import pytest
 from mock import Mock
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3
 
 from .utils import get_check
-
-pytestmark = [requires_py3]
 
 
 class TestNamespace:

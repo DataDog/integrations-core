@@ -18,7 +18,7 @@ def test_collect_metadata_parsing_matching(aggregator, datadog_agent, stdout, st
     check = GUnicornCheck(CHECK_NAME, {}, [INSTANCE])
     check.check_id = 'test:123'
 
-    with mock.patch('datadog_checks.gunicorn.gunicorn.get_subprocess_output', return_value=(stdout, stderr, 0)):
+    with mock.patch('datadog_checks.gunicorn.gunicorn.get_gunicorn_version', return_value=(stdout, stderr, 0)):
         check.check(INSTANCE)
 
     datadog_agent.assert_metadata_count(expect_metadata_count)

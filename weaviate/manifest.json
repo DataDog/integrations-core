@@ -52,7 +52,7 @@
       "auto_install": true
     },
     "monitors": {
-      "node_status": "assets/monitors/node_status.json"
+      "Weaviate Node in unhealthy state": "assets/monitors/node_status.json"
     },
     "dashboards": {
       "Weaviate Overview Dashboard": "assets/dashboards/overview_dashboard.json"

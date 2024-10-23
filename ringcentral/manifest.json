@@ -1,0 +1,80 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "d60bf9ee-043d-4113-b301-e14996a9b17b",
+  "app_id": "ringcentral",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into RingCentral Voice, A2P SMS and Audit data.",
+    "title": "RingCentral",
+    "media": [
+      {
+        "caption": "RingCentral Audit",
+        "image_url": "images/ringcentral_audit_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "RingCentral Audit",
+        "image_url": "images/ringcentral_audit_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "RingCentral Message",
+        "image_url": "images/ringcentral_message.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "RingCentral Voice Call",
+        "image_url": "images/ringcentral_voice_call.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Category::Collaboration",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 24962948,
+      "source_type_name": "RingCentral",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ringcentral.",
+        "check": ["ringcentral.voice.total_calls", "ringcentral.message.total_messages"],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "RingCentral Audit": "assets/dashboards/ringcentral_audit.json",
+      "RingCentral Message": "assets/dashboards/ringcentral_message.json",
+      "RingCentral Voice Call": "assets/dashboards/ringcentral_voice_call.json"
+    },
+    "monitors": {
+      "sms_budget_overrun": "assets/monitors/sms_budget_overrun.json",
+      "sms_high_error_rate_detected": "assets/monitors/sms_high_error_rate_detected.json"
+    },
+    "logs": {
+      "source": "ringcentral"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

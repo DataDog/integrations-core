@@ -6,7 +6,6 @@ import logging
 import pytest
 import requests
 from packaging import version
-from six import iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.elastic import ESCheck
@@ -276,7 +275,7 @@ def test_node_name_as_host(dd_environment, instance_normalize_hostname, aggregat
     elastic_check.check(None)
     node_name = node_tags[-1].split(':')[1]
 
-    for m_name, _ in iteritems(STATS_METRICS):
+    for m_name in STATS_METRICS:
         aggregator.assert_metric(m_name, count=1, tags=node_tags, hostname=node_name)
 
 
@@ -288,7 +287,7 @@ def test_pshard_metrics(dd_environment, aggregator):
     elastic_check.check(None)
 
     pshard_stats_metrics = pshard_stats_for_version(es_version)
-    for m_name, desc in iteritems(pshard_stats_metrics):
+    for m_name, desc in pshard_stats_metrics.items():
         if desc[0] == 'gauge':
             aggregator.assert_metric(m_name)
 
@@ -310,7 +309,7 @@ def test_detailed_index_stats(dd_environment, aggregator):
     es_version = elastic_check._get_es_version()
     elastic_check.check(None)
     pshard_stats_metrics = pshard_stats_for_version(es_version)
-    for m_name, desc in iteritems(pshard_stats_metrics):
+    for m_name, desc in pshard_stats_metrics.items():
         if desc[0] == 'gauge' and desc[1].startswith('_all.'):
             aggregator.assert_metric(m_name)
 

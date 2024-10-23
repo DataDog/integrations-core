@@ -33,8 +33,9 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 def test_common_replica_metrics(aggregator, integration_check, metrics_cache_replica, pg_replica_instance):
     check = integration_check(pg_replica_instance)
     check._connect()
-    check.initialize_is_aurora()
-    check.check(pg_replica_instance)
+
+    # Use check.run() to go through initilization queries
+    check.run()
 
     expected_tags = _get_expected_replication_tags(check, pg_replica_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
@@ -54,6 +55,20 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'])
 
     aggregator.assert_all_metrics_covered()
+
+
+@requires_over_10
+def test_replica_initialization_tags(integration_check, pg_replica_instance, pg_replica_instance2):
+    check = integration_check(pg_replica_instance)
+    check.run()
+    assert check.cluster_name == ''
+    assert check.system_identifier is not None
+
+    check2 = integration_check(pg_replica_instance2)
+    check2.run()
+    # After run, initialization queries should have set system identifier and cluster_name tags
+    assert check2.cluster_name == 'replica2'
+    assert check2.system_identifier is not None
 
 
 @requires_over_10

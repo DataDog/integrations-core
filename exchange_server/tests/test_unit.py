@@ -2,14 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.exchange_server import ExchangeCheck
 from datadog_checks.exchange_server.metrics import METRICS_CONFIG
 
 from .common import PERFORMANCE_OBJECTS
-
-pytestmark = [requires_py3]
 
 
 def test(aggregator, dd_default_hostname, dd_run_check, mock_performance_objects):

@@ -1,0 +1,1299 @@
+{
+    "title": "Suricata - Flow",
+    "description": "- This dashboard provides the insights into network flow data processed by Suricata.",
+    "widgets": [
+        {
+            "id": 4000160402704450,
+            "definition": {
+                "type": "image",
+                "url": "https://suricata.io/wp-content/uploads/2023/09/Logo-Suricata-vert-R.png",
+                "url_dark_theme": "https://suricata.io/wp-content/uploads/2023/09/Logo-Suricata-vert-whitetype-R.png",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7296852491781326,
+            "definition": {
+                "type": "note",
+                "content": "The Suricata Flow dashboard provides a comprehensive overview of network flow activities. \n\nThis detailed view helps users analyze network behavior, troubleshoot connectivity issues, and detect anomalies or inefficiencies in network traffic.\n\nFor more information, see the [Suricata Integration Documentation](https://docs.datadoghq.com/integrations/suricata).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 2442100025022408,
+            "definition": {
+                "title": "Flow",
+                "background_color": "purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3850824505601666,
+                        "definition": {
+                            "title": "Total Connections",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1845434581376704,
+                        "definition": {
+                            "title": "Total Alerts Seen",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow @flow.alerted:true $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2583199649441732,
+                        "definition": {
+                            "title": "Longest Flow Duration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "max",
+                                                "metric": "@suricata.flow.age"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1847343635244184,
+                        "definition": {
+                            "title": "Distribution of Flow by State",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@flow.state",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:suricata service:flow @flow.state:* $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8688993339646132,
+                        "definition": {
+                            "title": "Top Reasons of Flow Termination",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@flow.reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16",
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6846162708450826,
+                        "definition": {
+                            "title": "Distribution of Flow by Application Protocol",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@app_proto",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:suricata service:flow @app_proto:* $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "hide_total": true,
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 2,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3100781533826864,
+                        "definition": {
+                            "title": "Bytes  Transferred to Client",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1063921840674006,
+                        "definition": {
+                            "title": "Bytes Transferred over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bytes Transferred to Client",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Bytes Transferred to Server",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 6,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8523118541304900,
+                        "definition": {
+                            "title": "Bytes Transferred to Server",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2613932428407374,
+                        "definition": {
+                            "title": "  Packets Transferred to Client",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.pkts_toclient"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 399487289731706,
+                        "definition": {
+                            "title": "Packets Transferred over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Packets Transferred to Client",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            },
+                                            "alias": "Packets Transferred to Server",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.pkts_toclient"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.pkts_toserver"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 10,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5172341242691254,
+                        "definition": {
+                            "title": "Packets Transferred to Server",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.pkts_toserver"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4975028906307422,
+                        "definition": {
+                            "title": "Bypassed Bytes Transferred to Client",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.bypassed.bytes_toclient"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4556018037384164,
+                        "definition": {
+                            "title": "Bypassed Bytes Transferred over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bypassed Bytes Transferred to Client",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Bypassed Bytes Transferred to Server",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.bypassed.bytes_toclient"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.bypassed.bytes_toserver"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 14,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2050971796734002,
+                        "definition": {
+                            "title": "Bypassed Bytes Transferred to Server",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.bypassed.bytes_toserver"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4080294544567664,
+                        "definition": {
+                            "title": "  Bypassed Packets Transferred to Client",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.bypassed.pkts_toclient"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 18,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3430659789489756,
+                        "definition": {
+                            "title": "Bypassed Packets Transferred over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bypassed Packets Transferred to Client",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            },
+                                            "alias": "Bypassed Packets Transferred to Server",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.bypassed.pkts_toclient"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.bypassed.pkts_toserver"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 18,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1638372954470696,
+                        "definition": {
+                            "title": "Bypassed Packets Transferred to Server",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "packet"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@suricata.flow.bypassed.pkts_toserver"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "text_align": "center",
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7684064441917368,
+                        "definition": {
+                            "title": "Flow Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:suricata service:flow $Flow-State $Flow-ID $Protocol $Source-IP $Destination-IP $Host",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "flow_id",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "flow.start",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "flow.end",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@suricata.proto",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@suricata.flow.pkts_toclient",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@suricata.flow.pkts_toserver",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.bytes_written",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@network.bytes_read",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "flow.reason",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "flow.alerted",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "flow.state",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 22,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 27
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Source-IP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Destination-IP",
+            "prefix": "@network.destination.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Flow-ID",
+            "prefix": "@flow_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Flow-State",
+            "prefix": "@flow.state",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Protocol",
+            "prefix": "@suricata.proto",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

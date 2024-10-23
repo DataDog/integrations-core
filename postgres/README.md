@@ -8,6 +8,8 @@ The Postgres integration provides health and performance metrics for your Postgr
 
 Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
 
+Postgres versions 9.6-16 are supported.
+
 ## Setup
 
 <div class="alert alert-info">This page describes the standard Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
@@ -87,26 +89,26 @@ To configure this check for an Agent running on a host:
       #
       - host: localhost
 
-        ## @param port - integer - required
-        ## Port to use when connecting to PostgreSQL.
+        ## @param port - integer - optional - default: 5432
+        ## The port to use when connecting to PostgreSQL.
         #
-        port: 5432
-
-        ## @param user - string - required
-        ## Datadog Username created to connect to PostgreSQL.
+        # port: 5432
+    
+        ## @param username - string - required
+        ## The Datadog username created to connect to PostgreSQL.
         #
         username: datadog
-
-        ## @param pass - string - required
-        ## Password associated with the Datadog user.
+    
+        ## @param password - string - optional
+        ## The password associated with the Datadog user.
         #
-        password: "<PASSWORD>"
-
+        # password: <PASSWORD>
+    
         ## @param dbname - string - optional - default: postgres
-        ## Name of the PostgresSQL database to monitor.
-        ## Note: If omitted, the default system postgres database is queried.
+        ## The name of the PostgresSQL database to monitor.
+        ## Note: If omitted, the default system Postgres database is queried.
         #
-        dbname: "<DB_NAME>"
+        # dbname: <DBNAME>
    
         # @param disable_generic_tags - boolean - optional - default: false
         # The integration will stop sending server tag as is redundant with host tag
@@ -120,7 +122,7 @@ To configure this check for an Agent running on a host:
     ```yaml
     instances:
       - host: localhost
-        port: 5432
+        # port: 5432
         database_autodiscovery:
           enabled: true
           # Optionally, set the include field to specify
@@ -137,14 +139,14 @@ To configure this check for an Agent running on a host:
     ```yaml
     instances:
       - host: example-service-primary.example-host.com
-        port: 5432
+        # port: 5432
         username: datadog
         password: '<PASSWORD>'
         relations:
           - relation_name: products
           - relation_name: external_seller_products
       - host: example-service-replica-1.example-host.com
-        port: 5432
+        # port: 5432
         username: datadog
         password: '<PASSWORD>'
         relations:
@@ -153,7 +155,7 @@ To configure this check for an Agent running on a host:
               - r
               - i
       - host: example-service-replica-2.example-host.com
-        port: 5432
+        # port: 5432
         username: datadog
         password: '<PASSWORD>'
         relations:

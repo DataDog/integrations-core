@@ -1,0 +1,3 @@
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="9",patchlevel="16",version="3.9.16"} 1.0

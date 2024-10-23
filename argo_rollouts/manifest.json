@@ -51,7 +51,7 @@
       "Argo Rollouts Overview": "assets/dashboards/argo_rollouts_overview.json"
     },
     "monitors": {
-      "Rollout Phase": "assets/monitors/rollout_phase.json"
+      "Argo Rollout is in Non Running or Completed State": "assets/monitors/rollout_phase.json"
     },
     "saved_views": {
       "Argo Rollouts Logs Overview": "assets/saved_views/logs_overview.json",

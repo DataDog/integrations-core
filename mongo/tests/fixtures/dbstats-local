@@ -1,7 +1,7 @@
 {
     "db": "local",
     "collections": 7,
-    "views": 0,
+    "views": 1,
     "objects": 6938,
     "avgObjSize": 214.15696166042088,
     "dataSize": 1485821.0,

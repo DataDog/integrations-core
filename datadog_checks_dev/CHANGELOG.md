@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 33.1.0 / 2024-08-15
+
+***Added***:
+
+* Refactored integration name exclusion mapper and add new entries to exclusion mapper ([#18213](https://github.com/DataDog/integrations-core/pull/18213))
+
 ## 33.0.0 / 2024-08-05
 
 ***Removed***:

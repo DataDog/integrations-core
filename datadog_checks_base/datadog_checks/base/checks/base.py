@@ -178,7 +178,6 @@ class AgentCheck(object):
         # type: (*Any, **Any) -> None
         """
         Parameters:
-
             name (str):
                 the name of the check
             init_config (dict):
@@ -700,7 +699,6 @@ class AgentCheck(object):
         """Send an event platform event.
 
         Parameters:
-
             raw_event (str):
                 JSON formatted string representing the event to send
             event_track_type (str):
@@ -770,7 +768,6 @@ class AgentCheck(object):
         """Sample a gauge metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -793,7 +790,6 @@ class AgentCheck(object):
         """Sample a raw count metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -818,7 +814,6 @@ class AgentCheck(object):
         """Sample an increasing counter metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -850,7 +845,6 @@ class AgentCheck(object):
         """Sample a point, with the rate calculated at the end of the check.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -873,7 +867,6 @@ class AgentCheck(object):
         """Sample a histogram metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -896,7 +889,6 @@ class AgentCheck(object):
         """Sample a histogram based on rate metrics.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -919,7 +911,6 @@ class AgentCheck(object):
         """Increment a counter metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -943,7 +934,6 @@ class AgentCheck(object):
         """Decrement a counter metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -967,7 +957,6 @@ class AgentCheck(object):
         """Send the status of a service.
 
         Parameters:
-
             name (str):
                 the name of the service check
             status (int):
@@ -998,7 +987,6 @@ class AgentCheck(object):
         """Send a log for submission.
 
         Parameters:
-
             data (dict[str, str]):
                 The log data to send. The following keys are treated specially, if present:
 
@@ -1052,7 +1040,6 @@ class AgentCheck(object):
         """Updates the cached metadata `name` with `value`, which is then sent by the Agent at regular intervals.
 
         Parameters:
-
             name (str):
                 the name of the metadata
             value (Any):
@@ -1104,7 +1091,6 @@ class AgentCheck(object):
         """Returns the value previously stored with `write_persistent_cache` for the same `key`.
 
         Parameters:
-
             key (str):
                 the key to retrieve
         """
@@ -1119,7 +1105,6 @@ class AgentCheck(object):
         The cache is persistent between agent restarts but will be rebuilt if the check instance configuration changes.
 
         Parameters:
-
             key (str):
                 the key to retrieve
             value (str):
@@ -1165,7 +1150,6 @@ class AgentCheck(object):
         and make it compliant with flake8 logging format linter.
 
         Parameters:
-
             warning_message (str):
                 the warning message
             args (Any):
@@ -1231,11 +1215,12 @@ class AgentCheck(object):
     def normalize(self, metric, prefix=None, fix_case=False):
         # type: (Union[str, bytes], Union[str, bytes], bool) -> str
         """
-        Turn a metric into a well-formed metric name
-        prefix.b.c
-        :param metric The metric name to normalize
-        :param prefix A prefix to to add to the normalized name, default None
-        :param fix_case A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
+        Turn a metric into a well-formed metric name prefix.b.c
+
+        Parameters:
+            metric: The metric name to normalize
+            prefix: A prefix to to add to the normalized name, default None
+            fix_case: A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
         """
         if isinstance(metric, text_type):
             metric = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
@@ -1356,7 +1341,6 @@ class AgentCheck(object):
         ```
 
         Parameters:
-
             event (dict[str, Any]):
                 the event to be sent
         """

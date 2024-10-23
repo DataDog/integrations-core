@@ -123,6 +123,7 @@ def test_monitor_broker_highwatermarks(
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.flaky
 @pytest.mark.parametrize(
     'override, expected_exception, metric_count',
     [

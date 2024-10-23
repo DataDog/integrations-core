@@ -26,6 +26,7 @@ class ManagedAuthentication(BaseModel):
         frozen=True,
     )
     enabled: Optional[bool] = Field(None, examples=[False])
+    role_arn: Optional[str] = Field(None, examples=['arn:aws:iam::123456789012:role/MyRole'])
 
 
 class Aws(BaseModel):
@@ -104,6 +105,7 @@ class DatabaseAutodiscovery(BaseModel):
     )
     enabled: Optional[bool] = None
     exclude: Optional[tuple[str, ...]] = None
+    global_view_db: Optional[str] = None
     include: Optional[tuple[str, ...]] = None
     max_databases: Optional[int] = None
     refresh: Optional[int] = None
@@ -148,6 +150,7 @@ class ObfuscatorOptions(BaseModel):
     keep_boolean: Optional[bool] = None
     keep_dollar_quoted_func: Optional[bool] = None
     keep_identifier_quotation: Optional[bool] = None
+    keep_json_path: Optional[bool] = None
     keep_null: Optional[bool] = None
     keep_positional_parameter: Optional[bool] = None
     keep_sql_alias: Optional[bool] = None

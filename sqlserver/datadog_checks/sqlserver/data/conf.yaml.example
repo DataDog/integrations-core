@@ -12,6 +12,12 @@ init_config:
     #   - name: sqlserver.clr.execution
     #     counter_name: CLR Execution
 
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -147,10 +153,10 @@ instances:
         # history_row_limit: 10000
 
     ## @param availability_group - string - optional
-    ## You can specify an availability group when `include_ao_metrics`
-    ## is enabled to monitor a specific availability group.
-    ## If no availability group is specified, then all availability
-    ## groups on the current replica will output metrics.
+    ## When `include_ao_metrics` is enabled, you can provide the resource 
+    ## group id of a specific availability group that you would like to monitor.
+    ## If no availability group is specified, then we will collect AlwaysOn metrics 
+    ## for all availability groups on the current replica.
     #
     # availability_group: <AVAILABILITY_GROUP>
 
@@ -255,6 +261,12 @@ instances:
     ## Include tempdb file space usage metrics for how space is used in tempdb data files.
     #
     # include_tempdb_file_space_usage_metrics: true
+
+    ## @param include_xe_metrics - boolean - optional - default: true
+    ## Include extended events (XE) metrics. The collection of XE metrics is automatically enabled
+    ## when `deadlocks_collection` is enabled.
+    #
+    # include_xe_metrics: true
 
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
@@ -678,6 +690,32 @@ instances:
     ## If the DB specified doesn't exist on the server then don't do the check
     #
     # ignore_missing_database: false
+
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+    ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
+    #
+    # propagate_agent_tags: false
+
+    ## Configure the collection of deadlock data.
+    #
+    # deadlocks_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_deadlocks - number - optional - default: 100
+        ## Set the maximum number of deadlocks to retrieve per collection.
+        #
+        # max_deadlocks: 100
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

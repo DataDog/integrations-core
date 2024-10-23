@@ -123,3 +123,10 @@ the metric `foo.current` will be sent as a gauge with the value of `foo.bar`.
     options:
       show_root_heading: false
       show_root_toc_entry: false
+
+#### log
+
+::: datadog_checks.base.utils.db.transform.get_log
+    options:
+      show_root_heading: false
+      show_root_toc_entry: false

@@ -277,8 +277,9 @@ instances:
     ## then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
     ## and 'Green to Gray' will be included.
     ##
-    ## Currently, events can only be collected from the following resources:
-    ## VMs, hosts, datacenters, datastores, and clusters.
+    ## Events can only be collected if their event type ID is in the 'vim.event' class:
+    ## https://vdc-repo.vmware.com/vmwb-repository/dcr-public/d1902b0e-d479-46bf-8ac9-cee0e31e8ec0/
+    ## 07ce8dbd-db48-4261-9b8f-c6d3ad8ba472/vim.event.Event.html
     ##
     ## The default events reported are listed here:
     ## https://github.com/DataDog/integrations-core/tree/master/vsphere#events
@@ -444,6 +445,15 @@ instances:
     ## The default value is true.
     #
     # include_datastore_cluster_folder_tag: true
+
+    ## @param hostname_transform - string - optional - default: default
+    ## Should be either 'upper' or 'lower' or 'default'
+    ## If 'upper', the check will convert the vSphere hostname to uppercase.
+    ## If 'lower', the check will convert the vSphere hostname to lowercase.
+    ## If 'default', the check will not transform the vSphere hostname (the default option).
+    ## Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
+    #
+    # hostname_transform: default
 
     ## REST API options
     ## The options are used when making vSphere REST API calls to retrieve vSphere tags

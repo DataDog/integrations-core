@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.scylla import ScyllaCheck
@@ -13,7 +12,6 @@ from .common import (
 )
 
 
-@pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.usefixtures('dd_environment')
 def test_instance_integration_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
     check = ScyllaCheck('scylla', {}, [instance])

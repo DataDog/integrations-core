@@ -7,10 +7,9 @@ from __future__ import division
 
 import re
 import time
+from urllib.parse import urljoin
 
 import requests
-from six import string_types
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.couchbase.couchbase_consts import (
@@ -96,7 +95,7 @@ class Couchbase(AgentCheck):
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
                 if norm_metric_name in QUERY_STATS:
                     # for query times, the unit is part of the value, we need to extract it
-                    if isinstance(val, string_types):
+                    if isinstance(val, str):
                         val = self.extract_seconds_value(val)
 
                     full_metric_name = 'couchbase.query.{}'.format(self.camel_case_to_joined_lower(norm_metric_name))

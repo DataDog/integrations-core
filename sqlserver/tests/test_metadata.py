@@ -9,13 +9,12 @@ import re
 from copy import copy
 
 import pytest
-from deepdiff import DeepDiff
 
 from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
-from .utils import normalize_ids, normalize_indexes_columns
+from .utils import deep_compare, normalize_ids, normalize_indexes_columns
 
 try:
     import pyodbc
@@ -367,19 +366,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     for db_name, actual_payload in actual_payloads.items():
 
         assert db_name in databases_to_find
-
         # id's are env dependant
         normalize_ids(actual_payload)
-
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
-
-        difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
-
-        diff_keys = list(difference.keys())
-        # schema data also collects certain builtin default schemas which are ignored in the test
-        if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
-            raise AssertionError(Exception("found the following diffs: " + str(difference)))
+        assert deep_compare(actual_payload, expected_data_for_db[db_name])
 
 
 @pytest.mark.flaky

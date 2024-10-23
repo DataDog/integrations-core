@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-from six import PY2
 
 from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
@@ -271,7 +269,6 @@ def test_section_example():
     )
 
 
-@pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
 def test_section_example_indent():
     consumer = get_example_consumer(
         """
@@ -334,7 +331,6 @@ def test_section_example_indent():
     )
 
 
-@pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
 def test_section_example_indent_required():
     consumer = get_example_consumer(
         """
@@ -938,7 +934,6 @@ def test_option_description_length_limit_with_noqa():
     )
 
 
-@pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
 def test_deprecation():
     consumer = get_example_consumer(
         """

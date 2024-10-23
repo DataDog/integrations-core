@@ -2,6 +2,54 @@
 
 <!-- towncrier release notes start -->
 
+## 37.1.0 / 2024-10-04
+
+***Added***:
+
+* Added Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
+## 37.0.0 / 2024-09-19 / Agent 7.58.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+## 36.16.0 / 2024-09-30 / Agent 7.58.0
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+## 36.15.0 / 2024-09-05
+
+***Added***:
+
+* `utils.http.RequestsWrapper` accepts a session at initialization, useful for testing and controlling sessions in general. ([#18438](https://github.com/DataDog/integrations-core/pull/18438))
+* Bump ddtrace version to fix CouchDB tests ([#18451](https://github.com/DataDog/integrations-core/pull/18451))
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+## 36.14.0 / 2024-08-19
+
+***Added***:
+
+* Update propagate_agent_tags to propagate all tags from the agent host. ([#18269](https://github.com/DataDog/integrations-core/pull/18269))
+
+***Fixed***:
+
+* Fix ddtrace import issues ([#18324](https://github.com/DataDog/integrations-core/pull/18324))
+
+## 36.13.0 / 2024-08-09 / Agent 7.57.0
+
+***Added***:
+
+* Combine streams to single pipe ([#18273](https://github.com/DataDog/integrations-core/pull/18273))
+* Bump the ddtrace version to 2.9.3 ([#18275](https://github.com/DataDog/integrations-core/pull/18275))
+* Add `log` transformer to the QueryManager ([#18278](https://github.com/DataDog/integrations-core/pull/18278))
+
 ## 36.12.0 / 2024-08-06
 
 ***Added***:
@@ -27,7 +75,7 @@
 
 * [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
 
-## 36.9.0 / 2024-07-05
+## 36.9.0 / 2024-07-05 / Agent 7.56.0
 
 ***Security***:
 
