@@ -57,6 +57,17 @@ UNEXPLAINABLE_COMMANDS = frozenset(
     ]
 )
 
+UNEXPLAINABLE_PIPELINE_STAGES = frozenset(
+    [
+        "$collStats",
+        "$currentOp",
+        "$indexStats",
+        "$listSearchIndexes",
+        "$sample",
+        "$shardedDataDistribution",
+    ]
+)
+
 COMMAND_KEYS_TO_REMOVE = frozenset(["comment", "lsid", "$clusterTime"])
 
 EXPLAIN_PLAN_KEYS_TO_REMOVE = frozenset(
@@ -107,6 +118,12 @@ def should_explain_operation(
     # if UNEXPLAINABLE_COMMANDS in command, skip
     if any(command.get(key) for key in UNEXPLAINABLE_COMMANDS):
         return False
+
+    # if UNEXPLAINABLE_PIPELINE_STAGES in command pipeline stages, skip
+    if pipeline := command.get("pipeline"):
+        stages = [list(stage.keys())[0] for stage in pipeline if isinstance(stage, dict)]
+        if any(stage in UNEXPLAINABLE_PIPELINE_STAGES for stage in stages):
+            return False
 
     db, _ = namespace.split(".", 1)
     if db in MONGODB_SYSTEM_DATABASES:
