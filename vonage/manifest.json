@@ -18,9 +18,11 @@
     ]
   },
   "assets": {
-    "dashboards": {},
-    "monitors": {},
-    "saved_views": {}
+ "integration": {
+      "auto_install": false,
+      "events": {
+        "creates_events": false
+      }
   },
   "author": {
     "support_email": "help@datadoghq.com",
