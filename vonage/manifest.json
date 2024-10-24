@@ -8,40 +8,17 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
-    "title": "testing_tile",
-    "media": [
-      {
-        "media_type": "image",
-        "caption": "FILL IN Image 1 caption",
-        "image_url": "<FILL IN>"
-      },
-      {
-        "media_type": "image",
-        "caption": "FILL IN Image 2 caption",
-        "image_url": "<FILL IN>"
-      },
-      {
-        "media_type": "image",
-        "caption": "FILL IN Image 3 caption",
-        "image_url": "<FILL IN>"
-      }
-    ],
+    "description": "Gain insights into Vonage logs.",
+    "title": "Vonage",
+    "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
-      "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
-    "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-    },
+    "dashboards": {},
     "monitors": {},
     "saved_views": {}
   },
