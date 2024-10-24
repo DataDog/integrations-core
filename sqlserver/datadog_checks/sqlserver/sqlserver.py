@@ -154,7 +154,7 @@ class SQLServer(AgentCheck):
         # go through the agent internal metrics submission processing those tags
         self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
-        self.check_initializations.append(self.set_resolved_hostname)
+        self.check_initializations.append(self.load_static_information)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
@@ -218,7 +218,7 @@ class SQLServer(AgentCheck):
         elif AWS_RDS_HOSTNAME_SUFFIX in self._resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self._resolved_hostname))
         if self._config.cloud_metadata.get("azure") is not None:
             deployment_type = self._config.cloud_metadata.get("azure")["deployment_type"]
             name = self._config.cloud_metadata.get("azure")["name"]
@@ -227,7 +227,7 @@ class SQLServer(AgentCheck):
                 # azure sql databases have a special format, which is set for DBM
                 # customers in the resolved_hostname.
                 # If user is not DBM customer, the resource_name should just be set to the `name`
-                db_instance = self.resolved_hostname
+                db_instance = self._resolved_hostname
             # some `deployment_type`s map to multiple `resource_type`s
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
@@ -238,13 +238,12 @@ class SQLServer(AgentCheck):
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self._resolved_hostname,
             )
         )
 
     def set_resolved_hostname(self):
         # load static information cache
-        self.load_static_information()
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
@@ -277,13 +276,10 @@ class SQLServer(AgentCheck):
 
     @property
     def resolved_hostname(self):
-        # ensure _resolved_hostname is never None when referenced by other parts
-        # of this check. If it falls back to None, this will result in gaps in data
-        if self._resolved_hostname is None:
-            self.set_resolved_hostname()
         return self._resolved_hostname
 
     def load_static_information(self):
+        engine_edition_reloaded = False
         expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
@@ -313,6 +309,7 @@ class SQLServer(AgentCheck):
                         result = cursor.fetchone()
                         if result:
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
+                            engine_edition_reloaded = True
                         else:
                             self.log.warning("failed to load version static information due to empty results")
                     if STATIC_INFO_RDS not in self.static_info_cache:
@@ -322,9 +319,11 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_RDS] = True
                         else:
                             self.static_info_cache[STATIC_INFO_RDS] = False
-            # re-initialize resolved_hostname to ensure we take into consideration the static information
+            # re-initialize resolved_hostname to ensure we take into consideration the egine edition
             # after it's loaded
-            self._resolved_hostname = None
+            if engine_edition_reloaded:
+                self._resolved_hostname = None
+            self.set_resolved_hostname()
 
     def debug_tags(self):
         return self.tags + ["agent_hostname:{}".format(self.agent_hostname)]
@@ -712,6 +711,7 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
+            self.load_static_information()
             # configure custom queries for the check
             if self._query_manager is None:
                 # use QueryManager to process custom queries
