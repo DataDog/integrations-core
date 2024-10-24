@@ -1,4 +1,8 @@
 echo "INFO: waiting for SQL Server to come up"
+echo "INFO: Restarting MSSQLSERVER"
+Start-Sleep -Seconds 5
+Net Stop MSSQLSERVER
+Net Start MSSQLSERVER /T902
 (Get-Service MSSQLSERVER).WaitForStatus('Running')
 
 echo "INFO: enabling TCP"
@@ -24,7 +28,8 @@ if (-Not $?) {
 echo "INFO: setup.sql completed"
 
 echo "INFO: restarting MSSQLSERVER"
-Restart-Service -Name MSSQLSERVER
+Net Stop MSSQLSERVER
+Net Start MSSQLSERVER /T902
 (Get-Service MSSQLSERVER).WaitForStatus('Running')
 echo "INFO: MSSQLSERVER running."
 
