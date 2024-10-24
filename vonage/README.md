@@ -6,9 +6,9 @@
 
 This integration provides the following benefits:
 1. **Centralized Data**: Combines SMS and voice call logs in one place for easier access and management.
-2. **Enhanced Analytics**: Enables analysis of communication patterns to inform business strategies.
-3. **Trend Identification**: Allows businesses to spot trends in customer interactions, aiding proactive engagement.
-4. **Informed Decision-Making**: Provides insights that drive strategic decisions for growth and improvement.
+2. **Enhanced analytics**: Enables analysis of communication patterns to inform business strategies.
+3. **Trend identification**: Allows businesses to spot trends in customer interactions, aiding proactive engagement.
+4. **Informed decision-making**: Provides insights that drive strategic decisions for growth and improvement.
 
 ## Setup
 
