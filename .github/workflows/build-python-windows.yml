@@ -24,5 +24,10 @@ jobs:
           python-version: 3.x
 
       - name: Build CPython from Source
+        if : false
         run: |
           .\PCBuild\build.bat -p x64
+      
+      - name: Build CPython installer
+        run: | 
+          .\tools\msi\buildrelease.bat -x64 --skip-pgo
