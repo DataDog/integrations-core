@@ -47,7 +47,7 @@ For Agent versions >= 7.0 and < 7.58:
 For Agent versions >= 7.58:
 
 ```text
-"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install ibm_db==3.2.2
+"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install ibm_db==3.2.3
 ```
 
 On Linux there may be need for XML functionality. If you encounter errors during
