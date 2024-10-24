@@ -135,6 +135,7 @@ ray.serve.replica.pending_queries,gauge,,query,,The current number of pending qu
 ray.serve.replica.processing_queries,gauge,,query,,The current number of queries being processed.,0,ray,,
 ray.server.num_ongoing_grpc_requests,gauge,,,,The number of ongoing requests in this GRPC proxy.,0,ray,,
 ray.server.num_ongoing_http_requests,gauge,,,,The number of ongoing requests in this HTTP proxy.,0,ray,,
+ray.serve.ongoing_requests_at_replicas,gauge,,,,The current number of requests to this deployment that’s been assigned and sent to execute on a replica.,0,ray,,
 ray.server.num_scheduling_tasks,gauge,,,,The number of request scheduling tasks in the router.,0,ray,,
 ray.server.num_scheduling_tasks_in_backoff,gauge,,,,The number of request scheduling tasks in the router that are undergoing backoff.,0,ray,,
 ray.spill_manager.objects,gauge,,object,,"Number of local objects broken per state {Pinned, PendingRestore, PendingSpill}.",0,ray,,
