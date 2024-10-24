@@ -1,0 +1,38 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "0b226d22-4cee-459c-beb3-fb092b791cd8",
+  "app_id": "kubernetes-audit-webhook",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Delivers real-time API activity monitoring with minimal setup, offering a simple alternative to Kubernetes Audit Logs",
+    "title": "Kubernetes Audit Webhook",
+    "media": [],
+    "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
+      "Offering::Integration",
+      "Submitted Data Type::Events",
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows"
+    ]
+  },
+  "assets": {
+    "integrations": {
+      "source_type_name": "Kubernetes Audit Webhook"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
