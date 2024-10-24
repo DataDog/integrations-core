@@ -21,6 +21,7 @@ tests:
         "entity_id": 11,
         "timestamp": "2024-09-30T11:47:26.247269+05:30"
       }
+    service: "activity-events"
     result: null
   - sample: |-
       {
@@ -35,6 +36,7 @@ tests:
         "id": "188",
         "timestamp": "2024-09-30T12:37:04.133904+05:30"
       }
+    service: "activity-events"
     result: null
   - sample: >-
       {
@@ -55,6 +57,7 @@ tests:
         "database_name": "Sample Database",
         "database_description": "Some example data for you to play around with."
       }
+    service: "view-logs"
     result: null
   - sample: >-
       {
@@ -92,6 +95,7 @@ tests:
         "database_name": "Sample Database",
         "database_description": "Some example data for you to play around with."
       }
+    service: "query-logs"
     result: null
 
 # The `result` field should be left blank to start. Once you submit your log asset files with
