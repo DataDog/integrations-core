@@ -1,0 +1,33 @@
+name: Build CPython Installer
+
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        required: true
+        type: string
+        description: 'The version of CPython to build (e.g., 3.12)'
+
+jobs:
+  build_cpython:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout CPython Source
+        uses: actions/checkout@v3
+        with:
+          repository: python/cpython
+          ref: v${{ inputs.python_version }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Build CPython from Source
+        if : false
+        run: |
+          .\PCBuild\build.bat -p x64
+      
+      - name: Build CPython installer
+        run: | 
+          .\tools\msi\buildrelease.bat -x64
