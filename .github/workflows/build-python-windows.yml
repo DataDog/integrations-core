@@ -30,4 +30,4 @@ jobs:
       
       - name: Build CPython installer
         run: | 
-          .\tools\msi\buildrelease.bat -x64 --skip-pgo
+          .\tools\msi\buildrelease.bat -x64
