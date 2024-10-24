@@ -346,7 +346,6 @@ class SQLServer(AgentCheck):
 
     def initialize_connection(self):
         self.connection = Connection(
-            host=self.resolved_hostname,
             init_config=self.init_config,
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
