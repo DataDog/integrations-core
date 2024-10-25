@@ -48,10 +48,19 @@
       "events": {
         "creates_events": false
       },
+      "dashboards": {
+        "Databricks Model Serving Overview": "assets/dashboards/model_serving_overview.json"
+      },
       "metrics": {
         "prefix": "databricks.model_serving.",
         "check": "databricks.model_serving.cpu_usage_percentage",
         "metadata_path": "metadata.csv"
+      },
+      "monitors": {
+        "Databricks Model Serving: High count 4xx errors": "assets/monitors/4xx_errors.json",
+        "Databricks Model Serving: High count 5xx errors": "assets/monitors/5xx_errors.json",
+        "Databricks Model Serving: High memory utilization": "assets/monitors/memory_utilization_high.json",
+        "Databricks Model Serving: High CPU utilization": "assets/monitors/cpu_utilization_high.json"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
