@@ -8,6 +8,10 @@ on:
         type: string
         description: 'The version of CPython to build (e.g., 3.12)'
 
+# TODO:
+# Check if free-threading is needed
+# Check if PGO is needed
+
 jobs:
   build_cpython:
     runs-on: windows-latest
@@ -31,3 +35,17 @@ jobs:
       - name: Build CPython installer
         run: | 
           .\tools\msi\buildrelease.bat -x64
+          
+      - name: Create Python Zip
+        run: |
+          curl -L https://raw.githubusercontent.com/DataDog/integrations-core/refs/heads/nubtron/python-build-experiments/.github/workflows/scripts/Generate-Pyzip.ps1
+          $outDir = ".\out"
+          mkdir $outDir
+          .\Generate-Pyzip.ps1 -Version ${{ inputs.python_version }} -OutDir $outDir -InputFile "PCbuild\amd64\en-us\python-${{ inputs.python_version }}-amd64.exe"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-windows-${{ inputs.python_version }}-amd64
+          path: ./out/python-windows-${{ inputs.python_version }}-amd64.zip
+          if-no-files-found: error
+          retention-days: 1
