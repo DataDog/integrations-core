@@ -3,12 +3,22 @@ SINFO_NODE_PARAMS = ["-hNO", "PartitionName:|,Available:|,NodeList:|,NodeAIOT:|,
 SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:"
 GPU_PARAMS = "|,Gres:|,GresUsed:"
 SQUEUE_PARAMS = ["-ho", "%A|%u|%j|%T|%N|%C|%R|%m"]
-SSHARE_PARAMS = ["-lnpU"]
+SSHARE_PARAMS = ["-lnPU"]
 SACCT_PARAMS = [
     "-npo",
     "JobID,JobName%40,Partition,Account,AllocCPUs,AllocTRES%40,Elapsed,CPUTimeRAW,MaxRSS,MaxVMSize,AveCPU,AveRSS,State,ExitCode,Start,End,NodeList",
     "--units=M",
 ]
+
+EXPECTED_LENGTH = {
+    "spartition": 7,
+    "squeue": 8,
+    "sacct": 17,
+    "sshare": 11,
+    "snode": 6,
+    "snode_extension": 7,
+    "gpu": 2
+}
 
 PARTITION_MAP = {
     "tags": [

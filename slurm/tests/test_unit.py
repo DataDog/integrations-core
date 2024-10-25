@@ -5,12 +5,49 @@ from unittest.mock import patch
 
 import pytest
 
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.dev.utils import get_metadata_metrics  # noqa: F401
 from datadog_checks.slurm import SlurmCheck
 
-from .common import SACCT_MAP, SDIAG_MAP, SINFO_MAP, SLURM_VERSION, SQUEUE_MAP, SSHARE_MAP, mock_output
+from .common import (
+    DEFAULT_SINFO_PATH,
+    SACCT_MAP,
+    SDIAG_MAP,
+    SINFO_1_F,
+    SINFO_1_T,
+    SINFO_2_F,
+    SINFO_2_T,
+    SINFO_3_F,
+    SINFO_3_T,
+    SINFO_MAP,
+    SLURM_VERSION,
+    SQUEUE_MAP,
+    SSHARE_MAP,
+    mock_output,
+)
+
+
+@pytest.mark.parametrize(
+    "collection_level, gpu_stats, expected_params",
+    [
+        (1, False, DEFAULT_SINFO_PATH + SINFO_1_F),
+        (2, False, DEFAULT_SINFO_PATH + SINFO_2_F),
+        (3, False, DEFAULT_SINFO_PATH + SINFO_3_F),
+        (1, True, DEFAULT_SINFO_PATH + SINFO_1_T),
+        (2, True, DEFAULT_SINFO_PATH + SINFO_2_T),
+        (3, True, DEFAULT_SINFO_PATH + SINFO_3_T),
+    ],
+)
+def test_sinfo_command_params(collection_level, gpu_stats, expected_params, instance):
+    # Mock the instance configuration
+    instance['collect_sinfo_stats'] = True
+    instance['sinfo_collection_level'] = collection_level
+    instance['collect_gpu_stats'] = gpu_stats
+
+    check = SlurmCheck('slurm', {}, [instance])
+
+    if collection_level > 1:
+        assert check.sinfo_node_cmd == expected_params
+    else:
+        assert check.sinfo_partition_cmd == expected_params
 
 
 @pytest.mark.parametrize(
@@ -26,6 +63,12 @@ from .common import SACCT_MAP, SDIAG_MAP, SINFO_MAP, SLURM_VERSION, SQUEUE_MAP, 
 )
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_slurm_binary_processing(mock_get_subprocess_output, instance, aggregator, expected_metrics, binary):
+    """
+    This test is very strict in the sense, that we're testing the exact values of both tags and metric values
+    for each binary. This is to ensure that the parsing logic is correct and that the metrics are being collected
+    as expected.
+    """
+
     instance[f'collect_{binary}_stats'] = True
 
     # Metadata collection happens before the main collection so I'm mocking a failed call for it.

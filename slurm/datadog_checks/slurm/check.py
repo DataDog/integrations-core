@@ -22,6 +22,7 @@ from .constants import (
     SQUEUE_PARAMS,
     SSHARE_MAP,
     SSHARE_PARAMS,
+    EXPECTED_LENGTH
 )
 
 
@@ -125,7 +126,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             commands.append(('sshare', self.sshare_cmd, self.process_sshare))
 
         if self.collect_sacct_stats and self.last_run_time is not None:
-            self.update_sacct_params()
+            self._update_sacct_params()
             commands.append(('sacct', self.sacct_cmd, self.process_sacct))
         elif self.last_run_time is None:
             # Set timestamp here so we can use it for the next run and collect sacct stats only
@@ -166,8 +167,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('partition.info', 1, tags)
 
     def process_sinfo_node(self, output):
-        # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES      |GRES_USED | # noqa: E501
-        # normal    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.84 |    5440 |       0 |idle  |none   |(null)          |      1 |(null)    |(null)    | # noqa: E501
+        # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES      |GRES_USED  # noqa: E501
+        # normal    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.84 |    5440 |       0 |idle  |none   |(null)          |      1 |(null)    |(null)     # noqa: E501
         lines = output.strip().split('\n')
 
         if self.debug_sinfo_stats:
@@ -212,9 +213,10 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('squeue.job.info', 1, tags=tags)
 
     def process_sacct(self, output):
-        # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList   | # noqa: E501
-        # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         | # noqa: E501
-        # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         | # noqa: E501
+        # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList    # noqa: E501
+        # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1          # noqa: E501
+        # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         |
+        #  # noqa: E501
         lines = output.strip().split('\n')
 
         if self.debug_sacct_stats:
@@ -249,8 +251,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('sacct.job.info', 1, tags=tags)
 
     def process_sshare(self, output):
-        # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                    | # noqa: E501
-        # root    |root |        1 |           |       0 |          |    0.000000 | 0.000000 |0.000000 |            |cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0 | # noqa: E501
+        # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                     # noqa: E501
+        # root    |root |        1 |           |       0 |          |    0.000000 | 0.000000 |0.000000 |            |cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0  # noqa: E501
         lines = output.strip().split('\n')
 
         if self.debug_sshare_stats:
@@ -299,7 +301,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         for name, value in metrics.items():
             self.gauge(f'sdiag.{name}', value, tags=self.tags)
 
-    def update_sacct_params(self):
+    def _update_sacct_params(self):
         if self.last_run_time is not None:
             now = datetime.now()
             delta = now - self.last_run_time
@@ -328,8 +330,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def _process_sinfo_gpu(self, gres, gres_used, namespace, tags):
         used_gpu_used_idx = "null"
         gpu_type = "null"
-        total_gpu = 0
-        used_gpu_count = 0
+        total_gpu = None
+        used_gpu_count = None
 
         try:
             # gpu:tesla:4(IDX:0-3) -> ["gpu","tesla","4(IDX","0-3)"]
@@ -354,12 +356,14 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 gres_used,
                 e,
             )
-            return
 
         gpu_tags = [f"slurm_partition_gpu_type:{gpu_type}", f"slurm_partition_gpu_used_idx:{used_gpu_used_idx}"]
+
         _tags = tags + gpu_tags
-        self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
-        self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
+        if total_gpu is not None:
+            self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
+        if used_gpu_count is not None:
+            self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
 
         return gpu_tags
 

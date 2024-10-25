@@ -1,6 +1,22 @@
 import os
 
+from datadog_checks.slurm.constants import (
+    GPU_PARAMS,
+    SINFO_ADDITIONAL_NODE_PARAMS,
+    SINFO_NODE_PARAMS,
+    SINFO_PARTITION_PARAMS,
+)
+
 SLURM_VERSION = '21.08.6'
+DEFAULT_SINFO_PATH = ['/usr/bin/sinfo']
+
+# Testing for params addition in sinfo
+SINFO_1_F = SINFO_PARTITION_PARAMS
+SINFO_2_F = SINFO_NODE_PARAMS
+SINFO_3_F = [SINFO_NODE_PARAMS[0], SINFO_NODE_PARAMS[-1] + SINFO_ADDITIONAL_NODE_PARAMS]
+SINFO_1_T = [SINFO_PARTITION_PARAMS[0], SINFO_PARTITION_PARAMS[-1] + GPU_PARAMS]
+SINFO_2_T = [SINFO_NODE_PARAMS[0], SINFO_NODE_PARAMS[-1] + GPU_PARAMS]
+SINFO_3_T = [SINFO_NODE_PARAMS[0], SINFO_NODE_PARAMS[-1] + (SINFO_ADDITIONAL_NODE_PARAMS + GPU_PARAMS)]
 
 
 def mock_output(filename):
@@ -461,40 +477,6 @@ SINFO_MAP = {
             ],
         },
         {
-            'name': 'slurm.node.gpu_total',
-            'value': 0,
-            'tags': [
-                'slurm_node_active_features:foo',
-                'slurm_node_availability:up',
-                'slurm_node_cluster:bar',
-                'slurm_node_memory:5000',
-                'slurm_node_name:c3',
-                'slurm_node_state_reason:test',
-                'slurm_node_state:idle',
-                'slurm_node_threads:6',
-                'slurm_partition:normal',
-                'slurm_partition_gpu_type:null',
-                'slurm_partition_gpu_used_idx:null',
-            ],
-        },
-        {
-            'name': 'slurm.node.gpu_used',
-            'value': 0,
-            'tags': [
-                'slurm_node_active_features:foo',
-                'slurm_node_availability:up',
-                'slurm_node_cluster:bar',
-                'slurm_node_memory:5000',
-                'slurm_node_name:c3',
-                'slurm_node_state_reason:test',
-                'slurm_node_state:idle',
-                'slurm_node_threads:6',
-                'slurm_partition:normal',
-                'slurm_partition_gpu_type:null',
-                'slurm_partition_gpu_used_idx:null',
-            ],
-        },
-        {
             'name': 'slurm.node.info',
             'value': 1,
             'tags': [
@@ -676,34 +658,6 @@ SINFO_MAP = {
         {
             'name': 'slurm.partition.cpu.total',
             'value': 4,
-            'tags': [
-                'slurm_partition_available:N/A',
-                'slurm_partition_cpus_assigned:1',
-                'slurm_partition_gpu_type:null',
-                'slurm_partition_gpu_used_idx:null',
-                'slurm_partition_memory_assigned:2000',
-                'slurm_partition_name:foo',
-                'slurm_partition_node_list:c[3-4]',
-                'slurm_partition_state:down',
-            ],
-        },
-        {
-            'name': 'slurm.partition.gpu_total',
-            'value': 0,
-            'tags': [
-                'slurm_partition_available:N/A',
-                'slurm_partition_cpus_assigned:1',
-                'slurm_partition_gpu_type:null',
-                'slurm_partition_gpu_used_idx:null',
-                'slurm_partition_memory_assigned:2000',
-                'slurm_partition_name:foo',
-                'slurm_partition_node_list:c[3-4]',
-                'slurm_partition_state:down',
-            ],
-        },
-        {
-            'name': 'slurm.partition.gpu_used',
-            'value': 0,
             'tags': [
                 'slurm_partition_available:N/A',
                 'slurm_partition_cpus_assigned:1',
