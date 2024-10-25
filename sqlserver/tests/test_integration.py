@@ -382,9 +382,7 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
     found_log = 0
     for _, _, message in caplog.record_tuples:
         # make sure master and msdb is only queried once
-        if "SqlDatabaseFileStats: changing cursor context via use statement: use [master]" in message:
-            found_log += 1
-        if "SqlDatabaseFileStats: changing cursor context via use statement: use [msdb]" in message:
+        if "Restoring the original database context master" in message:
             found_log += 1
 
     assert found_log == 2
@@ -811,6 +809,21 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     ]
     for m in DATABASE_INDEX_METRICS:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
+    instance_docker['database'] = 'master'
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    dd_run_check(sqlserver_check)
+    expected_tags = sqlserver_check._config.tags + [
+        'database_recovery_model_desc:SIMPLE',
+        'database_state_desc:ONLINE',
+        'database:{}'.format(instance_docker['database']),
+        'db:{}'.format(instance_docker['database']),
+    ]
+    aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)
 
 
 @pytest.mark.parametrize(

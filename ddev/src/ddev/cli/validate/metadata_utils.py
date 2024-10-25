@@ -221,6 +221,14 @@ VALID_UNIT_NAMES = {
     'joule',
     'kilojoule',
     'megajoule',
+    "bit_in_bits_family",
+    "byte_in_bits_family",
+    "kilobit",
+    "megabit",
+    "gigabit",
+    "terabit",
+    "petabit",
+    "exabit",
 }
 
 ALLOWED_PREFIXES = ('system.', 'jvm.', 'http.', 'datadog.', 'sftp.', 'process.', 'runtime.', 'otelcol_')
