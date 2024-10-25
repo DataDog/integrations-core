@@ -163,8 +163,8 @@ class MongoConfig(object):
         cloud_metadata = {}
         if aws := instance.get('aws'):
             cloud_metadata['aws'] = {
-                'instance_endpoint': aws.get('instance_endpoint'),
-                'cluster_identifier': aws.get('cluster_identifier') or self.cluster_name,
+                'documentdb_instance_endpoint': aws.get('documentdb_instance_endpoint'),
+                'documentdb_cluster_identifier': aws.get('documentdb_cluster_identifier') or self.cluster_name,
             }
         return cloud_metadata
 

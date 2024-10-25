@@ -251,9 +251,9 @@ class MongoDb(AgentCheck):
             tags.append(f"dd.internal.resource:database_instance:{self._resolved_hostname}")
         if self._config.cloud_metadata:
             aws = self._config.cloud_metadata.get('aws')
-            if instance_endpoint := aws.get('instance_endpoint'):
+            if instance_endpoint := aws.get('documentdb_instance_endpoint'):
                 tags.append(f"dd.internal.resource:aws_docdb_instance:{instance_endpoint}")
-            if cluster_identifier := aws.get('cluster_identifier'):
+            if cluster_identifier := aws.get('documentdb_cluster_identifier'):
                 tags.append(f"dd.internal.resource:aws_docdb_cluster:{cluster_identifier}")
         return tags
 
