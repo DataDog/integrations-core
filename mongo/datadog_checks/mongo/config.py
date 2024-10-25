@@ -102,6 +102,7 @@ class MongoConfig(object):
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
         self.cluster_name = instance.get('cluster_name', None)
+        self.cloud_metadata = self._compute_cloud_metadata()
         self._operation_samples_config = instance.get('operation_samples', {})
         self._slow_operations_config = instance.get('slow_operations', {})
         self._schemas_config = instance.get('schemas', {})
@@ -157,6 +158,15 @@ class MongoConfig(object):
         if self.cluster_name:
             tags.append('clustername:%s' % self.cluster_name)
         return tags
+
+    def _compute_cloud_metadata(self):
+        cloud_metadata = {}
+        if aws := self.instance.get('aws'):
+            cloud_metadata['aws'] = {
+                'instance_endpoint': aws.get('instance_endpoint'),
+                'cluster_identifier': aws.get('cluster_identifier') or self.cluster_name,
+            }
+        return cloud_metadata
 
     @property
     def operation_samples(self):
