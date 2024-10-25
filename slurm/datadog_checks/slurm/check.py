@@ -22,7 +22,6 @@ from .constants import (
     SQUEUE_PARAMS,
     SSHARE_MAP,
     SSHARE_PARAMS,
-    EXPECTED_LENGTH
 )
 
 
@@ -215,8 +214,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def process_sacct(self, output):
         # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList    # noqa: E501
         # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1          # noqa: E501
-        # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         |
-        #  # noqa: E501
+        # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1          # noqa: E501
         lines = output.strip().split('\n')
 
         if self.debug_sacct_stats:

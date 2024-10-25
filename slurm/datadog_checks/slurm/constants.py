@@ -10,16 +10,6 @@ SACCT_PARAMS = [
     "--units=M",
 ]
 
-EXPECTED_LENGTH = {
-    "spartition": 7,
-    "squeue": 8,
-    "sacct": 17,
-    "sshare": 11,
-    "snode": 6,
-    "snode_extension": 7,
-    "gpu": 2
-}
-
 PARTITION_MAP = {
     "tags": [
         {"name": "slurm_partition_name", "index": 0},
