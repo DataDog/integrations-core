@@ -4,174 +4,174 @@
 <span class=w>  </span><span class=nt>metrics</span><span class=p>:</span>
 <span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">bar</span>
 <span class=w>  </span><span class="p p-Indicator">-</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">foo</span>
-</code></pre></div> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos=" 17 "></span><span class=k>class</span> <span class=nc>OpenMetricsBaseCheckV2</span><span class=p>(</span><span class=n>AgentCheck</span><span class=p>):</span>
-<span class=linenos data-linenos=" 18 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos=" 19 "></span><span class=sd>    OpenMetricsBaseCheckV2 is an updated class of OpenMetricsBaseCheck to scrape endpoints that emit Prometheus metrics.</span>
+</code></pre></div> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos=" 15 "></span><span class=k>class</span> <span class=nc>OpenMetricsBaseCheckV2</span><span class=p>(</span><span class=n>AgentCheck</span><span class=p>):</span>
+<span class=linenos data-linenos=" 16 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 17 "></span><span class=sd>    OpenMetricsBaseCheckV2 is an updated class of OpenMetricsBaseCheck to scrape endpoints that emit Prometheus metrics.</span>
+<span class=linenos data-linenos=" 18 "></span>
+<span class=linenos data-linenos=" 19 "></span><span class=sd>    Minimal example configuration:</span>
 <span class=linenos data-linenos=" 20 "></span>
-<span class=linenos data-linenos=" 21 "></span><span class=sd>    Minimal example configuration:</span>
-<span class=linenos data-linenos=" 22 "></span>
-<span class=linenos data-linenos=" 23 "></span><span class=sd>    ```yaml</span>
-<span class=linenos data-linenos=" 24 "></span><span class=sd>    instances:</span>
-<span class=linenos data-linenos=" 25 "></span><span class=sd>    - openmetrics_endpoint: http://example.com/endpoint</span>
-<span class=linenos data-linenos=" 26 "></span><span class=sd>      namespace: &quot;foobar&quot;</span>
-<span class=linenos data-linenos=" 27 "></span><span class=sd>      metrics:</span>
-<span class=linenos data-linenos=" 28 "></span><span class=sd>      - bar</span>
-<span class=linenos data-linenos=" 29 "></span><span class=sd>      - foo</span>
-<span class=linenos data-linenos=" 30 "></span><span class=sd>    ```</span>
+<span class=linenos data-linenos=" 21 "></span><span class=sd>    ```yaml</span>
+<span class=linenos data-linenos=" 22 "></span><span class=sd>    instances:</span>
+<span class=linenos data-linenos=" 23 "></span><span class=sd>    - openmetrics_endpoint: http://example.com/endpoint</span>
+<span class=linenos data-linenos=" 24 "></span><span class=sd>      namespace: &quot;foobar&quot;</span>
+<span class=linenos data-linenos=" 25 "></span><span class=sd>      metrics:</span>
+<span class=linenos data-linenos=" 26 "></span><span class=sd>      - bar</span>
+<span class=linenos data-linenos=" 27 "></span><span class=sd>      - foo</span>
+<span class=linenos data-linenos=" 28 "></span><span class=sd>    ```</span>
+<span class=linenos data-linenos=" 29 "></span>
+<span class=linenos data-linenos=" 30 "></span><span class=sd>    &quot;&quot;&quot;</span>
 <span class=linenos data-linenos=" 31 "></span>
-<span class=linenos data-linenos=" 32 "></span><span class=sd>    &quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 32 "></span>    <span class=n>DEFAULT_METRIC_LIMIT</span> <span class=o>=</span> <span class=mi>2000</span>
 <span class=linenos data-linenos=" 33 "></span>
-<span class=linenos data-linenos=" 34 "></span>    <span class=n>DEFAULT_METRIC_LIMIT</span> <span class=o>=</span> <span class=mi>2000</span>
-<span class=linenos data-linenos=" 35 "></span>
-<span class=linenos data-linenos=" 36 "></span>    <span class=c1># Allow tracing for openmetrics integrations</span>
-<span class=linenos data-linenos=" 37 "></span>    <span class=k>def</span> <span class=nf>__init_subclass__</span><span class=p>(</span><span class=bp>cls</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
-<span class=linenos data-linenos=" 38 "></span>        <span class=nb>super</span><span class=p>()</span><span class=o>.</span><span class=n>__init_subclass__</span><span class=p>(</span><span class=o>**</span><span class=n>kwargs</span><span class=p>)</span>
-<span class=linenos data-linenos=" 39 "></span>        <span class=k>return</span> <span class=n>traced_class</span><span class=p>(</span><span class=bp>cls</span><span class=p>)</span>
-<span class=linenos data-linenos=" 40 "></span>
-<span class=linenos data-linenos=" 41 "></span>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>):</span>
-<span class=linenos data-linenos=" 42 "></span><span class=w>        </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos=" 43 "></span><span class=sd>        The base class for any OpenMetrics-based integration.</span>
-<span class=linenos data-linenos=" 44 "></span>
-<span class=linenos data-linenos=" 45 "></span><span class=sd>        Subclasses are expected to override this to add their custom scrapers or transformers.</span>
-<span class=linenos data-linenos=" 46 "></span><span class=sd>        When overriding, make sure to call this (the parent&#39;s) __init__ first!</span>
-<span class=linenos data-linenos=" 47 "></span><span class=sd>        &quot;&quot;&quot;</span>
-<span class=linenos data-linenos=" 48 "></span>        <span class=nb>super</span><span class=p>(</span><span class=n>OpenMetricsBaseCheckV2</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>)</span>
-<span class=linenos data-linenos=" 49 "></span>
-<span class=linenos data-linenos=" 50 "></span>        <span class=c1># All desired scraper configurations, which subclasses can override as needed</span>
-<span class=linenos data-linenos=" 51 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>scraper_configs</span> <span class=o>=</span> <span class=p>[</span><span class=bp>self</span><span class=o>.</span><span class=n>instance</span><span class=p>]</span>
-<span class=linenos data-linenos=" 52 "></span>
-<span class=linenos data-linenos=" 53 "></span>        <span class=c1># All configured scrapers keyed by the endpoint</span>
-<span class=linenos data-linenos=" 54 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span> <span class=o>=</span> <span class=p>{}</span>
+<span class=linenos data-linenos=" 34 "></span>    <span class=c1># Allow tracing for openmetrics integrations</span>
+<span class=linenos data-linenos=" 35 "></span>    <span class=k>def</span> <span class=nf>__init_subclass__</span><span class=p>(</span><span class=bp>cls</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+<span class=linenos data-linenos=" 36 "></span>        <span class=nb>super</span><span class=p>()</span><span class=o>.</span><span class=n>__init_subclass__</span><span class=p>(</span><span class=o>**</span><span class=n>kwargs</span><span class=p>)</span>
+<span class=linenos data-linenos=" 37 "></span>        <span class=k>return</span> <span class=n>traced_class</span><span class=p>(</span><span class=bp>cls</span><span class=p>)</span>
+<span class=linenos data-linenos=" 38 "></span>
+<span class=linenos data-linenos=" 39 "></span>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>):</span>
+<span class=linenos data-linenos=" 40 "></span><span class=w>        </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 41 "></span><span class=sd>        The base class for any OpenMetrics-based integration.</span>
+<span class=linenos data-linenos=" 42 "></span>
+<span class=linenos data-linenos=" 43 "></span><span class=sd>        Subclasses are expected to override this to add their custom scrapers or transformers.</span>
+<span class=linenos data-linenos=" 44 "></span><span class=sd>        When overriding, make sure to call this (the parent&#39;s) __init__ first!</span>
+<span class=linenos data-linenos=" 45 "></span><span class=sd>        &quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 46 "></span>        <span class=nb>super</span><span class=p>(</span><span class=n>OpenMetricsBaseCheckV2</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>)</span>
+<span class=linenos data-linenos=" 47 "></span>
+<span class=linenos data-linenos=" 48 "></span>        <span class=c1># All desired scraper configurations, which subclasses can override as needed</span>
+<span class=linenos data-linenos=" 49 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>scraper_configs</span> <span class=o>=</span> <span class=p>[</span><span class=bp>self</span><span class=o>.</span><span class=n>instance</span><span class=p>]</span>
+<span class=linenos data-linenos=" 50 "></span>
+<span class=linenos data-linenos=" 51 "></span>        <span class=c1># All configured scrapers keyed by the endpoint</span>
+<span class=linenos data-linenos=" 52 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span> <span class=o>=</span> <span class=p>{}</span>
+<span class=linenos data-linenos=" 53 "></span>
+<span class=linenos data-linenos=" 54 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>check_initializations</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>configure_scrapers</span><span class=p>)</span>
 <span class=linenos data-linenos=" 55 "></span>
-<span class=linenos data-linenos=" 56 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>check_initializations</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>configure_scrapers</span><span class=p>)</span>
-<span class=linenos data-linenos=" 57 "></span>
-<span class=linenos data-linenos=" 58 "></span>    <span class=k>def</span> <span class=nf>check</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>_</span><span class=p>):</span>
-<span class=linenos data-linenos=" 59 "></span><span class=w>        </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos=" 60 "></span><span class=sd>        Perform an openmetrics-based check.</span>
-<span class=linenos data-linenos=" 61 "></span>
-<span class=linenos data-linenos=" 62 "></span><span class=sd>        Subclasses should typically not need to override this, as most common customization</span>
-<span class=linenos data-linenos=" 63 "></span><span class=sd>        needs are covered by the use of custom scrapers.</span>
-<span class=linenos data-linenos=" 64 "></span><span class=sd>        Another thing to note is that this check ignores its instance argument completely.</span>
-<span class=linenos data-linenos=" 65 "></span><span class=sd>        We take care of instance-level customization at initialization time.</span>
-<span class=linenos data-linenos=" 66 "></span><span class=sd>        &quot;&quot;&quot;</span>
-<span class=linenos data-linenos=" 67 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>refresh_scrapers</span><span class=p>()</span>
-<span class=linenos data-linenos=" 68 "></span>
-<span class=linenos data-linenos=" 69 "></span>        <span class=k>for</span> <span class=n>endpoint</span><span class=p>,</span> <span class=n>scraper</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>items</span><span class=p>():</span>
-<span class=linenos data-linenos=" 70 "></span>            <span class=bp>self</span><span class=o>.</span><span class=n>log</span><span class=o>.</span><span class=n>debug</span><span class=p>(</span><span class=s1>&#39;Scraping OpenMetrics endpoint: </span><span class=si>%s</span><span class=s1>&#39;</span><span class=p>,</span> <span class=n>endpoint</span><span class=p>)</span>
-<span class=linenos data-linenos=" 71 "></span>
-<span class=linenos data-linenos=" 72 "></span>            <span class=k>with</span> <span class=bp>self</span><span class=o>.</span><span class=n>adopt_namespace</span><span class=p>(</span><span class=n>scraper</span><span class=o>.</span><span class=n>namespace</span><span class=p>):</span>
-<span class=linenos data-linenos=" 73 "></span>                <span class=k>try</span><span class=p>:</span>
-<span class=linenos data-linenos=" 74 "></span>                    <span class=n>scraper</span><span class=o>.</span><span class=n>scrape</span><span class=p>()</span>
-<span class=linenos data-linenos=" 75 "></span>                <span class=k>except</span> <span class=p>(</span><span class=ne>ConnectionError</span><span class=p>,</span> <span class=n>RequestException</span><span class=p>)</span> <span class=k>as</span> <span class=n>e</span><span class=p>:</span>
-<span class=linenos data-linenos=" 76 "></span>                    <span class=bp>self</span><span class=o>.</span><span class=n>log</span><span class=o>.</span><span class=n>error</span><span class=p>(</span><span class=s2>&quot;There was an error scraping endpoint </span><span class=si>%s</span><span class=s2>: </span><span class=si>%s</span><span class=s2>&quot;</span><span class=p>,</span> <span class=n>endpoint</span><span class=p>,</span> <span class=nb>str</span><span class=p>(</span><span class=n>e</span><span class=p>))</span>
-<span class=linenos data-linenos=" 77 "></span>                    <span class=k>raise</span> <span class=nb>type</span><span class=p>(</span><span class=n>e</span><span class=p>)(</span><span class=s2>&quot;There was an error scraping endpoint </span><span class=si>{}</span><span class=s2>: </span><span class=si>{}</span><span class=s2>&quot;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>endpoint</span><span class=p>,</span> <span class=n>e</span><span class=p>))</span> <span class=kn>from</span> <span class=kc>None</span>
-<span class=linenos data-linenos=" 78 "></span>
-<span class=linenos data-linenos=" 79 "></span>    <span class=k>def</span> <span class=nf>configure_scrapers</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
-<span class=linenos data-linenos=" 80 "></span><span class=w>        </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos=" 81 "></span><span class=sd>        Creates a scraper configuration for each instance.</span>
-<span class=linenos data-linenos=" 82 "></span><span class=sd>        &quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 56 "></span>    <span class=k>def</span> <span class=nf>check</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>_</span><span class=p>):</span>
+<span class=linenos data-linenos=" 57 "></span><span class=w>        </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 58 "></span><span class=sd>        Perform an openmetrics-based check.</span>
+<span class=linenos data-linenos=" 59 "></span>
+<span class=linenos data-linenos=" 60 "></span><span class=sd>        Subclasses should typically not need to override this, as most common customization</span>
+<span class=linenos data-linenos=" 61 "></span><span class=sd>        needs are covered by the use of custom scrapers.</span>
+<span class=linenos data-linenos=" 62 "></span><span class=sd>        Another thing to note is that this check ignores its instance argument completely.</span>
+<span class=linenos data-linenos=" 63 "></span><span class=sd>        We take care of instance-level customization at initialization time.</span>
+<span class=linenos data-linenos=" 64 "></span><span class=sd>        &quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 65 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>refresh_scrapers</span><span class=p>()</span>
+<span class=linenos data-linenos=" 66 "></span>
+<span class=linenos data-linenos=" 67 "></span>        <span class=k>for</span> <span class=n>endpoint</span><span class=p>,</span> <span class=n>scraper</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>items</span><span class=p>():</span>
+<span class=linenos data-linenos=" 68 "></span>            <span class=bp>self</span><span class=o>.</span><span class=n>log</span><span class=o>.</span><span class=n>debug</span><span class=p>(</span><span class=s1>&#39;Scraping OpenMetrics endpoint: </span><span class=si>%s</span><span class=s1>&#39;</span><span class=p>,</span> <span class=n>endpoint</span><span class=p>)</span>
+<span class=linenos data-linenos=" 69 "></span>
+<span class=linenos data-linenos=" 70 "></span>            <span class=k>with</span> <span class=bp>self</span><span class=o>.</span><span class=n>adopt_namespace</span><span class=p>(</span><span class=n>scraper</span><span class=o>.</span><span class=n>namespace</span><span class=p>):</span>
+<span class=linenos data-linenos=" 71 "></span>                <span class=k>try</span><span class=p>:</span>
+<span class=linenos data-linenos=" 72 "></span>                    <span class=n>scraper</span><span class=o>.</span><span class=n>scrape</span><span class=p>()</span>
+<span class=linenos data-linenos=" 73 "></span>                <span class=k>except</span> <span class=p>(</span><span class=ne>ConnectionError</span><span class=p>,</span> <span class=n>RequestException</span><span class=p>)</span> <span class=k>as</span> <span class=n>e</span><span class=p>:</span>
+<span class=linenos data-linenos=" 74 "></span>                    <span class=bp>self</span><span class=o>.</span><span class=n>log</span><span class=o>.</span><span class=n>error</span><span class=p>(</span><span class=s2>&quot;There was an error scraping endpoint </span><span class=si>%s</span><span class=s2>: </span><span class=si>%s</span><span class=s2>&quot;</span><span class=p>,</span> <span class=n>endpoint</span><span class=p>,</span> <span class=nb>str</span><span class=p>(</span><span class=n>e</span><span class=p>))</span>
+<span class=linenos data-linenos=" 75 "></span>                    <span class=k>raise</span> <span class=nb>type</span><span class=p>(</span><span class=n>e</span><span class=p>)(</span><span class=s2>&quot;There was an error scraping endpoint </span><span class=si>{}</span><span class=s2>: </span><span class=si>{}</span><span class=s2>&quot;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>endpoint</span><span class=p>,</span> <span class=n>e</span><span class=p>))</span> <span class=kn>from</span> <span class=kc>None</span>
+<span class=linenos data-linenos=" 76 "></span>
+<span class=linenos data-linenos=" 77 "></span>    <span class=k>def</span> <span class=nf>configure_scrapers</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+<span class=linenos data-linenos=" 78 "></span><span class=w>        </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 79 "></span><span class=sd>        Creates a scraper configuration for each instance.</span>
+<span class=linenos data-linenos=" 80 "></span><span class=sd>        &quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 81 "></span>
+<span class=linenos data-linenos=" 82 "></span>        <span class=n>scrapers</span> <span class=o>=</span> <span class=p>{}</span>
 <span class=linenos data-linenos=" 83 "></span>
-<span class=linenos data-linenos=" 84 "></span>        <span class=n>scrapers</span> <span class=o>=</span> <span class=p>{}</span>
-<span class=linenos data-linenos=" 85 "></span>
-<span class=linenos data-linenos=" 86 "></span>        <span class=k>for</span> <span class=n>config</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scraper_configs</span><span class=p>:</span>
-<span class=linenos data-linenos=" 87 "></span>            <span class=n>endpoint</span> <span class=o>=</span> <span class=n>config</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s1>&#39;openmetrics_endpoint&#39;</span><span class=p>,</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
-<span class=linenos data-linenos=" 88 "></span>            <span class=k>if</span> <span class=ow>not</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>endpoint</span><span class=p>,</span> <span class=nb>str</span><span class=p>):</span>
-<span class=linenos data-linenos=" 89 "></span>                <span class=k>raise</span> <span class=n>ConfigurationError</span><span class=p>(</span><span class=s1>&#39;The setting `openmetrics_endpoint` must be a string&#39;</span><span class=p>)</span>
-<span class=linenos data-linenos=" 90 "></span>            <span class=k>elif</span> <span class=ow>not</span> <span class=n>endpoint</span><span class=p>:</span>
-<span class=linenos data-linenos=" 91 "></span>                <span class=k>raise</span> <span class=n>ConfigurationError</span><span class=p>(</span><span class=s1>&#39;The setting `openmetrics_endpoint` is required&#39;</span><span class=p>)</span>
+<span class=linenos data-linenos=" 84 "></span>        <span class=k>for</span> <span class=n>config</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scraper_configs</span><span class=p>:</span>
+<span class=linenos data-linenos=" 85 "></span>            <span class=n>endpoint</span> <span class=o>=</span> <span class=n>config</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s1>&#39;openmetrics_endpoint&#39;</span><span class=p>,</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+<span class=linenos data-linenos=" 86 "></span>            <span class=k>if</span> <span class=ow>not</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>endpoint</span><span class=p>,</span> <span class=nb>str</span><span class=p>):</span>
+<span class=linenos data-linenos=" 87 "></span>                <span class=k>raise</span> <span class=n>ConfigurationError</span><span class=p>(</span><span class=s1>&#39;The setting `openmetrics_endpoint` must be a string&#39;</span><span class=p>)</span>
+<span class=linenos data-linenos=" 88 "></span>            <span class=k>elif</span> <span class=ow>not</span> <span class=n>endpoint</span><span class=p>:</span>
+<span class=linenos data-linenos=" 89 "></span>                <span class=k>raise</span> <span class=n>ConfigurationError</span><span class=p>(</span><span class=s1>&#39;The setting `openmetrics_endpoint` is required&#39;</span><span class=p>)</span>
+<span class=linenos data-linenos=" 90 "></span>
+<span class=linenos data-linenos=" 91 "></span>            <span class=n>scrapers</span><span class=p>[</span><span class=n>endpoint</span><span class=p>]</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>create_scraper</span><span class=p>(</span><span class=n>config</span><span class=p>)</span>
 <span class=linenos data-linenos=" 92 "></span>
-<span class=linenos data-linenos=" 93 "></span>            <span class=n>scrapers</span><span class=p>[</span><span class=n>endpoint</span><span class=p>]</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>create_scraper</span><span class=p>(</span><span class=n>config</span><span class=p>)</span>
-<span class=linenos data-linenos=" 94 "></span>
-<span class=linenos data-linenos=" 95 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>clear</span><span class=p>()</span>
-<span class=linenos data-linenos=" 96 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>update</span><span class=p>(</span><span class=n>scrapers</span><span class=p>)</span>
-<span class=linenos data-linenos=" 97 "></span>
-<span class=linenos data-linenos=" 98 "></span>    <span class=k>def</span> <span class=nf>create_scraper</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>config</span><span class=p>):</span>
-<span class=linenos data-linenos=" 99 "></span><span class=w>        </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos="100 "></span><span class=sd>        Subclasses can override to return a custom scraper based on instance configuration.</span>
-<span class=linenos data-linenos="101 "></span><span class=sd>        &quot;&quot;&quot;</span>
-<span class=linenos data-linenos="102 "></span>        <span class=k>return</span> <span class=n>OpenMetricsScraper</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>get_config_with_defaults</span><span class=p>(</span><span class=n>config</span><span class=p>))</span>
-<span class=linenos data-linenos="103 "></span>
-<span class=linenos data-linenos="104 "></span>    <span class=k>def</span> <span class=nf>set_dynamic_tags</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=o>*</span><span class=n>tags</span><span class=p>):</span>
-<span class=linenos data-linenos="105 "></span>        <span class=k>for</span> <span class=n>scraper</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>values</span><span class=p>():</span>
-<span class=linenos data-linenos="106 "></span>            <span class=n>scraper</span><span class=o>.</span><span class=n>set_dynamic_tags</span><span class=p>(</span><span class=o>*</span><span class=n>tags</span><span class=p>)</span>
-<span class=linenos data-linenos="107 "></span>
-<span class=linenos data-linenos="108 "></span>    <span class=k>def</span> <span class=nf>get_config_with_defaults</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>config</span><span class=p>):</span>
-<span class=linenos data-linenos="109 "></span>        <span class=k>return</span> <span class=n>ChainMap</span><span class=p>(</span><span class=n>config</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>get_default_config</span><span class=p>())</span>
-<span class=linenos data-linenos="110 "></span>
-<span class=linenos data-linenos="111 "></span>    <span class=k>def</span> <span class=nf>get_default_config</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
-<span class=linenos data-linenos="112 "></span>        <span class=k>return</span> <span class=p>{}</span>
-<span class=linenos data-linenos="113 "></span>
-<span class=linenos data-linenos="114 "></span>    <span class=k>def</span> <span class=nf>refresh_scrapers</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
-<span class=linenos data-linenos="115 "></span>        <span class=k>pass</span>
-<span class=linenos data-linenos="116 "></span>
-<span class=linenos data-linenos="117 "></span>    <span class=nd>@contextmanager</span>
-<span class=linenos data-linenos="118 "></span>    <span class=k>def</span> <span class=nf>adopt_namespace</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>namespace</span><span class=p>):</span>
-<span class=linenos data-linenos="119 "></span>        <span class=n>old_namespace</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>__NAMESPACE__</span>
-<span class=linenos data-linenos="120 "></span>
-<span class=linenos data-linenos="121 "></span>        <span class=k>try</span><span class=p>:</span>
-<span class=linenos data-linenos="122 "></span>            <span class=bp>self</span><span class=o>.</span><span class=n>__NAMESPACE__</span> <span class=o>=</span> <span class=n>namespace</span> <span class=ow>or</span> <span class=n>old_namespace</span>
-<span class=linenos data-linenos="123 "></span>            <span class=k>yield</span>
-<span class=linenos data-linenos="124 "></span>        <span class=k>finally</span><span class=p>:</span>
-<span class=linenos data-linenos="125 "></span>            <span class=bp>self</span><span class=o>.</span><span class=n>__NAMESPACE__</span> <span class=o>=</span> <span class=n>old_namespace</span>
-</code></pre></div> </details> <div class="doc doc-children"> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.__init__ class="doc doc-heading"> <code class="highlight language-python"><span class=fm>__init__</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>)</span></code> <a href=#datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.__init__ class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>The base class for any OpenMetrics-based integration.</p> <p>Subclasses are expected to override this to add their custom scrapers or transformers. When overriding, make sure to call this (the parent's) <strong>init</strong> first!</p> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos="41 "></span><span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>):</span>
-<span class=linenos data-linenos="42 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos="43 "></span><span class=sd>    The base class for any OpenMetrics-based integration.</span>
-<span class=linenos data-linenos="44 "></span>
-<span class=linenos data-linenos="45 "></span><span class=sd>    Subclasses are expected to override this to add their custom scrapers or transformers.</span>
-<span class=linenos data-linenos="46 "></span><span class=sd>    When overriding, make sure to call this (the parent&#39;s) __init__ first!</span>
-<span class=linenos data-linenos="47 "></span><span class=sd>    &quot;&quot;&quot;</span>
-<span class=linenos data-linenos="48 "></span>    <span class=nb>super</span><span class=p>(</span><span class=n>OpenMetricsBaseCheckV2</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>)</span>
-<span class=linenos data-linenos="49 "></span>
-<span class=linenos data-linenos="50 "></span>    <span class=c1># All desired scraper configurations, which subclasses can override as needed</span>
-<span class=linenos data-linenos="51 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>scraper_configs</span> <span class=o>=</span> <span class=p>[</span><span class=bp>self</span><span class=o>.</span><span class=n>instance</span><span class=p>]</span>
-<span class=linenos data-linenos="52 "></span>
-<span class=linenos data-linenos="53 "></span>    <span class=c1># All configured scrapers keyed by the endpoint</span>
-<span class=linenos data-linenos="54 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span> <span class=o>=</span> <span class=p>{}</span>
-<span class=linenos data-linenos="55 "></span>
-<span class=linenos data-linenos="56 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>check_initializations</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>configure_scrapers</span><span class=p>)</span>
-</code></pre></div> </details> </div> </div> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.check class="doc doc-heading"> <code class="highlight language-python"><span class=n>check</span><span class=p>(</span><span class=n>_</span><span class=p>)</span></code> <a href=#datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.check class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>Perform an openmetrics-based check.</p> <p>Subclasses should typically not need to override this, as most common customization needs are covered by the use of custom scrapers. Another thing to note is that this check ignores its instance argument completely. We take care of instance-level customization at initialization time.</p> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos="58 "></span><span class=k>def</span> <span class=nf>check</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>_</span><span class=p>):</span>
-<span class=linenos data-linenos="59 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos="60 "></span><span class=sd>    Perform an openmetrics-based check.</span>
-<span class=linenos data-linenos="61 "></span>
-<span class=linenos data-linenos="62 "></span><span class=sd>    Subclasses should typically not need to override this, as most common customization</span>
-<span class=linenos data-linenos="63 "></span><span class=sd>    needs are covered by the use of custom scrapers.</span>
-<span class=linenos data-linenos="64 "></span><span class=sd>    Another thing to note is that this check ignores its instance argument completely.</span>
-<span class=linenos data-linenos="65 "></span><span class=sd>    We take care of instance-level customization at initialization time.</span>
-<span class=linenos data-linenos="66 "></span><span class=sd>    &quot;&quot;&quot;</span>
-<span class=linenos data-linenos="67 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>refresh_scrapers</span><span class=p>()</span>
-<span class=linenos data-linenos="68 "></span>
-<span class=linenos data-linenos="69 "></span>    <span class=k>for</span> <span class=n>endpoint</span><span class=p>,</span> <span class=n>scraper</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>items</span><span class=p>():</span>
-<span class=linenos data-linenos="70 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>log</span><span class=o>.</span><span class=n>debug</span><span class=p>(</span><span class=s1>&#39;Scraping OpenMetrics endpoint: </span><span class=si>%s</span><span class=s1>&#39;</span><span class=p>,</span> <span class=n>endpoint</span><span class=p>)</span>
-<span class=linenos data-linenos="71 "></span>
-<span class=linenos data-linenos="72 "></span>        <span class=k>with</span> <span class=bp>self</span><span class=o>.</span><span class=n>adopt_namespace</span><span class=p>(</span><span class=n>scraper</span><span class=o>.</span><span class=n>namespace</span><span class=p>):</span>
-<span class=linenos data-linenos="73 "></span>            <span class=k>try</span><span class=p>:</span>
-<span class=linenos data-linenos="74 "></span>                <span class=n>scraper</span><span class=o>.</span><span class=n>scrape</span><span class=p>()</span>
-<span class=linenos data-linenos="75 "></span>            <span class=k>except</span> <span class=p>(</span><span class=ne>ConnectionError</span><span class=p>,</span> <span class=n>RequestException</span><span class=p>)</span> <span class=k>as</span> <span class=n>e</span><span class=p>:</span>
-<span class=linenos data-linenos="76 "></span>                <span class=bp>self</span><span class=o>.</span><span class=n>log</span><span class=o>.</span><span class=n>error</span><span class=p>(</span><span class=s2>&quot;There was an error scraping endpoint </span><span class=si>%s</span><span class=s2>: </span><span class=si>%s</span><span class=s2>&quot;</span><span class=p>,</span> <span class=n>endpoint</span><span class=p>,</span> <span class=nb>str</span><span class=p>(</span><span class=n>e</span><span class=p>))</span>
-<span class=linenos data-linenos="77 "></span>                <span class=k>raise</span> <span class=nb>type</span><span class=p>(</span><span class=n>e</span><span class=p>)(</span><span class=s2>&quot;There was an error scraping endpoint </span><span class=si>{}</span><span class=s2>: </span><span class=si>{}</span><span class=s2>&quot;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>endpoint</span><span class=p>,</span> <span class=n>e</span><span class=p>))</span> <span class=kn>from</span> <span class=kc>None</span>
-</code></pre></div> </details> </div> </div> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.configure_scrapers class="doc doc-heading"> <code class="highlight language-python"><span class=n>configure_scrapers</span><span class=p>()</span></code> <a href=#datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.configure_scrapers class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>Creates a scraper configuration for each instance.</p> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos="79 "></span><span class=k>def</span> <span class=nf>configure_scrapers</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
-<span class=linenos data-linenos="80 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos="81 "></span><span class=sd>    Creates a scraper configuration for each instance.</span>
-<span class=linenos data-linenos="82 "></span><span class=sd>    &quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 93 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>clear</span><span class=p>()</span>
+<span class=linenos data-linenos=" 94 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>update</span><span class=p>(</span><span class=n>scrapers</span><span class=p>)</span>
+<span class=linenos data-linenos=" 95 "></span>
+<span class=linenos data-linenos=" 96 "></span>    <span class=k>def</span> <span class=nf>create_scraper</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>config</span><span class=p>):</span>
+<span class=linenos data-linenos=" 97 "></span><span class=w>        </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 98 "></span><span class=sd>        Subclasses can override to return a custom scraper based on instance configuration.</span>
+<span class=linenos data-linenos=" 99 "></span><span class=sd>        &quot;&quot;&quot;</span>
+<span class=linenos data-linenos="100 "></span>        <span class=k>return</span> <span class=n>OpenMetricsScraper</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>get_config_with_defaults</span><span class=p>(</span><span class=n>config</span><span class=p>))</span>
+<span class=linenos data-linenos="101 "></span>
+<span class=linenos data-linenos="102 "></span>    <span class=k>def</span> <span class=nf>set_dynamic_tags</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=o>*</span><span class=n>tags</span><span class=p>):</span>
+<span class=linenos data-linenos="103 "></span>        <span class=k>for</span> <span class=n>scraper</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>values</span><span class=p>():</span>
+<span class=linenos data-linenos="104 "></span>            <span class=n>scraper</span><span class=o>.</span><span class=n>set_dynamic_tags</span><span class=p>(</span><span class=o>*</span><span class=n>tags</span><span class=p>)</span>
+<span class=linenos data-linenos="105 "></span>
+<span class=linenos data-linenos="106 "></span>    <span class=k>def</span> <span class=nf>get_config_with_defaults</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>config</span><span class=p>):</span>
+<span class=linenos data-linenos="107 "></span>        <span class=k>return</span> <span class=n>ChainMap</span><span class=p>(</span><span class=n>config</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>get_default_config</span><span class=p>())</span>
+<span class=linenos data-linenos="108 "></span>
+<span class=linenos data-linenos="109 "></span>    <span class=k>def</span> <span class=nf>get_default_config</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+<span class=linenos data-linenos="110 "></span>        <span class=k>return</span> <span class=p>{}</span>
+<span class=linenos data-linenos="111 "></span>
+<span class=linenos data-linenos="112 "></span>    <span class=k>def</span> <span class=nf>refresh_scrapers</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+<span class=linenos data-linenos="113 "></span>        <span class=k>pass</span>
+<span class=linenos data-linenos="114 "></span>
+<span class=linenos data-linenos="115 "></span>    <span class=nd>@contextmanager</span>
+<span class=linenos data-linenos="116 "></span>    <span class=k>def</span> <span class=nf>adopt_namespace</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>namespace</span><span class=p>):</span>
+<span class=linenos data-linenos="117 "></span>        <span class=n>old_namespace</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>__NAMESPACE__</span>
+<span class=linenos data-linenos="118 "></span>
+<span class=linenos data-linenos="119 "></span>        <span class=k>try</span><span class=p>:</span>
+<span class=linenos data-linenos="120 "></span>            <span class=bp>self</span><span class=o>.</span><span class=n>__NAMESPACE__</span> <span class=o>=</span> <span class=n>namespace</span> <span class=ow>or</span> <span class=n>old_namespace</span>
+<span class=linenos data-linenos="121 "></span>            <span class=k>yield</span>
+<span class=linenos data-linenos="122 "></span>        <span class=k>finally</span><span class=p>:</span>
+<span class=linenos data-linenos="123 "></span>            <span class=bp>self</span><span class=o>.</span><span class=n>__NAMESPACE__</span> <span class=o>=</span> <span class=n>old_namespace</span>
+</code></pre></div> </details> <div class="doc doc-children"> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.__init__ class="doc doc-heading"> <code class="highlight language-python"><span class=fm>__init__</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>)</span></code> <a href=#datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.__init__ class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>The base class for any OpenMetrics-based integration.</p> <p>Subclasses are expected to override this to add their custom scrapers or transformers. When overriding, make sure to call this (the parent's) <strong>init</strong> first!</p> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos="39 "></span><span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>):</span>
+<span class=linenos data-linenos="40 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos="41 "></span><span class=sd>    The base class for any OpenMetrics-based integration.</span>
+<span class=linenos data-linenos="42 "></span>
+<span class=linenos data-linenos="43 "></span><span class=sd>    Subclasses are expected to override this to add their custom scrapers or transformers.</span>
+<span class=linenos data-linenos="44 "></span><span class=sd>    When overriding, make sure to call this (the parent&#39;s) __init__ first!</span>
+<span class=linenos data-linenos="45 "></span><span class=sd>    &quot;&quot;&quot;</span>
+<span class=linenos data-linenos="46 "></span>    <span class=nb>super</span><span class=p>(</span><span class=n>OpenMetricsBaseCheckV2</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>init_config</span><span class=p>,</span> <span class=n>instances</span><span class=p>)</span>
+<span class=linenos data-linenos="47 "></span>
+<span class=linenos data-linenos="48 "></span>    <span class=c1># All desired scraper configurations, which subclasses can override as needed</span>
+<span class=linenos data-linenos="49 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>scraper_configs</span> <span class=o>=</span> <span class=p>[</span><span class=bp>self</span><span class=o>.</span><span class=n>instance</span><span class=p>]</span>
+<span class=linenos data-linenos="50 "></span>
+<span class=linenos data-linenos="51 "></span>    <span class=c1># All configured scrapers keyed by the endpoint</span>
+<span class=linenos data-linenos="52 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span> <span class=o>=</span> <span class=p>{}</span>
+<span class=linenos data-linenos="53 "></span>
+<span class=linenos data-linenos="54 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>check_initializations</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>configure_scrapers</span><span class=p>)</span>
+</code></pre></div> </details> </div> </div> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.check class="doc doc-heading"> <code class="highlight language-python"><span class=n>check</span><span class=p>(</span><span class=n>_</span><span class=p>)</span></code> <a href=#datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.check class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>Perform an openmetrics-based check.</p> <p>Subclasses should typically not need to override this, as most common customization needs are covered by the use of custom scrapers. Another thing to note is that this check ignores its instance argument completely. We take care of instance-level customization at initialization time.</p> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos="56 "></span><span class=k>def</span> <span class=nf>check</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>_</span><span class=p>):</span>
+<span class=linenos data-linenos="57 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos="58 "></span><span class=sd>    Perform an openmetrics-based check.</span>
+<span class=linenos data-linenos="59 "></span>
+<span class=linenos data-linenos="60 "></span><span class=sd>    Subclasses should typically not need to override this, as most common customization</span>
+<span class=linenos data-linenos="61 "></span><span class=sd>    needs are covered by the use of custom scrapers.</span>
+<span class=linenos data-linenos="62 "></span><span class=sd>    Another thing to note is that this check ignores its instance argument completely.</span>
+<span class=linenos data-linenos="63 "></span><span class=sd>    We take care of instance-level customization at initialization time.</span>
+<span class=linenos data-linenos="64 "></span><span class=sd>    &quot;&quot;&quot;</span>
+<span class=linenos data-linenos="65 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>refresh_scrapers</span><span class=p>()</span>
+<span class=linenos data-linenos="66 "></span>
+<span class=linenos data-linenos="67 "></span>    <span class=k>for</span> <span class=n>endpoint</span><span class=p>,</span> <span class=n>scraper</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>items</span><span class=p>():</span>
+<span class=linenos data-linenos="68 "></span>        <span class=bp>self</span><span class=o>.</span><span class=n>log</span><span class=o>.</span><span class=n>debug</span><span class=p>(</span><span class=s1>&#39;Scraping OpenMetrics endpoint: </span><span class=si>%s</span><span class=s1>&#39;</span><span class=p>,</span> <span class=n>endpoint</span><span class=p>)</span>
+<span class=linenos data-linenos="69 "></span>
+<span class=linenos data-linenos="70 "></span>        <span class=k>with</span> <span class=bp>self</span><span class=o>.</span><span class=n>adopt_namespace</span><span class=p>(</span><span class=n>scraper</span><span class=o>.</span><span class=n>namespace</span><span class=p>):</span>
+<span class=linenos data-linenos="71 "></span>            <span class=k>try</span><span class=p>:</span>
+<span class=linenos data-linenos="72 "></span>                <span class=n>scraper</span><span class=o>.</span><span class=n>scrape</span><span class=p>()</span>
+<span class=linenos data-linenos="73 "></span>            <span class=k>except</span> <span class=p>(</span><span class=ne>ConnectionError</span><span class=p>,</span> <span class=n>RequestException</span><span class=p>)</span> <span class=k>as</span> <span class=n>e</span><span class=p>:</span>
+<span class=linenos data-linenos="74 "></span>                <span class=bp>self</span><span class=o>.</span><span class=n>log</span><span class=o>.</span><span class=n>error</span><span class=p>(</span><span class=s2>&quot;There was an error scraping endpoint </span><span class=si>%s</span><span class=s2>: </span><span class=si>%s</span><span class=s2>&quot;</span><span class=p>,</span> <span class=n>endpoint</span><span class=p>,</span> <span class=nb>str</span><span class=p>(</span><span class=n>e</span><span class=p>))</span>
+<span class=linenos data-linenos="75 "></span>                <span class=k>raise</span> <span class=nb>type</span><span class=p>(</span><span class=n>e</span><span class=p>)(</span><span class=s2>&quot;There was an error scraping endpoint </span><span class=si>{}</span><span class=s2>: </span><span class=si>{}</span><span class=s2>&quot;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>endpoint</span><span class=p>,</span> <span class=n>e</span><span class=p>))</span> <span class=kn>from</span> <span class=kc>None</span>
+</code></pre></div> </details> </div> </div> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.configure_scrapers class="doc doc-heading"> <code class="highlight language-python"><span class=n>configure_scrapers</span><span class=p>()</span></code> <a href=#datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.configure_scrapers class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>Creates a scraper configuration for each instance.</p> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos="77 "></span><span class=k>def</span> <span class=nf>configure_scrapers</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+<span class=linenos data-linenos="78 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos="79 "></span><span class=sd>    Creates a scraper configuration for each instance.</span>
+<span class=linenos data-linenos="80 "></span><span class=sd>    &quot;&quot;&quot;</span>
+<span class=linenos data-linenos="81 "></span>
+<span class=linenos data-linenos="82 "></span>    <span class=n>scrapers</span> <span class=o>=</span> <span class=p>{}</span>
 <span class=linenos data-linenos="83 "></span>
-<span class=linenos data-linenos="84 "></span>    <span class=n>scrapers</span> <span class=o>=</span> <span class=p>{}</span>
-<span class=linenos data-linenos="85 "></span>
-<span class=linenos data-linenos="86 "></span>    <span class=k>for</span> <span class=n>config</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scraper_configs</span><span class=p>:</span>
-<span class=linenos data-linenos="87 "></span>        <span class=n>endpoint</span> <span class=o>=</span> <span class=n>config</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s1>&#39;openmetrics_endpoint&#39;</span><span class=p>,</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
-<span class=linenos data-linenos="88 "></span>        <span class=k>if</span> <span class=ow>not</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>endpoint</span><span class=p>,</span> <span class=nb>str</span><span class=p>):</span>
-<span class=linenos data-linenos="89 "></span>            <span class=k>raise</span> <span class=n>ConfigurationError</span><span class=p>(</span><span class=s1>&#39;The setting `openmetrics_endpoint` must be a string&#39;</span><span class=p>)</span>
-<span class=linenos data-linenos="90 "></span>        <span class=k>elif</span> <span class=ow>not</span> <span class=n>endpoint</span><span class=p>:</span>
-<span class=linenos data-linenos="91 "></span>            <span class=k>raise</span> <span class=n>ConfigurationError</span><span class=p>(</span><span class=s1>&#39;The setting `openmetrics_endpoint` is required&#39;</span><span class=p>)</span>
+<span class=linenos data-linenos="84 "></span>    <span class=k>for</span> <span class=n>config</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>scraper_configs</span><span class=p>:</span>
+<span class=linenos data-linenos="85 "></span>        <span class=n>endpoint</span> <span class=o>=</span> <span class=n>config</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s1>&#39;openmetrics_endpoint&#39;</span><span class=p>,</span> <span class=s1>&#39;&#39;</span><span class=p>)</span>
+<span class=linenos data-linenos="86 "></span>        <span class=k>if</span> <span class=ow>not</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>endpoint</span><span class=p>,</span> <span class=nb>str</span><span class=p>):</span>
+<span class=linenos data-linenos="87 "></span>            <span class=k>raise</span> <span class=n>ConfigurationError</span><span class=p>(</span><span class=s1>&#39;The setting `openmetrics_endpoint` must be a string&#39;</span><span class=p>)</span>
+<span class=linenos data-linenos="88 "></span>        <span class=k>elif</span> <span class=ow>not</span> <span class=n>endpoint</span><span class=p>:</span>
+<span class=linenos data-linenos="89 "></span>            <span class=k>raise</span> <span class=n>ConfigurationError</span><span class=p>(</span><span class=s1>&#39;The setting `openmetrics_endpoint` is required&#39;</span><span class=p>)</span>
+<span class=linenos data-linenos="90 "></span>
+<span class=linenos data-linenos="91 "></span>        <span class=n>scrapers</span><span class=p>[</span><span class=n>endpoint</span><span class=p>]</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>create_scraper</span><span class=p>(</span><span class=n>config</span><span class=p>)</span>
 <span class=linenos data-linenos="92 "></span>
-<span class=linenos data-linenos="93 "></span>        <span class=n>scrapers</span><span class=p>[</span><span class=n>endpoint</span><span class=p>]</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>create_scraper</span><span class=p>(</span><span class=n>config</span><span class=p>)</span>
-<span class=linenos data-linenos="94 "></span>
-<span class=linenos data-linenos="95 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>clear</span><span class=p>()</span>
-<span class=linenos data-linenos="96 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>update</span><span class=p>(</span><span class=n>scrapers</span><span class=p>)</span>
-</code></pre></div> </details> </div> </div> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.create_scraper class="doc doc-heading"> <code class="highlight language-python"><span class=n>create_scraper</span><span class=p>(</span><span class=n>config</span><span class=p>)</span></code> <a href=#datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.create_scraper class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>Subclasses can override to return a custom scraper based on instance configuration.</p> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos=" 98 "></span><span class=k>def</span> <span class=nf>create_scraper</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>config</span><span class=p>):</span>
-<span class=linenos data-linenos=" 99 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
-<span class=linenos data-linenos="100 "></span><span class=sd>    Subclasses can override to return a custom scraper based on instance configuration.</span>
-<span class=linenos data-linenos="101 "></span><span class=sd>    &quot;&quot;&quot;</span>
-<span class=linenos data-linenos="102 "></span>    <span class=k>return</span> <span class=n>OpenMetricsScraper</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>get_config_with_defaults</span><span class=p>(</span><span class=n>config</span><span class=p>))</span>
+<span class=linenos data-linenos="93 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>clear</span><span class=p>()</span>
+<span class=linenos data-linenos="94 "></span>    <span class=bp>self</span><span class=o>.</span><span class=n>scrapers</span><span class=o>.</span><span class=n>update</span><span class=p>(</span><span class=n>scrapers</span><span class=p>)</span>
+</code></pre></div> </details> </div> </div> <div class="doc doc-object doc-function"> <h4 id=datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.create_scraper class="doc doc-heading"> <code class="highlight language-python"><span class=n>create_scraper</span><span class=p>(</span><span class=n>config</span><span class=p>)</span></code> <a href=#datadog_checks.base.checks.openmetrics.v2.base.OpenMetricsBaseCheckV2.create_scraper class=headerlink title="Permanent link">&para;</a></h4> <div class="doc doc-contents "> <p>Subclasses can override to return a custom scraper based on instance configuration.</p> <details class=quote> <summary>Source code in <code>datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py</code></summary> <div class=highlight><pre><span></span><code><span class=linenos data-linenos=" 96 "></span><span class=k>def</span> <span class=nf>create_scraper</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>config</span><span class=p>):</span>
+<span class=linenos data-linenos=" 97 "></span><span class=w>    </span><span class=sd>&quot;&quot;&quot;</span>
+<span class=linenos data-linenos=" 98 "></span><span class=sd>    Subclasses can override to return a custom scraper based on instance configuration.</span>
+<span class=linenos data-linenos=" 99 "></span><span class=sd>    &quot;&quot;&quot;</span>
+<span class=linenos data-linenos="100 "></span>    <span class=k>return</span> <span class=n>OpenMetricsScraper</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>get_config_with_defaults</span><span class=p>(</span><span class=n>config</span><span class=p>))</span>
 </code></pre></div> </details> </div> </div> </div> </div> </div><h2 id=scrapers>Scrapers<a class=headerlink href=#scrapers title="Permanent link">&para;</a></h2> <div class="doc doc-object doc-class"> <h3 id=datadog_checks.base.checks.openmetrics.v2.scraper.OpenMetricsScraper class="doc doc-heading"> <code>datadog_checks.base.checks.openmetrics.v2.scraper.OpenMetricsScraper</code> <a href=#datadog_checks.base.checks.openmetrics.v2.scraper.OpenMetricsScraper class=headerlink title="Permanent link">&para;</a></h3> <div class="doc doc-contents first"> <p>OpenMetricsScraper is a class that can be used to override the default scraping behavior for OpenMetricsBaseCheckV2.</p> <p>Minimal example configuration:</p> <div class=highlight><pre><span></span><code><span class="p p-Indicator">-</span><span class=w> </span><span class=nt>openmetrics_endpoint</span><span class=p>:</span><span class=w> </span><span class="l l-Scalar l-Scalar-Plain">http://example.com/endpoint</span>
 <span class=w>  </span><span class=nt>namespace</span><span class=p>:</span><span class=w> </span><span class=s>&quot;foobar&quot;</span>
 <span class=w>  </span><span class=nt>metrics</span><span class=p>:</span>
