@@ -424,6 +424,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
             raw=True,
         )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_ms",
+            (time.time() - start_time) * 1000,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_count",
+            row_len,
+            "histogram",
+        )
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -468,6 +480,13 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self.tags,
                 raw=True,
             )
+            datadog_agent.emit_agent_telemetry(
+                "postgres",
+                "collect_activity_snapshot_ms",
+                (time.time() - start_time) * 1000,
+                "histogram",
+            )
+
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
@@ -503,6 +522,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
             raw=True,
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            "collect_statement_samples_ms",
+            elapsed_ms,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            "collect_statement_samples_count",
+            submitted_count,
+            "gauge",
         )
 
     @staticmethod

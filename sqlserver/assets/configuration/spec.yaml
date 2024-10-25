@@ -17,6 +17,13 @@ files:
         example:
           - name: sqlserver.clr.execution
             counter_name: CLR Execution
+    - name: propagate_agent_tags
+      description: |
+        Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+        When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+      value:
+        example: false
+        type: boolean
     - template: init_config/db
     - template: init_config/default
   - template: instances
@@ -272,6 +279,13 @@ files:
     - name: include_tempdb_file_space_usage_metrics
       description: |
         Include tempdb file space usage metrics for how space is used in tempdb data files.
+      value:
+        type: boolean
+        example: true
+    - name: include_xe_metrics
+      description: |
+        Include extended events (XE) metrics. The collection of XE metrics is automatically enabled
+        when `deadlocks_collection` is enabled.
       value:
         type: boolean
         example: true
@@ -760,6 +774,36 @@ files:
           value:
             type: number
             example: 10
+    - name: propagate_agent_tags
+      description: |
+        Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+        When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+        This option takes precedence over the `propagate_agent_tags` option in `init_config`.
+      value:
+        example: false
+        type: boolean
+    - name: deadlocks_collection
+      description: |
+        Configure the collection of deadlock data.
+      options:
+        - name: enabled
+          description: |
+            Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
+          value:
+            type: number
+            example: 600
+        - name: max_deadlocks
+          description: |
+            Set the maximum number of deadlocks to retrieve per collection.
+          value:
+            type: number
+            example: 100
     - template: instances/default
   - template: logs
     example:
