@@ -38,7 +38,7 @@ jobs:
           
       - name: Create Python Zip
         run: |
-          curl -L https://raw.githubusercontent.com/DataDog/integrations-core/refs/heads/nubtron/python-build-experiments/.github/workflows/scripts/Generate-Pyzip.ps1
+          curl -L https://raw.githubusercontent.com/DataDog/integrations-core/refs/heads/nubtron/python-build-experiments/.github/workflows/scripts/Generate-Pyzip.ps1 -o Generate-Pyzip.ps1
           $outDir = ".\out"
           mkdir $outDir
           .\Generate-Pyzip.ps1 -Version ${{ inputs.python_version }} -OutDir $outDir -InputFile "PCbuild\amd64\en-us\python-${{ inputs.python_version }}-amd64.exe"
