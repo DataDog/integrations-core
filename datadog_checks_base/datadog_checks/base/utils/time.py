@@ -28,12 +28,9 @@ def get_timestamp(dt=None):
     If `dt` is not specified or `None`, the current time in UTC is assumed.
     """
     if dt is None:
-        # The precision is different between Python 2 and 3
         return epoch_offset()
 
-    # TODO: when we drop support for Python 2 switch to:
-    # return ensure_aware_datetime(dt).timestamp()
-    return (ensure_aware_datetime(dt) - EPOCH).total_seconds()
+    return ensure_aware_datetime(dt).timestamp()
 
 
 def get_current_datetime(tz=UTC):
