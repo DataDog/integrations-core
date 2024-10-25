@@ -35,6 +35,13 @@ jobs:
       - name: Build CPython installer
         run: | 
           .\tools\msi\buildrelease.bat -x64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-${{ inputs.python_version }}-amd64.exe
+          path: PCbuild\amd64\en-us\python-${{ inputs.python_version }}-amd64.exe
+          if-no-files-found: error
+          retention-days: 1
           
       - name: Create Python Zip
         run: |
@@ -45,7 +52,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: python-windows-${{ inputs.python_version }}-amd64
+          name: python-windows-${{ inputs.python_version }}-amd64.zip
           path: ./out/python-windows-${{ inputs.python_version }}-amd64.zip
           if-no-files-found: error
           retention-days: 1
