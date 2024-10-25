@@ -4,30 +4,31 @@
   "app_id": "vonage",
   "display_on_public_website": true,
   "tile": {
-    "overview": "README.md#Overview",
-    "configuration": "README.md#Setup",
-    "support": "README.md#Support",
-    "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Vonage logs.",
-    "title": "Vonage",
-    "media": [],
-    "classifier_tags": [
-      "Category::Log Collection",
-      "Submitted Data Type::Logs",
-      "Offering::Integration"
-    ]
+      "overview": "README.md#Overview",
+      "configuration": "README.md#Setup",
+      "support": "README.md#Support",
+      "changelog": "CHANGELOG.md",
+      "description": "Gain insights into Vonage logs.",
+      "title": "Vonage",
+      "media": [],
+      "classifier_tags": [
+          "Category::Log Collection",
+          "Submitted Data Type::Logs",
+          "Offering::Integration"
+      ]
   },
   "assets": {
- "integration": {
-      "auto_install": false,
-      "events": {
-        "creates_events": false
+      "integration": {
+          "auto_install": false,
+          "events": {
+              "creates_events": false
+          }
+      },
+      "author": {
+          "support_email": "help@datadoghq.com",
+          "name": "Datadog",
+          "homepage": "https://www.datadoghq.com",
+          "sales_email": "info@datadoghq.com"
       }
-  },
-  "author": {
-    "support_email": "help@datadoghq.com",
-    "name": "Datadog",
-    "homepage": "https://www.datadoghq.com",
-    "sales_email": "info@datadoghq.com"
   }
 }
