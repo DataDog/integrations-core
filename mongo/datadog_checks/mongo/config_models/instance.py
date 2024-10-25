@@ -25,8 +25,8 @@ class Aws(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    cluster_identifier: Optional[str] = None
-    instance_endpoint: Optional[str] = None
+    documentdb_cluster_identifier: Optional[str] = None
+    documentdb_instance_endpoint: Optional[str] = None
 
 
 class Field(BaseModel):
