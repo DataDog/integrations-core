@@ -107,11 +107,12 @@ if($maj -eq "2") {
 elseif ($maj -eq "3") {
     $Env:PATH="$Env:PATH;c:\tools\msys64\mingw64\bin"
 
-    try {
-        $installedPythonVersion = python --version
-        $installedPythonVersion = [regex]::match($installedPythonVersion,'Python (\d.\d.\d)').Groups[1].Value
-        $installedMaj, $installedMin, $installedPatch = $installedPythonVersion.Split(".")
 
+    $installedPythonVersion = python --version
+    $installedPythonVersion = [regex]::match($installedPythonVersion,'Python (\d.\d.\d)').Groups[1].Value
+    $installedMaj, $installedMin, $installedPatch = $installedPythonVersion.Split(".")
+
+    if ($installedMaj) {
         Write-Host -ForegroundColor Green "Detected installed Python $installedMaj $installedMin $installedPatch"
 
         if ($installedMaj -ne "3") {
@@ -121,9 +122,7 @@ elseif ($maj -eq "3") {
         # Python is already installed in the buildimage, but is the wrong version uninstall it
         Uninstall-Python -installedPythonVersion $installedPythonVersion -dlfullpath $dlfullpath -md5sum $null
     }
-    catch {
-        # Python command not found
-    }
+
 
     if ($InputFile) {
         $dlfullpath = Resolve-Path -Path $InputFile
