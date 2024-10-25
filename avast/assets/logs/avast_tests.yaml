@@ -1,0 +1,231 @@
+id: avast
+tests:
+  - sample: |-
+      {
+          "id": "26ab6b4d-a11a-45fd-b4f2-a6d612dbf649",
+          "companyName": "Site - Test 1",
+          "eventType": "SUBSCRIPTION_TRIAL_ACTIVATED",
+          "metadata": {
+              "@type": "AuditLoggingSubscriptionProductNameMetadata",
+              "productName": "TIER_3"
+          },
+          "origin": "USER",
+          "userName": "john.doe@example.com",
+          "result": "OK",
+          "eventCategory": "SUBSCRIPTION",
+          "ip": "10.10.10.10",
+          "timestamp": "2024-10-08T12:13:42.563Z",
+          "traceId": "670521f6b95152000073e333fb7e6e17",
+          "companyId": "3abe08bc-b111-11c1-a111-4c43120d60b9",
+          "userId": "a3587d0f-1a1a-1a1a-1a1a-c715de62ac23"
+      }
+    result: null
+  - sample: |-
+      {
+          "id": "26ab6b4d-a11a-45fd-b4f2-a6d612dbf6498",
+          "companyName": "Site - Test 1",
+          "eventType": "POLICY_CHANGED",
+          "metadata": {
+              "@type": "AuditLoggingPolicyMetadata",
+              "id": "6b42b4ec-ffde-4749-b3d7-b56cc1da24eb",
+              "name": "TEST-NAME",
+              "newName": null,
+              "description": "TEST-NAME",
+              "newDescription": null,
+              "action": null,
+              "type": "COMPANY_DIRECT"
+          },
+          "origin": "USER",
+          "userName": "john.doe@example.com",
+          "result": "OK",
+          "eventCategory": "POLICY",
+          "ip": "10.10.10.10",
+          "timestamp": "2024-10-08T12:14:42.118Z",
+          "traceId": "670522321ade000ab42bec2222adb74a",
+          "companyId": "3abe08bc-b111-11c1-a111-4c43120d60b9",
+          "userId": "a3587d0f-1a1a-1a1a-1a1a-c715de62ac23"
+      }
+    result: null
+  - sample: |-
+      {
+          "id": "26ab6b4d-a11a-45fd-b4f2-a6d612dbf647",
+          "companyName": "Test 1",
+          "eventType": "USER_LOGIN",
+          "metadata": {
+              "@type": "AuditLoggingUserMetadata",
+              "user": "john.doe@example.com"
+          },
+          "origin": "USER",
+          "userName": "john.doe@example.com",
+          "result": "OK",
+          "eventCategory": "USER",
+          "ip": "10.10.10.10",
+          "timestamp": "2024-10-09T17:03:52.194Z",
+          "traceId": "6706b7784a9ac897d57c22e33339aaf3",
+          "companyId": null,
+          "userId": "a3587d0f-1a1a-1a1a-1a1a-c715de62ac23"
+      }
+    result: null
+  - sample: |-
+      {
+          "id": "26ab6b4d-a11a-45fd-b4f2-a6d612dbf646",
+          "companyName": "Test 1",
+          "eventType": "USER_GRANTED_ACCESS",
+          "metadata": {
+              "@type": "AuditLoggingUserRoleMetadata",
+              "user": "random",
+              "role": "CWA"
+          },
+          "origin": "USER",
+          "userName": "john.doe@example.com",
+          "result": "OK",
+          "eventCategory": "USER",
+          "ip": "10.10.10.10",
+          "timestamp": "2024-10-09T17:17:29.366Z",
+          "traceId": "6706baa914d5dc666d0b666f9917f1a3",
+          "companyId": null,
+          "userId": "a3587d0f-1a1a-1a1a-1a1a-c715de62ac23"
+      }
+    result: null
+  - sample: >-
+      {
+          "id": "da83fc68-1a11-1111-1a11-6b273f72e1f9",
+          "companyId": "3abe08bc-111c-4c4c-a111-4c43120d60b9",
+          "companyName": "Site - Test 1",
+          "deviceId": "d4e7b235-a3b5-1111-a11a-295693a50a5d",
+          "deviceAlias": "WORKGROUP\\DESKTOP-TEST1S19",
+          "deviceName": "DESKTOP-TEST1S19",
+          "patchName": "VC_redist_14.40.33816_x86.exe",
+          "severity": "IMPORTANT",
+          "vendor": "Microsoft",
+          "applicationName": "Visual C++",
+          "bulletinId": "MSVC14-241010",
+          "bulletinTitle": "Microsoft Visual C++ Redistributable for Visual Studio 14.40.33816",
+          "bulletinUri": "(https://)support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0",
+          "status": "MISSING",
+          "reason": "APPROVED_FOR_SETTINGS",
+          "lastStatusUpdate": "2024-10-16T05:19:35.666Z",
+          "patchDeployStatus": null,
+          "patchDeployProgress": "None"
+      }
+    result: null
+  - sample: >-
+      {
+          "id": "232fa349-1a11-1111-1a11-085467982d5a",
+          "companyId": "3abe08bc-111c-4c4c-a111-4c43120d60b9",
+          "companyName": "Site - Test 1",
+          "deviceId": "d4e7b235-a3b5-1111-a11a-295693a50a5d",
+          "deviceAlias": "WORKGROUP\\DESKTOP-TEST1S19",
+          "deviceName": "DESKTOP-TEST1S19",
+          "patchName": "windows10.0-kb5043131-x64-22H2.msu",
+          "severity": "NONE",
+          "vendor": "Microsoft",
+          "applicationName": "Windows",
+          "bulletinId": "MSNS24-09-W10-5043131",
+          "bulletinTitle": "September 24, 2024-KB5043131 (OS Build 19045.4957) Preview",
+          "bulletinUri": "(http://)support.microsoft.com/kb/5043131",
+          "status": "MISSING",
+          "reason": "APPROVED_FOR_SETTINGS",
+          "lastStatusUpdate": "2024-10-16T05:19:35.666Z",
+          "patchDeployStatus": null,
+          "patchDeployProgress": "None"
+      }
+    result: null
+  - sample: |-
+      {
+          "id": "ba5c9b4c-111f-111f-111f-601d26404c79",
+          "companyId": "3abe08bc-b111-11c1-a111-4c43120d60b9",
+          "deviceId": "d8cc06e8-1aa1-1111-111c-99d787e4ae3c",
+          "deviceAlias": "WORKGROUP\\ASSET-TEST",
+          "deviceName": "ASSET-TEST",
+          "taskName": "Patch Scan - Oct 17, 2024 2:14 PM",
+          "creationTime": "2024-10-17T08:44:57.938Z",
+          "completedTime": "2024-10-17T09:09:11.994Z",
+          "taskScheduleInterval": "ONCE",
+          "taskSource": "ONCE",
+          "taskType": "PATCH_SCAN",
+          "result": null,
+          "status": "DONE",
+          "taskId": "44a4c196-1111-1111-111e-f6b08cb736d6",
+          "companyName": "Site - Test 1"
+      }
+    result: null
+  - sample: |-
+      {
+          "id": "502e5e56-111f-111f-111f-bf07e250ae79",
+          "companyId": "3abe08bc-b111-11c1-a111-4c43120d60b9",
+          "deviceId": "d8cc06e8-1aa1-1111-111c-99d787e4ae3c",
+          "deviceAlias": "WORKGROUP\\ASSET-TEST",
+          "deviceName": "ASSET-TEST",
+          "taskName": "Quick Scan - 15-Oct-2024, 10:54:48 am",
+          "creationTime": "2024-10-08T12:14:42.165Z",
+          "completedTime": "2024-10-15T08:54:48.076Z",
+          "taskScheduleInterval": "WEEKLY",
+          "taskSource": "SCHEDULED",
+          "taskType": "AV_SCAN_QUICK",
+          "result": {
+              "status": "SAFE",
+              "threatsResolved": 0,
+              "threatsDetected": 0,
+              "notScanned": 0,
+              "failed": 0
+          },
+          "status": "DONE",
+          "taskId": "89897b3f-111a-111a-ad22-3c70354a3541",
+          "companyName": "Site - Test 1"
+      }
+    result: null
+  - sample: >-
+      {
+          "companyId": "3abe08bc-111a-11c1-a111-4c43120d60b9",
+          "companyName": "Site - Test 1",
+          "groupId": "2282d5bd-a1c1-1111-1a11-aea4517c667d",
+          "groupName": "DEFAULT",
+          "deviceId": "d8cc06e8-1dd1-1111-111c-99d787e4ae3c",
+          "deviceAlias": "WORKGROUP\\ASSET-TEST",
+          "deviceName": "ASSET-TEST",
+          "localizedDetail": "Win64:HacktoolX-gen [Trj]<br/>C:\\Users\\random\\path\\to\\threat\\file\\Default\\Cache\\Cache_Data\\f_000240",
+          "id": "c106977c-111a-1111-1111-fe609c7cf13b",
+          "fileName": "C:\\Users\\random\\path\\to\\threat\\file\\Default\\Cache\\Cache_Data\\f_000240",
+          "threatName": "Win64:HacktoolX-gen [Trj]",
+          "detectionTime": "2024-10-15T08:56:37.664Z",
+          "infectionType": "MALWARE",
+          "detectionSource": "SHIELD_FILESYSTEM",
+          "actionType": "CHEST",
+          "fileAccessPath": null,
+          "alertId": "719611cccffe",
+          "originatingDeviceIp": null,
+          "originatingDeviceMac": null,
+          "originatingDeviceNetworkId": null,
+          "originatingDeviceNetworkName": null,
+          "originatingDeviceProtocol": null,
+          "originatingDeviceThreatCategory": null
+      }
+    result: null
+  - sample: >-
+      {
+          "companyId": "3abe08bc-111a-11c1-a111-4c43120d60b9",
+          "companyName": "Site - CD-AI",
+          "groupId": "2282d5bd-a1c1-1111-1a11-aea4517c667d",
+          "groupName": "DEFAULT",
+          "deviceId": "d8cc06e8-1dd1-1111-111c-99d787e4ae3c",
+          "deviceAlias": "WORKGROUP\\AssetTag-EID",
+          "deviceName": "AssetTag-EID",
+          "localizedDetail": "URL:Blacklist<br/>https(://)codeload.github.com/ParrotSec/mimikatz/zip/refs/heads/master",
+          "id": "ca6a749f-111d-11c1-11c1-813e0776f469",
+          "fileName": "https(://)codeload.github.com/ParrotSec/mimikatz/zip/refs/heads/master",
+          "threatName": "URL:Blacklist",
+          "detectionTime": "2024-10-09T05:08:47.108Z",
+          "infectionType": "MALWARE",
+          "detectionSource": "SHIELD_WEB",
+          "actionType": "BLOCKED",
+          "fileAccessPath": null,
+          "alertId": "30a1a2dddbc6",
+          "originatingDeviceIp": null,
+          "originatingDeviceMac": null,
+          "originatingDeviceNetworkId": null,
+          "originatingDeviceNetworkName": null,
+          "originatingDeviceProtocol": null,
+          "originatingDeviceThreatCategory": null
+      }
+    result: null

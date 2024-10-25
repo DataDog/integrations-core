@@ -30,6 +30,11 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
+    "dashboards": {
+      "Avast - Audit Summary" : "assets/dashboards/avast_audit_summary.json",
+      "Avast - Task and Patch Summary" : "assets/dashboards/avast_task_and_patch_summary.json",
+      "Avast - Threat Summary" : "assets/dashboards/avast_threat_summary.json"
+    },
     "logs": {
       "source": "avast"
     }

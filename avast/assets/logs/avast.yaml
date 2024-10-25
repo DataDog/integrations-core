@@ -1,0 +1,127 @@
+id: avast
+metric_id: avast
+backend_only: false
+facets:
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+pipeline:
+  type: pipeline
+  name: Avast
+  enabled: true
+  filter:
+    query: source:avast
+  processors:
+    - type: pipeline
+      name: Threat
+      enabled: true
+      filter:
+        query: service:threat
+      processors:
+        - type: date-remapper
+          name: Define `detectionTime` as the official date of the log
+          enabled: true
+          sources:
+            - detectionTime
+    - type: pipeline
+      name: Task
+      enabled: true
+      filter:
+        query: service:task
+      processors:
+        - type: date-remapper
+          name: Define `completedTime` as the official date of the log
+          enabled: true
+          sources:
+            - completedTime
+        - type: attribute-remapper
+          name: Map `status` to `task_status`
+          enabled: true
+          sources:
+            - status
+          sourceType: attribute
+          target: task_status
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Patch
+      enabled: true
+      filter:
+        query: service:patch
+      processors:
+        - type: date-remapper
+          name: Define `lastStatusUpdate` as the official date of the log
+          enabled: true
+          sources:
+            - lastStatusUpdate
+        - type: attribute-remapper
+          name: Map `status` to `patch_status`
+          enabled: true
+          sources:
+            - status
+          sourceType: attribute
+          target: patch_status
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Audit
+      enabled: true
+      filter:
+        query: service:audit
+      processors:
+        - type: date-remapper
+          name: Define `timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - timestamp
+        - type: attribute-remapper
+          name: Map `userName` to `usr.name`
+          enabled: true
+          sources:
+            - userName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `userId` to `usr.id`
+          enabled: true
+          sources:
+            - userId
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ip` to `network.client.ip`
+          enabled: true
+          sources:
+            - ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: geo-ip-parser
+          name: GeoIP Parser for `network.client.ip`
+          enabled: true
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
