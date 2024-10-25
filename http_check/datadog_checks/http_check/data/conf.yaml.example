@@ -393,6 +393,12 @@ instances:
     ##                 options:
     ##                   audience: https://example.com
     ##                   scope: read:example
+    ##   - type: oidc
+    ##     url (required): The full OIDC token provider endpoint
+    ##                     e.g. http://127.0.0.1:8200/v1/identity/oidc/token/
+    ##     role (required): The role against which to generate the token
+    ##     headers: Additional headers to include in the request
+    ##
     ##
     ## The available writers are:
     ##
