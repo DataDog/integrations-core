@@ -435,7 +435,7 @@ files:
 
         These values are only applied when `dbm: true` option is set.
       options:
-        - name: documentdb_instance_endpoint
+        - name: instance_endpoint
           description: |
             Equal to the Endpoint.Address of the instance the agent is connecting to.
             This value is optional if the value of `host` is already configured to the instance endpoint.
@@ -445,7 +445,7 @@ files:
           value:
             type: string
             example: mydocdb.c0xa1xvklawc.us-east-1.docdb.amazonaws.com
-        - name: documentdb_cluster_identifier
+        - name: cluster_identifier
           description: |
             Equal to the Cluster identifier of the instance the agent is connecting to.
             This value is optional if the value of `cluster_name` is already configured to the cluster identifier.
