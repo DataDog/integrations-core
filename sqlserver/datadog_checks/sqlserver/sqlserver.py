@@ -154,7 +154,7 @@ class SQLServer(AgentCheck):
         # go through the agent internal metrics submission processing those tags
         self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
-        self.check_initializations.append(self.set_resolved_hostname)
+        self.check_initializations.append(self.load_static_information)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
@@ -244,7 +244,6 @@ class SQLServer(AgentCheck):
 
     def set_resolved_hostname(self):
         # load static information cache
-        self.load_static_information()
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
@@ -280,6 +279,7 @@ class SQLServer(AgentCheck):
         return self._resolved_hostname
 
     def load_static_information(self):
+        engine_edition_reloaded = False
         expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
@@ -309,6 +309,7 @@ class SQLServer(AgentCheck):
                         result = cursor.fetchone()
                         if result:
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
+                            engine_edition_reloaded = True
                         else:
                             self.log.warning("failed to load version static information due to empty results")
                     if STATIC_INFO_RDS not in self.static_info_cache:
@@ -318,9 +319,11 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_RDS] = True
                         else:
                             self.static_info_cache[STATIC_INFO_RDS] = False
-            # re-initialize resolved_hostname to ensure we take into consideration the static information
+            # re-initialize resolved_hostname to ensure we take into consideration the egine edition
             # after it's loaded
-            self._resolved_hostname = None
+            if engine_edition_reloaded:
+                self._resolved_hostname = None
+            self.set_resolved_hostname()
 
     def debug_tags(self):
         return self.tags + ["agent_hostname:{}".format(self.agent_hostname)]
@@ -342,7 +345,6 @@ class SQLServer(AgentCheck):
 
     def initialize_connection(self):
         self.connection = Connection(
-            host=self.resolved_hostname,
             init_config=self.init_config,
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
@@ -709,6 +711,7 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
+            self.load_static_information()
             # configure custom queries for the check
             if self._query_manager is None:
                 # use QueryManager to process custom queries
