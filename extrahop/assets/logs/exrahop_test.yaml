@@ -1,0 +1,115 @@
+id: "extrahop"
+tests:
+  - sample: |-
+      {
+              "id": 34359738432,
+              "start_time": 1708636140001,
+              "update_time": 1708650000000,
+              "end_time": 1708646400000,
+              "title": "TCP SYN Scan",
+              "description": "[VMware 81C347](https://test.cloud.extrahop.com#/metrics/devices/f614c22480364499a52ebf71eed7bd49.00505681c3470000/overview?from=1708636140&interval_type=DT&until=1708646400) sent an unusually high number of TCP SYN packets to many IP addresses or ports across your network. An attacker might be looking for devices or services that are listening on open TCP ports. This detection appears when a device sends an unusually large number of TCP SYN packets without completing the connection across a large number of ports or IP addresses.\n\nThis device scanned approximately 6900 port and device combinations.",
+              "risk_score": 37,
+              "type": "tcp_syn_scan",
+              "recommended_factors": [],
+              "recommended": false,
+              "categories": [
+                  "sec.recon",
+                  "sec",
+                  "sec.attack"
+              ],
+              "properties": {},
+              "participants": [
+                  {
+                      "role": "offender",
+                      "scanner_service": null,
+                      "external": false,
+                      "object_id": 34359738588,
+                      "object_type": "device",
+                      "object_value": "172.0.4.100",
+                      "id": 6190704
+                  },
+                  {
+                      "role": "victim",
+                      "scanner_service": null,
+                      "external": false,
+                      "object_id": 34359738485,
+                      "object_type": "device",
+                      "object_value": "172.0.7.190",
+                      "id": 6190653
+                  },
+                  {
+                      "role": "victim",
+                      "scanner_service": null,
+                      "external": false,
+                      "object_id": 34359738398,
+                      "object_type": "device",
+                      "object_value": "172.0.7.188",
+                      "id": 6190585
+                  },
+                  {
+                      "role": "victim",
+                      "scanner_service": null,
+                      "external": false,
+                      "object_id": 34359738408,
+                      "object_type": "device",
+                      "object_value": "172.0.4.222",
+                      "id": 6190639
+                  }
+              ],
+              "ticket_id": null,
+              "assignee": null,
+              "status": null,
+              "resolution": null,
+              "mitre_tactics": [
+                  {
+                      "id": "TA0007",
+                      "name": "Discovery",
+                      "url": "https://attack.mitre.org/tactics/TA0007"
+                  }
+              ],
+              "mitre_techniques": [
+                  {
+                      "id": "T1046",
+                      "name": "Network Service Scanning",
+                      "url": "https://attack.mitre.org/techniques/T1046",
+                      "legacy_ids": [
+                          "T1046"
+                      ]
+                  }
+              ],
+              "appliance_id": 8,
+              "is_user_created": false,
+              "mod_time": 1709049465950,
+              "create_time": 1709048931113,
+              "url": "https://test.cloud.extrahop.com/extrahop/#/detections/detail/34359738432/?from=1708635240&until=1708647300&interval_type=DT"
+          }
+    result: null
+  - sample: |-
+      {
+              "id": 901,
+              "notes": "Notes for investigation 902",
+              "status": "open",
+              "creation_time": 1728987164108,
+              "update_time": 1728987164111,
+              "last_interaction_time": 1728987164108,
+              "name": "Investigation 902",
+              "assessment": "malicious_true_positive",
+              "created_by": "rest_api_id_3ni9e...",
+              "assignee": "Assignee 902",
+              "last_interaction_by": "rest_api_id_3ni9e...",
+              "description": null,
+              "investigation_types": null,
+              "is_user_created": true,
+              "start_time": null,
+              "end_time": null,
+              "detections": [
+                  34359738430
+              ],
+              "url": "https://test.cloud.extrahop.com/#/detections/investigations/901"
+          }
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
