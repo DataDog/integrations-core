@@ -1,0 +1,1 @@
+Fix jmx based integrations test failing due to a missing jvm metric
