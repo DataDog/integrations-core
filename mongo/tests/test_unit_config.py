@@ -171,3 +171,29 @@ def test_database_autodiscovery_dbnames_deprecation(instance_user):
     assert config.database_autodiscovery_config is not None
     assert config.database_autodiscovery_config['enabled'] is True
     assert config.database_autodiscovery_config['include'] == ['test$', 'integration$']
+
+
+@pytest.mark.parametrize(
+    'aws_cloud_metadata',
+    [
+        pytest.param(
+            {'instance_endpoint': 'mycluster.cluster-123456789012.us-east-1.docdb.amazonaws.com', 'cluster_identifier': 'mydocdbcluster'},
+            id='aws_cloud_metadata',
+        ),
+        pytest.param(
+            {'instance_endpoint': 'mycluster.cluster-123456789012.us-east-1.docdb.amazonaws.com'},
+            id='aws_cloud_metadata_no_cluster_identifier',
+        ),
+    ],
+)
+def test_amazon_docdb_cloud_metadata(instance_integration_cluster, aws_cloud_metadata):
+    instance_integration_cluster['aws'] = aws_cloud_metadata
+    config = MongoConfig(instance_integration_cluster, mock.Mock())
+    assert config.cloud_metadata is not None
+    aws = config.cloud_metadata['aws']
+    assert aws['instance_endpoint'] == aws_cloud_metadata['instance_endpoint']
+    assert aws['cluster_identifier'] is not None
+    if 'cluster_identifier' in aws_cloud_metadata:
+        assert aws['cluster_identifier'] == aws_cloud_metadata['cluster_identifier']
+    else:
+        assert aws['cluster_identifier'] == instance_integration_cluster['cluster_name']
