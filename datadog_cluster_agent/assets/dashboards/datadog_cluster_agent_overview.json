@@ -425,70 +425,70 @@
             }
         },
         {
-            "id": 4039048606672590,
+            "id": 225385967600580,
             "definition": {
-                "type": "note",
-                "content": "Cluster Checks",
+                "title": "Cluster Checks",
                 "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "vertical_align": "center",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 1
-            }
-        },
-        {
-            "id": 5247319193061510,
-            "definition": {
-                "title": "Agents reporting",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "default_zero(query1)"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "last",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:datadog.cluster_agent.cluster_checks.nodes_reporting{$cluster,$namespace,$leader}"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "autoscale": true,
-                "precision": 2
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 4296147848532994,
-            "definition": {
-                "title": "Cluster Check Runners",
-                "background_color": "white",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
+                    {
+                        "id": 5247319193061510,
+                        "definition": {
+                            "title": "Agents reporting",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.cluster_agent.cluster_checks.nodes_reporting{$cluster,$namespace,$leader}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1779149978416456,
+                        "definition": {
+                            "type": "note",
+                            "content": "Cluster Check Runners",
+                            "background_color": "gray",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 1
+                        }
+                    },
                     {
                         "id": 7447656200743962,
                         "definition": {
@@ -519,12 +519,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.cpu.usage.total{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.usage.total{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.cpu.limits{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.limits{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -546,8 +546,8 @@
                             "markers": []
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 0,
+                            "x": 4,
+                            "y": 1,
                             "width": 4,
                             "height": 2
                         }
@@ -556,6 +556,167 @@
                         "id": 2070905222445640,
                         "definition": {
                             "title": "Network in/out",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "on_right_yaxis": false,
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes.network.tx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                },
+                                {
+                                    "on_right_yaxis": false,
+                                    "formulas": [
+                                        {
+                                            "formula": "-query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes.network.rx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 1,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5912889026039722,
+                        "definition": {
+                            "title": "Dispatched configs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.cluster_agent.cluster_checks.configs_dispatched{$cluster,$namespace,$leader}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7239462763754610,
+                        "definition": {
+                            "title": "Dangling configs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 1
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.cluster_agent.cluster_checks.configs_dangling{$cluster,$namespace,$leader}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 435427916739656,
+                        "definition": {
+                            "title": "Dispatched configs by node",
+                            "title_size": "16",
+                            "title_align": "left",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -578,7 +739,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.tx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
+                                            "query": "avg:datadog.cluster_agent.cluster_checks.configs_dispatched{$cluster,$namespace,$leader} by {node}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -587,33 +748,12 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "area"
-                                },
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "-query1"
-                                        }
-                                    ],
-                                    "on_right_yaxis": false,
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:kubernetes.network.rx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
+                                    "display_type": "bars"
                                 }
                             ],
                             "yaxis": {
                                 "include_zero": true,
+                                "label": "",
                                 "scale": "linear",
                                 "min": "auto",
                                 "max": "auto"
@@ -621,8 +761,8 @@
                             "markers": []
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 0,
+                            "x": 0,
+                            "y": 3,
                             "width": 4,
                             "height": 2
                         }
@@ -657,12 +797,297 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.memory.usage{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.usage{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
                                             "query": "avg:kubernetes.memory.limits{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5207589473122188,
+                        "definition": {
+                            "title": "Container restarts",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:kubernetes.containers.restarts{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6162266504604468,
+                        "definition": {
+                            "title": "Dangling configs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query0"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query0",
+                                            "query": "avg:datadog.cluster_agent.cluster_checks.configs_dangling{$cluster,$namespace,$leader}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 4448048331853032,
+            "definition": {
+                "title": "Autoscaling",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 648237577478650,
+                        "definition": {
+                            "title": "Valid external metrics",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1) + default_zero(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.cluster_agent.external_metrics{valid:true,$cluster,$namespace,$leader}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{valid:true,$cluster,$namespace,$leader}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7845597748336138,
+                        "definition": {
+                            "title": "Invalid external metrics",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1) + default_zero(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.cluster_agent.external_metrics{valid:false,$cluster,$namespace,$leader}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{valid:false,$cluster,$namespace,$leader}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8846979597038894,
+                        "definition": {
+                            "title": "External metrics by namespace",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.cluster_agent.external_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -691,9 +1116,95 @@
                         }
                     },
                     {
-                        "id": 5207589473122188,
+                        "id": 1453748622802082,
                         "definition": {
-                            "title": "Container restarts",
+                            "title": "API queries made per period",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Queries",
+                                            "formula": "query1 - query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.cluster_agent.datadog.rate_limit_queries.limit{endpoint:/api/v1/query,$cluster,$namespace,$leader}.fill(null)"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:datadog.cluster_agent.datadog.rate_limit_queries.remaining{endpoint:/api/v1/query,$cluster,$namespace,$leader}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                },
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Rate Limit",
+                                            "formula": "query0"
+                                        }
+                                    ],
+                                    "on_right_yaxis": false,
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query0",
+                                            "query": "avg:datadog.cluster_agent.datadog.rate_limit_queries.limit{endpoint:/api/v1/query,$cluster,$namespace,$leader}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "dashed",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 341393539126720,
+                        "definition": {
+                            "title": "API queries response status",
+                            "title_size": "16",
+                            "title_align": "left",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -711,34 +1222,26 @@
                                             "formula": "query1"
                                         }
                                     ],
-                                    "on_right_yaxis": false,
                                     "queries": [
                                         {
-                                            "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.containers.restarts{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
+                                            "data_source": "metrics",
+                                            "query": "sum:datadog.cluster_agent.datadog.requests{$cluster, $namespace, $leader } by {status}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "semantic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "bars"
                                 }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
+                            ]
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 2,
+                            "x": 0,
+                            "y": 6,
                             "width": 4,
                             "height": 2
                         }
@@ -746,206 +1249,10 @@
                 ]
             },
             "layout": {
-                "x": 4,
-                "y": 0,
-                "width": 8,
-                "height": 5
-            }
-        },
-        {
-            "id": 5912889026039722,
-            "definition": {
-                "title": "Dispatched configs",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "green_on_white",
-                                "value": 0
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "last",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:datadog.cluster_agent.cluster_checks.configs_dispatched{$cluster,$namespace,$leader}"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "autoscale": true,
-                "precision": 2
-            },
-            "layout": {
-                "x": 0,
-                "y": 2,
-                "width": 2,
-                "height": 1
-            }
-        },
-        {
-            "id": 7239462763754610,
-            "definition": {
-                "title": "Dangling configs",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
-                    {
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "red_on_white",
-                                "value": 1
-                            }
-                        ],
-                        "formulas": [
-                            {
-                                "formula": "default_zero(query1)"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "aggregator": "last",
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "sum:datadog.cluster_agent.cluster_checks.configs_dangling{$cluster,$namespace,$leader}"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "autoscale": true,
-                "precision": 2
-            },
-            "layout": {
-                "x": 2,
-                "y": 2,
-                "width": 2,
-                "height": 1
-            }
-        },
-        {
-            "id": 435427916739656,
-            "definition": {
-                "title": "Dispatched configs by node",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "on_right_yaxis": false,
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:datadog.cluster_agent.cluster_checks.configs_dispatched{$cluster,$namespace,$leader} by {node}.fill(null)"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        },
-                        "display_type": "bars"
-                    }
-                ],
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "markers": []
-            },
-            "layout": {
-                "x": 0,
-                "y": 3,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 6162266504604468,
-            "definition": {
-                "title": "Dangling configs",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query0"
-                            }
-                        ],
-                        "on_right_yaxis": false,
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query0",
-                                "query": "avg:datadog.cluster_agent.cluster_checks.configs_dangling{$cluster,$namespace,$leader}.fill(null)"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "warm",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        },
-                        "display_type": "bars"
-                    }
-                ],
-                "yaxis": {
-                    "include_zero": true,
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "markers": []
-            },
-            "layout": {
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 2,
+                "height": 9,
                 "is_column_break": true
             }
         },
@@ -1277,7 +1584,7 @@
                     {
                         "id": 3587666939487434,
                         "definition": {
-                            "title": "Failed mutation attempts by type per minute",
+                            "title": "Failed mutation attempts per minute by type",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -1393,7 +1700,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1489,7 +1795,7 @@
                     {
                         "id": 8518800568155760,
                         "definition": {
-                            "title": "Failed validation attempts by type per minute",
+                            "title": "Failed validation attempts per minute by type",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -1499,7 +1805,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1546,314 +1851,6 @@
                 "y": 0,
                 "width": 8,
                 "height": 13
-            }
-        },
-        {
-            "id": 4448048331853032,
-            "definition": {
-                "title": "Autoscaling",
-                "background_color": "gray",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 648237577478650,
-                        "definition": {
-                            "title": "Valid external metrics",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "palette": "green_on_white",
-                                            "value": 0
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1) + default_zero(query2)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:datadog.cluster_agent.external_metrics{valid:true,$cluster,$namespace,$leader}"
-                                        },
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{valid:true,$cluster,$namespace,$leader}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 7845597748336138,
-                        "definition": {
-                            "title": "Invalid external metrics",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "palette": "red_on_white",
-                                            "value": 0
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1) + default_zero(query2)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:datadog.cluster_agent.external_metrics{valid:false,$cluster,$namespace,$leader}"
-                                        },
-                                        {
-                                            "aggregator": "last",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{valid:false,$cluster,$namespace,$leader}"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 0,
-                            "width": 2,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8846979597038894,
-                        "definition": {
-                            "title": "External metrics by namespace",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:datadog.cluster_agent.external_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:datadog.cluster_agent.external_metrics.datadog_metrics{$namespace,$cluster,$leader} by {valid,kube_namespace}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "label": "",
-                                "scale": "linear",
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 1453748622802082,
-                        "definition": {
-                            "title": "API queries made per period",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Queries",
-                                            "formula": "query1 - query4"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:datadog.cluster_agent.datadog.rate_limit_queries.limit{endpoint:/api/v1/query,$cluster,$namespace,$leader}.fill(null)"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query4",
-                                            "query": "avg:datadog.cluster_agent.datadog.rate_limit_queries.remaining{endpoint:/api/v1/query,$cluster,$namespace,$leader}.fill(null)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                },
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Rate Limit",
-                                            "formula": "query0"
-                                        }
-                                    ],
-                                    "on_right_yaxis": false,
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query0",
-                                            "query": "avg:datadog.cluster_agent.datadog.rate_limit_queries.limit{endpoint:/api/v1/query,$cluster,$namespace,$leader}.fill(null)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "dashed",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "label": "",
-                                "scale": "linear",
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 341393539126720,
-                        "definition": {
-                            "title": "API queries response status",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:datadog.cluster_agent.datadog.requests{$cluster, $namespace, $leader } by {status}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "semantic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 4,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 2,
-                "width": 4,
-                "height": 9
             }
         }
     ],
