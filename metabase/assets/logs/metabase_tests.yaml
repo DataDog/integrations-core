@@ -114,11 +114,9 @@ tests:
       "entity_qualified_id" : "dashboard_1",
       "user_email" : "abc.xyz@something.com",
       "database_name" : "Sample Database",
-      "entity_name" : null,
       "table_description" : "Information on customer accounts registered with Piespace. Each account represents a new organization signing up for on-demand pies.",
       "entity_id" : 1,
       "table_name" : "ACCOUNTS",
-      "entity_description" : null,
       "entity_type" : "table",
       "user_type" : "personal",
       "user_id" : 1,
@@ -129,7 +127,44 @@ tests:
       "timestamp" : "2024-09-05T11:59:10.181879Z"
     }
   service: "view-logs"
-  result: null
+  result:
+    custom:
+      database_description: "Some example data for you to play around with."
+      database_name: "Sample Database"
+      entity_description: "Information on customer accounts registered with Piespace. Each account represents a new organization signing up for on-demand pies."
+      entity_display_name: "Accounts"
+      entity_id: 1
+      entity_name: "ACCOUNTS"
+      entity_qualified_id: "dashboard_1"
+      entity_type: "table"
+      id: "12"
+      timestamp: "2024-09-05T11:59:10.181879Z"
+      user_type: "personal"
+      usr:
+        email: "abc.xyz@something.com"
+        id: 1
+        name: "Abc Xyz"
+    message: |-
+      {
+        "entity_qualified_id" : "dashboard_1",
+        "user_email" : "abc.xyz@something.com",
+        "database_name" : "Sample Database",
+        "table_description" : "Information on customer accounts registered with Piespace. Each account represents a new organization signing up for on-demand pies.",
+        "entity_id" : 1,
+        "table_name" : "ACCOUNTS",
+        "entity_type" : "table",
+        "user_type" : "personal",
+        "user_id" : 1,
+        "database_description" : "Some example data for you to play around with.",
+        "user_full_name" : "Abc Xyz",
+        "table_display_name" : "Accounts",
+        "id" : "12",
+        "timestamp" : "2024-09-05T11:59:10.181879Z"
+      }
+    service: "view-logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1725537550181
  -
   sample: |-
     {
