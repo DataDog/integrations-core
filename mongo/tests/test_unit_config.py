@@ -177,7 +177,10 @@ def test_database_autodiscovery_dbnames_deprecation(instance_user):
     'aws_cloud_metadata',
     [
         pytest.param(
-            {'instance_endpoint': 'mycluster.cluster-123456789012.us-east-1.docdb.amazonaws.com', 'cluster_identifier': 'mydocdbcluster'},
+            {
+                'instance_endpoint': 'mycluster.cluster-123456789012.us-east-1.docdb.amazonaws.com',
+                'cluster_identifier': 'mydocdbcluster',
+            },
             id='aws_cloud_metadata',
         ),
         pytest.param(
