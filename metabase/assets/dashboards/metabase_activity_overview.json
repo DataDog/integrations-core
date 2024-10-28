@@ -227,6 +227,7 @@
                             "title": "Event List",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -237,14 +238,6 @@
                                         "storage": "hot"
                                     },
                                     "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
                                         {
                                             "field": "timestamp",
                                             "width": "auto"
@@ -618,14 +611,6 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "timestamp",
                                             "width": "auto"
                                         },
@@ -976,14 +961,6 @@
                                         "storage": "hot"
                                     },
                                     "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
                                         {
                                             "field": "timestamp",
                                             "width": "auto"
@@ -1354,14 +1331,6 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "timestamp",
                                             "width": "auto"
                                         },
@@ -1731,14 +1700,6 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "timestamp",
                                             "width": "auto"
                                         },
@@ -2049,14 +2010,6 @@
                                         "storage": "hot"
                                     },
                                     "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
                                         {
                                             "field": "timestamp",
                                             "width": "auto"
@@ -2426,14 +2379,6 @@
                                         "storage": "hot"
                                     },
                                     "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
                                         {
                                             "field": "timestamp",
                                             "width": "auto"
@@ -2813,14 +2758,6 @@
                                         "storage": "hot"
                                     },
                                     "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
                                         {
                                             "field": "timestamp",
                                             "width": "auto"
@@ -3317,14 +3254,6 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "timestamp",
                                             "width": "auto"
                                         },
@@ -3810,14 +3739,6 @@
                                     },
                                     "columns": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "timestamp",
                                             "width": "auto"
                                         },
@@ -4013,14 +3934,6 @@
                                         "storage": "hot"
                                     },
                                     "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "id",
-                                            "width": "auto"
-                                        },
                                         {
                                             "field": "timestamp",
                                             "width": "auto"
