@@ -11,7 +11,63 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 **Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
 
-### Installation
+### Installation:  Prepare your environment and enable LLM
+You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
+
+#### If you do not have the Datadog Agent:
+1. Install the `ddtrace` package:
+
+```shell
+  pip install ddtrace
+```
+
+2. Start your application with the following command, enabling agentless mode:
+
+```shell
+  DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <your_app>.py
+```
+
+#### If you already have the Datadog Agent installed:
+1. Make sure the Agent is running and that APM and StatsD are enabled. For example, use the following command with Docker:
+
+```shell
+docker run -d \
+  --cgroupns host \
+  --pid host \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /proc/:/host/proc/:ro \
+  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+  -e DD_API_KEY=<DATADOG_API_KEY> \
+  -p 127.0.0.1:8126:8126/tcp \
+  -p 127.0.0.1:8125:8125/udp \
+  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+  -e DD_APM_ENABLED=true \
+  gcr.io/datadoghq/agent:latest
+```
+
+2. Install the `ddtrace` package if it isn’t installed yet:
+
+```shell
+  pip install ddtrace
+```
+
+3. Start your application using the `ddtrace-run` command to automatically enable tracing:
+
+```shell
+   DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <your_app>.py
+```
+
+**Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
+
+#### If you are running LLM Observability in a serverless environment (AWS Lambda):
+1. Install the **Datadog-Python** and **Datadog-Extension** Lambda layers as part of your AWS Lambda setup.
+2. Enable LLM Observability by setting the following environment variables:
+
+```shell
+   DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME>
+```
+
+**Note**: In serverless environments, Datadog automatically flushes spans at the end of the Lambda function.
 
 #### Web: Get Account-level Usage and Cost Metrics
 
@@ -29,47 +85,36 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
 <!-- effect on the tile. -->
 
-#### APM: Get Usage Metrics for Python and Node.js Applications
+#### Automatic OpenAI tracing
+LLM Observability provides automatic tracing for OpenAI's completion and chat completion methods without requiring manual instrumentation.
 
-1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
+The SDK will automatically trace the following OpenAI methods:
+- `OpenAI().completions.create()`, `OpenAI().chat.completions.create()`
+- For async calls: `AsyncOpenAI().completions.create()`, `AsyncOpenAI().chat.completions.create()`
 
-```shell
-docker run -d
-  --cgroupns host \
-  --pid host \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /proc/:/host/proc/:ro \
-  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-  -e DD_API_KEY=<DATADOG_API_KEY> \
-  -p 127.0.0.1:8126:8126/tcp \
-  -p 127.0.0.1:8125:8125/udp \
-  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-  -e DD_APM_ENABLED=true \
-  gcr.io/datadoghq/agent:latest
-```
+No additional setup is required to capture latency, input/output messages, and token usage for these traced calls.
 
-2. Install the Datadog APM Python library.
+#### Validation
+Validate that LLM Observability is properly capturing spans by checking your application logs for successful span creation. You can also run the following command to check the status of the `ddtrace` integration:
 
 ```shell
-pip install ddtrace
+ddtrace-run --info
 ```
 
-3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below:
+Look for the following message to confirm the setup:
 
 ```shell
-DD_SERVICE="my-service" DD_ENV="staging" ddtrace-run python <your-app>.py
+Agent error: None
 ```
 
-**Notes**:
+#### Debugging
+If you encounter issues during setup, enable debug logging by passing the `--debug` flag:
 
-<!-- partial
-{{% site-region region="us3,us5,eu,gov,ap1" %}}
-- Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
-partial -->
+```shell
+ddtrace-run --debug
+```
 
-- If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
-
-See the [APM Python library documentation][2] for more advanced usage.
+This will display detailed information about any errors or issues with tracing.
 
 ### Configuration
 
