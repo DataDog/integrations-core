@@ -4,14 +4,13 @@
 
 This check monitors [Slurm][1] through the Datadog Agent. 
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+The check executes and collects metrics through the output of the [sinfo][8], [squeue][9], [sacct][10], [sdiag][11], and [sshare][12] command line binaries.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various Slurm binaries, monitoring Slurm in containerized environments is not yet recommended.
+
+**Note**: This check was tested on Slurm version 21.08.0.
 
 ### Installation
 
@@ -20,41 +19,93 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `slurm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your slurm performance data. See the [sample slurm.d/conf.yaml][4] for all available configuration options.
+1. Ensure that the dd-agent user has execute permissions on the relevant command binaries and the necessary permissions to access the directories where these binaries are located.
 
-2. [Restart the Agent][5].
+2. Edit the `slurm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your slurm data. See the [sample slurm.d/conf.yaml][3] for all available configuration options.
+
+```yaml
+init_config:
+
+    ## Feel free to customize this part incase the binaries are not located in the /usr/bin/ directory
+    ## @param slurm_binaries_dir - string - optional - default: /usr/bin/
+    ## The directory at which all the Slurm binaries are located. These are mainly:
+    ## sinfo, sacct, sdiag, sshare and sdiag.
+
+    slurm_binaries_dir: /usr/bin/
+
+instances:
+
+  -
+    ## Configure here if there's data you wish to or not collect.
+    ## @param collect_sinfo_stats - boolean - optional - default: true
+    ## Whether or not to collect statistics from the sinfo command.
+    #
+    collect_sinfo_stats: true
+
+    ## @param collect_sdiag_stats - boolean - optional - default: true
+    ## Whether or not to collect statistics from the sdiag command.
+    #
+    collect_sdiag_stats: true
+
+    ## @param collect_squeue_stats - boolean - optional - default: true
+    ## Whether or not to collect statistics from the squeue command.
+    #
+    collect_squeue_stats: true
+
+    ## @param collect_sacct_stats - boolean - optional - default: true
+    ## Whether or not to collect statistics from the sacct command.
+    #
+    collect_sacct_stats: true
+
+    ## @param collect_sshare_stats - boolean - optional - default: true
+    ## Whether or not to collect statistics from the sshare command.
+    #
+    collect_sshare_stats: true
+
+    ## @param collect_gpu_stats - boolean - optional - default: false
+    ## Whether or not to collect GPU statistics when Slurm is configured to use GPUs using sinfo.
+    #
+    collect_gpu_stats: true
+
+    ## @param sinfo_collection_level - integer - optional - default: 1
+    ## The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
+    ## 3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3 
+    ## collects data from from individual nodes as well but will be more verbose and include data such as CPU and 
+    ## memory usage as reported from the OS as well as additional tags.
+    #
+    sinfo_collection_level: 1
+```
+
+3. [Restart the Agent][4].
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `slurm` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `slurm` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
 The Slurm integration does not include any events.
 
-### Service Checks
-
-The Slurm integration does not include any service checks.
-
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
 ## Troubleshooting
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][7].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://slurm.schedmd.com/overview.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/slurm/datadog_checks/slurm/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/slurm/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/slurm/assets/service_checks.json
-[9]: https://docs.datadoghq.com/help/
+[3]: https://github.com/DataDog/integrations-core/blob/master/slurm/datadog_checks/slurm/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/slurm/metadata.csv
+[7]: https://docs.datadoghq.com/help/
+[8]: https://slurm.schedmd.com/sinfo.html
+[9]: https://slurm.schedmd.com/squeue.html
+[10]: https://slurm.schedmd.com/sacct.html
+[11]: https://slurm.schedmd.com/sdiag.html
+[12]: https://slurm.schedmd.com/sshare.html
