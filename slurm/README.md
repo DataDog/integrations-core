@@ -1,4 +1,4 @@
-# Agent Check: Slurm
+# Agent Check: SLURM
 
 ## Overview
 
@@ -12,11 +12,11 @@ The check gathers metrics from slurmctld by executing and parsing the output of 
 
 Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various SLURM binaries, monitoring SLURM in containerized environments is not yet recommended.
 
-**Note**: This check was tested on Slurm version 21.08.0.
+**Note**: This check was tested on SLURM version 21.08.0.
 
 ### Installation
 
-The Slurm check is included in the [Datadog Agent][2] package.
+The SLURM check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -92,7 +92,7 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
-The Slurm integration does not include any events.
+The SLURM integration does not include any events.
 
 ## Troubleshooting
 
