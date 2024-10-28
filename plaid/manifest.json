@@ -2,31 +2,15 @@
     "manifest_version": "2.0.0",
     "app_uuid": "d5c95215-bc13-4925-941b-ede8459d9005",
     "app_id": "plaid",
-    "display_on_public_website": true,
+    "display_on_public_website": false,
     "tile": {
       "overview": "README.md#Overview",
       "configuration": "README.md#Setup",
       "support": "README.md#Support",
       "changelog": "CHANGELOG.md",
-      "description": "<FILL IN - A brief description of what this offering provides>",
+      "description": "Gain insights into Plaid logs.",
       "title": "Plaid",
-      "media": [
-        {
-          "media_type": "image",
-          "caption": "FILL IN Image 1 caption",
-          "image_url": "<FILL IN>"
-        },
-        {
-          "media_type": "image",
-          "caption": "FILL IN Image 2 caption",
-          "image_url": "<FILL IN>"
-        },
-        {
-          "media_type": "image",
-          "caption": "FILL IN Image 3 caption",
-          "image_url": "<FILL IN>"
-        }
-      ],
+      "media": [],
       "classifier_tags": [
         "Category::Log Collection",
         "Offering::Integration",
@@ -34,11 +18,11 @@
       ]
     },
     "assets": {
-      "dashboards": {
-          "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-      },
-      "monitors": {},
-      "saved_views": {}
+      "integration": {
+          "auto_install": false,
+          "events": {
+              "creates_events": false
+          }
     },
     "author": {
       "support_email": "help@datadoghq.com",
@@ -47,6 +31,6 @@
       "sales_email": "info@datadoghq.com"
     }
   }
-  
+}
   
   
