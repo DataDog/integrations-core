@@ -153,12 +153,7 @@ def _row_key(row):
     :param row: a normalized row from STATEMENT_METRICS_QUERY
     :return: a tuple uniquely identifying this row
     """
-    return (
-        row.get('database_name'),
-        row['query_signature'],
-        row['query_hash'],
-        row['query_plan_hash'],
-    )
+    return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
 
 
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
