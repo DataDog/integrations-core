@@ -127,3 +127,39 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: pipeline
+      name: Processing for Table View Logs
+      enabled: true
+      filter:
+        query: "service:view-logs @entity_type:table"
+      processors:
+        - type: attribute-remapper
+          name: Map `table_name` to `entity_name`
+          enabled: true
+          sources:
+            - table_name
+          sourceType: attribute
+          target: entity_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `table_display_name` to `entity_display_name`
+          enabled: true
+          sources:
+            - table_display_name
+          sourceType: attribute
+          target: entity_display_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `table_description` to `entity_description`
+          enabled: true
+          sources:
+            - table_description
+          sourceType: attribute
+          target: entity_description
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
