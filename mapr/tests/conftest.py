@@ -15,12 +15,12 @@ E2E_METADATA = {
         # customers are expected to install the package themselves.
         # We do that here for the e2e testing environment.
         'apt-get update',
-        'apt-get install -y gcc gnupg lsb-release build-essential',
+        'apt-get install -y gcc gnupg lsb-release',
         # mapr-streams-python requires librdkafka headers as they're not shipped with the Agent
         # This requires adding confluent's APT repositories. These steps are based on the docs in
         # - https://docs.confluent.io/platform/current/installation/installing_cp/deb-ubuntu.html#get-the-software
         # - https://github.com/confluentinc/librdkafka#installing-prebuilt-packages
-        "sh -c 'curl https://packages.confluent.io/deb/7.7/archive.key "
+        "sh -c 'curl https://packages.confluent.io/deb/7.0/archive.key "
         "| gpg --dearmor -o /usr/share/keyrings/confluent.gpg'",
         "sh -c 'echo "
         "\"deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/confluent.gpg] "
@@ -29,7 +29,7 @@ E2E_METADATA = {
         'apt-get update',
         'apt-get install -y librdkafka-dev',
         # Finally, we can install the package
-        '/opt/datadog-agent/embedded/bin/pip install mapr-streams-python',
+        '/opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python',
     ]
 }
 
