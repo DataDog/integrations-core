@@ -29,7 +29,7 @@ E2E_METADATA = {
         'apt-get update',
         'apt-get install -y librdkafka-dev',
         # Finally, we can install the package
-        '/opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python',
+        '/opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python',  # noqa: E501
     ]
 }
 
