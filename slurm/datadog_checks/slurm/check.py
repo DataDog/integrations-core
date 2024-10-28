@@ -18,6 +18,7 @@ from .constants import (
     SINFO_ADDITIONAL_NODE_PARAMS,
     SINFO_NODE_PARAMS,
     SINFO_PARTITION_PARAMS,
+    SINFO_STATE_CODE,
     SQUEUE_MAP,
     SQUEUE_PARAMS,
     SSHARE_MAP,
@@ -378,6 +379,20 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             if not value:
                 self.log.debug("Empty value for tag '%s'. Assigning 'null'.", tag_info["name"])
                 value = "null"
+
+            if tag_info["name"] == "slurm_partition_name":
+                # Check for asterisk (*) or default partition in the value
+                if '*' in value:
+                    value = value.replace('*', '')  # Remove the asterisk
+                    tags.append('slurm_default_partition:true')
+
+            # https://slurm.schedmd.com/sinfo.html#SECTION_NODE-STATE-CODES
+            if tag_info["name"] in ["slurm_partition_state", "slurm_node_state"]:
+                for key, mapped_value in SINFO_STATE_CODE.items():
+                    if key in value:
+                        value = value.replace(key, '').strip()
+                        tags.append(f'sinfo_state_code:{mapped_value}')
+                        break
 
             tags.append(f'{tag_info["name"]}:{value}')
 

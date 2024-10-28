@@ -15,15 +15,16 @@ PARTITION_MAP = {
         {"name": "slurm_partition_name", "index": 0},
         {"name": "slurm_partition_node_list", "index": 1},
         {"name": "slurm_partition_cpus_assigned", "index": 2},
-        {"name": "slurm_partition_state", "index": 3},
+        {"name": "slurm_partition_availability", "index": 3},
         {"name": "slurm_partition_memory_assigned", "index": 4},
         {"name": "slurm_partition_available", "index": 5},
+        {"name": "slurm_partition_state", "index": 7},
     ],
 }
 
 NODE_MAP = {
     "tags": [
-        {"name": "slurm_partition", "index": 0},
+        {"name": "slurm_partition_name", "index": 0},
         {"name": "slurm_node_availability", "index": 1},
         {"name": "slurm_node_name", "index": 2},
         {"name": "slurm_node_memory", "index": 4},
@@ -40,6 +41,18 @@ NODE_MAP = {
         {"name": "node.free_mem", "index": 7},
         {"name": "node.tmp_disk", "index": 8},
     ],
+}
+
+SINFO_STATE_CODE = {
+    "*": "non_responsive",
+    "~": "powered_off",
+    "#": "powering_up_configured",
+    "!": "pending_power_down",
+    "%": "powered_down",
+    "$": "maintenance",
+    "@": "pending_reboot",
+    "^": "reboot_issued",
+    "-": "planned_higher_priority_job",
 }
 
 SQUEUE_MAP = {
