@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import subprocess
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from datadog_checks.base import AgentCheck, is_affirmative  # noqa: F401
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.time import get_timestamp
 
 from .config_models import ConfigMixin
 from .constants import (
@@ -131,7 +132,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         elif self.last_run_time is None:
             # Set timestamp here so we can use it for the next run and collect sacct stats only
             # between the 2 runs.
-            self.last_run_time = datetime.now()
+            self.last_run_time = get_timestamp()
 
         for name, cmd, process_func in commands:
             self.log.debug("Running %s command: %s", name, cmd)
@@ -302,12 +303,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def _update_sacct_params(self):
         if self.last_run_time is not None:
-            now = datetime.now()
+            now = get_timestamp()
             delta = now - self.last_run_time
-            start_time_param = f"--starttime=now-{int(delta.total_seconds())}seconds"
+            start_time_param = f"--starttime=now-{int(delta)}seconds"
+
             SACCT_PARAMS.append(start_time_param)
 
-        self.last_run_time = datetime.now()
+        self.last_run_time = get_timestamp()
 
         # Update the sacct command with the dynamic SACCT_PARAMS
         self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
