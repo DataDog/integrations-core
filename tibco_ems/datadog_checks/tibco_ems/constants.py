@@ -122,10 +122,10 @@ SHOW_METRIC_DATA = {
     },
     'show connections full': {
         'regex': re.compile(
-            r'^\s*(?P<client_type>[JC])\s+'
+            r'^\s*(?P<client_type>[-#JC])\s+'
             r'(?P<tibco_version>[\w.]+(?:\s+V\d+)?)\s+'
             r'(?P<id>\d+)\s+'
-            r'(?P<fsxt>[-A]+)\s+'
+            r'(?P<fsxt>[-A-Za-z]+)\s+'
             r'(?P<s>[+|-])\s+'
             r'(?P<tibco_host>\S+)\s+'
             r'(?P<ip_address>\S+)\s+'
