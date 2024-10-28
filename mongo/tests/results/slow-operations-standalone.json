@@ -10,6 +10,7 @@
             "clustername:my_cluster",
             "hosting_type:self-hosted"
         ],
+        "cloud_metadata": {},
         "timestamp": 1715911398111.2722,
         "mongodb_slow_queries": [
             {

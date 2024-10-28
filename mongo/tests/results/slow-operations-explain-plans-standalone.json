@@ -5,6 +5,7 @@
         "ddagentversion": "0.0.0",
         "ddsource": "mongo",
         "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted",
+        "cloud_metadata": {},
         "timestamp": 1720550476223.0,
         "network": {
             "client": {
@@ -135,6 +136,7 @@
         "ddagentversion": "0.0.0",
         "ddsource": "mongo",
         "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted",
+        "cloud_metadata": {},
         "timestamp": 32479987545338.0,
         "network": {
             "client": {
@@ -280,6 +282,7 @@
         "ddagentversion": "0.0.0",
         "ddsource": "mongo",
         "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted",
+        "cloud_metadata": {},
         "timestamp": 32479987545521.0,
         "network": {
             "client": {
