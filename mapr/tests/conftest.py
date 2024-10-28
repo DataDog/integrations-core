@@ -15,12 +15,12 @@ E2E_METADATA = {
         # customers are expected to install the package themselves.
         # We do that here for the e2e testing environment.
         'apt-get update',
-        'apt-get install -y gcc gnupg lsb-release',
+        'apt-get install -y gcc gnupg lsb-release build-essential',
         # mapr-streams-python requires librdkafka headers as they're not shipped with the Agent
         # This requires adding confluent's APT repositories. These steps are based on the docs in
         # - https://docs.confluent.io/platform/current/installation/installing_cp/deb-ubuntu.html#get-the-software
         # - https://github.com/confluentinc/librdkafka#installing-prebuilt-packages
-        "sh -c 'curl https://packages.confluent.io/deb/7.0/archive.key "
+        "sh -c 'curl https://packages.confluent.io/deb/7.7/archive.key "
         "| gpg --dearmor -o /usr/share/keyrings/confluent.gpg'",
         "sh -c 'echo "
         "\"deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/confluent.gpg] "
