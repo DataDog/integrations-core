@@ -6,25 +6,14 @@ import functools
 import importlib
 import inspect
 import logging
+import os
 import re
 import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import (  # noqa: F401
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
-)
+from typing import (TYPE_CHECKING, Any, AnyStr, Callable, Deque,  # noqa: F401
+                    Dict, List, Optional, Sequence, Set, Tuple, Union)
 
 import yaml
 from pydantic import BaseModel, ValidationError
@@ -34,15 +23,13 @@ from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..errors import ConfigurationError
-from ..types import (
-    AgentConfigType,  # noqa: F401
-    Event,  # noqa: F401
-    ExternalTagType,  # noqa: F401
-    InitConfigType,  # noqa: F401
-    InstanceType,  # noqa: F401
-    ProxySettings,  # noqa: F401
-    ServiceCheckStatus,  # noqa: F401
-)
+from ..types import AgentConfigType  # noqa: F401
+from ..types import Event  # noqa: F401
+from ..types import ExternalTagType  # noqa: F401
+from ..types import InitConfigType  # noqa: F401
+from ..types import InstanceType  # noqa: F401
+from ..types import ProxySettings  # noqa: F401
+from ..types import ServiceCheckStatus  # noqa: F401
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
 from ..utils.diagnose import Diagnosis
@@ -86,6 +73,12 @@ if is_affirmative(datadog_agent.get_config('integration_profiling')):
 
 if TYPE_CHECKING:
     import ssl  # noqa: F401
+
+if os.environ.get("DD_FIPS_MODE", None):
+    from cryptography.hazmat.backends import default_backend
+
+    cryptography_backend = default_backend()
+    cryptography_backend._enable_fips()
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
