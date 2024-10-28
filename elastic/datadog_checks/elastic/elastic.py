@@ -6,10 +6,9 @@ import time
 from collections import defaultdict, namedtuple
 from copy import deepcopy
 from itertools import product
+from urllib.parse import urljoin, urlparse
 
 import requests
-from six import iteritems, itervalues
-from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 
@@ -262,13 +261,13 @@ class ESCheck(AgentCheck):
                 index_data['health_reverse'] = dd_health.reverse_status
 
             # Ensure that index_data does not contain None values
-            for key, value in list(iteritems(index_data)):
+            for key, value in index_data.items():
                 if value is None:
                     del index_data[key]
                     self.log.debug("The index %s has no metric data for %s", idx['index'], key)
 
             tags = base_tags + ['index_name:' + idx['index']]
-            for metric, desc in iteritems(index_stats_for_version(version)):
+            for metric, desc in index_stats_for_version(version).items():
                 self._process_metric(index_data, metric, *desc, tags=tags)
         self._get_index_search_stats(admin_forwarder, base_tags)
 
@@ -282,7 +281,7 @@ class ESCheck(AgentCheck):
 
         filtered_templates = [t for t in template_resp if not t['name'].startswith(TEMPLATE_EXCLUSION_LIST)]
 
-        for metric, desc in iteritems(TEMPLATE_METRICS):
+        for metric, desc in TEMPLATE_METRICS.items():
             self._process_metric({'templates': filtered_templates}, metric, *desc, tags=base_tags)
 
     def _get_index_search_stats(self, admin_forwarder, base_tags):
@@ -294,7 +293,7 @@ class ESCheck(AgentCheck):
         # The health we can get from /_cluster/health if we pass level=indices query param. Reference:
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html#cluster-health-api-query-params # noqa: E501
         indices = self._get_data(self._join_url('/_stats/search', admin_forwarder))['indices']
-        for (idx_name, data), (m_name, path) in product(iteritems(indices), INDEX_SEARCH_STATS):
+        for (idx_name, data), (m_name, path) in product(indices.items(), INDEX_SEARCH_STATS):
             tags = base_tags + ['index_name:' + idx_name]
             self._process_metric(data, m_name, 'gauge', path, tags=tags)
 
@@ -362,7 +361,7 @@ class ESCheck(AgentCheck):
             p_tasks[task.get('priority')] += 1
             average_time_in_queue += task.get('time_in_queue_millis', 0)
 
-        total = sum(itervalues(p_tasks))
+        total = sum(p_tasks.values())
         node_data = {
             'pending_task_total': total,
             'pending_tasks_priority_high': p_tasks['high'],
@@ -377,7 +376,7 @@ class ESCheck(AgentCheck):
             self._process_metric(node_data, metric, *desc, tags=base_tags)
 
     def _process_stats_data(self, data, stats_metrics, base_tags):
-        for node_data in itervalues(data.get('nodes', {})):
+        for node_data in data.get('nodes', {}).values():
             metric_hostname = None
             metrics_tags = list(base_tags)
 
@@ -396,18 +395,18 @@ class ESCheck(AgentCheck):
                         metric_hostname = node_data[k]
                         break
 
-            for metric, desc in iteritems(stats_metrics):
+            for metric, desc in stats_metrics.items():
                 self._process_metric(node_data, metric, *desc, tags=metrics_tags, hostname=metric_hostname)
 
     def _process_pshard_stats_data(self, data, pshard_stats_metrics, base_tags):
-        for metric, desc in iteritems(pshard_stats_metrics):
+        for metric, desc in pshard_stats_metrics.items():
             pshard_tags = base_tags
             if desc[1].startswith('_all.'):
                 pshard_tags = pshard_tags + ['index_name:_all']
             self._process_metric(data, metric, *desc, tags=pshard_tags)
         # process index-level metrics
         if self._config.cluster_stats and self._config.detailed_index_stats:
-            for metric, desc in iteritems(pshard_stats_metrics):
+            for metric, desc in pshard_stats_metrics.items():
                 if desc[1].startswith('_all.'):
                     for index in data['indices']:
                         self.log.debug("Processing index %s", index)
@@ -449,7 +448,7 @@ class ESCheck(AgentCheck):
         ):
             self.event(self._create_event(current_status, tags=base_tags))
 
-        for metric, desc in iteritems(health_stats_for_version(version)):
+        for metric, desc in health_stats_for_version(version).items():
             self._process_metric(data, metric, *desc, tags=base_tags)
 
         # Process the service check
@@ -473,12 +472,12 @@ class ESCheck(AgentCheck):
         self.service_check(self.SERVICE_CHECK_CLUSTER_STATUS, dd_health.status, message=msg, tags=service_check_tags)
 
     def _process_policy_data(self, data, version, base_tags):
-        for policy, policy_data in iteritems(data):
+        for policy, policy_data in data.items():
             repo = policy_data.get('policy', {}).get('repository', 'unknown')
             tags = base_tags + ['policy:{}'.format(policy), 'repository:{}'.format(repo)]
 
             slm_stats = slm_stats_for_version(version)
-            for metric, desc in iteritems(slm_stats):
+            for metric, desc in slm_stats.items():
                 self._process_metric(policy_data, metric, *desc, tags=tags)
 
     def _process_cat_allocation_data(self, admin_forwarder, version, base_tags):

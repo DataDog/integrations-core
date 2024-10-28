@@ -205,6 +205,7 @@ class InstanceConfig(BaseModel):
     options: Optional[Options] = None
     password: Optional[str] = None
     port: Optional[float] = None
+    propagate_agent_tags: Optional[bool] = None
     queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None

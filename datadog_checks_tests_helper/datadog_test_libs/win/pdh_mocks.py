@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import winreg
 from collections import defaultdict
 
 import mock
 import pytest
-from six import PY3
-from six.moves import winreg
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,10 +18,7 @@ counters_index = defaultdict(list)
 
 @pytest.fixture
 def pdh_mocks_fixture():
-    if PY3:
-        regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueEx)
-    else:
-        regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueEx)
+    regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueEx)
 
     pdhlookupbyindex = mock.patch('win32pdh.LookupPerfNameByIndex', mock_LookupPerfNameByIndex)
     pdhenumobjectitems = mock.patch('win32pdh.EnumObjectItems', mock_EnumObjectItems)
@@ -46,10 +42,7 @@ def pdh_mocks_fixture():
 
 @pytest.fixture
 def pdh_mocks_fixture_bad_perf_strings():
-    if PY3:
-        regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueExWithRaise)
-    else:
-        regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueExWithRaise)
+    regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueExWithRaise)
 
     pdhlookupbyindex = mock.patch('win32pdh.LookupPerfNameByIndex', mock_LookupPerfNameByIndex)
     pdhenumobjectitems = mock.patch('win32pdh.EnumObjectItems', mock_EnumObjectItems)

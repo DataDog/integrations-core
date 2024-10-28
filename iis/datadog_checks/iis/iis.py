@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from six import PY3, iteritems
-
 from datadog_checks.base import PDHBaseCheck, is_affirmative
 
 from .service_check import app_pool_service_check, site_service_check
@@ -49,7 +47,7 @@ class IIS(PDHBaseCheck):
     APP_POOL = 'app_pool'
 
     def __new__(cls, name, init_config, instances):
-        if PY3 and not is_affirmative(instances[0].get('use_legacy_check_version', False)):
+        if not is_affirmative(instances[0].get('use_legacy_check_version', False)):
             from .check import IISCheckV2
 
             return IISCheckV2(name, init_config, instances)
@@ -84,7 +82,7 @@ class IIS(PDHBaseCheck):
                     self.log.debug(
                         "Unknown IIS counter: %s. Falling back to default submission.", counter.english_class_name
                     )
-                    for instance_name, val in iteritems(counter_values):
+                    for instance_name, val in counter_values.items():
                         tags = list(self._tags.get(self.instance_hash, []))
 
                         if not counter.is_single_instance():
@@ -102,7 +100,7 @@ class IIS(PDHBaseCheck):
         namespace = self.SITE
         remaining_sites = self._remaining_data[namespace]
 
-        for site_name, value in iteritems(counter_values):
+        for site_name, value in counter_values.items():
             is_single_instance = counter.is_single_instance()
             if (
                 not is_single_instance
@@ -139,7 +137,7 @@ class IIS(PDHBaseCheck):
         namespace = self.APP_POOL
         remaining_app_pools = self._remaining_data[namespace]
 
-        for app_pool_name, value in iteritems(counter_values):
+        for app_pool_name, value in counter_values.items():
             is_single_instance = counter.is_single_instance()
             if (
                 not is_single_instance

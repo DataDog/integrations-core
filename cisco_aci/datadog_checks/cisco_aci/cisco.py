@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import iteritems
+import time
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import _is_affirmative
@@ -32,6 +32,7 @@ class CiscoACICheck(AgentCheck):
         self.tagger = CiscoTags(log=self.log)
 
     def check(self, _):
+        start_time = time.time()
         aci_url = self.instance.get('aci_url')
         aci_urls = self.instance.get('aci_urls', [])
         if aci_url:
@@ -139,6 +140,8 @@ class CiscoACICheck(AgentCheck):
 
         self.set_external_tags(self.get_external_host_tags())
 
+        self.submit_telemetry_metrics(start_time, tags=self.check_tags)
+
         api.close()
 
     def submit_metrics(self, metrics, tags, instance=None, obj_type="gauge", hostname=None):
@@ -146,7 +149,7 @@ class CiscoACICheck(AgentCheck):
             instance = {}
 
         user_tags = instance.get('tags', [])
-        for mname, mval in iteritems(metrics):
+        for mname, mval in metrics.items():
             tags_to_send = []
             if mval:
                 if hostname:
@@ -160,9 +163,15 @@ class CiscoACICheck(AgentCheck):
                     log_line = "Trying to submit metric: %s with unknown type: %s"
                     self.log.debug(log_line, mname, obj_type)
 
+    def submit_telemetry_metrics(self, start_time, tags):
+        current_time = time.time()
+        check_duration = current_time - start_time
+        self.monotonic_count('datadog.cisco_aci.check_interval', current_time, tags=tags)
+        self.gauge('datadog.cisco_aci.check_duration', check_duration, tags=tags)
+
     def get_external_host_tags(self):
         external_host_tags = []
-        for hostname, tags in iteritems(self.external_host_tags):
+        for hostname, tags in self.external_host_tags.items():
             host_tags = tags + self.check_tags
             external_host_tags.append((hostname, {SOURCE_TYPE: host_tags}))
         return external_host_tags

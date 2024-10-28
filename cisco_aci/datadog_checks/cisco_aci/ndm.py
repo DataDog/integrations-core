@@ -2,17 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-from six import PY3
-
-if PY3:
-    from datadog_checks.cisco_aci.models import (
-        DeviceMetadata,
-        InterfaceMetadata,
-        NetworkDevicesMetadata,
-        Node,
-        PhysIf,
-    )
+from datadog_checks.cisco_aci.models import (
+    DeviceMetadata,
+    InterfaceMetadata,
+    NetworkDevicesMetadata,
+    Node,
+    PhysIf,
+)
 
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
@@ -52,9 +48,11 @@ def create_interface_metadata(phys_if, address, namespace):
     eth = PhysIf(**phys_if.get('l1PhysIf', {}))
     interface = InterfaceMetadata(
         device_id='{}:{}'.format(namespace, address),
+        raw_id=eth.attributes.id,
         id_tags=['interface:{}'.format(eth.attributes.name)],
         index=eth.attributes.id,
         name=eth.attributes.name,
+        alias=eth.attributes.id,
         description=eth.attributes.desc,
         mac_address=eth.attributes.router_mac,
         admin_status=eth.attributes.admin_st,

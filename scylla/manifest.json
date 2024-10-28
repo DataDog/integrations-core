@@ -51,7 +51,7 @@
       "Scylla Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Scylla] Server is shutting down": "assets/monitors/instance_down.json"
+      "Node State is abnormal": "assets/monitors/instance_down.json"
     }
   }
 }
