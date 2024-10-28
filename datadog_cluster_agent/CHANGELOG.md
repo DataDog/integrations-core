@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.0.1 / 2024-10-28
+
+***Fixed***:
+
+* Fix the place of paranthetis for queries in `Cluster Check Runners` section of Dashboard.
+
 ## 5.0.0 / 2024-10-04
 
 ***Removed***:
