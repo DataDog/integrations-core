@@ -2,13 +2,15 @@
 
 ## Overview
 
-This check monitors [Slurm][1] through the Datadog Agent. 
+This check monitors [SLURM][1] through the Datadog Agent. 
 
-The check executes and collects metrics through the output of the [sinfo][8], [squeue][9], [sacct][10], [sdiag][11], and [sshare][12] command line binaries.
+SLURM (Simple Linux Utility for Resource Management) is an open-source workload manager used to schedule and manage jobs on large-scale compute clusters. It allocates resources, monitors job queues, and ensures efficient execution of parallel and batch jobs in high-performance computing environments.
+
+The check gathers metrics from slurmctld by executing and parsing the output of several command-line binaries, including [sinfo][8], [squeue][9], [sacct][10], [sdiag][11], and [sshare][12]. These commands provide detailed information on resource availability, job queues, accounting, diagnostics, and share usage in a SLURM-managed cluster.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various Slurm binaries, monitoring Slurm in containerized environments is not yet recommended.
+Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various SLURM binaries, monitoring SLURM in containerized environments is not yet recommended.
 
 **Note**: This check was tested on Slurm version 21.08.0.
 
