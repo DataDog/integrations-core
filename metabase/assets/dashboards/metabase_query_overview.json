@@ -285,7 +285,7 @@
           {
             "id": 1769213227294192,
             "definition": {
-              "title": "Top Users/API Keys by Resource Consumption",
+              "title": "Top Users/API Keys by Total Query Running Time",
               "title_size": "16",
               "title_align": "left",
               "time": {},
@@ -802,7 +802,7 @@
           {
             "id": 4961758982707352,
             "definition": {
-              "title": "Top Dashboards by Resource Consumption",
+              "title": "Top Dashboards by Total Running Time",
               "title_size": "16",
               "title_align": "left",
               "time": {},
@@ -972,7 +972,7 @@
           {
             "id": 2287284381540338,
             "definition": {
-              "title": "Top Cards by Resource Consumption",
+              "title": "Top Cards by Total Running Time",
               "title_size": "16",
               "title_align": "left",
               "time": {},

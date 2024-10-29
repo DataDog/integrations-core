@@ -18,8 +18,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 6. Click on **Go to the Metabase Store**.
 7. Log in to your **Metabase Store** using Metabase credentials.
 8. Go to the **Instances** tab.
-9. Click on **DNS alias**.
-10. Copy the text box value.
+9. Click on **DNS alias** section to get the DNS alias value.
 
 #### Find your Metabase API Key
 
@@ -32,13 +31,12 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 7. Click **Create API Key**.
 8. Enter a key name.
 9. Select the **Administrators** Group.
-10. Click **Create**.
-11. Copy the generated API key.
+10. Click **Create** and copy the generated API key.
 
 ### Add your Metabase credentials
 
-- Metabase DNS alias (DNS alias of your Metabase cloud instance)
-- Metabase API key (API key to authenticate the API requests)
+- Metabase DNS alias
+- Metabase API key
 
 ## Data Collected
 
