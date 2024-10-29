@@ -1,5 +1,7 @@
 # CHANGELOG - Prometheus
 
+<!-- towncrier release notes start -->
+
 ## 5.0.0 / 2024-10-04
 
 ***Removed***:

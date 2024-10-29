@@ -296,7 +296,7 @@ files:
             - 'datacenter'
             - 'cluster'
             - 'storage_pod'
-            - 'vcenter_object_manager'
+            - 'vstorage_object_manager'
           type: array
           display_default: ['vm', 'host']
           items:
