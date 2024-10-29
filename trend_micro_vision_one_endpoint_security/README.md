@@ -44,14 +44,14 @@ Use out-of-the-box dashboards to gain detailed insights into system events, netw
 
 1. Log in to the Trend Micro Vision One console.
 2. Go to **Administration** (Sidebar) > **Console Settings** > **Time Zone**.
-3. Check the **Timezone** from **Current console time**.<br>Ensure this timezone is selected in the integration configuration.
+3. Check the **Timezone** from **Current console time**.
 
 #### Add your Trend Micro Vision One Endpoint Security credentials
 
 - API Host
 - Application ID
 - API Key
-- Time Zone
+- Time Zone (This timezone should be the same as the Trend Vision One console.)
 
 ## Data Collected
 
