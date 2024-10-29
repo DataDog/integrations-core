@@ -31,9 +31,9 @@ Use out-of-the-box dashboards to gain detailed insights into system events, netw
 1. Log in to the Trend Micro Vision One console.
 2. Go to **Endpoint Security** (Sidebar) > **Standard Endpoint Protection** > **Administration** > **Settings** > **Automation API Access Settings**.
 3. Click **Add**.<br> The Application Access Settings section appears and displays the following information:
-   1. **API URL**: The **API Host** of the Trend Micro Vision One Endpoint Security console.
-   2. **Application ID**: The **Application ID** of the Trend Micro Vision One Endpoint Security console.
-   3. **API key**: The **API key** of the Trend Micro Vision One Endpoint Security console.
+   1. **API URL**: The API Host of the Trend Micro Vision One Endpoint Security console.
+   2. **Application ID**: The Application ID of the Trend Micro Vision One Endpoint Security console.
+   3. **API key**: The API key of the Trend Micro Vision One Endpoint Security console.
 4. Tick the **Enable application integration using Apex Central Automation APIs** checkbox.
 5. Configure the following settings.
    1. **Application name**: Specify an easily identifiable name for the application.
