@@ -36,7 +36,8 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "semver==3.0.2",
+    "semver==2.13.0; python_version < '3.0'",
+    "semver==3.0.2; python_version > '3.0'",
 ]
 
 [project.urls]
