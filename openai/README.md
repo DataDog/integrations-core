@@ -17,7 +17,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 **Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
 
-### Installation:  Prepare your environment and enable LLM
+### Installation: Prepare your environment and enable LLM
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
 #### If you do not have the Datadog Agent:
