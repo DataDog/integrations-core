@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 22.0.3 / 2024-10-23
+
+***Fixed***:
+
+* Fix `UnboundLocalError` in postgres schema collection, ensuring proper reset of `_is_schemas_collection_in_progress` to allow consecutive collections. ([#18870](https://github.com/DataDog/integrations-core/pull/18870))
+
+## 22.0.2 / 2024-10-18
+
+***Fixed***:
+
+* Revert "Parse each row of pg_stat_activity separately inside a try/catch (#18762)" ([#18866](https://github.com/DataDog/integrations-core/pull/18866))
+
 ## 22.0.1 / 2024-10-14
 
 ***Fixed***:
