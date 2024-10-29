@@ -8,18 +8,17 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Monitor SLURM cluster resource usage, job statuses, and system performance.",
     "title": "Slurm",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
-      "Supported OS::Windows",
-      "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::Automation",
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
@@ -43,7 +42,7 @@
       }
     },
     "dashboards": {
-        "Slurm": "assets/dashboards/slurm_overview.json"
+        "slurm": "assets/dashboards/slurm_overview.json"
     },
     "monitors": {},
     "saved_views": {}
