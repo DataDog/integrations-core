@@ -2,6 +2,12 @@
 
 ## Overview
 
+#### Description:
+
+Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatbots or data extraction tools, using [OpenAI][1]. With LLM Observability, you can investigate the root cause of issues, monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
+
+[LLM Obs tracing view video][16]
+
 Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics, APM, and logs.
 
 ## Setup
@@ -358,3 +364,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
 [14]: https://app.datadoghq.com/cost
 [15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected
+[16]: https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max
