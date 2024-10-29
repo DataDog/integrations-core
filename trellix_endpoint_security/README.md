@@ -23,20 +23,13 @@ This integration provides enrichment and visualization for above mentioned event
    - **Method Types**: Select **GET**.
 5. Click **Request** to submit the request. It typically takes 2-3 days to process. You will be notified once your credentials are ready.
 6. When your credentials are available, generate your Client credentials by clicking **Generate** under **Create Client Credentials**.
-7. Copy and securely store the API key from **Access Management**, along with the Client ID and Client Secret, from **Create Client Credentials**.
+7. Copy the API key from **Access Management**, along with the Client ID and Client Secret, from **Create Client Credentials**.
 
-#### Configure the Trellix Endpoint Security and Datadog Integration
+#### Add your Trellix Endpoint Security credentials
 
-Configure the Datadog endpoint to forward Trellix Endpoint Security logs to Datadog.
-
-1. Navigate to **Trellix Endpoint Security**.
-2. Add your Trellix Endpoint Security credentials.
-
-| Trellix Endpoint Security Parameters | Description                            |
-| ------------------------------------ | -------------------------------------- |
-| Client ID                            | The Client ID of Trellix ePO SaaS.     |
-| Client Secret                        | The Client Secret of Trellix ePO SaaS. |
-| API Key                              | The API Key of Trellix ePO SaaS.       |
+- Client ID
+- Client Secret
+- API Key
 
 ## Data Collected
 
