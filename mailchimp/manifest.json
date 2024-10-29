@@ -50,8 +50,8 @@
       "Mailchimp - Audiences" : "assets/dashboards/mailchimp_audience.json"
     },
     "monitors" : {
-      "[Mailchimp] Too Many Abuse Reports" : "assets/monitors/abuse_report_rate.json",
-      "[Mailchimp] Too Many Unsubscribes" : "assets/monitors/unsubscribe_rate.json"
+      "Too Many Abuse Reports" : "assets/monitors/abuse_report_rate.json",
+      "Too Many Unsubscribes" : "assets/monitors/unsubscribe_rate.json"
     }
   },
   "author": {
