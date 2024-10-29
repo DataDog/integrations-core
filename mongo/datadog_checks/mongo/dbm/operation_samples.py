@@ -305,6 +305,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags()),
             "timestamp": now * 1000,
+            "service": self._check._config.service,
             "network": {
                 "client": operation_metadata["client"],
             },
@@ -362,5 +363,6 @@ class MongoOperationSamples(DBMAsyncJob):
             "ddtags": self._check._get_tags(),
             "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": now * 1000,
+            "service": self._check._config.service,
             "mongodb_activity": activities,
         }
