@@ -6,11 +6,9 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 
 ## Setup
 
-### Configuration
+### Get config parameters from Metabase
 
-#### Get config parameters of Metabase
-
-##### DNS alias
+#### Find your Metabase DNS alias
 
 1. Log in to your Metabase cloud instance as an administrator.
 2. Click on the gear icon in the upper right corner.
@@ -23,7 +21,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 9. Click on **DNS alias**.
 10. Copy the text box value.
 
-##### API Key
+#### Find your Metabase API Key
 
 1. Log in to your Metabase cloud instance as an administrator.
 2. Click on the gear icon in the upper right corner.
@@ -37,17 +35,10 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 10. Click **Create**.
 11. Copy the generated API key.
 
-#### Configure the Metabase and Datadog integration
+### Add your Metabase credentials
 
-Configure the Metabase endpoint to forward Metabase logs to Datadog.
-
-1. Navigate to `Metabase` integration on Datadog platform.
-2. Add your Metabase credentials.
-
-| Metabase Parameters | Description                                                          |
-|---------------------|----------------------------------------------------------------------|
-| DNS alias           | The DNS alias of your Metabase cloud instance.                       |
-| API key             | The API key used to authenticate the API requests.                   |
+- Metabase DNS alias (DNS alias of your Metabase cloud instance)
+- Metabase API key (API key to authenticate the API requests)
 
 ## Data Collected
 
