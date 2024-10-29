@@ -309,6 +309,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "network": {
                 "client": operation_metadata["client"],
             },
+            "cloud_metadata": self._check._config.cloud_metadata,
             "db": {
                 "instance": operation_metadata["dbname"],
                 "plan": explain_plan,
@@ -360,6 +361,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": now * 1000,
             "service": self._check._config.service,
             "mongodb_activity": activities,
