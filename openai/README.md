@@ -51,7 +51,7 @@ docker run -d \
   gcr.io/datadoghq/agent:latest
 ```
 
-2. Install the `ddtrace` package if it isn’t installed yet:
+2. Install the `ddtrace` package if it isn't installed yet:
 
 ```shell
   pip install ddtrace
