@@ -1,53 +1,57 @@
-# ExtraHop Integration For Datadog
-
 ## Overview
 
-[ExtraHop][1] leverages the network to give organizations comprehensive visibility into the cyber threats, vulnerabilities, and performance issues that evade their existing security and IT tools.
+[ExtraHop][1] applies machine learning techniques and rule-based monitoring to your wire data to identify unusual behaviors and potential risks to the security and performance of your network.
 
-This integration ingests the following log:
+This integration ingests the following logs:
 
 - Detection: Represents data of anomalous behavior identified by ExtraHop system.
 - Investigation: Represents a collection of data related to a specific security investigation, including its status, assignment, and associated detections.
 
-The ExtraHop integration seamlessly collect the data of ExtraHop logs using REST APIs.
-Before ingesting the data, it normalizes and enriches the logs, ensuring a consistent data format and enhancing information content for downstream processing and analysis. The integration provides insights into Detections using out-of-the-box dashboards.
+This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into detections and investigations through the out-of-the-box dashboards.
 
 ## Setup
 
 ### Configuration
 
-#### Get Credentials of ExtraHop
+#### Create CLIENT ID and CLIENT SECRET from ExtraHop Platform
 
-#### Steps to create Client ID and Client Secret
+1. On the ExtraHop console, go to **System Settings** > **API Access**.
+2. Generate new Client ID and Client Secret. Click **Create Credentials** which is present at the bottom of the page under **Rest API Credentials** section.
+3. On **System Settings** > **API Access** > **Rest API Credentials**, at the top right corner; Click **Create Credentials** Specify the settings of the new Client ID and Client Secret.
+    - Name: A meaningful name that can help you identify the Client ID and Client Secret.
+    - System Access: The system access permission assigned to the ID and Secret. Select **System administration**.
+    - NDR Module Access: The NDR module access permission assigned to the ID and Secret. Select **Full Access**.
+    - NPM Module Access: The NPM module access permission assigned to the ID and Secret. Select **Full Access**.
+    - Packet And Session Key Access: The packet and session key access permission assigned to the ID and Secret. Select **No Access**.
+4. Click **Save**.
+5. Copy and store **ID** and **Secret** in a secure location.
 
-1. Login to **ExtraHop** Platform with your credentials.
-2. From ExtraHop Platform, go to **System Settings** > **API Access** > **REST API Credentials**.
-3. Then, click **Create Credentials**.
-4. In the **Create Rest API credentials** section, provide credential name, select the appropriate system access, select the appropriate access for NDR Module Access, NPM Module Access, Packet And Session Key Access and click save button. The **Copy REST API Credentials** section for this credential is displayed.
-5. Copy the **ID** and **Secret**.
-
-#### ExtraHop DataDog Integration Configuration
+#### ExtraHop Datadog Integration Configuration
 
 Configure the Datadog endpoint to forward ExtraHop logs to Datadog.
 
 1. Navigate to `ExtraHop`.
 2. Add your ExtraHop credentials.
 
-| ExtraHop Parameters             | Description  |
-| ------------------------------- | ------------ |
-| Domain                          | Domain of ExtraHop platform. |
-| Client ID                       | The Client ID from ExtraHop. |
-| Client Secret                   | The Client Secret from ExtraHop. |
+| ExtraHop Parameters                   | Description                                                  |
+| ------------------------------------- | ------------------------------------------------------------ |
+| Domain                                | The Domain of your ExtraHop Console                          |
+| Client ID                             | The Client ID of your ExtraHop Console                       |
+| Client Secret                         | The Client Secret of your ExtraHop Console                   |
 
 ## Data Collected
 
 ### Logs
 
-The ExtraHop integration collects and forwards ExtraHop Detection and investigation logs to Datadog.
+The ExtraHop integration collects and forwards ExtraHop Detection and Investigation logs to Datadog.
 
 ### Metrics
 
 The ExtraHop integration does not include any metrics.
+
+### Service Checks
+
+ExtraHop does not include any service checks.
 
 ### Events
 
