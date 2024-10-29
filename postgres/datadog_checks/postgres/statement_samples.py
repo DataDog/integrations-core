@@ -83,6 +83,7 @@ PG_STAT_ACTIVITY_COLS = [
 
 # PG_STAT_ACTIVITY_COLS_MAPPING applies additional data type casting to the columns
 PG_STAT_ACTIVITY_COLS_MAPPING = {
+    # use the bytea type to avoid unicode decode errors on Azure PostgreSQL 
     'backend_type': 'backend_type::bytea as backend_type',
 }
 
@@ -261,7 +262,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         if report_activity:
             cur_time_func = CURRENT_TIME_FUNC
         activity_columns = [activity_columns_mapping.get(col, col) for col in available_activity_columns]
-        print(activity_columns)
         query = PG_STAT_ACTIVITY_QUERY.format(
             backend_type_predicate=backend_type_predicate,
             current_time_func=cur_time_func,
