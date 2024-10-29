@@ -191,7 +191,7 @@ def test_database_autodiscovery_dbnames_deprecation(instance_user):
 )
 def test_amazon_docdb_cloud_metadata(instance_integration_cluster, aws_cloud_metadata):
     instance_integration_cluster['aws'] = aws_cloud_metadata
-    config = MongoConfig(instance_integration_cluster, mock.Mock())
+    config = MongoConfig(instance_integration_cluster, mock.Mock(), {})
     assert config.cloud_metadata is not None
     aws = config.cloud_metadata['aws']
     assert aws['instance_endpoint'] == aws_cloud_metadata['instance_endpoint']
