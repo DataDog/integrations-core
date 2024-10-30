@@ -1,5 +1,3 @@
-# Greenhouse Integration For Datadog
-
 ## Overview
 
 [Greenhouse][1] is a cloud-based hiring platform that helps companies manage their recruitment processes. It features job postings, application tracking, candidate communications, interview scheduling, offers, and bulk actions, all aimed at helping companies hire the right people efficiently.
@@ -12,12 +10,7 @@ The Greenhouse integration collects these logs and sends them to Datadog. These 
 
 ### Configuration
 
-1. [Create an API key from the Greenhouse Platform](#greenhouse-configuration).
-2. [Configure the Datadog endpoint to forward Greenhouse events as logs to Datadog](#greenhouse-integration-configuration).
-
-#### Greenhouse Configuration
-
-Steps to create an API key on the Greenhouse Platform:
+#### Steps to create an API key on the Greenhouse Platform
 
 1. Log in to **[Greenhouse][2]** with your credentials.
 2. Click **Configure** located in the top right corner.
@@ -28,14 +21,12 @@ Steps to create an API key on the Greenhouse Platform:
 7. Select **Unlisted vendor** for Partner (if your name is not in the list).
 8. Add a description for your API key.
 9. Click **Manage permissions**.
-10. Copy and paste the API key as it cannot be retrieved later.
+10. Copy and paste the **API key** as it cannot be retrieved later.
 11. Under **Manage permissions**, check "Audit Log V1".
 (**Note**: If this option is not available, contact **[Greenhouse support][4]** to enable the audit log feature.)
 12. Click **Save**.
 
-#### Greenhouse Integration Configuration
-
-Configure the Datadog endpoint to forward Greenhouse events as logs to Datadog.
+#### Configure the Datadog endpoint to forward Greenhouse events as logs to Datadog
 
 1. Navigate to Greenhouse.
 2. Add your Greenhouse API Key.
