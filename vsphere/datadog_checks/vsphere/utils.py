@@ -20,7 +20,7 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR
 from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex  # noqa: F401
-from vsphere.datadog_checks.vsphere.type import InfrastructureData, MetricFilters, MetricName  # noqa: F401
+from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName  # noqa: F401
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:

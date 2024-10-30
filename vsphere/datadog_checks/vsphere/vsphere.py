@@ -32,7 +32,7 @@ from datadog_checks.vsphere.constants import (
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
 from datadog_checks.vsphere.resource_filters import TagFilter
-from vsphere.datadog_checks.vsphere.type import (
+from datadog_checks.vsphere.types import (
     CounterId,  # noqa: F401
     InfrastructureData,  # noqa: F401
     InfrastructureDataItem,  # noqa: F401
