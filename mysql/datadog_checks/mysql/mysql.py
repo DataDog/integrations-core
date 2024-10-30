@@ -683,7 +683,7 @@ class MySql(AgentCheck):
                 self.service_check(
                     self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
                     status=status,
-                    tags=self._service_check_tags() + additional_tags,
+                    tags=self.service_check_tags + additional_tags,
                 )
 
                 metrics_to_fetch = SQL_GROUP_REPLICATION_METRICS_8_0_2 if above_802 else SQL_GROUP_REPLICATION_METRICS
