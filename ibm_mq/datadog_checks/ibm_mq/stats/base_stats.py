@@ -20,7 +20,7 @@ class BaseStats(object):
         self.start_datetime = self._parse_datetime(raw_message[MQCAMO_START_DATE], raw_message[MQCAMO_START_TIME])
 
     @staticmethod
-    def _parse_datetime(raw_date, raw_time):
+    def _parse_datetime(raw_date, raw_time, timezone=None):
         # date might contain extra chars, we only keep 10 first that match the format YYYY-MM-DD
         date = sanitize_strings(raw_date[:10])
         time = sanitize_strings(raw_time)  # date format YYYY-MM-DD
@@ -31,4 +31,5 @@ class BaseStats(object):
         #       when the integration doesn't need to be backward compatible anymore
         #       with agent versions without ensure_aware_datetime.
         #       When doing that, bump the base package in setup.py
-        return naive_start_datetime.replace(tzinfo=UTC)
+        timezone = timezone if timezone is not None else UTC
+        return naive_start_datetime.replace(tzinfo=timezone)

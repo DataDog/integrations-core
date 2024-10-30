@@ -4,6 +4,7 @@
 
 import datetime as dt
 import re
+import pytz
 
 from dateutil.tz import UTC
 
@@ -99,6 +100,15 @@ class IBMMQConfig:
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
+        try:
+            if self.qm_timezone != 'UTC':
+                self.qm_stats_tz = pytz.timezone(self.qm_timezone)
+            else:
+                self.qm_stats_tz = pytz.UTC
+        except pytz.UnknownTimeZoneError:
+            self.log.error("%s is not a recognized timezone. Defaulting to UTC. Please specify a valid time zone in IANA/Olson format.", self.qm_timezone)
+            self.qm_stats_tz = pytz.UTC
+
         self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
 
         custom_tags = instance.get('tags', [])  # type: List[str]
