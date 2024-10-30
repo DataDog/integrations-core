@@ -380,6 +380,8 @@ In addition, [Airflow DatadogHook][16] can be used to interact with Datadog:
 
 See [metadata.csv][17] for a list of metrics provided by this check.
 
+**Note**: `airflow.healthy`, `airflow.can_connect`, `airflow.dag.task.total_running`, and `airflow.dag.task.ongoing_duration` metrics are collected from the Agent portion of the integration. All other metrics come from StatsD.
+
 ### Events
 
 The Airflow check does not include any events.
@@ -389,6 +391,10 @@ The Airflow check does not include any events.
 See [service_checks.json][18] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+
+### HTTP 403 errors for Agent integration
+
+You may need to configure parameters for the Datadog Agent to make authenticated requests to Airflow's API. Use one of the available [configuration options][23].
 
 Need help? Contact [Datadog support][11].
 
@@ -415,3 +421,4 @@ Need help? Contact [Datadog support][11].
 [20]: https://airflow.apache.org/docs/apache-airflow/stable/executor/kubernetes.html
 [21]: http://docs.datadoghq.com/resources/json/airflow_ust.json
 [22]: https://github.com/apache/airflow/blob/main/chart/values.yaml#L1522-L1529
+[23]: https://github.com/DataDog/integrations-core/blob/master/airflow/datadog_checks/airflow/data/conf.yaml.example#L84-L118
