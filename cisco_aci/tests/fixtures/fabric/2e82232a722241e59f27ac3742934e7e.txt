@@ -63,64 +63,6 @@
       "fabricNode": {
         "attributes": {
           "adSt": "on",
-          "address": "10.0.200.2",
-          "annotation": "",
-          "childAction": "",
-          "delayedHeartbeat": "no",
-          "dn": "topology/pod-1/node-202",
-          "extMngdBy": "",
-          "fabricSt": "active",
-          "id": "202",
-          "lastStateModTs": "2018-05-29T16:53:17.892-07:00",
-          "lcOwn": "local",
-          "modTs": "2018-05-29T16:53:58.202-07:00",
-          "model": "N9K-C9336PQ",
-          "monPolDn": "uni/fabric/monfab-default",
-          "name": "spine202",
-          "nameAlias": "",
-          "nodeType": "unspecified",
-          "role": "spine",
-          "serial": "SAL2014N5T7",
-          "status": "",
-          "uid": "0",
-          "vendor": "Cisco Systems, Inc",
-          "version": ""
-        }
-      }
-    },
-    {
-      "fabricNode": {
-        "attributes": {
-          "adSt": "on",
-          "address": "10.0.200.3",
-          "annotation": "",
-          "childAction": "",
-          "delayedHeartbeat": "no",
-          "dn": "topology/pod-1/node-3",
-          "extMngdBy": "",
-          "fabricSt": "unknown",
-          "id": "3",
-          "lastStateModTs": "1969-12-31T17:00:00.000-07:00",
-          "lcOwn": "local",
-          "modTs": "2018-05-10T19:01:36.971-07:00",
-          "model": "APIC-SERVER-M1",
-          "monPolDn": "uni/fabric/monfab-default",
-          "name": "apic3",
-          "nameAlias": "",
-          "nodeType": "unspecified",
-          "role": "controller",
-          "serial": "FCH1927V11T",
-          "status": "",
-          "uid": "0",
-          "vendor": "Cisco Systems, Inc",
-          "version": "A"
-        }
-      }
-    },
-    {
-      "fabricNode": {
-        "attributes": {
-          "adSt": "on",
           "address": "10.0.200.4",
           "annotation": "",
           "childAction": "",
@@ -172,35 +114,6 @@
           "uid": "0",
           "vendor": "Cisco Systems, Inc",
           "version": ""
-        }
-      }
-    },
-    {
-      "fabricNode": {
-        "attributes": {
-          "adSt": "on",
-          "address": "10.0.200.6",
-          "annotation": "",
-          "childAction": "",
-          "delayedHeartbeat": "no",
-          "dn": "topology/pod-1/node-2",
-          "extMngdBy": "",
-          "fabricSt": "unknown",
-          "id": "2",
-          "lastStateModTs": "1969-12-31T17:00:00.000-07:00",
-          "lcOwn": "local",
-          "modTs": "2016-07-20T12:19:20.101-07:00",
-          "model": "APIC-SERVER-M1",
-          "monPolDn": "uni/fabric/monfab-default",
-          "name": "apic2",
-          "nameAlias": "",
-          "nodeType": "unspecified",
-          "role": "controller",
-          "serial": "FCH1928V06Q",
-          "status": "",
-          "uid": "0",
-          "vendor": "Cisco Systems, Inc",
-          "version": "A"
         }
       }
     }

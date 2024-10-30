@@ -1,0 +1,996 @@
+
+=====================================
+2024-10-23 17:51:16 0x74cac80d3640 INNODB MONITOR OUTPUT
+=====================================
+Per second averages calculated from the last 5 seconds
+-----------------
+BACKGROUND THREAD
+-----------------
+srv_master_thread loops: 0 srv_active, 0 srv_shutdown, 10600 srv_idle
+srv_master_thread log flush and writes: 10600
+----------
+SEMAPHORES
+----------
+------------------------
+LATEST DETECTED DEADLOCK
+------------------------
+2024-10-23 17:37:41 0x74ca9edb4640
+*** (1) TRANSACTION:
+TRANSACTION (0x74cac8432380), ACTIVE 0 sec starting index read
+mysql tables in use 5, locked 5
+LOCK WAIT 163 lock struct(s), heap size 24696, 546 row lock(s)
+MariaDB thread id 3440, OS thread handle 128413597386304, query id 194431315 127.0.0.1 shopper_2 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-00000000000000002e4340dd707a0a3d-03c8c1aab91918d9-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ 
+                        INSERT INTO order_status_change (dbm_order_id, message, price, state) 
+                                VALUES ((SELECT id as dbm_order_id FROM dbm_order WHERE id = 15), 'discount applied', 
+                        (SELECT (t.price * t.quantity * d.discount_percent) 
+                                AS price FROM dbm_order o 
+                                JOIN order_item t ON o.id = t.dbm_order_id 
+                                JOIN discount d ON d.dbm_item_id = t.id
+                                WHERE o.id = 15 LIMIT 1), 'started') /* num='42' */
+*** WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 9 page no 4 n bits 232 index PRIMARY of table `dbmorders`.`order_item` trx id 0 lock mode S locks rec but not gap waiting
+Record lock, heap no 56 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000037; asc        7;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000006ce9; asc       l ;;
+ 4: len 30; hex 37643037353465362d303366392d346335652d386538312d643163653636; asc 7d0754e6-03f9-4c5e-8e81-d1ce66; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+*** CONFLICTING WITH:
+RECORD LOCKS space id 9 page no 4 n bits 320 index PRIMARY of table `dbmorders`.`order_item` trx id 1507141 lock_mode X
+Record lock, heap no 2 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000001; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000002ada; asc       * ;;
+ 4: len 30; hex 31316530633330342d666636622d343535642d396539612d636238336439; asc 11e0c304-ff6b-455d-9e9a-cb83d9; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 3 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000002; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000001878; asc        x;;
+ 4: len 30; hex 35303166656531382d393838342d343133392d383232632d303262626336; asc 501fee18-9884-4139-822c-02bbc6; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 4 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000003; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000005499; asc       T ;;
+ 4: len 30; hex 35373939666633622d316231612d343166632d616135632d646462306665; asc 5799ff3b-1b1a-41fc-aa5c-ddb0fe; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 5 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000004; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000008b76; asc        v;;
+ 4: len 30; hex 34316439336238382d646439362d346430652d393864612d386537306361; asc 41d93b88-dd96-4d0e-98da-8e70ca; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 6 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000005; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000008bc9; asc         ;;
+ 4: len 30; hex 62346434326164372d623564322d346465372d393935312d326538356261; asc b4d42ad7-b5d2-4de7-9951-2e85ba; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 7 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000006; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000004ee6; asc       N ;;
+ 4: len 30; hex 30646230643466332d373732622d343266362d396335302d653037313639; asc 0db0d4f3-772b-42f6-9c50-e07169; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 8 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000007; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000008385; asc         ;;
+ 4: len 30; hex 39633039373534312d643936362d343031652d623962632d353835363033; asc 9c097541-d966-401e-b9bc-585603; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 9 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000008; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000ad63; asc        c;;
+ 4: len 30; hex 65663661326339322d323038352d343662322d383032382d666639383564; asc ef6a2c92-2085-46b2-8028-ff985d; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 10 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000009; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000ba1d; asc         ;;
+ 4: len 30; hex 66326463363861372d316630392d343762622d623664662d643863363865; asc f2dc68a7-1f09-47bb-b6df-d8c68e; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 11 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000000a; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000007976; asc       yv;;
+ 4: len 30; hex 64636431333038652d343236662d343366362d393439662d653933323664; asc dcd1308e-426f-43f6-949f-e9326d; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 12 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000000b; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000bc63; asc        c;;
+ 4: len 30; hex 62383036633030312d383832342d343034382d396232302d333338363234; asc b806c001-8824-4048-9b20-338624; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 13 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000000c; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000069ff; asc       i ;;
+ 4: len 30; hex 33343637336535372d316639352d343536612d626634332d656338313934; asc 34673e57-1f95-456a-bf43-ec8194; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 14 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000000d; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000698f; asc       i ;;
+ 4: len 30; hex 66366537336130642d653030652d346232652d383536302d643962633237; asc f6e73a0d-e00e-4b2e-8560-d9bc27; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 15 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000000e; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000001c6b; asc        k;;
+ 4: len 30; hex 38326236333066342d623665622d343232322d626130632d666565356334; asc 82b630f4-b6eb-4222-ba0c-fee5c4; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 16 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000000f; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000065e2; asc       e ;;
+ 4: len 30; hex 66353265623961352d323261632d346430342d393732642d333266333035; asc f52eb9a5-22ac-4d04-972d-32f305; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 17 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000010; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000ba08; asc         ;;
+ 4: len 30; hex 61373333633964342d346161662d343461302d613561352d383963626665; asc a733c9d4-4aaf-44a0-a5a5-89cbfe; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 18 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000011; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000a1f0; asc         ;;
+ 4: len 30; hex 61316665623531652d376239332d346637612d386237372d346231323463; asc a1feb51e-7b93-4f7a-8b77-4b124c; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 19 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000012; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000805f; asc        _;;
+ 4: len 30; hex 65346162366163352d636533352d343164662d383664342d613334353230; asc e4ab6ac5-ce35-41df-86d4-a34520; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 20 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000013; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000bc72; asc        r;;
+ 4: len 30; hex 36336266626638332d653239302d346666372d623265352d626563363763; asc 63bfbf83-e290-4ff7-b2e5-bec67c; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 21 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000014; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000009e48; asc        H;;
+ 4: len 30; hex 66343932393437322d653831362d343832382d616339652d376164646563; asc f4929472-e816-4828-ac9e-7addec; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 22 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000015; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000000045; asc        E;;
+ 4: len 30; hex 65373331383365622d353333622d346636652d616539662d336236336531; asc e73183eb-533b-4f6e-ae9f-3b63e1; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 23 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000016; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000008869; asc        i;;
+ 4: len 30; hex 31643637636166622d373933612d343966332d616364322d633235646233; asc 1d67cafb-793a-49f3-acd2-c25db3; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 24 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000017; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000050b6; asc       P ;;
+ 4: len 30; hex 39653361316234652d623734352d343538362d626332382d343232623037; asc 9e3a1b4e-b745-4586-bc28-422b07; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 25 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000018; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000005ea0; asc       ^ ;;
+ 4: len 30; hex 30336430333566382d303366622d346131322d383336622d346138663565; asc 03d035f8-03fb-4a12-836b-4a8f5e; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 26 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000019; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000005dac; asc       ] ;;
+ 4: len 30; hex 64643664353037372d316333352d346234332d626137342d643136386462; asc dd6d5077-1c35-4b43-ba74-d168db; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 27 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000001a; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000bf6a; asc        j;;
+ 4: len 30; hex 37643761656164342d613362622d346161332d626232342d653965343135; asc 7d7aead4-a3bb-4aa3-bb24-e9e415; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 28 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000001b; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000001815; asc         ;;
+ 4: len 30; hex 39333233343036382d623534312d346665362d393564642d393133303462; asc 93234068-b541-4fe6-95dd-91304b; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 29 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000001c; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000004751; asc       GQ;;
+ 4: len 30; hex 31613362616139372d396566332d343265662d613836302d383330613366; asc 1a3baa97-9ef3-42ef-a860-830a3f; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 30 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000001d; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000004f29; asc       O);;
+ 4: len 30; hex 38373138663431632d626363342d346263362d393133662d303539636534; asc 8718f41c-bcc4-4bc6-913f-059ce4; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 31 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000001e; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000a609; asc         ;;
+ 4: len 30; hex 64633761663333362d363733322d343563372d613636622d613661393936; asc dc7af336-6732-45c7-a66b-a6a996; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 32 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000001f; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000514d; asc       QM;;
+ 4: len 30; hex 62313435376165392d373361652d343735392d623938302d653633616462; asc b1457ae9-73ae-4759-b980-e63adb; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 33 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000020; asc         ;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000007945; asc       yE;;
+ 4: len 30; hex 37626134643936372d346664662d343461652d626534642d626530656136; asc 7ba4d967-4fdf-44ae-be4d-be0ea6; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 34 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000021; asc        !;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000002eb2; asc       . ;;
+ 4: len 30; hex 31633061316436632d313033652d346536622d613130342d616236346564; asc 1c0a1d6c-103e-4e6b-a104-ab64ed; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 35 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000022; asc        ";;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000acaf; asc         ;;
+ 4: len 30; hex 37336534353562622d646464632d343363392d623763622d333965373634; asc 73e455bb-dddc-43c9-b7cb-39e764; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 36 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000023; asc        #;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000021f; asc         ;;
+ 4: len 30; hex 61613835346335342d303165362d346334312d623965312d306534613866; asc aa854c54-01e6-4c41-b9e1-0e4a8f; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 37 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000024; asc        $;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000000d26; asc        &;;
+ 4: len 30; hex 66326461613066632d386335362d346666392d393236632d303530613732; asc f2daa0fc-8c56-4ff9-926c-050a72; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 38 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000025; asc        %;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000c325; asc        %;;
+ 4: len 30; hex 31313537373636652d386532342d346139312d396333372d653138613265; asc 1157766e-8e24-4a91-9c37-e18a2e; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 39 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000026; asc        &;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000002f04; asc       / ;;
+ 4: len 30; hex 35613261663763612d353166352d343032302d396634612d393532633566; asc 5a2af7ca-51f5-4020-9f4a-952c5f; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 40 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000027; asc        ';;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000001a94; asc         ;;
+ 4: len 30; hex 34343436313865322d313539662d343135322d383833622d313234653632; asc 444618e2-159f-4152-883b-124e62; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 41 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000028; asc        (;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000003c77; asc       <w;;
+ 4: len 30; hex 34353636366265302d383739352d343362342d393530312d326131343536; asc 45666be0-8795-43b4-9501-2a1456; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 42 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000029; asc        );;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000955d; asc        ];;
+ 4: len 30; hex 31346435393061342d316439342d343237322d383535642d366463363164; asc 14d590a4-1d94-4272-855d-6dc61d; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 43 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000002a; asc        *;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000906c; asc        l;;
+ 4: len 30; hex 38623532616533662d636438342d346464392d623231362d383666616435; asc 8b52ae3f-cd84-4dd9-b216-86fad5; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 44 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000002b; asc        +;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000003750; asc       7P;;
+ 4: len 30; hex 35383530386538622d316365622d343633642d623339312d333534333134; asc 58508e8b-1ceb-463d-b391-354314; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 45 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000002c; asc        ,;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000a020; asc         ;;
+ 4: len 30; hex 32663461396632622d386165342d343438372d613762382d323136323835; asc 2f4a9f2b-8ae4-4487-a7b8-216285; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 46 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000002d; asc        -;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000005875; asc       Xu;;
+ 4: len 30; hex 30326665363834332d396363352d343238392d383763322d366438316433; asc 02fe6843-9cc5-4289-87c2-6d81d3; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 47 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000002e; asc        .;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000007ff9; asc         ;;
+ 4: len 30; hex 34376437376363622d326530312d346366352d383464372d373333393061; asc 47d77ccb-2e01-4cf5-84d7-73390a; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 48 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000002f; asc        /;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000609c; asc       ` ;;
+ 4: len 30; hex 38326464376336632d346263312d343662652d396337382d323663386237; asc 82dd7c6c-4bc1-46be-9c78-26c8b7; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 49 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000030; asc        0;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000c1f7; asc         ;;
+ 4: len 30; hex 30313834646462662d623431642d343330652d613866372d326634313164; asc 0184ddbf-b41d-430e-a8f7-2f411d; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 50 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000031; asc        1;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000024c0; asc       $ ;;
+ 4: len 30; hex 66356162396235302d333636622d343161322d386631362d356361643939; asc f5ab9b50-366b-41a2-8f16-5cad99; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 51 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000032; asc        2;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000016aa; asc         ;;
+ 4: len 30; hex 35633332636239392d626366382d343063642d393965312d633539353335; asc 5c32cb99-bcf8-40cd-99e1-c59535; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 52 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000033; asc        3;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000a4a7; asc         ;;
+ 4: len 30; hex 61333165306439362d373861652d343432332d386562652d643063303264; asc a31e0d96-78ae-4423-8ebe-d0c02d; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 53 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000034; asc        4;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000004f09; asc       O ;;
+ 4: len 30; hex 64356666363732352d623962322d346637662d383130342d646139636665; asc d5ff6725-b9b2-4f7f-8104-da9cfe; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 54 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000035; asc        5;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 000000000000a426; asc        &;;
+ 4: len 30; hex 62323937616636652d623834622d343561332d393463642d353664313166; asc b297af6e-b84b-45a3-94cd-56d11f; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 55 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000036; asc        6;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000007040; asc       p@;;
+ 4: len 30; hex 63616532393339382d313136342d343737342d383232632d316665383265; asc cae29398-1164-4774-822c-1fe82e; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 56 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000037; asc        7;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000006ce9; asc       l ;;
+ 4: len 30; hex 37643037353465362d303366392d346335652d386538312d643163653636; asc 7d0754e6-03f9-4c5e-8e81-d1ce66; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 57 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000038; asc        8;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000087c9; asc         ;;
+ 4: len 30; hex 63656538393532322d653131312d343739322d386163622d623039343439; asc cee89522-e111-4792-8acb-b09449; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 58 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 0000000000000039; asc        9;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000006b20; asc       k ;;
+ 4: len 30; hex 36613866366565372d383964352d343930302d396363392d633766316163; asc 6a8f6ee7-89d5-4900-9cc9-c7f1ac; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 59 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000003a; asc        :;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000003e18; asc       > ;;
+ 4: len 30; hex 34396463643861322d326235342d346634352d396263302d366131333161; asc 49dcd8a2-2b54-4f45-9bc0-6a131a; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+Record lock, heap no 60 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000003b; asc        ;;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 0000000000001760; asc        `;;
+ 4: len 30; hex 66313434663931622d666437342d346535302d386335642d613936396365; asc f144f91b-fd74-4e50-8c5d-a969ce; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+
+*** (2) TRANSACTION:
+TRANSACTION 1507141, ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 1
+LOCK WAIT 3 lock struct(s), heap size 1128, 60 row lock(s)
+MariaDB thread id 3423, OS thread handle 128414288832064, query id 194431831 127.0.0.1 shopper_1 Updating
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-00000000000000003994b4c702193073-592966b666d56eb0-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ UPDATE /* time:2:00AM,num:42 */ order_item SET sku=trim(sku) WHERE id < 114
+*** WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 9 page no 4 n bits 320 index PRIMARY of table `dbmorders`.`order_item` trx id 1507141 lock_mode X waiting
+Record lock, heap no 61 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000003c; asc        <;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000013e0; asc         ;;
+ 4: len 30; hex 32313730323862322d326139622d343930352d613563322d373366346536; asc 217028b2-2a9b-4905-a5c2-73f4e6; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+*** CONFLICTING WITH:
+RECORD LOCKS space id 9 page no 4 n bits 232 index PRIMARY of table `dbmorders`.`order_item` trx id 0 lock mode S locks rec but not gap
+Record lock, heap no 61 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000003c; asc        <;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000013e0; asc         ;;
+ 4: len 30; hex 32313730323862322d326139622d343930352d613563322d373366346536; asc 217028b2-2a9b-4905-a5c2-73f4e6; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+RECORD LOCKS space id 9 page no 4 n bits 232 index PRIMARY of table `dbmorders`.`order_item` trx id 0 lock mode S locks rec but not gap
+Record lock, heap no 61 PHYSICAL RECORD: n_fields 9; compact format; info bits 0
+ 0: len 8; hex 000000000000003c; asc        <;;
+ 1: len 6; hex 000000000000; asc       ;;
+ 2: len 7; hex 80000000000000; asc        ;;
+ 3: len 8; hex 00000000000013e0; asc         ;;
+ 4: len 30; hex 32313730323862322d326139622d343930352d613563322d373366346536; asc 217028b2-2a9b-4905-a5c2-73f4e6; (total 36 bytes);
+ 5: len 8; hex 0000000000000257; asc        W;;
+ 6: len 4; hex 80000001; asc     ;;
+ 7: len 5; hex 99b4aeeda7; asc      ;;
+ 8: len 5; hex 99b4aeeda7; asc      ;;
+
+*** WE ROLL BACK TRANSACTION (1)
+------------
+TRANSACTIONS
+------------
+Trx id counter 1612414
+Purge done for trx's n:o < 1612318 undo n:o < 0 state: running
+History list length 48
+LIST OF TRANSACTIONS FOR EACH SESSION:
+---TRANSACTION (0x74cac8424780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8418c80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8418180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8417680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8416b80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8416080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8415580), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8414a80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8413f80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8413480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8412980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8411e80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8411380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8410880), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac840fd80), ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 3771, OS thread handle 128414083925568, query id 210546949 127.0.0.1 shopper_1 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-000000000000000017ba09cd2c2146a8-3f4adfa42a4b7698-00',ddh='127.0.0.1',dddb='dbmorders_1',ddprs='orders-mysql'*/ SELECT * FROM discount where description LIKE 'random%'
+Trx read view will not see trx with id >= 1612412, sees < 1612412
+---TRANSACTION (0x74cac840f280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac840e780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac840dc80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac840d180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac840c680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac840bb80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac840b080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac843e980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac843de80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac843d380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac843c880), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac840a580), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac843bd80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac843b280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8430280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac843a780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8439c80), ACTIVE 0 sec fetching rows
+mysql tables in use 5, locked 5
+649 lock struct(s), heap size 90232, 56699 row lock(s)
+MariaDB thread id 3748, OS thread handle 128414308320832, query id 210544322 127.0.0.1 shopper_1 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-000000000000000051bd7c16efd5478b-1d6cbaf63b1abc18-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ 
+                        INSERT INTO order_status_change (dbm_order_id, message, price, state) 
+                                VALUES ((SELECT id as dbm_order_id FROM dbm_order WHERE id = 612), 'discount applied', 
+                        (SELECT (t.price * t.quantity * d.discount_percent) 
+                                AS price FROM dbm_order o 
+                                JOIN order_item t ON o.id = t.dbm_order_id 
+                                JOIN discount d ON d.dbm_item_id = t.id
+                                WHERE o.id = 612 LIMIT 1), 'started')
+---TRANSACTION (0x74cac842f780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8409a80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8408f80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8408480), ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 3741, OS thread handle 128413953287744, query id 210547094 127.0.0.1 shopper_1 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-00000000000000000aa8664024d1c19e-66eea60fe65b651e-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ SELECT * FROM order_item where sku LIKE 'random%' /* date:12/31 */
+Trx read view will not see trx with id >= 1612412, sees < 1612412
+---TRANSACTION (0x74cac8439180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8438680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8423c80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8423180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8422680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8421b80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8419780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8407980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8406e80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8406380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8405880), ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 3728, OS thread handle 128413608179264, query id 210547128 127.0.0.1 shopper_4 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-00000000000000001c959936926ab454-51fdb8957adf1f0b-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ SELECT * FROM dbm_user where username LIKE 'random%' /* key:val */
+Trx read view will not see trx with id >= 1612414, sees < 1612414
+---TRANSACTION (0x74cac8404d80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8437b80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8437080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8403780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8436580), ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 3722, OS thread handle 128413607564864, query id 210546885 127.0.0.1 shopper_4 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-00000000000000005bbec62fe74da8e0-46eea0ced60e2954-00',ddh='127.0.0.1',dddb='dbmorders_1',ddprs='orders-mysql'*/ SELECT * FROM discount where description LIKE 'random%' /* time:2:00AM,num:42 */
+Trx read view will not see trx with id >= 1612412, sees < 1612412
+---TRANSACTION (0x74cac8435a80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8434f80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8434480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac842ec80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac842e180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac842d680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac842cb80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8402c80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac842c080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac842b580), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8421080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8420580), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac841fa80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac841ef80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac841e480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac841d980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac841ce80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8402180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8401680), ACTIVE 0 sec starting index read
+mysql tables in use 5, locked 5
+456 lock struct(s), heap size 57464, 31407 row lock(s)
+MariaDB thread id 3698, OS thread handle 128414351636032, query id 210545712 127.0.0.1 shopper Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-00000000000000001eec806319da405e-397a9e1e028b7ff8-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ 
+                        INSERT INTO order_status_change (dbm_order_id, message, price, state) 
+                                VALUES ((SELECT id as dbm_order_id FROM dbm_order WHERE id = 889), 'discount applied', 
+                        (SELECT (t.price * t.quantity * d.discount_percent) 
+                                AS price FROM dbm_order o 
+                                JOIN order_item t ON o.id = t.dbm_order_id 
+                                JOIN discount d ON d.dbm_item_id = t.id
+                                WHERE o.id = 889 LIMIT 1), 'started')
+---TRANSACTION (0x74cac842aa80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8429f80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8400b80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8429480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8428980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac841c380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8427e80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8427380), ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 3688, OS thread handle 128413953594944, query id 210546752 127.0.0.1 shopper_1 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-0000000000000000630cc910b5dcf019-3e7f2c154a83fdb9-00',ddh='127.0.0.1',dddb='dbmorders_1',ddprs='orders-mysql'*/ SELECT * FROM order_item where sku LIKE 'random%' /* date='12%2F31',time='2%3A00AM' */
+Trx read view will not see trx with id >= 1612412, sees < 1612412
+---TRANSACTION (0x74cac841b880), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac841ad80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac841a280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x74cac8404280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+--------
+FILE I/O
+--------
+Pending flushes (fsync): 0
+160 OS file reads, 748613 OS file writes, 746133 OS fsyncs
+0.00 reads/s, 0 avg bytes/read, 73.59 writes/s, 73.59 fsyncs/s
+---
+LOG
+---
+Log sequence number 404971760
+Log flushed up to   404971760
+Pages flushed up to 353645295
+Last checkpoint at  353645295
+----------------------
+BUFFER POOL AND MEMORY
+----------------------
+Total large memory allocated 167772160
+Dictionary memory allocated 892408
+Buffer pool size   8064
+Free buffers       4850
+Database pages     3206
+Old database pages 1163
+Modified db pages  413
+Percent of dirty pages(LRU & free pages): 5.126
+Max dirty pages percent: 90.000
+Pending reads 0
+Pending writes: LRU 0, flush list 0
+Pages made young 5165214, not young 0
+315.14 youngs/s, 0.00 non-youngs/s
+Pages read 149, created 4218, written 3599
+0.00 reads/s, 0.00 creates/s, 0.00 writes/s
+Buffer pool hit rate 1000 / 1000, young-making rate 0 / 1000 not 0 / 1000
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+LRU len: 3206, unzip_LRU len: 0
+I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+--------------
+ROW OPERATIONS
+--------------
+5 read views open inside InnoDB
+state: sleeping
+----------------------------
+END OF INNODB MONITOR OUTPUT
+============================

@@ -262,6 +262,12 @@ instances:
     #
     # include_tempdb_file_space_usage_metrics: true
 
+    ## @param include_xe_metrics - boolean - optional - default: true
+    ## Include extended events (XE) metrics. The collection of XE metrics is automatically enabled
+    ## when `deadlocks_collection` is enabled.
+    #
+    # include_xe_metrics: true
+
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
@@ -692,7 +698,7 @@ instances:
     #
     # propagate_agent_tags: false
 
-    ## Configure the collection of deadlock data. The feature is supported for odbc connector only.
+    ## Configure the collection of deadlock data.
     #
     # deadlocks_collection:
 
