@@ -31,7 +31,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 7. Click **Create API Key**.
 8. Enter a key name.
 9. Select the **Administrators** Group.
-10. Click **Create** and copy the generated API key.
+10. Click **Create** to get the generated API key.
 
 ### Add your Metabase credentials
 
