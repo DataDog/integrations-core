@@ -1,0 +1,1 @@
+Fix unicode decode error from Azure PostgreSQL Flexible Server
