@@ -4,8 +4,8 @@
 
 import datetime as dt
 import re
-import pytz
 
+import pytz
 from dateutil.tz import UTC
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -106,7 +106,10 @@ class IBMMQConfig:
             else:
                 self.qm_stats_tz = pytz.UTC
         except pytz.UnknownTimeZoneError:
-            self.log.error("%s is not a recognized timezone. Defaulting to UTC. Please specify a valid time zone in IANA/Olson format.", self.qm_timezone)
+            self.log.error(
+                "Invalid timezone: %s. Defaulting to UTC. Please specify a valid time zone in IANA/Olson format.",
+                self.qm_timezone,
+            )
             self.qm_stats_tz = pytz.UTC
 
         self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
