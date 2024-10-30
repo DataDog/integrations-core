@@ -80,7 +80,7 @@ def create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, namespa
         lldp_adj_ep = LldpAdjEp(**lldp_adj_ep.get("lldpAdjEp", {}))
 
         local_device_id = device_map.get(lldp_adj_ep.attributes.local_device_dn)
-        local_interface_id = "{}:{}".format(local_device_id, lldp_adj_ep.attributes.local_port_index)
+        local_interface_id = "{}:{}".format(local_device_id, lldp_adj_ep.attributes.local_port_id)
 
         remote_entry_unique_id = "{}.{}".format(
             lldp_adj_ep.attributes.local_port_index, lldp_adj_ep.attributes.remote_port_index
@@ -114,7 +114,19 @@ def create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, namespa
         )
 
 
+def get_interface_dd_id(device_id: str, port_id: str) -> str:
+    """
+    Create the interface DD ID based off of the device DD ID and port ID
+    ex: default:10.0.200.1:cisco_aci-eth1/1
+    """
+    return '{}:cisco_aci-{}'.format(device_id, port_id)
+
+
 def get_device_ip_mapping(devices):
+    """
+    Create a mapping of node ID to device ID
+    ex: pod-1-node-1 -> default:10.100.0.1
+    """
     devices_map = {}
     for device in devices:
         key = device.pod_node_id

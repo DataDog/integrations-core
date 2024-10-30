@@ -280,7 +280,7 @@ TOPOLOGY_LINK_METADATA = [
                 'dd_id': 'default:10.0.200.0',
             },
             'interface': {
-                'dd_id': 'default:10.0.200.0:49',
+                'dd_id': 'default:10.0.200.0:eth1/49',
                 'id': 'eth1/49',
                 'id_type': 'interface_name',
             },
@@ -308,7 +308,7 @@ TOPOLOGY_LINK_METADATA = [
                 'dd_id': 'default:10.0.200.1',
             },
             'interface': {
-                'dd_id': 'default:10.0.200.1:49',
+                'dd_id': 'default:10.0.200.1:eth1/49',
                 'id': 'eth1/49',
                 'id_type': 'interface_name',
             },
