@@ -83,7 +83,7 @@ PG_STAT_ACTIVITY_COLS = [
 
 # PG_STAT_ACTIVITY_COLS_MAPPING applies additional data type casting to the columns
 PG_STAT_ACTIVITY_COLS_MAPPING = {
-    # use the bytea type to avoid unicode decode errors on Azure PostgreSQL 
+    # use the bytea type to avoid unicode decode errors on Azure PostgreSQL
     'backend_type': 'backend_type::bytea as backend_type',
 }
 
