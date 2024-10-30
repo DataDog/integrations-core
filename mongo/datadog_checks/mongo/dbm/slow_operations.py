@@ -309,7 +309,9 @@ class MongoSlowOperations(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags()),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": slow_operation["ts"] * 1000,
+            "service": self._check._config.service,
             "network": {
                 "client": self._get_slow_operation_client(slow_operation),
             },
@@ -404,7 +406,9 @@ class MongoSlowOperations(DBMAsyncJob):
             "dbm_type": "slow_query",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": time.time() * 1000,
+            "service": self._check._config.service,
             "mongodb_slow_queries": slow_operation_events,
         }
         self._check.database_monitoring_query_activity(json_util.dumps(payload))
