@@ -20,6 +20,9 @@ files:
       value:
         type: boolean 
         example: false
+        show_default: true
+      enabled: false
+
   - template: logs
     example:
     - type: file

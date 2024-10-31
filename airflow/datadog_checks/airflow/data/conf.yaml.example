@@ -401,9 +401,10 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
+    ## @param omit_authenticated_metrics - boolean - optional - default: false
     ## Disable collection of metrics from the Airflow web server REST API endpoint that require authentication.
     #
-    # omit_authenticated_metrics: {}
+    # omit_authenticated_metrics: false
 
 ## Log Section
 ##
