@@ -7,7 +7,6 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
 from typing import Optional
@@ -27,6 +26,7 @@ class SharedConfig(BaseModel):
         frozen=True,
     )
     service: Optional[str] = None
+    slurm_binaries_dir: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

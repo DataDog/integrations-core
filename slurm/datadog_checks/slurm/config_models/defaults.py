@@ -8,9 +8,85 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_slurm_binaries_dir():
+    return '/usr/bin/'
+
+
+def instance_collect_gpu_stats():
+    return False
+
+
+def instance_collect_sacct_stats():
+    return True
+
+
+def instance_collect_sdiag_stats():
+    return True
+
+
+def instance_collect_sinfo_stats():
+    return True
+
+
+def instance_collect_squeue_stats():
+    return True
+
+
+def instance_collect_sshare_stats():
+    return True
+
+
+def instance_debug_sacct_stats():
+    return False
+
+
+def instance_debug_sdiag_stats():
+    return False
+
+
+def instance_debug_sinfo_stats():
+    return False
+
+
+def instance_debug_squeue_stats():
+    return False
+
+
+def instance_debug_sshare_stats():
+    return False
+
+
+def instance_disable_generic_tags():
+    return False
+
+
 def instance_empty_default_hostname():
     return False
 
 
 def instance_min_collection_interval():
-    return 15
+    return 60
+
+
+def instance_sacct_path():
+    return '/usr/bin/sacct'
+
+
+def instance_sdiag_path():
+    return '/usr/bin/sdiag'
+
+
+def instance_sinfo_collection_level():
+    return 1
+
+
+def instance_sinfo_path():
+    return '/usr/bin/sinfo'
+
+
+def instance_squeue_path():
+    return '/usr/bin/squeue'
+
+
+def instance_sshare_path():
+    return '/usr/bin/sshare'

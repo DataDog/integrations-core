@@ -7,7 +7,6 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
 from typing import Optional
@@ -20,15 +19,43 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class MetricPatterns(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_gpu_stats: Optional[bool] = None
+    collect_sacct_stats: Optional[bool] = None
+    collect_sdiag_stats: Optional[bool] = None
+    collect_sinfo_stats: Optional[bool] = None
+    collect_squeue_stats: Optional[bool] = None
+    collect_sshare_stats: Optional[bool] = None
+    debug_sacct_stats: Optional[bool] = None
+    debug_sdiag_stats: Optional[bool] = None
+    debug_sinfo_stats: Optional[bool] = None
+    debug_squeue_stats: Optional[bool] = None
+    debug_sshare_stats: Optional[bool] = None
+    disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    sacct_path: Optional[str] = None
+    sdiag_path: Optional[str] = None
     service: Optional[str] = None
+    sinfo_collection_level: Optional[int] = None
+    sinfo_path: Optional[str] = None
+    squeue_path: Optional[str] = None
+    sshare_path: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 
     @model_validator(mode='before')
