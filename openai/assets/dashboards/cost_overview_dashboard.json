@@ -1,6 +1,6 @@
 {
     "title": "OpenAI Cost Overview",
-    "description": "[[suggested_dashboards]]",
+    "description": "This dashboard provides a view into various OpenAI costs and the sources of attribution for those costs.",
     "widgets": [
         {
             "id": 3636494906945158,
