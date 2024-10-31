@@ -17,7 +17,9 @@ except ImportError as e:
 
 class BaseStats(object):
     def __init__(self, raw_message, timezone=None):
-        self.start_datetime = self._parse_datetime(raw_message[MQCAMO_START_DATE], raw_message[MQCAMO_START_TIME], timezone=timezone)
+        self.start_datetime = self._parse_datetime(
+            raw_message[MQCAMO_START_DATE], raw_message[MQCAMO_START_TIME], timezone=timezone
+        )
 
     @staticmethod
     def _parse_datetime(raw_date, raw_time, timezone=None):
