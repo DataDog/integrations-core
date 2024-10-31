@@ -4,7 +4,11 @@
 from . import common
 
 DATABASE_INSTANCE_RESOURCE_TAG = 'dd.internal.resource:database_instance:{hostname}'
-METRIC_TAGS = ['tag1:value1', 'tag2:value2']
+METRIC_TAGS = [
+    'tag1:value1',
+    'tag2:value2',
+    'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
+]
 METRIC_TAGS_WITH_RESOURCE = [
     'tag1:value1',
     'tag2:value2',
