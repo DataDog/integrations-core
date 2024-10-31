@@ -116,12 +116,8 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     aggregator = dd_agent_check(instance_complex)
     _assert_complex_config(
         aggregator,
-        tags.SC_TAGS
-        + [
-            tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname),
-            'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
-        ],
-        tags.METRIC_TAGS + ['dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower())],
+        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
+        tags.METRIC_TAGS,
         hostname=dd_default_hostname,
         e2e=True,
     )
