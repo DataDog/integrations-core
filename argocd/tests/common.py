@@ -113,12 +113,18 @@ appset_controller_counters = ['reconcile.errors.count', 'runtime.reconcile.count
 appset_controller_gauges = [
     'active.workers',
     'max.concurrent.reconciles',
+    'appset.info',
+    'appset.owned.applications',
+    'appset.labels',
 ]
 
 appset_controller_histograms = [
     'reconcile.time_seconds.bucket',
     'reconcile.time_seconds.count',
     'reconcile.time_seconds.sum',
+    'appset.reconcile.bucket',
+    'appset.reconcile.count',
+    'appset.reconcile.sum',
 ]
 
 api_server_counters = [
