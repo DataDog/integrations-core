@@ -19,6 +19,7 @@ class AirflowCheck(AgentCheck):
 
         self._url = self.instance.get('url', '')
         self._tags = self.instance.get('tags', [])
+        self._omit_authenticated_metrics = self.instance.get("omit_authenticated_metrics")
 
         # The Agent only makes one attempt to instantiate each AgentCheck so any errors occurring
         # in `__init__` are logged just once, making it difficult to spot. Therefore, we emit
@@ -51,7 +52,7 @@ class AirflowCheck(AgentCheck):
         else:
             submit_metrics(resp, tags)
             # Only calculate task duration for stable API and when desired
-            if target_url is url_stable and not self.config.omit_authenticated_metrics:
+            if target_url is url_stable and not self._omit_authenticated_metrics:
                 task_instances = self._get_all_task_instances(url_stable_task_instances, tags)
                 if task_instances:
                     self._calculate_task_ongoing_duration(task_instances, tags)
