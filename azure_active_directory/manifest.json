@@ -30,7 +30,7 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Microsoft Entra ID",
+      "source_type_name": "Azure Active Directory",
       "configuration": {},
       "events": {
         "creates_events": false
