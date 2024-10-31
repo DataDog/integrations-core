@@ -9,19 +9,19 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.vllm import vLLMCheck
+from datadog_checks.nvidia_nim import NvidiaNIMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
 
-def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
-    check = vLLMCheck("vLLM", {}, [instance])
+def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance):
+    check = NvidiaNIMCheck("nvidia_nim", {}, [instance])
     check.check_id = "test:123"
     with mock.patch(
         'requests.get',
         side_effect=[
-            MockResponse(file_path=get_fixture_path("vllm_metrics.txt")),
-            MockResponse(file_path=get_fixture_path("vllm_version.json")),
+            MockResponse(file_path=get_fixture_path("nim_metrics.txt")),
+            MockResponse(file_path=get_fixture_path("nim_version.json")),
         ],
     ):
         dd_run_check(check)
@@ -32,7 +32,7 @@ def test_check_vllm(dd_run_check, aggregator, datadog_agent, instance):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_service_check("vllm.openmetrics.health", ServiceCheck.OK)
+    aggregator.assert_service_check("nvidia_nim.openmetrics.health", ServiceCheck.OK)
 
     raw_version = "0.4.3"
     major, minor, patch = raw_version.split(".")
@@ -53,9 +53,9 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     If we fail to reach the openmetrics endpoint the openmetrics service check should report as critical
     """
     mock_http_response(status_code=404)
-    check = vLLMCheck("vllm", {}, [instance])
+    check = NvidiaNIMCheck("nvidia_nim", {}, [instance])
     with pytest.raises(Exception, match="requests.exceptions.HTTPError"):
         dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_service_check("vllm.openmetrics.health", ServiceCheck.CRITICAL)
+    aggregator.assert_service_check("nvidia_nim.openmetrics.health", ServiceCheck.CRITICAL)

@@ -7,5 +7,5 @@ from datadog_checks.dev.utils import assert_service_checks
 
 def test_check_vllm_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
-    aggregator.assert_service_check('vllm.openmetrics.health', ServiceCheck.OK, count=2)
+    aggregator.assert_service_check('nvidia_nim.openmetrics.health', ServiceCheck.OK, count=2)
     assert_service_checks(aggregator)
