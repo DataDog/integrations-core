@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.1.0 / 2024-10-31
+
+***Added***:
+
+* Add telemetry scraping for Validation AdmissionController ([#18867](https://github.com/DataDog/integrations-core/pull/18867))
+
 ## 5.0.0 / 2024-10-04
 
 ***Removed***:
