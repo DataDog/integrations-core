@@ -64,7 +64,6 @@
     },
     "monitors": {
       "Connection pool is reaching saturation": "assets/monitors/high_connections.json",
-      "High query targeting": "assets/monitors/high_query_targeting.json",
       "High queued readers": "assets/monitors/high_queued_readers.json",
       "High queued writers": "assets/monitors/high_queued_writers.json",
       "High replication lag": "assets/monitors/high_replication_lag.json",
