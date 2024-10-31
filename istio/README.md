@@ -79,7 +79,7 @@ ad.datadoghq.com/discovery.checks: |
   }
 ```
 
-This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
+This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.checks` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
 
 The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
@@ -147,7 +147,7 @@ ad.datadoghq.com/discovery.logs: |
   ]
 ```
 
-This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
+This annotation specifies the container `discovery` to match the default container name of the Istio container in this pod. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.logs` with the name (`.spec.containers[i].name`) of your Istio container if yours differs.
 
 Replace `<SERVICE_NAME>` with your desired Istio service name.
 
@@ -168,7 +168,7 @@ ad.datadoghq.com/istio-proxy.logs: |
   ]
 ```
 
-This annotation specifies the container `istio-proxy` to match the default container name of the injected Istio sidecar container. Replace this annotation `ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs` with the name (`.spec.containers[i].name`) of your Istio sidecar container if yours differs.
+This annotation specifies the container `istio-proxy` to match the default container name of the injected Istio sidecar container. Replace this annotation `ad.datadoghq.com/<CONTAINER_NAME>.logs` with the name (`.spec.containers[i].name`) of your Istio sidecar container if yours differs.
 
 Replace `<SERVICE_NAME>` with your desired Istio proxy service name.
 
