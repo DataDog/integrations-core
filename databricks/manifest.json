@@ -54,6 +54,11 @@
       "source_type_id": 10152,
       "auto_install": true
     },
+    "dashboards": {
+      "Databricks Overview Dashboard": "assets/dashboards/overview_dashboard.json",
+      "Databricks Clusters Dashboard": "assets/dashboards/clusters_dashboard.json",
+      "Databricks Cost Dashboard": "assets/dashboards/cost_dashboard.json"
+    },
     "logs": {
       "source": "spark"
     }
