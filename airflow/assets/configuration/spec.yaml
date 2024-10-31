@@ -15,6 +15,11 @@ files:
         type: string
     - template: instances/http
     - template: instances/default
+    - name: omit_authenticated_metrics
+      description: Disable collection of metrics from the Airflow web server REST API endpoint that require authentication.
+      value:
+        type: boolean 
+        example: false
   - template: logs
     example:
     - type: file

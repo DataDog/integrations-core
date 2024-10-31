@@ -401,6 +401,10 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
+    ## Disable collection of metrics from the Airflow web server REST API endpoint that require authentication.
+    #
+    # omit_authenticated_metrics: {}
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event).
