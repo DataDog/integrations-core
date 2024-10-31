@@ -61,8 +61,8 @@ SELECT
         ELSE req.statement_end_offset END
             - req.statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
-    CASE 
-        WHEN LEN(qt.text) > {proc_char_limit} THEN RIGHT(qt.text, {tail_text_size}) 
+    CASE
+        WHEN LEN(qt.text) > {proc_char_limit} THEN RIGHT(qt.text, {tail_text_size})
     ELSE ''
     END AS tail_text,
     c.client_tcp_port as client_port,
