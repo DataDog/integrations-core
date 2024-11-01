@@ -413,10 +413,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname') as resolve_db_host:
         mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
         dd_run_check(mysql_check)
-        if reported_hostname:
-            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
-        else:
-            assert resolve_db_host.called is True
+        assert resolve_db_host.called is True
 
     expected_tags = [
         'database_hostname:{}'.format(mysql_check.database_hostname),
@@ -793,6 +790,7 @@ def test_propagate_agent_tags(
     expected_tags = (
         instance_basic.get('tags', [])
         + [
+            'database_hostname:stubbed.hostname',
             'server:{}'.format(HOST),
             'port:{}'.format(PORT),
             'dd.internal.resource:database_instance:forced_hostname',
