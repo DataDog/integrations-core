@@ -202,6 +202,8 @@ class SQLServer(AgentCheck):
         self.set_metadata("resolved_hostname", self.resolved_hostname)
 
     def set_resource_tags(self):
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+
         if self._config.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
