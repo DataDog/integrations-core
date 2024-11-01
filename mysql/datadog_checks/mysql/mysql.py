@@ -169,6 +169,14 @@ class MySql(AgentCheck):
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
+    
+
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            self._database_hostname = self.resolve_db_host()
+        return self._database_hostname
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -1296,6 +1304,7 @@ class MySql(AgentCheck):
             event = {
                 "host": self.resolved_hostname,
                 "port": self._config.port,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "mysql",
                 "kind": "database_instance",

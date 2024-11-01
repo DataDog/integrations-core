@@ -278,6 +278,14 @@ class SQLServer(AgentCheck):
     def resolved_hostname(self):
         return self._resolved_hostname
 
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            host, _ = split_sqlserver_host_port(self.instance.get("host"))
+            self._database_hostname = resolve_db_host(host)
+        return self._database_hostname
+
     def load_static_information(self):
         engine_edition_reloaded = False
         expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
@@ -952,6 +960,7 @@ class SQLServer(AgentCheck):
         if self.resolved_hostname not in self._database_instance_emitted:
             event = {
                 "host": self.resolved_hostname,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver",
                 "kind": "database_instance",
