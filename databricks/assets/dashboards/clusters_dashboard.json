@@ -1,12 +1,12 @@
 {
     "title": "Databricks Clusters",
-    "description": "[[suggested_dashboards]]",
+    "description": "This dashboard tracks the status of your Databricks clusters. It allows you to track the resources utilization, as well as the Databricks jobs running on them",
     "widgets": [
         {
             "id": 7986081179091420,
             "definition": {
                 "title": "New group",
-                "banner_img": "/static/images/logos/databricks_hero_1.svg",
+                "banner_img": "/static/images/logos/databricks_hero_1.png",
                 "show_title": false,
                 "type": "group",
                 "layout_type": "ordered",
