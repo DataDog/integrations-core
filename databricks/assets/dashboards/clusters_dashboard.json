@@ -488,7 +488,7 @@
                         "id": 3585103700094100,
                         "definition": {
                             "type": "note",
-                            "content": "Each databricks cluster is composed of one driver that coordinate workers. \n\nWhen running distributed spark, the driver is delegating the computations to workers. When running local python code, it is executed on the driver.\n",
+                            "content": "Each Databricks cluster is composed of one driver that coordinate workers. \n\nWhen running distributed spark, the driver delegates the computations to workers. When running local python code, it executes on the driver.\n",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
