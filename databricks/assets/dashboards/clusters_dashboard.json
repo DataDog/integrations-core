@@ -905,7 +905,7 @@
                         "id": 2102656673592240,
                         "definition": {
                             "type": "note",
-                            "content": "Monitor your Databricks workers resource usage. Metrics of workers are aggregated by Databricks cluster to have an overview of the full cluster\n\nThe Agent has to be installed on the worker nodes to collect those metrics.\n",
+                            "content": "Monitor the resource usage of your Databricks workers.  Databricks clusters aggregate worker metrics, providing an overview of the full cluster\n\nTo collect these metrics, install the Agent on the worker nodes.\n",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
