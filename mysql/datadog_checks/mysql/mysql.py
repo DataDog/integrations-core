@@ -212,6 +212,12 @@ class MySql(AgentCheck):
             )
         )
 
+    def set_version_tags(self):
+        if not self.version or not self.version.flavor:
+            return
+
+        self.tags.append('dbms_flavor:{}'.format(self.version.flavor.lower()))
+
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
         self._check_events_wait_current_enabled(db)
@@ -284,7 +290,6 @@ class MySql(AgentCheck):
         if self.instance.get('pass'):
             self._log_deprecation('_config_renamed', 'pass', 'password')
 
-        tags = list(self.tags)
         self._set_qcache_stats()
         try:
             with self._connect() as db:
@@ -293,11 +298,12 @@ class MySql(AgentCheck):
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
                     aurora_tags = self._get_runtime_aurora_tags(db)
-                    self.tags = tags + aurora_tags
+                    self.tags = list(set(self.tags) | set(aurora_tags))
                     self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
 
                 # version collection
                 self.version = get_version(db)
+                self.set_version_tags()
                 self._send_metadata()
                 self._send_database_instance_metadata()
 
@@ -309,6 +315,7 @@ class MySql(AgentCheck):
                     self.check_userstat_enabled(db)
 
                 # Metric collection
+                tags = copy.deepcopy(self.tags)
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
@@ -686,7 +693,7 @@ class MySql(AgentCheck):
                 self.service_check(
                     self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
                     status=status,
-                    tags=self._service_check_tags() + additional_tags,
+                    tags=self.service_check_tags + additional_tags,
                 )
 
                 metrics_to_fetch = SQL_GROUP_REPLICATION_METRICS_8_0_2 if above_802 else SQL_GROUP_REPLICATION_METRICS
