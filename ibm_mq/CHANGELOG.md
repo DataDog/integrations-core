@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.1-beta.1 / 2024-11-01
+
+***Added***:
+
+* Add timezone feature for stats ([#18951](https://github.com/DataDog/integrations-core/pull/18951))
+
 ## 8.0.0 / 2024-10-04
 
 ***Removed***:
