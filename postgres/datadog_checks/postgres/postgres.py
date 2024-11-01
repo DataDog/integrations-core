@@ -483,7 +483,6 @@ class PostgreSql(AgentCheck):
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
-
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
 

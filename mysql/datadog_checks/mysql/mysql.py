@@ -169,7 +169,6 @@ class MySql(AgentCheck):
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
-    
 
     @property
     def database_hostname(self):
