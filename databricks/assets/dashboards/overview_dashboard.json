@@ -6,7 +6,7 @@
             "id": 5738258122441435,
             "definition": {
                 "title": "About",
-                "banner_img": "/static/images/logos/databricks_hero_1.png",
+                "banner_img": "/static/images/integration_dashboard/databricks_hero_1.png",
                 "show_title": false,
                 "type": "group",
                 "layout_type": "ordered",
