@@ -6,7 +6,7 @@
     }
   }
 
-  route /version {
+  route /v1/version {
     rewrite * /version
     file_server {
       root /usr/share/caddy

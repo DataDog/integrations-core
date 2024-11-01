@@ -34,7 +34,7 @@ def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check("nvidia_nim.openmetrics.health", ServiceCheck.OK)
 
-    raw_version = "0.4.3"
+    raw_version = "1.0.0"
     major, minor, patch = raw_version.split(".")
     version_metadata = {
         "version.scheme": "semver",

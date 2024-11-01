@@ -13,7 +13,7 @@ METRIC_MAP = {
     'process_cpu_seconds': 'process.cpu_seconds',
     'process_open_fds': 'process.open_fds',
     'process_max_fds': 'process.max_fds',
-    'num_request_max': 'num_requests.max',
+    'num_request_max': 'num_request.max',
     'num_requests_running': 'num_requests.running',
     'num_requests_waiting': 'num_requests.waiting',
     'prompt_tokens': 'prompt_tokens',

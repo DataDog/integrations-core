@@ -15,12 +15,12 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The nvidia_nim check is included in the [Datadog Agent][2] package.
+The Nvidia NIM check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `nvidia_nim.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your nvidia_nim performance data. See the [sample nvidia_nim.d/conf.yaml][4] for all available configuration options.
+1. Edit the `nvidia_nim.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Nvidia NIM performance data. See the [sample nvidia_nim.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -36,11 +36,11 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The nvidia_nim integration does not include any events.
+The Nvidia NIM integration does not include any events.
 
 ### Service Checks
 
-The nvidia_nim integration does not include any service checks.
+The Nvidia NIM integration does not include any service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
