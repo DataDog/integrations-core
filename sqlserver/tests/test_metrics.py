@@ -611,6 +611,7 @@ def test_check_ao_secondary_replica(aggregator, dd_run_check, init_config, insta
 
 def check_sqlserver_can_connect(aggregator, host, resolved_hostname, tags, autodiscovery=False):
     expected_tags = tags + [
+        'database_hostname:{}'.format(host),
         'connection_host:{}'.format(host),
         'sqlserver_host:{}'.format(resolved_hostname),
         'db:master',

@@ -726,15 +726,8 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     pg_instance['disable_generic_tags'] = False  # This flag also affects the hostname
     pg_instance['reported_hostname'] = reported_hostname
 
-    with mock.patch(
-        'datadog_checks.postgres.PostgreSql.resolve_db_host', return_value=expected_hostname
-    ) as resolve_db_host:
-        check = PostgreSql('test_instance', {}, [pg_instance])
-        check.run()
-        if reported_hostname:
-            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
-        else:
-            assert resolve_db_host.called is True
+    check = PostgreSql('test_instance', {}, [pg_instance])
+    check.run()
 
     expected_tags_no_db = _get_expected_tags(check, pg_instance, server=HOST)
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']

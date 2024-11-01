@@ -853,7 +853,11 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance.get('tags', []) + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+    return dbm_instance.get('tags', []) + [
+        'database_hostname:{}'.format(common.HOST),
+        'server:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+    ]
 
 
 # the inactive job metrics are emitted from the main integrations

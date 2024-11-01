@@ -420,6 +420,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
             assert resolve_db_host.called is True
 
     expected_tags = [
+        'database_hostname:{}'.format(mysql_check.database_hostname),
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(expected_hostname),
