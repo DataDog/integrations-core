@@ -109,6 +109,7 @@ class MySql(AgentCheck):
         self.is_mariadb = None
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags

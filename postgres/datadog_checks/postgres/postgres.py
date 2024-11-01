@@ -97,6 +97,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self._db = None
         self.version = None
         self.raw_version = None
