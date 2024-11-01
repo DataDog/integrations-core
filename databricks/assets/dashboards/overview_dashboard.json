@@ -15,7 +15,7 @@
                         "id": 7886510948573746,
                         "definition": {
                             "type": "note",
-                            "content": "This dashboard tracks the current status of your Spark jobs, tasks, and stages in your Databricks clusters. It also allows you to track the resource utilization of your nodes, which point to possible areas for optimization.\n\nSee the [Datadog Databricks integration documentation](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly) to find the suitable init script for your Databricks cluster environment.\nClone this template dashboard to make changes and add your own graph widgets.",
+                            "content": "This dashboard tracks the current status of your Spark jobs, tasks, and stages in your Databricks clusters. It also tracks the resource utilization of your nodes to identify possible areas for optimization.\n\nSee the [Datadog Databricks integration documentation](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly) to find the suitable init script for your Databricks cluster environment.\nClone this template dashboard to make changes and add your own graph widgets.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",

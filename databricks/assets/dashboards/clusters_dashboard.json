@@ -15,7 +15,7 @@
                         "id": 2088480862142846,
                         "definition": {
                             "type": "note",
-                            "content": "This dashboard tracks the status of your Databricks clusters. It allows you to track the resources utilization, as well as the Databricks and Spark jobs running on them.\n\nIt shows clusters that are under/over-utilized to point to possible areas for optimization.\n\nThis dashboard works best when filtering on a specific **cluster_name** or **databricks_cluster_id** from the cluster list.\n\nTo filter on all clusters of a specific job, you can use a wildcard filter **job-<JOB_ID>*** for the cluster_name.",
+                            "content": "This dashboard monitors the status of your Databricks clusters, including resource utilization and Databricks and Spark jobs running on them.\n\nIt identifies clusters that are underutilized or overutilized, highlighting possible areas for optimization.\n\nThis dashboard works best when filtered on a specific **cluster_name** or **databricks_cluster_id** from the cluster list.\n\nTo filter on all clusters of a specific job, use a wildcard filter **job-<JOB_ID>*** for the cluster_name.",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -488,7 +488,7 @@
                         "id": 3585103700094100,
                         "definition": {
                             "type": "note",
-                            "content": "Each databricks cluster is composed of one driver that coordinate workers. \n\nWhen running distributed spark, the driver is delegating the computations to workers. When running local python code, it is executed on the driver.\n",
+                            "content": "Each Databricks cluster is composed of one driver that coordinate workers. \n\nWhen running distributed spark, the driver delegates the computations to workers. When running local python code, it executes on the driver.\n",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
@@ -905,7 +905,7 @@
                         "id": 2102656673592240,
                         "definition": {
                             "type": "note",
-                            "content": "Monitor your Databricks workers resource usage. Metrics of workers are aggregated by Databricks cluster to have an overview of the full cluster\n\nThe Agent has to be installed on the worker nodes to collect those metrics.\n",
+                            "content": "Monitor the resource usage of your Databricks workers.  Databricks clusters aggregate worker metrics, providing an overview of the full cluster\n\nTo collect these metrics, install the Agent on the worker nodes.\n",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
