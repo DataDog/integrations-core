@@ -2,11 +2,11 @@
     "version": 2,
     "created_at": "2024-09-12",
     "last_updated_at": "2024-09-12",
-    "title": "[incident.io] Public incident reopened",
+    "title": "Public incident reopened",
     "description": "This monitor alerts when a previously closed public incident is reopened, indicating that the issue may not have been fully resolved or has recurred.",
     "definition": {
         "id": 153157704,
-        "name": "[incident.io] Public incident reopened",
+        "name": "Public incident reopened",
         "type": "log alert",
         "query": "logs(\"source:incident-io @evt.name:public_incident.incident_status_updated_v2 @data.incident.mode:standard @data.previous_status.category:closed @data.new_status.category:live\").index(\"*\").rollup(\"count\").by(\"@data.name,@data.reference,@data.incident_type.name,@data.new_status.name\").last(\"5m\") >= 1",
         "message": "Public incident **{{[@data.reference].name}}: {{[@data.name].name}}** was reopened from closed state.\n**Incident type:** {{[@data.incident_type.name].name}}\n**Incident status:** {{[@data.new_status.name].name}}",
