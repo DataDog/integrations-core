@@ -1,1 +1,0 @@
-Always emit `database_instance` metadata regardless of DBM status; previously emitted only when DBM was enabled.

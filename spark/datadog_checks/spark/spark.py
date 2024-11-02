@@ -73,6 +73,8 @@ class SparkCheck(AgentCheck):
         self.metricsservlet_path = self.instance.get('metricsservlet_path', '/metrics/json')
 
         self._enable_query_name_tag = is_affirmative(self.instance.get('enable_query_name_tag', False))
+        self._disable_spark_job_stage_tags = is_affirmative(self.instance.get('disable_spark_job_stage_tags', False))
+        self._disable_spark_stage_metrics = is_affirmative(self.instance.get('disable_spark_stage_metrics', False))
 
         # Get the cluster name from the instance configuration
         self.cluster_name = self.instance.get('cluster_name')
@@ -97,8 +99,9 @@ class SparkCheck(AgentCheck):
         # Get the job metrics
         self._spark_job_metrics(spark_apps, tags)
 
-        # Get the stage metrics
-        self._spark_stage_metrics(spark_apps, tags)
+        if not self._disable_spark_stage_metrics:
+            # Get the stage metrics
+            self._spark_stage_metrics(spark_apps, tags)
 
         # Get the executor metrics
         self._spark_executor_metrics(spark_apps, tags)
@@ -412,8 +415,9 @@ class SparkCheck(AgentCheck):
                 if job_id is not None:
                     tags.append('job_id:{}'.format(job_id))
 
-                for stage_id in job.get('stageIds', []):
-                    tags.append('stage_id:{}'.format(stage_id))
+                if not self._disable_spark_job_stage_tags:
+                    for stage_id in job.get('stageIds', []):
+                        tags.append('stage_id:{}'.format(stage_id))
 
                 self._set_metrics_from_json(tags, job, SPARK_JOB_METRICS)
                 self._set_metric('spark.job.count', COUNT, 1, tags)

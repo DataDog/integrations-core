@@ -282,6 +282,13 @@ files:
       value:
         type: boolean
         example: true
+    - name: include_xe_metrics
+      description: |
+        Include extended events (XE) metrics. The collection of XE metrics is automatically enabled
+        when `deadlocks_collection` is enabled.
+      value:
+        type: boolean
+        example: true
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider
@@ -776,9 +783,8 @@ files:
         example: false
         type: boolean
     - name: deadlocks_collection
-      hidden: True
       description: |
-        Configure the collection of deadlock data. The feature is supported for odbc connector only.
+        Configure the collection of deadlock data.
       options:
         - name: enabled
           description: |
