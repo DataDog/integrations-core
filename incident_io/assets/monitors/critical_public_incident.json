@@ -2,11 +2,11 @@
 	"version": 2,
 	"created_at": "2024-09-12",
 	"last_updated_at": "2024-09-12",
-	"title": "[incident.io] Critical public incident",
+	"title": "Critical public incident",
 	"description": "This monitor alerts when a public incident of critical severity is reported, which can have a significant impact if not addressed properly.",
 	"definition": {
 		"id": 153155024,
-		"name": "[incident.io] Critical public incident",
+		"name": "Critical public incident",
 		"type": "log alert",
 		"query": "logs(\"source:incident-io @evt.name:public_incident.incident_created_v2 @data.mode:standard @data.severity.name:Critical\").index(\"*\").rollup(\"count\").by(\"@data.name,@data.incident_id,@data.incident_type.name,@data.reference\").last(\"5m\") >= 1",
 		"message": "Critical public incident **{{[@data.reference].name}}: {{[@data.name].name}}** was created.\n**Incident type:** {{[@data.incident_type.name].name}}\n**Incident ID:** {{[@data.incident_id].name}}",
