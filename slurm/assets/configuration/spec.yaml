@@ -124,7 +124,7 @@ files:
           This changes the collection interval of the check. For more information, see:
           https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
 
-          Most Slurm metrics are collected from calling the different binaries. Depending on the size of the slurm cluster,
+          Most Slurm metrics are collected from calling the different binaries. Depending on the size of the Slurm cluster,
           this can be a very expensive operation. It is recommended to set this to a higher value than the default 15 
           seconds, but this can be adjusted based on the size of the cluster and the desired granularity of the metrics.
         min_collection_interval.value.display_default: 15
