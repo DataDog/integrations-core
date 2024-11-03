@@ -112,8 +112,8 @@ files:
       hidden: True
     - name: debug_sacct_stats
       description: |
-        Whether or not to enable debug logging for the sacct command. This will log the output of the sacct command
-        to the agent log.
+        Whether or not to enable debug logging for the sacct command. This logs the output of the sacct command
+        to the Agent log.
       value:
         type: boolean
         example: False
