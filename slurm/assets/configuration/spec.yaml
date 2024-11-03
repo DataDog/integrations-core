@@ -80,8 +80,8 @@ files:
         example: /usr/bin/squeue
     - name: debug_sinfo_stats
       description: |
-        Whether or not to enable debug logging for the sinfo command. This will log the output of the sinfo command
-        to the agent log.
+        Whether or not to enable debug logging for the sinfo command. This logs the output of the sinfo command
+        to the Agent log.
       value:
         type: boolean
         example: False
