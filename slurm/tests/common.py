@@ -11,7 +11,7 @@ from datadog_checks.slurm.constants import (
     SINFO_PARTITION_PARAMS,
 )
 
-Slurm_VERSION = '21.08.6'
+SLURM_VERSION = '21.08.6'
 DEFAULT_SINFO_PATH = ['/usr/bin/sinfo']
 
 # Testing for params addition in sinfo
