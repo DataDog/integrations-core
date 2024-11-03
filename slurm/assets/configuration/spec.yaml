@@ -88,8 +88,8 @@ files:
       hidden: True
     - name: debug_sdiag_stats
       description: |
-        Whether or not to enable debug logging for the sdiag command. This will log the output of the sdiag command
-        to the agent log.
+        Whether or not to enable debug logging for the sdiag command. This logs the output of the sdiag command
+        to the Agent log.
       value:
         type: boolean
         example: False
