@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor SLURM cluster resource usage, job statuses, and system performance.",
+    "description": "Monitor Slurm cluster resource usage, job statuses, and system performance.",
     "title": "Slurm",
     "media": [],
     "classifier_tags": [
