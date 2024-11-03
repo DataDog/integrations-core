@@ -23,7 +23,7 @@ No additional installation is needed on your server.
 
 1. Ensure that the dd-agent user has execute permissions on the relevant command binaries and the necessary permissions to access the directories where these binaries are located.
 
-2. Edit the `slurm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your slurm data. See the [sample slurm.d/conf.yaml][3] for all available configuration options.
+2. Edit the `slurm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Slurm data. See the [sample slurm.d/conf.yaml][3] for all available configuration options.
 
 ```yaml
 init_config:
