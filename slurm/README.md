@@ -72,8 +72,8 @@ instances:
     ## @param sinfo_collection_level - integer - optional - default: 1
     ## The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
     ## 3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3 
-    ## collects data from from individual nodes as well but will be more verbose and include data such as CPU and 
-    ## memory usage as reported from the OS as well as additional tags.
+    ## collects data from from individual nodes as well but is more verbose and includes data such as CPU and 
+    ## memory usage as reported from the OS, as well as additional tags.
     #
     sinfo_collection_level: 1
 ```
