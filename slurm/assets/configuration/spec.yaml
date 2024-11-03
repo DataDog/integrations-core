@@ -96,8 +96,8 @@ files:
       hidden: True
     - name: debug_squeue_stats
       description: |
-        Whether or not to enable debug logging for the squeue command. This will log the output of the squeue command
-        to the agent log.
+        Whether or not to enable debug logging for the squeue command. This logs the output of the squeue command
+        to the Agent log.
       value:
         type: boolean
         example: False
