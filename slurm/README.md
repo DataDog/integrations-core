@@ -10,7 +10,7 @@ The check gathers metrics from `slurmctld` by executing and parsing the output o
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various SLURM binaries, monitoring SLURM in containerized environments is not yet recommended.
+Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various SLURM binaries, monitoring SLURM in containerized environments is not recommended.
 
 **Note**: This check was tested on SLURM version 21.08.0.
 
