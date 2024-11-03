@@ -28,7 +28,7 @@ No additional installation is needed on your server.
 ```yaml
 init_config:
 
-    ## Feel free to customize this part incase the binaries are not located in the /usr/bin/ directory
+    ## Customize this part if the binaries are not located in the /usr/bin/ directory
     ## @param slurm_binaries_dir - string - optional - default: /usr/bin/
     ## The directory at which all the Slurm binaries are located. These are mainly:
     ## sinfo, sacct, sdiag, sshare and sdiag.
