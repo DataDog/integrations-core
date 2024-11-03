@@ -6,7 +6,7 @@ files:
     options:
       - name: slurm_binaries_dir
         description: |
-          The directory at which all the Slurm binaries are located. These are mainly:
+          The directory in which all the Slurm binaries are located. These are mainly:
           sinfo, sacct, sdiag, sshare and sdiag.
         value:
           type: string
