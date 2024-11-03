@@ -38,7 +38,7 @@ init_config:
 instances:
 
   -
-    ## Configure here if there's data you wish to or not collect.
+    ## Configure these parameters to select which data the integration collects.
     ## @param collect_sinfo_stats - boolean - optional - default: true
     ## Whether or not to collect statistics from the sinfo command.
     #
