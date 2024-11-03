@@ -119,7 +119,7 @@ instances:
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
     ##
-    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    ## Metrics defined in `exclude` take precedence in case of overlap.
     #
     # metric_patterns:
     #   include:
