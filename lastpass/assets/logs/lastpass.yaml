@@ -139,7 +139,7 @@ pipeline:
           samples:
             - Testing_data
             - "VID: 8931324857103585383 to Testing_data"
-            - "'Testing_data' 'test@abc.com' 'Read only:no Admin:yes Hide PW:yes"
+            - "'Testing_data' 'test@abc.com' 'Read only:no Admin:yes Hide PW:yes'"
             - "'Testing_data' 'test@abc.com'"
             - "VID: 4364210409355695795"
           grok:
@@ -149,7 +149,7 @@ pipeline:
               \'%{notSpace:shared_folder.modified_user}\' \'Read
               only\:%{word:shared_folder.permissions.read_only}
               Admin\:%{word:shared_folder.permissions.is_admin} Hide
-              PW\:%{word:shared_folder.permissions.hide_password}
+              PW\:%{word:shared_folder.permissions.hide_password}\'
 
               move_to VID\: %{numberStr:shared_folder.VID} to %{greedyData:shared_folder.name}
 

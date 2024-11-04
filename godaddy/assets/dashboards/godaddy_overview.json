@@ -469,7 +469,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Cancelled Certificates",
+                      "alias": "Canceled Certificates",
                       "formula": "query2"
                     },
                     {
@@ -485,7 +485,7 @@
                       "formula": "query5"
                     },
                     {
-                      "alias": "Pending Issued Certificates",
+                      "alias": "Pending Issuance Certificates",
                       "formula": "query6"
                     },
                     {
