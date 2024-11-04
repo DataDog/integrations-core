@@ -925,7 +925,7 @@
                         "id": 8149905710105464,
                         "definition": {
                             "type": "note",
-                            "content": "Monitor your Spark jobs, stages, and tasks by status.\n\nIncrease in stage failures may signify there is a problem with processing a Spark task like incorrect Spark configuration or code errors. Correlate the failures with your driver logs to observe for an exception.",
+                            "content": "Monitor your Spark jobs, stages, and tasks by status.\n\nAn increase in stage failures may indicate issues with Spark task processing, such as incorrect Spark configuration or code errors. Correlate the failures with your driver logs to check for exceptions.",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
