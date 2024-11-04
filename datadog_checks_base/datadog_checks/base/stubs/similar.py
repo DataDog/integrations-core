@@ -8,10 +8,10 @@ Build similar message for better test assertion failure message.
 
 MAX_SIMILAR_TO_DISPLAY = 15
 
+
 def tags_list_to_dict(tags):
-    return {
-                        tag.split(':', 1)[0]: (tag.split(':', 1)[1] if ":" in tag else '') for tag in tags
-                    }
+    return {tag.split(':', 1)[0]: (tag.split(':', 1)[1] if ":" in tag else '') for tag in tags}
+
 
 def build_similar_elements_msg(expected, submitted_elements):
     """
