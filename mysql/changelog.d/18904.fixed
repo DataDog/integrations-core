@@ -1,5 +1,0 @@
-Fixes missing innodb metrics collected from `SHOW ENGINE INNODB STATUS` output.
-- `mysql.innodb.history_list_length` for MySQL 5.6
-- `mysq..innodb.pending_log_writes` for MySQL 5.7
-- `mysql.innodb.pending_checkpoint_writes` for MySQL 5.7
-

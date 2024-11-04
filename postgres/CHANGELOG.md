@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 22.1.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied to query metrics, query samples and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+
+***Fixed***:
+
+* Use specific databases for template on postgres ignore ([#18807](https://github.com/DataDog/integrations-core/pull/18807))
+* Fix unicode decode error from Azure PostgreSQL Flexible Server ([#18938](https://github.com/DataDog/integrations-core/pull/18938))
+
 ## 22.0.3 / 2024-10-23
 
 ***Fixed***:

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.1 / 2024-10-31
+
+***Fixed***:
+
+* Add debug log line for host tags. ([#18774](https://github.com/DataDog/integrations-core/pull/18774))
+
 ## 8.0.0 / 2024-09-25
 
 ***Removed***:
