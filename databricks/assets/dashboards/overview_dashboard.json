@@ -769,7 +769,7 @@
                         "id": 6606212809463528,
                         "definition": {
                             "type": "note",
-                            "content": "Monitor the resource consumption on your Spark driver and worker nodes.\n\nIf there is high resource consumption on your clusters, consider choosing a larger Driver or Worker type for the cluster. Read more about configuring your [Databricks clusters](https://docs.databricks.com/clusters/configure.html).",
+                            "content": "Monitor the resource consumption on your Spark Driver and worker nodes.\n\nIf there is high resource consumption on your clusters, consider choosing a larger Driver or Worker type for the cluster. Read more about configuring your [Databricks clusters](https://docs.databricks.com/clusters/configure.html).",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
