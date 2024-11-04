@@ -6,7 +6,7 @@
             "id": 5349101981275174,
             "definition": {
                 "title": "Overview",
-                "background_color": "white",
+                "background_color": "gray",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
