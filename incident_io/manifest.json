@@ -53,9 +53,9 @@
       "source": "incident-io"
     },
     "monitors": {
-      "[incident.io] Critical public incident": "assets/monitors/critical_public_incident.json",
-      "[incident.io] High number of public incidents": "assets/monitors/high_number_of_public_incidents.json",
-      "[incident.io] Public incident reopened": "assets/monitors/public_incident_reopened.json"
+      "Critical public incident": "assets/monitors/critical_public_incident.json",
+      "High number of public incidents": "assets/monitors/high_number_of_public_incidents.json",
+      "Public incident reopened": "assets/monitors/public_incident_reopened.json"
     }
   },
   "author": {
