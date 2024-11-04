@@ -233,7 +233,7 @@ DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datado
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
 ##### If you do not have the Datadog Agent:
-1. Install the `ddtrace` package:
+1. Install the `dd-trace` package:
 
 ```shell
   npm install dd-trace
@@ -269,7 +269,7 @@ docker run -d \
 npm install dd-trace
 ```
 
-3. Start your application using the `-r dd-trace/init` or `NODE_OPTIONS='--require dd-trace/init` command to automatically enable tracing:
+3. Start your application using the `-r dd-trace/init` or `NODE_OPTIONS='--require dd-trace/init'` command to automatically enable tracing:
 
 ```shell
 DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r 'dd-trace/init' <your_app>.js
@@ -453,7 +453,7 @@ See the [APM PHP library documentation][17] for more advanced usage.
 
 See the [APM PHP library documentation][17] for all the available configuration options.
 
-#### Log prompt and completion sampling (Beta) 
+#### Log prompt and completion sampling (Preview) 
 
 To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="true"` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
 
