@@ -549,7 +549,7 @@
                         "id": 5374534613650044,
                         "definition": {
                             "type": "note",
-                            "content": "The Datadog init scripts support logs configuration to collect and monitor your [Databrick's driver logs](https://docs.microsoft.com/en-us/azure/databricks/clusters/clusters-manage#driver-logs). \n\nYou can also modify the init scripts to configure additional logs instances to read from other log files in your environment. ",
+                            "content": "The Datadog init scripts support configuration for collecting and monitoring your [Databrick's driver logs](https://docs.microsoft.com/en-us/azure/databricks/clusters/clusters-manage#driver-logs). \n\nYou can also modify the init scripts to configure additional logs instances to read from other log files in your environment. ",
                             "background_color": "yellow",
                             "font_size": "14",
                             "text_align": "left",
