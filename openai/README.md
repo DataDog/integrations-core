@@ -240,7 +240,7 @@ You can enable LLM Observability in different environments. Follow the appropria
 2. Start your application with the following command, enabling agentless mode:
 
 ```shell
-  DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r ‘dd-trace/init’ <your_app>.js
+  DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r 'dd-trace/init’ <your_app>.js
 ```
 
 ##### If you already have the Datadog Agent installed:
@@ -270,7 +270,7 @@ npm install dd-trace
 3. Start your application using the `-r dd-trace/init` or `NODE_OPTIONS=’--require dd-trace/init` command to automatically enable tracing:
 
 ```shell
-DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r ‘dd-trace/init’ <your_app>.js
+DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r 'dd-trace/init’ <your_app>.js
 ```
 
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
