@@ -8,6 +8,10 @@ Build similar message for better test assertion failure message.
 
 MAX_SIMILAR_TO_DISPLAY = 15
 
+def tags_list_to_dict(tags):
+    return {
+                        tag.split(':', 1)[0]: (tag.split(':', 1)[1] if ":" in tag else '') for tag in tags
+                    }
 
 def build_similar_elements_msg(expected, submitted_elements):
     """
@@ -30,8 +34,19 @@ def build_similar_elements_msg(expected, submitted_elements):
         for key in closest_dict:
             expected_value = expected_dict[key]
             closest_value = closest_dict[key]
+
             if expected_value is not None and expected_value != closest_value:
-                closest_diff.append(f"        Expected {key}: {expected_value}\n        Found {closest_value}")
+                if key == "tags":
+                    expected_tags_dict = tags_list_to_dict(expected_value)
+                    closest_tags_dict = tags_list_to_dict(closest_value)
+                    for tag in expected_tags_dict:
+                        if closest_tags_dict[tag] != expected_tags_dict[tag]:
+                            closest_diff.append(
+                                f"        Expected tag.{tag}:{expected_tags_dict[tag]}\n"
+                                + f"        Found {closest_tags_dict[tag]}"
+                            )
+                else:
+                    closest_diff.append(f"        Expected {key}: {expected_value}\n        Found {closest_value}")
 
     return (
         "Expected:\n"
