@@ -758,18 +758,18 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:extrahop service:detection @risk_status:critical"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [],
-                                            "search": {
-                                                "query": "source:extrahop service:detection @risk_status:critical"
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -811,18 +811,18 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:extrahop service:detection @risk_status:warning"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [],
-                                            "search": {
-                                                "query": "source:extrahop service:detection @risk_status:warning"
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -863,18 +863,18 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:extrahop service:detection @risk_status:info"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [],
-                                            "search": {
-                                                "query": "source:extrahop service:detection @risk_status:info"
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1593,7 +1593,6 @@
                             "title": "Mitre Tactics Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -1753,7 +1752,6 @@
                             "title": "Mitre Techniques Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -2093,18 +2091,18 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:extrahop service:investigation @status:open"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [],
-                                            "search": {
-                                                "query": "source:extrahop service:investigation @status:open"
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -2204,18 +2202,18 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:extrahop service:investigation @status:in-progress"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [],
-                                            "search": {
-                                                "query": "source:extrahop service:investigation @status:in-progress"
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -2256,18 +2254,18 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:extrahop service:investigation @status:closed"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [],
-                                            "search": {
-                                                "query": "source:extrahop service:investigation @status:closed"
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -2308,18 +2306,18 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:extrahop service:investigation @is_user_created:true"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [],
-                                            "search": {
-                                                "query": "source:extrahop service:investigation @is_user_created:true"
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -2631,7 +2629,6 @@
                             "title": "Investigation Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {

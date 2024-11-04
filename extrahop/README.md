@@ -19,16 +19,14 @@ This integration seamlessly collects all the above listed logs, channeling them 
 2. Generate new Client ID and Client Secret. Click **Create Credentials** which is present at the bottom of the page under **Rest API Credentials** section.
 3. On **System Settings** > **API Access** > **Rest API Credentials**, at the top right corner; Click **Create Credentials** Specify the settings of the new Client ID and Client Secret.
     - Name: A meaningful name that can help you identify the Client ID and Client Secret.
-    - System Access: The system access permission assigned to the ID and Secret. Select **System administration**.
+    - System Access: The system access permission assigned to the ID and Secret. Select **Full read-only**.
     - NDR Module Access: The NDR module access permission assigned to the ID and Secret. Select **Full Access**.
-    - NPM Module Access: The NPM module access permission assigned to the ID and Secret. Select **Full Access**.
+    - NPM Module Access: The NPM module access permission assigned to the ID and Secret. Select **No Access**.
     - Packet And Session Key Access: The packet and session key access permission assigned to the ID and Secret. Select **No Access**.
 4. Click **Save**.
 5. Copy and store **ID** and **Secret** in a secure location.
 
-#### ExtraHop Datadog Integration Configuration
-
-Configure the Datadog endpoint to forward ExtraHop logs to Datadog.
+#### Configure the Datadog endpoint to forward ExtraHop logs to Datadog
 
 1. Navigate to `ExtraHop`.
 2. Add your ExtraHop credentials.
