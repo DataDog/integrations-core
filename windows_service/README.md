@@ -8,6 +8,8 @@ This check monitors the state of any Windows Service and submits a service check
 
 ### Installation
 
+Install the [Windows Services integration][18], and configure it as described in the next section.
+
 The Windows Service check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Windows hosts.
 
 ### Configuration
@@ -136,3 +138,4 @@ If the service is present in the output, permissions are the issue. To give the 
 [15]: https://docs.datadoghq.com/agent/guide/windows-agent-ddagent-user/
 [16]: https://learn.microsoft.com/en-US/troubleshoot/windows-server/group-policy/configure-group-policies-set-security
 [17]: https://learn.microsoft.com/en-us/windows/win32/services/service-trigger-events
+[18]: https://app.datadoghq.com/integrations/windows-service?search=windows%20service
