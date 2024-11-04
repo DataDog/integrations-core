@@ -42,8 +42,8 @@ def build_similar_elements_msg(expected, submitted_elements):
                     for tag in expected_tags_dict:
                         if closest_tags_dict[tag] != expected_tags_dict[tag]:
                             closest_diff.append(
-                                f"        Expected tag.{tag}:{expected_tags_dict[tag]}\n"
-                                + f"        Found {closest_tags_dict[tag]}"
+                                f"        Expected tag {tag}:{expected_tags_dict[tag]}\n"
+                                + f"        Found {tag}:{closest_tags_dict[tag]}"
                             )
                 else:
                     closest_diff.append(f"        Expected {key}: {expected_value}\n        Found {closest_value}")
