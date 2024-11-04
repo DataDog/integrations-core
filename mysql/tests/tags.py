@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from . import common
 
+
 def database_instance_resource_tags(hostname):
     return [f'dd.internal.resource:database_instance:{hostname}', f'database_hostname:{hostname}']
+
 
 METRIC_TAGS = ['tag1:value1', 'tag2:value2']
 METRIC_TAGS_WITH_RESOURCE = [

@@ -708,7 +708,8 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
         aggregator.assert_metric_has_tag("mysql.net.connections", m)
     aggregator.assert_metric_has_tag(
         "mysql.net.connections",
-        f'dd.internal.resource:database_instance:{mysql_check.resolved_hostname}',    )
+        f'dd.internal.resource:database_instance:{mysql_check.resolved_hostname}',
+    )
 
 
 @pytest.mark.parametrize(
