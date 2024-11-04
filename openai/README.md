@@ -9,16 +9,12 @@ Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatb
 Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics, APM, and logs.
 
 ## Setup
+<!-- xxz tab xxx -->
+<!-- xxx tab "API Key" xxx -->
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Python" xxx -->
-
-**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+**Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
 
 ### Installation
-
-#### Web: Get Account-level Usage and Cost Metrics
-
 **Note**: This setup method only collects `openai.api.usage*` metrics, and if you enable OpenAI in Cloud Cost Management, you will also get cost metrics, no additional permissions or setup required. Use the agent setup below for additional metrics.
 
 1. Login to your [OpenAI Account][10].
@@ -29,9 +25,20 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 6. Enter an account name and OpenAI API key copied above in the accounts configuration.
 7. If you use [Cloud Cost Management][14] and enable collecting cost data, it will be visible in Cloud Cost Management within 24 hours. ([collected data][15])
 
+### Configuration
+1. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
+2. Enter an account name and OpenAI API key copied above in the accounts configuration.
+
 <!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
 <!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
 <!-- effect on the tile. -->
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Python" xxx -->
+
+**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+
+### Installation
 
 #### LLM Observability : Prepare your environment and enable LLM
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
@@ -213,22 +220,6 @@ DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datado
 
 ### Installation
 
-#### Web: Get Account-level Usage and Cost Metrics
-
-**Note**: This setup method only collects `openai.api.usage*` metrics, and if you enable OpenAI in Cloud Cost Management, you will also get cost metrics, no additional permissions or setup required. Use the agent setup below for additional metrics.
-
-1. Login to your [OpenAI Account][10].
-2. Navigate to **View API Keys** under account settings.
-3. Click the **Create a new secret key** button.
-4. Copy the created API Key to your clipboard.
-5. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
-6. Enter an account name and OpenAI API key copied above in the accounts configuration.
-7. If you use [Cloud Cost Management][14] and enable collecting cost data, it will be visible in Cloud Cost Management within 24 hours. ([collected data][15])
-
-<!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
-<!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
-<!-- effect on the tile. -->
-
 #### LLM Observability : Prepare your environment and enable LLM
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
@@ -398,22 +389,6 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 **Note**: To collect `openai.api.usage.*` metrics, follow the API key setup instructions.
 
 ### Installation
-
-#### Web: Get Account-level Usage and Cost Metrics
-
-**Note**: This setup method only collects `openai.api.usage*` metrics, and if you enable OpenAI in Cloud Cost Management, you will also get cost metrics, no additional permissions or setup required. Use the agent setup below for additional metrics.
-
-1. Login to your [OpenAI Account][10].
-2. Navigate to **View API Keys** under account settings.
-3. Click the **Create a new secret key** button.
-4. Copy the created API Key to your clipboard.
-5. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
-6. Enter an account name and OpenAI API key copied above in the accounts configuration.
-7. If you use [Cloud Cost Management][14] and enable collecting cost data, it will be visible in Cloud Cost Management within 24 hours. ([collected data][15])
-
-<!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
-<!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
-<!-- effect on the tile. -->
 
 #### APM: Get Usage Metrics for Php Applications
 
