@@ -300,4 +300,4 @@ Need help? Contact [Datadog support][5].
 [3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#langchain
 [4]: https://github.com/DataDog/integrations-core/blob/master/langchain/metadata.csv
 [5]: https://docs.datadoghq.com/help/
-[6]:https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max
+[6]: https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max
