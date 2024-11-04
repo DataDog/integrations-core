@@ -101,7 +101,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 
     _assert_complex_config(
         aggregator,
-        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname='stubbed.hostname')],
+        tags.SC_TAGS + tags.database_instance_resource_tags('stubbed.hostname'),
         tags.METRIC_TAGS_WITH_RESOURCE,
     )
     aggregator.assert_metrics_using_metadata(
@@ -116,7 +116,7 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     aggregator = dd_agent_check(instance_complex)
     _assert_complex_config(
         aggregator,
-        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
+        tags.SC_TAGS + tags.database_instance_resource_tags(dd_default_hostname),
         tags.METRIC_TAGS + ['dbms_flavor:{}'.format(MYSQL_FLAVOR.lower())],
         hostname=dd_default_hostname,
         e2e=True,
@@ -707,8 +707,8 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
     for m in metric_names:
         aggregator.assert_metric_has_tag("mysql.net.connections", m)
     aggregator.assert_metric_has_tag(
-        "mysql.net.connections", tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)
-    )
+        "mysql.net.connections",
+        f'dd.internal.resource:database_instance:{mysql_check.resolved_hostname}',    )
 
 
 @pytest.mark.parametrize(
