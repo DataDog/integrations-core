@@ -22,9 +22,23 @@ def build_similar_elements_msg(expected, submitted_elements):
             metric_stub.tags.sort()
         similar_metrics_to_print.append("{:.2f}    {}".format(score, metric_stub))
 
+    closest_diff = []
+    if len(similar_metrics) > 0:
+        [_, closest] = similar_metrics[0]
+        closest_dict = closest._asdict()
+        expected_dict = expected._asdict()
+        for key in closest_dict:
+            expected_value = expected_dict[key]
+            closest_value = closest_dict[key]
+            if expected_value is not None and expected_value != closest_value:
+                closest_diff.append(f"        Expected {key}: {expected_value}\n        Found {closest_value}")
+
     return (
         "Expected:\n"
         + "        {}\n".format(expected)
+        + "Difference to closest:\n"
+        + "\n".join(closest_diff)
+        + "\n\n"
         + "Similar submitted:\n"
         + "Score   Most similar\n"
         + "\n".join(similar_metrics_to_print)
