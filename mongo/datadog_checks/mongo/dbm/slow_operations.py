@@ -15,6 +15,7 @@ from datadog_checks.mongo.dbm.utils import (
     format_key_name,
     get_command_collection,
     get_command_truncation_state,
+    get_db_from_namespace,
     get_explain_plan,
     obfuscate_command,
     should_explain_operation,
@@ -222,7 +223,7 @@ class MongoSlowOperations(DBMAsyncJob):
         return slow_operation
 
     def _get_db_name(self, command, ns):
-        return command.get('$db') or ns.split('.', 1)[0]
+        return command.get('$db') or get_db_from_namespace(ns)
 
     def _binary_search(self, logs, ts):
         # Binary search to find the index of the first log line with timestamp >= ts
