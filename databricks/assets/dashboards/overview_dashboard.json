@@ -1,6 +1,6 @@
 {
     "title": "Databricks Overview",
-    "description": "This Dashboard provides a high-level overview of your Databricks clusters, alongside detailed Spark metrics and logs, so you can monitor your jobs in real-time.\n\n- [Monitor Databricks with Datadog](/blog/databricks-monitoring-datadog)\n- [Databricks integration docs](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly)\n- [Spark integration docs](https://docs.datadoghq.com/integrations/spark/?tab=host)",
+    "description": "This Dashboard provides a high-level overview of your Databricks clusters, along with detailed Spark metrics and logs, enabling real-time job monitoring.\n\n- [Monitor Databricks with Datadog](/blog/databricks-monitoring-datadog)\n- [Databricks integration docs](https://docs.datadoghq.com/integrations/databricks/?tab=driveronly)\n- [Spark integration docs](https://docs.datadoghq.com/integrations/spark/?tab=host)",
     "widgets": [
         {
             "id": 5738258122441435,
@@ -549,7 +549,7 @@
                         "id": 5374534613650044,
                         "definition": {
                             "type": "note",
-                            "content": "The Datadog init scripts support logs configuration to collect and monitor your [Databrick's driver logs](https://docs.microsoft.com/en-us/azure/databricks/clusters/clusters-manage#driver-logs). \n\nYou can also modify the init scripts to configure additional logs instances to read from other log files in your environment. ",
+                            "content": "The Datadog init scripts support configuration for collecting and monitoring your [Databrick's driver logs](https://docs.microsoft.com/en-us/azure/databricks/clusters/clusters-manage#driver-logs). \n\nYou can also modify the init scripts to configure additional logs instances to read from other log files in your environment. ",
                             "background_color": "yellow",
                             "font_size": "14",
                             "text_align": "left",
@@ -769,7 +769,7 @@
                         "id": 6606212809463528,
                         "definition": {
                             "type": "note",
-                            "content": "Monitor the resource consumption on your Spark driver and worker nodes.\n\nIf there is high resource consumption on your clusters, consider choosing a larger Driver or Worker type for the cluster. Read more about configuring your [Databricks clusters](https://docs.databricks.com/clusters/configure.html).",
+                            "content": "Monitor the resource consumption on your Spark Driver and worker nodes.\n\nIf there is high resource consumption on your clusters, consider choosing a larger Driver or Worker type for the cluster. Read more about configuring your [Databricks clusters](https://docs.databricks.com/clusters/configure.html).",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
@@ -925,7 +925,7 @@
                         "id": 8149905710105464,
                         "definition": {
                             "type": "note",
-                            "content": "Monitor your Spark jobs, stages, and tasks by status.\n\nIncrease in stage failures may signify there is a problem with processing a Spark task like incorrect Spark configuration or code errors. Correlate the failures with your driver logs to observe for an exception.",
+                            "content": "Monitor your Spark jobs, stages, and tasks by status.\n\nAn increase in stage failures may indicate issues with Spark task processing, such as incorrect Spark configuration or code errors. Correlate the failures with your driver logs to check for exceptions.",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
