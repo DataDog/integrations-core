@@ -1,0 +1,1 @@
+Fix bug in parsing database name from namespace when no collection name is present, affecting database-level commands in MongoDB versions 5 and earlier.

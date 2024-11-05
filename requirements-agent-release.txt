@@ -29,9 +29,9 @@ datadog-cert-manager==5.1.0
 datadog-checkpoint-quantum-firewall==1.0.0
 datadog-checks-base==37.1.0
 datadog-checks-dependency-provider==3.0.0
-datadog-checks-downloader==6.0.0
+datadog-checks-downloader==6.1.0
 datadog-cilium==5.0.0
-datadog-cisco-aci==4.0.0
+datadog-cisco-aci==4.1.0
 datadog-cisco-secure-firewall==1.0.0
 datadog-citrix-hypervisor==5.0.0
 datadog-clickhouse==5.0.0
@@ -44,7 +44,7 @@ datadog-coredns==5.0.0; sys_platform == 'linux2'
 datadog-couch==8.0.0
 datadog-couchbase==5.0.0
 datadog-crio==4.0.0
-datadog-datadog-cluster-agent==5.0.0
+datadog-datadog-cluster-agent==5.1.0
 datadog-dcgm==3.1.0
 datadog-directory==4.0.0
 datadog-disk==7.0.0
@@ -120,10 +120,10 @@ datadog-marklogic==6.0.0
 datadog-mcache==6.0.0; sys_platform != 'win32'
 datadog-mesos-master==5.0.0; sys_platform != 'win32'
 datadog-mesos-slave==5.0.0; sys_platform != 'win32'
-datadog-mongo==8.1.0
-datadog-mysql==14.0.0
+datadog-mongo==8.2.0
+datadog-mysql==14.1.0
 datadog-nagios==3.0.0
-datadog-network==5.0.0
+datadog-network==5.1.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==4.0.0
 datadog-nginx==8.0.0
@@ -141,7 +141,7 @@ datadog-pgbouncer==8.0.0; sys_platform != 'win32'
 datadog-php-fpm==5.0.0
 datadog-ping-federate==2.0.0
 datadog-postfix==3.0.0; sys_platform != 'win32'
-datadog-postgres==22.0.3
+datadog-postgres==22.1.0
 datadog-powerdns-recursor==4.0.0
 datadog-presto==3.1.0
 datadog-process==5.0.0
@@ -163,8 +163,8 @@ datadog-snmp==9.0.0
 datadog-snowflake==7.0.0
 datadog-solr==2.1.0
 datadog-sonarqube==5.0.0
-datadog-spark==6.0.0
-datadog-sqlserver==20.0.0
+datadog-spark==6.1.0
+datadog-sqlserver==20.1.0
 datadog-squid==4.0.0
 datadog-ssh-check==4.0.0
 datadog-statsd==3.0.0
@@ -194,7 +194,7 @@ datadog-vault==6.0.0
 datadog-vertica==6.0.0
 datadog-vllm==2.1.0
 datadog-voltdb==5.0.0
-datadog-vsphere==8.0.0
+datadog-vsphere==8.0.1
 datadog-weaviate==3.1.0
 datadog-weblogic==3.0.0
 datadog-win32-event-log==5.0.0; sys_platform == 'win32'
