@@ -1,0 +1,50 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b868f586-fc9e-4514-8316-277df252ec96",
+  "app_id": "vanta",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Vanta Vulnerability logs and Framework metrics.",
+    "title": "Vanta",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 29135246,
+      "source_type_name": "Vanta",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "vanta.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "logs": {
+      "source": "vanta"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
