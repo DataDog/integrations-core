@@ -340,7 +340,7 @@ instances:
     # collect_property_metrics: false
 
     ## @param collect_vsan_data - boolean - optional - default: false
-    ## If true, the integration will collect additional metrics and events about vSAN clusters, hosts, and disks.
+    ## If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
     #
     # collect_vsan_data: false
 

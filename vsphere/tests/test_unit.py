@@ -3470,14 +3470,11 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
 
     mock_cluster = MagicMock()
     mock_host = MagicMock()
-    mock_disk = MagicMock()
     mock_cluster.name = 'hello'
     mock_cluster.configurationEx.vsanConfigInfo.enabled = True
     mock_cluster.host = [mock_host]
     mock_host.name = 'world'
     mock_host.configManager.vsanSystem.config.clusterInfo.nodeUuid = 'TestHostUUID'
-    mock_host.configManager.vsanSystem.QueryDisksForVsan.return_value = [mock_disk]
-    mock_disk.vsanUuid = 'disk'
     mock_infrastructure_cache = MagicMock()
     check.infrastructure_cache = mock_infrastructure_cache
     mock_infrastructure_cache.get_mors.return_value = [mock_cluster, mock_host]
@@ -3494,25 +3491,14 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
         value=0.03,
         tags=[],
     )
-    aggregator.assert_metric(
-        'vsphere.vsan.disk.iopsRead',
-        count=1,
-        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world', 'vsphere_disk:disk'],
-    )
 
     assert "Skipping metric unmapCongestion because it is not in the list of metrics to collect" in caplog.text
     assert "Skipping metric latencyStddev because it is not in the list of metrics to collect" in caplog.text
-    assert "Skipping metric llogLogSpace because it is not in the list of metrics to collect" in caplog.text
     aggregator.assert_metric('vsphere.vsan.cluster.unmapCongestion', count=0)
     aggregator.assert_metric('vsphere.vsan.host.latencyStddev', count=0)
-    aggregator.assert_metric('vsphere.vsan.disk.llogLogSpace', count=0)
     aggregator.assert_metric('vsphere.vsan.cluster.example_cluster_metric', count=0)
     aggregator.assert_metric(
         'vsphere.vsan.host.example_host_metric',
-        count=0,
-    )
-    aggregator.assert_metric(
-        'vsphere.vsan.disk.example_disk_metric',
         count=0,
     )
 
@@ -3546,11 +3532,6 @@ def test_vsan_excluded_host_tags(aggregator, realtime_instance, dd_run_check):
         count=0,
         value=0.03,
         tags=[],
-    )
-    aggregator.assert_metric(
-        'vsphere.vsan.disk.iopsRead',
-        count=1,
-        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world', 'vsphere_disk:disk'],
     )
 
 

@@ -389,7 +389,7 @@ files:
           example: false
       - name: collect_vsan_data
         description: |
-          If true, the integration will collect additional metrics and events about vSAN clusters, hosts, and disks.
+          If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
         value:
           type: boolean
           example: false

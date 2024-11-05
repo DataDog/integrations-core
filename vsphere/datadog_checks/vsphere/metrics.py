@@ -432,24 +432,6 @@ VSAN_CLUSTER_METRICS = {
     'vsan.cluster.used',
 }
 
-VSAN_DISK_METRICS = {
-    'vsan.disk.ioCountDevRead',
-    'vsan.disk.ioCountDevWrite',
-    'vsan.disk.ioCountRead',
-    'vsan.disk.ioCountWrite',
-    'vsan.disk.iopsDevRead',
-    'vsan.disk.iopsDevWrite',
-    'vsan.disk.iopsRead',
-    'vsan.disk.iopsWrite',
-    'vsan.disk.latencyDevDAvg',
-    'vsan.disk.latencyDevGAvg',
-    'vsan.disk.latencyDevRead',
-    'vsan.disk.latencyDevWrite',
-    'vsan.disk.latencyRead',
-    'vsan.disk.latencyWrite',
-    'vsan.disk.throughputDevRead',
-    'vsan.disk.throughputDevWrite',
-}
 
 VSAN_HOST_METRICS = {
     'vsan.host.clientCacheHitRate',
@@ -498,7 +480,6 @@ DATASTORE_METRICS = {
 ALLOWED_METRICS_FOR_VSAN = {
     'cluster': VSAN_CLUSTER_METRICS,
     'host': VSAN_HOST_METRICS,
-    'disk': VSAN_DISK_METRICS,
 }
 
 # All metrics that can be collected from Datacenters.

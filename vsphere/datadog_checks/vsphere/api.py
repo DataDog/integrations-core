@@ -448,23 +448,3 @@ class VSphereAPI(object):
                     )
             performance_metrics.append(discovered_metrics)
         return [health_metrics, performance_metrics]
-
-    @smart_retry
-    def get_vsan_disk_metrics(self, host_reference, cluster_reference):
-        new_cluster_nested_elts = {}
-        new_id_to_tags = {}
-        host_disks = host_reference.configManager.vsanSystem.QueryDisksForVsan()
-        for disk in host_disks:
-            disk_uuid = disk.vsanUuid
-            if disk_uuid:
-                if cluster_reference not in new_cluster_nested_elts:
-                    new_cluster_nested_elts[cluster_reference] = []
-                new_cluster_nested_elts[cluster_reference].append(disk_uuid)
-                new_id_to_tags[disk_uuid] = {
-                    1: cluster_reference.name,
-                    2: host_reference.name,
-                    3: disk_uuid,
-                    0: 'disk',
-                }
-
-        return new_id_to_tags, new_cluster_nested_elts

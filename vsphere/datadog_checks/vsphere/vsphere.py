@@ -558,13 +558,6 @@ class VSphereCheck(AgentCheck):
                                     )
                                     tags.extend(self._config.base_tags)
                                     hostname = given_metric.metricId.dynamicProperty[0][2]
-                                elif resource_type == 'disk':
-                                    tags = (
-                                        ['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
-                                        + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
-                                        + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
-                                        + self._config.base_tags
-                                    )
 
                                 if (
                                     'vsan.{}.{}'.format(resource_type, given_metric.metricId.label)
@@ -619,7 +612,6 @@ class VSphereCheck(AgentCheck):
         entity_ref_ids = {}
         entity_ref_ids['cluster'] = ['cluster-domclient:', 'vsan-cluster-capacity:']
         entity_ref_ids['host'] = ['host-domclient:', 'host-cpu:']
-        entity_ref_ids['disk'] = ['capacity-disk:', 'cache-disk:']
         # {id: {0: type, 1: cluster_name, (optional)2: host_name, (optional)3: disk_id}}
         id_to_tags = {}
         for cluster in self.infrastructure_cache.get_mors(vim.ClusterComputeResource):
@@ -635,9 +627,6 @@ class VSphereCheck(AgentCheck):
                         host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
                         cluster_nested_elts[cluster].append(host_uuid)
                         id_to_tags[host_uuid] = {1: host, 2: host.name, 0: 'host'}
-                        new_id_to_tags, new_cluster_nested_elts = self.api.get_vsan_disk_metrics(host, cluster)
-                        id_to_tags.update(new_id_to_tags)
-                        cluster_nested_elts[cluster].extend(new_cluster_nested_elts[cluster])
                     else:
                         self.log.debug("Skipping host %s because it was filtered", host.name)
             else:
