@@ -16,6 +16,7 @@ slurm.partition.cpu.total,gauge,,cpu,,Total number of CPUs on the partition.,1,s
 slurm.partition.gpu_total,gauge,,,,Total number of GPUs on the partition.,1,slurm,slurm_partition_gpu_total,,
 slurm.partition.gpu_used,gauge,,,,Number of GPUs used on the partition.,1,slurm,slurm_partition_gpu_used,,
 slurm.partition.info,gauge,,,,Information about the Slurm partition.,1,slurm,slurm_partition_info,,
+slurm.partition.nodes.count,gauge,,node,,Number of nodes in the partition.,1,slurm,slurm_partition_nodes_count,,
 slurm.sacct.enabled,gauge,,,,Shows whether we're collecting sacct metrics or not for this host.,1,slurm,slurm_sacct_enabled,,
 slurm.sacct.job.duration,gauge,,second,,Duration of the job in seconds.,1,slurm,slurm_sacct_job_duration,,
 slurm.sacct.job.info,gauge,,,,Information about the Slurm job in sacct.,1,slurm,slurm_sacct_job_info,,

@@ -146,7 +146,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 self.log.debug("No output from %s", name)
 
     def process_sinfo_partition(self, output):
-        # normal*|c[1-2]|1|up|1000|N/A|0/2/0/2|(null)|
+        # normal*|c1|1|up|1000|N/A|1/0/0/1|allocated|1
         lines = output.strip().split('\n')
 
         if self.debug_sinfo_stats:
@@ -163,6 +163,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             if self.gpu_stats:
                 gpu_tags = self._process_sinfo_gpu(partition_data[-2], partition_data[-1], "partition", tags)
                 tags.extend(gpu_tags)
+
+            self._process_metrics(partition_data, PARTITION_MAP, tags)
 
             self._process_sinfo_cpu_state(partition_data[6], "partition", tags)
             self.gauge('partition.info', 1, tags)
@@ -245,7 +247,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             tags = self._process_tags(job_data, SACCT_MAP["tags"], tags)
 
-            # Submit job info metric
+            # Process job metrics
             self._process_metrics(job_data, SACCT_MAP, tags)
 
             duration = parse_duration(job_data[6])
