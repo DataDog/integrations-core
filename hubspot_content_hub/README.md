@@ -13,32 +13,23 @@ The integration includes dashboards that show and analyze both Activity Logs and
 
 ### Configuration
 
-The HubSpot Content Hub Integration requires a HubSpot Content Hub Enterprise Account and a Private app. 
+#### Get HubSpot Content Hub Credentials
 
-#### Create a HubSpot Private App and Obtain an Access Token
-
-1. Log in to [HubSpot Content Hub][2] and navigate to **Settings > Integrations > Private Apps**.
-2. Click **Create private app**, and then enter the required information.
-3. On the **Scopes** tab, select the **Request** checkbox for the following scopes:
+1. Log in to [HubSpot Content Hub][2] 
+2. Navigate to **Settings > Integrations > Private Apps**.
+3. Click **Create private app**, and then enter the required information.
+4. In the **Scopes** tab, click on **+Add New Scope**.
+5. Select the checkboxes for the following scopes and click on **Update**:
    - **account-info.security.read**
    - **business-intelligence**
    - **content**
-4. Click **Create app**.
-5. Review the details in the dialog box and click **Continue creating**.
-6. In the success popup, click **Show Token**, and then click **Copy** to use the access token.
-7. To view the token later, go to the list of private apps, find the created app, and select **View access token**.
+6. Click on **Create app**.
+7. Review the details in the dialog box and click **Continue creating**.
+8. In the success popup, click **Show Token**.
 
+#### Add HubSpot Credentials
 
-#### Configure the HubSpot Content Hub integration in Datadog
-
-Configure the Datadog endpoint to forward HubSpot Content Hub logs and metrics to Datadog.
-
-1. Navigate to the `HubSpot Content Hub` integration tile in Datadog.
-2. Add your HubSpot Content Hub credentials.
-
-| HubSpot Content Hub parameters | Description                                    |
-| ------------------------------ | ---------------------------------------------  |
-| Access Token                   | Access token for your HubSpot private app.     |
+- HubSpot Access Token 
 
 
 ## Data Collected
