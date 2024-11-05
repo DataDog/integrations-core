@@ -76,8 +76,8 @@
       "HubSpot Content Hub - Source Analytics" : "assets/dashboards/hubspot_content_hub_source_analytics.json"
     },
     "monitors": {
-      "[HubSpot Content Hub] Blog-Posts Bounce Rate is High" : "assets/monitors/blog_posts_bounce_rate.json",
-      "[HubSpot Content Hub] Page Bounce Rate is High" : "assets/monitors/page_bounce_rate.json"
+      "Blog Posts Bounce Rate is High" : "assets/monitors/blog_posts_bounce_rate.json",
+      "Page Bounce Rate is High" : "assets/monitors/page_bounce_rate.json"
     },
     "logs": {
       "source": "hubspot-content-hub"
