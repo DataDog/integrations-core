@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-SINFO_PARTITION_PARAMS = ["-hO", "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:|,StateLong:|,Nodes:"]
+SINFO_PARTITION_PARAMS = [
+    "-hO",
+    "Partition:|,NodeList:|,CPUs:|,Available:|,Memory:|,Cluster:|,NodeAIOT:|,StateLong:|,Nodes:",
+]
 SINFO_NODE_PARAMS = ["-hNO", "PartitionName:|,Available:|,NodeList:|,NodeAIOT:|,Memory:|,Cluster:"]
 SINFO_ADDITIONAL_NODE_PARAMS = "|,CPUsLoad:|,FreeMem:|,Disk:|,StateLong:|,Reason:|,features_act:|,Threads:"
 GPU_PARAMS = "|,Gres:|,GresUsed:"
