@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 14.1.0 / 2024-10-31
+
+***Added***:
+
+* [dbm] add service from integration configuration to dbm event payload ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+
+***Fixed***:
+
+* Fixed an incorrect warning when binary logs were disabled ([#18785](https://github.com/DataDog/integrations-core/pull/18785))
+* Fix `mysql.innodb.mem_total` metric parsing from INNODB STATUS for MySQL version 5.7 and above. ([#18885](https://github.com/DataDog/integrations-core/pull/18885))
+* Fixes missing innodb metrics collected from `SHOW ENGINE INNODB STATUS` output.
+  - `mysql.innodb.history_list_length` for MySQL 5.6
+  - `mysq..innodb.pending_log_writes` for MySQL 5.7
+  - `mysql.innodb.pending_checkpoint_writes` for MySQL 5.7 ([#18904](https://github.com/DataDog/integrations-core/pull/18904))
+
 ## 14.0.0 / 2024-10-04
 
 ***Removed***:
