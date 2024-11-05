@@ -131,16 +131,22 @@ SDIAG_MAP = {
         'mean_cycle': 'Mean cycle:',
         'cycles_per_minute': 'Cycles per minute:',
     },
-    "backfill_stats": {
+    'backfill_stats': {
         'backfill.total_jobs_since_start': 'Total backfilled jobs (since last slurm start):',
         'backfill.total_jobs_since_cycle_start': 'Total backfilled jobs (since last stats cycle start):',
         'backfill.total_heterogeneous_components': 'Total backfilled heterogeneous job components:',
         'backfill.total_cycles': 'Total cycles:',
+        'backfill.last_cycle_when': 'Last cycle when:',
         'backfill.last_cycle': 'Last cycle:',
         'backfill.max_cycle': 'Max cycle:',
+        'backfill.mean_cycle': 'Mean cycle:',
         'backfill.last_depth_cycle': 'Last depth cycle:',
         'backfill.last_depth_try_schedule': 'Last depth cycle (try sched):',
+        'backfill.depth_mean': 'Depth Mean:',
+        'backfill.depth_mean_try_depth': 'Depth Mean (try depth):',
         'backfill.last_queue_length': 'Last queue length:',
+        'backfill.queue_length_mean': 'Queue length mean:',
         'backfill.last_table_size': 'Last table size:',
+        'backfill.mean_table_size': 'Mean table size:',
     },
 }

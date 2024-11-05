@@ -1067,6 +1067,11 @@ SDIAG_MAP = {
         {'name': 'slurm.sdiag.backfill.last_depth_try_schedule', 'value': 23, 'tags': []},
         {'name': 'slurm.sdiag.backfill.last_queue_length', 'value': 24, 'tags': []},
         {'name': 'slurm.sdiag.backfill.last_table_size', 'value': 25, 'tags': []},
+        {'name': 'slurm.sdiag.backfill.mean_cycle', 'value': 2411, 'tags': []},
+        {'name': 'slurm.sdiag.backfill.depth_mean', 'value': 26, 'tags': []},
+        {'name': 'slurm.sdiag.backfill.depth_mean_try_depth', 'value': 27, 'tags': []},
+        {'name': 'slurm.sdiag.backfill.queue_length_mean', 'value': 28, 'tags': []},
+        {'name': 'slurm.sdiag.backfill.mean_table_size', 'value': 29, 'tags': []},
     ]
 }
 
