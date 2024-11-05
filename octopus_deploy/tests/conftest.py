@@ -111,8 +111,17 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         url = get_url_path(url)
         request_path = url.replace('?', '/')
         params = kwargs.get('params')
+
         if params:
-            param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
+            param_list = []
+            for param_name, param_value in params.items():
+                if type(param_value) == list:
+                    for param_item in param_value:
+                        param_list.append((param_name, param_item))
+                else:
+                    param_list.append((param_name, param_value))
+
+            param_string = '/'.join(f'{param[0]}={str(param[1])}' for param in param_list)
             request_path = f'{url}/{param_string}'
 
         request_path = request_path.replace(" ", "")

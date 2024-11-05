@@ -16,6 +16,7 @@ from .constants import (
     ALL_METRICS,
     DEPLOYMENT_METRICS,
     DEPLOYMENT_METRICS_NO_PROJECT_1,
+    IN_PROGRESS_METRICS,
     MOCKED_TIMESTAMPS,
     PROJECT_ALL_METRICS,
     PROJECT_GROUP_ALL_METRICS,
@@ -30,7 +31,7 @@ from .constants import (
 
 
 @pytest.mark.usefixtures('mock_http_get')
-@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
 def test_check(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     dd_run_check(check)
@@ -81,7 +82,7 @@ def test_space_invalid(dd_run_check, aggregator, instance):
 
 
 @pytest.mark.usefixtures('mock_http_get')
-@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
 def test_space_cached(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     check._get_space_id = mock.MagicMock()
@@ -134,7 +135,7 @@ def test_space_cached(get_current_datetime, dd_run_check, aggregator, instance):
     ],
 )
 @pytest.mark.usefixtures('mock_http_get')
-@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
 def test_project_groups_discovery(
     get_current_datetime, dd_run_check, aggregator, instance, project_groups_config, expected_metrics
 ):
@@ -147,7 +148,7 @@ def test_project_groups_discovery(
 
 
 @pytest.mark.usefixtures('mock_http_get')
-@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
 def test_project_groups_discovery_error(get_current_datetime, dd_run_check, instance):
     instance = copy.deepcopy(instance)
     instance['project_groups'] = {'include': None}
@@ -196,7 +197,7 @@ def test_project_groups_discovery_error(get_current_datetime, dd_run_check, inst
     ],
 )
 @pytest.mark.usefixtures('mock_http_get')
-@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
 def test_projects_discovery(
     get_current_datetime, dd_run_check, aggregator, instance, project_groups_config, expected_metrics
 ):
@@ -209,13 +210,13 @@ def test_projects_discovery(
 
 
 @pytest.mark.usefixtures('mock_http_get')
-@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
 def test_deployment_metrics(get_current_datetime, dd_run_check, aggregator, instance, caplog):
     caplog.set_level(logging.DEBUG)
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     dd_run_check(check)
 
-    for metric in DEPLOYMENT_METRICS:
+    for metric in DEPLOYMENT_METRICS + IN_PROGRESS_METRICS:
         aggregator.assert_metric(metric["name"], count=metric["count"], value=metric["value"], tags=metric["tags"])
 
 
@@ -229,14 +230,14 @@ def test_deployment_metrics(get_current_datetime, dd_run_check, aggregator, inst
                     '14:45:58.888492+00:00': MockResponse(status_code=404)
                 }
             },
-            'Encountered a RequestException in \'_get_new_tasks_for_project\'',
+            'Encountered a RequestException in \'_get_new_completed_tasks_for_project\'',
             id='404',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get')
-@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
 def test_exception_when_getting_tasks(get_current_datetime, dd_run_check, aggregator, instance, message, caplog):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     caplog.set_level(logging.INFO)
@@ -248,7 +249,7 @@ def test_exception_when_getting_tasks(get_current_datetime, dd_run_check, aggreg
 
 
 @pytest.mark.usefixtures('mock_http_get')
-@mock.patch("datadog_checks.octopus_deploy.project_groups.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime", side_effect=MOCKED_TIMESTAMPS)
 def test_octopus_server_node_metrics(get_current_datetime, dd_run_check, aggregator, instance):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     dd_run_check(check)

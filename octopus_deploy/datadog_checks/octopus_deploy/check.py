@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
@@ -9,6 +9,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.base.utils.models.types import copy_raw
+from datadog_checks.base.utils.time import get_current_datetime
 
 from .config_models import ConfigMixin
 from .constants import (
@@ -16,7 +17,11 @@ from .constants import (
     DEPLOY_COUNT_METRIC,
     DEPLOY_DURATION_METRIC,
     DEPLOY_QUEUE_TIME_METRIC,
+    DEPLOY_QUEUED_METRIC,
+    DEPLOY_QUEUED_STATE,
     DEPLOY_RERUN_METRIC,
+    DEPLOY_RUNNING_METRIC,
+    DEPLOY_RUNNING_STATE,
     DEPLOY_SUCCESS_METRIC,
     DEPLOY_SUCCESS_STATE,
     DEPLOY_WARNINGS_METRIC,
@@ -41,6 +46,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.space_id = None
         space_name = self.instance.get("space")
         self.base_tags = self.instance.get("tags", []) + [f"space_name:{space_name}"]
+        self._to_completed_time = None
+        self._from_completed_time = None
         self.check_initializations.append(self._get_space_id)
         self.check_initializations.append(self._initialize_caches)
 
@@ -49,16 +56,57 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         for _, _, project_group, project_group_config in self.project_groups():
             self._initialize_projects(project_group, project_group_config)
 
-    @handle_error
-    def _get_new_tasks_for_project(self, project):
-        self.log.debug("Getting new tasks for project %s", project.name)
-        params = {'project': project.id, 'fromCompletedDate': project.last_task_time}
+    def _update_completed_times(self):
+        previous_to_time = self._to_completed_time
+        self._from_completed_time = previous_to_time if previous_to_time is not None else get_current_datetime()
+        self._to_completed_time = get_current_datetime()
+
+    def _get_in_progress_tasks(self, project):
+        self.log.debug("Getting queued and running tasks for project %s", project.name)
+        params = {'project': project.id, 'states': [DEPLOY_QUEUED_STATE, DEPLOY_RUNNING_STATE]}
         url = f"{self.config.octopus_endpoint}/{self.space_id}/tasks"
         response = self.http.get(url, params=params)
         response.raise_for_status()
         tasks_json = response.json().get('Items', [])
-        new_completed_time = project.last_task_time
+        self.log.debug("Found %s in progress tasks for project %s", len(tasks_json), project.name)
+
+        project_tags = project.tags
+
+        any_queued = False
+        any_running = False
+        for task in tasks_json:
+            task_name = task.get("Name")
+            state = task.get("State")
+
+            task_tags = [f'task_name:{task_name}', f'task_state:{state}']
+            if state == DEPLOY_QUEUED_STATE:
+                self.gauge(DEPLOY_QUEUED_METRIC, 1, tags=self.base_tags + project_tags + task_tags)
+                any_queued = True
+            else:
+                self.gauge(DEPLOY_RUNNING_METRIC, 1, tags=self.base_tags + project_tags + task_tags)
+                any_running = True
+
+        if not any_queued:
+            self.gauge(DEPLOY_QUEUED_METRIC, 0, tags=self.base_tags + project_tags)
+
+        if not any_running:
+            self.gauge(DEPLOY_RUNNING_METRIC, 0, tags=self.base_tags + project_tags)
+
+    @handle_error
+    def _get_new_completed_tasks_for_project(self, project):
+        self.log.debug("Getting new tasks for project %s", project.name)
+        params = {
+            'project': project.id,
+            'fromCompletedDate': self._from_completed_time,
+            'toCompletedDate': self._to_completed_time,
+        }
+        url = f"{self.config.octopus_endpoint}/{self.space_id}/tasks"
+        response = self.http.get(url, params=params)
+        response.raise_for_status()
+        tasks_json = response.json().get('Items', [])
         self.log.debug("Found %s new tasks for project %s", len(tasks_json), project.name)
+
+        project_tags = project.tags
 
         for task in tasks_json:
             task_id = task.get("Id")
@@ -70,7 +118,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             can_rerun = int(task.get("CanRerun", False))
             has_warnings = int(task.get("HasWarningsOrErrors", False))
 
-            self.log.debug("Found task id=%s, name=%s", task_id, task_name)
+            self.log.debug("Found completed task id=%s, name=%s", task_id, task_name)
 
             completed_time_converted = datetime.fromisoformat(completed_time)
             start_time_converted = datetime.fromisoformat(start_time)
@@ -82,17 +130,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             queue_time = start_time_converted - queue_time_converted
             queue_time_seconds = queue_time.total_seconds()
 
-            if completed_time_converted > new_completed_time:
-                new_completed_time = completed_time_converted
-
             succeeded = int(state == DEPLOY_SUCCESS_STATE)
-
-            project_tags = [
-                f"project_id:{project.id}",
-                f"project_name:{project.name}",
-                f"project_group_id:{project.project_group.id}",
-                f"project_group_name:{project.project_group.name}",
-            ]
 
             tags = [f'task_name:{task_name}', f'task_state:{state}']
 
@@ -102,9 +140,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge(DEPLOY_SUCCESS_METRIC, succeeded, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_RERUN_METRIC, can_rerun, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_WARNINGS_METRIC, has_warnings, tags=self.base_tags + project_tags + tags)
-
-        new_completed_time = new_completed_time + timedelta(milliseconds=1)
-        project.last_completed_time = new_completed_time
 
     def _initialize_projects(self, project_group, project_group_config):
         normalized_projects = normalize_discover_config_include(
@@ -247,10 +282,12 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge(SERVER_MAX_TASKS_METRIC, max_tasks, tags=self.base_tags + server_tags)
 
     def check(self, _):
+        self._update_completed_times()
         for _, _, project_group, _ in self.project_groups():
             self.collect_project_metrics(project_group)
             for _, _, project, _ in self.projects(project_group):
-                self._get_new_tasks_for_project(project)
+                self._get_new_completed_tasks_for_project(project)
+                self._get_in_progress_tasks(project)
 
         self.collect_server_nodes_metrics()
 
