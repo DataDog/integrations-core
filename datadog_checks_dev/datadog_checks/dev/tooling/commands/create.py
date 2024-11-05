@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 from collections import defaultdict
 from datetime import date
@@ -9,7 +10,12 @@ import click
 
 from ...fs import resolve_path
 from ..constants import get_root
-from ..create import construct_template_fields, create_template_files, get_valid_templates
+from ..create import (
+    construct_template_fields,
+    create_template_files,
+    get_valid_templates,
+    prefill_template_fields_for_check_only,
+)
 from ..utils import kebab_case_name, normalize_package_name
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
 
@@ -149,8 +155,9 @@ def _valid_template_description():
 @click.option('--non-interactive', '-ni', is_flag=True, help='Disable prompting for fields')
 @click.option('--quiet', '-q', is_flag=True, help='Show less output')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
+@click.option('--skip-manifest', is_flag=True, help='Prevents validating the manfiest for check_only')
 @click.pass_context
-def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
+def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run, skip_manifest):
     """
     Create scaffolding for a new integration.
 
@@ -171,26 +178,44 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     if integration_type == 'snmp_tile':
         integration_dir_name = 'snmp_' + integration_dir_name
     integration_dir = os.path.join(root, integration_dir_name)
-    if os.path.exists(integration_dir):
-        abort(f'Path `{integration_dir}` already exists!')
+    manifest = {}
+    # check_only is designed to already have content in it
+    if integration_type == 'check_only':
+        if not skip_manifest:
+            if not os.path.exists(os.path.join(integration_dir, "manifest.json")):
+                abort(f"Expected {integration_dir}/manifest.json to exist")
+            # The existing integration folder already includes the author name, strip it out
+            with open(f"{integration_dir_name}/manifest.json", "r") as manifest:
+                manifest = json.loads(manifest.read())
+            author = manifest.get("author", {}).get("name")
+            if author is None:
+                abort("Unable to determine author from manifest")
+            integration_dir_name = integration_dir_name.removeprefix(f"{author}_")
+    else:
+        if os.path.exists(integration_dir):
+            abort(f'Path `{integration_dir}` already exists!')
 
     template_fields = {'manifest_version': '1.0.0', "today": date.today()}
+    if integration_type == 'check_only':
+        template_fields.update(prefill_template_fields_for_check_only(manifest, integration_dir_name))
     if non_interactive and repo_choice != 'core':
         abort(f'Cannot use non-interactive mode with repo_choice: {repo_choice}')
 
     if not non_interactive and not dry_run:
         if repo_choice not in ['core', 'integrations-internal-core']:
-            support_email = click.prompt('Email used for support requests')
-            template_fields['email'] = support_email
+            prompt_and_update_if_missing(template_fields, 'email', 'Email used for support requests')
+            support_email = template_fields['email']
             template_fields['email_packages'] = template_fields['email']
         if repo_choice == 'extras':
             template_fields['author'] = click.prompt('Your name')
 
         if repo_choice == 'marketplace':
-            author_name = click.prompt('Your Company Name')
-            homepage = click.prompt('The product or company homepage')
-            sales_email = click.prompt('Email used for subscription notifications')
-
+            prompt_and_update_if_missing(template_fields, 'author_name', 'Your Company Name')
+            prompt_and_update_if_missing(template_fields, 'homepage', 'The product or company homepage')
+            prompt_and_update_if_missing(template_fields, 'sales_email', 'Email used for subscription notifications')
+            author_name = template_fields['author_name']
+            sales_email = template_fields['sales_email']
+            homepage = template_fields['homepage']
             template_fields['author'] = author_name
 
             eula = 'assets/eula.pdf'

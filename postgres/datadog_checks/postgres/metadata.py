@@ -275,15 +275,28 @@ class PostgresMetadata(DBMAsyncJob):
         }
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-        elapsed_s_schemas = time.time() - self._last_schemas_query_time
-        if (
-            self._collect_schemas_enabled
-            and not self._is_schemas_collection_in_progress
-            and elapsed_s_schemas >= self.schemas_collection_interval
-        ):
-            self._is_schemas_collection_in_progress = True
+        if not self._collect_schemas_enabled:
+            self._log.debug("Skipping schema collection because it is disabled")
+            return
+        if self._is_schemas_collection_in_progress:
+            self._log.debug("Skipping schema collection because it is in progress")
+            return
+        if time.time() - self._last_schemas_query_time < self.schemas_collection_interval:
+            self._log.debug("Skipping schema collection because it was recently collected")
+            return
+
+        self._collect_postgres_schemas()
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_postgres_schemas(self):
+        self._is_schemas_collection_in_progress = True
+        status = "success"
+        start_time = time.time()
+        total_tables = 0
+        try:
             schema_metadata = self._collect_schema_info()
-            # We emit an event for each batch of tables to reduce total data in memory and keep event size reasonable
+            # We emit an event for each batch of tables to reduce total data in memory
+            # and keep event size reasonable
             base_event = {
                 "host": self._check.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
@@ -310,6 +323,14 @@ class PostgresMetadata(DBMAsyncJob):
                                 continue
 
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
+                            self._log.debug(
+                                "Tables found for schema '{schema}' in database '{database}':"
+                                "{tables}".format(
+                                    schema=database["schemas"],
+                                    database=dbname,
+                                    tables=[table["name"] for table in tables],
+                                )
+                            )
                             table_chunks = list(get_list_chunks(tables, chunk_size))
 
                             buffer_column_count = 0
@@ -324,12 +345,35 @@ class PostgresMetadata(DBMAsyncJob):
 
                                 if buffer_column_count >= 100_000:
                                     self._flush_schema(base_event, database, schema, tables_buffer)
+                                    total_tables += len(tables_buffer)
                                     tables_buffer = []
                                     buffer_column_count = 0
 
                             if len(tables_buffer) > 0:
                                 self._flush_schema(base_event, database, schema, tables_buffer)
+                                total_tables += len(tables_buffer)
+        except Exception as e:
+            self._log.error("Error collecting schema metadata: %s", e)
+            status = "error"
+        finally:
             self._is_schemas_collection_in_progress = False
+            elapsed_ms = (time.time() - start_time) * 1000
+            self._check.histogram(
+                "dd.postgres.schema.time",
+                elapsed_ms,
+                tags=self._check.tags + ["status:" + status],
+                hostname=self._check.resolved_hostname,
+                raw=True,
+            )
+            self._check.gauge(
+                "dd.postgres.schema.tables_count",
+                total_tables,
+                tags=self._check.tags + ["status:" + status],
+                hostname=self._check.resolved_hostname,
+                raw=True,
+            )
+            datadog_agent.emit_agent_telemetry("postgres", "schema_tables_elapsed_ms", elapsed_ms, "gauge")
+            datadog_agent.emit_agent_telemetry("postgres", "schema_tables_count", total_tables, "gauge")
 
     def _should_collect_metadata(self, name, metadata_type):
         for re_str in self._config.schemas_metadata_config.get(
@@ -415,6 +459,8 @@ class PostgresMetadata(DBMAsyncJob):
         schemas = []
         for row in rows:
             schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
+
+        self._log.debug("Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows))
         return schemas
 
     def _get_table_info(self, cursor, dbname, schema_id):
@@ -436,6 +482,13 @@ class PostgresMetadata(DBMAsyncJob):
 
         if len(table_info) <= limit:
             return table_info
+
+        self._log.debug(
+            "{table_count} tables found but max_tables is set to {max_tables}."
+            "{missing_count} tables will be missing from this collection".format(
+                table_count=len(table_info), max_tables=limit, missing_count=len(table_info) - limit
+            )
+        )
 
         if not self._config.relations:
             self._check.log.warning(

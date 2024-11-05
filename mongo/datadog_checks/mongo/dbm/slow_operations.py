@@ -15,6 +15,7 @@ from datadog_checks.mongo.dbm.utils import (
     format_key_name,
     get_command_collection,
     get_command_truncation_state,
+    get_db_from_namespace,
     get_explain_plan,
     obfuscate_command,
     should_explain_operation,
@@ -222,7 +223,7 @@ class MongoSlowOperations(DBMAsyncJob):
         return slow_operation
 
     def _get_db_name(self, command, ns):
-        return command.get('$db') or ns.split('.', 1)[0]
+        return command.get('$db') or get_db_from_namespace(ns)
 
     def _binary_search(self, logs, ts):
         # Binary search to find the index of the first log line with timestamp >= ts
@@ -257,7 +258,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "user": slow_operation.get("user"),  # only available with profiling
             "application": slow_operation.get("appName"),  # only available with profiling
             "statement": slow_operation["obfuscated_command"],
-            "query_hash": slow_operation.get("queryHash"),  # only available with profiling
+            "query_hash": slow_operation.get("queryHash") or slow_operation.get("planCacheShapeHash"),
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
             "comment": slow_operation["command"].get("comment"),
@@ -290,6 +291,11 @@ class MongoSlowOperations(DBMAsyncJob):
             "cursor": self._get_slow_operation_cursor(slow_operation),
             "lock_stats": self._get_slow_operation_lock_stats(slow_operation),
             "flow_control_stats": self._get_slow_operation_flow_control_stats(slow_operation),
+            # MongoDB 5.0+ specific fields
+            "resolved_views": self._get_slow_operation_resolved_views(slow_operation),
+            # MongoDB 8.0+ specific fields
+            "working_millis": slow_operation.get("workingMillis"),  # the amount of time spends working on the operation
+            "queues": self._get_slow_operation_queues(slow_operation),
         }
 
         return self._sanitize_event(event)
@@ -304,7 +310,9 @@ class MongoSlowOperations(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags()),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": slow_operation["ts"] * 1000,
+            "service": self._check._config.service,
             "network": {
                 "client": self._get_slow_operation_client(slow_operation),
             },
@@ -372,6 +380,21 @@ class MongoSlowOperations(DBMAsyncJob):
             return format_key_name(self._check.convert_to_underscore_separated, flow_control_stats)
         return None
 
+    def _get_slow_operation_queues(self, slow_operation):
+        queues = slow_operation.get("queues")
+        if queues:
+            return format_key_name(self._check.convert_to_underscore_separated, queues)
+        return
+
+    def _get_slow_operation_resolved_views(self, slow_operation):
+        resolved_views = slow_operation.get("resolvedViews")
+        result = []
+        if resolved_views:
+            for view in resolved_views:
+                view.pop("resolvedPipeline", None)
+                result.append(format_key_name(self._check.convert_to_underscore_separated, view))
+        return result or None
+
     def _sanitize_event(self, event):
         # remove empty fields
         return {k: v for k, v in event.items() if v is not None}
@@ -384,7 +407,9 @@ class MongoSlowOperations(DBMAsyncJob):
             "dbm_type": "slow_query",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": time.time() * 1000,
+            "service": self._check._config.service,
             "mongodb_slow_queries": slow_operation_events,
         }
         self._check.database_monitoring_query_activity(json_util.dumps(payload))

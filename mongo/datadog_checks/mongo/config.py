@@ -11,7 +11,7 @@ from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
 
 
 class MongoConfig(object):
-    def __init__(self, instance, log):
+    def __init__(self, instance, log, init_config):
         self.log = log
         self.min_collection_interval = int(instance.get('min_collection_interval', 15))
 
@@ -102,6 +102,7 @@ class MongoConfig(object):
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
         self.cluster_name = instance.get('cluster_name', None)
+        self.cloud_metadata = self._compute_cloud_metadata(instance)
         self._operation_samples_config = instance.get('operation_samples', {})
         self._slow_operations_config = instance.get('slow_operations', {})
         self._schemas_config = instance.get('schemas', {})
@@ -119,6 +120,7 @@ class MongoConfig(object):
         # TODO: service check and metric tags should be updated to be dynamic with auto-discovered databases
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
+        self.service = instance.get('service') or init_config.get('service') or ''
 
     def _get_clean_server_name(self):
         try:
@@ -148,6 +150,8 @@ class MongoConfig(object):
             main_host, main_port = main_host.split(':')
 
         service_check_tags = ["db:%s" % self.db_name, "host:%s" % main_host, "port:%s" % main_port] + self._base_tags
+        if self.cluster_name:
+            service_check_tags.append('clustername:%s' % self.cluster_name)
         return service_check_tags
 
     def _compute_metric_tags(self):
@@ -155,6 +159,15 @@ class MongoConfig(object):
         if self.cluster_name:
             tags.append('clustername:%s' % self.cluster_name)
         return tags
+
+    def _compute_cloud_metadata(self, instance):
+        cloud_metadata = {}
+        if aws := instance.get('aws'):
+            cloud_metadata['aws'] = {
+                'instance_endpoint': aws.get('instance_endpoint'),
+                'cluster_identifier': aws.get('cluster_identifier') or self.cluster_name,
+            }
+        return cloud_metadata
 
     @property
     def operation_samples(self):
