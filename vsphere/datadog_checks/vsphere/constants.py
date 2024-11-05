@@ -220,10 +220,8 @@ PER_RESOURCE_EVENTS = [
 ]
 
 VSAN_EVENT_IDS = [
-    'vsan.health.test.cloudhealth.diskusage.event',
     'vsan.health.test.cluster.consistentconfig.event',
     'vsan.health.test.network.hostdisconnected.event',
-    'vsan.health.test.physicaldisks.diskusage.event',
 ]
 
 HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']
