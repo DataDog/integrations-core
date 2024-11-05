@@ -167,6 +167,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self._process_sinfo_cpu_state(partition_data[6], "partition", tags)
             self.gauge('partition.info', 1, tags)
 
+        self.gauge('sinfo.partition.enabled', 1)
+
     def process_sinfo_node(self, output):
         # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES      |GRES_USED  # noqa: E501
         # normal    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.84 |    5440 |       0 |idle  |none   |(null)          |      1 |(null)    |(null)     # noqa: E501
@@ -195,6 +197,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self._process_sinfo_cpu_state(node_data[3], 'node', tags)
             self.gauge('node.info', 1, tags=tags)
 
+        self.gauge('sinfo.node.enabled', 1)
+
     def process_squeue(self, output):
         # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY # noqa: E501
         #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M # noqa: E501
@@ -212,6 +216,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             tags = self._process_tags(job_data, SQUEUE_MAP["tags"], tags)
 
             self.gauge('squeue.job.info', 1, tags=tags)
+
+        self.gauge('squeue.enabled', 1)
 
     def process_sacct(self, output):
         # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList    # noqa: E501
@@ -250,6 +256,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge('sacct.job.duration', duration, tags=tags)
             self.gauge('sacct.job.info', 1, tags=tags)
 
+        self.gauge('sacct.enabled', 1)
+
     def process_sshare(self, output):
         # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                     # noqa: E501
         # root    |root |        1 |           |       0 |          |    0.000000 | 0.000000 |0.000000 |            |cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0  # noqa: E501
@@ -267,6 +275,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             tags = self._process_tags(sshare_data, SSHARE_MAP["tags"], tags)
 
             self._process_metrics(sshare_data, SSHARE_MAP, tags)
+
+        self.gauge('sshare.enabled', 1, tags=tags)
 
     def process_sdiag(self, output):
         metrics = {}
@@ -300,6 +310,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         for name, value in metrics.items():
             self.gauge(f'sdiag.{name}', value, tags=self.tags)
+
+        self.gauge('sdiag.enabled', 1)
 
     def _update_sacct_params(self):
         if self.last_run_time is not None:

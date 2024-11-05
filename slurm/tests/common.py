@@ -31,6 +31,11 @@ def mock_output(filename):
 
 SINFO_MAP = {
     'metrics': [
+        {
+            'name': 'slurm.sinfo.node.enabled',
+            'value': 1,
+            'tags': [],
+        },
         # Node metrics
         # PARTITION  |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES        |GRES_USED    # noqa: E501
         # normal*    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.46 |    4076 |       0 |idle  |none   |(null)          |      1 |gpu:tesla:4 |gpu:tesla:3(IDX:0,2-3)   # noqa: E501
@@ -552,6 +557,11 @@ SINFO_MAP = {
                 'sinfo_state_code:maintenance',
             ],
         },
+        {
+            'name': 'slurm.sinfo.partition.enabled',
+            'value': 1,
+            'tags': [],
+        },
         # partition metrics
         # PARTITION |NODELIST |CPUS |AVAIL |MEMORY |CLUSTER |NODES(A/I/O/T) |STATE        |GRES        |GRES_USED    # noqa: E501
         # normal*   |c[1-2]   |   1 |up    |  1000 |N/A     |0/2/0/2        |idle~        |gpu:tesla:4 |gpu:tesla:3(IDX:0,2-3)    # noqa: E501
@@ -761,6 +771,11 @@ SINFO_MAP = {
 
 SQUEUE_MAP = {
     'metrics': [
+        {
+            'name': 'slurm.squeue.enabled',
+            'value': 1,
+            'tags': [],
+        },
         # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY   # noqa: E501
         #    42 |root |wrap    |RUNNING |c1       |   1 |c1               |300M        # noqa: E501
         {
@@ -830,6 +845,11 @@ SQUEUE_MAP = {
 
 SACCT_MAP = {
     'metrics': [
+        {
+            'name': 'slurm.sacct.enabled',
+            'value': 1,
+            'tags': [],
+        },
         # JobID    |JobName |Partition |Account |AllocCPUS |AllocTRES                       |Elapsed  |CPUTimeRAW |MaxRSS |MaxVMSize |AveCPU |AveRSS |State     |ExitCode |Start               |End                 |NodeList | # noqa: E501
         # 56       |wrap    |normal    |root    |        1 |billing=1,cpu=1,mem=500M,node=1 |00:12:34 |        10 |    11 |       12 |    13 |    14 |COMPLETED |0:0      |2024-10-20T22:14:25 |2024-10-20T22:14:25 |c1       | # noqa: E501
         {
@@ -1038,6 +1058,11 @@ SACCT_MAP = {
 
 SDIAG_MAP = {
     'metrics': [
+        {
+            'name': 'slurm.sdiag.enabled',
+            'value': 1,
+            'tags': [],
+        },
         {'name': 'slurm.sdiag.server_thread_count', 'value': 1, 'tags': []},
         {'name': 'slurm.sdiag.agent_queue_size', 'value': 2, 'tags': []},
         {'name': 'slurm.sdiag.agent_count', 'value': 3, 'tags': []},
@@ -1077,6 +1102,11 @@ SDIAG_MAP = {
 
 SSHARE_MAP = {
     'metrics': [
+        {
+            'name': 'slurm.sshare.enabled',
+            'value': 1,
+            'tags': [],
+        },
         # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                    | # noqa: E501
         # root    |root |        1 |         2 |       3 |        4 |    5.000000 | 6.000000 |7.000000 |            |cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0 | # noqa: E501
         {
