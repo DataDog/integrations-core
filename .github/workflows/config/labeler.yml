@@ -445,6 +445,8 @@ integration/silk:
 - silk/**/*
 integration/singlestore:
 - singlestore/**/*
+integration/slurm:
+- slurm/**/*
 integration/snmp:
 - snmp/**/*
 integration/snmp_american_power_conversion:
