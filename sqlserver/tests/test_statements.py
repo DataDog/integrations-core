@@ -1020,6 +1020,7 @@ def test_metrics_lookback_multiplier(instance_docker):
     check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
     mock_cursor.execute.assert_called_with(ANY, (6,))
 
+
 @pytest.mark.unit
 def test_metrics_lookback_window_config(instance_docker):
     instance_docker['query_metrics'] = {'lookback_window': 86400}
