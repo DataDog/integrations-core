@@ -157,6 +157,7 @@ class QueryMetrics(BaseModel):
     enforce_collection_interval_deadline: Optional[bool] = None
     max_queries: Optional[int] = None
     samples_per_hour_per_query: Optional[int] = None
+    lookback_window: Optional[int] = None
 
 
 class SchemasCollection(BaseModel):
