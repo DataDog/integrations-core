@@ -11,7 +11,7 @@
         expression {query}.contains('fromCompletedDate')
     }
     route @get_tasks_project_1 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-1/fromCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
+        rewrite * /GET/api/Spaces-1/tasks/project=Projects-1/fromCompletedDate=2024-09-2314:45:58.888492+00:00/toCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
         file_server
     }
     @get_running_tasks_project_1 {
@@ -31,7 +31,7 @@
         expression {query}.contains('fromCompletedDate')
     }
     route @get_tasks_project_2 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-2/fromCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
+        rewrite * /GET/api/Spaces-1/tasks/project=Projects-2/fromCompletedDate=2024-09-2314:45:58.888492+00:00/toCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
         file_server
     }
     @get_running_tasks_project_2 {
@@ -51,7 +51,7 @@
         expression {query}.contains('fromCompletedDate')
     }
     route @get_tasks_project_3 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-3/fromCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
+        rewrite * /GET/api/Spaces-1/tasks/project=Projects-3/fromCompletedDate=2024-09-2314:45:58.888492+00:00/toCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
         file_server
     }
     @get_running_tasks_project_3 {
@@ -71,7 +71,7 @@
         expression {query}.contains('fromCompletedDate')
     }
     route @get_tasks_project_4 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-4/fromCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
+        rewrite * /GET/api/Spaces-1/tasks/project=Projects-4/fromCompletedDate=2024-09-2314:45:58.888492+00:00/toCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
         file_server
     }
     @get_running_tasks_project_4 {
