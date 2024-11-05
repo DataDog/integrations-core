@@ -40,7 +40,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ### Installation
 
-#### LLM Observability: Prepare your environment and enable LLM
+#### LLM Observability: Get end-to-end visibility into your LLM application's calls to OpenAI
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
 ##### If you do not have the Datadog Agent:
@@ -220,7 +220,7 @@ DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datado
 
 ### Installation
 
-#### LLM Observability: Prepare your environment and enable LLM
+#### LLM Observability: Get end-to-end visibility into your LLM application's calls to OpenAI
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
 ##### If you do not have the Datadog Agent:
