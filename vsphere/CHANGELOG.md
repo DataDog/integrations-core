@@ -8,7 +8,7 @@
 
 * Add debug log line for host tags. ([#18774](https://github.com/DataDog/integrations-core/pull/18774))
 
-## 8.0.0 / 2024-09-25
+## 8.0.0 / 2024-09-25 / Agent 7.59.0
 
 ***Removed***:
 

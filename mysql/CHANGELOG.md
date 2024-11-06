@@ -17,7 +17,7 @@
   - `mysq..innodb.pending_log_writes` for MySQL 5.7
   - `mysql.innodb.pending_checkpoint_writes` for MySQL 5.7 ([#18904](https://github.com/DataDog/integrations-core/pull/18904))
 
-## 14.0.0 / 2024-10-04
+## 14.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 
