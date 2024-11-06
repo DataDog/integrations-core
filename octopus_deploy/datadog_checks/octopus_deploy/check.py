@@ -72,25 +72,18 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
         project_tags = project.tags
 
-        any_queued = False
-        any_running = False
+        queued = 0
+        running = 0
         for task in tasks_json:
-            task_name = task.get("Name")
             state = task.get("State")
-
-            task_tags = [f'task_name:{task_name}', f'task_state:{state}']
             if state == DEPLOY_QUEUED_STATE:
-                self.gauge(DEPLOY_QUEUED_METRIC, 1, tags=self.base_tags + project_tags + task_tags)
-                any_queued = True
+                queued += 1
             else:
-                self.gauge(DEPLOY_RUNNING_METRIC, 1, tags=self.base_tags + project_tags + task_tags)
-                any_running = True
+                running += 1
 
-        if not any_queued:
-            self.gauge(DEPLOY_QUEUED_METRIC, 0, tags=self.base_tags + project_tags)
+        self.gauge(DEPLOY_QUEUED_METRIC, queued, tags=self.base_tags + project_tags)
 
-        if not any_running:
-            self.gauge(DEPLOY_RUNNING_METRIC, 0, tags=self.base_tags + project_tags)
+        self.gauge(DEPLOY_RUNNING_METRIC, running, tags=self.base_tags + project_tags)
 
     @handle_error
     def _get_new_completed_tasks_for_project(self, project):
