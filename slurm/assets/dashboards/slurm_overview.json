@@ -1442,7 +1442,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:slurm.sacct.job.duration{slurm_job_state:running,$slurmctld_host,$slurm_job_id,$slurm_job_user} by {host,slurm_job_id,slurm_job_user}.fill(null)"
+                                            "query": "avg:slurm.sacct.job.duration{slurm_job_state:running,$slurmctld_host,$slurm_job_id} by {host,slurm_job_id,slurm_job_account}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
