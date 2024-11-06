@@ -31,7 +31,82 @@ tests:
             "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
         }
     }
-  result: null
+  result:
+    custom:
+      actor:
+        actor_type: "user"
+      context:
+        context_type: "web"
+      created_at: "2024-10-18T04:42:40.072Z"
+      details:
+        app_gid: "1207902716322150"
+        app_name: "ExperienceCloudAsana"
+        app_type: "oauth"
+        app_url: ""
+      event_category: "apps"
+      event_type: "user_app_authorized"
+      gid: "1208575735614490"
+      http:
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "130"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      resource:
+        email: "test.user@gmail.com"
+        gid: "1208549725691543"
+        name: "Test User"
+        resource_type: "user"
+      usr:
+        email: "test.user@gmail.com"
+        id: "1208549725691543"
+        name: "Test User"
+    message: |-
+      {
+        "actor" : {
+          "gid" : "1208549725691543",
+          "actor_type" : "user",
+          "name" : "Test User",
+          "email" : "test.user@gmail.com"
+        },
+        "gid" : "1208575735614490",
+        "event_type" : "user_app_authorized",
+        "resource" : {
+          "gid" : "1208549725691543",
+          "resource_type" : "user",
+          "name" : "Test User",
+          "email" : "test.user@gmail.com"
+        },
+        "context" : {
+          "context_type" : "web",
+          "client_ip_address" : "10.10.10.10",
+          "user_agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+        },
+        "created_at" : "2024-10-18T04:42:40.072Z",
+        "details" : {
+          "app_name" : "ExperienceCloudAsana",
+          "app_type" : "oauth",
+          "app_url" : "",
+          "app_gid" : "1207902716322150"
+        },
+        "event_category" : "apps"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1729226560072
  -
   sample: |-
     {
@@ -51,7 +126,6 @@ tests:
             "name": "Test User1's previously assigned tasks"
         },
         "details": {
-            "old_value": null,
             "new_value": "members_only"
         },
         "context": {
