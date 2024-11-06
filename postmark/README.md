@@ -23,7 +23,7 @@ Configure the Datadog endpoint to forward Postmark broadcast message streams act
 1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
 2. Log in to your [Postmark account][3]. This redirects you to the [servers page][4].
 3. Select the desired server. This redirects you to the **Message Streams page**.
-4. 4. On the message streams page, either select an existing broadcast message stream or create a new one. To create a new stream, click the **Create Message Stream** button, enter a stream name, and select **Broadcasts** as the message type.
+4. On the message streams page, either select an existing broadcast message stream or create a new one. To create a new stream, click the **Create Message Stream** button, enter a stream name, and select **Broadcasts** as the message type.
 5. In the navigation panel, click the **Webhooks** tab.
 6. Click **Add Webhook**.
 7. Enter the webhook URL provided from step 1.
