@@ -2,7 +2,32 @@
 
 <!-- towncrier release notes start -->
 
-## 3.0.0 / 2024-10-01
+## 4.1.0 / 2024-10-31
+
+***Added***:
+
+* [NDM] [Cisco ACI] Utilize raw ID for interface metadata ([#18842](https://github.com/DataDog/integrations-core/pull/18842))
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Improve integration performance ([#18747](https://github.com/DataDog/integrations-core/pull/18747))
+
+## 4.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* [NDM] [Cisco ACI] Add check metrics ([#18748](https://github.com/DataDog/integrations-core/pull/18748))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 
