@@ -23,7 +23,6 @@ from .constants import (
     DEPLOY_RUNNING_METRIC,
     DEPLOY_RUNNING_STATE,
     DEPLOY_SUCCESS_METRIC,
-    DEPLOY_SUCCESS_STATE,
     DEPLOY_WARNINGS_METRIC,
     PROJECT_COUNT_METRIC,
     PROJECT_GROUP_COUNT_METRIC,
@@ -57,9 +56,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._initialize_projects(project_group, project_group_config)
 
     def _update_completed_times(self):
+        current_time = get_current_datetime()
         previous_to_time = self._to_completed_time
-        self._from_completed_time = previous_to_time if previous_to_time is not None else get_current_datetime()
-        self._to_completed_time = get_current_datetime()
+        self._from_completed_time = previous_to_time if previous_to_time is not None else current_time
+        self._to_completed_time = current_time
 
     def _get_in_progress_tasks(self, project):
         self.log.debug("Getting queued and running tasks for project %s", project.name)
@@ -116,6 +116,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             start_time = task.get("StartTime")
             queue_time = task.get("QueueTime")
             can_rerun = int(task.get("CanRerun", False))
+            finished_successfully = int(task.get('FinishedSuccessfully', False))
             has_warnings = int(task.get("HasWarningsOrErrors", False))
 
             self.log.debug("Found completed task id=%s, name=%s", task_id, task_name)
@@ -130,14 +131,12 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             queue_time = start_time_converted - queue_time_converted
             queue_time_seconds = queue_time.total_seconds()
 
-            succeeded = int(state == DEPLOY_SUCCESS_STATE)
-
             tags = [f'task_name:{task_name}', f'task_state:{state}']
 
             self.gauge(DEPLOY_COUNT_METRIC, 1, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_DURATION_METRIC, duration_seconds, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_QUEUE_TIME_METRIC, queue_time_seconds, tags=self.base_tags + project_tags + tags)
-            self.gauge(DEPLOY_SUCCESS_METRIC, succeeded, tags=self.base_tags + project_tags + tags)
+            self.gauge(DEPLOY_SUCCESS_METRIC, finished_successfully, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_RERUN_METRIC, can_rerun, tags=self.base_tags + project_tags + tags)
             self.gauge(DEPLOY_WARNINGS_METRIC, has_warnings, tags=self.base_tags + project_tags + tags)
 
