@@ -135,4 +135,72 @@ tests:
             "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
         }
     }
-  result: null
+  result:
+    custom:
+      actor:
+        actor_type: "user"
+      context:
+        context_type: "web"
+      created_at: "2024-10-18T09:14:10.943Z"
+      details:
+        new_value: "members_only"
+        old_value: "NULL"
+      event_category: "roles"
+      event_type: "project_privacy_settings_changed"
+      gid: "1208576820918547"
+      http:
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "130"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      network:
+        client:
+          geoip: {}
+          ip: "20.20.20.20"
+      resource:
+        gid: "1208576817480872"
+        name: "Test User1's previously assigned tasks"
+        resource_type: "project"
+      usr:
+        email: "test.user@gmail.com"
+        id: "1208549725691543"
+        name: "Test User"
+    message: |-
+      {
+        "actor" : {
+          "gid" : "1208549725691543",
+          "actor_type" : "user",
+          "name" : "Test User",
+          "email" : "test.user@gmail.com"
+        },
+        "gid" : "1208576820918547",
+        "event_type" : "project_privacy_settings_changed",
+        "resource" : {
+          "gid" : "1208576817480872",
+          "resource_type" : "project",
+          "name" : "Test User1's previously assigned tasks"
+        },
+        "context" : {
+          "context_type" : "web",
+          "client_ip_address" : "20.20.20.20",
+          "user_agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+        },
+        "created_at" : "2024-10-18T09:14:10.943Z",
+        "details" : {
+          "new_value" : "members_only"
+        },
+        "event_category" : "roles"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1729242850943
