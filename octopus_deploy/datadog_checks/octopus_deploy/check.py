@@ -255,6 +255,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
     def project_groups(self):
         if self._project_groups_discovery:
             project_groups = list(self._project_groups_discovery.get_items())
+            for _, project_group_name, _, _ in project_groups:
+                if self._projects_discovery.get(project_group_name) is None:
+                    self._projects_discovery[project_group_name] = None
         else:
             project_groups = [
                 (None, project_groups.name, project_groups, None) for project_groups in self._get_new_project_groups()
