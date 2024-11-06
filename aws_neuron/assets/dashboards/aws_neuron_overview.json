@@ -1,6 +1,6 @@
 {
   "title": "AWS Inferentia and AWS Trainium Monitoring Dashboard",
-  "description": "# Description\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency and memory usage.\n\n# Useful Links\n\n[AWS Inferentia and AWS Trainium Monitoring Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
+  "description": "# Description\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency, and memory usage.\n\n# Useful Links\n\n[AWS Inferentia and AWS Trainium Monitoring Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
   "widgets": [
     {
       "id": 6979231130018708,
@@ -15,7 +15,7 @@
             "id": 56755139831890,
             "definition": {
               "type": "note",
-              "content": "# AWS Trainium and AWS Inferentia Monitoring\n\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your AWS ML chips as well as insights into the execution and training of your models, including error rates, latency and memory usage.",
+              "content": "# AWS Trainium and AWS Inferentia Monitoring\n\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your AWS machine learning (ML) chips as well as insights into the execution and training of your models, including error rates, latency, and memory usage.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
