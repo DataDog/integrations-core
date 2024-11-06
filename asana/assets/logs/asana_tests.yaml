@@ -113,7 +113,7 @@ tests:
         "gid": "1208576820918547",
         "created_at": "2024-10-18T09:14:10.943Z",
         "event_type": "project_privacy_settings_changed",
-        "event_category": "access_control",
+        "event_category": "roles",
         "actor": {
             "actor_type": "user",
             "gid": "1208549725691543",
@@ -126,6 +126,7 @@ tests:
             "name": "Test User1's previously assigned tasks"
         },
         "details": {
+            "old_value": null,
             "new_value": "members_only"
         },
         "context": {
