@@ -1,1 +1,0 @@
-Fix `mysql.innodb.mem_total` metric parsing from INNODB STATUS for MySQL version 5.7 and above.
