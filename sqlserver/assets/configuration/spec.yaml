@@ -412,6 +412,7 @@ files:
           value:
             type: integer
             display_default: 2 * collection_interval
+            example: 600
     - name: procedure_metrics
       description: Configure collection of procedure metrics
       options:

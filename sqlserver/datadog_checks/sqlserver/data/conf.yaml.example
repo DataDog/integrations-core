@@ -353,7 +353,7 @@ instances:
         ## metrics collection. Set a longer lookback window (in seconds) to capture infrequently
         ## run queries.
         #
-        # lookback_window: <LOOKBACK_WINDOW>
+        # lookback_window: 600
 
     ## Configure collection of procedure metrics
     #
