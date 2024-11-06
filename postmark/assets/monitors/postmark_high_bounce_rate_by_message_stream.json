@@ -6,7 +6,7 @@
 	"description": "This monitor tracks the bounce rate for emails sent with specific message stream. A high bounce rate may indicate issues with recipient addresses or content quality, helping you identify and address potential problems in your email campaigns.",
 	"definition": {
 		"id": 156055837,
-		"name": "[Postmark] High bounce rate by message stream",
+		"name": "High bounce rate by message stream",
 		"type": "log alert",
 		"query": "formula(\"(query1 / query) * 100\").last(\"1d\") > 10",
 		"message": "{{#is_warning}}  \nThe bounce rate for message stream  '{{log.attributes.MessageStream}}' has exceeded the threshold.  \nCurrent Bounce Rate: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe bounce rate for message stream  '{{log.attributes.MessageStream}}' has exceeded the threshold.    \nCurrent Bounce Rate: {{value}}%  \nThreshold: {{threshold}}%  \n{{/is_alert}}",
