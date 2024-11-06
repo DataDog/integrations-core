@@ -354,6 +354,12 @@ hubspot_content_hub/*.md                                            @DataDog/saa
 hubspot_content_hub/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
 hubspot_content_hub/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+
+vonage/                                                @DataDog/saas-integrations
+vonage/*.md                                            @DataDog/saas-integrations @DataDog/documentation
+vonage/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
+vonage/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
