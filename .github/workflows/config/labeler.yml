@@ -69,6 +69,8 @@ integration/argo_workflows:
 - argo_workflows/**/*
 integration/argocd:
 - argocd/**/*
+integration/asana:
+- asana/**/*
 integration/aspdotnet:
 - aspdotnet/**/*
 integration/avi_vantage:
