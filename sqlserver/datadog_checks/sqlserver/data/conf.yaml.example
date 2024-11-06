@@ -348,12 +348,12 @@ instances:
         #
         # samples_per_hour_per_query: 4
 
-        ## @param lookback_window - integer - optional - default: 3600
+        ## @param lookback_window - integer - optional
         ## Queries whose last execution completed after the lookback window are excluded from
         ## metrics collection. Set a longer lookback window (in seconds) to capture infrequently
         ## run queries.
         #
-        # lookback_window: 3600
+        # lookback_window: <LOOKBACK_WINDOW>
 
     ## Configure collection of procedure metrics
     #
