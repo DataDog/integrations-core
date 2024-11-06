@@ -75,7 +75,9 @@ docker run -d \
 **Note**: In serverless environments, Datadog automatically flushes spans at the end of the Lambda function.
 
 ##### Automatic LangChain Tracing
-LangChain integration is automatically enabled when LLM Observability is configured. This captures latency, errors, input/output messages, and token usage for LangChain operations. 
+
+LangChain integration is automatically enabled when LLM Observability is configured. This captures latency, errors, input/output messages, and token usage for LangChain operations.
+
 The following methods are traced for both synchronous and asynchronous LangChain operations:
 
 - LLMs: `llm.invoke()`, `llm.ainvoke()`
@@ -86,6 +88,7 @@ The following methods are traced for both synchronous and asynchronous LangChain
 No additional setup is required for these methods.
 
 ##### Validation
+
 Validate that LLM Observability is properly capturing spans by checking your application logs for successful span creation. You can also run the following command to check the status of the `ddtrace` integration:
 
 ```shell
@@ -157,7 +160,7 @@ To adjust the log sample rate, see the [APM library documentation][3].
 **Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
 
 
-###Validation
+### Validation
 
 Validate that the APM Python library can communicate with your Agent using:
 
@@ -186,8 +189,7 @@ ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake
 WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
 DEBUG:ddtrace.contrib._trace_utils_llm.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
 ```
-
-<!-- xxx tabs xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Other Languages" xxx -->
 
 ### Installation
