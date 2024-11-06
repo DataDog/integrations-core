@@ -157,6 +157,7 @@ class KafkaCheck(AgentCheck):
             ]
             consumer_group_tags.extend(self.config._custom_tags)
 
+            # test
             partitions = self.client.get_partitions_for_topic(topic)
             self.log.debug("Received partitions %s for topic %s", partitions, topic)
             if partitions is not None and partition in partitions:
