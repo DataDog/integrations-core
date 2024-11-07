@@ -10,7 +10,23 @@
       "changelog": "CHANGELOG.md",
       "description": "Gain insights into Vonage logs.",
       "title": "Vonage",
-      "media": [],
+      "media": [
+      {
+        "media_type": "image",
+        "caption": "Overview of Vonage Logs",
+        "image_url": "images/overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Overview of Messaging Logs",
+        "image_url": "images/message.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Overview of Voice Logs",
+        "image_url": "images/voice.png"
+      }
+      ],
       "classifier_tags": [
           "Category::Log Collection",
           "Submitted Data Type::Logs",
@@ -32,8 +48,11 @@
             },
         "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+        "dashboards": {
+        "vonage_overview": "assets/dashboards/vonage_overview.json"
     }
+      }
   },
       "author": {
           "support_email": "help@datadoghq.com",
