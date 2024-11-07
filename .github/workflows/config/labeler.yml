@@ -445,6 +445,8 @@ integration/silk:
 - silk/**/*
 integration/singlestore:
 - singlestore/**/*
+integration/slurm:
+- slurm/**/*
 integration/snmp:
 - snmp/**/*
 integration/snmp_american_power_conversion:
@@ -555,6 +557,8 @@ integration/vllm:
 - vllm/**/*
 integration/voltdb:
 - voltdb/**/*
+integration/vonage:
+- vonage/**/*
 integration/vsphere:
 - vsphere/**/*
 integration/weaviate:

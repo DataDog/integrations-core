@@ -12,6 +12,7 @@ from datadog_checks.mongo.dbm.utils import (
     format_key_name,
     get_command_collection,
     get_command_truncation_state,
+    get_db_from_namespace,
     get_explain_plan,
     obfuscate_command,
     should_explain_operation,
@@ -160,7 +161,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping operation without namespace: %s", operation)
             return False
 
-        db, _ = namespace.split(".", 1)
+        db = get_db_from_namespace(namespace)
         if db not in databases_monitored:
             self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
             return False
@@ -203,7 +204,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
     def _get_operation_metadata(self, operation: dict) -> OperationSampleOperationMetadata:
         namespace = operation.get("ns")
-        db, _ = namespace.split(".", 1)
+        db = get_db_from_namespace(namespace)
         command = operation.get("command", {})
         return {
             "type": operation.get("type"),

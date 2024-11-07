@@ -2,7 +2,24 @@
 
 <!-- towncrier release notes start -->
 
-## 8.1.0 / 2024-10-16
+## 8.2.1 / 2024-11-06
+
+***Fixed***:
+
+* Fix bug in parsing database name from namespace when no collection name is present, affecting database-level commands in MongoDB versions 5 and earlier. ([#18953](https://github.com/DataDog/integrations-core/pull/18953))
+
+## 8.2.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied, query samples, slow queries and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+* Add `aws` to the instance configuration to allow cloud resource linking with Amazon DocumentDB. ([#18921](https://github.com/DataDog/integrations-core/pull/18921))
+
+***Fixed***:
+
+* Skip explain plan collection for mongo administrative aggregation pipeline, including `$collStats`, `$currentOp`, `$indexStats`, `$listSearchIndexes`, `$sample` and `$shardedDataDistribution`. ([#18844](https://github.com/DataDog/integrations-core/pull/18844))
+
+## 8.1.0 / 2024-10-16 / Agent 7.59.0
 
 ***Added***:
 
