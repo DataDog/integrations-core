@@ -6,7 +6,7 @@
 	"description": "This monitor alerts when block rates for transactional emails by subject line are higher than usual. A high block rate may indicate that unsubscribed recipients are still receiving emails. This monitor helps to identify and resolve problems to improve the deliverability of transactional messages.",
 	"definition": {
 		"id": 152860279,
-		"name": "[Brevo] High Block Rate by Subject",
+		"name": "High Block Rate by Subject",
 		"type": "log alert",
 		"query": "formula(\"(query / query1) * 100\").last(\"1d\") > 10",
 		"message": "{{#is_warning}}  \nThe block rate for subject '{{log.attributes.subject}}' has exceeded the threshold.  \nCurrent Block Rate: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe block rate for subject '{{log.attributes.subject}}' has exceeded the threshold.    \nCurrent Block Rate: {{value}}%  \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n@example@abc.com",

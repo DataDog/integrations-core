@@ -48,9 +48,9 @@
       "source": "brevo"
     },
     "monitors": {
-      "[Brevo] High Block Rate by Subject" : "assets/monitors/brevo_high_block_rate_by_subject.json",
-      "[Brevo] High Bounce Rate by Subject" : "assets/monitors/brevo_high_bounce_rate_by_subject.json",
-      "[Brevo] High Error Rate by Subject" : "assets/monitors/brevo_high_error_rate_by_subject.json"
+      "High Block Rate by Subject" : "assets/monitors/brevo_high_block_rate_by_subject.json",
+      "High Bounce Rate by Subject" : "assets/monitors/brevo_high_bounce_rate_by_subject.json",
+      "High Error Rate by Subject" : "assets/monitors/brevo_high_error_rate_by_subject.json"
     }
   },
   "author": {
