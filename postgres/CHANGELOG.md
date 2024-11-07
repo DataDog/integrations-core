@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.2.0 / 2024-11-06
+
+***Added***:
+
+* Include port as part of database instance metadata for MySQL and Postgres ([#18966](https://github.com/DataDog/integrations-core/pull/18966))
+
 ## 22.1.0 / 2024-10-31
 
 ***Added***:

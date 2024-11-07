@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.2.1 / 2024-11-06
+
+***Fixed***:
+
+* Fix bug in parsing database name from namespace when no collection name is present, affecting database-level commands in MongoDB versions 5 and earlier. ([#18953](https://github.com/DataDog/integrations-core/pull/18953))
+
 ## 8.2.0 / 2024-10-31
 
 ***Added***:
