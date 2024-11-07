@@ -4,9 +4,9 @@
 
 This integration enriches and ingests the following logs from Symantec Endpoint Protection:
 
-- **Audit logs**: Record changes to policies such as policy updates, policy assignments, etc.
+- **Audit logs**: Record changes to policies such as policy updates, policy assignments, and more.
 - **Risk logs**: Track and record potential security risks detected on endpoints, including malware, vulnerabilities, and suspicious activities.
-- **Scan logs**: Record the results of antivirus scans, including detected malware, scan settings and user information.
+- **Scan logs**: Record the results of antivirus scans, including detected malware, scan settings, and user information.
 - **System logs**: Record all administrative activities, client activities, server activities and `client_server` activities.
 - **Security logs**: Record security-related events, including attacks, compliance, and device control.
 - **Application control logs**: Record events related to application control, such as blocked or allowed applications.
