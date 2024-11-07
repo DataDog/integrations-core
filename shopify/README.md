@@ -12,35 +12,26 @@ It includes dashboards that show and analyze logs, making it easier to monitor a
 
 ### Configuration
 
-The Shopify integration requires a Shopify Admin Account and a Custom app.
-(Refer Steps to create a Shopify private app and access token below)
+#### Get Shopify Credentials
+1. Log in to [Shopify][2] admin account 
+2. Shopify Store name is the `xxxx` part of the Store URL (`https://admin.shopify.com/store/xxxx`)
+3. Navigate to **Settings > Apps and sales channels**.
+4. Select **Develop apps** and Click **Allow custom app development**.
+5. Click **Create a custom app**, provide the necessary details and Click on **Create app**.
+6. Click **Configure Admin API Scopes** under the Overview tab.
+7. In the **Admin API access scopes section**, select the following scopes:
+    - **read_orders** 
+    - **read_products** 
+    - **read_customers** 
+    - **read_content** 
+    - **read_price_rules** 
+8. Click on **Save** to apply the changes.
+9. Click on **Install app**.
+10. Under the **Admin API access token** section, Click on **Reveal token once**.
 
-#### Steps to Create a Shopify Custom App and Obtain the Access Token
-1. Log in to [Shopify][2] admin account and navigate to **Settings > Apps and sales channels**.
-2. Select **Develop apps** and Click **Allow custom app development**.
-3. Click **Create a custom app**, provide the necessary details and Click **Create app**.
-4. Click **Configure Admin API Scopes** under the Overview tab.
-5. In the **Admin API access scopes section**, select the following scope:
-    - **read_orders** (Check the Request box)
-    - **read_products** (Check the Request box)
-    - **read_customers** (Check the Request box)
-    - **read_content** (Check the Request box)
-    - **read_price_rules** (Check the Request box)
-6. Click **Save** to apply changes.
-7. To get the api access token, Click **Install app**.
-8. Under the **Admin API access token section**, Click **Reveal token once**.
-
-#### Shopify DataDog integration configuration
-
-Configure the Datadog endpoint to forward Shopify Logs to Datadog.
-
-1. Navigate to the `Shopify` integration tile in Datadog.
-2. Add your Shopify store credentials.
-
-| Shopify parameters              | Description                                    |
-| ------------------------------- | ---------------------------------------------  |
-| Store Name                      | Store name of your Shopify admin account. It is the `xxxx` part of `https://admin.shopify.com/store/xxxx`.  |
-| Access Token                    | Access Token for your Shopify admin account.     |
+#### Add Shopify Credentials
+- Shopify Store Name 
+- Shopify Access Token
 
 ## Data Collected
 

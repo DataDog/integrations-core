@@ -57,8 +57,8 @@
       "Shopify - Order Overview" : "assets/dashboards/shopify_order_overview.json"
     },
     "monitors" : {
-      "[Shopify] Product Inventory is Out of Stock" : "assets/monitors/product_inventory_out_of_stock.json",
-      "[Shopify] Order Cancellation Rate is High" : "assets/monitors/order_cancellation_rate.json"
+      "Product Inventory is Out of Stock" : "assets/monitors/product_inventory_out_of_stock.json",
+      "Order Cancellation Rate is High" : "assets/monitors/order_cancellation_rate.json"
     },
     "logs": {
       "source": "shopify"
