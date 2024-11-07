@@ -94,7 +94,7 @@
             "id": 3057371097924390,
             "definition": {
               "type": "note",
-              "content": "Slurm Overview show a quick summary of all reporting Slurm instances and related monitors and their status.",
+              "content": "Slurm Overview shows a quick summary of all reporting Slurm instances as well as related monitors and their status.",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "center",
