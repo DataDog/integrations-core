@@ -3,7 +3,7 @@
     "created_at": "2024-11-05",
     "last_updated_at": "2024-11-05",
     "title": "Slurm DBD Agent Queue Size",
-    "description": "Slurm queues up the messages intended for the SlurmDBD and processes them in a separate thread. If the SlurmDBD, or database, is down then this number will increase. This monitor will alert then the Message size is reported to be more than half the default MaxDBDMsgs setting.",
+    "description": "Slurm queues up the messages intended for the SlurmDBD, or database, and processes them in a separate thread. If the SlurmDBD is down, this number increases. This monitor alerts when the Message size is reported to be more than half the default MaxDBDMsgs setting.",
     "definition": {
         "name": "[Slurm] High Number of Messages in DBD Agent Queue",
         "type": "query alert",
