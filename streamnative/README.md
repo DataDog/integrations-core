@@ -16,36 +16,27 @@ The StreamNative integration collects below types of metrics:
 
 ### Configuration
 
-StreamNative integration requires a StreamNative account and its Client Id, Client Secret, Organization ID and Instance Name. Below are the steps to fetch these details from StreamNative console:
-
-#### Steps to retrieve Organization ID, Instance Name, Client Id & Client Secret
+#### Get StreamNative Credentials
 
 1. Login to the [StreamNative Cloud Console Account][2] 
-2. Go to the profile icon and select to the **Organizations** option.
-3. Go into the **Organization** from which data needs to be collected in the Datadog.
-4. Copy and save the **Organization ID** to configure in the Integration.
-5. From the **Select an Instance** section, Copy and save the **Instance Name** to configure in the Integration.
-6. Go to the profile icon and select the **Accounts & Accesses** tab.
-7. Choose the Service Account for which **Admin** permission is **True**.
-8. If the Service Account does not exist, click on **New -> Service Account** to create a new one, and ensure the **Super Admin** type is enabled.
-9. Click on the 3 dots on the right side of the selected Service Account.
-10. Click on **Download OAuth2 Key**, this file will have required **Client ID** & **Client Secret** to configure in the Integration.
+2. Get the Organization ID and Instance Name
+    - Navigate to the profile icon and select the **Organizations** option.
+    - Select the **Organization** for which data needs to be collected.
+    - Obtain the **Instance Name** from the **Select an Instance** dropdown.
+3. Get the Client Id and Client Secret
+    - Navigate to the profile icon and select the **Accounts & Accesses** tab.
+    - Select the Service Account for which **Admin** permission is **Enabled**.
+    - If the Service Account does not exist, click on **New -> Service Account** to create a new one, and ensure the **Super Admin** option is enabled.
+    - Click on `...` button on the right side of the selected Service Account.
+    - Click **Download OAuth2 Key** to get the **Client ID** and **Client Secret**.
 
 
-#### StreamNative DataDog integration configuration
+#### Add StreamNative Credentials
 
-Configure the Datadog endpoint to forward StreamNative metrics to Datadog.
-
-1. Navigate to the `StreamNative` integration tile in Datadog.
-2. Add your StreamNative credentials.
-
-| StreamNative parameters | Description                                    |
-| ------------------------------ | ---------------------------------------------  |
-| Organization ID                   | Organization ID of your StreamNative account.     |
-| Instance Name                   | Instance name of the desired organization.     |
-| Client ID                   | Client ID of your service account.     |
-| Client Secret                   | Client Secret of your service account.     |
-
+- Organization ID 
+- Instance Name
+- Client ID  
+- Client Secret  
 
 
 ## Data Collected
