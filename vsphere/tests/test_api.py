@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
-import logging
 import ssl
 
 import pytest
@@ -332,7 +331,6 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
 def test_vsan_empty_health_metrics(aggregator, realtime_instance, dd_run_check, caplog):
     realtime_instance['collect_vsan_data'] = True
-    caplog.set_level(logging.DEBUG)
 
     with patch('datadog_checks.vsphere.api.connect'):
         with patch('pyVmomi.vim.cluster.VsanPerformanceManager') as MockVsanPerformanceManager:
