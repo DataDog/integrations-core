@@ -557,6 +557,8 @@ integration/vllm:
 - vllm/**/*
 integration/voltdb:
 - voltdb/**/*
+integration/vonage:
+- vonage/**/*
 integration/vsphere:
 - vsphere/**/*
 integration/weaviate:
