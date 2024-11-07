@@ -2365,7 +2365,7 @@
           {
             "id": 6687609145978784,
             "definition": {
-              "title": "Mean Time for All Scheduling Cycle",
+              "title": "Mean Time for All Scheduling Cycles",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
