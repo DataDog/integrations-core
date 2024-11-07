@@ -19,7 +19,7 @@
 
 * Skip explain plan collection for mongo administrative aggregation pipeline, including `$collStats`, `$currentOp`, `$indexStats`, `$listSearchIndexes`, `$sample` and `$shardedDataDistribution`. ([#18844](https://github.com/DataDog/integrations-core/pull/18844))
 
-## 8.1.0 / 2024-10-16
+## 8.1.0 / 2024-10-16 / Agent 7.59.0
 
 ***Added***:
 
