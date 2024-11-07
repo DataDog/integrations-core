@@ -88,9 +88,16 @@ if is_affirmative(datadog_agent.get_config('integration_profiling')):
 if TYPE_CHECKING:
     import ssl  # noqa: F401
 
-if os.environ.get("DD_FIPS_MODE", None):
+if os.environ.get("GOFIPS", None):
+    import sys
+
     from cryptography.hazmat.backends import default_backend
 
+    path_to_embedded = sys.executable.split("embedded")[0] + "embedded"
+    # The cryptography package can enter FIPS mode if its internal OpenSSL
+    # can access the FIPS module and configuration.
+    os.environ["OPENSSL_CONF"] = path_to_embedded + "/ssl/openssl.cnf"
+    os.environ["OPENSSL_MODULES"] = path_to_embedded + "/lib/ossl-modules"
     cryptography_backend = default_backend()
     cryptography_backend._enable_fips()
 
