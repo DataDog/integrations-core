@@ -15,6 +15,7 @@
       "Category::Log Collection",
       "Category::Metrics",
       "Category::Security",
+      "Category::Compliance",
       "Offering::Integration",
       "Submitted Data Type::Logs",
       "Submitted Data Type::Metrics"
