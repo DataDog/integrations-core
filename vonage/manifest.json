@@ -4,13 +4,13 @@
   "app_id": "vonage",
   "display_on_public_website": true,
   "tile": {
-      "overview": "README.md#Overview",
-      "configuration": "README.md#Setup",
-      "support": "README.md#Support",
-      "changelog": "CHANGELOG.md",
-      "description": "Gain insights into Vonage logs.",
-      "title": "Vonage",
-      "media": [
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Vonage logs.",
+    "title": "Vonage",
+    "media": [
       {
         "media_type": "image",
         "caption": "Overview of Vonage Logs",
@@ -26,38 +26,38 @@
         "caption": "Overview of Voice Logs",
         "image_url": "images/voice.png"
       }
-      ],
-      "classifier_tags": [
-          "Category::Log Collection",
-          "Submitted Data Type::Logs",
-          "Offering::Integration"
-      ]
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
   },
   "assets": {
-      "integration": {
-          "auto_install": true,
-          "source_type_id": 30175200,
-          "source_type_name": "vonage",
-          "events": {
-              "creates_events": false
-          },
-        "metrics": {
-            "prefix": "vonage.",
-            "check": "",
-            "metadata_path": "metadata.csv"
-            },
-        "service_checks": {
-        "metadata_path": "assets/service_checks.json"
+    "dashboards": {
+      "vonage_overview": "assets/dashboards/vonage_overview.json"
+    },
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 30175200,
+      "source_type_name": "vonage",
+      "events": {
+        "creates_events": false
       },
-        "dashboards": {
-        "vonage_overview": "assets/dashboards/vonage_overview.json"
+      "metrics": {
+        "prefix": "vonage.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
     }
-      }
   },
-      "author": {
-          "support_email": "help@datadoghq.com",
-          "name": "Datadog",
-          "homepage": "https://www.datadoghq.com",
-          "sales_email": "info@datadoghq.com"
-      }
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
 }
