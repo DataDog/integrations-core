@@ -289,6 +289,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mimecast/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /mimecast/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/mux/                                                               @DataDog/saas-integrations
+/mux/*.md                                                           @DataDog/saas-integrations @DataDog/documentation
+/mux/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
+
 /palo_alto_cortex_xdr/                                               @DataDog/saas-integrations
 /palo_alto_cortex_xdr/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_cortex_xdr/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
