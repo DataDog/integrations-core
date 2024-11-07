@@ -8,7 +8,7 @@
 
 * [cloudera] Configure the number of connection pools to cache ([#18886](https://github.com/DataDog/integrations-core/pull/18886))
 
-## 3.1.0 / 2024-10-04
+## 3.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Added***:
 
