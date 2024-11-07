@@ -3072,7 +3072,7 @@
           {
             "id": 1949830880003490,
             "definition": {
-              "title": "Last Depth Cycled Tried",
+              "title": "Last Depth Cycle Tried",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
