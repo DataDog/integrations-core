@@ -262,6 +262,12 @@ instances:
     #
     # include_tempdb_file_space_usage_metrics: true
 
+    ## @param include_xe_metrics - boolean - optional - default: true
+    ## Include extended events (XE) metrics. The collection of XE metrics is automatically enabled
+    ## when `deadlocks_collection` is enabled.
+    #
+    # include_xe_metrics: true
+
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
@@ -347,6 +353,13 @@ instances:
         ## execution plan.
         #
         # samples_per_hour_per_query: 4
+
+        ## @param lookback_window - integer - optional - default: 2 * collection_interval
+        ## Queries whose last execution completed after the lookback window are excluded from
+        ## metrics collection. Set a longer lookback window (in seconds) to capture infrequently
+        ## run queries.
+        #
+        # lookback_window: 600
 
     ## Configure collection of procedure metrics
     #
@@ -691,6 +704,25 @@ instances:
     ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
     #
     # propagate_agent_tags: false
+
+    ## Configure the collection of deadlock data.
+    #
+    # deadlocks_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_deadlocks - number - optional - default: 100
+        ## Set the maximum number of deadlocks to retrieve per collection.
+        #
+        # max_deadlocks: 100
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

@@ -46,6 +46,7 @@ class MongoApi(object):
             'socketTimeoutMS': self._config.timeout,
             'connectTimeoutMS': self._config.timeout,
             'serverSelectionTimeoutMS': self._config.timeout,
+            'timeoutMS': self._config.timeout,
             'directConnection': True,
             'read_preference': ReadPreference.PRIMARY_PREFERRED,
             'appname': DD_APP_NAME,

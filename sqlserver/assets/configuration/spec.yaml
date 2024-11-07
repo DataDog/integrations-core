@@ -282,6 +282,13 @@ files:
       value:
         type: boolean
         example: true
+    - name: include_xe_metrics
+      description: |
+        Include extended events (XE) metrics. The collection of XE metrics is automatically enabled
+        when `deadlocks_collection` is enabled.
+      value:
+        type: boolean
+        example: true
     - name: adoprovider
       description: |
         Choose the ADO provider.  Note that the (default) provider
@@ -404,6 +411,15 @@ files:
             example: 250
             display_default: 250
           hidden: true
+        - name: lookback_window
+          description: |
+            Queries whose last execution completed after the lookback window are excluded from
+            metrics collection. Set a longer lookback window (in seconds) to capture infrequently
+            run queries.
+          value:
+            type: integer
+            display_default: 2 * collection_interval
+            example: 600
     - name: procedure_metrics
       description: Configure collection of procedure metrics
       options:
@@ -776,9 +792,8 @@ files:
         example: false
         type: boolean
     - name: deadlocks_collection
-      hidden: True
       description: |
-        Configure the collection of deadlock data. The feature is supported for odbc connector only.
+        Configure the collection of deadlock data.
       options:
         - name: enabled
           description: |
