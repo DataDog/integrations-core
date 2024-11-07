@@ -23,7 +23,7 @@ You can enable LLM observability in the following environments:
 - You are using the Datadog Agent
 - You are running in a serverless environment (AWS Lambda)
 
-##### If you do not have the Datadog Agent:
+#### If you do not have the Datadog Agent:
 1. Install the `ddtrace` package:
 
    ```shell
