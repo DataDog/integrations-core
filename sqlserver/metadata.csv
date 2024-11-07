@@ -154,3 +154,5 @@ sqlserver.transactions.longest_transaction_running_time,gauge,,second,,The time 
 sqlserver.transactions.version_cleanup_rate,gauge,,kibibyte,second,The cleanup rate of the version store in tempdb. (Perf. Counter: `Transactions - Version Cleanup rate (KB/s)`),0,sql_server,version cleanup rate,,
 sqlserver.transactions.version_generation_rate,gauge,,kibibyte,second,The generation rate of the version store in tempdb. (Perf. Counter: `Transactions - Version Generation rate (KB/s)`),0,sql_server,version generation rate,,
 sqlserver.transactions.version_store_size,gauge,,kibibyte,,The size of the version store in tempdb. (Perf. Counter: `Transactions - Version Store Size (KB)`),0,sql_server,version store size,,
+sqlserver.xe.events_not_in_xml,gauge,,event,,"Number of generated events that are missing in the XML representation of the ring buffer. Tags: `session_name`",0,sql_server,xe events not in xml,,
+sqlserver.xe.session_status,gauge,,,,"Status of the node in a SQL Server failover cluster instance. Tags: `session_name`",0,sql_server,xe session status,,

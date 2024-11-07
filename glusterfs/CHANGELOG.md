@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.0.1 / 2024-10-10
+
+***Fixed***:
+
+* Fix cmd as a string instead of a list ([#18808](https://github.com/DataDog/integrations-core/pull/18808))
+
 ## 3.0.0 / 2024-10-04
 
 ***Removed***:
@@ -16,7 +22,7 @@
 
 * Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
 
-## 2.0.0 / 2024-10-01
+## 2.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 

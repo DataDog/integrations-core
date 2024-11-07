@@ -2,6 +2,44 @@
 
 <!-- towncrier release notes start -->
 
+## 20.1.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied to query metrics, query samples and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+* Add extended events (XE) session monitoring ([#18875](https://github.com/DataDog/integrations-core/pull/18875))
+* Migrate following dynamic metrics to database_metrics for better maintainability and testability.
+  - SQLServer AlwaysOn metrics
+  - SQLServer FCI metrics
+  - SQLServer file stats metrics
+  - SQLServer primary log shipping metrics
+  - SQLServer secondary log shipping metrics
+  - SQLServer server state metrics
+  - SQLServer tempdb file space usage metrics
+  - SQLServer index usage metrics
+  - SQLServer database index fragmentation metrics
+  - SQLServer os tasks metrics
+  - SQLServer master files metrics
+  - SQLServer database files metrics
+  - SQLServer database stats metrics
+  - SQLServer database backup metrics
+  - SQLServer os schedulers metrics
+  - SQLServer database replication stats metrics
+  - SQLServer availability replicas metrics
+  - SQLServer availability groups metrics
+  Increase database backup metrics and index fragmentation metrics collection interval to 5 minutes. ([#18883](https://github.com/DataDog/integrations-core/pull/18883))
+
+***Fixed***:
+
+* Prevent hostname evaluating to None in sqlserver check ([#18237](https://github.com/DataDog/integrations-core/pull/18237))
+* Update sqlserver metric collection row_key to prevent overwriting metric information for two queries with the same query_plan_hash but part of two different stored procedures. ([#18882](https://github.com/DataDog/integrations-core/pull/18882))
+
+## 20.0.0 / 2024-10-10
+
+***Changed***:
+
+* Use ``datadog`` XE session as the default for deadlock monitoring. Fall back to ``system_health`` if unavailable. ([#18781](https://github.com/DataDog/integrations-core/pull/18781))
+
 ## 19.0.0 / 2024-10-04
 
 ***Removed***:
