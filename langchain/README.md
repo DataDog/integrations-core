@@ -78,7 +78,7 @@ You can enable LLM observability in the following environments:
 
 **Note**: In serverless environments, Datadog automatically flushes spans at the end of the Lambda function.
 
-##### Automatic LangChain Tracing
+#### Automatic LangChain Tracing
 
 LangChain integration is automatically enabled when LLM Observability is configured. This captures latency, errors, input/output messages, and token usage for LangChain operations.
 
