@@ -503,21 +503,7 @@ class Redis(AgentCheck):
             max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))
 
         # Get all slowlog entries
-        try:
-            slowlogs = conn.slowlog_get(max_slow_entries)
-        except TypeError as e:
-            # This catch is needed in PY2 because there is a known issue that has only been fixed after redis
-            # dropped python 2 support
-            # issue: https://github.com/andymccurdy/redis-py/issues/1475
-            # fix: https://github.com/andymccurdy/redis-py/pull/1352
-            # TODO: remove once PY2 is no longer supported
-            self.log.exception(e)
-            self.log.error(
-                'There was an error retrieving slowlog, these metrics will be skipped. This issue is fixed on Agent 7+.'
-                ' You can find more information about upgrading to agent 7 in '
-                'https://docs.datadoghq.com/agent/versions/upgrade_to_agent_v7/?tab=linux'
-            )
-            slowlogs = []
+        slowlogs = conn.slowlog_get(max_slow_entries)
 
         # Find slowlog entries between last timestamp and now using start_time
         slowlogs = [s for s in slowlogs if s['start_time'] > self.last_timestamp_seen]

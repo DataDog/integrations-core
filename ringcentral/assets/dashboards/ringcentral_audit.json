@@ -1,0 +1,589 @@
+{
+  "title": "RingCentral Audit",
+  "description": "The RingCentral Audit dashboard provides a detailed examination of activity within the RingCentral account. It includes the total number of audit logs, frequent audit logs, infrequent audit logs and detailed insights into audit activities.",
+  "widgets": [
+    {
+      "id": 4130361917849544,
+      "definition": {
+        "type": "image",
+        "url": "https://www.jenne.com/media/1024/ringcentral.png",
+        "url_dark_theme": "https://www.jenne.com/media/1024/ringcentral.png",
+        "sizing": "fill",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 7,
+        "height": 2
+      }
+    },
+    {
+      "id": 259564121481914,
+      "definition": {
+        "title": "Total Audit Logs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:ringcentral service:audit $AccountId $EventType $ActionId $ExtensionId $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 0,
+                "palette": "black_on_light_green"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
+      },
+      "layout": {
+        "x": 7,
+        "y": 0,
+        "width": 5,
+        "height": 5
+      }
+    },
+    {
+      "id": 727466998845956,
+      "definition": {
+        "type": "note",
+        "content": "**Dashboard Overview**\n\nThe RingCentral Audit dashboard provides a detailed examination of activity within the RingCentral account. It includes the total number of audit logs, frequent audit logs, infrequent audit logs and detailed insights into audit activities.\n\nFor more information, see the [RingCentral Integration Documentation](https://docs.datadoghq.com/integrations/ringcentral/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "background_color": "transparent",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 7,
+        "height": 3
+      }
+    },
+    {
+      "id": 7222771573571842,
+      "definition": {
+        "title": "Frequent Audit Logs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "@actionId",
+                    "limit": 10,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:ringcentral service:audit $AccountId $EventType $ActionId $ExtensionId $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 6431214995239432,
+      "definition": {
+        "title": "Infrequent Audit Logs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "@actionId",
+                    "limit": 10,
+                    "sort": {
+                      "order": "asc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:ringcentral service:audit $AccountId $EventType $ActionId $ExtensionId $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "asc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 5,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 1139033551588232,
+      "definition": {
+        "title": "Activity by User ",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "@usr.name",
+                    "limit": 10,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:ringcentral service:audit $EventType $ActionId $ExtensionId $AccountId $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "style": {
+              "palette": "datadog16"
+            },
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "type": "sunburst",
+        "legend": {
+          "type": "table"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 9,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 7580811123066196,
+      "definition": {
+        "title": "Activity by Extension ID",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "@extensionId",
+                    "limit": 10,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:ringcentral service:audit $EventType $ActionId $AccountId $UserName $ExtensionId"
+                },
+                "storage": "hot"
+              }
+            ],
+            "style": {
+              "palette": "datadog16"
+            },
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "type": "sunburst",
+        "legend": {
+          "type": "table"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 9,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 4062801632963958,
+      "definition": {
+        "title": "Activity by Role",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "@initiator.role",
+                    "limit": 10,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:ringcentral service:audit $EventType $ActionId $ExtensionId $AccountId $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "style": {
+              "palette": "datadog16"
+            },
+            "sort": {
+              "count": 500,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "type": "sunburst",
+        "legend": {
+          "type": "table"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 4650277533081732,
+      "definition": {
+        "title": "Activity by Location",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "geomap",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "@network.client.geoip.country.iso_code",
+                    "limit": 250,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:ringcentral service:audit $EventType $ActionId $ExtensionId $AccountId $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 250,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "palette": "hostmap_blues",
+          "palette_flip": false
+        },
+        "view": {
+          "focus": "WORLD"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 13,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 5393766589865430,
+      "definition": {
+        "title": "Audit Logs",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "response_format": "event_list",
+            "query": {
+              "data_source": "logs_stream",
+              "query_string": "service:audit source:ringcentral $AccountId $EventType $ActionId $ExtensionId $UserName",
+              "indexes": [],
+              "storage": "hot",
+              "sort": {
+                "order": "desc",
+                "column": "timestamp"
+              }
+            },
+            "columns": [
+              {
+                "field": "status_line",
+                "width": "auto"
+              },
+              {
+                "field": "timestamp",
+                "width": "auto"
+              },
+              {
+                "field": "service",
+                "width": "auto"
+              },
+              {
+                "field": "content",
+                "width": "auto"
+              }
+            ]
+          }
+        ],
+        "type": "list_stream"
+      },
+      "layout": {
+        "x": 0,
+        "y": 17,
+        "width": 12,
+        "height": 5
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "AccountId",
+      "prefix": "@accountId",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "EventType",
+      "prefix": "@eventType",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "ActionId",
+      "prefix": "@actionId",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "ExtensionId",
+      "prefix": "@extensionId",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "UserName",
+      "prefix": "@usr.name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
