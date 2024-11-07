@@ -1,6 +1,3 @@
 name: vonage
 files:
 - name: vonage.yaml
-  options:
-  - template: init_config
-  - template: instances
