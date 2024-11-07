@@ -9,7 +9,7 @@ Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatb
 Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics, APM, and logs.
 
 ## Setup
-<!-- xxz tab xxx -->
+<!-- xxx tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
 **Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
@@ -29,7 +29,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
 <!-- effect on the tile. -->
 
-<!-- xxx tabs xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "Python" xxx -->
 
 **Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
