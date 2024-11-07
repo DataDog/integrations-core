@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.0.0 / 2024-10-04
+## 6.1.0 / 2024-10-31
+
+***Added***:
+
+* Add configuration option to disable `stage_id` tag on `spark.job` metrics and disable `spark.stage` metrics ([#18791](https://github.com/DataDog/integrations-core/pull/18791))
+
+## 6.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 

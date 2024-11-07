@@ -9,6 +9,7 @@ METRIC_TAGS_WITH_RESOURCE = [
     'tag1:value1',
     'tag2:value2',
     DATABASE_INSTANCE_RESOURCE_TAG.format(hostname='stubbed.hostname'),
+    'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
 ]
 SC_TAGS = [
     'port:' + str(common.PORT),

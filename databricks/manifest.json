@@ -54,6 +54,9 @@
       "source_type_id": 10152,
       "auto_install": true
     },
+    "dashboards": {
+      "databricks-cost-overview": "assets/dashboards/databricks_cost_overview.json"
+    },
     "logs": {
       "source": "spark"
     }
