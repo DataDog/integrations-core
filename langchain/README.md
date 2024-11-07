@@ -16,7 +16,6 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
-### Installation
 
 #### LLM Observability: Prepare your environment and enable LLM
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
