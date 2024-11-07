@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2024-10-31
+
+***Added***:
+
+* [NDM] [Cisco ACI] Utilize raw ID for interface metadata ([#18842](https://github.com/DataDog/integrations-core/pull/18842))
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Improve integration performance ([#18747](https://github.com/DataDog/integrations-core/pull/18747))
+
 ## 4.0.0 / 2024-10-04
 
 ***Removed***:
@@ -17,7 +27,7 @@
 
 * Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
 
-## 3.0.0 / 2024-10-01
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 

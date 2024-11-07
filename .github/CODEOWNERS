@@ -192,9 +192,9 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /oracle/                                            @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /oracle/*.md                                        @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /oracle/manifest.json                               @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/mongo/                                             @DataDog/agent-integrations @DataDog/database-monitoring-agent
-/mongo/*.md                                         @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
-/mongo/manifest.json                                @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/mongo/                                             @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/mongo/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/mongo/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
@@ -284,10 +284,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mailchimp/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /mailchimp/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
-/mimecast/                                                           @DataDog/saas-integrations
-/mimecast/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
-/mimecast/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
-/mimecast/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+/mimecast/                                                          @DataDog/saas-integrations
+/mimecast/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/mimecast/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/mimecast/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /palo_alto_cortex_xdr/                                               @DataDog/saas-integrations
 /palo_alto_cortex_xdr/*.md                                           @DataDog/saas-integrations @DataDog/documentation
@@ -329,10 +329,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ringcentral/metadata.csv                                            @DataDog/saas-integrations @DataDog/documentation
 /ringcentral/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/trend_micro_email_security/                                         @DataDog/saas-integrations
-/trend_micro_email_security/*.md                                     @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_email_security/manifest.json                            @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_email_security/assets/logs/                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+/trend_micro_email_security/                                        @DataDog/saas-integrations
+/trend_micro_email_security/*.md                                    @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_email_security/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_email_security/assets/logs/                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /trellix_endpoint_security/                                         @DataDog/saas-integrations
 /trellix_endpoint_security/*.md                                     @DataDog/saas-integrations @DataDog/documentation
@@ -353,6 +353,17 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /shopify/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
 /shopify/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
 /shopify/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+hubspot_content_hub/                                                @DataDog/saas-integrations
+hubspot_content_hub/*.md                                            @DataDog/saas-integrations @DataDog/documentation
+hubspot_content_hub/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
+hubspot_content_hub/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+
+vonage/                                                @DataDog/saas-integrations
+vonage/*.md                                            @DataDog/saas-integrations @DataDog/documentation
+vonage/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
+vonage/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
