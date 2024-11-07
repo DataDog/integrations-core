@@ -153,7 +153,8 @@ class VSphereAPI(object):
             connect.Disconnect(self._conn)
 
         self._conn = conn
-        self._vsan_stub = vsanapiutils.GetVsanVcStub(conn._stub, context=context)
+        if self.config.collect_vsan:
+            self._vsan_stub = vsanapiutils.GetVsanVcStub(conn._stub, context=context)
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry

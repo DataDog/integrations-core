@@ -224,4 +224,6 @@ VSAN_EVENT_IDS = [
     'vsan.health.test.network.hostdisconnected.event',
 ]
 
+VSAN_EVENT_PREFIX = 'vsan'
+
 HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']
