@@ -67,9 +67,9 @@
       "StreamNative - Source Connector" : "assets/dashboards/streamnative_source_connector.json"
     },
     "monitors": {
-      "[StreamNative] Backlog size exceeding threshold" : "assets/monitors/streamnative_backlog_size_exceeding_threshold.json",
-      "[Streamnative] Messaging service is down" : "assets/monitors/streamnative_messaging_service_down.json",
-      "[Streamnative] Webservice is down" : "assets/monitors/streamnative_webservice_down.json"
+      "Backlog size exceeding threshold" : "assets/monitors/backlog_size_exceeding_threshold.json",
+      "Messaging service is down" : "assets/monitors/messaging_service_down.json",
+      "Webservice is down" : "assets/monitors/webservice_down.json"
     }
   },
   "author": {
