@@ -18,7 +18,10 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 
 ### LLM Observability: Prepare your environment and enable LLM
-You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
+You can enable LLM observability in the following environments:
+- You do not have the Datadog Agent installed (Agentless environment)
+- You are using the Datadog Agent
+- You are running in a serverless environment (AWS Lambda)
 
 ##### If you do not have the Datadog Agent:
 1. Install the `ddtrace` package:
