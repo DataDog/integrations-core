@@ -6,7 +6,7 @@
 	"description": "This monitor tracks the frequency of query errors observed within your Metabase account. A high query error rate may indicate issues with database performance, application logic, or misconfigurations.",
 	"definition": {
 		"id": 156193929,
-		"name": "[Metabase] High query error rate",
+		"name": "High query error rate",
 		"type": "log alert",
 		"query": "formula(\"(query1 / query) * 100\").last(\"30m\") > 1",
 		"message": "{{#is_warning}}\n\nThe query error rate has surpassed the warning threshold of {{warn_threshold}}%.\nQuery Error Rate: {{value}}%\n\n{{/is_warning}}\n\n{{#is_alert}}\n\nThe percentage of queries resulting in errors has exceeded the alert threshold of {{threshold}}%, indicating a significant query error rate.\nQuery Error Rate: {{value}}%\n\n{{/is_alert}}\n\n@example@example.com",

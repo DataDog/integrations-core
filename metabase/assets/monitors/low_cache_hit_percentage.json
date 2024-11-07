@@ -6,7 +6,7 @@
 	"description": "This monitor tracks the cache hit percentage for queries running within your Metabase account. A low cache hit rate may indicate inefficient cache utilization, leading to increased database load and slower response times.",
 	"definition": {
 		"id": 156194158,
-		"name": "[Metabase] Low cache hit percentage",
+		"name": "Low cache hit percentage",
 		"type": "log alert",
 		"query": "formula(\"(query1 / query) * 100\").last(\"30m\") < 50",
 		"message": "{{#is_alert}}\n\nThe cache hit percentage for queries is below {{threshold}}%.\nCache hit percentage: {{value}}%\n\n{{/is_alert}}\n\n@example@example.com",

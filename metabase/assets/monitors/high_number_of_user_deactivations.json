@@ -6,7 +6,7 @@
 	"description": "This monitor tracks the rate of user deactivations on your Metabase account. A sudden spike may suggest security breaches or policy violations. Monitoring helps identify trends, investigate causes, intervene timely.",
 	"definition": {
 		"id": 154754660,
-		"name": "[Metabase] High number of user deactivations",
+		"name": "High number of user deactivations",
 		"type": "log alert",
 		"query": "logs(\"source:metabase service:activity-events @evt.name:user-deactivated\").index(\"*\").rollup(\"count\").last(\"12h\") > 10",
 		"message": "{{#is_alert}}\n\nThis indicates a significant rise in user account deactivations, potentially highlighting policy violations, insider threats or security risk.\n\n{{/is_alert}}\n\n{{#is_warning}}\n\nThis indicates a significant increase in user account deactivations. Immediate attention is required to address this trend.\n\n{{/is_warning}}\n\n@example@example.com",

@@ -6,7 +6,7 @@
 	"description": "This monitor tracks user invite volume on your Metabase account. This trend can present several security implications, Onboarding mismanagement or account takeover risks.",
 	"definition": {
 		"id": 154753670,
-		"name": "[Metabase] High number of user invites",
+		"name": "High number of user invites",
 		"type": "log alert",
 		"query": "logs(\"source:metabase service:activity-events @evt.name:user-invited\").index(\"*\").rollup(\"count\").last(\"1d\") > 15",
 		"message": "{{#is_alert}}\n\nThis indicates a significant increase in the number of user invites sent within the Metabase account.\n\n{{/is_alert}}\n\n@example@example.com",
