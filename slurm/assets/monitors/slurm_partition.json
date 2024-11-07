@@ -3,7 +3,7 @@
     "created_at": "2024-11-05",
     "last_updated_at": "2024-11-05",
     "title": "Slurm Partition Down State",
-    "description": "Slurm Partition can be monitored with the sinfo command on a slurmctld. This monitor will alert when a Slurm partition is reported to be in a down state by a slurmctld.",
+    "description": "Slurm Partition can be monitored with the sinfo command on a slurmctld. This monitor alerts when a Slurm partition is reported to be in a down state by a slurmctld.",
     "definition": {
         "name": "[Slurm] Partition in Down State",
         "type": "query alert",
