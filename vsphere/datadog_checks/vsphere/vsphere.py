@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import copy
 import datetime as dt
 import logging
 from collections import defaultdict
@@ -514,13 +515,29 @@ class VSphereCheck(AgentCheck):
             for cluster in new_performance_metrics:
                 for entity_type in cluster:
                     if len(entity_type.value) == 0:
-                            if self.log.isEnabledFor(logging.DEBUG):
-                                    self.log.debug(
-                                        "No information returned for entity type %s",
-                                        str(entity_type).replace("\n", "\\n"),
-                                    )
-                            continue
-                    resource_type = entity_type.value[0].metricId.dynamicProperty[0][0]
+                        if self.log.isEnabledFor(logging.DEBUG):
+                            self.log.debug(
+                                "No information returned for entity type %s",
+                                str(entity_type).replace("\n", "\\n"),
+                            )
+                        continue
+                    first_metric_for_entity = entity_type.value[0].metricId
+                    resource_type = first_metric_for_entity.dynamicProperty[0][0]
+                    hostname = None
+                    entity = first_metric_for_entity.dynamicProperty[0][1]
+                    resource_tags = self.infrastructure_cache.get_mor_tags(entity)
+                    if resource_type == 'host':
+                        tags = (
+                            [t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags]
+                            if self._config.excluded_host_tags
+                            else []
+                        )
+                        hostname = first_metric_for_entity.dynamicProperty[0][2]
+                    else:
+                        tags = copy.deepcopy(resource_tags)
+                    tags.extend(self.infrastructure_cache.get_mor_props(entity)['tags'])
+                    tags.extend(self._config.base_tags)
+
                     for given_metric in entity_type.value:
                         if self.log.isEnabledFor(logging.DEBUG):
                             self.log.debug(
@@ -530,42 +547,11 @@ class VSphereCheck(AgentCheck):
                                 str(given_metric).replace("\n", "\\n"),
                             )
                         latest_value = given_metric.values.split(',')[-1]
-                        if latest_value == 'None':  
-                            self.log.debug("None value returned etc")  
-                            continue  
-                        if given_metric.metricId.label in VSAN_PERCENT_METRICS:  
-                            latest_value = float(latest_value) / 100.0  
-
-                        hostname = None  
-                        if resource_type == 'cluster':
-                            tags = self.infrastructure_cache.get_mor_tags(
-                                given_metric.metricId.dynamicProperty[0][1]
-                            )
-                            tags.extend(
-                                self.infrastructure_cache.get_mor_props(
-                                    given_metric.metricId.dynamicProperty[0][1]
-                                )['tags']
-                            )
-                            tags.extend(self._config.base_tags)
-                        elif resource_type == 'host':
-                            tags = (
-                                [
-                                    t
-                                    for t in self.infrastructure_cache.get_mor_tags(
-                                        given_metric.metricId.dynamicProperty[0][1]
-                                    )
-                                    if t.split(":", 1)[0] in self._config.excluded_host_tags
-                                ]
-                                if self._config.excluded_host_tags
-                                else []
-                            )
-                            tags.extend(
-                                self.infrastructure_cache.get_mor_props(
-                                    given_metric.metricId.dynamicProperty[0][1]
-                                )['tags']
-                            )
-                            tags.extend(self._config.base_tags)
-                            hostname = given_metric.metricId.dynamicProperty[0][2]
+                        if latest_value == 'None':
+                            self.log.debug("None value returned for metric %s", given_metric.metricId.label)
+                            continue
+                        if given_metric.metricId.label in VSAN_PERCENT_METRICS:
+                            latest_value = float(latest_value) / 100.0
 
                         if (
                             'vsan.{}.{}'.format(resource_type, given_metric.metricId.label)
@@ -587,12 +573,12 @@ class VSphereCheck(AgentCheck):
                             hostname=hostname,
                         )
                         self.log.debug(
-                                "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
-                                given_metric.metricId.label,
-                                float(latest_value),
-                                str(hostname),
-                                tags,
-                            )
+                            "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                            given_metric.metricId.label,
+                            float(latest_value),
+                            str(hostname),
+                            tags,
+                        )
                     if latest_metric_time is None:
                         latest_metric_time = collect_start_time
         except Exception as e:
