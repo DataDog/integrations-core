@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import datetime as dt
+import logging
 import ssl
 
 import pytest
@@ -326,3 +327,37 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             aggregator.assert_metric('vsphere.vsan.cluster.health.count', value=1)
             aggregator.assert_metric('vsphere.vsan.cluster.health.1.count', count=0)
             aggregator.assert_metric('vsphere.vsan.cluster.health.2.count', count=0)
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_vsan_empty_health_metrics(aggregator, realtime_instance, dd_run_check, caplog):
+    realtime_instance['collect_vsan_data'] = True
+    caplog.set_level(logging.DEBUG)
+
+    with patch('datadog_checks.vsphere.api.connect'):
+        with patch('pyVmomi.vim.cluster.VsanPerformanceManager') as MockVsanPerformanceManager:
+            config = VSphereConfig(realtime_instance, {}, MagicMock())
+            api = VSphereAPI(config, MagicMock())
+            cluster = MagicMock(name='a', spec=vim.ClusterComputeResource)
+            host = MagicMock(name='b')
+            cluster.host = [host]
+            cluster_nested_elts = {cluster: ['nested-id-1', 'nested-id-2']}
+            entity_ref_ids = {'type1': ['entity-1'], 'type2': ['entity-2']}
+            id_to_tags = {'nested-id-1': ['type1'], 'nested-id-2': ['type2']}
+            starting_time = dt.datetime(2024, 1, 1)
+            mock_vsan_events = api.get_vsan_events(starting_time)
+            assert len(mock_vsan_events) == 0
+
+            mock_vsan_perf_manager = MockVsanPerformanceManager.return_value
+            mock_vsan_perf_manager.QueryClusterHealth.return_value = []
+            mock_vsan_perf_manager.QueryVsanPerf.return_value = [
+                MagicMock(
+                    entityRefId="cluster-domclient:nested-id-1",
+                    value=[MagicMock(metricId=MagicMock(dynamicProperty=[]))],
+                )
+            ]
+
+            health_metrics, performance_metrics = api.get_vsan_metrics(
+                cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
+            )
+            assert len(health_metrics) == 0

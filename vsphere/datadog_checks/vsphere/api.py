@@ -406,7 +406,7 @@ class VSphereAPI(object):
         for cluster_reference, nested_ids in cluster_nested_elts.items():
             self.log.debug("Querying vSAN metrics for cluster %s", cluster_reference.name)
             unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
-            if len(unprocessed_health_metrics) < 0:
+            if len(unprocessed_health_metrics) <= 0:
                 self.log.debug("No health metrics returned for cluster %s", cluster_reference.name)
                 continue
             processed_health_metrics = {}
@@ -422,9 +422,6 @@ class VSphereAPI(object):
                 }
             )
             for health_test in unprocessed_health_metrics[0].groupTests:
-                if len(health_test.testId) == 0:
-                    self.log.debug('no testId for health test %s', health_test)
-                    continue
                 test_name = health_test.testId.split('.')[-1]
                 processed_health_metrics.update(
                     {
@@ -449,9 +446,6 @@ class VSphereAPI(object):
                     )
             discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
             for entity_type in discovered_metrics:
-                if len(entity_type.entityRefId) == 0:
-                    self.log.debug('no entityRefId for metric %s', entity_type)
-                    continue
                 for metric in entity_type.value:
                     metric.metricId.dynamicProperty.append(
                         id_to_tags[entity_type.entityRefId.replace("'", "").split(':')[-1]]
