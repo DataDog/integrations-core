@@ -14,7 +14,7 @@ This integration provides the following benefits:
 
 1. Log into [Vonage](https://www.vonage.com/log-in/).
 2. Navigate to Vonage [dashboard](https://dashboard.nexmo.com/).
-3. Here, you can obtain both the API key and API secret. 
+3. Here, you can obtain both the API key and API secret.
 4. Navigate to [Applications](https://dashboard.nexmo.com/applications).
 5. Click on + Create a new Application to create a new application.
 6. Enable the Messages Capabilities.
