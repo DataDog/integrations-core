@@ -403,6 +403,7 @@ class VSphereAPI(object):
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         health_metrics = []
         performance_metrics = []
+        to_redapl_metrics = []
         for cluster_reference, nested_ids in cluster_nested_elts.items():
             self.log.debug("Querying vSAN metrics for cluster %s", cluster_reference.name)
             unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
@@ -444,11 +445,34 @@ class VSphereAPI(object):
                             entityRefId=(entity_type + str(nested_id)), startTime=starting_time
                         )
                     )
+            redapl_cluster_data = {
+                'ref': cluster_reference,
+                'info': {'name': cluster_reference.name, 'vcenter_server': self.config.hostname},
+            }
             discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
             for entity_type in discovered_metrics:
                 for metric in entity_type.value:
+                    if metric.metricId.label in ('iopsRead', 'latencyAvgRead', 'used', 'total'):
+                        if metric.values != 'None':
+                            relabelMap = {
+                                'iopsRead': 'requests',
+                                'latencyAvgRead': 'latency',
+                                'used': 'size_used',
+                                'total': 'size_total',
+                            }
+                            redapl_cluster_data['info'][relabelMap[metric.metricId.label]] = int(
+                                metric.values.split(',')[-1]
+                            )
                     metric.metricId.dynamicProperty.append(
                         id_to_tags[entity_type.entityRefId.replace("'", "").split(':')[-1]]
                     )
+            cpuCount = 0
+            for host in cluster_reference.host:
+                for vm in host.vm:
+                    cpuCount += vm.summary.config.numCpu
+            # TODO: get cost multiplier since cost = cpuCount * multiplier
+            redapl_cluster_data['info']['cost'] = cpuCount
+            redapl_cluster_data['info']['num_hosts'] = len(cluster_reference.host)
             performance_metrics.append(discovered_metrics)
-        return [health_metrics, performance_metrics]
+            to_redapl_metrics.append(redapl_cluster_data)
+        return [health_metrics, performance_metrics, to_redapl_metrics]
