@@ -66,6 +66,11 @@ files:
       value:
         type: boolean
         example: False
+    - name: verify
+      description: Specifies whether a certificate is required and whether it will be validated after connection.
+      value:
+        type: boolean
+        example: True
     - template: instances/db
       overrides:
         custom_queries.value.example:

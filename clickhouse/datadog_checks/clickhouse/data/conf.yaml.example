@@ -79,6 +79,11 @@ instances:
     #
     # tls_verify: false
 
+    ## @param verify - boolean - optional - default: true
+    ## Specifies whether a certificate is required and whether it will be validated after connection.
+    #
+    # verify: true
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.
