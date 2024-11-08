@@ -21,7 +21,6 @@ This integration provides the following benefits:
 7. Enable the Voice Capabilities.
 8. To make a call using the dashboard, Please refer to this [link](https://developer.vonage.com/en/voice/voice-api/getting-started?lang=using-dashboard).
 
-
 ### Configuration
 
 Configure the Datadog endpoint to forward Vonage logs to Datadog.
