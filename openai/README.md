@@ -92,7 +92,7 @@ docker run -d \
    DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME>
 ```
 
-**Note**: In serverless environments, Datadog automatically flushes spans at the end of the Lambda function.
+**Note**: In serverless environments, Datadog automatically flushes spans when the Lambda function finishes running.
 ##### Automatic OpenAI tracing
 LLM Observability provides automatic tracing for OpenAI's completion and chat completion methods without requiring manual instrumentation.
 
