@@ -547,6 +547,8 @@ integration/twemproxy:
 - twemproxy/**/*
 integration/twistlock:
 - twistlock/**/*
+integration/vanta:
+- vanta/**/*
 integration/varnish:
 - varnish/**/*
 integration/vault:
