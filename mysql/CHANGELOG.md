@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 14.2.0 / 2024-11-06
+
+***Added***:
+
+* Include port as part of database instance metadata for MySQL and Postgres ([#18966](https://github.com/DataDog/integrations-core/pull/18966))
+
 ## 14.1.0 / 2024-10-31
 
 ***Added***:
@@ -17,7 +23,7 @@
   - `mysq..innodb.pending_log_writes` for MySQL 5.7
   - `mysql.innodb.pending_checkpoint_writes` for MySQL 5.7 ([#18904](https://github.com/DataDog/integrations-core/pull/18904))
 
-## 14.0.0 / 2024-10-04
+## 14.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 
