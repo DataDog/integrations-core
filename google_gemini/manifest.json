@@ -1,0 +1,52 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "93179a9e-98f8-48fe-843a-59f9c9bb84df",
+  "app_id": "google-gemini",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Optimize Google Gemini usage: cost estimates, prompt sampling and performance metrics.",
+    "title": "Google Gemini",
+    "media": [],
+    "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Metrics",
+      "Category::Cost Management",
+      "Submitted Data Type::Traces",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 31079799,
+      "source_type_name": "Google Gemini",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "google_gemini.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "LLM Overview for Google": "assets/dashboards/google_gemini_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
