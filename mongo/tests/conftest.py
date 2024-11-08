@@ -130,6 +130,7 @@ def instance_integration(instance_custom_queries):
     instance["collections"] = ["foo", "bar"]
     instance["collections_indexes_stats"] = True
     instance["add_node_tag_to_events"] = False
+    instance["service"] = "my_service"
     return instance
 
 

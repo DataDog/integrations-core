@@ -78,7 +78,8 @@ instances:
     ## For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
     #
     # ignore_databases:
-    #   - template%
+    #   - template0
+    #   - template1
     #   - rdsadmin
     #   - azure_maintenance
     #   - cloudsqladmin
@@ -162,7 +163,7 @@ instances:
     ## * p = partitioned table
     ##
     ## Note: For compatibility reasons you can also use the following syntax to track relations metrics by specifying
-    ## the list of table names. All schemas are included and regex are not supported.
+    ## the list of table names. All schemas are included.
     ## relations:
     #
     # relations:

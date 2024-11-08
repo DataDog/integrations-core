@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 6.0.0 / 2024-10-04
+## 6.1.0 / 2024-10-31
+
+***Added***:
+
+* Update root.json for v14 ceremony. ([#18824](https://github.com/DataDog/integrations-core/pull/18824))
+
+## 6.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 
