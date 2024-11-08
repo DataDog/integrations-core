@@ -38,9 +38,6 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {
-      "LLM Overview for Google": "assets/dashboards/google_gemini_overview.json"
     }
   },
   "author": {
