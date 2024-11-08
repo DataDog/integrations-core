@@ -5,25 +5,21 @@ Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatb
 
 If you are building LLM applications, use LLM Observability to investigate the root cause of issues, monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
 
-<!-- partial
-{{< vimeo url="https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4" >}}
-partial -->
+[LLM Obs tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max)
 
 Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [LangChain][1] Python library requests using Datadog metrics, APM, and logs.
 
 ## Setup
 
+### LLM Observability: Prepare your environment and enable LLM
+You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
+#### Installation for Python
 
-### LLM Observability: Prepare your environment and enable LLM
-You can enable LLM observability in the following environments:
-- You do not have the Datadog Agent installed (Agentless environment)
-- You are using the Datadog Agent
-- You are running in a serverless environment (AWS Lambda)
-
-#### If you do not have the Datadog Agent:
+##### If you do not have the Datadog Agent:
 1. Install the `ddtrace` package:
 
    ```shell
@@ -68,7 +64,7 @@ You can enable LLM observability in the following environments:
 
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
 
-#### If you are running LLM Observability in a serverless environment (AWS Lambda):
+##### If you are running LLM Observability in a serverless environment (AWS Lambda):
 1. Install the **Datadog-Python** and **Datadog-Extension** Lambda layers as part of your AWS Lambda setup.
 2. Enable LLM Observability by setting the following environment variables:
 
@@ -78,7 +74,7 @@ You can enable LLM observability in the following environments:
 
 **Note**: In serverless environments, Datadog automatically flushes spans at the end of the Lambda function.
 
-#### Automatic LangChain Tracing
+##### Automatic LangChain Tracing
 
 LangChain integration is automatically enabled when LLM Observability is configured. This captures latency, errors, input/output messages, and token usage for LangChain operations.
 
@@ -114,172 +110,84 @@ ddtrace-run --debug
 
 This will display any errors related to data transmission or instrumentation, including issues with LangChain traces.
 
-#### APM: Get Usage Metrics for your python Applications
-
-1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
-
-   ```shell
-   docker run -d --cgroupns host \
-                 --pid host \
-                 -v /var/run/docker.sock:/var/run/docker.sock:ro \
-                 -v /proc/:/host/proc/:ro \
-                 -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-                 -e DD_API_KEY=<DATADOG_API_KEY> \
-                 -p 127.0.0.1:8126:8126/tcp \
-                 -p 127.0.0.1:8125:8125/udp \
-                 -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-                 -e DD_APM_ENABLED=true \
-                 gcr.io/datadoghq/agent:latest
-   ```
-
-2. Install the Datadog APM Python library.
-
-   ```shell
-   pip install ddtrace>=1.17
-   ```
-
-3. Prefix your LangChain Python application command with `ddtrace-run`.
-
-   ```shell
-   DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
-   ```
-
-**Note**: If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
-
-See the [APM Python library documentation][2] for more advanced usage.
-
-
-##### Configuration
-
-See the [APM Python library documentation][3] for all the available configuration options.
-
-
-##### Log Prompt & Completion Sampling
-
-To enable log prompt and completion sampling, set the `DD_LANGCHAIN_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
-
-To adjust the log sample rate, see the [APM library documentation][3].
-
-**Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
-
-
-### Validation
-
-Validate that the APM Python library can communicate with your Agent using:
-
-```shell
-ddtrace-run --info
-```
-
-You should see the following output:
-
-```
-    Agent error: None
-```
-
-##### Debug Logging
-
-Pass the `--debug` flag to `ddtrace-run` to enable debug logging.
-
-```shell
-ddtrace-run --debug
-```
-
-This displays any errors sending data:
-
-```
-ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
-WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
-DEBUG:ddtrace.contrib._trace_utils_llm.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
-```
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "Other Languages" xxx -->
-
-### Installation
-
-#### APM: Get Usage Metrics for your python Applications
-
-1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
-
-   ```shell
-   docker run -d --cgroupns host \
-                 --pid host \
-                 -v /var/run/docker.sock:/var/run/docker.sock:ro \
-                 -v /proc/:/host/proc/:ro \
-                 -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-                 -e DD_API_KEY=<DATADOG_API_KEY> \
-                 -p 127.0.0.1:8126:8126/tcp \
-                 -p 127.0.0.1:8125:8125/udp \
-                 -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-                 -e DD_APM_ENABLED=true \
-                 gcr.io/datadoghq/agent:latest
-   ```
-
-2. Install the Datadog APM Python library.
-
-   ```shell
-   pip install ddtrace>=1.17
-   ```
-
-
-3. Prefix your LangChain Python application command with `ddtrace-run`.
-
-   ```shell
-   DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
-   ```
-
-**Note**: If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
-
-See the [APM Python library documentation][2] for more advanced usage.
-
-
-##### Configuration
-
-See the [APM Python library documentation][3] for all the available configuration options.
-
-
-##### Log Prompt & Completion Sampling
-
-To enable log prompt and completion sampling, set the `DD_LANGCHAIN_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
-
-To adjust the log sample rate, see the [APM library documentation][3].
-
-**Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
-
-
-### Validation
-
-Validate that the APM Python library can communicate with your Agent using:
-
-```shell
-ddtrace-run --info
-```
-
-You should see the following output:
-
-```
-    Agent error: None
-```
-
-##### Debug Logging
-
-Pass the `--debug` flag to `ddtrace-run` to enable debug logging.
-
-```shell
-ddtrace-run --debug
-```
-
-This displays any errors sending data:
-
-```
-ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
-WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
-DEBUG:ddtrace.contrib._trace_utils_llm.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
-```
-
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+### APM: Get Usage Metrics for your python Applications
+
+1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
+
+   ```shell
+   docker run -d --cgroupns host \
+                 --pid host \
+                 -v /var/run/docker.sock:/var/run/docker.sock:ro \
+                 -v /proc/:/host/proc/:ro \
+                 -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+                 -e DD_API_KEY=<DATADOG_API_KEY> \
+                 -p 127.0.0.1:8126:8126/tcp \
+                 -p 127.0.0.1:8125:8125/udp \
+                 -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+                 -e DD_APM_ENABLED=true \
+                 gcr.io/datadoghq/agent:latest
+   ```
+
+2. Install the Datadog APM Python library.
+
+   ```shell
+   pip install ddtrace>=1.17
+   ```
+
+3. Prefix your LangChain Python application command with `ddtrace-run`.
+
+   ```shell
+   DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
+   ```
+
+**Note**: If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
+
+See the [APM Python library documentation][2] for more advanced usage.
+
+#### Configuration
+
+See the [APM Python library documentation][3] for all the available configuration options.
+
+#### Log Prompt & Completion Sampling
+
+To enable log prompt and completion sampling, set the `DD_LANGCHAIN_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
+
+To adjust the log sample rate, see the [APM library documentation][3].
+
+**Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
+
+#### Validation
+
+Validate that the APM Python library can communicate with your Agent using:
+
+```shell
+ddtrace-run --info
+```
+
+You should see the following output:
+
+```
+    Agent error: None
+```
+
+#### Debug Logging
+
+Pass the `--debug` flag to `ddtrace-run` to enable debug logging.
+
+```shell
+ddtrace-run --debug
+```
+
+This displays any errors sending data:
+
+```
+ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
+WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
+DEBUG:ddtrace.contrib._trace_utils_llm.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
+```
 
 ## Data Collected
 
@@ -294,7 +202,6 @@ The LangChain integration does not include any events.
 ### Service Checks
 
 The LangChain integration does not include any service checks.
-
 
 ## Troubleshooting
 
