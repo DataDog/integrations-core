@@ -11,7 +11,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ## Setup
 
-### LLM Observability: Prepare your environment and enable LLM
+### LLM Observability: Get end-to-end visibility into your LLM application using LangChain
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
 <!-- xxx tabs xxx -->
