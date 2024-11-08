@@ -54,7 +54,7 @@
       "dashboards": {
         "Keycloak - Overview":"assets/dashboards/keycloak_overview.json",
         "Keycloak - User Events":"assets/dashboards/keycloak_user_events.json",
-        "Keycloak - Admin Events":"assets/dashboards/keycloak_admin_events.json",
+        "Keycloak - Admin Events":"assets/dashboards/keycloak_admin_events.json"
       },
       "logs": {
         "source": "keycloak"
