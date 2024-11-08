@@ -273,6 +273,8 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
+integration/keycloak:
+- keycloak/**/*
 integration/kong:
 - kong/**/*
 integration/kube_apiserver_metrics:
