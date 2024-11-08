@@ -313,6 +313,8 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/google_gemini:
+- google_gemini/**/*
 integration/lastpass:
 - lastpass/**/*
 integration/lighttpd:
