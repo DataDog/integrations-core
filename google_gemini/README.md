@@ -71,7 +71,7 @@ docker run -d \
    DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME>
 ```
 
-**Note**: In serverless environments, Datadog automatically flushes spans at the end of the Lambda function.
+**Note**: In serverless environments, Datadog automatically flushes spans when the Lambda function finishes running.
 
 ##### Automatic Google Gemini tracing
 
@@ -105,17 +105,11 @@ ddtrace-run --debug
 
 This displays any errors related to data transmission or instrumentation, including issues with Google Gemini traces.
 
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
-
-### APM: Get usage metrics for Python applications
-If you haven't already, set up the [Microsoft Azure integration][1] first. There are no other installation steps.
-
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][2] for a list of metrics provided by this integration.
+See [metadata.csv][1] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -127,9 +121,8 @@ The Azure OpenAI integration does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
-[1]: https://docs.datadoghq.com/integrations/azure/
-[2]: https://github.com/DataDog/integrations-internal-core/blob/main/azure_openai/metadata.csv
-[3]: https://docs.datadoghq.com/help/
+[1]: https://github.com/DataDog/integrations-core/blob/main/google-gemini/metadata.csv
+[2]: https://docs.datadoghq.com/help/
 
