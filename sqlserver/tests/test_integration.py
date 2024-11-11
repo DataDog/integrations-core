@@ -653,7 +653,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 'azure': {
                     'deployment_type': 'sql_database',
                     'fully_qualified_domain_name': 'my-instance.database.windows.net',
-                    'aggregate_azure_sql_databases': True,
+                    'aggregate_sql_databases': True,
                 },
             },
             [

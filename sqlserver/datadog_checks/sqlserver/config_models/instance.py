@@ -43,7 +43,7 @@ class Azure(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    aggregate_azure_sql_databases: Optional[bool] = None
+    aggregate_sql_databases: Optional[bool] = None
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
 
