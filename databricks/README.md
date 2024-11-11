@@ -17,7 +17,7 @@ Datadog offers several Databricks monitoring capabilities.
 
 [Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Jobs Monitoring][25].
 
-[Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality — visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
+[Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
 
 ## Setup
 
