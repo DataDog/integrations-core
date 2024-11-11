@@ -4,6 +4,9 @@
 dependencies = [
   "rrdtool==0.1.14",
 ]
+pre-install-commands = [
+"python install-rrd.py"
+]
 
 [[envs.default.matrix]]
 python = ["3.12"]
