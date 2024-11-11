@@ -1,6 +1,6 @@
 {
     "title": "Databricks Cost Overview",
-    "description": "[[suggested_dashboards]]",
+    "description": "This dashboard provides insights into various Databricks costs and their sources of attribution.",
     "widgets": [
       {
         "id": 8347049005274980,
