@@ -109,17 +109,17 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /tcp_queue_length/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # NDM
-/cisco_aci/                                                        @DataDog/network-device-monitoring @DataDog/agent-integrations
-/cisco_sdwan/                                                      @DataDog/network-device-monitoring @DataDog/agent-integrations
-/snmp/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
-/snmp/*.md                                                         @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
-/snmp_*/                                                           @DataDog/network-device-monitoring @DataDog/agent-integrations
-/snmp_*/*.md                                                       @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
+/cisco_aci/                                                        @DataDog/ndm-integrations @DataDog/agent-integrations
+/cisco_sdwan/                                                      @DataDog/ndm-integrations @DataDog/agent-integrations
+/snmp/                                                             @DataDog/ndm-core @DataDog/agent-integrations
+/snmp/*.md                                                         @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
+/snmp_*/                                                           @DataDog/ndm-core @DataDog/agent-integrations
+/snmp_*/*.md                                                       @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 /network_path/                                                     @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations
 /network_path/*.md                                                 @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
 
-/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/network-device-monitoring @DataDog/agent-integrations
-/docs/developer/tutorials/snmp/                                    @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
+/datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/ndm-core @DataDog/agent-integrations
+/docs/developer/tutorials/snmp/                                    @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 
 # Platform Integrations
 /citrix_hypervisor/                     @DataDog/platform-integrations @DataDog/agent-integrations
