@@ -2866,7 +2866,7 @@
                                     "formulas": [
                                         {
                                             "cell_display_mode": "bar",
-                                            "alias": "Count",
+                                            "alias": "Team Members",
                                             "formula": "query1"
                                         }
                                     ]
