@@ -484,11 +484,11 @@ instances:
         #
         # fully_qualified_domain_name: my-sqlserver-database.database.windows.net
 
-        ## @param group_azure_sql_databases - boolean - optional - default: false
-        ## Group individual Azure SQL Databases under a single logical database instance.
+        ## @param aggregate_azure_sql_databases - boolean - optional - default: false
+        ## Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
         ## Only applicable when `deployment_type` is set to `sql_database`.
         #
-        # group_azure_sql_databases: false
+        # aggregate_azure_sql_databases: false
 
     ## Configuration section used for Azure AD Authentication.
     ##

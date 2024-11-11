@@ -67,7 +67,7 @@ class SQLServerConfig:
             # Remap fully_qualified_domain_name to name
             if 'fully_qualified_domain_name' in azure:
                 azure['name'] = azure.pop('fully_qualified_domain_name')
-            azure['group_azure_sql_databases'] = is_affirmative(azure.get('group_azure_sql_databases', False))
+            azure['aggregate_azure_sql_databases'] = is_affirmative(azure.get('aggregate_azure_sql_databases', False))
             self.cloud_metadata.update({'azure': azure})
 
         obfuscator_options_config: dict = instance.get('obfuscator_options', {}) or {}

@@ -566,9 +566,9 @@ files:
           value:
             type: string
             example: my-sqlserver-database.database.windows.net
-        - name: group_azure_sql_databases
+        - name: aggregate_azure_sql_databases
           description: |
-            Group individual Azure SQL Databases under a single logical database instance.
+            Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
             Only applicable when `deployment_type` is set to `sql_database`.
           value:
             type: boolean
