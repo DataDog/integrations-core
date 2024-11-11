@@ -68,8 +68,11 @@
     "monitors": {
       "Databricks Model Serving: High count 4xx errors": "assets/monitors/4xx_errors.json",
       "Databricks Model Serving: High count 5xx errors": "assets/monitors/5xx_errors.json",
-      "Databricks Model Serving: High memory utilization": "assets/monitors/memory_utilization_high.json",
-      "Databricks Model Serving: High CPU utilization": "assets/monitors/cpu_utilization_high.json"
+      "Databricks Model Serving: High CPU usage": "assets/monitors/cpu_usage_high.json",
+      "Databricks Model Serving: High CPU memory usage": "assets/monitors/cpu_memory_usage_high.json",
+      "Databricks Model Serving: High GPU usage": "assets/monitors/gpu_memory_usage_high.json",
+      "Databricks Model Serving: High GPU memory usage": "assets/monitors/gpu_memory_usage_high.json",
+      "Databricks Model Serving: High request latency": "assets/monitors/request_latency_high.json",
     },
     "logs": {
       "source": "spark"
