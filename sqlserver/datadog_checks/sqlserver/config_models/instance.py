@@ -45,6 +45,7 @@ class Azure(BaseModel):
     )
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
+    group_azure_sql_databases: Optional[bool] = None
 
 
 class CollectSettings(BaseModel):
@@ -202,7 +203,6 @@ class InstanceConfig(BaseModel):
     dsn: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
-    group_azure_sql_database: Optional[bool] = None
     host: str
     ignore_missing_database: Optional[bool] = None
     include_ao_metrics: Optional[bool] = None

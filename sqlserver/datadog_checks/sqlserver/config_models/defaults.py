@@ -60,10 +60,6 @@ def instance_empty_default_hostname():
     return False
 
 
-def instance_group_azure_sql_database():
-    return False
-
-
 def instance_ignore_missing_database():
     return False
 

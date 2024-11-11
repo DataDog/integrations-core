@@ -59,13 +59,15 @@ class SQLServerConfig:
         aws: dict = instance.get('aws', {}) or {}
         gcp: dict = instance.get('gcp', {}) or {}
         azure: dict = instance.get('azure', {}) or {}
-        # Remap fully_qualified_domain_name to name
-        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
             self.cloud_metadata.update({'aws': aws})
         if gcp:
             self.cloud_metadata.update({'gcp': gcp})
         if azure:
+            # Remap fully_qualified_domain_name to name
+            if 'fully_qualified_domain_name' in azure:
+                azure['name'] = azure.pop('fully_qualified_domain_name')
+            azure['group_azure_sql_database'] = is_affirmative(azure.get('group_azure_sql_database', False))
             self.cloud_metadata.update({'azure': azure})
 
         obfuscator_options_config: dict = instance.get('obfuscator_options', {}) or {}
@@ -112,7 +114,6 @@ class SQLServerConfig:
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
-        self.group_azure_sql_database = is_affirmative(instance.get('group_azure_sql_database', False))
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:
         valid_patterns = []

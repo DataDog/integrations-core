@@ -1,1 +1,1 @@
-Add config option `group_azure_sql_database` to group multiple azure sql databases into one database host.
+Add config option `azure.group_azure_sql_database` to group multiple azure sql databases into one database host.
