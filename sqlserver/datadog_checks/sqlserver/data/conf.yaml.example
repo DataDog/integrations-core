@@ -354,6 +354,13 @@ instances:
         #
         # samples_per_hour_per_query: 4
 
+        ## @param lookback_window - integer - optional - default: 2 * collection_interval
+        ## Queries whose last execution completed after the lookback window are excluded from
+        ## metrics collection. Set a longer lookback window (in seconds) to capture infrequently
+        ## run queries.
+        #
+        # lookback_window: 600
+
     ## Configure collection of procedure metrics
     #
     # procedure_metrics:
@@ -690,6 +697,28 @@ instances:
     ## If the DB specified doesn't exist on the server then don't do the check
     #
     # ignore_missing_database: false
+
+    ## Available for Agent 7.56 and newer.
+    ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
+    ## only for the database configured with `database` parameter.
+    #
+    # schemas_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 10
+        ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
+        ## Capped by `schemas_collection.collection_interval`
+        #
+        # max_execution_time: 10
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.

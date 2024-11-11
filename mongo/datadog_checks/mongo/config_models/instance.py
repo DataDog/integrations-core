@@ -20,6 +20,15 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, deprecations, validators
 
 
+class Aws(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    cluster_identifier: Optional[str] = None
+    instance_endpoint: Optional[str] = None
+
+
 class Field(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -103,6 +112,7 @@ class InstanceConfig(BaseModel):
     )
     add_node_tag_to_events: Optional[bool] = None
     additional_metrics: Optional[tuple[str, ...]] = None
+    aws: Optional[Aws] = None
     cluster_name: Optional[str] = None
     collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None
