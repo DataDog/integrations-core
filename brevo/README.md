@@ -13,25 +13,25 @@ Follow the instructions below to configure this integration for Brevo Marketing 
 #### Webhook configuration for marketing events
 Configure the Datadog endpoint to forward Brevo marketing events as logs to Datadog. For more details, see the Brevo [Marketing webhooks][3] documentation.
 
-1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
+1. Select an existing API key or create a new one by clicking one of the buttons below:
 2. Log in to your [Brevo account][4].
 3. In the left-side panel, navigate to **Campaigns**.
-4. Go to the **Settings** Page.
+4. Navigate to the **Settings** Page.
 5. Under the **Webhooks** section, click **Configure**.
 6. Click **Add a New Webhook**.
-7. Enter the webhook URL provided from step 1.
+7. Enter the webhook URL that you identified previously.
 8. Choose the types of messages and contact logs you want to forward to Datadog.
 9. Click **Add**.
 
 #### Webhook configuration for transactional events
 Configure the Datadog endpoint to forward Brevo transactional events as logs to Datadog. For more details, see the Brevo [Transactional webhooks][5] documentation.
 
-1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
+1. Select an existing API key or create a new one by clicking one of the buttons below:
 2. Log in to your [Brevo account][4]. If you are already logged in, Brevo automatically redirects to the [Brevo homepage][6].
 3. In the left-side panel, navigate to **Transactional**.
-4. Go to **Settings > Webhook**.
+4. In **Settings**, click "**Webhook**".
 5. Click **Add a new webhook**.
-6. Enter the webhook URL provided from step 1.
+6. Enter the webhook URL that you identified previously.
 7. Select the types of message logs to forward to Datadog.
 8. Click **Save**.
 
