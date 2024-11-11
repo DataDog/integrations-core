@@ -601,12 +601,12 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             {
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
-                "dd.internal.resource:azure_sql_server_database:forced_hostname",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
@@ -618,12 +618,12 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             {
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
-                "dd.internal.resource:azure_sql_server_database:localhost/datadog_test-1",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
@@ -656,13 +656,13 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 },
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
                 "dd.internal.resource:aws_rds_instance:foo.aws.com",
-                "dd.internal.resource:azure_sql_server_database:my-instance",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
