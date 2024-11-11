@@ -112,6 +112,7 @@ class SQLServerConfig:
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
+        self.group_azure_sql_database = is_affirmative(instance.get('group_azure_sql_database', False))
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:
         valid_patterns = []

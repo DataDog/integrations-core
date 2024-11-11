@@ -202,6 +202,7 @@ class InstanceConfig(BaseModel):
     dsn: Optional[str] = None
     empty_default_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
+    group_azure_sql_database: Optional[bool] = None
     host: str
     ignore_missing_database: Optional[bool] = None
     include_ao_metrics: Optional[bool] = None

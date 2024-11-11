@@ -80,6 +80,11 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
+    ## @param group_azure_sql_database - boolean - optional - default: false
+    ## Group individual Azure SQL Databases under a single logical database instance.
+    #
+    # group_azure_sql_database: false
+
     ## @param database_autodiscovery - boolean - optional - default: false
     ## Auto-discover and monitor databases. Supported for the metrics check.
     ## If `true`, overrides `database` option.

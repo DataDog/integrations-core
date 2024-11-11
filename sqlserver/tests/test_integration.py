@@ -535,7 +535,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "dbm_enabled, database, reported_hostname, engine_edition, expected_hostname, cloud_metadata, metric_names",
+    "dbm_enabled,database,reported_hostname,engine_edition,expected_hostname,cloud_metadata,metric_names,group_azure_sql_database",
     [
         (
             True,
@@ -545,6 +545,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'stubbed.hostname',
             {},
             [],
+            None,
         ),
         (
             False,
@@ -559,6 +560,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 },
             },
             ["dd.internal.resource:azure_sql_server_managed_instance:my-instance"],
+            None,
         ),
         (
             True,
@@ -573,6 +575,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 },
             },
             ["dd.internal.resource:azure_sql_server_managed_instance:my-instance"],
+            None,
         ),
         (
             True,
@@ -582,6 +585,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'forced_hostname',
             {},
             [],
+            None,
         ),
         (
             False,
@@ -591,6 +595,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'forced_hostname',
             {},
             [],
+            None,
         ),
         (
             True,
@@ -608,6 +613,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
                 "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
+            None,
         ),
         (
             True,
@@ -625,6 +631,25 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
                 "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
+            None,
+        ),
+        (
+            True,
+            'datadog_test-1',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'name': 'my-instance.database.windows.net',
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
+            ],
+            True,
         ),
         (
             True,
@@ -634,6 +659,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'localhost/master',
             {},
             [],
+            None,
         ),
         (
             False,
@@ -643,6 +669,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             'localhost/master',
             {},
             [],
+            None,
         ),
         (
             False,
@@ -664,6 +691,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net",
                 "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
+            None,
         ),
         (
             False,
@@ -681,6 +709,7 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             [
                 "dd.internal.resource:gcp_sql_database_instance:foo-project:bar",
             ],
+            None,
         ),
     ],
 )
@@ -696,6 +725,7 @@ def test_resolved_hostname_set(
     expected_hostname,
     cloud_metadata,
     metric_names,
+    group_azure_sql_database,
 ):
     if cloud_metadata:
         for k, v in cloud_metadata.items():
@@ -711,6 +741,8 @@ def test_resolved_hostname_set(
         instance_docker['database'] = database
     if reported_hostname:
         instance_docker['reported_hostname'] = reported_hostname
+    if group_azure_sql_database is not None:
+        instance_docker['group_azure_sql_database'] = group_azure_sql_database
     sqlserver_check = SQLServer(CHECK_NAME, {}, [instance_docker])
     if engine_edition:
         sqlserver_check.static_info_cache[STATIC_INFO_VERSION] = "Microsoft SQL Server 2019"
