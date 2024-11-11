@@ -572,7 +572,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
-                    'group_azure_sql_database': False,
+                    'group_azure_sql_databases': False,
                 },
             },
         ),
@@ -587,7 +587,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
-                    'group_azure_sql_database': False,
+                    'group_azure_sql_databases': False,
                 },
             },
         ),
@@ -608,7 +608,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
-                    'group_azure_sql_database': False,
+                    'group_azure_sql_databases': False,
                 },
             },
         ),
