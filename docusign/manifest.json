@@ -63,9 +63,9 @@
       "Docusign - Alert" : "assets/dashboards/docusign_alert.json"
     },
     "monitors": {
-      "[Docusign] Credential Leak Detected" : "assets/monitors/credential_leak_activity.json",
-      "[Docusign] Too Many Login Attempts" : "assets/monitors/multiple_login_attempts.json",
-      "[Docusign] Unauthorized IP Address Activity" : "assets/monitors/unauthorized_ip_activity.json"
+      "Credential Leak Detected" : "assets/monitors/credential_leak_activity.json",
+      "Too Many Login Attempts" : "assets/monitors/multiple_login_attempts.json",
+      "Unauthorized IP Address Activity" : "assets/monitors/unauthorized_ip_activity.json"
     },
     "logs": {
       "source": "docusign"

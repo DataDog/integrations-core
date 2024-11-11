@@ -585,8 +585,8 @@ spec:
      name: "<POD_NAME>"
      annotations:
       ad.datadoghq.com/<CONTAINER_NAME>.check_names: '[<CHECK_NAME>]'
-      ad.datadoghq.com/<CONTAINER_IDENTIFIER>.init_configs: '[<INIT_CONFIG>]'
-      ad.datadoghq.com/<CONTAINER_IDENTIFIER>.instances: '[<INSTANCE_CONFIG>]'
+      ad.datadoghq.com/<CONTAINER_NAME>.init_configs: '[<INIT_CONFIG>]'
+      ad.datadoghq.com/<CONTAINER_NAME>.instances: '[<INSTANCE_CONFIG>]'
    spec:
      serviceAccountName: datadog-agent
      containers:
