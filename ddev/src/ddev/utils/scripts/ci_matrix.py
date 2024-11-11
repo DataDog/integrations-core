@@ -71,7 +71,7 @@ DISPLAY_ORDER_OVERRIDE = {
 __plat = namedtuple('__plat', ['name', 'image'])
 PLATFORMS = {
     # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
-    'linux': __plat('Linux', 'ubuntu-22.04'),
+    'linux': __plat('Linux', 'ubuntu-24.04'),
     # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
     'windows': __plat('Windows', 'windows-2022'),
     # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md
