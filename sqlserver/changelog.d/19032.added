@@ -1,1 +1,1 @@
-Add config option `azure.group_azure_sql_database` to group multiple azure sql databases into one database host.
+Add config option `azure.aggregate_sql_databases` to report multiple azure sql databases as one database host. This is an opted in feature and is disabled by default. 
