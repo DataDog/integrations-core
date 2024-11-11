@@ -1,4 +1,4 @@
-id: REPLACE_WITH_ID_FIELD_FROM_YAML_FILE
+id: vonage
 tests:
   - sample: >-
       {
