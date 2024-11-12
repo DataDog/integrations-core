@@ -44,42 +44,43 @@ You can enable LLM Observability in different environments. Follow the appropria
 
    ```shell
      pip install ddtrace
+   ```
 
 2. Start your application with the following command, enabling agentless mode:
 
-```shell
-  DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <YOUR_APP>.py
-```
+   ```shell
+     DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <YOUR_APP>.py
+   ```
 
 ##### If you already have the Datadog Agent installed:
 1. Make sure the Agent is running and that APM and StatsD are enabled. For example, use the following command with Docker:
 
-```shell
-docker run -d \
-  --cgroupns host \
-  --pid host \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /proc/:/host/proc/:ro \
-  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-  -e DD_API_KEY=<DATADOG_API_KEY> \
-  -p 127.0.0.1:8126:8126/tcp \
-  -p 127.0.0.1:8125:8125/udp \
-  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-  -e DD_APM_ENABLED=true \
-  gcr.io/datadoghq/agent:latest
-```
+   ```shell
+   docker run -d \
+     --cgroupns host \
+     --pid host \
+     -v /var/run/docker.sock:/var/run/docker.sock:ro \
+     -v /proc/:/host/proc/:ro \
+     -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+     -e DD_API_KEY=<DATADOG_API_KEY> \
+     -p 127.0.0.1:8126:8126/tcp \
+     -p 127.0.0.1:8125:8125/udp \
+     -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+     -e DD_APM_ENABLED=true \
+     gcr.io/datadoghq/agent:latest
+   ```
 
 2. Install the `ddtrace` package if it isn't installed yet:
 
-```shell
-  pip install ddtrace
-```
+   ```shell
+     pip install ddtrace
+   ```
 
 3. Start your application using the `ddtrace-run` command to automatically enable tracing:
 
-```shell
-   DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <YOUR_APP>.py
-```
+   ```shell
+      DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <YOUR_APP>.py
+   ```
 
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
 
@@ -87,9 +88,9 @@ docker run -d \
 1. Install the **Datadog-Python** and **Datadog-Extension** Lambda layers as part of your AWS Lambda setup.
 2. Enable LLM Observability by setting the following environment variables:
 
-```shell
-   DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME>
-```
+   ```shell
+      DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME>
+   ```
 
 **Note**: In serverless environments, Datadog automatically flushes spans when the Lambda function finishes running.
 ##### Automatic OpenAI tracing
@@ -104,22 +105,22 @@ No additional setup is required to capture latency, input/output messages, and t
 ##### Validation
 Validate that LLM Observability is properly capturing spans by checking your application logs for successful span creation. You can also run the following command to check the status of the `ddtrace` integration:
 
-```shell
-ddtrace-run --info
-```
+   ```shell
+   ddtrace-run --info
+   ```
 
 Look for the following message to confirm the setup:
 
-```shell
-Agent error: None
-```
+   ```shell
+   Agent error: None
+   ```
 
 ##### Debugging
 If you encounter issues during setup, enable debug logging by passing the `--debug` flag:
 
-```shell
-ddtrace-run --debug
-```
+   ```shell
+   ddtrace-run --debug
+   ```
 
 This will display detailed information about any errors or issues with tracing.
 
@@ -127,32 +128,32 @@ This will display detailed information about any errors or issues with tracing.
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
-```shell
-docker run -d
-  --cgroupns host \
-  --pid host \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /proc/:/host/proc/:ro \
-  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-  -e DD_API_KEY=<DATADOG_API_KEY> \
-  -p 127.0.0.1:8126:8126/tcp \
-  -p 127.0.0.1:8125:8125/udp \
-  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-  -e DD_APM_ENABLED=true \
-  gcr.io/datadoghq/agent:latest
-```
+   ```shell
+   docker run -d
+     --cgroupns host \
+     --pid host \
+     -v /var/run/docker.sock:/var/run/docker.sock:ro \
+     -v /proc/:/host/proc/:ro \
+     -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+     -e DD_API_KEY=<DATADOG_API_KEY> \
+     -p 127.0.0.1:8126:8126/tcp \
+     -p 127.0.0.1:8125:8125/udp \
+     -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+     -e DD_APM_ENABLED=true \
+     gcr.io/datadoghq/agent:latest
+   ```
 
 2. Install the Datadog APM Python library.
 
-```shell
-pip install ddtrace
-```
+   ```shell
+   pip install ddtrace
+   ```
 
 3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below:
 
-```shell
-DD_SERVICE="my-service" DD_ENV="staging" ddtrace-run python <your-app>.py
-```
+   ```shell
+   DD_SERVICE="my-service" DD_ENV="staging" ddtrace-run python <your-app>.py
+   ```
 
 **Notes**:
 
@@ -181,31 +182,31 @@ To adjust the log sample rate, see the [APM library documentation][3].
 
 Validate that the APM Python library can communicate with your Agent using:
 
-```shell
-ddtrace-run --info
-```
+   ```shell
+   ddtrace-run --info
+   ```
 
 You should see the following output:
 
-```
-    Agent error: None
-```
+   ```
+       Agent error: None
+   ```
 
 ##### Debug Logging
 
 Pass the `--debug` flag to `ddtrace-run` to enable debug logging.
 
-```shell
-ddtrace-run --debug
-```
+   ```shell
+   ddtrace-run --debug
+   ```
 
 This displays any errors sending data:
 
-```
-ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
-WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
-DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
-```
+   ```
+   ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
+   WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
+   DEBUG:ddtrace.contrib.openai._logging.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
+   ```
 
 
 <!-- xxz tab xxx -->
@@ -221,72 +222,72 @@ You can enable LLM Observability in different environments. Follow the appropria
 ##### If you do not have the Datadog Agent:
 1. Install the `dd-trace` package:
 
-```shell
-  npm install dd-trace
-```
+   ```shell
+     npm install dd-trace
+   ```
 
 2. Start your application with the following command, enabling agentless mode:
 
-```shell
-  DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r 'dd-trace/init' <your_app>.js
-```
+   ```shell
+     DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r 'dd-trace/init' <your_app>.js
+   ```
 
 ##### If you already have the Datadog Agent installed:
 1. Make sure the Agent is running and that APM and StatsD are enabled. For example, use the following command with Docker:
 
-```shell
-docker run -d \
-  --cgroupns host \
-  --pid host \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /proc/:/host/proc/:ro \
-  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-  -e DD_API_KEY=<DATADOG_API_KEY> \
-  -p 127.0.0.1:8126:8126/tcp \
-  -p 127.0.0.1:8125:8125/udp \
-  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-  -e DD_APM_ENABLED=true \
-  gcr.io/datadoghq/agent:latest
-```
+   ```shell
+   docker run -d \
+     --cgroupns host \
+     --pid host \
+     -v /var/run/docker.sock:/var/run/docker.sock:ro \
+     -v /proc/:/host/proc/:ro \
+     -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+     -e DD_API_KEY=<DATADOG_API_KEY> \
+     -p 127.0.0.1:8126:8126/tcp \
+     -p 127.0.0.1:8125:8125/udp \
+     -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+     -e DD_APM_ENABLED=true \
+     gcr.io/datadoghq/agent:latest
+   ```
 
 2. Install the Datadog APM Python library.
 
-```shell
-npm install dd-trace
-```
+   ```shell
+   npm install dd-trace
+   ```
 
 3. Start your application using the `-r dd-trace/init` or `NODE_OPTIONS='--require dd-trace/init'` command to automatically enable tracing:
 
-```shell
-DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r 'dd-trace/init' <your_app>.js
-```
+   ```shell
+   DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r 'dd-trace/init' <your_app>.js
+   ```
 
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
 
 ##### If you are running LLM Observability in a serverless environment (AWS Lambda):
 1. Enable LLM Observability by setting the following environment variables:
 
-```shell
-DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME>
-```
+   ```shell
+   DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME>
+   ```
 
 2. Before the lambda finishes, call `llmobs.flush()`:
 
-```js
-const llmobs = require('dd-trace').llmobs;
-// or, if dd-trace was not initialized via NODE_OPTIONS
-const llmobs = require('dd-trace').init({
-  llmobs: {
-    mlApp: <YOUR_ML_APP>,
-  }
-}).llmobs; // with DD_API_KEY and DD_SITE being set at the environment level
-
-async function handler (event, context) {
-  ...
-  llmobs.flush()
-  return ...
-}
-```
+   ```js
+   const llmobs = require('dd-trace').llmobs;
+   // or, if dd-trace was not initialized via NODE_OPTIONS
+   const llmobs = require('dd-trace').init({
+     llmobs: {
+       mlApp: <YOUR_ML_APP>,
+     }
+   }).llmobs; // with DD_API_KEY and DD_SITE being set at the environment level
+   
+   async function handler (event, context) {
+     ...
+     llmobs.flush()
+     return ...
+   }
+   ```
 
 ##### Automatic OpenAI tracing
 LLM Observability provides automatic tracing for OpenAI's completion, chat completion, and embedding methods without requiring manual instrumentation.
@@ -305,34 +306,34 @@ This will display detailed information about any errors or issues with tracing.
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
-```shell
-docker run -d
-  --cgroupns host \
-  --pid host \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /proc/:/host/proc/:ro \
-  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-  -e DD_API_KEY=<DATADOG_API_KEY> \
-  -p 127.0.0.1:8126:8126/tcp \
-  -p 127.0.0.1:8125:8125/udp \
-  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-  -e DD_APM_ENABLED=true \
-  gcr.io/datadoghq/agent:latest
-```
+   ```shell
+   docker run -d
+     --cgroupns host \
+     --pid host \
+     -v /var/run/docker.sock:/var/run/docker.sock:ro \
+     -v /proc/:/host/proc/:ro \
+     -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+     -e DD_API_KEY=<DATADOG_API_KEY> \
+     -p 127.0.0.1:8126:8126/tcp \
+     -p 127.0.0.1:8125:8125/udp \
+     -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+     -e DD_APM_ENABLED=true \
+     gcr.io/datadoghq/agent:latest
+   ```
 
 2. Install the Datadog APM Node.js library.
 
-```shell
-npm install dd-trace
-```
+   ```shell
+   npm install dd-trace
+   ```
 
 3. Inject the library into your OpenAI Node.js application.
 
-```shell
-DD_TRACE_DEBUG=1 DD_TRACE_BEAUTIFUL_LOGS=1 DD_SERVICE="my-service" \
-  DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> \
-  NODE_OPTIONS='-r dd-trace/init' node app.js
-```
+   ```shell
+   DD_TRACE_DEBUG=1 DD_TRACE_BEAUTIFUL_LOGS=1 DD_SERVICE="my-service" \
+     DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> \
+     NODE_OPTIONS='-r dd-trace/init' node app.js
+   ```
 
 **Note**: If the Agent is using a non-default hostname or port, you must also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
 
@@ -354,25 +355,25 @@ To adjust the log sample rate, see the [APM library documentation][3].
 
 Validate that the APM Node.js library can communicate with your Agent by examining the debugging output from the application process. Within the section titled "Encoding payload," you should see an entry with a `name` field and a correlating value of `openai.request`. See below for a truncated example of this output:
 
-```json
-{
-  "name": "openai.request",
-  "resource": "listModels",
-  "meta": {
-    "component": "openai",
-    "span.kind": "client",
-    "openai.api_base": "https://api.openai.com/v1",
-    "openai.request.endpoint": "/v1/models",
-    "openai.request.method": "GET",
-    "language": "javascript"
-  },
-  "metrics": {
-    "openai.response.count": 106
-  },
-  "service": "my-service",
-  "type": "openai"
-}
-```
+   ```json
+   {
+     "name": "openai.request",
+     "resource": "listModels",
+     "meta": {
+       "component": "openai",
+       "span.kind": "client",
+       "openai.api_base": "https://api.openai.com/v1",
+       "openai.request.endpoint": "/v1/models",
+       "openai.request.method": "GET",
+       "language": "javascript"
+     },
+     "metrics": {
+       "openai.response.count": 106
+     },
+     "service": "my-service",
+     "type": "openai"
+   }
+   ```
 
 [8]: https://datadoghq.dev/dd-trace-js/interfaces/plugins.openai.html
 [9]: https://github.com/DataDog/dd-trace-js
@@ -389,20 +390,20 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
-```shell
-docker run -d
-  --cgroupns host \
-  --pid host \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /proc/:/host/proc/:ro \
-  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-  -e DD_API_KEY=<DATADOG_API_KEY> \
-  -p 127.0.0.1:8126:8126/tcp \
-  -p 127.0.0.1:8125:8125/udp \
-  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-  -e DD_APM_ENABLED=true \
-  gcr.io/datadoghq/agent:latest
-```
+   ```shell
+   docker run -d
+     --cgroupns host \
+     --pid host \
+     -v /var/run/docker.sock:/var/run/docker.sock:ro \
+     -v /proc/:/host/proc/:ro \
+     -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+     -e DD_API_KEY=<DATADOG_API_KEY> \
+     -p 127.0.0.1:8126:8126/tcp \
+     -p 127.0.0.1:8125:8125/udp \
+     -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+     -e DD_APM_ENABLED=true \
+     gcr.io/datadoghq/agent:latest
+   ```
 
 2. [Install the Datadog APM PHP library][16].
 
