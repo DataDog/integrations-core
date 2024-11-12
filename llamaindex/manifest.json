@@ -12,7 +12,14 @@
     "title": "LlamaIndex",
     "media": [],
     "classifier_tags": [
-      "Category::Metrics"
+      "Category::AI/ML",
+      "Category::Metrics",
+      "Category::Cost Management",
+      "Submitted Data Type::Traces",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "assets": {
