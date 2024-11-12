@@ -35,7 +35,7 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {'octopus_endpoint': 'http://localhost:80/api', 'space': 'Default'}
+    return INSTANCE
 
 
 def get_json_value_from_file(file_path):
