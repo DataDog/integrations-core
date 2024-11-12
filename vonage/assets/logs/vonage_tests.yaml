@@ -91,4 +91,4 @@ tests:
         "status" : "delivered"
       }
     tags:
-     - "source:vonage"
+     - "source:LOGS_SOURCE"

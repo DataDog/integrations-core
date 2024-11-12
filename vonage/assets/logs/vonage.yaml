@@ -54,7 +54,7 @@ facets:
     groups:
       - Vonage
     name: product
-    path: product
+    path: vonage_product
     source: log
     type: string
   - facetType: list
@@ -79,10 +79,10 @@ facets:
     source: log
     type: double
   - facetType: list
-    groups:
+  - groups:
       - Web Access
-    name: URL Path
-    path: http.url
+    name: ClientIP
+    path: network.client.ip
     source: log
   - facetType: list
     groups:
