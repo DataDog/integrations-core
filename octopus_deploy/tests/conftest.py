@@ -27,7 +27,7 @@ def dd_environment():
         endpoint = INSTANCE["octopus_endpoint"]
         conditions = [
             CheckDockerLogs(identifier='octopus-api', patterns=['server running']),
-            CheckEndpoints(f'{endpoint}/spaces'),
+            CheckEndpoints(f'{endpoint}/api/spaces'),
         ]
         with docker_run(compose_file, conditions=conditions):
             yield INSTANCE
