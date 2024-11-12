@@ -77,7 +77,20 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
+    "dashboards": {
+      "Bitdefender - Advanced Threat Control Events": "assets/dashboards/bitdefender_advanced_threat_control_events.json",
+      "Bitdefender - Antiphising Events": "assets/dashboards/bitdefender_antiphising_events.json",
+      "Bitdefender - Hyper Detect Events": "assets/dashboards/bitdefender_hyper_detect_events.json",
+      "Bitdefender - Incident Details": "assets/dashboards/bitdefender_incident_details.json",
+      "Bitdefender - Malware Events": "assets/dashboards/bitdefender_malware_events.json",
+      "Bitdefender - Network Attack Defense Event Details": "assets/dashboards/bitdefender_network_attack_defense_event_details.json",
+      "Bitdefender - Overview": "assets/dashboards/bitdefender_overview.json",
+      "Bitdefender - User Control Event Details": "assets/dashboards/bitdefender_user_control_event_details.json",
+      "Bitdefender - Firewall Event Details": "assets/dashboards/bitdefender_firewall_event_details.json",
+      "Bitdefender - Data Protection Events": "assets/dashboards/bitdefender_data_protection_events.json",
+      "Bitdefender - Ransomware Activity Detection Event Details": "assets/dashboards/bitdefender_ransomware_activity_detection_event_details.json",
+      "Bitdefender - Antiexploit Events": "assets/dashboards/bitdefender_antiexploit_events.json"
+    },
     "logs": {
       "source": "bitdefender"
     }
