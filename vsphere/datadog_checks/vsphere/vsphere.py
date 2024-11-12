@@ -628,8 +628,8 @@ class VSphereCheck(AgentCheck):
         # cluster: {'ref': cluster-reference, 'info': {all data attributes except for 'tags'}}
         cluster_reference = input_data['ref']
         raw_resource = RawResourceV3()
-        # TODO: remove org_id attribute as redapl will be responsible for setting it
-        raw_resource.org_id = 2
+        # REDAPL requests that an org_id of -1 be used for all resources--they will change it
+        raw_resource.org_id = -1
         raw_resource.type = "vsphere_vsan_cluster"
         raw_resource.name = cluster_reference.name
 
