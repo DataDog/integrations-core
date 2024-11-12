@@ -80,10 +80,10 @@ facets:
     type: double
   - facetType: list
     groups:
-      - Vonage
-    name: URL
+      - Web Access
+    name: URL Path
     path: http.url
-    source: tag
+    source: log
     type: string
   - facetType: list
     groups:
