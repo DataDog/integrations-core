@@ -35,7 +35,6 @@ CACTI_TO_DD = {
 }
 
 
-
 class CactiCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(CactiCheck, self).__init__(name, init_config, instances)
