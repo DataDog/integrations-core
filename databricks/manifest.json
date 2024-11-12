@@ -50,7 +50,7 @@
       },
       "metrics": {
         "prefix": "databricks.model_serving.",
-        "check": "databricks.model_serving.cpu_usage.avg",
+        "check": "databricks.model_serving.cpu_usage_percentage.avg",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
