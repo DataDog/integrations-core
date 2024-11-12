@@ -91,6 +91,7 @@ if TYPE_CHECKING:
 if os.environ.get("GOFIPS", None):
     import sys
 
+    from cryptography.exceptions import InternalError
     from cryptography.hazmat.backends import default_backend
 
     path_to_embedded = sys.executable.split("embedded")[0] + "embedded"
@@ -99,7 +100,15 @@ if os.environ.get("GOFIPS", None):
     os.environ["OPENSSL_CONF"] = path_to_embedded + "/ssl/openssl.cnf"
     os.environ["OPENSSL_MODULES"] = path_to_embedded + "/lib/ossl-modules"
     cryptography_backend = default_backend()
-    cryptography_backend._enable_fips()
+    try:
+        cryptography_backend._enable_fips()
+    except InternalError as e:
+        logging.error("FIPS mode could not be enabled.")
+        raise e
+    if not cryptography_backend._fips_enabled:
+        logging.error("FIPS mode was not enabled successfully.")
+        raise RuntimeError("FIPS is not enabled.")
+
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
