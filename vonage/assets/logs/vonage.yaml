@@ -121,7 +121,7 @@ pipeline:
       sources:
         - product
       sourceType: tag
-      target: product
+      target: vonage_product
       targetType: attribute
       preserveSource: true
       overrideOnConflict: false
