@@ -1,0 +1,45 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "8c5c8715-b141-4af0-a15d-6fb807be2027",
+  "app_id": "llamaindex",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "<FILL IN - A brief description of what this offering provides>",
+    "title": "LlamaIndex",
+    "media": [],
+    "classifier_tags": [
+      "Category::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 31416505,
+      "source_type_name": "LlamaIndex",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "llamaindex.",
+        "check": [],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/llamaindex_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
