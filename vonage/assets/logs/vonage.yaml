@@ -116,7 +116,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map tag `product` to an attribute
+      name: Map tag `product` to attribute `vonage_product`
       enabled: true
       sources:
         - product
