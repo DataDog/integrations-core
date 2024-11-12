@@ -150,7 +150,7 @@ class RateLimitingTTLCache(TTLCache):
 
 
 def resolve_db_host(db_host):
-    if db_host.endswith('.local'):
+    if db_host and db_host.endswith('.local'):
         return db_host
 
     agent_hostname = datadog_agent.get_hostname()
