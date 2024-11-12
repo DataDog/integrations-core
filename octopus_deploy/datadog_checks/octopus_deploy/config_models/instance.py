@@ -49,6 +49,17 @@ class ProjectGroups(BaseModel):
     limit: Optional[int] = Field(None, description='Maximum number of project groups to be processed.\n')
 
 
+class Projects(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of projects to be processed.\n')
+
+
 class Proxy(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -57,6 +68,17 @@ class Proxy(BaseModel):
     http: Optional[str] = None
     https: Optional[str] = None
     no_proxy: Optional[tuple[str, ...]] = None
+
+
+class Spaces(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of spaces to be processed.\n')
 
 
 class InstanceConfig(BaseModel):
@@ -91,12 +113,13 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     project_groups: Optional[ProjectGroups] = None
+    projects: Optional[Projects] = None
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
-    space: str
+    spaces: Optional[Spaces] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[float] = None
     tls_ca_cert: Optional[str] = None

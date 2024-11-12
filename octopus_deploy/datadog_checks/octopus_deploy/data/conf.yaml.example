@@ -51,11 +51,6 @@ instances:
     #
   - octopus_endpoint: http://localhost:80/api
 
-    ## @param space - string - required
-    ## Space to monitor
-    #
-    space: Default
-
     ## @param headers - mapping - optional
     ## Headers to use for every request. An Authorization header including the Octopus Deploy API key token is required
     ## for authentication for the REST API.
@@ -64,10 +59,20 @@ instances:
     headers:
       X-Octopus-ApiKey: <OCTOPUS_API_KEY>
 
+    ## @param spaces - mapping - optional
+    ## Filter your integration by spaces.
+    #
+    # spaces: {}
+
     ## @param project_groups - mapping - optional
     ## Filter your integration by project groups and projects.
     #
     # project_groups: {}
+
+    ## @param projects - mapping - optional
+    ## Filter your integration by projects.
+    #
+    # projects: {}
 
     ## @param auth_token - mapping - optional
     ## This allows for the use of authentication information from dynamic sources.

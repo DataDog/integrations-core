@@ -13,6 +13,7 @@ import requests
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
+from datadog_checks.dev.http import MockResponse
 
 from .constants import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_OCTOPUS_LAB
 
@@ -55,9 +56,7 @@ def mock_responses():
         for file in dir.rglob('*'):
             if file.is_file() and file.stem != ".slash":
                 relative_dir_path = (
-                    "/"
-                    + (str(file.parent.relative_to(dir)) if str(file.parent.relative_to(dir)) != "." else "")
-                    + ("/" if (file.parent / ".slash").is_file() else "")
+                    "/" + str(file.parent.relative_to(dir)) + ("/" if (file.parent / ".slash").is_file() else "")
                 )
                 if relative_dir_path not in response_parent:
                     response_parent[relative_dir_path] = {}
@@ -70,14 +69,24 @@ def mock_responses():
 
     def create_responses_tree():
         root_dir_path = os.path.join(get_here(), 'fixtures')
-        method_subdirs = [d for d in Path(root_dir_path).iterdir() if d.is_dir() and d.name == 'GET']
+        method_subdirs = [d for d in Path(root_dir_path).iterdir() if d.is_dir() and d.name in ['GET', 'POST']]
         for method_subdir in method_subdirs:
             process_dir(method_subdir, responses_map)
 
     def method(method, url, file='response', headers=None, params=None):
         filename = file
         request_path = url
-
+        request_path = request_path.replace('?', '/')
+        if params:
+            param_string = ""
+            for key, val in params.items():
+                if type(val) is list:
+                    val_string = ','.join(f'{str(val_item)}' for val_item in val)
+                else:
+                    val_string = str(val)
+                param_string += ("/" if param_string else "") + f'{key}={val_string}'
+            request_path = '{}/{}'.format(url, param_string)
+        print(request_path)
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
         return response
 
@@ -88,7 +97,6 @@ def mock_responses():
 @pytest.fixture
 def mock_http_call(mock_responses):
     def call(method, url, file='response', headers=None, params=None):
-
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response
@@ -105,34 +113,22 @@ def mock_http_call(mock_responses):
 def mock_http_get(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
+    data = param.pop('mock_data', {})
+    elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
 
     def get(url, *args, **kwargs):
         method = 'GET'
         url = get_url_path(url)
-        request_path = url.replace('?', '/')
-        params = kwargs.get('params')
-
-        if params:
-            param_list = []
-            for param_name, param_value in params.items():
-                if type(param_value) == list:
-                    for param_item in param_value:
-                        param_list.append((param_name, param_item))
-                else:
-                    param_list.append((param_name, param_value))
-
-            param_string = '/'.join(f'{param[0]}={str(param[1])}' for param in param_list)
-            request_path = f'{url}/{param_string}'
-
-        request_path = request_path.replace(" ", "")
-        if http_error and request_path in http_error:
-            return http_error[request_path]
-
-        mock_status_code = mock.MagicMock(return_value=200)
+        if http_error and url in http_error:
+            return http_error[url]
+        if data and url in data:
+            return MockResponse(json_data=data[url], status_code=200)
         headers = kwargs.get('headers')
-
-        mock_json = mock.MagicMock(return_value=mock_http_call(method, request_path, headers=headers))
-        return mock.MagicMock(json=mock_json, status_code=mock_status_code)
+        params = kwargs.get('params')
+        mock_elapsed = mock.MagicMock(total_seconds=mock.MagicMock(return_value=elapsed_total_seconds.get(url, 0.0)))
+        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
+        mock_status_code = mock.MagicMock(return_value=200)
+        return mock.MagicMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
 
     mock_get = mock.MagicMock(side_effect=get)
     monkeypatch.setattr('requests.get', mock_get)
