@@ -739,6 +739,7 @@ class SQLServer(AgentCheck):
 
     def _new_database_metric_executor(self, database_metric_class, db_names=None):
         return database_metric_class(
+            config=self._config,
             instance_config=self.instance,
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
