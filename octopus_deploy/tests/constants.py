@@ -13,7 +13,7 @@ OCTOPUS_API_KEY = os.environ.get('OCTOPUS_API_KEY')
 OCTOPUS_SPACE = os.environ.get('OCTOPUS_SPACE', 'Default')
 
 COMPOSE_FILE = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
-INSTANCE = {'octopus_endpoint': 'http://localhost:80/api', 'space': 'Default'}
+INSTANCE = {'octopus_endpoint': 'http://localhost:80', 'space': 'Default'}
 
 LAB_INSTANCE = {
     'octopus_endpoint': OCTOPUS_LAB_ENDPOINT,

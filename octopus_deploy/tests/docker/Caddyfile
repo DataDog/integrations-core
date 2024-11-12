@@ -4,100 +4,12 @@
 }
 :8080 {
     root * /usr/share/caddy/
-    @get_tasks_project_1 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {uri}.contains('Projects-1')
-        expression {query}.contains('fromCompletedDate')
-    }
-    route @get_tasks_project_1 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-1/fromCompletedDate=2024-09-2314:45:58.888492+00:00/toCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
-        file_server
-    }
-    @get_running_tasks_project_1 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {uri}.contains('Projects-1')
-        expression {query}.contains('states')
-    }
-    route @get_running_tasks_project_1 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-1/states=Queued/states=Executing/response.json
-        file_server
-    }
-    @get_tasks_project_2 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {uri}.contains('Projects-2')
-        expression {query}.contains('fromCompletedDate')
-    }
-    route @get_tasks_project_2 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-2/fromCompletedDate=2024-09-2314:45:58.888492+00:00/toCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
-        file_server
-    }
-    @get_running_tasks_project_2 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {uri}.contains('Projects-2')
-        expression {query}.contains('states')
-    }
-    route @get_running_tasks_project_2 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-2/states=Queued/states=Executing/response.json
-        file_server
-    }
-    @get_tasks_project_3 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {uri}.contains('Projects-3')
-        expression {query}.contains('fromCompletedDate')
-    }
-    route @get_tasks_project_3 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-3/fromCompletedDate=2024-09-2314:45:58.888492+00:00/toCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
-        file_server
-    }
-    @get_running_tasks_project_3 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {uri}.contains('Projects-3')
-        expression {query}.contains('states')
-    }
-    route @get_running_tasks_project_3 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-3/states=Queued/states=Executing/response.json
-        file_server
-    }
-    @get_tasks_project_4 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {uri}.contains('Projects-4')
-        expression {query}.contains('fromCompletedDate')
-    }
-    route @get_tasks_project_4 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-4/fromCompletedDate=2024-09-2314:45:58.888492+00:00/toCompletedDate=2024-09-2314:45:58.888492+00:00/response.json
-        file_server
-    }
-    @get_running_tasks_project_4 {
-        method GET
-        path /api/Spaces-1/tasks*
-        expression {uri}.contains('Projects-4')
-        expression {query}.contains('states')
-    }
-    route @get_running_tasks_project_4 {
-        rewrite * /GET/api/Spaces-1/tasks/project=Projects-4/states=Queued/states=Executing/response.json
-        file_server
-    }
     @get_spaces {
         method GET
         path /api/spaces
     }
     route @get_spaces {
-        rewrite * /GET/api/spaces/response.json
-        file_server
-    }
-    @get_spaces_1 {
-        method GET
-        path /api/Spaces-1
-    }
-    route @get_spaces_1 {
-        rewrite * /GET/api/Spaces-1/response.json
+        rewrite * "/GET/api/spaces/response.json"
         file_server
     }
     @get_projectgroups {
@@ -106,31 +18,6 @@
     }
     route @get_projectgroups {
         rewrite * /GET/api/Spaces-1/projectgroups/response.json
-        file_server
-    }
-
-    @get_projectgroups_1 {
-        method GET
-        path /api/Spaces-1/projectgroups/ProjectGroups-1
-    }
-    route @get_projectgroups_1 {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-1/response.json
-        file_server
-    }
-    @get_projectgroups_2 {
-        method GET
-        path /api/Spaces-1/projectgroups/ProjectGroups-2
-    }
-    route @get_projectgroups_2 {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-2/response.json
-        file_server
-    }
-    @get_projectgroups_3 {
-        method GET
-        path /api/Spaces-1/projectgroups/ProjectGroups-3
-    }
-    route @get_projectgroups_3 {
-        rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-3/response.json
         file_server
     }
     @get_projectgroups_1_projects {
@@ -157,14 +44,77 @@
         rewrite * /GET/api/Spaces-1/projectgroups/ProjectGroups-3/projects/response.json
         file_server
     }
-    @get_octopusservernodes {
+    @get_running_tasks_project_1 {
         method GET
-        path /api/octopusservernodes
+        path /api/Spaces-1/tasks
+        expression {query.project}.contains("Projects-1") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
     }
-    route @get_octopusservernodes {
-        rewrite * /GET/api/octopusservernodes/response.json
+    route @get_running_tasks_project_1 {
+        rewrite * /GET/api/Spaces-1/tasks/project=Projects-1/states=Queued,Executing/response.json
         file_server
     }
-    
+    @get_running_tasks_project_2 {
+        method GET
+        path /api/Spaces-1/tasks
+        expression {query.project}.contains("Projects-2") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
+    }
+    route @get_running_tasks_project_2 {
+        rewrite * /GET/api/Spaces-1/tasks/project=Projects-2/states=Queued,Executing/response.json
+        file_server
+    }
+    @get_running_tasks_project_3 {
+        method GET
+        path /api/Spaces-1/tasks
+        expression {query.project}.contains("Projects-3") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
+    }
+    route @get_running_tasks_project_3 {
+        rewrite * /GET/api/Spaces-1/tasks/project=Projects-3/states=Queued,Executing/response.json
+        file_server
+    }
+    @get_running_tasks_project_4 {
+        method GET
+        path /api/Spaces-1/tasks
+        expression {query.project}.contains("Projects-4") && {query.states}.contains("Queued") && {query.states}.contains("Executing")
+    }
+    route @get_running_tasks_project_4 {
+        rewrite * /GET/api/Spaces-1/tasks/project=Projects-4/states=Queued,Executing/response.json
+        file_server
+    }
+    @get_completed_tasks_project_1 {
+        method GET
+        path /api/Spaces-1/tasks*
+        expression {query.project}.contains("Projects-1") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+    }
+    route @get_completed_tasks_project_1 {
+        rewrite * "/GET/api/Spaces-1/tasks/project=Projects-1/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/toCompletedDate=2024-09-23 14:45:00.123000+00:00/response.json"
+        file_server
+    }
+    @get_completed_tasks_project_2 {
+        method GET
+        path /api/Spaces-1/tasks*
+        expression {query.project}.contains("Projects-2") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+    }
+    route @get_completed_tasks_project_2 {
+        rewrite * "/GET/api/Spaces-1/tasks/project=Projects-2/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/toCompletedDate=2024-09-23 14:45:00.123000+00:00/response.json"
+        file_server
+    }
+    @get_completed_tasks_project_3 {
+        method GET
+        path /api/Spaces-1/tasks*
+        expression {query.project}.contains("Projects-3") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+    }
+    route @get_completed_tasks_project_3 {
+        rewrite * "/GET/api/Spaces-1/tasks/project=Projects-3/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/toCompletedDate=2024-09-23 14:45:00.123000+00:00/response.json"
+        file_server
+    }
+    @get_completed_tasks_project_4 {
+        method GET
+        path /api/Spaces-1/tasks*
+        expression {query.project}.contains("Projects-4") && {query}.contains("fromCompletedDate") && {query}.contains("toCompletedDate")
+    }
+    route @get_completed_tasks_project_4 {
+        rewrite * "/GET/api/Spaces-1/tasks/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/toCompletedDate=2024-09-23 14:45:00.123000+00:00/response.json"
+        file_server
+    }
     file_server browse
 }
