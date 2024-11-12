@@ -84,7 +84,6 @@ facets:
     name: URL Path
     path: http.url
     source: log
-    type: string
   - facetType: list
     groups:
       - Vonage
