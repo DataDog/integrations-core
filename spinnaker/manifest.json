@@ -62,7 +62,6 @@
     "dashboards": {
         "Spinnaker Dashboard Overview": "assets/dashboards/spinnaker_overview.json"
     },
-    "monitors": {},
     "saved_views": {}
   },
   "author": {
