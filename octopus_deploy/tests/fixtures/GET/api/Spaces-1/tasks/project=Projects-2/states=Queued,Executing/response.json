@@ -9,8 +9,8 @@
       "Cancelling": 0,
       "Executing": 1,
       "Failed": 2,
-      "Queued": 1,
-      "Success": 1879,
+      "Queued": 0,
+      "Success": 1,
       "TimedOut": 0,
       "Interrupted": 0
     },
@@ -26,46 +26,46 @@
     },
     "Items": [
       {
-        "Id": "ServerTasks-118055",
+        "Id": "ServerTasks-118048",
         "SpaceId": "Spaces-1",
         "EstimatedRemainingQueueDurationSeconds": 0,
         "Name": "Deploy",
-        "Description": "Deploy test release 0.0.41 to dev",
+        "Description": "Deploy hello release 0.0.36 to staging",
         "Arguments": {
-          "DeploymentId": "Deployments-118"
+          "DeploymentId": "Deployments-111"
         },
-        "State": "Queued",
-        "Completed": "Queued...",
-        "QueueTime": "2024-11-05T19:13:49.010+00:00",
+        "State": "Executing",
+        "Completed": "Executing...",
+        "QueueTime": "2024-09-23T14:42:00.123+00:00",
         "QueueTimeExpiry": null,
-        "StartTime": null,
-        "LastUpdatedTime": "2024-11-05T19:13:49.523+00:00",
+        "StartTime": "2024-09-23T14:42:30.123+00:00",
+        "LastUpdatedTime": "2024-11-05T18:59:25.395+00:00",
         "CompletedTime": null,
-        "ServerNode": null,
-        "Duration": "9 seconds",
+        "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+        "Duration": "18 seconds",
         "ErrorMessage": "",
-        "HasBeenPickedUpByProcessor": false,
+        "HasBeenPickedUpByProcessor": true,
         "IsCompleted": false,
         "FinishedSuccessfully": false,
         "HasPendingInterruptions": false,
         "CanRerun": false,
         "HasWarningsOrErrors": false,
         "UnmetPreconditions": null,
-        "ProjectId": "Projects-3",
+        "ProjectId": "Projects-2",
         "Links": {
-          "Self": "/api/tasks/ServerTasks-118055",
-          "Web": "/app#/Spaces-1/tasks/ServerTasks-118055",
-          "Raw": "/api/tasks/ServerTasks-118055/raw",
-          "Rerun": "/api/tasks/rerun/ServerTasks-118055",
-          "Cancel": "/api/tasks/ServerTasks-118055/cancel",
-          "State": "/api/tasks/ServerTasks-118055/state",
-          "BlockedBy": "/api/tasks/ServerTasks-118055/blockedby",
-          "QueuedBehind": "/api/tasks/ServerTasks-118055/queued-behind{?skip,take}",
-          "Details": "/api/tasks/ServerTasks-118055/details{?verbose,tail,ranges}",
-          "StatusMessages": "/api/tasks/ServerTasks-118055/status/messages",
-          "Prioritize": "/api/tasks/ServerTasks-118055/prioritize",
-          "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-118055",
-          "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-118055"
+          "Self": "/api/tasks/ServerTasks-118048",
+          "Web": "/app#/Spaces-1/tasks/ServerTasks-118048",
+          "Raw": "/api/tasks/ServerTasks-118048/raw",
+          "Rerun": "/api/tasks/rerun/ServerTasks-118048",
+          "Cancel": "/api/tasks/ServerTasks-118048/cancel",
+          "State": "/api/tasks/ServerTasks-118048/state",
+          "BlockedBy": "/api/tasks/ServerTasks-118048/blockedby",
+          "QueuedBehind": "/api/tasks/ServerTasks-118048/queued-behind{?skip,take}",
+          "Details": "/api/tasks/ServerTasks-118048/details{?verbose,tail,ranges}",
+          "StatusMessages": "/api/tasks/ServerTasks-118048/status/messages",
+          "Prioritize": "/api/tasks/ServerTasks-118048/prioritize",
+          "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-118048",
+          "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-118048"
         }
       }
     ],
@@ -76,4 +76,4 @@
       "Page.Current": "/api/tasks?skip=0&take=30",
       "Page.Last": "/api/tasks?skip=0&take=30"
     }
-}  
+  }

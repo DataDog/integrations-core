@@ -1,0 +1,35 @@
+{
+  "ItemType": "Task",
+  "TotalResults": 3,
+  "ItemsPerPage": 30,
+  "NumberOfPages": 1,
+  "LastPageNumber": 0,
+  "TotalCounts": {
+    "Canceled": 0,
+    "Cancelling": 0,
+    "Executing": 0,
+    "Failed": 13,
+    "Queued": 0,
+    "Success": 1783,
+    "TimedOut": 0,
+    "Interrupted": 0
+  },
+  "TotalCountsInOtherSpaces": {
+    "Canceled": 0,
+    "Cancelling": 0,
+    "Executing": 0,
+    "Failed": 0,
+    "Queued": 0,
+    "Success": 0,
+    "TimedOut": 0,
+    "Interrupted": 0
+  },
+  "Items": [],
+  "Links": {
+    "Self": "/api/tasks?skip=0&take=30",
+    "Template": "/api/tasks{?skip,active,environment,tenant,runbook,project,name,node,running,states,hasPendingInterruptions,hasWarningsOrErrors,take,ids,partialName,spaces,includeSystem,description,fromCompletedDate,toCompletedDate,fromQueueDate,toQueueDate,fromStartDate,toStartDate}",
+    "Page.All": "/api/tasks?skip=0&take=2147483647",
+    "Page.Current": "/api/tasks?skip=0&take=30",
+    "Page.Last": "/api/tasks?skip=0&take=30"
+  }
+}
