@@ -1,6 +1,6 @@
 # CHANGELOG - Spinnaker
 
-## 1.0.0 / YYYY-MM-DD
+## 1.0.0 / 2024-11-12
 
 ***Added***:
 
