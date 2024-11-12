@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "It centralizes logs from Clouddriver, Orca, Redis, Rosco, Deck, and Echo, enabling teams to monitor, analyze, and troubleshoot deployment workflows and infrastructure operations efficiently",
+    "description": "Centralizes logs for efficient monitoring, analysis, and troubleshooting of deployment workflows and infrastructure.",
     "title": "Spinnaker",
     "media": [
       {
@@ -68,7 +68,7 @@
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
-    "homepage": "",
-    "sales_email": ""
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
   }
 }
