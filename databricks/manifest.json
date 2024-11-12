@@ -72,7 +72,7 @@
       "Databricks Model Serving: High CPU memory usage": "assets/monitors/cpu_memory_usage_high.json",
       "Databricks Model Serving: High GPU usage": "assets/monitors/gpu_memory_usage_high.json",
       "Databricks Model Serving: High GPU memory usage": "assets/monitors/gpu_memory_usage_high.json",
-      "Databricks Model Serving: High request latency": "assets/monitors/request_latency_high.json",
+      "Databricks Model Serving: High request latency": "assets/monitors/request_latency_high.json"
     },
     "logs": {
       "source": "spark"
