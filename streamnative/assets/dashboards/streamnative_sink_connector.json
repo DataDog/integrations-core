@@ -26,7 +26,7 @@
             "id": 8995860272844608,
             "definition": {
                 "type": "note",
-                "content": "**[StreamNative](https://www.streamnative.com/)** provides an enterprise-grade messaging platform built on Apache Pulsar, offering scalable real-time data streaming with multi-tenancy, geo-replication, and cloud integration.\n\nThis Sink Connector dashboard provides insights into sink operations, data flow, exceptions and JVM resource management for efficient Pulsar performance.\n\nFor more information, see the [StreamNative Integration Documentation](https://docs.datadoghq.com/integrations/streamnative/).",
+                "content": "**[StreamNative](https://www.streamnative.com/)** provides an enterprise-grade messaging platform built on Apache Pulsar, offering scalable real-time data streaming with multi-tenancy, geo-replication, and cloud integration.\n\nThis Sink Connector dashboard provides insights into sink operations, data flow, exceptions, and JVM resource management for efficient Pulsar performance.\n\nFor more information, see the [StreamNative Integration Documentation](https://docs.datadoghq.com/integrations/streamnative/).",
                 "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
@@ -47,7 +47,7 @@
             "id": 5920141165566776,
             "definition": {
                 "type": "note",
-                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured on sink connector statistics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured on sink connector statistics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "yellow",
                 "font_size": "14",
                 "text_align": "left",

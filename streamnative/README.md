@@ -4,7 +4,7 @@
 
 [StreamNative][1] provides an enterprise-grade messaging and event streaming platform built on Apache Pulsar. It offers scalable, real-time data streaming solutions with features like multi-tenancy, geo-replication, and seamless integration with cloud services.
 
-The StreamNative integration collects below types of [metrics][2]:
+The StreamNative integration collects the below types of [metrics][2]:
 
 1. Health
 2. Pulsar Resource
@@ -18,17 +18,17 @@ The StreamNative integration collects below types of [metrics][2]:
 
 #### Get StreamNative Credentials
 
-1. Login to the [StreamNative Cloud Console Account][3].
-2. Get the `Organization ID` and `Instance Name`
-    - Click the profile icon and select the **Organizations** option.
-    - Select the **Organization** for which data needs to be collected.
-    - Obtain the **Instance Name** from the **Select an Instance** dropdown.
-3. Get the `Client ID` and `Client Secret`
-    - Click the profile icon and select the **Accounts & Accesses** tab.
-    - Select the Service Account for which **Admin** permission is **Enabled**.
-    - If the Service Account does not exist, click on **New -> Service Account** to create a new one, and ensure the **Super Admin** option is enabled.
-    - Click on `...` button on the right side of the selected Service Account.
-    - Click **Download OAuth2 Key** to get the **Client ID** and **Client Secret**.
+##### Login to the [StreamNative Cloud Console Account][3].
+##### Get the `Organization ID` and `Instance Name`:
+1. Click the profile icon and select the **Organizations** option.
+2. Select the **Organization** for which data needs to be collected.
+3. Obtain the **Instance Name** from the **Select an Instance** dropdown.
+##### Get the `Client ID` and `Client Secret`:
+1. Click the profile icon and select the **Accounts & Accesses** tab.
+2. Select the Service Account for which **Admin** permission is **Enabled**.
+3. If the Service Account does not exist, click on **New -> Service Account** to create a new one, and ensure the **Super Admin** option is enabled.
+4. Click on the `...` button on the right side of the selected Service Account.
+5. Click **Download OAuth2 Key** to get the **Client ID** and **Client Secret**.
 
 
 #### Add StreamNative Credentials

@@ -72,7 +72,7 @@
             "id": 5437379294232914,
             "definition": {
                 "type": "note",
-                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured based on health statistics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured based on health statistics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "yellow",
                 "font_size": "14",
                 "text_align": "left",

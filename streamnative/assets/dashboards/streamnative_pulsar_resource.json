@@ -51,7 +51,7 @@
             "id": 8952756529161660,
             "definition": {
                 "type": "note",
-                "content": "**[StreamNative](https://www.streamnative.com/)**  provides an enterprise-grade messaging platform built on Apache Pulsar, offering scalable real-time data streaming with multi-tenancy, geo-replication, and cloud integration.\n\nThis Pulsar Resource dashboard track topics, subscriptions, message rates, and throughput, along with storage metrics like size, backlog, and offloaded data. Latency and entry size distributions are also monitored for efficient data flow and storage management.\n\nFor more information, see the [StreamNative Integration Documentation](https://docs.datadoghq.com/integrations/streamnative/).",
+                "content": "**[StreamNative](https://www.streamnative.com/)**  provides an enterprise-grade messaging platform built on Apache Pulsar, offering scalable real-time data streaming with multi-tenancy, geo-replication, and cloud integration.\n\nThis Pulsar Resource dashboard tracks topics, subscriptions, message rates, and throughput, along with storage metrics like size, backlog, and offloaded data. Latency and entry size distributions are also monitored for efficient data flow and storage management.\n\nFor more information, see the [StreamNative Integration Documentation](https://docs.datadoghq.com/integrations/streamnative/).",
                 "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
@@ -72,7 +72,7 @@
             "id": 393756623944156,
             "definition": {
                 "type": "note",
-                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured on Pulsar resource statistics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Note**:\n- The dashboard widgets display the latest metric values captured on Pulsar resource statistics.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "yellow",
                 "font_size": "14",
                 "text_align": "left",
