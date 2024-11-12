@@ -38,8 +38,7 @@
         "x": 0,
         "y": 0,
         "width": 6,
-        "height": 5,
-        "is_column_break": true
+        "height": 5
       }
     },
     {
@@ -57,7 +56,9 @@
               "title": "Average CPU Usage",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "query_value",
               "requests": [
                 {
@@ -113,10 +114,12 @@
           {
             "id": 1389956830572192,
             "definition": {
-              "title": "Average CPU Usage",
+              "title": "Average CPU Memory Usage",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "query_value",
               "requests": [
                 {
@@ -175,7 +178,6 @@
               "title": "Average Requests Per Min",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -217,7 +219,6 @@
               "title": "5xx Errors",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -275,7 +276,6 @@
               "title": "4xx Errors",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -333,7 +333,6 @@
               "title": "Average request latency",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -507,15 +506,13 @@
                 "value",
                 "sum"
               ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1 * 100"
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
@@ -655,7 +652,9 @@
                 "value",
                 "sum"
               ],
-              "time": {},
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -703,7 +702,9 @@
                 "value",
                 "sum"
               ],
-              "time": {},
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -751,7 +752,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -847,7 +847,7 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1 * 100"
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
@@ -895,7 +895,13 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1 * 100"
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
@@ -937,7 +943,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -985,7 +990,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1033,7 +1037,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1081,7 +1084,9 @@
                 "value",
                 "sum"
               ],
-              "time": {},
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -1120,7 +1125,7 @@
         "x": 0,
         "y": 5,
         "width": 12,
-        "height": 1
+        "height": 19
       }
     },
     {
@@ -1157,7 +1162,7 @@
             "id": 1333178577565114,
             "definition": {
               "type": "note",
-              "content": "The request error rate tracks the proportion of failed HTTP requests, with high values indicating potential server, code, or client-related issues that could degrade user experience. Low error rates suggest that the majority of requests are being processed successfully, reflecting a stable application.",
+              "content": "The request error rate tracks the proportion of failed HTTP requests, with high values indicating potential server, code, or client-related issues that could degrade user experience. \n\nLow error rates suggest that the majority of requests are being processed successfully, reflecting a stable application.\n\nA 5xx status code indicates a server error, where the server failed to fulfill a valid request, implying a problem on the server side. A 4xx status code signifies a client error, where the request cannot be processed due to issues such as a malformed request or unauthorized access, suggesting fault lies with the client's request.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -1189,15 +1194,20 @@
                 "value",
                 "sum"
               ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query3"
+                      "formula": "query3",
+                      "number_format": {
+                        "unit": {
+                          "unit_name": "request",
+                          "per_unit_name": "minute",
+                          "type": "canonical_unit"
+                        }
+                      }
                     }
                   ],
                   "queries": [
@@ -1239,7 +1249,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1334,7 +1343,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1371,9 +1379,10 @@
       },
       "layout": {
         "x": 0,
-        "y": 6,
+        "y": 0,
         "width": 12,
-        "height": 1
+        "height": 7,
+        "is_column_break": true
       }
     },
     {
@@ -1421,15 +1430,19 @@
                 "value",
                 "sum"
               ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query3"
+                      "formula": "query3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
                     }
                   ],
                   "queries": [
@@ -1509,6 +1522,7 @@
               "title": "Request Latencies by Endpoint",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -1574,7 +1588,13 @@
                     },
                     {
                       "alias": "p99",
-                      "formula": "query5"
+                      "formula": "query5",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
                     }
                   ]
                 }
@@ -1643,7 +1663,7 @@
         "x": 0,
         "y": 7,
         "width": 12,
-        "height": 1
+        "height": 7
       }
     }
   ],
