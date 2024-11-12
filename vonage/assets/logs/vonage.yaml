@@ -106,7 +106,7 @@ pipeline:
     query: "source:vonage"
   processors:
     - type: attribute-remapper
-      name: latency_map
+      name: Map tag `latency` to an attribute
       enabled: true
       sources:
         - latency
@@ -116,7 +116,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: product_name
+      name: Map tag `product` to an attribute
       enabled: true
       sources:
         - product
@@ -126,7 +126,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: error_code
+      name: Map tag `error_code_description` to an attribute
       enabled: true
       sources:
         - error_code_description
@@ -136,7 +136,7 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Error_Code
+      name: Map tag `error_code` to an attribute
       enabled: true
       sources:
         - error_code
