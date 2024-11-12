@@ -670,10 +670,11 @@ class VSphereCheck(AgentCheck):
 
         raw_resource.version = 1
         raw_resource.tiebreaker = 123
-        raw_resource.scope = "example_scope"
+        raw_resource.scope = "integrations_core_scope"
 
         redapl_event = RedaplEvent()
-        redapl_event.source = "RawResourceV3"
+        # any resource from integrations_core should have this source
+        redapl_event.source = "integrations-core"
         redapl_event.message = raw_resource.SerializeToString()
         serialized_redapl_event = redapl_event.SerializeToString()
 
