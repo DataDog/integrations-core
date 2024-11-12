@@ -1,38 +1,94 @@
-id: vonage
+id: "vonage"
 tests:
-  - sample: >-
+ -
+  sample: |-
+    {
+      "country" : "IN",
+      "changed_from" : "",
+      "latency" : "945284",
+      "date_finalized" : "2024-11-05T07:18:37+00:00",
+      "network" : "40471",
+      "error_code_description" : "Delivered",
+      "message_body" : "Hello from Vonage, checking for new data!",
+      "dcs" : "0",
+      "country_name" : "India",
+      "from" : "918050290593",
+      "currency" : "EUR",
+      "date_received" : "2024-11-05T07:02:52+00:00",
+      "id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
+      "direction" : "outbound",
+      "account_ref" : "",
+      "total_price" : "0.07268000",
+      "client_ref" : "1|19118688-07e9-45b8-8ca4-340850f8dde7|1730790172031|eu-central-1",
+      "validity_period" : "241106080252000+",
+      "network_name" : "BSNL - Karnataka",
+      "message_id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
+      "ip_address" : "49.249.95.150",
+      "account_id" : "bf8d8cc9",
+      "udh" : "",
+      "forced_from" : "918050290593",
+      "error_code" : "0",
+      "to" : "919481686682",
+      "status" : "delivered"
+    }
+  result:
+    custom:
+      account_id: "bf8d8cc9"
+      account_ref: ""
+      changed_from: ""
+      client_ref: "1|19118688-07e9-45b8-8ca4-340850f8dde7|1730790172031|eu-central-1"
+      country: "IN"
+      country_name: "India"
+      currency: "EUR"
+      date_finalized: "2024-11-05T07:18:37+00:00"
+      date_received: "2024-11-05T07:02:52+00:00"
+      dcs: "0"
+      direction: "outbound"
+      error_code: "0"
+      error_code_description: "Delivered"
+      forced_from: "918050290593"
+      from: "918050290593"
+      id: "19118688-07e9-45b8-8ca4-340850f8dde7"
+      ip_address: "49.249.95.150"
+      latency: "945284"
+      message_body: "Hello from Vonage, checking for new data!"
+      message_id: "19118688-07e9-45b8-8ca4-340850f8dde7"
+      network: "40471"
+      network_name: "BSNL - Karnataka"
+      status: "delivered"
+      to: "919481686682"
+      total_price: "0.07268000"
+      udh: ""
+      validity_period: "241106080252000+"
+    message: |-
       {
-                  "account_id": "bf8d8cc9",
-                  "message_id": "19118688-07e9-45b8-8ca4-340850f8dde7",
-                  "account_ref": "",
-                  "client_ref": "1|19118688-07e9-45b8-8ca4-340850f8dde7|1730790172031|eu-central-1",
-                  "direction": "outbound",
-                  "from": "918050290593",
-                  "to": "919481686682",
-                  "forced_from": "918050290593",
-                  "message_body": "Hello from Vonage, checking for new data!",
-                  "network": "40471",
-                  "network_name": "BSNL - Karnataka",
-                  "country": "IN",
-                  "country_name": "India",
-                  "date_received": "2024-11-05T07:02:52+00:00",
-                  "date_finalized": "2024-11-05T07:18:37+00:00",
-                  "latency": "945284",
-                  "status": "delivered",
-                  "error_code": "0",
-                  "error_code_description": "Delivered",
-                  "currency": "EUR",
-                  "total_price": "0.07268000",
-                  "id": "19118688-07e9-45b8-8ca4-340850f8dde7",
-                  "dcs": "0",
-                  "validity_period": "241106080252000+",
-                  "ip_address": "49.249.95.150",
-                  "changed_from": "",
-                  "udh": ""
-              }
-    result: null
-
-# The `result` field should be left blank to start. Once you submit your log asset files with
-# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
-# run your raw logs against your pipeline and return the result. If the result output in the
-# validation is accurate, take the output and add it to the `result` field in your test YAML file.
+        "country" : "IN",
+        "changed_from" : "",
+        "latency" : "945284",
+        "date_finalized" : "2024-11-05T07:18:37+00:00",
+        "network" : "40471",
+        "error_code_description" : "Delivered",
+        "message_body" : "Hello from Vonage, checking for new data!",
+        "dcs" : "0",
+        "country_name" : "India",
+        "from" : "918050290593",
+        "currency" : "EUR",
+        "date_received" : "2024-11-05T07:02:52+00:00",
+        "id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
+        "direction" : "outbound",
+        "account_ref" : "",
+        "total_price" : "0.07268000",
+        "client_ref" : "1|19118688-07e9-45b8-8ca4-340850f8dde7|1730790172031|eu-central-1",
+        "validity_period" : "241106080252000+",
+        "network_name" : "BSNL - Karnataka",
+        "message_id" : "19118688-07e9-45b8-8ca4-340850f8dde7",
+        "ip_address" : "49.249.95.150",
+        "account_id" : "bf8d8cc9",
+        "udh" : "",
+        "forced_from" : "918050290593",
+        "error_code" : "0",
+        "to" : "919481686682",
+        "status" : "delivered"
+      }
+    tags:
+     - "source:vonage"
