@@ -21,4 +21,4 @@ databricks.model_serving.request_latency_ms.95percentile,gauge,60,millisecond,,9
 databricks.model_serving.request_latency_ms.99percentile,gauge,60,millisecond,,99th percentile request latency in milliseconds during the minute,0,databricks,Request latency ms 99th percentile,
 databricks.model_serving.request_latency_ms.max,gauge,60,millisecond,,Maximum request latency in milliseconds during the minute,0,databricks,Request latency ms max,
 databricks.model_serving.request_latency_ms.min,gauge,60,millisecond,,Minimum request latency in milliseconds during the minute,0,databricks,Request latency ms min,
-databricks.model_serving.request_rate,rate,60,request,,Average number of requests per minute,0,databricks,request rate,PU memory usage percentage max,
+databricks.model_serving.request_rate,rate,60,request,,Average number of requests per minute,0,databricks,request rate,
