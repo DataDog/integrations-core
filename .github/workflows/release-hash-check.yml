@@ -38,5 +38,7 @@ jobs:
         git config user.name "release-hash-check"
         git config user.email "<>"
         git merge --no-commit --no-edit origin/$HEAD_BRANCH
-
     - run: python .github/workflows/release-hash-check.py ${{ steps.files.outputs.all }}
+    
+    permissions:
+      contents: write
