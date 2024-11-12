@@ -61,8 +61,7 @@
     },
     "dashboards": {
         "Spinnaker Dashboard Overview": "assets/dashboards/spinnaker_overview.json"
-    },
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
