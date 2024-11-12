@@ -42,9 +42,8 @@ You can enable LLM Observability in different environments. Follow the appropria
 ##### If you do not have the Datadog Agent:
 1. Install the `ddtrace` package:
 
-```shell
-  pip install ddtrace
-```
+   ```shell
+     pip install ddtrace
 
 2. Start your application with the following command, enabling agentless mode:
 
