@@ -14,9 +14,6 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 ### LLM Observability: Get end-to-end visibility into your LLM application using LangChain
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Python" xxx -->
-
 #### Installation for Python
 
 ##### If you do not have the Datadog Agent:
@@ -109,9 +106,6 @@ ddtrace-run --debug
 ```
 
 This will display any errors related to data transmission or instrumentation, including issues with LangChain traces.
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ### APM: Get Usage Metrics for your python Applications
 
