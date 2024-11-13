@@ -40,6 +40,9 @@
       }
     }
   },
+  "dashboards": {
+    "LLM Observability Overview Dashboard": "assets/dashboards/llm_observability_overview_dashboard.json"
+  },
   "author": {
     "support_email": "help@datadoghq.com",
     "name": "Datadog",
