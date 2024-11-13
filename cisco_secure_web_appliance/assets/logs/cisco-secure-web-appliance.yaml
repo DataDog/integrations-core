@@ -1,7 +1,5 @@
 id: cisco-secure-web-appliance
 metric_id: cisco-secure-web-appliance
-# If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
   - groups:
@@ -374,10 +372,10 @@ pipeline:
           sources:
             - syslog.severity
     - type: pipeline
-      name: Processing of l4tm logs.
+      name: Processing of l4tm logs
       enabled: true
       filter:
-        query: "service:l4tm_logs "
+        query: "service:l4tm_logs"
       processors:
         - type: grok-parser
           name: Parse l4tm logs
