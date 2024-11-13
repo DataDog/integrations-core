@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Optimize Google Gemini usage: cost estimates, prompt sampling and performance metrics.",
+    "description": "Monitor Google Gemini usage and health at the application level",
     "title": "Google Gemini",
     "media": [],
     "classifier_tags": [
