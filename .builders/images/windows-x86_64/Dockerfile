@@ -72,6 +72,12 @@ RUN Get-RemoteFile `
     Remove-Item rustup-init.exe; `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
+# Install msys
+ENV MSYS_VERSION="20230318" `
+    MSYS_SHA256="83B95C0787810B06AE2E30420C70126D2269B4A64D0702FC3D6B2BF24FC6D72D"
+COPY install_msys.ps1 C:\install_msys.ps1
+RUN C:\install_msys.ps1 -Version $ENV:MSYS_VERSION -Sha256 $ENV:MSYS_SHA256
+
 # Install Python 3
 ENV PYTHON_VERSION="3.12.6"
 RUN Get-RemoteFile `
@@ -95,9 +101,27 @@ RUN Get-RemoteFile `
     Remove-Item $Env:IBM_MQ_VERSION-IBM-MQC-Redist-Win64.zip; `
     setx /M MQ_FILE_PATH 'C:\ibm_mq'
 
+# openssl
+ENV OPENSSL_VERSION="3.3.2"
+RUN Get-RemoteFile `
+      -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
+      -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
+      -Hash '2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281'; `
+    7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
+    7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
+    cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
+    bash -c `
+    'perl.exe ./Configure && `
+    make depend && `
+    make -j 4 && `
+    make install_sw'
+
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
 RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.txt
+
+# Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
+ENV PIP_NO_BINARY="confluent_kafka"
 
 # Restore the default Windows shell for correct batch processing.
 SHELL ["cmd", "/S", "/C"]
