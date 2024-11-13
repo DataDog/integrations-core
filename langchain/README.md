@@ -3,7 +3,7 @@
 ## Overview
 Monitor, troubleshoot, and evaluate your LLM-powered applications (e.g. chatbot, data extraction tool, etc) built using LangChain.
 
-If you are building LLM applications, use LLM Observability to investigate the root cause of issues, monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
+Use LLM Observability to investigate the root cause of issues, monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
 
 See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max) for an example of how you can investigate a trace.
 
