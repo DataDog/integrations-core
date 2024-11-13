@@ -1,5 +1,5 @@
 {
-    "title": "Test Spinnaker Dashboard",
+    "title": "Spinnaker Dashboard",
     "description": "[[suggested_dashboards]]",
     "widgets": [
         {
@@ -136,7 +136,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:spinnakerlogscheck service:testSpinnakerCloudDriverLogsCheck",
+                            "query_string": "source:spinnakerlogscheck service:SpinnakerCloudDriverLogsCheck",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -192,7 +192,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerCloudDriverLogsCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerCloudDriverLogsCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -262,7 +262,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerCloudDriverLogsCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerCloudDriverLogsCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -315,7 +315,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:spinnakerlogscheck service:testSpinnakerDeckLogsCheck",
+                            "query_string": "source:spinnakerlogscheck service:SpinnakerDeckLogsCheck",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -370,7 +370,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerDeckLogsCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerDeckLogsCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -441,7 +441,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerDeckLogsCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerDeckLogsCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -485,7 +485,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerDeckLogsCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerDeckLogsCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -558,7 +558,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerDeckLogsCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerDeckLogsCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -626,7 +626,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:spinnakerlogscheck service:testSpinnakerLogsRoscoCheck",
+                            "query_string": "source:spinnakerlogscheck service:SpinnakerLogsRoscoCheck",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -681,7 +681,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsRoscoCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsRoscoCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -751,7 +751,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsRoscoCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsRoscoCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -795,7 +795,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsRoscoCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsRoscoCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -873,7 +873,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:spinnakerlogscheck service:testSpinnakerLogsOrcaCheck",
+                            "query_string": "source:spinnakerlogscheck service:SpinnakerLogsOrcaCheck",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -929,7 +929,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsOrcaCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsOrcaCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -1000,7 +1000,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsOrcaCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsOrcaCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -1053,7 +1053,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:spinnakerlogscheck service:testSpinnakerLogsRedisCheck",
+                            "query_string": "source:spinnakerlogscheck service:SpinnakerLogsRedisCheck",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -1108,7 +1108,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsRedisCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsRedisCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -1168,7 +1168,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsRedisCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsRedisCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -1221,7 +1221,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:spinnakerlogscheck service:testSpinnakerLogsEchoCheck",
+                            "query_string": "source:spinnakerlogscheck service:SpinnakerLogsEchoCheck",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -1276,7 +1276,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsEchoCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsEchoCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -1346,7 +1346,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsEchoCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsEchoCheck"
                                 },
                                 "indexes": [
                                     "*"
@@ -1390,7 +1390,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:spinnakerlogscheck service:testSpinnakerLogsEchoCheck"
+                                    "query": "source:spinnakerlogscheck service:SpinnakerLogsEchoCheck"
                                 },
                                 "indexes": [
                                     "*"
