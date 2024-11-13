@@ -8,10 +8,10 @@ backend_only: false
 facets: null
 pipeline:
   type: pipeline
-  name: spinnakerlogscheck
+  name: spinnaker
   enabled: true
   filter:
-    query: source:spinnakerlogscheck
+    query: source:spinnaker
   processors:
     - type: grok-parser
       name: isolate_spinnaker_logs
