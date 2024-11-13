@@ -138,7 +138,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.mem_usage_percentage.avg{$workspace_id, $endpoint_name, $workspace_name, $served_model_name}",
+                      "query": "max:databricks.model_serving.mem_usage_percentage.avg{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name}",
                       "aggregator": "last"
                     }
                   ],
@@ -196,7 +196,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_rate{$workspace_id, $endpoint_name, $served_model_name, $workspace_name}",
+                      "query": "max:databricks.model_serving.request_rate{$workspace_id, $endpoint_name, $served_entity_name, $workspace_name}",
                       "aggregator": "last"
                     }
                   ],
@@ -236,7 +236,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_5xx_count_total{$workspace_id, $endpoint_name, $served_model_name, $workspace_name}",
+                      "query": "max:databricks.model_serving.request_5xx_count_total{$workspace_id, $endpoint_name, $served_entity_name, $workspace_name}",
                       "aggregator": "sum"
                     }
                   ],
@@ -293,7 +293,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_4xx_count_total{$workspace_id, $endpoint_name, $workspace_name, $served_model_name}",
+                      "query": "max:databricks.model_serving.request_4xx_count_total{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name}",
                       "aggregator": "sum"
                     }
                   ],
@@ -351,7 +351,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$workspace_id, $endpoint_name, $served_model_name, $workspace_name}",
+                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$workspace_id, $endpoint_name, $served_entity_name, $workspace_name}",
                       "aggregator": "last"
                     }
                   ],
@@ -519,7 +519,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.cpu_usage_percentage.avg{$workspace_name,$endpoint_name,$served_model_name} by {endpoint_name}"
+                      "query": "avg:databricks.model_serving.cpu_usage_percentage.avg{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -569,7 +569,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.avg{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.avg{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -617,7 +617,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.cpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.cpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -667,7 +667,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.cpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.cpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -717,7 +717,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.gpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -764,7 +764,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -854,7 +854,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.mem_usage_percentage.avg{$workspace_name,$endpoint_name,$served_model_name} by {endpoint_name}"
+                      "query": "avg:databricks.model_serving.mem_usage_percentage.avg{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -908,7 +908,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.gpu_mem_usage_percentage.avg{$workspace_name,$endpoint_name,$served_model_name} by {endpoint_name}"
+                      "query": "avg:databricks.model_serving.gpu_mem_usage_percentage.avg{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -955,7 +955,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.mem_usage_percentage.max{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.mem_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1002,7 +1002,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1049,7 +1049,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.max{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1099,7 +1099,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1214,7 +1214,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_rate{$endpoint_name, $served_model_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_rate{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1261,7 +1261,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.request_5xx_count_total{$workspace_name,$endpoint_name,$served_model_name}"
+                      "query": "avg:databricks.model_serving.request_5xx_count_total{$workspace_name,$endpoint_name,$served_entity_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1308,7 +1308,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.provisioned_concurrent_requests_total{$endpoint_name,$served_model_name,$workspace_name} by {endpoint_name}"
+                      "query": "avg:databricks.model_serving.provisioned_concurrent_requests_total{$endpoint_name,$served_entity_name,$workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1355,7 +1355,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.request_4xx_count_total{$endpoint_name, $workspace_name, $served_model_name} by {endpoint_name}"
+                      "query": "avg:databricks.model_serving.request_4xx_count_total{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1449,7 +1449,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$endpoint_name, $served_model_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1496,7 +1496,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.max{$endpoint_name, $served_model_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_latency_ms.max{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1531,31 +1531,31 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:databricks.model_serving.request_latency_ms.50percentile{$workspace_name, $endpoint_name, $served_model_name} by {endpoint_name}",
+                      "query": "avg:databricks.model_serving.request_latency_ms.50percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "avg:databricks.model_serving.request_latency_ms.75percentile{$workspace_name, $endpoint_name, $served_model_name} by {endpoint_name}",
+                      "query": "avg:databricks.model_serving.request_latency_ms.75percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:databricks.model_serving.request_latency_ms.90percentile{$workspace_name, $endpoint_name, $served_model_name} by {endpoint_name}",
+                      "query": "avg:databricks.model_serving.request_latency_ms.90percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:databricks.model_serving.request_latency_ms.95percentile{$workspace_name, $endpoint_name, $served_model_name} by {endpoint_name}",
+                      "query": "avg:databricks.model_serving.request_latency_ms.95percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "avg:databricks.model_serving.request_latency_ms.99percentile{$workspace_name, $endpoint_name, $served_model_name} by {endpoint_name}",
+                      "query": "avg:databricks.model_serving.request_latency_ms.99percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
                       "aggregator": "avg"
                     }
                   ],
@@ -1637,7 +1637,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.max{$endpoint_name, $served_model_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_latency_ms.max{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1687,8 +1687,8 @@
       "default": "*"
     },
     {
-      "name": "served_model_name",
-      "prefix": "served_model_name",
+      "name": "served_entity_name",
+      "prefix": "served_entity_name",
       "available_values": [],
       "default": "*"
     }
