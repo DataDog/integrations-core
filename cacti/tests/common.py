@@ -27,10 +27,10 @@ INSTANCE_INTEGRATION = {
 E2E_METADATA = {
     'start_commands': [
         'apt-get update',
-        'export DEBIAN_FRONTEND=noninteractive',
+        "bash -c 'export DEBIAN_FRONTEND=noninteractive'",
         'apt-get install rrdtool git librrd-dev build-essential -y',
         # 'export CC=aarch64-linux-gnu-gcc',
-        'export CC="x86_64-linux-gnu-gcc"',
+        "bash -c 'export CC=x86_64-linux-gnu-gcc'",
         'pip install rrdtool',
         # 'git clone https://github.com/nubtron/python-rrdtool.git',
         # 'cd python-rrdtool',
