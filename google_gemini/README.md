@@ -110,11 +110,11 @@ See [metadata.csv][1] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-The Azure OpenAI integration does not include any service checks.
+The Google Gemini integration does not include any service checks.
 
 ### Events
 
-The Azure OpenAI integration does not include any events.
+The Google Gemini integration does not include any events.
 
 ## Troubleshooting
 
