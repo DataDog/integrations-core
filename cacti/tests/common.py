@@ -28,7 +28,6 @@ E2E_METADATA = {
     'start_commands': [
         'apt-get update',
         "bash -c 'export DEBIAN_FRONTEND=noninteractive && apt-get install rrdtool git librrd-dev build-essential -y'",
-        'apt-get install rrdtool git librrd-dev build-essential -y',
         "bash -c 'export CC=x86_64-linux-gnu-gcc && pip install rrdtool'",
         # 'git clone https://github.com/nubtron/python-rrdtool.git',
         # 'cd python-rrdtool',
