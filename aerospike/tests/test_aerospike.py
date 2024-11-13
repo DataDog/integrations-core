@@ -13,6 +13,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .common import (
     EXPECTED_PROMETHEUS_METRICS,
     EXPECTED_PROMETHEUS_METRICS_5_6,
+    INDEXES_METRICS,
     LATENCIES_METRICS,
     LAZY_METRICS,
     LEGACY_SET_METRICS,
@@ -37,7 +38,6 @@ def test_check(aggregator, instance, dd_run_check):
 
 
 def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
-
     check = AerospikeCheck('aerospike', {}, [instance])
     check.check_id = 'test:123'
 
@@ -127,6 +127,9 @@ def _test_check(aggregator):
     else:
         for metric in LEGACY_SET_METRICS:
             aggregator.assert_metric("aerospike.set.{}".format(metric))
+
+    for metric in INDEXES_METRICS:
+        aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
 
