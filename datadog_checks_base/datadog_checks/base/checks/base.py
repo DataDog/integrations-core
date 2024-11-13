@@ -1450,18 +1450,28 @@ class AgentCheck(object):
             self.gauge(m.name, m.value, tags=tags, raw=True)
 
     def enable_fips(self, path_to_embedded=None):
-        import sys
+        from pathlib import Path
 
         from cryptography.exceptions import InternalError
         from cryptography.hazmat.backends import default_backend
 
-        path_to_embedded = (
-            sys.executable.split("embedded")[0] + "embedded" if path_to_embedded is None else path_to_embedded
-        )
+        if path_to_embedded is None:
+            if os.name == 'nt':  # Windows
+                import winreg
+
+                registry_hive = winreg.HKEY_LOCAL_MACHINE
+                registry_path = r"SOFTWARE\Datadog\Datadog Agent"
+                registry_key = winreg.OpenKey(registry_hive, registry_path, 0, winreg.KEY_READ)
+                # The Agent install path is stored in a Windows registry
+                path_to_agent, _ = winreg.QueryValueEx(registry_key, "InstallPath")
+                winreg.CloseKey(registry_key)
+                path_to_embedded = Path(path_to_agent) / "embedded3"
+            else:  # Linux
+                path_to_embedded = Path('/opt/datadog-agent/embedded')
         # The cryptography package can enter FIPS mode if its internal OpenSSL
         # can access the FIPS module and configuration.
-        os.environ["OPENSSL_CONF"] = path_to_embedded + "/ssl/openssl.cnf"
-        os.environ["OPENSSL_MODULES"] = path_to_embedded + "/lib/ossl-modules"
+        os.environ["OPENSSL_CONF"] = path_to_embedded / "ssl" / "openssl.cnf"
+        os.environ["OPENSSL_MODULES"] = path_to_embedded / "lib" / "ossl-modules"
         cryptography_backend = default_backend()
         try:
             cryptography_backend._enable_fips()
