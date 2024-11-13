@@ -2,7 +2,27 @@
 
 <!-- towncrier release notes start -->
 
-## 4.1.0 / 2024-10-04
+## 5.1.0 / 2024-10-31
+
+***Added***:
+
+* Add mtu and speed tags to interfaces that support it ([#18819](https://github.com/DataDog/integrations-core/pull/18819))
+
+## 5.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 4.1.0 / 2024-10-04 / Agent 7.58.0
 
 ***Fixed***:
 

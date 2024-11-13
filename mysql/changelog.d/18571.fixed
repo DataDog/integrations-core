@@ -1,1 +1,0 @@
-Fixed a bug in MySQL 8.4 where `SHOW MASTER STATUS` would fail
