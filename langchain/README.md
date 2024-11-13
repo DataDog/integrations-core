@@ -1,7 +1,7 @@
 # LangChain
 
 ## Overview
-Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatbots or data extraction tools, using LangChain.
+Monitor, troubleshoot, and evaluate your LLM-powered applications (e.g. chatbot, data extraction tool, etc) built using LangChain.
 
 If you are building LLM applications, use LLM Observability to investigate the root cause of issues, monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
 
