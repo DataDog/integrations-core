@@ -6,7 +6,7 @@ Monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatb
 
 If you are building LLM applications, use LLM Observability to investigate the root cause of issues, monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
 
-[LLM Obs tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max )
+See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max) for an example of how you can investigate a trace.
 
 ## Setup
 
