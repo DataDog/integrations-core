@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from .constants import ALL_METRICS
+# from .constants import ALL_METRICS
 
 
 @pytest.mark.e2e
