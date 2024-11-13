@@ -411,6 +411,15 @@ files:
             example: 250
             display_default: 250
           hidden: true
+        - name: lookback_window
+          description: |
+            Queries whose last execution completed after the lookback window are excluded from
+            metrics collection. Set a longer lookback window (in seconds) to capture infrequently
+            run queries.
+          value:
+            type: integer
+            display_default: 2 * collection_interval
+            example: 600
     - name: procedure_metrics
       description: Configure collection of procedure metrics
       options:
@@ -557,6 +566,13 @@ files:
           value:
             type: string
             example: my-sqlserver-database.database.windows.net
+        - name: aggregate_sql_databases
+          description: |
+            Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
+            Only applicable when `deployment_type` is set to `sql_database`.
+          value:
+            type: boolean
+            example: false
 
     - name: managed_identity
       description: |
@@ -750,8 +766,8 @@ files:
         example: 1800
         display_default: false
     - name: schemas_collection
-      hidden: True
       description: |
+        Available for Agent 7.56 and newer.
         Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
         only for the database configured with `database` parameter.
       options:
