@@ -27,19 +27,23 @@ MOCKED_TIMESTAMPS = [BASE_TIME] * 20
 
 
 ALL_METRICS = [
+    "octopus_deploy.space.count",
     "octopus_deploy.project_group.count",
     "octopus_deploy.project.count",
     "octopus_deploy.deployment.count",
-    "octopus_deploy.deployment.duration",
-    "octopus_deploy.deployment.has_warnings_or_errors",
-    "octopus_deploy.deployment.queue_time",
-    "octopus_deploy.deployment.succeeded",
-    "octopus_deploy.deployment.can_rerun",
-    "octopus_deploy.deployment.queued",
-    "octopus_deploy.deployment.running",
-    "octopus_deploy.server_node.count",
-    "octopus_deploy.server_node.in_maintenance_mode",
-    "octopus_deploy.server_node.max_concurrent_tasks",
+    "octopus_deploy.deployment.queued_time",
+    "octopus_deploy.deployment.executing_time",
+    "octopus_deploy.deployment.completed_time",
+    # "octopus_deploy.deployment.duration",
+    # "octopus_deploy.deployment.has_warnings_or_errors",
+    # "octopus_deploy.deployment.queue_time",
+    # "octopus_deploy.deployment.succeeded",
+    # "octopus_deploy.deployment.can_rerun",
+    # "octopus_deploy.deployment.queued",
+    # "octopus_deploy.deployment.running",
+    # "octopus_deploy.server_node.count",
+    # "octopus_deploy.server_node.in_maintenance_mode",
+    # "octopus_deploy.server_node.max_concurrent_tasks",
 ]
 
 PROJECT_GROUP_ALL_METRICS = [
