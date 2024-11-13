@@ -88,22 +88,22 @@ No additional setup is required for these methods.
 
 Validate that LLM Observability is properly capturing spans by checking your application logs for successful span creation. You can also run the following command to check the status of the `ddtrace` integration:
 
-```shell
-ddtrace-run --info
-```
+   ```shell
+   ddtrace-run --info
+   ```
 
 Look for the following message to confirm the setup:
 
-```
-Agent error: None
-```
+   ```
+   Agent error: None
+   ```
 
 ##### Debugging
 If you encounter issues during setup, enable debug logging by passing the `--debug` flag:
 
-```shell
-ddtrace-run --debug
-```
+   ```shell
+   ddtrace-run --debug
+   ```
 
 This will display any errors related to data transmission or instrumentation, including issues with LangChain traces.
 
@@ -157,31 +157,31 @@ To adjust the log sample rate, see the [APM library documentation][3].
 
 Validate that the APM Python library can communicate with your Agent using:
 
-```shell
-ddtrace-run --info
-```
+   ```shell
+   ddtrace-run --info
+   ```
 
 You should see the following output:
 
-```
-    Agent error: None
-```
+   ```
+       Agent error: None
+   ```
 
 #### Debug Logging
 
 Pass the `--debug` flag to `ddtrace-run` to enable debug logging.
 
-```shell
-ddtrace-run --debug
-```
+   ```shell
+   ddtrace-run --debug
+   ```
 
 This displays any errors sending data:
 
-```
-ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
-WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
-DEBUG:ddtrace.contrib._trace_utils_llm.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
-```
+   ```
+   ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
+   WARNING:ddtrace.vendor.dogstatsd:Error submitting packet: [Errno 61] Connection refused, dropping the packet and closing the socket
+   DEBUG:ddtrace.contrib._trace_utils_llm.py:sent 2 logs to 'http-intake.logs.datadoghq.com'
+   ```
 
 ## Data Collected
 
