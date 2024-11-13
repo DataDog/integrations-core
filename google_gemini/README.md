@@ -72,7 +72,7 @@ You can enable LLM Observability in different environments. Follow the appropria
 
 ##### Automatic Google Gemini tracing
 
-The Google Gemini integration provides automatic tracing for the Google AI Python SDK's content generation calls. This captures latency, errors, input/output messages, and token usage for Google Gemini operations.
+The Google Gemini integration provides automatic tracing for the Google AI Python SDK's content generation calls. This captures latency, errors, input and output messages, as well as token usage for Google Gemini operations.
 
 The following methods are traced for both synchronous and asynchronous Google Gemini operations:
 - Generating content (including streamed calls): `model.generate_content()`, `model.generate_content_async()`
