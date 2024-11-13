@@ -41,7 +41,7 @@ from datadog_checks.vsphere.metrics import (
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.send_to_redapl.redapl_pb2 import RedaplEvent
 from datadog_checks.vsphere.send_to_redapl.resource_pb2 import RawResourceV3
-from datadog_checks.vsphere.send_to_redapl.struct_pb2 import ListValue, Value
+from datadog_checks.vsphere.send_to_redapl.struct_pb2 import Value
 from datadog_checks.vsphere.send_to_redapl.timestamp_pb2 import Timestamp
 from datadog_checks.vsphere.types import (
     CounterId,  # noqa: F401
@@ -586,6 +586,7 @@ class VSphereCheck(AgentCheck):
                         )
                     if latest_metric_time is None:
                         latest_metric_time = collect_start_time
+
             for cluster_data in to_redapl_metrics:
                 self.send_resource_to_redapl(cluster_data)
         except Exception as e:
@@ -634,10 +635,6 @@ class VSphereCheck(AgentCheck):
         raw_resource.name = cluster_reference.name
 
         data = input_data['info']
-        tags = self.infrastructure_cache.get_mor_tags(cluster_reference)
-        tags.extend(self.infrastructure_cache.get_mor_props(cluster_reference)['tags'])
-        tags.extend(self._config.base_tags)
-        data['tags'] = tags
 
         for i, v in data.items():
             field_value = Value()
@@ -645,18 +642,6 @@ class VSphereCheck(AgentCheck):
                 field_value.string_value = v
             elif isinstance(v, (int, float)):
                 field_value.number_value = v
-            elif isinstance(v, list):
-                # Convert the Python list to a ListValue
-                list_value = ListValue()
-                list_value.values.extend(
-                    [
-                        (
-                            Value(string_value=elem) if isinstance(elem, str) else Value()
-                        )  # fallback to NullValue if unsupported type
-                        for elem in v
-                    ]
-                )
-                field_value.list_value.CopyFrom(list_value)
             raw_resource.fields_by_name[i].CopyFrom(field_value)
 
         now = int(time.time())

@@ -471,6 +471,7 @@ class VSphereAPI(object):
                 for vm in host.vm:
                     cpuCount += vm.summary.config.numCpu
             # TODO: get cost multiplier since cost = cpuCount * multiplier
+            redapl_cluster_data['info']['class'] = 'standard'
             redapl_cluster_data['info']['cost'] = cpuCount
             redapl_cluster_data['info']['num_hosts'] = len(cluster_reference.host)
             performance_metrics.append(discovered_metrics)

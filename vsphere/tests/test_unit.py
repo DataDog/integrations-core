@@ -12,6 +12,8 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.constants import DEFAULT_MAX_QUERY_METRICS
+from datadog_checks.vsphere.send_to_redapl.redapl_pb2 import RedaplEvent
+from datadog_checks.vsphere.send_to_redapl.resource_pb2 import RawResourceV3
 
 from .common import (
     EVENTS,
@@ -3584,6 +3586,64 @@ def test_vsan_cluster_with_host_filtered(realtime_instance, dd_run_check, caplog
 
     dd_run_check(check)
     assert "Skipping host world because it was filtered" in caplog.text
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
+def test_vsan_cluster_to_redapl(realtime_instance, dd_run_check, caplog):
+    realtime_instance['collect_vsan_data'] = True
+    caplog.set_level(logging.DEBUG)
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    with patch('datadog_checks.base.stubs.datadog_agent.get_config') as MockGetConfig, patch(
+        'datadog_checks.base.utils.http.requests.post'
+    ) as MockPost, patch('datadog_checks.vsphere.VSphereCheck.query_vsan_metrics') as MockQueryVsanMetrics:
+        mock_cluster = MagicMock()
+        mock_host = MagicMock()
+        mock_infrastructure_cache = MagicMock()
+        check.infrastructure_cache = mock_infrastructure_cache
+        mock_infrastructure_cache.get_mors.return_value = [mock_cluster]
+        mock_infrastructure_cache.get_mor_tags.return_value = ['tag1', 'tag2']
+        mock_infrastructure_cache.get_mor_props.return_value = {'tags': ['tag3']}
+        mock_cluster.name = 'hello'
+        mock_cluster.configurationEx.vsanConfigInfo.enabled = True
+        mock_cluster.host = [mock_host]
+        mock_host.name = 'world'
+
+        cluster_reference = MagicMock()
+        cluster_reference.name = 'ClusterReference'
+        MockQueryVsanMetrics.return_value = [
+            [],
+            [],
+            [{'ref': cluster_reference, 'info': {'attr0': 1.0, 'attr1': 'value1', 'attr2': 123}}],
+        ]
+
+        MockGetConfig.side_effect = lambda key: {
+            'api_key': 'test_api_key',
+            'dd_url': 'https://www.test_dd_url.com',
+        }.get(key)
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        MockPost.return_value = mock_response
+
+        dd_run_check(check)
+
+        MockPost.assert_called_once()
+        _, post_kwargs = MockPost.call_args
+        assert post_kwargs['headers']['dd-api-key'] == 'test_api_key'
+        assert post_kwargs['headers']['Content-Type'] == 'application/x-protobuf'
+
+        redapl_event = RedaplEvent()
+        redapl_event.ParseFromString(post_kwargs['data'])
+        assert redapl_event.source == 'integrations-core'
+
+        raw_resource = RawResourceV3()
+        raw_resource.ParseFromString(redapl_event.message)
+
+        assert raw_resource.org_id == -1
+        assert raw_resource.type == 'vsphere_vsan_cluster'
+        assert raw_resource.name == 'ClusterReference'
+        assert raw_resource.fields_by_name['attr0'].number_value == 1.0
+        assert raw_resource.fields_by_name['attr1'].string_value == 'value1'
+        assert raw_resource.fields_by_name['attr2'].number_value == 123
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
