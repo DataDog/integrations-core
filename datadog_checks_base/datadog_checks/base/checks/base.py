@@ -1470,8 +1470,8 @@ class AgentCheck(object):
                 path_to_embedded = Path('/opt/datadog-agent/embedded')
         # The cryptography package can enter FIPS mode if its internal OpenSSL
         # can access the FIPS module and configuration.
-        os.environ["OPENSSL_CONF"] = path_to_embedded / "ssl" / "openssl.cnf"
-        os.environ["OPENSSL_MODULES"] = path_to_embedded / "lib" / "ossl-modules"
+        os.environ["OPENSSL_CONF"] = str(path_to_embedded / "ssl" / "openssl.cnf")
+        os.environ["OPENSSL_MODULES"] = str(path_to_embedded / "lib" / "ossl-modules")
         cryptography_backend = default_backend()
         try:
             cryptography_backend._enable_fips()
