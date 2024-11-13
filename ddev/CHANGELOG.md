@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 10.4.0 / 2024-11-13
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* add bit family as valid units ([#18845](https://github.com/DataDog/integrations-core/pull/18845))
+* Bumped datadog_checks_dev version to 34.0.0 ([#18918](https://github.com/DataDog/integrations-core/pull/18918))
+* Add MIT-0 license ([#18936](https://github.com/DataDog/integrations-core/pull/18936))
+* Add units for all circulating currencies ([#18947](https://github.com/DataDog/integrations-core/pull/18947))
+* Bump `datadog_checks_dev` to 34.1.0 ([#19049](https://github.com/DataDog/integrations-core/pull/19049))
+
+***Fixed***:
+
+* Don't hardcode location of payload file in script that serves static OpenMetrics payloads. ([#18993](https://github.com/DataDog/integrations-core/pull/18993))
+
 ## 10.3.0 / 2024-10-28
 
 ***Added***:
