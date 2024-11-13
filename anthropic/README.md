@@ -14,9 +14,6 @@ See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video
 ### LLM Observability: Get end-to-end visibility into your LLM application using Anthropic
 You can enable LLM Observability in different environments. Follow the appropriate setup based on your scenario:
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Python" xxx -->
-
 #### Installation for Python
 
 ##### If you do not have the Datadog Agent:
@@ -105,9 +102,6 @@ ddtrace-run --debug
 ```
 
 This displays any errors related to data transmission or instrumentation, including issues with Anthropic traces.
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ## Data Collected
 
