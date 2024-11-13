@@ -30,7 +30,7 @@ E2E_METADATA = {
         'export DEBIAN_FRONTEND=noninteractive',
         'apt-get install rrdtool git librrd-dev build-essential -y',
         # 'export CC=aarch64-linux-gnu-gcc',
-        'export CC=x86_64-linux-gnu-gcc',
+        'export CC="x86_64-linux-gnu-gcc"'
         'pip install rrdtool',
         # 'git clone https://github.com/nubtron/python-rrdtool.git',
         # 'cd python-rrdtool',
