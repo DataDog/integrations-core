@@ -485,7 +485,6 @@ class VSphereCheck(AgentCheck):
 
     def collect_vsan_metrics(self):
         # type: () -> None
-        latest_metric_time = None
         collect_start_time = get_current_datetime()
         self.log.debug("Starting vsan metrics collection (query start time: %s).", collect_start_time)
         try:
@@ -543,7 +542,7 @@ class VSphereCheck(AgentCheck):
                             self.log.debug(
                                 "Processing metric `%s`: resource_type=`%s`, result=`%s`",
                                 given_metric.metricId.label,
-                                type(given_metric),
+                                resource_type,
                                 str(given_metric).replace("\n", "\\n"),
                             )
                         latest_value = given_metric.values.split(',')[-1]
@@ -579,8 +578,6 @@ class VSphereCheck(AgentCheck):
                             str(hostname),
                             tags,
                         )
-                    if latest_metric_time is None:
-                        latest_metric_time = collect_start_time
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass

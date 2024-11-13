@@ -20,6 +20,9 @@ from datadog_checks.vsphere.constants import (
     UNLIMITED_HIST_METRICS_PER_QUERY,
     VSAN_EVENT_IDS,
 )
+from datadog_checks.vsphere.metrics import (
+    ENTITY_REMAPPER,
+)
 from datadog_checks.vsphere.types import InfrastructureData
 from datadog_checks.vsphere.utils import properties_to_collect
 
@@ -441,7 +444,9 @@ class VSphereAPI(object):
                 for entity_type in entity_ref_ids[id_to_tags[nested_id][0]]:
                     vsan_perf_query_spec.append(
                         vim.cluster.VsanPerfQuerySpec(
-                            entityRefId=(entity_type + str(nested_id)), startTime=starting_time
+                            entityRefId=(entity_type + str(nested_id)),
+                            labels=list(ENTITY_REMAPPER[entity_type]),
+                            startTime=starting_time,
                         )
                     )
             discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)

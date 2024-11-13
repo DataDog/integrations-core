@@ -278,8 +278,11 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             host = MagicMock(name='b')
             cluster.host = [host]
             cluster_nested_elts = {cluster: ['nested-id-1', 'nested-id-2']}
-            entity_ref_ids = {'type1': ['entity-1'], 'type2': ['entity-2']}
-            id_to_tags = {'nested-id-1': ['type1'], 'nested-id-2': ['type2']}
+            entity_ref_ids = {
+                'cluster': ['cluster-domclient:', 'vsan-cluster-capacity:'],
+                'host': ['host-domclient:', 'host-cpu:'],
+            }
+            id_to_tags = {'nested-id-1': ['cluster'], 'nested-id-2': ['host']}
             starting_time = dt.datetime(2024, 1, 1)
             mock_vsan_events = api.get_vsan_events(starting_time)
             assert len(mock_vsan_events) == 0
