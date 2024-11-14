@@ -11,6 +11,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      
     steps:
     - uses: actions/checkout@v4
       with:
@@ -40,5 +43,3 @@ jobs:
         git merge --no-commit --no-edit origin/$HEAD_BRANCH
     - run: python .github/workflows/release-hash-check.py ${{ steps.files.outputs.all }}
     
-    permissions:
-      contents: write
