@@ -16,9 +16,9 @@ The StreamNative integration collects the below types of [metrics][2]:
 
 ### Configuration
 
-#### Get StreamNative Credentials
+#### Get StreamNative credentials
 
-##### Login to the [StreamNative Cloud Console Account][3].
+##### Log in to the [StreamNative Cloud Console Account][3].
 ##### Get the `Organization ID` and `Instance Name`:
 1. Click the profile icon and select the **Organizations** option.
 2. Select the **Organization** for which data needs to be collected.
@@ -31,7 +31,7 @@ The StreamNative integration collects the below types of [metrics][2]:
 5. Click **Download OAuth2 Key** to get the **Client ID** and **Client Secret**.
 
 
-#### Add StreamNative Credentials
+#### Add StreamNative credentials
 
 - Organization ID 
 - Instance Name
@@ -49,11 +49,7 @@ The StreamNative integration does not include any logs.
 
 The StreamNative integration collects and forwards the following metrics to Datadog.
 
-1. Health
-2. Pulsar Resource
-3. Source Connector
-4. Sink Connector
-5. Kafka Connect
+{{< get-metrics-from-git "streamnative" >}}
 
 ### Service Checks
 
