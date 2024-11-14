@@ -116,6 +116,7 @@ class Gcp(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    deployment_type: Optional[str] = None
     instance_id: Optional[str] = None
     project_id: Optional[str] = None
 

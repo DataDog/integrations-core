@@ -46,6 +46,7 @@ from .util import (
     CONNECTION_METRICS,
     COUNT_METRICS,
     FUNCTION_METRICS,
+    GCP_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     INDEX_PROGRESS_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
@@ -168,12 +169,11 @@ class PostgreSql(AgentCheck):
         return discovery
 
     def set_resource_tags(self):
-        if self.cloud_metadata.get("gcp") is not None:
-            self.tags.append(
-                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
-                    self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
-                )
-            )
+        if gcp := self.cloud_metadata.get("gcp") is not None:
+            deployment_type = gcp.get("deployment_type", "cloud_sql")
+            resource_type = GCP_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
+            if resource_type:
+                self.tags.append(f"dd.internal.resource:{resource_type}:{gcp['project_id']}:{gcp['instance_id']}")
         if self.cloud_metadata.get("aws") is not None and 'instance_endpoint' in self.cloud_metadata.get("aws"):
             self.tags.append(
                 "dd.internal.resource:aws_rds_instance:{}".format(
@@ -184,14 +184,12 @@ class PostgreSql(AgentCheck):
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
-        if self.cloud_metadata.get("azure") is not None:
-            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
+        if azure := self.cloud_metadata.get("azure") is not None:
+            deployment_type = azure["deployment_type"]
             # some `deployment_type`s map to multiple `resource_type`s
             resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
             if resource_type:
-                self.tags.append(
-                    "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
-                )
+                self.tags.append("dd.internal.resource:{}:{}".format(resource_type, azure["name"]))
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(

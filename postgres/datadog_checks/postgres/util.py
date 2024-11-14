@@ -131,6 +131,10 @@ AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
     "single_server": "azure_postgresql_server",
     "virtual_machine": "azure_virtual_machine_instance",
 }
+GCP_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE = {
+    "cloud_sql": "gcp_sql_database_instance",
+    "alloydb": "gcp_alloydb_instance",
+}
 
 DBM_MIGRATED_METRICS = {
     'numbackends': ('connections', AgentCheck.gauge),

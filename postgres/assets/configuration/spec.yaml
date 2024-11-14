@@ -727,6 +727,16 @@ files:
 
         These values are only applied when `dbm: true` option is set.
       options:
+        - name: deployment_type
+          description: |
+            Equal to the deployment type for the managed database.
+
+            Acceptable values are:
+              - `cloud_sql`
+              - `alloydb`
+          value:
+            type: string
+            example: cloud_sql
         - name: project_id
           description: |
             Equal to the GCP resource's project ID.

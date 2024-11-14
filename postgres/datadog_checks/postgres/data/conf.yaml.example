@@ -643,6 +643,15 @@ instances:
     #
     # gcp:
 
+        ## @param deployment_type - string - optional - default: cloud_sql
+        ## Equal to the deployment type for the managed database.
+        ##
+        ## Acceptable values are:
+        ##   - `cloud_sql`
+        ##   - `alloydb`
+        #
+        # deployment_type: cloud_sql
+
         ## @param project_id - string - optional - default: foo-project
         ## Equal to the GCP resource's project ID.
         ##
