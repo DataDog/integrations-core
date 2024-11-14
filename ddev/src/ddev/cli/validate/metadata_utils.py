@@ -387,6 +387,7 @@ VALID_UNIT_NAMES = {
     "uzbekistan sum",
     "vatu",
     "bolívar soberano",
+    "bolívar digital",
     "đồng",
     "yemeni rial",
     "zambian kwacha",
