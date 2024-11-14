@@ -109,7 +109,7 @@ This displays any errors related to data transmission or instrumentation, includ
 
 ### Metrics
 
-See [metadata.csv][2] for a list of metrics provided by this integration.
+The Anthropic integration does not include any custom metrics.
 
 ### Service Checks
 
@@ -121,9 +121,8 @@ The Anthropic integration does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
 [1]: https://docs.datadoghq.com/integrations/anthropic/
-[2]: https://github.com/DataDog/integrations-core/blob/main/anthropic/metadata.csv
-[3]: https://docs.datadoghq.com/help/
+[2]: https://docs.datadoghq.com/help/
 
