@@ -219,7 +219,6 @@
               "title": "5xx Error Rate",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -279,7 +278,6 @@
               "title": "4xx Error Rate",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -559,9 +557,6 @@
                 "value",
                 "sum"
               ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
               "type": "timeseries",
               "requests": [
                 {
@@ -1250,15 +1245,20 @@
                 "value",
                 "sum"
               ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "unit_name": "request",
+                          "per_unit_name": "minute",
+                          "type": "canonical_unit"
+                        }
+                      }
                     }
                   ],
                   "queries": [
@@ -1347,15 +1347,20 @@
                 "value",
                 "sum"
               ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "unit_name": "request",
+                          "per_unit_name": "minute",
+                          "type": "canonical_unit"
+                        }
+                      }
                     }
                   ],
                   "queries": [
@@ -1386,7 +1391,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 24,
+        "y": 0,
         "width": 12,
         "height": 7,
         "is_column_break": true
@@ -1666,7 +1671,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 31,
+        "y": 7,
         "width": 12,
         "height": 7
       }
