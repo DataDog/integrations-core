@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.0-beta.1 / 2024-11-14
+
+***Added***:
+
+* Add support for Couch version 3.4.0 ([#19051](https://github.com/DataDog/integrations-core/pull/19051))
+
 ## 8.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
