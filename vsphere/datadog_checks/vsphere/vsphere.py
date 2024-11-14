@@ -490,7 +490,6 @@ class VSphereCheck(AgentCheck):
 
     def collect_vsan_metrics(self):
         # type: () -> None
-        latest_metric_time = None
         collect_start_time = get_current_datetime()
         self.log.debug("Starting vsan metrics collection (query start time: %s).", collect_start_time)
         try:
@@ -530,9 +529,12 @@ class VSphereCheck(AgentCheck):
                     resource_type = first_metric_for_entity.dynamicProperty[0][0]
                     hostname = None
                     entity = first_metric_for_entity.dynamicProperty[0][1]
-                    resource_tags = self.infrastructure_cache.get_mor_tags(entity)
+                    resource_tags = []
+                    resource_tags.extend(self.infrastructure_cache.get_mor_tags(entity))
+                    resource_tags.extend(self.infrastructure_cache.get_mor_props(entity)['tags'])
+                    tags = []
                     if resource_type == 'host':
-                        tags = (
+                        tags.extend(
                             [t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags]
                             if self._config.excluded_host_tags
                             else []
@@ -540,7 +542,6 @@ class VSphereCheck(AgentCheck):
                         hostname = first_metric_for_entity.dynamicProperty[0][2]
                     else:
                         tags = copy.deepcopy(resource_tags)
-                    tags.extend(self.infrastructure_cache.get_mor_props(entity)['tags'])
                     tags.extend(self._config.base_tags)
 
                     for given_metric in entity_type.value:
@@ -548,7 +549,7 @@ class VSphereCheck(AgentCheck):
                             self.log.debug(
                                 "Processing metric `%s`: resource_type=`%s`, result=`%s`",
                                 given_metric.metricId.label,
-                                type(given_metric),
+                                resource_type,
                                 str(given_metric).replace("\n", "\\n"),
                             )
                         latest_value = given_metric.values.split(',')[-1]
@@ -584,8 +585,6 @@ class VSphereCheck(AgentCheck):
                             str(hostname),
                             tags,
                         )
-                    if latest_metric_time is None:
-                        latest_metric_time = collect_start_time
 
             for cluster_data in to_redapl_metrics:
                 self.send_resource_to_redapl(cluster_data)

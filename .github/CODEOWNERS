@@ -83,6 +83,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /kubernetes/                                    @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubernetes_admission/                          @DataDog/container-platform     @DataDog/agent-integrations
 /kubernetes_cluster_autoscaler/                 @DataDog/container-integrations @DataDog/agent-integrations 
 /kubernetes_cluster_autoscaler/*.md             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes_cluster_autoscaler/manifest.json    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -349,10 +350,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /trend_micro_vision_one_endpoint_security/manifest.json             @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_vision_one_endpoint_security/assets/logs/              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-hubspot_content_hub/                                                @DataDog/saas-integrations
-hubspot_content_hub/*.md                                            @DataDog/saas-integrations @DataDog/documentation
-hubspot_content_hub/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
-hubspot_content_hub/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+/hubspot_content_hub/                                               @DataDog/saas-integrations
+/hubspot_content_hub/*.md                                           @DataDog/saas-integrations @DataDog/documentation
+/hubspot_content_hub/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
+/hubspot_content_hub/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 
 vonage/                                                @DataDog/saas-integrations

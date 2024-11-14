@@ -454,6 +454,46 @@ VSAN_HOST_METRICS = {
     'vsan.host.writeCount',
 }
 
+CLUSTER_DOMCLIENT = {
+    'iopsRead',
+    'throughputRead',
+    'latencyAvgRead',
+    'iopsWrite',
+    'throughputWrite',
+    'latencyAvgWrite',
+    'congestion',
+    'oio',
+}
+
+VSAN_CLUSTER_CAPACITY = {'total', 'used', 'free', 'savedByDedup', 'dedupRatio'}
+
+HOST_DOMCLIENT = {
+    'iopsRead',
+    'throughputRead',
+    'latencyAvgRead',
+    'readCount',
+    'iopsWrite',
+    'throughputWrite',
+    'latencyAvgWrite',
+    'writeCount',
+    'congestion',
+    'oio',
+    'clientCacheHits',
+    'clientCacheHitRate',
+    'iopsUnmap',
+    'throughputUnmap',
+    'latencyAvgUnmap',
+}
+
+HOST_CPU = {'coreUtilPct', 'pcpuUtilPct', 'pcpuUsedPct'}
+
+ENTITY_REMAPPER = {
+    'cluster-domclient:': CLUSTER_DOMCLIENT,
+    'vsan-cluster-capacity:': VSAN_CLUSTER_CAPACITY,
+    'host-domclient:': HOST_DOMCLIENT,
+    'host-cpu:': HOST_CPU,
+}
+
 # All metrics that can be collected from Datastores.
 DATASTORE_METRICS = {
     REALTIME: [],

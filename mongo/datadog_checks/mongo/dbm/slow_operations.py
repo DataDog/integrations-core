@@ -65,6 +65,8 @@ class MongoSlowOperations(DBMAsyncJob):
 
         self._last_collection_timestamp = None
 
+        self._log_json_opts = json_util.JSONOptions(tz_aware=True)
+
     def run_job(self):
         self.collect_slow_operations()
 
@@ -157,18 +159,24 @@ class MongoSlowOperations(DBMAsyncJob):
             yield self._obfuscate_slow_operation(profile, db_name)
 
     def _collect_slow_operations_from_logs(self, db_names, last_ts):
+        self._check.log.debug(
+            "Collecting slow operations from logs for databases %s with lookback ts %s", db_names, last_ts
+        )
         logs = self._check.api_client.get_log_data()
         log_entries = logs.get("log", [])
+        self._check.log.debug("Found %d log entries", len(log_entries))
         start_index = self._binary_search(log_entries, last_ts)
+        self._check.log.debug("Starting log search from index: %d", start_index)
         for i in range(start_index, len(log_entries)):
             parsed_log = log_entries[i]
             if isinstance(parsed_log, str):
                 try:
-                    parsed_log = json_util.loads(parsed_log)
+                    parsed_log = json_util.loads(parsed_log, json_options=self._log_json_opts)
                 except Exception as e:
                     self._check.log.error("Failed to parse log line: %s", e)
                     continue
-            if parsed_log.get("msg", "").lower() == 'slow query':
+            log_msg = parsed_log.get("msg", "")
+            if log_msg.lower() == 'slow query':
                 ts = parsed_log["t"].timestamp()
                 if ts <= last_ts:
                     # This check is still needed when binary search fails to parse a log line
@@ -182,6 +190,8 @@ class MongoSlowOperations(DBMAsyncJob):
                     continue
                 log_attr["ts"] = ts
                 yield self._obfuscate_slow_operation(log_attr, db_name)
+            else:
+                self._check.log.debug("Skipping non-slow query log entry: %s", log_msg)
 
     def _collect_slow_operation_explain_plan(self, slow_operation, dbname):
         try:
@@ -232,7 +242,7 @@ class MongoSlowOperations(DBMAsyncJob):
         while left <= right:
             mid = (left + right) // 2
             try:
-                parsed_log = json_util.loads(logs[mid])
+                parsed_log = json_util.loads(logs[mid], json_options=self._log_json_opts)
             except Exception as e:
                 self._check.log.debug("Failed to parse log line: %s", e)
                 # If we can't parse the log, skip binary search and linearly search the rest of the logs
