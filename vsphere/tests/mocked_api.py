@@ -28,6 +28,8 @@ class MockedAPI(object):
         self.infrastructure_data = {}
         self.metrics_data = []
         self.mock_events = []
+        self.mock_vsan_events = []
+        self.vsan_metrics_data = [[], []]
         self.server_time = dt.datetime.now()
 
     def get_current_time(self):
@@ -119,6 +121,66 @@ class MockedAPI(object):
 
     def get_new_events(self, start_time):
         return self.mock_events
+
+    def get_vsan_events(self, start_time):
+        return self.mock_vsan_events
+
+    def get_vsan_metrics(self, cluster_nested_elts, entity_ref_ids, id_to_tags, start_time):
+        mock_health_data = [
+            {
+                'vsphere.vsan.cluster.health.count': MagicMock(group_id='group_id', status='group_health'),
+            }
+        ]
+        mock_performance_data = [
+            [],
+            [
+                MagicMock(
+                    value=[MagicMock(metricId=MagicMock(label='oio', dynamicProperty=[{0: 'cluster', 1: MagicMock()}]))]
+                ),
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(
+                                label='congestion', value=3, dynamicProperty=[{0: 'host', 1: MagicMock(), 2: 'world'}]
+                            )
+                        )
+                    ]
+                ),
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(label='unmapCongestion', dynamicProperty=[{0: 'cluster', 1: 'hello'}])
+                        )
+                    ]
+                ),
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(
+                                label='latencyStddev', dynamicProperty=[{0: 'host', 1: 'hello', 2: 'world'}]
+                            )
+                        )
+                    ]
+                ),
+                MagicMock(value=[]),
+                MagicMock(value=[MagicMock(values='None')]),
+                MagicMock(
+                    value=[
+                        MagicMock(metricId=MagicMock(label='oio', dynamicProperty=[{0: 'wrong_resource', 1: 'hello'}]))
+                    ]
+                ),
+                MagicMock(value=[]),
+            ],
+            [
+                MagicMock(
+                    value=[
+                        MagicMock(metricId=MagicMock(label='example', dynamicProperty=[{0: 'cluster', 1: MagicMock()}]))
+                    ]
+                ),
+            ],
+        ]
+        self.vsan_metrics_data = [mock_health_data, mock_performance_data]
+        return self.vsan_metrics_data
 
 
 class MockResponse(Response):
