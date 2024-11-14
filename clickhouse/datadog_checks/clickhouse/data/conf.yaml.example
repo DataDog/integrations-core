@@ -80,7 +80,7 @@ instances:
     # tls_verify: false
 
     ## @param verify - boolean - optional - default: true
-    ## Specifies whether a certificate is required and whether it will be validated after connection.
+    ## Indicates if a certificate is required and if it will be validated after a connection is established.
     #
     # verify: true
 
