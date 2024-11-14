@@ -524,9 +524,12 @@ class VSphereCheck(AgentCheck):
                     resource_type = first_metric_for_entity.dynamicProperty[0][0]
                     hostname = None
                     entity = first_metric_for_entity.dynamicProperty[0][1]
-                    resource_tags = self.infrastructure_cache.get_mor_tags(entity)
+                    resource_tags = []
+                    resource_tags.extend(self.infrastructure_cache.get_mor_tags(entity))
+                    resource_tags.extend(self.infrastructure_cache.get_mor_props(entity)['tags'])
+                    tags = []
                     if resource_type == 'host':
-                        tags = (
+                        tags.extend(
                             [t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags]
                             if self._config.excluded_host_tags
                             else []
@@ -534,7 +537,6 @@ class VSphereCheck(AgentCheck):
                         hostname = first_metric_for_entity.dynamicProperty[0][2]
                     else:
                         tags = copy.deepcopy(resource_tags)
-                    tags.extend(self.infrastructure_cache.get_mor_props(entity)['tags'])
                     tags.extend(self._config.base_tags)
 
                     for given_metric in entity_type.value:

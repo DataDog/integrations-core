@@ -3506,22 +3506,23 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
 def test_vsan_excluded_host_tags(aggregator, realtime_instance, dd_run_check):
     realtime_instance['collect_vsan_data'] = True
-    realtime_instance['excluded_host_tags'] = ['vsphere_host']
+    realtime_instance['excluded_host_tags'] = ['vsphere_host', 'vsphere_folder']
     check = VSphereCheck('vsphere', {}, [realtime_instance])
 
     mock_cluster = MagicMock()
     mock_host = MagicMock()
-    mock_disk = MagicMock()
     mock_cluster.name = 'hello'
     mock_cluster.configurationEx.vsanConfigInfo.enabled = True
     mock_cluster.host = [mock_host]
     mock_host.name = 'world'
     mock_host.configManager.vsanSystem.config.clusterInfo.nodeUuid = 'TestHostUUID'
-    mock_host.configManager.vsanSystem.QueryDisksForVsan.return_value = [mock_disk]
-    mock_disk.vsanUuid = 'disk'
     mock_infrastructure_cache = MagicMock()
     check.infrastructure_cache = mock_infrastructure_cache
     mock_infrastructure_cache.get_mors.return_value = [mock_cluster, mock_host]
+    mock_infrastructure_cache.get_mor_tags.return_value = ['random:tags']
+    mock_infrastructure_cache.get_mor_props.return_value = {
+        'tags': ['vsphere_host:world', 'vsphere_folder:example_folder', 'vsphere_cluster:hello']
+    }
 
     dd_run_check(check)
     aggregator.assert_metric('datadog.vsphere.vsan.cluster.time', metric_type=aggregator.GAUGE, count=1)
@@ -3529,9 +3530,17 @@ def test_vsan_excluded_host_tags(aggregator, realtime_instance, dd_run_check):
     aggregator.assert_metric('vsphere.vsan.cluster.oio', count=1, tags=[])
     aggregator.assert_metric(
         'vsphere.vsan.host.congestion',
+        count=1,
+        value=0.01,
+        tags=['vcenter_server:FAKE', 'vsphere_folder:example_folder', 'vsphere_host:world'],
+        hostname='world',
+    )
+    aggregator.assert_metric(
+        'vsphere.vsan.host.congestion',
         count=0,
-        value=0.03,
-        tags=[],
+        value=0.01,
+        tags=['vcenter_server:FAKE', 'vsphere_folder:example_folder', 'vsphere_host:world', 'vsphere_cluster:hello'],
+        hostname='world',
     )
 
 
