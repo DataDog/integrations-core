@@ -216,9 +216,10 @@
           {
             "id": 3641275610662684,
             "definition": {
-              "title": "5xx Errors",
+              "title": "5xx Error Rate",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -226,7 +227,9 @@
                     {
                       "number_format": {
                         "unit": {
-                          "type": "canonical_unit"
+                          "type": "canonical_unit",
+                          "unit_name": "request",
+                          "per_unit_name": "minute"
                         }
                       },
                       "formula": "query1"
@@ -236,8 +239,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_5xx_count_total{$workspace_id, $endpoint_name, $served_entity_name, $workspace_name}",
-                      "aggregator": "sum"
+                      "query": "max:databricks.model_serving.request_5xx_count_rate{$workspace_id, $endpoint_name, $served_entity_name, $workspace_name}.as_count()",
+                      "aggregator": "avg"
                     }
                   ],
                   "response_format": "scalar",
@@ -273,9 +276,10 @@
           {
             "id": 3445909936231622,
             "definition": {
-              "title": "4xx Errors",
+              "title": "4xx Error Rate",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -283,7 +287,9 @@
                     {
                       "number_format": {
                         "unit": {
-                          "type": "canonical_unit"
+                          "type": "canonical_unit",
+                          "unit_name": "request",
+                          "per_unit_name": "minute"
                         }
                       },
                       "formula": "query1"
@@ -293,8 +299,8 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_4xx_count_total{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name}",
-                      "aggregator": "sum"
+                      "query": "max:databricks.model_serving.request_4xx_count_rate{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name}.as_count()",
+                      "aggregator": "avg"
                     }
                   ],
                   "response_format": "scalar",
@@ -506,7 +512,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -604,7 +609,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -841,7 +845,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -889,7 +892,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1194,7 +1196,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1237,7 +1238,7 @@
           {
             "id": 7772095570773674,
             "definition": {
-              "title": "Total Count of 5xx Requests",
+              "title": "5xx Error Rate",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1249,6 +1250,9 @@
                 "value",
                 "sum"
               ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -1261,7 +1265,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.request_5xx_count_total{$workspace_name,$endpoint_name,$served_entity_name}"
+                      "query": "avg:databricks.model_serving.request_5xx_count_rate{$workspace_name,$endpoint_name,$served_entity_name}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1331,7 +1335,7 @@
           {
             "id": 7486385226747274,
             "definition": {
-              "title": "Total Count of 4xx Requests",
+              "title": "4xx Error Rate",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1343,6 +1347,9 @@
                 "value",
                 "sum"
               ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -1355,7 +1362,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.request_4xx_count_total{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
+                      "query": "avg:databricks.model_serving.request_4xx_count_rate{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1379,7 +1386,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 24,
         "width": 12,
         "height": 7,
         "is_column_break": true
@@ -1430,7 +1437,6 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1522,7 +1528,6 @@
               "title": "Request Latencies by Endpoint",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
@@ -1661,7 +1666,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 7,
+        "y": 31,
         "width": 12,
         "height": 7
       }
