@@ -3478,6 +3478,10 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
     mock_infrastructure_cache = MagicMock()
     check.infrastructure_cache = mock_infrastructure_cache
     mock_infrastructure_cache.get_mors.return_value = [mock_cluster, mock_host]
+    mock_infrastructure_cache.get_mor_tags.return_value = ['random:tags']
+    mock_infrastructure_cache.get_mor_props.return_value = {
+        'tags': ['vsphere_host:world', 'vsphere_folder:example_folder', 'vsphere_cluster:hello']
+    }
 
     dd_run_check(check)
 
