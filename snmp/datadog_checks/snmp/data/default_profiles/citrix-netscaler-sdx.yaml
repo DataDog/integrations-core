@@ -286,11 +286,13 @@ metrics:
           name: netscaler.sdx.nsHaSync
         tag: netscaler_sdx_ns_ha_sync
 metric_tags:
-  - OID: 1.3.6.1.4.1.5951.6.2.2.0
-    symbol: systemProduct
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.2.0
+      name: systemProduct
     tag: netscaler_sdx_system_product
-  - OID: 1.3.6.1.4.1.5951.6.2.4.0
-    symbol: systemSvmIPAddressType
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.4.0
+      name: systemSvmIPAddressType
     tag: netscaler_sdx_system_svm_ip_address_type
     mapping:
       0: unknown
@@ -300,12 +302,14 @@ metric_tags:
       4: ipv6z
       16: dns
       25: l2vpn
-  - OID: 1.3.6.1.4.1.5951.6.2.5.0
-    symbol: systemSvmIPAddress
-    format: ip_address
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.5.0
+      name: systemSvmIPAddress
+      format: ip_address
     tag: netscaler_sdx_system_svm_ip_address
-  - OID: 1.3.6.1.4.1.5951.6.2.6.0
-    symbol: systemXenIPAddressType
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.6.0
+      name: systemXenIPAddressType
     tag: netscaler_sdx_system_xen_ip_address_type
     mapping:
       0: unknown
@@ -315,12 +319,14 @@ metric_tags:
       4: ipv6z
       16: dns
       25: l2vpn
-  - OID: 1.3.6.1.4.1.5951.6.2.7.0
-    symbol: systemXenIPAddress
-    format: ip_address
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.7.0
+      name: systemXenIPAddress
+      format: ip_address
     tag: netscaler_sdx_system_xen_ip_address
-  - OID: 1.3.6.1.4.1.5951.6.2.8.0
-    symbol: systemNetmaskType
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.8.0
+      name: systemNetmaskType
     tag: netscaler_sdx_system_netmask_type
     mapping:
       0: unknown
@@ -330,12 +336,14 @@ metric_tags:
       4: ipv6z
       16: dns
       25: l2vpn
-  - OID: 1.3.6.1.4.1.5951.6.2.9.0
-    symbol: systemNetmask
-    format: ip_address
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.9.0
+      name: systemNetmask
+      format: ip_address
     tag: netscaler_sdx_system_netmask
-  - OID: 1.3.6.1.4.1.5951.6.2.10.0
-    symbol: systemGatewayType
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.10.0
+      name: systemGatewayType
     tag: netscaler_sdx_system_gateway_type
     mapping:
       0: unknown
@@ -345,9 +353,10 @@ metric_tags:
       4: ipv6z
       16: dns
       25: l2vpn
-  - OID: 1.3.6.1.4.1.5951.6.2.11.0
-    symbol: systemGateway
-    format: ip_address
+  - symbol:
+      OID: 1.3.6.1.4.1.5951.6.2.11.0
+      name: systemGateway
+      format: ip_address
     tag: netscaler_sdx_system_gateway
   - OID: 1.3.6.1.4.1.5951.6.2.12.0
     symbol: systemNetworkInterface
