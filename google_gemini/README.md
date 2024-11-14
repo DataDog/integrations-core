@@ -107,7 +107,7 @@ This displays any errors related to data transmission or instrumentation, includ
 
 ### Metrics
 
-The Google Gemini integration does not include any custom metrics.
+The Google Gemini integration does not include any metrics.
 
 ### Service Checks
 
