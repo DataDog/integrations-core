@@ -82,6 +82,7 @@ The following methods are traced for both synchronous and asynchronous Anthropic
 No additional setup is required for these methods.
 
 ##### Validation
+
 Validate that LLM Observability is properly capturing spans by checking your application logs for successful span creation. You can also run the following command to check the status of the `dd-trace` integration:
 
   ```shell
