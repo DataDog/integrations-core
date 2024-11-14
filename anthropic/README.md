@@ -23,7 +23,7 @@ You can enable LLM Observability in different environments. Follow the appropria
     pip install ddtrace
   ```
 
-2. Start your application with the following command, enabling Agentless mode:
+2.  Start your application using the following command to enable Agentless mode:
 
   ```shell
     DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <YOUR_APP>.py
