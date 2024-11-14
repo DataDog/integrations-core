@@ -90,7 +90,7 @@ DEBUG:ddtrace.contrib._trace_utils_llm.py:sent 2 logs to 'http-intake.logs.datad
 
 ### Metrics
 
-See [metadata.csv][4] for a list of metrics provided by this integration.
+The Anthropic integration does not include any custom metrics. 
 
 ### Events
 
