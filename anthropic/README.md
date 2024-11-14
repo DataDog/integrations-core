@@ -73,7 +73,7 @@ You can enable LLM Observability in different environments. Follow the appropria
 
 ##### Automatic Anthropic tracing
 
-The Anthropic integration provides automatic tracing for the Anthropic Python SDK's chat message calls. This captures latency, errors, input/output messages, and token usage for Anthropic operations.
+The Anthropic integration allows for automatic tracing of chat message calls made by the Anthropic Python SDK, capturing latency, errors, input/output messages, and token usage during Anthropic operations.
 
 The following methods are traced for both synchronous and asynchronous Anthropic operations:
 - Chat messages (including streamed calls): `Anthropic().messages.create()`, `AsyncAnthropic().messages.create()`
