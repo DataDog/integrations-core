@@ -53,7 +53,7 @@ You can enable LLM Observability in different environments. Follow the appropria
     pip install ddtrace
   ```
 
-3. Start your application using the `ddtrace-run` command to automatically enable tracing:
+3. To automatically enable tracing, start your application using the `ddtrace-run` command:
 
   ```shell
      DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <your_app>.py
