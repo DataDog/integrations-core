@@ -96,6 +96,7 @@ Look for the following message to confirm the setup:
   ```
 
 ##### Debugging
+
 If you encounter issues during setup, enable debug logging by passing the `--debug` flag:
 
   ```shell
