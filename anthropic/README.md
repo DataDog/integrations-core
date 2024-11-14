@@ -23,7 +23,7 @@ You can enable LLM Observability in different environments. Follow the appropria
     pip install ddtrace
   ```
 
-2. Start your application with the following command, enabling Agentless mode:
+2.  Start your application using the following command to enable Agentless mode:
 
   ```shell
     DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <YOUR_APP>.py
@@ -53,7 +53,7 @@ You can enable LLM Observability in different environments. Follow the appropria
     pip install ddtrace
   ```
 
-3. Start your application using the `ddtrace-run` command to automatically enable tracing:
+3. To automatically enable tracing, start your application using the `ddtrace-run` command:
 
   ```shell
      DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <your_app>.py
@@ -73,7 +73,7 @@ You can enable LLM Observability in different environments. Follow the appropria
 
 ##### Automatic Anthropic tracing
 
-The Anthropic integration provides automatic tracing for the Anthropic Python SDK's chat message calls. This captures latency, errors, input/output messages, and token usage for Anthropic operations.
+The Anthropic integration allows for automatic tracing of chat message calls made by the Anthropic Python SDK, capturing latency, errors, input/output messages, and token usage during Anthropic operations.
 
 The following methods are traced for both synchronous and asynchronous Anthropic operations:
 - Chat messages (including streamed calls): `Anthropic().messages.create()`, `AsyncAnthropic().messages.create()`
@@ -82,6 +82,7 @@ The following methods are traced for both synchronous and asynchronous Anthropic
 No additional setup is required for these methods.
 
 ##### Validation
+
 Validate that LLM Observability is properly capturing spans by checking your application logs for successful span creation. You can also run the following command to check the status of the `dd-trace` integration:
 
   ```shell
@@ -95,6 +96,7 @@ Look for the following message to confirm the setup:
   ```
 
 ##### Debugging
+
 If you encounter issues during setup, enable debug logging by passing the `--debug` flag:
 
   ```shell
