@@ -26,7 +26,7 @@ Avast integration requires a Avast Business Hub account and its Client Id, and C
 #### Get Avast Credentials
 
 1. Login to the [Avast Business Hub][4] Account.
-2. Navigate and click the gear(⚙️) icon.
+2. Navigate and click the gear(settings) icon.
 3. In the **Settings** section, click **Integrations**.
 4. Click **Add a new integration**.
 5. Provide an integration name.
