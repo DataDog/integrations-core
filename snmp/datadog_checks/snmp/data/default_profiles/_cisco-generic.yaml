@@ -445,6 +445,41 @@ metrics:
           26: fabric_path_echo
       - index: 1
         tag: rtt_index
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.2.1.6
+          name: rttMonEchoAdminSourceAddress
+          format: ip_address
+        table: rttMonEchoAdminTable
+        tag: rtt_source_address
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.2.1.2
+          name: rttMonEchoAdminTargetAddress
+          format: ip_address
+        table: rttMonEchoAdminTable
+        tag: rtt_target_address
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.10.1.2
+          name: rttMonLatestRttOperSense
+        table: rttMonLatestRttOperTable
+        tag: rtt_sense
+        mapping:
+          0: other
+          1: ok
+          2: disconnected
+          3: overThreshold
+          4: timeout
+          5: busy
+          6: notConnected
+          7: dropped
+          8: sequenceError
+          9: verifyError
+          10: applicationSpecific
+          11: dnsServerTimeout
+          12: tcpConnectTimeout
+          13: httpTransactionTimeout
+          14: dnsQueryError
+          15: httpError
+          16: error
 
   - MIB: CISCO-RTTMON-MIB
     table:
@@ -500,3 +535,24 @@ metrics:
           26: fabric_path_echo
       - index: 1
         tag: rtt_index
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.2.1.6
+          name: rttMonEchoAdminSourceAddress
+          format: ip_address
+        table: rttMonEchoAdminTable
+        tag: rtt_source_address
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.2.1.2
+          name: rttMonEchoAdminTargetAddress
+          format: ip_address
+        table: rttMonEchoAdminTable
+        tag: rtt_target_address
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.9.1.6
+          name: rttMonCtrlOperTimeoutOccurred
+        name: rttMonCtrlOperTable
+        tag: rtt_timeout
+        mapping:
+          1: true
+          2: false
+
