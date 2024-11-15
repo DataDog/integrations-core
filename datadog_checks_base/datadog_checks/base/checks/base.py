@@ -1461,10 +1461,14 @@ class AgentCheck(object):
 
                 registry_hive = winreg.HKEY_LOCAL_MACHINE
                 registry_path = r"SOFTWARE\Datadog\Datadog Agent"
-                registry_key = winreg.OpenKey(registry_hive, registry_path, 0, winreg.KEY_READ)
-                # The Agent install path is stored in a Windows registry
-                path_to_agent, _ = winreg.QueryValueEx(registry_key, "InstallPath")
-                winreg.CloseKey(registry_key)
+                try:
+                    registry_key = winreg.OpenKey(registry_hive, registry_path, 0, winreg.KEY_READ)
+                    # The Agent install path is stored in a Windows registry
+                    path_to_agent, _ = winreg.QueryValueEx(registry_key, "InstallPath")
+                    winreg.CloseKey(registry_key)
+                except OSError as e:
+                    logging.error(f'The install path could not be read from the \"{registry_path}\" registry.')
+                    raise e
                 path_to_embedded = Path(path_to_agent) / "embedded3"
             else:  # Linux
                 path_to_embedded = Path('/opt/datadog-agent/embedded')
