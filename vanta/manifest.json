@@ -10,7 +10,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Vanta Vulnerability logs and Framework metrics.",
     "title": "Vanta",
-    "media": [],
+    "media": [
+      {
+        "caption": "Vanta - Vulnerability Overview",
+        "image_url": "images/vanta_vulnerability_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Vanta - Framework Analytics",
+        "image_url": "images/vanta_framework_analytics.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Metrics",
@@ -31,12 +42,16 @@
       },
       "metrics": {
         "prefix": "vanta.",
-        "check": [],
+        "check": ["vanta.frameworks.count"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Vanta - Vulnerability Overview": "assets/dashboards/vanta_vulnerability_overview.json",
+      "Vanta - Framework Analytics": "assets/dashboards/vanta_framework_analytics.json"
     },
     "logs": {
       "source": "vanta"

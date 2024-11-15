@@ -1,1 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+vanta.frameworks.controls_completed,gauge,,,,Number of completed controls in the framework,1,vanta,Completed Controls,,
+vanta.frameworks.controls_total,gauge,,,,Total number of controls in the framework,0,vanta,Total Controls,,
+vanta.frameworks.count,gauge,,,,Total number of frameworks,0,vanta,Total Frameworks,,
+vanta.frameworks.documents_passing,gauge,,,,Number of passing documents in the framework,1,vanta,Passing Documents,,
+vanta.frameworks.documents_total,gauge,,,,Total number of documents in the framework,0,vanta,Total Documents,,
+vanta.frameworks.tests_passing,gauge,,,,Number of passing tests in the framework,1,vanta,Passing Tests,
+vanta.frameworks.tests_total,gauge,,,,Total number of tests in the framework,0,vanta,Total Tests,,

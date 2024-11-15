@@ -1,0 +1,1108 @@
+{
+    "title": "Vanta - Framework Analytics",
+    "description": "",
+    "widgets": [
+        {
+            "id": 5592078299243640,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn.prod.website-files.com/64009032676f244c7bf002fd/6526c89072011401910f5866_How%20does%20Vanta%20work.webp",
+                "url_dark_theme": "https://cdn.prod.website-files.com/64009032676f244c7bf002fd/6526c89072011401910f5866_How%20does%20Vanta%20work.webp",
+                "sizing": "fill",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 3
+            }
+        },
+        {
+            "id": 6093292215781214,
+            "definition": {
+                "type": "note",
+                "content": "[Vanta](https://www.vanta.com/) is a compliance automation tool that assists businesses in obtaining security certifications and identifying vulnerabilities. It streamlines compliance processes through automation, making monitoring and documentation easier to establish solid security practices.\n\nThis dashboard offers insights into different framework analytics such as completed controls, passing documents, and successful tests.\n\n**Note**:\n- The dashboard widgets display the latest analytics collected for the frameworks.\n\n**Tips:**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n\n\nFor more information, see the [Vanta Integration Documentation](https://docs.datadoghq.com/integrations/vanta/).",
+                "background_color": "purple",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 3
+            }
+        },
+        {
+            "id": 8524856018791306,
+            "definition": {
+                "title": "Total Frameworks",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:vanta.frameworks.count{*}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "yellow_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 8780080685863904,
+            "definition": {
+                "title": "Frameworks Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Frameworks",
+                                "style": {
+                                    "palette": "orange",
+                                    "palette_index": 7
+                                },
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:vanta.frameworks.count{*}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "datadog16",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 3,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 1188008779141564,
+            "definition": {
+                "title": "Framework Summary",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:vanta.frameworks.controls_completed{$framework_id,$display_name} by {id,displayname}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:vanta.frameworks.controls_total{$framework_id,$display_name} by {id,displayname}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query3",
+                                "query": "sum:vanta.frameworks.documents_passing{$framework_id,$display_name} by {id,displayname}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query4",
+                                "query": "sum:vanta.frameworks.documents_total{$framework_id,$display_name} by {id,displayname}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query5",
+                                "query": "sum:vanta.frameworks.tests_passing{$framework_id,$display_name} by {id,displayname}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query6",
+                                "query": "sum:vanta.frameworks.tests_total{$framework_id,$display_name} by {id,displayname}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 5,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Completed Controls",
+                                "formula": "query1"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Total Controls",
+                                "formula": "query2"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Passing Documents",
+                                "formula": "query3"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Total Documents",
+                                "formula": "query4"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Passing Tests",
+                                "formula": "query5"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Total Tests",
+                                "formula": "query6"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 8875599066575204,
+            "definition": {
+                "title": "Control Analytics",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7201219711460146,
+                        "definition": {
+                            "title": "Total Controls",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.controls_total{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6550131854174166,
+                        "definition": {
+                            "title": "Controls Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Completed Controls",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Controls",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.controls_completed{$framework_id,$display_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:vanta.frameworks.controls_total{$framework_id,$display_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6358141847110464,
+                        "definition": {
+                            "title": "Completed Controls",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.controls_completed{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3929382612470484,
+                        "definition": {
+                            "title": "Control Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:vanta.frameworks.controls_total{$framework_id,$display_name} by {id,displayname}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.controls_completed{$framework_id,$display_name} by {id,displayname}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 2,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Controls",
+                                            "cell_display_mode": "number",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Completed Controls",
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Failed Controls",
+                                            "formula": "query2 - query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2497771688602536,
+                        "definition": {
+                            "title": "Completed Controls Rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.controls_completed{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:vanta.frameworks.controls_total{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query1 * 100 / query2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 7
+            }
+        },
+        {
+            "id": 4146882262920716,
+            "definition": {
+                "title": "Document Analytics",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 507411841197724,
+                        "definition": {
+                            "title": "Total Documents",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.documents_total{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6059325816315426,
+                        "definition": {
+                            "title": "Documents Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Passing Documents",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Documents",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.documents_passing{$framework_id,$display_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:vanta.frameworks.documents_total{$framework_id,$display_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5385894765638388,
+                        "definition": {
+                            "title": "Passing Documents",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.documents_passing{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 828405696433564,
+                        "definition": {
+                            "title": "Document Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.documents_total{$framework_id,$display_name} by {id,displayname}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:vanta.frameworks.documents_passing{$framework_id,$display_name} by {id,displayname}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 2,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Documents",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Passing Documents",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Failed Documents",
+                                            "formula": "query1 - query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2267318100456072,
+                        "definition": {
+                            "title": "Passing Documents Rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.documents_passing{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:vanta.frameworks.documents_total{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query1 * 100 / query2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 7,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 3805405321275046,
+            "definition": {
+                "title": "Test Analytics",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8519405194859596,
+                        "definition": {
+                            "title": "Total Tests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.tests_total{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5063407457575374,
+                        "definition": {
+                            "title": "Tests Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Passing Tests",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Total Tests",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.tests_passing{$framework_id,$display_name}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:vanta.frameworks.tests_total{$framework_id,$display_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1971609628316616,
+                        "definition": {
+                            "title": "Passing Tests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.tests_passing{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5286694913698136,
+                        "definition": {
+                            "title": "Test Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.tests_total{$framework_id,$display_name} by {id,displayname}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:vanta.frameworks.tests_passing{$framework_id,$display_name} by {id,displayname}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 2,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Tests",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Passing Tests",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Failed Tests",
+                                            "formula": "query1 - query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1005356945978308,
+                        "definition": {
+                            "title": "Passing Tests Rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vanta.frameworks.tests_passing{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:vanta.frameworks.tests_total{$framework_id,$display_name}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query1 * 100 / query2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 3,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 24,
+                "width": 12,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "framework_id",
+            "prefix": "id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "display_name",
+            "prefix": "displayname",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
