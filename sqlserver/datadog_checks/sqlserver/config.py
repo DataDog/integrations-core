@@ -59,13 +59,15 @@ class SQLServerConfig:
         aws: dict = instance.get('aws', {}) or {}
         gcp: dict = instance.get('gcp', {}) or {}
         azure: dict = instance.get('azure', {}) or {}
-        # Remap fully_qualified_domain_name to name
-        azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
             self.cloud_metadata.update({'aws': aws})
         if gcp:
             self.cloud_metadata.update({'gcp': gcp})
         if azure:
+            # Remap fully_qualified_domain_name to name
+            if 'fully_qualified_domain_name' in azure:
+                azure['name'] = azure.pop('fully_qualified_domain_name')
+            azure['aggregate_sql_databases'] = is_affirmative(azure.get('aggregate_sql_databases', False))
             self.cloud_metadata.update({'azure': azure})
 
         obfuscator_options_config: dict = instance.get('obfuscator_options', {}) or {}
