@@ -4,7 +4,7 @@
 
 [StreamNative][1] provides an enterprise-grade messaging and event streaming platform built on Apache Pulsar. It offers scalable, real-time data streaming solutions with features like multi-tenancy, geo-replication, and seamless integration with cloud services.
 
-The StreamNative integration collects the below types of [metrics][2]:
+The StreamNative integration Collects the following types of [metrics][2]:
 
 1. Health
 2. Pulsar Resource
@@ -20,15 +20,18 @@ The StreamNative integration collects the below types of [metrics][2]:
 
 ##### Log in to the [StreamNative Cloud Console Account][3].
 ##### Get the `Organization ID` and `Instance Name`:
-1. Click the profile icon and select the **Organizations** option.
-2. Select the **Organization** for which data needs to be collected.
-3. Obtain the **Instance Name** from the **Select an Instance** dropdown.
+
+1. Click the profile icon and select **Organizations**.
+2. Choose the **Organization** for which data needs to be collected.
+3. From the **Select an Instance** dropdown, note the **Instance Name**.
+
 ##### Get the `Client ID` and `Client Secret`:
-1. Click the profile icon and select the **Accounts & Accesses** tab.
-2. Select the Service Account for which **Admin** permission is **Enabled**.
-3. If the Service Account does not exist, click on **New -> Service Account** to create a new one, and ensure the **Super Admin** option is enabled.
-4. Click on the `...` button on the right side of the selected Service Account.
-5. Click **Download OAuth2 Key** to get the **Client ID** and **Client Secret**.
+
+1. Click the profile icon and navigate to the **Accounts & Accesses** tab.
+2. Find the Service Account with **Admin** permissions set to **Enabled**.
+   - If no Service Account exists, select **New -> Service Account** to create one, and make sure to enable the **Super Admin** option.
+3. On the right side of the chosen Service Account, click the `...` button.
+4. Select **Download OAuth2 Key** to obtain the **Client ID** and **Client Secret**.
 
 
 #### Add StreamNative credentials
