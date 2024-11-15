@@ -5,8 +5,6 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from . import metrics
 
-# test
-
 
 class RabbitMQOpenMetrics(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "rabbitmq"
