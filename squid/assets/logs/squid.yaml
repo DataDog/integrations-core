@@ -187,7 +187,7 @@ pipeline:
           parse_prefix_combined_log_rule (-|%{ip:network.client.ip}) -
           (-|%{word:squid.user_identity}) \[%{date("dd/MMM/yyyy:HH:mm:ss
           Z"):timestamp}\] \"(-|%{word:http.method})
-          (-|%{regex("(http|https)://[^\\s]+"):http.url}|error:%{greedyData:error.message}|%{parse_url})
+          (-|%{regex("(http|https)://[^\\s]+"):http.url}|error:%{data:error.message}|%{parse_url})
           %{regex("[^\"]*"):http.version}\" (-|%{number:http.status_code})
           %{number:network.bytes_written}
 
@@ -200,7 +200,7 @@ pipeline:
           (-|%{ip:network.client.ip})
           %{regex("[^_]*"):network.protocol}_%{regex("[^/]*"):squid.status}/(000|%{integer:http.status_code})
           (-|%{number:network.bytes_written}) (-|%{word:http.method})
-          (-|%{regex("(http|https)://[^\\s]+"):http.url}|error:%{greedyData:error.message}|%{parse_url})
+          (-|%{regex("(http|https)://[^\\s]+"):http.url}|error:%{data:error.message}|%{parse_url})
           (-|%{notSpace:squid.user_identity})
           (-|%{word:squid.peer_status})/(-|%{ip:network.destination.ip})
           (:|-|%{notSpace:http.resource.content_type})(
