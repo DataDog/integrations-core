@@ -1,0 +1,1 @@
+Drop support for Python versions older than 3.12 and remove tomli dependency
