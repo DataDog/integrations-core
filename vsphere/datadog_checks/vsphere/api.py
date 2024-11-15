@@ -457,11 +457,9 @@ class VSphereAPI(object):
             discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
             for entity_type in discovered_metrics:
                 for metric in entity_type.value:
-                    if metric.metricId.label in ('iopsRead', 'latencyAvgRead', 'used', 'total'):
+                    if metric.metricId.label in ('used', 'total'):
                         if metric.values != 'None':
                             relabelMap = {
-                                'iopsRead': 'requests',
-                                'latencyAvgRead': 'latency',
                                 'used': 'size_used',
                                 'total': 'size_total',
                             }
