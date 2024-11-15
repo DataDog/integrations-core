@@ -277,6 +277,8 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             cluster = MagicMock(name='a', spec=vim.ClusterComputeResource)
             host = MagicMock(name='b')
             cluster.host = [host]
+            vm = MagicMock(name='c', summary=MagicMock(config=MagicMock(numCpu=4)))
+            host.vm = [vm]
             cluster_nested_elts = {cluster: ['nested-id-1', 'nested-id-2']}
             entity_ref_ids = {
                 'cluster': ['cluster-domclient:', 'vsan-cluster-capacity:'],
@@ -302,10 +304,18 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
                 MagicMock(
                     entityRefId="cluster-domclient:nested-id-1",
                     value=[MagicMock(metricId=MagicMock(dynamicProperty=[]))],
-                )
+                ),
+                MagicMock(
+                    entityRefId="cluster-domclient:nested-id-1",
+                    value=[MagicMock(metricId=MagicMock(dynamicProperty=[], label='iopsRead'), values='1,2')],
+                ),
+                MagicMock(
+                    entityRefId="cluster-domclient:nested-id-1",
+                    value=[MagicMock(metricId=MagicMock(dynamicProperty=[], label='iopsRead'), values='None')],
+                ),
             ]
 
-            health_metrics, performance_metrics = api.get_vsan_metrics(
+            health_metrics, performance_metrics, redapl_metrics = api.get_vsan_metrics(
                 cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
             )
 
@@ -314,7 +324,10 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             assert 'vsphere.vsan.cluster.health.1.count' in health_metrics[0]
             assert 'vsphere.vsan.cluster.health.2.count' in health_metrics[0]
             assert len(performance_metrics) == 1
-            assert len(performance_metrics[0]) == 1
+            assert len(performance_metrics[0]) == 3
+            assert len(redapl_metrics) == 1
+            assert redapl_metrics[0]['info']['requests'] == 2
+            assert redapl_metrics[0]['info']['cost'] == 4
 
             vsan_config = MagicMock()
             vsan_config.enabled = True
@@ -358,7 +371,7 @@ def test_vsan_empty_health_metrics(aggregator, realtime_instance, dd_run_check, 
                 )
             ]
 
-            health_metrics, performance_metrics = api.get_vsan_metrics(
+            health_metrics, performance_metrics, redapl_metrics = api.get_vsan_metrics(
                 cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
             )
             assert len(health_metrics) == 0

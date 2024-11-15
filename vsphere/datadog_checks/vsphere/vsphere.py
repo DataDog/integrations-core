@@ -6,6 +6,7 @@ from __future__ import division
 import copy
 import datetime as dt
 import logging
+import time
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -38,6 +39,10 @@ from datadog_checks.vsphere.metrics import (
     VSAN_PERCENT_METRICS,
 )
 from datadog_checks.vsphere.resource_filters import TagFilter
+from datadog_checks.vsphere.send_to_redapl.redapl_pb2 import RedaplEvent
+from datadog_checks.vsphere.send_to_redapl.resource_pb2 import RawResourceV3
+from datadog_checks.vsphere.send_to_redapl.struct_pb2 import Value
+from datadog_checks.vsphere.send_to_redapl.timestamp_pb2 import Timestamp
 from datadog_checks.vsphere.types import (
     CounterId,  # noqa: F401
     InfrastructureData,  # noqa: F401
@@ -489,7 +494,7 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Starting vsan metrics collection (query start time: %s).", collect_start_time)
         try:
             t0 = Timer()
-            new_health_metrics, new_performance_metrics = self.query_vsan_metrics(
+            new_health_metrics, new_performance_metrics, to_redapl_metrics = self.query_vsan_metrics(
                 collect_start_time - dt.timedelta(hours=2)
             )
             self.gauge(
@@ -580,6 +585,9 @@ class VSphereCheck(AgentCheck):
                             str(hostname),
                             tags,
                         )
+
+            for cluster_data in to_redapl_metrics:
+                self.send_resource_to_redapl(cluster_data)
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass
@@ -613,8 +621,60 @@ class VSphereCheck(AgentCheck):
                 self.log.debug("Skipping vsan metrics for cluster %s because it is not a vsan cluster", cluster.name)
         if not cluster_nested_elts:
             self.log.debug("There are no vsan clusters to collect metrics from, skipping vsan collection")
-            return [], []
+            return [], [], []
         return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
+
+    def send_resource_to_redapl(self, input_data):
+        # cluster: {'ref': cluster-reference, 'info': {all data attributes except for 'tags'}}
+        cluster_reference = input_data['ref']
+        raw_resource = RawResourceV3()
+        # REDAPL requests that an org_id of -1 be used for all resources--they will change it
+        raw_resource.org_id = -1
+        raw_resource.type = "vsphere_vsan_cluster"
+        raw_resource.name = cluster_reference.name
+
+        data = input_data['info']
+
+        for i, v in data.items():
+            field_value = Value()
+            if isinstance(v, str):
+                field_value.string_value = v
+            elif isinstance(v, (int, float)):
+                field_value.number_value = v
+            raw_resource.fields_by_name[i].CopyFrom(field_value)
+
+        now = int(time.time())
+        seen_at = Timestamp()
+        seen_at.seconds = now
+        raw_resource.seen_at.CopyFrom(seen_at)
+
+        expire_at = Timestamp()
+        expire_at.seconds = now + 86400  # Expire after 24 hours
+        raw_resource.expire_at.CopyFrom(expire_at)
+
+        raw_resource.version = 1
+        raw_resource.tiebreaker = 123
+        raw_resource.scope = "integrations_core_scope"
+
+        redapl_event = RedaplEvent()
+        # any resource from integrations_core should have this source
+        redapl_event.source = "integrations-core"
+        redapl_event.message = raw_resource.SerializeToString()
+        serialized_redapl_event = redapl_event.SerializeToString()
+
+        headers = {
+            'dd-api-key': datadog_agent.get_config('api_key'),
+            'Content-Type': 'application/x-protobuf',
+        }
+
+        base_url = datadog_agent.get_config('dd_url')
+        domain = '.'.join(base_url.split('//')[-1].split('.')[-2:])
+        response = self.http.post(
+            f'https://intake.profile.{domain}/api/v2/genresources', headers=headers, data=serialized_redapl_event
+        )
+
+        self.log.debug("Response Code for cluster %s, %s", cluster_reference, response.status_code)
+        self.log.debug("Response Body: %s", response.text)
 
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]
