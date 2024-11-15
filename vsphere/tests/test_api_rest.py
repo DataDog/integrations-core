@@ -17,6 +17,13 @@ from .common import build_rest_api_client
 logger = logging.getLogger()
 
 
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
+
+
 @pytest.mark.usefixtures("mock_rest_api", "mock_type")
 def test_get_resource_tags(realtime_instance):
     config = VSphereConfig(realtime_instance, {}, logger)
