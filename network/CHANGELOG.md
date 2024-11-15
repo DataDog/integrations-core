@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2024-10-04
+
+***Fixed***:
+
+* Fix metric type in new network metrics ([#18764](https://github.com/DataDog/integrations-core/pull/18764))
+
+## 4.0.0 / 2024-10-01
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
+
 ## 3.4.0 / 2024-09-05
 
 ***Added***:

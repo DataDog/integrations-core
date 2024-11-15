@@ -62,6 +62,7 @@ class InstanceConfig(BaseModel):
     server: str
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    tls_ca_cert: Optional[str] = None
     tls_verify: Optional[bool] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
