@@ -1,4 +1,4 @@
-# Agent Check: AWS Neuron
+# Agent Check: AWS Inferentia and AWS Trainium Monitoring
 
 ## Overview
 

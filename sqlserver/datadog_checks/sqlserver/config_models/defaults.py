@@ -112,6 +112,10 @@ def instance_include_tempdb_file_space_usage_metrics():
     return True
 
 
+def instance_include_xe_metrics():
+    return True
+
+
 def instance_index_usage_metrics_interval():
     return 300
 

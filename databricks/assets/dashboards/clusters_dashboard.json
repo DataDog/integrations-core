@@ -1,0 +1,1997 @@
+{
+    "title": "Databricks Clusters",
+    "description": "This dashboard tracks the status of your Databricks clusters. It allows you to track the resources utilization, as well as the Databricks jobs running on them",
+    "widgets": [
+        {
+            "id": 7986081179091420,
+            "definition": {
+                "title": "New group",
+                "banner_img": "/static/images/logos/databricks_large.svg",
+                "show_title": false,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2088480862142846,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard monitors the status of your Databricks clusters, including resource utilization and Databricks and Spark jobs running on them.\n\nIt identifies clusters that are underutilized or overutilized, highlighting possible areas for optimization.\n\nThis dashboard works best when filtered on a specific **cluster_name** or **databricks_cluster_id** from the cluster list.\n\nTo filter on all clusters of a specific job, use a wildcard filter **job-<JOB_ID>*** for the cluster_name.",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 7
+            }
+        },
+        {
+            "id": 696856316767128,
+            "definition": {
+                "title": "Overview",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 908912502631126,
+                        "definition": {
+                            "title": "Currently active clusters",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "hostmap",
+                            "requests": {
+                                "fill": {
+                                    "q": "avg:system.cpu.idle{$cluster_name,$databricks_cluster_id,$jobid,$job_name} by {host}"
+                                }
+                            },
+                            "node_type": "host",
+                            "no_metric_hosts": false,
+                            "no_group_hosts": false,
+                            "group": [
+                                "cluster_name",
+                                "spark_node"
+                            ],
+                            "scope": [
+                                "$cluster_name",
+                                "$databricks_cluster_id",
+                                "$jobid",
+                                "$job_name"
+                            ],
+                            "style": {
+                                "palette": "green_to_orange",
+                                "palette_flip": false,
+                                "fill_min": "auto",
+                                "fill_max": "auto"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 8,
+                            "height": 6
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 7
+            }
+        },
+        {
+            "id": 3099884101005090,
+            "definition": {
+                "title": "Driver Infra Metrics",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6911774026162056,
+                        "definition": {
+                            "title": "Average Driver CPU Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "100 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "value": 5,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 20,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 90,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3281409481807368,
+                        "definition": {
+                            "title": "Driver Cores Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Cores Total",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "core"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Cores Used",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "core"
+                                                }
+                                            },
+                                            "formula": "(100 - query2) / 100 * query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:system.cpu.num_cores{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7278341068977720,
+                        "definition": {
+                            "title": "Driver Network IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Network Received",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Network Sent",
+                                            "formula": "0 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.net.bytes_rcvd{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.net.bytes_sent{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5352425254965778,
+                        "definition": {
+                            "title": "Average Driver Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2 / query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.mem.total{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.mem.used{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2572028652296372,
+                        "definition": {
+                            "title": "Driver Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Total",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Memory Used",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:system.mem.total{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.mem.used{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7495689945000702,
+                        "definition": {
+                            "title": "Driver Disk IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Disk Read",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Disk Write",
+                                            "formula": "0 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.io.rkb_s{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid}.fill(null)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.io.wkb_s{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1622605763497646,
+                        "definition": {
+                            "title": "Driver Instance type",
+                            "type": "treemap",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:datadog.agent.running{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {jobid,cluster_name,databricks_instance_type}.fill(null).rollup(avg, 15)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3585103700094100,
+                        "definition": {
+                            "type": "note",
+                            "content": "Each Databricks cluster is composed of one driver that coordinate workers. \n\nWhen running distributed spark, the driver delegates the computations to workers. When running local python code, it executes on the driver.\n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 6,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 12,
+                "height": 10
+            }
+        },
+        {
+            "id": 4267549119585796,
+            "definition": {
+                "title": "Worker Infra Metrics",
+                "background_color": "yellow",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4302717802964760,
+                        "definition": {
+                            "title": "Average Workers CPU Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "100 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<",
+                                            "value": 10,
+                                            "palette": "white_on_red"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 40,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "value": 95,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4408207578967238,
+                        "definition": {
+                            "title": "Workers Core Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Cores Total",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Cores Used",
+                                            "formula": "(100 - query2) / 100 * query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.cpu.num_cores{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid,host}.fill(null).rollup(avg, 15)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid,host}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4342739401280664,
+                        "definition": {
+                            "title": "Workers Network IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Network Received",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Network Sent",
+                                            "formula": "0 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.net.bytes_rcvd{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid,host}.fill(null).rollup(avg, 15)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.net.bytes_sent{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid,host}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8932299730586084,
+                        "definition": {
+                            "title": "Average Workers Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2 / query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.mem.used{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.mem.total{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4579711997928106,
+                        "definition": {
+                            "title": "Workers Memory Usage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory Used",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Memory Total",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.mem.used{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid,host}.fill(null).rollup(avg, 15)"
+                                        },
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.mem.total{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid,host}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1808828575473100,
+                        "definition": {
+                            "title": "Workers Disk IO",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Disk Read",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Disk Write",
+                                            "formula": "0 - query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.io.rkb_s{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid,host}.fill(null).rollup(avg, 15)"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.io.wkb_s{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,jobid,host}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8753199573607550,
+                        "definition": {
+                            "title": "Worker Count by Instance type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Worker Count",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "sum:datadog.agent.running{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {jobid,cluster_name,databricks_instance_type}.fill(null).rollup(avg, 15)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2102656673592240,
+                        "definition": {
+                            "type": "note",
+                            "content": "Monitor the resource usage of your Databricks workers.  Databricks clusters aggregate worker metrics, providing an overview of the full cluster.\n\nTo collect these metrics, install the Agent on the worker nodes.\n",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 6,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 10
+            }
+        },
+        {
+            "id": 3740656414431136,
+            "definition": {
+                "title": "Clusters List",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2519283390108434,
+                        "definition": {
+                            "title": "Databricks Clusters (click to set template variable)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:system.cpu.num_cores{databricks_cluster_id:*,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,databricks_cluster_id,jobid}.rollup(avg, 60)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "name": "query4",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{databricks_cluster_id:*,spark_node:driver,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,databricks_cluster_id,jobid}.fill(null)",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:system.cpu.idle{databricks_cluster_id:*,spark_node:worker,$databricks_cluster_id,$cluster_name,$jobid,$job_name} by {cluster_name,databricks_cluster_id,jobid}.fill(null)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Core-Hours",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1 / 60"
+                                        },
+                                        {
+                                            "alias": "Avg Driver CPU Usage",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "value": 10,
+                                                    "palette": "black_on_light_red"
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "value": 40,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "100 - query4"
+                                        },
+                                        {
+                                            "alias": "Driver CPU Usage",
+                                            "cell_display_mode": "trend",
+                                            "formula": "100 - (query4 * 1)"
+                                        },
+                                        {
+                                            "alias": "Avg Worker CPU Usage",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "value": 10,
+                                                    "palette": "black_on_light_red"
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "value": 40,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "100 - query2"
+                                        },
+                                        {
+                                            "alias": "Worker CPU Usage",
+                                            "cell_display_mode": "trend",
+                                            "formula": "100 - (query2 * 1)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 6
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 27,
+                "width": 12,
+                "height": 7,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 3169436294904234,
+            "definition": {
+                "title": "Databricks Jobs",
+                "background_color": "orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1733057346490264,
+                        "definition": {
+                            "type": "note",
+                            "content": "Jobs and tasks running on the selected cluster. The data is retrieved using the [Databricks integration](https://app.datadoghq.com/integrations/databricks?search=databricks).",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4480463482887100,
+                        "definition": {
+                            "title": "Databricks Task by status",
+                            "type": "treemap",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@state.result_state",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "resource_name",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "operation_name:databricks.task @cluster_metadata.cluster_name:$cluster_name.value @cluster_metadata.cluster_id:$databricks_cluster_id.value $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6556999691319020,
+                        "definition": {
+                            "title": "Top 30 Databricks Jobs (click to Data Jobs Monitoring)",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query2",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "service",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "jobid",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "operation_name:databricks.task @cluster_metadata.cluster_name:$cluster_name.value @cluster_metadata.cluster_id:$databricks_cluster_id.value @state.result_state:SUCCESS $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query3",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "service",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "jobid",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "operation_name:databricks.task @cluster_metadata.cluster_name:$cluster_name.value @cluster_metadata.cluster_id:$databricks_cluster_id.value @state.result_state:FAILED $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query4",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "count",
+                                                "metric": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "service",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "jobid",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "operation_name:databricks.task @cluster_metadata.cluster_name:$cluster_name.value @cluster_metadata.cluster_id:$databricks_cluster_id.value @state.life_cycle_state:SKIPPED $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 900,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 1,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "alias": "Successful Tasks",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_red"
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar",
+                                            "alias": "Failed Tasks",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "cell_display_mode": "bar",
+                                            "alias": "Skipped Tasks",
+                                            "formula": "query4"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto",
+                            "custom_links": [
+                                {
+                                    "override_label": "containers",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "hosts",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "logs",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "override_label": "profiles",
+                                    "is_hidden": true
+                                },
+                                {
+                                    "label": "Go to Data Jobs Monitoring",
+                                    "link": "/data-jobs/{{service.value}}?start={{timestamp_widget_start}}&end={{timestamp_widget_end}}"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8987340002212884,
+                        "definition": {
+                            "title": "Databricks tasks runs (click to view trace)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "trace_stream",
+                                        "query_string": "operation_name:databricks.task @cluster_metadata.cluster_name:$cluster_name.value @cluster_metadata.cluster_id:$databricks_cluster_id.value $jobid $job_name",
+                                        "indexes": []
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "resource_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@state.result_state",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@state.life_cycle_state",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@duration",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@error.message",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 34,
+                "width": 12,
+                "height": 10
+            }
+        },
+        {
+            "id": 6145985371833798,
+            "definition": {
+                "title": "Spark Job Performance",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7694220939331754,
+                        "definition": {
+                            "type": "note",
+                            "content": "##  Spark Job Performance\n\nSpark operations and metrics coming from the spark driver. \n\nClick Spark Jobs and SQL to view a more detailed view of the computations",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6952043600652888,
+                        "definition": {
+                            "title": "Spark Task Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.executor_run_time"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1749374829297236,
+                        "definition": {
+                            "title": "Spark Input Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.input_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6296211348550286,
+                        "definition": {
+                            "title": "Spark Output Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.output_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2682399131601456,
+                        "definition": {
+                            "title": "Spark Shuffle Read Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.shuffle_read_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6526189305692078,
+                        "definition": {
+                            "title": "Spark Shuffle Write Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.shuffle_write_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 10,
+                            "y": 0,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1342992510754146,
+                        "definition": {
+                            "title": "Spark Efficiency (duration of Spark tasks divided by core uptime of Spark executors)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "label": "%",
+                                                    "type": "custom_unit_label"
+                                                }
+                                            },
+                                            "formula": "100 * query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.executor_run_time"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query2",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.available_executor_time"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 70,
+                                            "palette": "white_on_green"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 40,
+                                            "palette": "white_on_yellow"
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "value": 10,
+                                            "palette": "white_on_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 1
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7916441977076770,
+                        "definition": {
+                            "title": "Disk Spill",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@spark.disk_bytes_spilled"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "@_top_level:1 type:spark databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5671942968235890,
+                        "definition": {
+                            "title": "Spark Jobs Overtime",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "spans",
+                                            "name": "query1",
+                                            "indexes": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "operation_name:spark.job databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid retained_by:retention_filter $job_name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "semantic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 2,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3798835960288668,
+                        "definition": {
+                            "title": "Spark Jobs (click to view trace)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "trace_stream",
+                                        "query_string": "operation_name:spark.job databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid $job_name",
+                                        "indexes": []
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "resource_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@duration",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.input_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.output_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.shuffle_read_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.shuffle_write_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@job_id",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3063249931182548,
+                        "definition": {
+                            "title": "Spark SQL (click to view trace)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "trace_stream",
+                                        "query_string": "operation_name:spark.sql databricks_cluster_id:* $cluster_name $databricks_cluster_id $jobid $job_name",
+                                        "indexes": []
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "resource_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@duration",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.input_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.output_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.shuffle_read_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@spark.shuffle_write_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@query_id",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 44,
+                "width": 12,
+                "height": 10
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "cluster_name",
+            "prefix": "cluster_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "databricks_cluster_id",
+            "prefix": "databricks_cluster_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "jobid",
+            "prefix": "jobid",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "job_name",
+            "prefix": "job_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

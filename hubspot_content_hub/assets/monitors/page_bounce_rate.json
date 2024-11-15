@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-09-23",
+	"last_updated_at": "2024-09-23",
+	"title": "Page Bounce Rate is High",
+	"description": "High bounce rate detected on content pages.",
+	"definition": {
+		"id": 154374499,
+		"name": "Page Bounce Rate is High",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:hubspot.content_hub.content.page_bounce_rate{content_type:landing-pages or content_type:standard-pages} by {content_id,content_title} > 0.4",
+		"message": "{{#is_warning}}  \nThe Page Bounce Rate for Page {{content_title.name}} ({{content_id.name}}) has exceeded the threshold.  \nCurrent Page Bounce Rate: {{eval \"int(value100)\"}}%  \nThreshold: {{eval \"int(warn_threshold100)\"}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe Page Bounce Rate for Page {{content_title.name}} ({{content_id.name}}) has exceeded the threshold.  \nCurrent Page Bounce Rate: {{eval \"int(value100)\"}}%  \nThreshold: {{eval \"int(threshold100)\"}}%  \n{{/is_alert}}\n\n\n@email@example.com",
+		"tags": [
+			"hubspot-content-hub"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0.4,
+				"warning": 0.2
+			},
+			"notify_audit": false,
+			"on_missing_data": "show_no_data",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:hubspot-content-hub"
+	]
+}

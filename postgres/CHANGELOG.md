@@ -2,7 +2,59 @@
 
 <!-- towncrier release notes start -->
 
-## 21.0.0 / 2024-10-01
+## 22.2.0 / 2024-11-06
+
+***Added***:
+
+* Include port as part of database instance metadata for MySQL and Postgres ([#18966](https://github.com/DataDog/integrations-core/pull/18966))
+
+## 22.1.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied to query metrics, query samples and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+
+***Fixed***:
+
+* Use specific databases for template on postgres ignore ([#18807](https://github.com/DataDog/integrations-core/pull/18807))
+* Fix unicode decode error from Azure PostgreSQL Flexible Server ([#18938](https://github.com/DataDog/integrations-core/pull/18938))
+
+## 22.0.3 / 2024-10-23 / Agent 7.59.0
+
+***Fixed***:
+
+* Fix `UnboundLocalError` in postgres schema collection, ensuring proper reset of `_is_schemas_collection_in_progress` to allow consecutive collections. ([#18870](https://github.com/DataDog/integrations-core/pull/18870))
+
+## 22.0.2 / 2024-10-18
+
+***Fixed***:
+
+* Revert "Parse each row of pg_stat_activity separately inside a try/catch (#18762)" ([#18866](https://github.com/DataDog/integrations-core/pull/18866))
+
+## 22.0.1 / 2024-10-14
+
+***Fixed***:
+
+* Wrap schema collection attempt in try/except block to catch collection exceptions ([#18788](https://github.com/DataDog/integrations-core/pull/18788))
+
+## 22.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Add `keep_json_path` to `obfuscator_options` to allow users to control whether JSON paths following JSON operators in SQL statements should be obfuscated. By default, these paths are treated as literals and are obfuscated to `?`. ([#18726](https://github.com/DataDog/integrations-core/pull/18726))
+* Add additional debug logging to help with schema collection investigations ([#18754](https://github.com/DataDog/integrations-core/pull/18754))
+* Add Postgres cross-org telemetry metrics. ([#18758](https://github.com/DataDog/integrations-core/pull/18758))
+
+***Fixed***:
+
+* Parse each row of `pg_stat_activity` separately inside a `try`/`catch` to avoid crashing on bad UTF8 data. ([#18762](https://github.com/DataDog/integrations-core/pull/18762))
+
+## 21.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 

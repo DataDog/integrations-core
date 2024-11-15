@@ -28,8 +28,6 @@ from threading import Event, Thread
 
 import pythoncom
 import pywintypes
-from six import iteritems, string_types, with_metaclass
-from six.moves import zip
 from win32com.client import Dispatch
 
 from .counter_type import UndefinedCalculator, get_calculator, get_raw
@@ -67,7 +65,7 @@ class ProviderArchitectureMeta(type):
         return provider in cls._AVAILABLE_PROVIDER_ARCHITECTURES
 
 
-class ProviderArchitecture(with_metaclass(ProviderArchitectureMeta, object)):
+class ProviderArchitecture(metaclass=ProviderArchitectureMeta):
     """
     Enumerate WMI Provider Architectures.
     """
@@ -349,7 +347,7 @@ class WMISampler(object):
         """
         formatted_wmi_object = CaseInsensitiveDict()
 
-        for property_name, property_raw_value in iteritems(current):
+        for property_name, property_raw_value in current.items():
             counter_type = self._property_counter_types.get(property_name)
             property_formatted_value = property_raw_value
 
@@ -429,7 +427,7 @@ class WMISampler(object):
         def build_where_clause(fltr):
             def add_to_bool_ops(k, v):
                 if isinstance(v, (tuple, list)):
-                    if len(v) == 2 and isinstance(v[0], string_types) and v[0].upper() in WQL_OPERATORS:
+                    if len(v) == 2 and isinstance(v[0], str) and v[0].upper() in WQL_OPERATORS:
                         # Append if: [WQL_OP, value]
                         #     PROPERTY: ['<WQL_OP>', '%bar']
                         #     PROPERTY: { <BOOL_OP>: ['<WQL_OP>', 'foo']}
@@ -473,7 +471,7 @@ class WMISampler(object):
                     #     - [WQL_OP, val]
                     #     - foo
                     #     - bar
-                    for k, v in iteritems(value):
+                    for k, v in value.items():
                         bool_op = default_bool_op
                         if k.upper() in BOOL_OPERATORS:
                             bool_op = k.upper()
@@ -481,7 +479,7 @@ class WMISampler(object):
                             # map NOT to NOR or NAND
                             bool_op = 'N{}'.format(default_bool_op)
                         add_to_bool_ops(bool_op, v)
-                elif isinstance(value, string_types) and '%' in value:
+                elif isinstance(value, str) and '%' in value:
                     # Override operator to LIKE if wildcard detected
                     # e.g.
                     # PROPERTY: 'foo%'  -> PROPERTY LIKE 'foo%'
@@ -492,7 +490,7 @@ class WMISampler(object):
                     # PROPERTY: 'bar'   -> PROPERTY = 'foo'
                     add_to_bool_ops(default_bool_op, [default_wql_op, value])
 
-                for bool_op, value in iteritems(bool_ops):
+                for bool_op, value in bool_ops.items():
                     if not len(value):
                         continue
 
@@ -501,9 +499,7 @@ class WMISampler(object):
                             (prop, x)
                             if isinstance(x, (tuple, list))
                             else (
-                                (prop, ('LIKE', x))
-                                if isinstance(x, string_types) and '%' in x
-                                else (prop, (default_wql_op, x))
+                                (prop, ('LIKE', x)) if isinstance(x, str) and '%' in x else (prop, (default_wql_op, x))
                             )
                         ),
                         value,

@@ -63,6 +63,7 @@ class MongoSchemas(DBMAsyncJob):
             "collection_interval": self._collection_interval,
             "dbms_version": self._check._mongo_version,
             "tags": self._check._get_tags(),
+            "cloud_metadata": self._check._config.cloud_metadata,
         }
 
         collected_collections = 0

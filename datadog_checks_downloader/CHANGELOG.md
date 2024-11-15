@@ -2,7 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 5.0.0 / 2024-10-01
+## 6.1.0 / 2024-10-31
+
+***Added***:
+
+* Update root.json for v14 ceremony. ([#18824](https://github.com/DataDog/integrations-core/pull/18824))
+
+## 6.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+## 5.0.0 / 2024-10-01 / Agent 7.58.0
 
 ***Changed***:
 

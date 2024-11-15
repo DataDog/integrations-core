@@ -75,10 +75,10 @@ For containerized environments, see [Configure integrations with Autodiscovery o
 
 **Example**
 
-Apply the following annotation to your pod, where `<CONTAINER_IDENTIFIER>` is the Aerospike container image name or a [custom identifier][15]:
+Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
 
 ```
-ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks: |
+ad.datadoghq.com/<CONTAINER_NAME>.checks: |
   {
     "aerospike": {
       "init_config": {},
@@ -100,10 +100,10 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 **Example**
 
-Apply the following annotation to your pod, where `<CONTAINER_IDENTIFIER>` is the Aerospike container image name or a [custom identifier][15]:
+Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
 
 ```
-ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs: |
+ad.datadoghq.com/<CONTAINER_NAME>.logs: |
   [
     {
       "type": "file",

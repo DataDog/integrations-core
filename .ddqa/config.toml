@@ -78,6 +78,28 @@ jira_statuses = [
 github_team = "network-device-monitoring"
 github_labels = ["team/network-device-monitoring"]
 
+[teams."Network Device Monitoring Core"]
+jira_project = "NDMII"
+jira_issue_type = "Task"
+jira_statuses = [
+  "To Do",
+  "In Progress",
+  "Done",
+]
+github_team = "ndm-core"
+github_labels = ["team/ndm-core"]
+
+[teams."Network Device Monitoring Integrations"]
+jira_project = "NDINT"
+jira_issue_type = "Task"
+jira_statuses = [
+  "To Do",
+  "In Progress",
+  "Done",
+]
+github_team = "ndm-integrations"
+github_labels = ["team/ndm-integrations"]
+
 [teams."Windows Agent"]
 jira_project = "WINA"
 jira_issue_type = "QA Task"

@@ -19,7 +19,7 @@ The [ibm_db][4] client library is required. To install it, ensure you have a wor
 ##### Unix
 
 ```text
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.1.0
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.2.3
 ```
 
 Note: If you are on an Agent running Python 2, use `ibm_db==3.0.1` instead of `ibm_db=3.1.0`.
@@ -38,10 +38,16 @@ For Agent versions >= 6.12 and < 7.0:
 "C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install ibm_db==3.0.1
 ```
 
-For Agent versions >= 7.0:
+For Agent versions >= 7.0 and < 7.58:
 
 ```text
-"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install ibm_db==3.2.2
+"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install ibm_db==3.1.4
+```
+
+For Agent versions >= 7.58:
+
+```text
+"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install ibm_db==3.2.3
 ```
 
 On Linux there may be need for XML functionality. If you encounter errors during
@@ -49,7 +55,7 @@ the build process, install `libxslt-dev` (or `libxslt-devel` for RPM).
 
 #### Enable monitoring
 
-The IBM Db2 integration pulls data using the following table functions: 
+The IBM Db2 integration pulls data using the following table functions:
 * `MON_GET_TABLESPACE`
 * `MON_GET_TRANSACTION_LOG`
 * `MON_GET_BUFFERPOOL`
@@ -63,7 +69,7 @@ To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permissio
 * `DBADM` authority
 * `SQLADM` authority
 
-To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor: 
+To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor:
 * Statement
 * Lock
 * Tables

@@ -17,15 +17,39 @@ files:
         example: http://localhost:80/api
         type: string
       required: true
-    - name: space
-      display_priority: 7
+    - name: spaces
+      display_priority: 5
       description: |
-        Space to monitor
+        Filter your integration by spaces.
       value:
-        example: Default
-        type: string
-        enabled: true
-      required: true
+        type: object
+        properties:
+          - name: limit
+            description: |
+              Maximum number of spaces to be processed.
+            type: integer
+          - name: include
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
+    # - name: space
+    #   display_priority: 7
+    #   description: |
+    #     Space to monitor
+    #   value:
+    #     example: Default
+    #     type: string
+    #     enabled: true
+    #   required: true
     - name: project_groups
       display_priority: 5
       description: |
@@ -36,6 +60,30 @@ files:
           - name: limit
             description: |
               Maximum number of project groups to be processed.
+            type: integer
+          - name: include
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
+    - name: projects
+      display_priority: 5
+      description: |
+        Filter your integration by projects.
+      value:
+        type: object
+        properties:
+          - name: limit
+            description: |
+              Maximum number of projects to be processed.
             type: integer
           - name: include
             type: array

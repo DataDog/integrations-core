@@ -137,6 +137,7 @@ def test_client_ssl(dd_run_check, cloudera_check, cloudera_cm_client):
         api_url='http://localhost:8080/api/v48/',
         workload_username='~',
         workload_password='~',
+        pools_size=4,
         max_parallel_requests=4,
         verify_ssl=True,
         ssl_ca_cert='ssl_ca_cert_path',

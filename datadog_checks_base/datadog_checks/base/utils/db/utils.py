@@ -12,7 +12,6 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from ipaddress import IPv4Address
-from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
 from cachetools import TTLCache
@@ -79,9 +78,7 @@ def create_submission_transformer(submit_method):
             # type: (Dict[str, Any], Tuple[str, Any], Dict[str, Any]) -> None
             kwargs.update(modifiers)
 
-            # TODO: When Python 2 goes away simply do:
-            # submit_method(*creation_args, *call_args, **kwargs)
-            submit_method(*chain(creation_args, call_args), **kwargs)
+            submit_method(*creation_args, *call_args, **kwargs)
 
         return transformer
 
@@ -153,6 +150,9 @@ class RateLimitingTTLCache(TTLCache):
 
 
 def resolve_db_host(db_host):
+    if db_host and db_host.endswith('.local'):
+        return db_host
+
     agent_hostname = datadog_agent.get_hostname()
     if not db_host or db_host in {'localhost', '127.0.0.1'} or db_host.startswith('/'):
         return agent_hostname

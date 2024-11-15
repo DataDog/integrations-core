@@ -22,7 +22,7 @@
       }
     },
     "priority": null,
-    "query": "max(last_30m):default_zero(avg:argocd.app_controller.app.info{!sync_status:synced} by {sync_status,name}) >= 1",
+    "query": "min(last_30m):avg:argocd.app_controller.app.info{!sync_status:synced} by {sync_status,name} >= 1",
     "restricted_roles": null,
     "tags": [
       "integration:argocd"

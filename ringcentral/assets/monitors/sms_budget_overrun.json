@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-07",
+	"last_updated_at": "2024-08-07",
+	"title": "SMS budget overrun",
+	"description": "The monitor tracks and alerts when the total cost for RingCentral SMS messages exceeds the daily allocated budget. It provides notifications to ensure timely awareness and action can be taken to manage SMS usage within the allocated budget limits.",
+	"definition": {
+		"id": 150232092,
+		"name": "[RingCentral] SMS budget overrun",
+		"type": "query alert",
+		"query": "sum(last_1mo):sum:ringcentral.message.cost_total{*} by {accountid}.as_count() > 500",
+		"message": "{{#is_alert}}\nThe total cost for RingCentral SMS has exceeded the alert threshold.\nThe total cost incurred is {{value}} , which exceeds the threshold of {{threshold}} . Please review your RingCentral account.\n{{/is_alert}}\n\n{{#is_warning}}\nThe total cost for RingCentral SMS has exceeded the warning threshold.\nThe total cost incurred is {{value}} , which exceeds the threshold of {{warn_threshold}} . Please review your RingCentral account.\n{{/is_warning}}",
+		"tags": [
+			"integration:ringcentral"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 500,
+				"warning": 400
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:ringcentral"
+	]
+}

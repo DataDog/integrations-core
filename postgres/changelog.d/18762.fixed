@@ -1,1 +1,0 @@
-Parse each row of pg_stat_activity separately inside a try/catch to avoid crashing on bad UTF8 data.

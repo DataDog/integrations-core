@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2024-10-16",
+    "last_updated_at": "2024-10-16",
+    "title": "Low oplog window",
+    "tags": [
+      "integration:mongodb"
+    ],
+    "description": "This monitor tracks the oplog window on a MongoDB replica set to alert when it is insufficient.",
+    "definition": {
+      "message": "Oplog window for database host {{database_instance.name}} on MongoDB Cluster {{clustername.name}} is below the threshold. The oplog window is {{value}} seconds.",
+      "name": "[MongoDB] Low oplog window",
+      "options": {
+        "escalation_message": "",
+        "include_tags": true,
+        "locked": false,
+        "new_host_delay": 300,
+        "no_data_timeframe": null,
+        "notify_audit": false,
+        "notify_no_data": false,
+        "renotify_interval": "0",
+        "require_full_window": true,
+        "thresholds": {
+          "critical": 3600,
+          "warning": 7200
+        },
+        "timeout_h": 0
+      },
+      "query": "avg(last_60m):100 * avg:mongodb.oplog.timediff{*} by {clustername,database_instance} < 3600",
+      "tags": [
+        "integration:mongodb"
+      ],
+      "type": "query alert"
+    }
+  }

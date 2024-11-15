@@ -1,0 +1,188 @@
+2018-04-12 15:14:08 0x7f971c063700 INNODB MONITOR OUTPUT
+=====================================
+Per second averages calculated from the last 4 seconds
+-----------------
+BACKGROUND THREAD
+-----------------
+srv_master_thread loops: 15 srv_active, 0 srv_shutdown, 1122 srv_idle
+srv_master_thread log flush and writes: 0
+----------
+SEMAPHORES
+----------
+OS WAIT ARRAY INFO: reservation count 24
+OS WAIT ARRAY INFO: signal count 24
+RW-shared spins 4, rounds 8, OS waits 4
+RW-excl spins 2, rounds 60, OS waits 2
+RW-sx spins 0, rounds 0, OS waits 0
+Spin rounds per wait: 2.00 RW-shared, 30.00 RW-excl, 0.00 RW-sx
+------------------------
+LATEST FOREIGN KEY ERROR
+------------------------
+2018-04-12 14:57:24 0x7f97a9c91700 Transaction:
+TRANSACTION 7717, ACTIVE 0 sec inserting
+mysql tables in use 1, locked 1
+4 lock struct(s), heap size 1136, 3 row lock(s), undo log entries 3
+MySQL thread id 8, OS thread handle 140289365317376, query id 14 localhost root update
+INSERT INTO child VALUES (NULL, 1), (NULL, 2), (NULL, 3), (NULL, 4), (NULL, 5), (NULL, 6)
+Foreign key constraint fails for table `test`.`child`:
+,
+  CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`id`) ON DELETE
+  CASCADE ON UPDATE CASCADE
+Trying to add in child table, in index par_ind tuple:
+DATA TUPLE: 2 fields;
+ 0: len 4; hex 80000003; asc     ;;
+ 1: len 4; hex 80000003; asc     ;;
+
+But in parent table `test`.`parent`, in index PRIMARY,
+the closest match we can find is record:
+PHYSICAL RECORD: n_fields 3; compact format; info bits 0
+ 0: len 4; hex 80000004; asc     ;;
+ 1: len 6; hex 000000001e19; asc       ;;
+ 2: len 7; hex 81000001110137; asc       7;;
+
+------------
+TRANSACTIONS
+------------
+Trx id counter 7748
+Purge done for trx's n:o < 7747 undo n:o < 0 state: running but idle
+History list length 19
+LIST OF TRANSACTIONS FOR EACH SESSION:
+---TRANSACTION 421764459790000, not started
+0 lock struct(s), heap size 1136, 0 row lock(s)
+---TRANSACTION 7747, ACTIVE 23 sec starting index read
+mysql tables in use 1, locked 1
+LOCK WAIT 2 lock struct(s), heap size 1136, 1 row lock(s)
+MySQL thread id 9, OS thread handle 140286987249408, query id 51 localhost root updating
+DELETE FROM t WHERE i = 1
+------- TRX HAS BEEN WAITING 23 SEC FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 4 page no 4 n bits 72 index GEN_CLUST_INDEX of table `test`.`t`
+trx id 7747 lock_mode X waiting
+Record lock, heap no 3 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 6; hex 000000000202; asc       ;;
+ 1: len 6; hex 000000001e41; asc      A;;
+ 2: len 7; hex 820000008b0110; asc        ;;
+ 3: len 4; hex 80000001; asc     ;;
+
+------------------
+TABLE LOCK table `test`.`t` trx id 7747 lock mode IX
+RECORD LOCKS space id 4 page no 4 n bits 72 index GEN_CLUST_INDEX of table `test`.`t`
+trx id 7747 lock_mode X waiting
+Record lock, heap no 3 PHYSICAL RECORD: n_fields 4; compact format; info bits 0
+ 0: len 6; hex 000000000202; asc       ;;
+ 1: len 6; hex 000000001e41; asc      A;;
+ 2: len 7; hex 820000008b0110; asc        ;;
+ 3: len 4; hex 80000001; asc     ;;
+
+--------
+FILE I/O
+--------
+I/O thread 0 state: waiting for i/o request (insert buffer thread)
+I/O thread 1 state: waiting for i/o request (log thread)
+I/O thread 2 state: waiting for i/o request (read thread)
+I/O thread 3 state: waiting for i/o request (read thread)
+I/O thread 4 state: waiting for i/o request (read thread)
+I/O thread 5 state: waiting for i/o request (read thread)
+I/O thread 6 state: waiting for i/o request (write thread)
+I/O thread 7 state: waiting for i/o request (write thread)
+I/O thread 8 state: waiting for i/o request (write thread)
+I/O thread 9 state: waiting for i/o request (write thread)
+Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
+ ibuf aio reads:, log i/o's:, sync i/o's:
+Pending flushes (fsync) log: 0; buffer pool: 0
+833 OS file reads, 605 OS file writes, 208 OS fsyncs
+0.00 reads/s, 0 avg bytes/read, 0.00 writes/s, 0.00 fsyncs/s
+-------------------------------------
+INSERT BUFFER AND ADAPTIVE HASH INDEX
+-------------------------------------
+Ibuf: size 1, free list len 0, seg size 2, 0 merges
+merged operations:
+ insert 0, delete mark 0, delete 0
+discarded operations:
+ insert 0, delete mark 0, delete 0
+Hash table size 553253, node heap has 0 buffer(s)
+Hash table size 553253, node heap has 1 buffer(s)
+Hash table size 553253, node heap has 3 buffer(s)
+Hash table size 553253, node heap has 0 buffer(s)
+Hash table size 553253, node heap has 0 buffer(s)
+Hash table size 553253, node heap has 0 buffer(s)
+Hash table size 553253, node heap has 0 buffer(s)
+Hash table size 553253, node heap has 0 buffer(s)
+0.00 hash searches/s, 0.00 non-hash searches/s
+---
+LOG
+---
+Log sequence number          19643450
+Log buffer assigned up to    19643450
+Log buffer completed up to   19643450
+Log written up to            19643450
+Log flushed up to            19643450
+Added dirty pages up to      19643450
+Pages flushed up to          19643450
+Last checkpoint at           19643450
+129 log i/o's done, 0.00 log i/o's/second
+----------------------
+BUFFER POOL AND MEMORY
+----------------------
+Total large memory allocated 2198863872
+Dictionary memory allocated 409606
+Buffer pool size   131072
+Free buffers       130095
+Database pages     973
+Old database pages 0
+Modified db pages  0
+Pending reads      0
+Pending writes: LRU 0, flush list 0, single page 0
+Pages made young 0, not young 0
+0.00 youngs/s, 0.00 non-youngs/s
+Pages read 810, created 163, written 404
+0.00 reads/s, 0.00 creates/s, 0.00 writes/s
+Buffer pool hit rate 1000 / 1000, young-making rate 0 / 1000 not 0 / 1000
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+LRU len: 973, unzip_LRU len: 0
+I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+----------------------
+INDIVIDUAL BUFFER POOL INFO
+----------------------
+---BUFFER POOL 0
+Buffer pool size   65536
+Free buffers       65043
+Database pages     491
+Old database pages 0
+Modified db pages  0
+Pending reads      0
+Pending writes: LRU 0, flush list 0, single page 0
+Pages made young 0, not young 0
+0.00 youngs/s, 0.00 non-youngs/s
+Pages read 411, created 80, written 210
+0.00 reads/s, 0.00 creates/s, 0.00 writes/s
+Buffer pool hit rate 1000 / 1000, young-making rate 0 / 1000 not 0 / 1000
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+LRU len: 491, unzip_LRU len: 0
+I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+---BUFFER POOL 1
+Buffer pool size   65536
+Free buffers       65052
+Database pages     482
+Old database pages 0
+Modified db pages  0
+Pending reads      0
+Pending writes: LRU 0, flush list 0, single page 0
+Pages made young 0, not young 0
+0.00 youngs/s, 0.00 non-youngs/s
+Pages read 399, created 83, written 194
+0.00 reads/s, 0.00 creates/s, 0.00 writes/s
+No buffer pool page gets since the last printout
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+LRU len: 482, unzip_LRU len: 0
+I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+--------------
+ROW OPERATIONS
+--------------
+0 queries inside InnoDB, 0 queries in queue
+0 read views open inside InnoDB
+Process ID=5772, Main thread ID=140286437054208 , state=sleeping
+Number of rows inserted 57, updated 354, deleted 4, read 4421
+0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.00 reads/s
+----------------------------
+END OF INNODB MONITOR OUTPUT
+============================

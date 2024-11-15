@@ -20,7 +20,7 @@ from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
 from . import common
-from .common import MYSQL_VERSION_PARSED
+from .common import MYSQL_FLAVOR, MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
 
@@ -853,7 +853,11 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
 
 
 def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance.get('tags', []) + ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
+    return dbm_instance.get('tags', []) + [
+        'server:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
+    ]
 
 
 # the inactive job metrics are emitted from the main integrations
@@ -863,6 +867,7 @@ def _expected_dbm_job_err_tags(dbm_instance):
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
+        'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
     ]
 
 

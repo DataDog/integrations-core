@@ -277,7 +277,8 @@ class TestStatementMetrics:
         Make sure we minimize the temporary objects created when computing the derivative
         This test is skipped if tracemalloc is not available
         '''
-        MEMORY_USAGE_THRESHOLD = 7 * 1024 * 1024  # 7 MB
+        # The memory usage threshold takes tracing overhead into account
+        MEMORY_USAGE_THRESHOLD = 8 * 1024 * 1024  # 8 MB
 
         try:
             import tracemalloc

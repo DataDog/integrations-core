@@ -6,6 +6,7 @@
         "kind": "mongodb_databases",
         "collection_interval": 600,
         "dbms_version": "4.1.13",
+        "cloud_metadata": {},
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
@@ -595,6 +596,7 @@
         "kind": "mongodb_databases",
         "collection_interval": 600,
         "dbms_version": "4.1.13",
+        "cloud_metadata": {},
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",

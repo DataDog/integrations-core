@@ -21,7 +21,7 @@
 			"notify_audit": false,
 			"include_tags": true,
 			"notify_no_data": false,
-			"new_host_delay": 300,
+			"new_group_delay": 0,
 			"silenced": {}
 		},
 		"priority": null,

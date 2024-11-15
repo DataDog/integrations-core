@@ -13,7 +13,7 @@ OCTOPUS_API_KEY = os.environ.get('OCTOPUS_API_KEY')
 OCTOPUS_SPACE = os.environ.get('OCTOPUS_SPACE', 'Default')
 
 COMPOSE_FILE = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
-INSTANCE = {'octopus_endpoint': 'http://localhost:80/api', 'space': 'Default'}
+INSTANCE = {'octopus_endpoint': 'http://localhost:80', 'space': 'Default'}
 
 LAB_INSTANCE = {
     'octopus_endpoint': OCTOPUS_LAB_ENDPOINT,
@@ -27,17 +27,23 @@ MOCKED_TIMESTAMPS = [BASE_TIME] * 20
 
 
 ALL_METRICS = [
+    "octopus_deploy.space.count",
     "octopus_deploy.project_group.count",
     "octopus_deploy.project.count",
     "octopus_deploy.deployment.count",
-    "octopus_deploy.deployment.duration",
-    "octopus_deploy.deployment.has_warnings_or_errors",
-    "octopus_deploy.deployment.queue_time",
-    "octopus_deploy.deployment.succeeded",
-    "octopus_deploy.deployment.can_rerun",
-    "octopus_deploy.server_node.count",
-    "octopus_deploy.server_node.in_maintenance_mode",
-    "octopus_deploy.server_node.max_concurrent_tasks",
+    "octopus_deploy.deployment.queued_time",
+    "octopus_deploy.deployment.executing_time",
+    "octopus_deploy.deployment.completed_time",
+    # "octopus_deploy.deployment.duration",
+    # "octopus_deploy.deployment.has_warnings_or_errors",
+    # "octopus_deploy.deployment.queue_time",
+    # "octopus_deploy.deployment.succeeded",
+    # "octopus_deploy.deployment.can_rerun",
+    # "octopus_deploy.deployment.queued",
+    # "octopus_deploy.deployment.running",
+    # "octopus_deploy.server_node.count",
+    # "octopus_deploy.server_node.in_maintenance_mode",
+    # "octopus_deploy.server_node.max_concurrent_tasks",
 ]
 
 PROJECT_GROUP_ALL_METRICS = [
@@ -935,5 +941,108 @@ SERVER_NODES_METRICS = [
         ],
         'count': 1,
         'value': 5,
+    },
+]
+
+IN_PROGRESS_METRICS = [
+    {
+        'name': 'octopus_deploy.deployment.queued',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test-api",
+            "project_id:Projects-1",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
+        'name': 'octopus_deploy.deployment.running',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test-api",
+            "project_id:Projects-1",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
+        'name': 'octopus_deploy.deployment.queued',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:my-project",
+            "project_id:Projects-2",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
+        'name': 'octopus_deploy.deployment.running',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:my-project",
+            "project_id:Projects-2",
+            "task_name:Deploy",
+            "task_state:Executing",
+        ],
+        'count': 1,
+        'value': 1,
+    },
+    {
+        'name': 'octopus_deploy.deployment.queued',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+            "task_name:Deploy",
+            "task_state:Queued",
+        ],
+        'count': 1,
+        'value': 1,
+    },
+    {
+        'name': 'octopus_deploy.deployment.running',
+        'tags': [
+            "project_group_name:Default Project Group",
+            "project_group_id:ProjectGroups-1",
+            "space_name:Default",
+            "project_name:test",
+            "project_id:Projects-3",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
+        'name': 'octopus_deploy.deployment.queued',
+        'tags': [
+            "project_group_name:test-group",
+            "project_group_id:ProjectGroups-2",
+            "space_name:Default",
+            "project_name:hi",
+            "project_id:Projects-4",
+        ],
+        'count': 1,
+        'value': 0,
+    },
+    {
+        'name': 'octopus_deploy.deployment.running',
+        'tags': [
+            "project_group_name:test-group",
+            "project_group_id:ProjectGroups-2",
+            "space_name:Default",
+            "project_name:hi",
+            "project_id:Projects-4",
+        ],
+        'count': 1,
+        'value': 0,
     },
 ]

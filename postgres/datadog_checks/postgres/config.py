@@ -12,7 +12,8 @@ SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'
 TABLE_COUNT_LIMIT = 200
 
 DEFAULT_IGNORE_DATABASES = [
-    'template%',
+    'template0',
+    'template1',
     'rdsadmin',
     'azure_maintenance',
     'cloudsqladmin',
@@ -166,6 +167,7 @@ class PostgresConfig:
             self.statement_metrics_config.get('incremental_query_metrics', False)
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
+        self.service = instance.get('service') or init_config.get('service') or ''
 
     def _build_tags(self, custom_tags, propagate_agent_tags):
         # Clean up tags in case there was a None entry in the instance
