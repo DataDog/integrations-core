@@ -105,13 +105,13 @@
                             "x": 0,
                             "y": 0,
                             "width": 3,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
                         "id": 7123682658942534,
                         "definition": {
-                            "title": "Completed Tasks Overtime",
+                            "title": "Completed Tasks Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -164,7 +164,7 @@
                             "x": 3,
                             "y": 0,
                             "width": 9,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
@@ -229,7 +229,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 3,
+                            "y": 4,
                             "width": 3,
                             "height": 4
                         }
@@ -237,7 +237,7 @@
                     {
                         "id": 3974600337102680,
                         "definition": {
-                            "title": "Tasks by Type Overtime",
+                            "title": "Tasks by Type Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -297,7 +297,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 3,
+                            "y": 4,
                             "width": 9,
                             "height": 4
                         }
@@ -364,7 +364,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 7,
+                            "y": 8,
                             "width": 3,
                             "height": 4
                         }
@@ -372,7 +372,7 @@
                     {
                         "id": 6796210644266930,
                         "definition": {
-                            "title": "Tasks by Status Overtime",
+                            "title": "Tasks by Status Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -432,142 +432,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 7,
-                            "width": 9,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2701874979961596,
-                        "definition": {
-                            "title": "Tasks by Result",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@result.status",
-                                                    "limit": 25,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:avast service:task $device_name $company_name"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "inline"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 11,
-                            "width": 3,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6950649997800374,
-                        "definition": {
-                            "title": "Tasks by Result Overtime",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Tasks",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@result.status",
-                                                    "limit": 25,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:avast service:task $device_name $company_name"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "orange",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 3,
-                            "y": 11,
+                            "y": 8,
                             "width": 9,
                             "height": 4
                         }
@@ -642,7 +507,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 15,
+                            "y": 12,
                             "width": 3,
                             "height": 4
                         }
@@ -650,7 +515,7 @@
                     {
                         "id": 4943921848747444,
                         "definition": {
-                            "title": "Task Report",
+                            "title": "Task Summary",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -680,7 +545,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "taskName",
+                                            "field": "evt.name",
                                             "width": "auto"
                                         },
                                         {
@@ -692,15 +557,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "creationTime",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "task_status",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "result.status",
+                                            "field": "evt.outcome",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "creationTime",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "completedTime",
                                             "width": "auto"
                                         },
                                         {
@@ -714,7 +583,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 15,
+                            "y": 12,
                             "width": 9,
                             "height": 4
                         }
@@ -725,7 +594,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 20
+                "height": 17
             }
         },
         {
@@ -790,13 +659,13 @@
                             "x": 0,
                             "y": 0,
                             "width": 3,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
                         "id": 1909926423216216,
                         "definition": {
-                            "title": "Patches Overtime",
+                            "title": "Patches Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -849,7 +718,7 @@
                             "x": 3,
                             "y": 0,
                             "width": 9,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
@@ -914,7 +783,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 3,
+                            "y": 4,
                             "width": 3,
                             "height": 4
                         }
@@ -922,7 +791,7 @@
                     {
                         "id": 5099078990811936,
                         "definition": {
-                            "title": "Patches by Severity Overtime",
+                            "title": "Patches by Severity Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -982,7 +851,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 3,
+                            "y": 4,
                             "width": 9,
                             "height": 4
                         }
@@ -1002,26 +871,28 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:patch $device_name $company_name"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
                                             "group_by": [
                                                 {
-                                                    "facet": "@patch_status",
+                                                    "facet": "@evt.outcome",
                                                     "limit": 25,
                                                     "sort": {
+                                                        "aggregation": "count",
                                                         "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:patch $device_name $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1049,7 +920,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 7,
+                            "y": 8,
                             "width": 3,
                             "height": 4
                         }
@@ -1057,7 +928,7 @@
                     {
                         "id": 6789780160211354,
                         "definition": {
-                            "title": "Patches by Status Overtime",
+                            "title": "Patches by Status Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1080,26 +951,28 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:patch $device_name $company_name"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
                                             "group_by": [
                                                 {
-                                                    "facet": "@patch_status",
+                                                    "facet": "@evt.outcome",
                                                     "limit": 25,
                                                     "sort": {
+                                                        "aggregation": "count",
                                                         "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:patch $device_name $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1117,7 +990,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 7,
+                            "y": 8,
                             "width": 9,
                             "height": 4
                         }
@@ -1125,7 +998,7 @@
                     {
                         "id": 4779149756645254,
                         "definition": {
-                            "title": "Devices with Most Patch Updates",
+                            "title": "Devices with Most Patches",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1192,7 +1065,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 11,
+                            "y": 12,
                             "width": 4,
                             "height": 4
                         }
@@ -1267,7 +1140,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 11,
+                            "y": 12,
                             "width": 4,
                             "height": 4
                         }
@@ -1342,7 +1215,7 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 11,
+                            "y": 12,
                             "width": 4,
                             "height": 4
                         }
@@ -1350,7 +1223,7 @@
                     {
                         "id": 7795639481531012,
                         "definition": {
-                            "title": "Patch Report",
+                            "title": "Patch Summary",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1396,7 +1269,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "patch_status",
+                                            "field": "evt.outcome",
                                             "width": "auto"
                                         },
                                         {
@@ -1414,7 +1287,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 15,
+                            "y": 16,
                             "width": 12,
                             "height": 4
                         }
@@ -1423,29 +1296,29 @@
             },
             "layout": {
                 "x": 0,
-                "y": 23,
+                "y": 20,
                 "width": 12,
-                "height": 20
+                "height": 21,
+                "is_column_break": true
             }
         },
         {
-            "id": 5571742835788440,
+            "id": 3125847044834944,
             "definition": {
                 "title": "Datadog Cloud SIEM",
-                "title_align": "center",
                 "background_color": "vivid_orange",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 4361753522838104,
+                        "id": 578971188532674,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes task and patch logs to detect real-time threats happening in your Avast Business Hub account. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security).",
+                            "content": "Datadog Cloud SIEM analyzes logs to detect real-time threats happening in your Avast Business Hub account. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security).",
                             "background_color": "blue",
                             "font_size": "14",
-                            "text_align": "left",
+                            "text_align": "center",
                             "vertical_align": "center",
                             "show_tick": false,
                             "tick_pos": "50%",
@@ -1460,7 +1333,7 @@
                         }
                     },
                     {
-                        "id": 3301817012121564,
+                        "id": 8323675225612746,
                         "definition": {
                             "title": "CRITICALs",
                             "title_size": "16",
@@ -1493,7 +1366,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:(task OR patch) status:critical"
+                                                "query": "source:avast status:critical"
                                             }
                                         }
                                     ],
@@ -1512,7 +1385,7 @@
                         }
                     },
                     {
-                        "id": 1387948752022878,
+                        "id": 6891964633055142,
                         "definition": {
                             "title": "MEDIUMs",
                             "title_size": "16",
@@ -1545,7 +1418,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:(task OR patch) status:medium"
+                                                "query": "source:avast status:medium"
                                             }
                                         }
                                     ],
@@ -1564,7 +1437,7 @@
                         }
                     },
                     {
-                        "id": 7177801650734416,
+                        "id": 520432066128062,
                         "definition": {
                             "title": "Critical Security Signals",
                             "type": "toplist",
@@ -1599,7 +1472,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:(task OR patch) status:critical"
+                                                "query": "source:avast status:critical"
                                             }
                                         }
                                     ],
@@ -1637,7 +1510,7 @@
                         }
                     },
                     {
-                        "id": 1854778270367062,
+                        "id": 4577097587583116,
                         "definition": {
                             "title": "HIGHs",
                             "title_size": "16",
@@ -1670,7 +1543,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:(task OR patch) status:high"
+                                                "query": "source:avast status:high"
                                             }
                                         }
                                     ],
@@ -1689,59 +1562,7 @@
                         }
                     },
                     {
-                        "id": 6421833281481222,
-                        "definition": {
-                            "title": "LOWs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">=",
-                                            "custom_bg_color": "#bc303c",
-                                            "palette": "black_on_light_yellow",
-                                            "value": 0
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "security_signals",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:(task OR patch) status:low"
-                                            }
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 3,
-                            "width": 2,
-                            "height": 1
-                        }
-                    },
-                    {
-                        "id": 838302009139662,
+                        "id": 5474826048352046,
                         "definition": {
                             "title": "INFOs",
                             "title_size": "16",
@@ -1774,7 +1595,59 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:(task OR patch) status:info"
+                                                "query": "source:avast status:info"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7327804537579120,
+                        "definition": {
+                            "title": "LOWs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "custom_bg_color": "#bc303c",
+                                            "palette": "black_on_light_yellow",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:avast status:low"
                                             }
                                         }
                                     ],
@@ -1793,7 +1666,7 @@
                         }
                     },
                     {
-                        "id": 6570591410332106,
+                        "id": 6483829680609632,
                         "definition": {
                             "title": "High Security Signals",
                             "type": "toplist",
@@ -1828,7 +1701,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:(task OR patch) status:high"
+                                                "query": "source:avast status:high"
                                             }
                                         }
                                     ],
@@ -1866,7 +1739,7 @@
                         }
                     },
                     {
-                        "id": 4134056178799244,
+                        "id": 7962873168353874,
                         "definition": {
                             "title": "Medium Security Signals",
                             "type": "toplist",
@@ -1901,7 +1774,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:(task OR patch) status:medium"
+                                                "query": "source:avast status:medium"
                                             }
                                         }
                                     ],
@@ -1942,7 +1815,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 43,
+                "y": 41,
                 "width": 12,
                 "height": 10
             }

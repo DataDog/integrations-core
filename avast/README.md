@@ -23,7 +23,7 @@ This integration collects logs from the sources listed above and sends them to D
 
 Avast integration requires a Avast Business Hub account and its Client Id, and Client Secret. Below are the steps to fetch these details from Avast Business Hub console:
 
-#### Get the Client Id & Client Secret from Avast Business Hub
+#### Get Avast Credentials
 
 1. Login to the [Avast Business Hub][4] Account.
 2. Navigate and click the gear(⚙️) icon.
@@ -31,12 +31,12 @@ Avast integration requires a Avast Business Hub account and its Client Id, and C
 4. Click **Add a new integration**.
 5. Provide an integration name.
 6. Select Integration scope as **API Gateway**, then click **Generate a secret**.
-7. Copy **Client ID** and the **Client Secret** for configuration.
+7. Obtain the **Client ID** and the **Client Secret** for configuration.
 
 #### Add Avast Credentials
 
-1. Add Avast `Client ID`
-2. Add Avast `Client Secret`
+1. Avast `Client ID`
+2. Avast `Client Secret`
 
 ## Data Collected
 

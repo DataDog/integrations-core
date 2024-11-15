@@ -100,13 +100,13 @@
                             "x": 0,
                             "y": 0,
                             "width": 3,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
                         "id": 2377118346660930,
                         "definition": {
-                            "title": "Audit Logs Overtime",
+                            "title": "Audit Logs Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -159,7 +159,7 @@
                             "x": 3,
                             "y": 0,
                             "width": 9,
-                            "height": 3
+                            "height": 4
                         }
                     },
                     {
@@ -177,26 +177,28 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:audit $company_name $event_category"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
                                             "group_by": [
                                                 {
-                                                    "facet": "@eventCategory",
+                                                    "facet": "@evt.name",
                                                     "limit": 25,
                                                     "sort": {
+                                                        "aggregation": "count",
                                                         "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:audit $company_name $event_category"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -224,7 +226,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 3,
+                            "y": 4,
                             "width": 3,
                             "height": 4
                         }
@@ -232,7 +234,7 @@
                     {
                         "id": 2560513985857418,
                         "definition": {
-                            "title": "Audit Logs by Event Category Overtime",
+                            "title": "Audit Logs by Event Category Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -255,26 +257,28 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:audit $company_name $event_category"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
                                             "group_by": [
                                                 {
-                                                    "facet": "@eventCategory",
+                                                    "facet": "@evt.name",
                                                     "limit": 25,
                                                     "sort": {
+                                                        "aggregation": "count",
                                                         "order": "desc",
-                                                        "aggregation": "count"
-                                                    }
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:audit $company_name $event_category"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -292,7 +296,7 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 3,
+                            "y": 4,
                             "width": 9,
                             "height": 4
                         }
@@ -357,7 +361,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 7,
+                            "y": 8,
                             "width": 12,
                             "height": 4
                         }
@@ -424,8 +428,8 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 11,
-                            "width": 3,
+                            "y": 12,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -498,8 +502,8 @@
                             }
                         },
                         "layout": {
-                            "x": 3,
-                            "y": 11,
+                            "x": 4,
+                            "y": 12,
                             "width": 4,
                             "height": 4
                         }
@@ -573,9 +577,9 @@
                             }
                         },
                         "layout": {
-                            "x": 7,
-                            "y": 11,
-                            "width": 5,
+                            "x": 8,
+                            "y": 12,
+                            "width": 4,
                             "height": 4
                         }
                     },
@@ -642,7 +646,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 15,
+                            "y": 16,
                             "width": 12,
                             "height": 4
                         }
@@ -650,7 +654,7 @@
                     {
                         "id": 3693423989023244,
                         "definition": {
-                            "title": "Audit Report",
+                            "title": "Audit Summary",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -676,7 +680,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "eventCategory",
+                                            "field": "evt.name",
                                             "width": "auto"
                                         },
                                         {
@@ -684,7 +688,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "result",
+                                            "field": "evt.outcome",
                                             "width": "auto"
                                         },
                                         {
@@ -710,7 +714,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 19,
+                            "y": 20,
                             "width": 12,
                             "height": 4
                         }
@@ -721,7 +725,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 24
+                "height": 25
             }
         },
         {
@@ -737,10 +741,10 @@
                         "id": 5492216562993688,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes audit logs to detect real-time threats happening in your Avast Business Hub account. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security).",
+                            "content": "Datadog Cloud SIEM analyzes logs to detect real-time threats happening in your Avast Business Hub account. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security).",
                             "background_color": "blue",
                             "font_size": "14",
-                            "text_align": "left",
+                            "text_align": "center",
                             "vertical_align": "center",
                             "show_tick": false,
                             "tick_pos": "50%",
@@ -788,7 +792,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:audit status:critical $event_category"
+                                                "query": "source:avast status:critical"
                                             }
                                         }
                                     ],
@@ -840,7 +844,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:audit status:medium $event_category"
+                                                "query": "source:avast status:medium"
                                             }
                                         }
                                     ],
@@ -894,7 +898,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:audit status:critical $event_category"
+                                                "query": "source:avast status:critical"
                                             }
                                         }
                                     ],
@@ -965,7 +969,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:audit status:high $event_category"
+                                                "query": "source:avast status:high"
                                             }
                                         }
                                     ],
@@ -1017,7 +1021,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:audit status:info $event_category"
+                                                "query": "source:avast status:info"
                                             }
                                         }
                                     ],
@@ -1069,7 +1073,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:audit status:low $event_category"
+                                                "query": "source:avast status:low"
                                             }
                                         }
                                     ],
@@ -1123,7 +1127,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:audit status:high $event_category"
+                                                "query": "source:avast status:high"
                                             }
                                         }
                                     ],
@@ -1196,7 +1200,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:audit status:medium $event_category"
+                                                "query": "source:avast status:medium"
                                             }
                                         }
                                     ],
@@ -1237,19 +1241,14 @@
             },
             "layout": {
                 "x": 0,
-                "y": 27,
+                "y": 28,
                 "width": 12,
-                "height": 10
+                "height": 10,
+                "is_column_break": true
             }
         }
     ],
     "template_variables": [
-        {
-            "name": "device_name",
-            "prefix": "@deviceName",
-            "available_values": [],
-            "default": "*"
-        },
         {
             "name": "company_name",
             "prefix": "@companyName",
@@ -1258,7 +1257,7 @@
         },
         {
             "name": "event_category",
-            "prefix": "@eventCategory",
+            "prefix": "@evt.name",
             "available_values": [],
             "default": "*"
         }

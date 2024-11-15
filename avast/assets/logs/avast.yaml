@@ -3,6 +3,16 @@ metric_id: avast
 backend_only: false
 facets:
   - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
       - User
     name: User Name
     path: usr.name
@@ -35,6 +45,26 @@ pipeline:
           enabled: true
           sources:
             - detectionTime
+        - type: attribute-remapper
+          name: Map `actionType` to `evt.outcome`
+          enabled: true
+          sources:
+            - actionType
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `threatName` to `evt.name`
+          enabled: true
+          sources:
+            - threatName
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Task
       enabled: true
@@ -56,6 +86,26 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `result.status` to `evt.outcome`
+          enabled: true
+          sources:
+            - result.status
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `taskName` to `evt.name`
+          enabled: true
+          sources:
+            - taskName
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Patch
       enabled: true
@@ -68,15 +118,31 @@ pipeline:
           sources:
             - lastStatusUpdate
         - type: attribute-remapper
-          name: Map `status` to `patch_status`
+          name: Map `status` to `evt.outcome`
           enabled: true
           sources:
             - status
           sourceType: attribute
-          target: patch_status
+          target: evt.outcome
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - name: Lookup for `severity` to `status`
+          enabled: true
+          source: severity
+          target: status
+          lookupTable: |-
+            NONE, Info
+            LOW, Notice
+            MODERATE, Warn
+            IMPORTANT, Critical
+            CRITICAL, Emergency
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `status` as the official status of the log
+          enabled: true
+          sources:
+            - status
     - type: pipeline
       name: Audit
       enabled: true
@@ -125,3 +191,23 @@ pipeline:
             - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
+        - type: attribute-remapper
+          name: Map `eventCategory` to `evt.name`
+          enabled: true
+          sources:
+            - eventCategory
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `result` to `evt.outcome`
+          enabled: true
+          sources:
+            - result
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false

@@ -64,31 +64,26 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "conditional_formats": [
                                         {
-                                            "comparator": "=",
+                                            "comparator": ">=",
                                             "value": 0,
                                             "palette": "yellow_on_white"
-                                        },
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_yellow"
                                         }
                                     ],
                                     "formulas": [
@@ -111,7 +106,7 @@
                     {
                         "id": 8450762702991642,
                         "definition": {
-                            "title": "Threats Overtime",
+                            "title": "Threats Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -134,18 +129,17 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -211,19 +205,14 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @infectionType:MALWARE $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @infectionType:MALWARE $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "conditional_formats": [
                                         {
-                                            "comparator": "=",
-                                            "value": 0,
-                                            "palette": "yellow_on_white"
-                                        },
-                                        {
-                                            "comparator": ">",
+                                            "comparator": ">=",
                                             "value": 0,
                                             "palette": "black_on_light_yellow"
                                         }
@@ -267,19 +256,14 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @infectionType:SUSPICIOUS $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @infectionType:SUSPICIOUS $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "conditional_formats": [
                                         {
-                                            "comparator": "=",
-                                            "value": 0,
-                                            "palette": "yellow_on_white"
-                                        },
-                                        {
-                                            "comparator": ">",
+                                            "comparator": ">=",
                                             "value": 0,
                                             "palette": "black_on_light_yellow"
                                         }
@@ -323,19 +307,14 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @infectionType:PUP $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @infectionType:PUP $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "conditional_formats": [
                                         {
-                                            "comparator": "=",
-                                            "value": 0,
-                                            "palette": "yellow_on_white"
-                                        },
-                                        {
-                                            "comparator": ">",
+                                            "comparator": ">=",
                                             "value": 0,
                                             "palette": "black_on_light_yellow"
                                         }
@@ -379,7 +358,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @infectionType:TOOL $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @infectionType:TOOL $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -430,7 +409,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @infectionType:URL $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @infectionType:URL $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -481,7 +460,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @infectionType:ERROR $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @infectionType:ERROR $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -553,19 +532,14 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @actionType:CHEST $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @actionType:CHEST $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "conditional_formats": [
                                         {
-                                            "comparator": "=",
-                                            "value": 0,
-                                            "palette": "yellow_on_white"
-                                        },
-                                        {
-                                            "comparator": ">",
+                                            "comparator": ">=",
                                             "value": 0,
                                             "palette": "black_on_light_yellow"
                                         }
@@ -609,7 +583,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @actionType:AUTOFIX $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @actionType:AUTOFIX $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -660,19 +634,14 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @actionType:BLOCKED $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @actionType:BLOCKED $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "conditional_formats": [
                                         {
-                                            "comparator": "=",
-                                            "value": 0,
-                                            "palette": "yellow_on_white"
-                                        },
-                                        {
-                                            "comparator": ">",
+                                            "comparator": ">=",
                                             "value": 0,
                                             "palette": "black_on_light_yellow"
                                         }
@@ -716,7 +685,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @actionType:NONE $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @actionType:NONE $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -767,19 +736,14 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @actionType:DELETE $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @actionType:DELETE $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
                                     "conditional_formats": [
                                         {
-                                            "comparator": "=",
-                                            "value": 0,
-                                            "palette": "yellow_on_white"
-                                        },
-                                        {
-                                            "comparator": ">",
+                                            "comparator": ">=",
                                             "value": 0,
                                             "palette": "black_on_light_yellow"
                                         }
@@ -823,7 +787,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat @actionType:REPAIR $threat_name $device_name $infection_type $company_name"
+                                                "query": "source:avast service:threat @actionType:REPAIR $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -885,28 +849,28 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@detectionSource",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -943,7 +907,7 @@
                     {
                         "id": 973874876496878,
                         "definition": {
-                            "title": "Threats by Detection Source Overtime",
+                            "title": "Threats by Detection Source Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -966,28 +930,28 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@detectionSource",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1013,43 +977,40 @@
                     {
                         "id": 8641206060949660,
                         "definition": {
-                            "title": "Threats by Type Overtime",
+                            "title": "Threats by Type",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@infectionType",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1057,6 +1018,16 @@
                                     "response_format": "scalar",
                                     "style": {
                                         "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
                                     }
                                 }
                             ],
@@ -1075,7 +1046,7 @@
                     {
                         "id": 5871164560788856,
                         "definition": {
-                            "title": "Threats by Type Overtime",
+                            "title": "Threats by Type Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1098,28 +1069,28 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@infectionType",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1145,43 +1116,40 @@
                     {
                         "id": 3655814319638798,
                         "definition": {
-                            "title": "Threats by Action Overtime",
+                            "title": "Threats by Action",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
-                                                    "facet": "@actionType",
+                                                    "facet": "@evt.outcome",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1189,6 +1157,16 @@
                                     "response_format": "scalar",
                                     "style": {
                                         "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
                                     }
                                 }
                             ],
@@ -1207,7 +1185,7 @@
                     {
                         "id": 5389298477665468,
                         "definition": {
-                            "title": "Threats by Action Overtime",
+                            "title": "Threats by Action Over Time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1230,28 +1208,28 @@
                                     ],
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
-                                                    "facet": "@actionType",
+                                                    "facet": "@evt.outcome",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1285,28 +1263,28 @@
                                 {
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
-                                                    "facet": "@threatName",
+                                                    "facet": "@evt.name",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1361,28 +1339,28 @@
                                 {
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@deviceName",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1437,28 +1415,28 @@
                                 {
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@fileName",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1513,28 +1491,28 @@
                                 {
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "@id"
-                                            },
                                             "group_by": [
                                                 {
                                                     "facet": "@groupName",
                                                     "limit": 25,
                                                     "sort": {
-                                                        "order": "desc",
                                                         "aggregation": "count",
-                                                        "metric": "@id"
-                                                    }
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
-                                            "search": {
-                                                "query": "source:avast service:threat $threat_name $device_name $infection_type $company_name"
+                                            "compute": {
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -1581,7 +1559,7 @@
                     {
                         "id": 4627491413983612,
                         "definition": {
-                            "title": "Threat Report",
+                            "title": "Threat Summary",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1589,7 +1567,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:avast service:threat $threat_name $device_name $infection_type $company_name",
+                                        "query_string": "source:avast service:threat $threat_name $device_name $infection_type $company_name $action $detection_source",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1619,7 +1597,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "threatName",
+                                            "field": "evt.name",
                                             "width": "auto"
                                         },
                                         {
@@ -1631,7 +1609,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "actionType",
+                                            "field": "evt.outcome",
                                             "width": "auto"
                                         },
                                         {
@@ -1656,27 +1634,27 @@
                 "x": 0,
                 "y": 13,
                 "width": 12,
-                "height": 25
+                "height": 25,
+                "is_column_break": true
             }
         },
         {
-            "id": 5571742835788440,
+            "id": 6911481496941142,
             "definition": {
                 "title": "Datadog Cloud SIEM",
-                "title_align": "center",
                 "background_color": "vivid_orange",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 4361753522838104,
+                        "id": 1526775597979286,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes threat logs to detect real-time threats happening in your Avast Business Hub account. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security).",
+                            "content": "Datadog Cloud SIEM analyzes logs to detect real-time threats happening in your Avast Business Hub account. If you don't see any signals, make sure you've enabled [Datadog Cloud SIEM](/security).",
                             "background_color": "blue",
                             "font_size": "14",
-                            "text_align": "left",
+                            "text_align": "center",
                             "vertical_align": "center",
                             "show_tick": false,
                             "tick_pos": "50%",
@@ -1691,7 +1669,7 @@
                         }
                     },
                     {
-                        "id": 3301817012121564,
+                        "id": 1621530279104278,
                         "definition": {
                             "title": "CRITICALs",
                             "title_size": "16",
@@ -1724,7 +1702,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat status:critical"
+                                                "query": "source:avast status:critical"
                                             }
                                         }
                                     ],
@@ -1743,7 +1721,7 @@
                         }
                     },
                     {
-                        "id": 1387948752022878,
+                        "id": 6856078606965092,
                         "definition": {
                             "title": "MEDIUMs",
                             "title_size": "16",
@@ -1753,7 +1731,7 @@
                                 {
                                     "conditional_formats": [
                                         {
-                                            "comparator": ">",
+                                            "comparator": ">=",
                                             "custom_bg_color": "#c83c3c",
                                             "palette": "white_on_yellow",
                                             "value": 0
@@ -1776,7 +1754,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat status:medium"
+                                                "query": "source:avast status:medium"
                                             }
                                         }
                                     ],
@@ -1795,7 +1773,7 @@
                         }
                     },
                     {
-                        "id": 7177801650734416,
+                        "id": 6046119176398772,
                         "definition": {
                             "title": "Critical Security Signals",
                             "type": "toplist",
@@ -1830,7 +1808,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:threat status:critical"
+                                                "query": "source:avast status:critical"
                                             }
                                         }
                                     ],
@@ -1868,7 +1846,7 @@
                         }
                     },
                     {
-                        "id": 1854778270367062,
+                        "id": 2094197408771650,
                         "definition": {
                             "title": "HIGHs",
                             "title_size": "16",
@@ -1901,7 +1879,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat status:high"
+                                                "query": "source:avast status:high"
                                             }
                                         }
                                     ],
@@ -1920,59 +1898,7 @@
                         }
                     },
                     {
-                        "id": 6421833281481222,
-                        "definition": {
-                            "title": "LOWs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">=",
-                                            "custom_bg_color": "#bc303c",
-                                            "palette": "black_on_light_yellow",
-                                            "value": 0
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "security_signals",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat status:low"
-                                            }
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "autoscale": true,
-                            "custom_links": [],
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 2,
-                            "y": 3,
-                            "width": 2,
-                            "height": 1
-                        }
-                    },
-                    {
-                        "id": 838302009139662,
+                        "id": 2767780939957100,
                         "definition": {
                             "title": "INFOs",
                             "title_size": "16",
@@ -2005,7 +1931,59 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:avast service:threat status:info"
+                                                "query": "source:avast status:info"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3599067785029358,
+                        "definition": {
+                            "title": "LOWs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "custom_bg_color": "#bc303c",
+                                            "palette": "black_on_light_yellow",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:avast status:low"
                                             }
                                         }
                                     ],
@@ -2024,7 +2002,7 @@
                         }
                     },
                     {
-                        "id": 6570591410332106,
+                        "id": 1571477012004862,
                         "definition": {
                             "title": "High Security Signals",
                             "type": "toplist",
@@ -2059,7 +2037,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:threat status:high"
+                                                "query": "source:avast status:high"
                                             }
                                         }
                                     ],
@@ -2097,7 +2075,7 @@
                         }
                     },
                     {
-                        "id": 4134056178799244,
+                        "id": 3611860449479746,
                         "definition": {
                             "title": "Medium Security Signals",
                             "type": "toplist",
@@ -2132,7 +2110,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:avast service:threat status:medium"
+                                                "query": "source:avast status:medium"
                                             }
                                         }
                                     ],
@@ -2194,13 +2172,25 @@
         },
         {
             "name": "threat_name",
-            "prefix": "@threatName",
+            "prefix": "@evt.name",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "infection_type",
             "prefix": "@infectionType",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "action",
+            "prefix": "@evt.outcome",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "detection_source",
+            "prefix": "@detectionSource",
             "available_values": [],
             "default": "*"
         }
