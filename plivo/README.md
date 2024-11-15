@@ -1,7 +1,7 @@
 # Plivo
 
 ## Overview
-[Plivo][1] is a communication platform as a service provider that offers a range of communication APIs and tools for businesses. A notable aspect of Plivo’s product lineup is their SMS, MMS and WhatsApp services. Plivo offers a comprehensive suite of communication services including SMS, messaging, and WhatsApp integration. Plivo also integrates voice calling features, allowing businesses to make and receive voice calls through their platform. It also supports multiparty and conference calls. Overall, Plivo provides a versatile communication platform to enhance customer engagement and streamline communication strategies.
+[Plivo][1] is a communication platform as a service provider that offers a range of communication APIs and tools for businesses. Plivo offers a comprehensive suite of communication services including SMS, messaging, and WhatsApp integration. Plivo also integrates voice calling features, allowing businesses to make and receive voice calls through their platform. It also supports multiparty and conference calls. Overall, Plivo provides a versatile communication platform to enhance customer engagement and streamline communication strategies.
 
 The Plivo integration seamlessly collects Messages(SMS, MMS, WhatsApp) and Voice call data and ingests it into Datadog for comprehensive analysis.
 
