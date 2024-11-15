@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor the performance, reliability, and cost of your Apache Spark and Databricks jobs.",
+    "description": "Monitor the reliability and cost of your Databricks environment.",
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
@@ -53,6 +53,11 @@
       },
       "source_type_id": 10152,
       "auto_install": true
+    },
+    "dashboards": {
+      "Databricks Overview Dashboard": "assets/dashboards/overview_dashboard.json",
+      "Databricks Clusters Dashboard": "assets/dashboards/clusters_dashboard.json",
+      "databricks_cost_overview": "assets/dashboards/databricks_cost_overview.json"
     },
     "logs": {
       "source": "spark"

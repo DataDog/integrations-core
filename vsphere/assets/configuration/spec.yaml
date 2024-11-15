@@ -296,7 +296,7 @@ files:
             - 'datacenter'
             - 'cluster'
             - 'storage_pod'
-            - 'vcenter_object_manager'
+            - 'vstorage_object_manager'
           type: array
           display_default: ['vm', 'host']
           items:
@@ -385,6 +385,12 @@ files:
           Note: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
           Warning: Depending on the size of the vSphere environment, property metric collection can be slow,
           very CPU intensive and put pressure on the vCenter Server.
+        value:
+          type: boolean
+          example: false
+      - name: collect_vsan_data
+        description: |
+          If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
         value:
           type: boolean
           example: false

@@ -556,8 +556,7 @@ class AgentCheck(object):
     def load_configuration_model(import_path, model_name, config, context):
         try:
             package = importlib.import_module(import_path)
-        # TODO: remove the type ignore when we drop Python 2
-        except ModuleNotFoundError as e:  # type: ignore
+        except ModuleNotFoundError as e:
             # Don't fail if there are no models
             if str(e).startswith('No module named '):
                 return
@@ -568,8 +567,7 @@ class AgentCheck(object):
         if model is not None:
             try:
                 config_model = model.model_validate(config, context=context)
-            # TODO: remove the type ignore when we drop Python 2
-            except ValidationError as e:  # type: ignore
+            except ValidationError as e:
                 errors = e.errors()
                 num_errors = len(errors)
                 message_lines = [

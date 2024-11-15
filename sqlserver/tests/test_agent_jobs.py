@@ -357,6 +357,26 @@ def agent_jobs_instance(instance_docker):
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "dbm_enabled,agent_jobs_enabled,expected_agent_jobs_enabled",
+    [
+        (True, True, True),
+        (True, False, False),
+        (False, True, False),
+        (False, False, False),
+    ],
+)
+def test_agent_job_enabled(instance_docker, dbm_enabled, agent_jobs_enabled, expected_agent_jobs_enabled):
+    instance_docker['dbm'] = dbm_enabled
+    instance_docker['agent_jobs'] = {'enabled': agent_jobs_enabled}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
+    agent_jobs_metrics = [m for m in check.database_metrics if m.__class__.__name__ == 'SqlserverAgentMetrics']
+    assert agent_jobs_metrics is not None
+    assert agent_jobs_metrics[0].enabled == expected_agent_jobs_enabled
+
+
+@pytest.mark.usefixtures('dd_environment')
 def test_connection_with_agent_history(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
