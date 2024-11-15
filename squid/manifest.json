@@ -56,10 +56,10 @@
             "Squid": "assets/dashboards/squid.json"
         },
         "monitors": {
-            "[Squid] CPU usage exceeded": "assets/monitors/cpu_usage_exceeded.json",
-            "[Squid] High latency requests": "assets/monitors/high_latency_requests.json",
-            "[Squid] High rate of client HTTP errors": "assets/monitors/high_rate_of_client_http_errors.json",
-            "[Squid] High rate of server errors": "assets/monitors/high_rate_of_server_errors.json"
+            "CPU usage exceeded": "assets/monitors/cpu_usage_exceeded.json",
+            "High latency requests": "assets/monitors/high_latency_requests.json",
+            "High rate of client HTTP errors": "assets/monitors/high_rate_of_client_http_errors.json",
+            "High rate of server errors": "assets/monitors/high_rate_of_server_errors.json"
         },
         "logs": {
             "source": "squid"
