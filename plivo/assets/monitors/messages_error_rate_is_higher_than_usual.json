@@ -1,7 +1,7 @@
 {
 	"version": 2,
-	"created_at": "2024-10-01",
-	"last_updated_at": "2024-10-01",
+	"created_at": "2024-10-22",
+	"last_updated_at": "2024-10-22",
 	"title": "Messages error rate is higher than usual",
 	"description": "The error rate rises when a significant number of messages fail to be delivered or sent. This monitor tracks the error rate for messages delivered/sent via Plivo, ensuring that any spikes in errors are quickly detected to maintain the reliability of messages delivery.",
 	"definition": {
@@ -9,15 +9,16 @@
 		"name": "Messages error rate is higher than usual",
 		"type": "log alert",
 		"query": "formula(\"(query1 - query) / query1\").last(\"1h\") >= 0.05",
-		"message": "{{#is_alert}}\nThe high error rate detected while sending message through Plivo within the last hour. Errors have exceeded the threshold, which may impact message delivery reliability. Review your Plivo account.\n{{/is_alert}}",
+		"message": "{{#is_alert}}\nThe error rate rises when a significant number of messages fail to be delivered or sent. This monitor tracks the error rate for messages delivered/sent via Plivo, ensuring that any spikes in errors are quickly detected to maintain the reliability of message delivery.\n{{/is_alert}}",
 		"tags": [
-			"plivo"
+			"source:plivo",
+			"service:messages"
 		],
 		"options": {
 			"thresholds": {
 				"critical": 0.05
 			},
-			"enable_logs_sample": true,
+			"enable_logs_sample": false,
 			"notify_audit": false,
 			"on_missing_data": "default",
 			"include_tags": true,
@@ -34,7 +35,7 @@
 					},
 					"group_by": [],
 					"search": {
-						"query": "source:plivo"
+						"query": "source:plivo service:messages"
 					},
 					"storage": "hot"
 				},
@@ -50,7 +51,7 @@
 					},
 					"group_by": [],
 					"search": {
-						"query": "source:plivo @plivo.error.type:(000 OR -*)"
+						"query": "source:plivo @plivo.error.type:(000 OR -*) service:messages"
 					},
 					"storage": "hot"
 				}

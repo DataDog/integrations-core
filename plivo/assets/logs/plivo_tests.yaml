@@ -34,7 +34,7 @@ tests:
         "message_updated_time" : "2024-09-18 11:16:42.500341+05:30",
         "conversation_origin" : ""
       }
-    service: "sms"
+    service: "messages"
     result:
       custom:
         carrier_fees_rate: "0.00000"
@@ -112,7 +112,7 @@ tests:
           "message_updated_time" : "2024-09-18 11:16:42.500341+05:30",
           "conversation_origin" : ""
         }
-      service: "sms"
+      service: "messages"
       status: "info"
       tags:
        - "source:LOGS_SOURCE"
@@ -151,7 +151,7 @@ tests:
         "message_updated_time" : "",
         "conversation_origin" : ""
       }
-    service: "mms"
+    service: "messages"
     result:
       custom:
         carrier_fees_rate: "0.01000"
@@ -226,7 +226,7 @@ tests:
           "message_updated_time" : "",
           "conversation_origin" : ""
         }
-      service: "mms"
+      service: "messages"
       status: "info"
       tags:
        - "source:LOGS_SOURCE"
@@ -264,7 +264,7 @@ tests:
         "message_updated_time" : "",
         "conversation_origin" : "utility"
       }
-    service: "whatsapp"
+    service: "messages"
     result:
       custom:
         carrier_fees_rate: ""
@@ -338,8 +338,37 @@ tests:
           "message_updated_time" : "",
           "conversation_origin" : "utility"
         }
-      service: "whatsapp"
+      service: "messages"
       status: "info"
       tags:
        - "source:LOGS_SOURCE"
       timestamp: 1726673031648
+  - sample: >-
+      {
+              "answer_time": "2024-10-12 21:57:47+05:30",
+              "api_id": "52cd2e1d-2bfd-11ec-a7bd-0242ac110005",
+              "bill_duration": 1,
+              "billed_duration": 1,
+              "call_direction": "outbound",
+              "call_duration": 1,
+              "call_state": "ANSWER",
+              "call_uuid": "5607532d-5037-4066-befc-a8b40218dd4f",
+              "conference_uuid": null,
+              "end_time": "2024-10-14 15:25:47+05:30",
+              "from_number": "+12025551111",
+              "hangup_cause_code": 8011,
+              "hangup_cause_name": "Invalid Answer XML",
+              "hangup_source": "Error",
+              "initiation_time": "2024-10-12 21:57:40+05:30",
+              "parent_call_uuid": null,
+              "resource_uri": "/v1/Account/MA2025RK4E639VJFZAGV/Call/5607532d-5037-4066-befc-a8b40218dd4f/",
+              "stir_verification": "Not Applicable",
+              "to_number": "sip:sam9461399937766203278@phone.plivo.com",
+              "total_amount": "0.01667",
+              "total_rate": "1.00000",
+              "Stir_attestation": "A",
+              "voice_network_group": "",
+              "source_ip": "92.168.0.1"
+            }
+          service: "voice"
+    result: null

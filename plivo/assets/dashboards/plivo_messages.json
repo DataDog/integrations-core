@@ -40,7 +40,7 @@
               "hide_zero_counts": true,
               "show_status": true,
               "last_triggered_format": "relative",
-              "query": "tag:plivo",
+              "query": "tag:(source:plivo AND service:messages)",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
@@ -52,7 +52,7 @@
               "x": 0,
               "y": 0,
               "width": 6,
-              "height": 4
+              "height": 5
             }
           }
         ]
@@ -61,7 +61,7 @@
         "x": 6,
         "y": 0,
         "width": 6,
-        "height": 5
+        "height": 6
       }
     },
     {
@@ -82,7 +82,7 @@
         "x": 0,
         "y": 2,
         "width": 6,
-        "height": 3
+        "height": 4
       }
     },
     {
@@ -117,7 +117,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo $Destination_Country_ISO $From_Number $Direction $Type $To_Number"
+                        "query": "source:plivo service:messages $Destination_Country_ISO $From_Number $Direction $Type $To_Number"
                       },
                       "storage": "hot"
                     }
@@ -169,7 +169,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo service:sms $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
+                        "query": "source:plivo service:messages @message_type:sms $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
                       },
                       "storage": "hot"
                     }
@@ -221,7 +221,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo service:mms $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
+                        "query": "source:plivo service:messages @message_type:mms $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
                       },
                       "storage": "hot"
                     }
@@ -273,7 +273,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo service:whatsapp $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
+                        "query": "source:plivo service:messages @message_type:whatsapp $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
                       },
                       "storage": "hot"
                     }
@@ -306,7 +306,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 6,
         "width": 12,
         "height": 4
       }
@@ -343,7 +343,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo @message_state:sent $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages @message_state:sent $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -395,7 +395,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo @message_state:delivered $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages @message_state:delivered $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -447,7 +447,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo @message_state:undelivered $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages @message_state:undelivered $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -500,7 +500,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo @message_state:rejected $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages @message_state:rejected $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -552,7 +552,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo @message_state:received $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages @message_state:received $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -605,7 +605,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo @message_state:failed $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages @message_state:failed $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -671,7 +671,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -707,7 +707,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 9,
+        "y": 10,
         "width": 12,
         "height": 13
       }
@@ -727,9 +727,6 @@
               "title": "Messages by Errors",
               "title_size": "16",
               "title_align": "left",
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
               "requests": [
                 {
                   "response_format": "scalar",
@@ -761,7 +758,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo -@plivo.error.type:000 @plivo.error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages -@plivo.error.type:000 @plivo.error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -843,7 +840,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo -@plivo.error.type:000 @plivo.error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages -@plivo.error.type:000 @plivo.error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -881,7 +878,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 22,
+        "y": 23,
         "width": 12,
         "height": 9
       }
@@ -906,13 +903,13 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
                           "unit_name": "dollar"
                         }
-                      }
+                      },
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
@@ -928,7 +925,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -979,7 +976,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1050,7 +1047,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "service",
+                          "facet": "@message_type",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1060,7 +1057,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1125,7 +1122,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     },
@@ -1136,12 +1133,11 @@
                         "*"
                       ],
                       "compute": {
-                        "aggregation": "cardinality",
-                        "metric": "@plivo.messaging.message_id"
+                        "aggregation": "count"
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO -@message_type:whatsapp"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO -@message_type:whatsapp"
                       },
                       "storage": "hot"
                     }
@@ -1173,7 +1169,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 31,
+        "y": 32,
         "width": 12,
         "height": 6
       }
@@ -1219,7 +1215,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1289,7 +1285,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1359,7 +1355,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1428,7 +1424,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1488,7 +1484,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo @is_domestic:false $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages @is_domestic:false $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1543,7 +1539,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:plivo @is_domestic:true $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages @is_domestic:true $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1607,7 +1603,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO -@destination_network:\"\""
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO -@destination_network:\"\""
                       },
                       "storage": "hot"
                     }
@@ -1648,7 +1644,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 37,
+        "y": 38,
         "width": 12,
         "height": 13
       }
@@ -1699,7 +1695,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1768,7 +1764,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo service:whatsapp $Type $From_Number $To_Number $Destination_Country_ISO $Direction -@conversation_origin:\"\""
+                        "query": "source:plivo service:messages message_type:whatsapp $Type $From_Number $To_Number $Destination_Country_ISO $Direction -@conversation_origin:\"\""
                       },
                       "storage": "hot"
                     }
@@ -1841,7 +1837,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1911,7 +1907,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "service",
+                          "facet": "@message_type",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1921,7 +1917,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:plivo $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                        "query": "source:plivo service:messages $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
                       },
                       "storage": "hot"
                     }
@@ -1950,15 +1946,12 @@
               "title": "Message Logs",
               "title_size": "16",
               "title_align": "left",
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
               "requests": [
                 {
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:plivo $Direction $Type $From_Number $To_Number $Destination_Country_ISO",
+                    "query_string": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO ",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1995,7 +1988,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 50,
+        "y": 51,
         "width": 12,
         "height": 16
       }
