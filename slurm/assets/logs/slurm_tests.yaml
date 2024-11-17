@@ -33,6 +33,7 @@ tests:
     custom:
       debug:
         level: "2"
+      level: "debug"
       timestamp: 1730091176841
     message: "Finish processing RPC: REQUEST_PING"
     status: "debug"
