@@ -1,8 +1,6 @@
 id: slurm
 metric_id: slurm
 backend_only: false
-installation_sources:
-  - slurm
 facets:
 pipeline:
   type: pipeline
