@@ -131,3 +131,14 @@ files:
         min_collection_interval.value.default: 60
         min_collection_interval.value.example: 60
         min_collection_interval.enabled: true
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/slurm/slurmd.log 
+      source: slurm
+    - type: file
+      path: /var/log/slurm/slurmdbd.log
+      source: slurm
+    - type: file
+      path: /var/log/slurm/slurmctld.log
+      source: slurm
