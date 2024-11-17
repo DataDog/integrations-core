@@ -53,6 +53,9 @@
     },
     "dashboards": {
       "Slurm Overview": "assets/dashboards/slurm_overview.json"
+    },
+    "saved_views": {
+      "Slurm Logs Overview": "assets/saved_views/slurm_overview.json"
     }
   },
   "author": {
