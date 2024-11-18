@@ -23,8 +23,7 @@
 			"notify_audit": false,
 			"on_missing_data": "default",
 			"include_tags": true,
-			"groupby_simple_monitor": false,
-			"silenced": {}
+			"groupby_simple_monitor": false
 		},
 		"priority": null,
 		"restriction_policy": {

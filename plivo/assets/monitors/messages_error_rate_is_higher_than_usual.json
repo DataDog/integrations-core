@@ -56,7 +56,7 @@
 					"storage": "hot"
 				}
 			],
-			"silenced": {}
+			"groupby_simple_monitor": false
 		},
 		"priority": null,
 		"restriction_policy": {
