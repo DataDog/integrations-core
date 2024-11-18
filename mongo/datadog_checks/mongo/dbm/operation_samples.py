@@ -7,6 +7,7 @@ import time
 from typing import List, Optional
 
 from bson import json_util
+from pymongo.errors import NotPrimaryError
 
 from datadog_checks.mongo.dbm.utils import (
     format_key_name,
@@ -149,10 +150,16 @@ class MongoOperationSamples(DBMAsyncJob):
                 continue
 
     def _get_current_op(self):
-        operations = self._check.api_client.current_op()
-        for operation in operations:
-            self._check.log.debug("Found operation: %s", operation)
-            yield operation
+        try:
+            operations = self._check.api_client.current_op()
+            for operation in operations:
+                self._check.log.debug("Found operation: %s", operation)
+                yield operation
+        except NotPrimaryError as e:
+            # If the node is not primary or secondary, for example node is in recovering state
+            # we could not run the $currentOp command to collect operation samples.
+            self._check.log.warning("Could not collect operation samples, node is not primary or secondary")
+            self._check.log.debug("Error details: %s", e)
 
     def _should_include_operation(self, operation: dict, databases_monitored: List[str]) -> bool:
         # Skip operations from db that are not configured to be monitored
