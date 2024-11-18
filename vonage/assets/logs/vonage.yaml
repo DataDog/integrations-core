@@ -70,7 +70,7 @@ facets:
     type: double
   - groups:
       - Web Access
-    name: ClientIP
+    name: Client IP
     path: network.client.ip
     source: log
   - groups:
