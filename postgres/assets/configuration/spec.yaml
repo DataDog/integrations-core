@@ -76,12 +76,16 @@ files:
           - rdsadmin
           - azure_maintenance
           - cloudsqladmin
+          - alloydbadmin
+          - alloydbmetadata
         default:
           - 'template0'
           - 'template1'
           - rdsadmin
           - azure_maintenance
           - cloudsqladmin
+          - alloydbadmin
+          - alloydbmetadata
     - name: ssl
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
