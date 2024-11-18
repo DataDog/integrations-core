@@ -466,19 +466,19 @@ metrics:
           0: other
           1: ok
           2: disconnected
-          3: overThreshold
+          3: over_threshold
           4: timeout
           5: busy
-          6: notConnected
+          6: not_connected
           7: dropped
-          8: sequenceError
-          9: verifyError
-          10: applicationSpecific
-          11: dnsServerTimeout
-          12: tcpConnectTimeout
-          13: httpTransactionTimeout
-          14: dnsQueryError
-          15: httpError
+          8: sequence_error
+          9: verify_error
+          10: application_specific
+          11: dns_server_timeout
+          12: tcp_connect_timeout
+          13: http_transaction_timeout
+          14: dns_query_error
+          15: http_error
           16: error
 
   - MIB: CISCO-RTTMON-MIB
