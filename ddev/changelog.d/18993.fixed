@@ -1,1 +1,0 @@
-Don't hardcode location of payload file in script that serves static OpenMetrics payloads.

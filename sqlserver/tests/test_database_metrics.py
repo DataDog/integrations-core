@@ -77,6 +77,7 @@ def test_sqlserver_file_stats_metrics(
         return mocked_results
 
     file_stats_metrics = SqlserverFileStatsMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -153,6 +154,7 @@ def test_sqlserver_ao_metrics(
     ]
 
     ao_metrics = SqlserverAoMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -262,6 +264,7 @@ def test_sqlserver_availability_groups_metrics(
         return mocked_results
 
     availability_groups_metrics = SqlserverAvailabilityGroupsMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -351,6 +354,7 @@ def test_sqlserver_database_replication_stats_metrics(
         return mocked_results
 
     database_replication_stats_metrics = SqlserverDatabaseReplicationStatsMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -485,6 +489,7 @@ def test_sqlserver_availability_replicas_metrics(
         return mocked_results
 
     availability_replicas_metrics = SqlserverAvailabilityReplicasMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -555,6 +560,7 @@ def test_sqlserver_fci_metrics(
         return mocked_results
 
     fci_metrics = SqlserverFciMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -602,6 +608,7 @@ def test_sqlserver_primary_log_shipping_metrics(
         return mocked_results
 
     primary_log_shipping_metrics = SqlserverPrimaryLogShippingMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -661,6 +668,7 @@ def test_sqlserver_secondary_log_shipping_metrics(
         return mocked_results
 
     primary_log_shipping_metrics = SqlserverSecondaryLogShippingMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -707,6 +715,7 @@ def test_sqlserver_server_state_metrics(
         return mocked_results
 
     server_state_metrics = SqlserverServerStateMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -747,6 +756,7 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
         return mocked_results
 
     tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -819,6 +829,7 @@ def test_sqlserver_index_usage_metrics(
     execute_query_handler_mocked.side_effect = mocked_results
 
     index_usage_metrics = SqlserverIndexUsageMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -922,6 +933,7 @@ def test_sqlserver_db_fragmentation_metrics(
     execute_query_handler_mocked.side_effect = mocked_results
 
     db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -1011,6 +1023,7 @@ def test_sqlserver_os_schedulers_metrics(
         return mocked_results
 
     os_schedulers_metrics = SqlserverOsSchedulersMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -1075,6 +1088,7 @@ def test_sqlserver_os_tasks_metrics(
         return mocked_results
 
     os_tasks_metrics = SqlserverOsTasksMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -1140,6 +1154,7 @@ def test_sqlserver_master_files_metrics(
         return mocked_results
 
     master_files_metrics = SqlserverMasterFilesMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -1210,6 +1225,7 @@ def test_sqlserver_database_files_metrics(
     execute_query_handler_mocked.side_effect = mocked_results
 
     database_files_metrics = SqlserverDatabaseFilesMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -1265,6 +1281,7 @@ def test_sqlserver_database_stats_metrics(
         return mocked_results
 
     database_stats_metrics = SqlserverDatabaseStatsMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
@@ -1317,6 +1334,7 @@ def test_sqlserver_database_backup_metrics(
         return mocked_results
 
     database_backup_metrics = SqlserverDatabaseBackupMetrics(
+        config=sqlserver_check._config,
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
