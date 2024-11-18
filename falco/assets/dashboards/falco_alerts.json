@@ -1115,7 +1115,7 @@
                     {
                         "id": 3242772641487490,
                         "definition": {
-                            "title": "Top Event PlugIn Infos",
+                            "title": "Top Event Plugin Infos",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1892,7 +1892,7 @@
                 "x": 0,
                 "y": 39,
                 "width": 12,
-                "height": 1
+                "height": 9
             }
         },
         {
@@ -1907,7 +1907,7 @@
                     {
                         "id": 3116182659237542,
                         "definition": {
-                            "title": "Top Process exe paths",
+                            "title": "Top Process EXE Paths",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2314,7 +2314,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 40,
+                "y": 48,
                 "width": 12,
                 "height": 13
             }
@@ -2449,7 +2449,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 53,
+                "y": 61,
                 "width": 12,
                 "height": 5
             }
@@ -2671,75 +2671,6 @@
                         }
                     },
                     {
-                        "id": 2824230459620324,
-                        "definition": {
-                            "title": "Distribution by Container Image Tag",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:falco"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@output_fields.container.image.tag",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
                         "id": 8224569110427824,
                         "definition": {
                             "title": "Container Details",
@@ -2793,9 +2724,9 @@
                             "type": "list_stream"
                         },
                         "layout": {
-                            "x": 4,
+                            "x": 0,
                             "y": 4,
-                            "width": 8,
+                            "width": 12,
                             "height": 4
                         }
                     }
@@ -2803,7 +2734,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 58,
+                "y": 66,
                 "width": 12,
                 "height": 9
             }
@@ -3008,7 +2939,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 67,
+                "y": 75,
                 "width": 12,
                 "height": 8
             }
