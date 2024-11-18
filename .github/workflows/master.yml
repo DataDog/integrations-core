@@ -4,9 +4,6 @@ on:
   push:
     branches:
     - master
-  pull_request: # DELETEME
-    branches:
-    - master
 
 jobs:
   cache:
