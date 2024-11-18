@@ -195,6 +195,14 @@
 * Yarn [7.0.0](https://github.com/DataDog/integrations-core/blob/master/yarn/CHANGELOG.md) **BREAKING CHANGE**
 * ZooKeeper [6.0.0](https://github.com/DataDog/integrations-core/blob/master/zk/CHANGELOG.md) **BREAKING CHANGE**
 
+## Datadog Agent version [7.58.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7582)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.58.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7581)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.58.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7580)
 
 * Active Directory [3.0.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md) **BREAKING CHANGE**
