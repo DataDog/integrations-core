@@ -42,6 +42,7 @@ def replay(*, record_file: str, port: int) -> None:
             body = b64decode(record['body'])
             conn.request('PUT', path, body=body, headers=record['headers'])
             response = conn.getresponse()
+            response.read() # Needs to be done to prevent ResponseNotReady.
             print(response.status, response.reason)
 
 
