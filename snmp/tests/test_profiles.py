@@ -2142,6 +2142,7 @@ def assert_cisco_asa(aggregator, profile):
     rtt_types = [22, 21, 17, 6, 20, 8, 16]
     rtt_states = [3, 1, 6, 4, 6, 1, 6]
     rtt_senses = [13, 30, 2, 21, 19, 20, 27]
+    rtt_timeouts = [1, 1, 2, 2, 1, 2, 1]
     rtt_gauges = ['rttMonLatestRttOperCompletionTime', 'rttMonLatestRttOperSense']
     for i in range(len(rtt_indexes)):
         tags = [
@@ -2158,10 +2159,9 @@ def assert_cisco_asa(aggregator, profile):
             "rtt_index:{}".format(rtt_indexes[i]),
             "rtt_type:{}".format(rtt_types[i]),
             "rtt_state:{}".format(rtt_states[i]),
+            "rtt_timeout:{}".format(rtt_timeouts[i]),
         ] + common_tags
-        aggregator.assert_metric(
-            'snmp.rttMonCtrlOperTimeoutOccurred', metric_type=aggregator.GAUGE, tags=tags
-        )
+        aggregator.assert_metric('snmp.rttMonCtrlOperTimeoutOccurred', metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
