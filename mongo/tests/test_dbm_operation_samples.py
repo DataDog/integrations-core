@@ -110,8 +110,8 @@ def test_mongo_operation_samples_arbiter(aggregator, instance_arbiter, check, dd
 
 
 @mock_now(1715911398.1112723)
-@common.standalone
-def test_mongo_operation_samples_standalone_not_primary(
+@common.shard
+def test_mongo_operation_samples_not_primary(
     aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
 ):
     instance_integration_cluster_autodiscovery['dbm'] = True
@@ -128,11 +128,14 @@ def test_mongo_operation_samples_standalone_not_primary(
             aggregator.reset()
             run_check_once(mongo_check, dd_run_check)
 
-    # we will not assert the metrics, as they are already tested in test_integration.py
-    # we will only assert the operation sample and activity events
     dbm_activities = aggregator.get_event_platform_events("dbm-activity")
-
     activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
-
     assert activity_samples is not None
     assert len(activity_samples[0]['mongodb_activity']) == 0
+
+    aggregator.reset()
+    mongo_check.deployment_type.replset_state = 3
+    run_check_once(mongo_check, dd_run_check)
+    dbm_activities = aggregator.get_event_platform_events("dbm-activity")
+    activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
+    assert len(activity_samples) == 0

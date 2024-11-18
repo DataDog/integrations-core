@@ -108,6 +108,9 @@ class MongoOperationSamples(DBMAsyncJob):
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping operation samples collection on arbiter node")
             return False
+        elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
+            self._check.log.debug("Skipping operation samples collection on node in recovering state")
+            return False
         return True
 
     def _get_operation_samples(self, now, databases_monitored: List[str]):
