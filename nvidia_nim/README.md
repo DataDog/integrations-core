@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Nvidia NIM][1] through the Datadog Agent. 
+This check monitors [NVIDIA NIM][1] through the Datadog Agent. 
 
 ## Setup
 
@@ -12,15 +12,15 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Nvidia NIM check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+The NVIDIA NIM check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
-Nvidia NIM provides Prometheus metrics indicating request statistics. By default, these metrics are available at http://localhost:8000/metrics. The Datadog Agent can collect the exposed metrics using this integration. Follow the instructions below to configure data collection from any or all of the components.
+NVIDIA NIM provides Prometheus metrics indicating request statistics. By default, these metrics are available at http://localhost:8000/metrics. The Datadog Agent can collect the exposed metrics using this integration. Follow the instructions below to configure data collection from any or all of the components.
 
 **Note**: This check uses [OpenMetrics][10] for metric collection, which requires Python 3.
 
-1. Edit the `nvidia_nim.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Nvidia NIM performance data. See the [sample nvidia_nim.d/conf.yaml][4] for all available configuration options.
+1. Edit the `nvidia_nim.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your NVIDIA NIM performance data. See the [sample nvidia_nim.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -36,11 +36,11 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Nvidia NIM integration does not include any events.
+The NVIDIA NIM integration does not include any events.
 
 ### Service Checks
 
-The Nvidia NIM integration does not include any service checks.
+The NVIDIA NIM integration does not include any service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
