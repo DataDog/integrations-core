@@ -13,6 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
+      "Category::Google Cloud",
       "Category::Metrics",
       "Category::Cost Management",
       "Submitted Data Type::Traces",
