@@ -8,9 +8,7 @@ This check monitors the state of any Windows Service and submits a service check
 
 ### Installation
 
-Install the [Windows Services integration][18], and configure it as described in the next section.
-
-The Windows Service check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Windows hosts.
+The Windows Service check is installed by default with the [Datadog Agent][1], but is not configured. Please see the next section to configure the check.
 
 ### Configuration
 
