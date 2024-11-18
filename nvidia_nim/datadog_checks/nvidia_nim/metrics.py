@@ -27,7 +27,6 @@ METRIC_MAP = {
     'request_prompt_tokens': 'request.prompt_tokens',
     'request_success': 'request.success',
     'request_failure': 'request.failure',
-
 }
 
 RENAME_LABELS_MAP = {
