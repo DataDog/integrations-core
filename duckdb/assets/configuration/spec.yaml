@@ -7,4 +7,29 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: db_name
+      required: true
+      description: |
+        The database to connect to.
+        NOTE: DuckDB databases are stored as files.
+      value:
+        example: "my_database.db"
+        type: string
+    - name: username
+      description: The Datadog username created to connect to DuckDB.
+      required: true
+      value:
+        type: string
+        example: datadog
+    - name: password
+      description: The password associated with the Datadog user.
+      value:
+        type: string
+    - name: collect_profiling_data
+      description: This option is used if the query profiling is enabled for you database.
+      value:
+        type: boolean
+        example: False
     - template: instances/default
+
+
