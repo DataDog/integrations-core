@@ -7,7 +7,7 @@ pipeline:
   name: AWS Neuron
   enabled: true
   filter:
-    query: "source:aws_neuron "
+    query: "source:aws_neuron"
   processors:
     - type: grok-parser
       name: Operator compilation
