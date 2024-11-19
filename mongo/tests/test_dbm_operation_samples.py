@@ -5,7 +5,9 @@
 import json
 import os
 
+import mock
 import pytest
+from pymongo.errors import NotPrimaryError
 
 from . import common
 from .common import HERE
@@ -105,3 +107,35 @@ def test_mongo_operation_samples_arbiter(aggregator, instance_arbiter, check, dd
 
     assert len(dbm_samples) == 0
     assert len(dbm_activities) == 0
+
+
+@mock_now(1715911398.1112723)
+@common.shard
+def test_mongo_operation_samples_not_primary(
+    aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check
+):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    with mock_pymongo("standalone"):
+        with mock.patch(
+            'datadog_checks.mongo.api.MongoApi.current_op', new_callable=mock.PropertyMock
+        ) as mock_current_op:
+            mock_current_op.side_effect = NotPrimaryError("node is recovering")
+            aggregator.reset()
+            run_check_once(mongo_check, dd_run_check)
+
+    dbm_activities = aggregator.get_event_platform_events("dbm-activity")
+    activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
+    assert activity_samples is not None
+    assert len(activity_samples[0]['mongodb_activity']) == 0
+
+    aggregator.reset()
+    mongo_check.deployment_type.replset_state = 3
+    run_check_once(mongo_check, dd_run_check)
+    dbm_activities = aggregator.get_event_platform_events("dbm-activity")
+    activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
+    assert len(activity_samples) == 0
