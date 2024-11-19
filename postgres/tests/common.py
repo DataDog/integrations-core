@@ -156,7 +156,7 @@ def _get_expected_tags(
         base_tags.append(f'replication_role:{role}')
     if with_db:
         base_tags.append(f'db:{pg_instance["dbname"]}')
-    if with_host:        
+    if with_host:
         base_tags.append(f'dd.internal.resource:database_instance:{check.resolved_hostname}')
         base_tags.append(f'database_hostname:{check.database_hostname}')
     if with_cluster_name and check.cluster_name:
