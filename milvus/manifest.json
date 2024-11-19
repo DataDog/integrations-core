@@ -12,14 +12,15 @@
     "title": "Milvus",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::AI",
+      "Category::Data Store",
+      "Category::Machine Learning & LLM",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
@@ -41,12 +42,7 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-    },
-    "monitors": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
