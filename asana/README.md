@@ -20,7 +20,7 @@ This integration collects audit logs and sends them to Datadog for analysis. Dat
 4. Click the **Add service account** button.
     1. Under **Name**, Enter a descriptive and identifiable service account name.
     2. Under **Permissions scopes**, choose **Scoped permissions**, and tick the **Audit logs** box.
-5. Click **Save changes** and copy the **service account token** for later use.
+5. Click **Save changes** and copy the **Service Account PAT** for later use.
 6. Navigate to the **Settings** tab from your admin console.
 7. Scroll down till the end of the page, where you can find **Domain ID (Workspace ID)**.
 

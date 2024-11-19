@@ -2026,7 +2026,7 @@
                     {
                         "id": 7619310895750484,
                         "definition": {
-                            "title": "Top Role Change Activity by Users",
+                            "title": "Top Role Change Activities by User",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
