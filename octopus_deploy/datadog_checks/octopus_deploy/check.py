@@ -29,6 +29,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._project_groups_discovery = {}
         self._default_projects_discovery = {}
         self._projects_discovery = {}
+        self._base_tags = self.instance.get("tags", [])
 
     def check(self, _):
         self._update_times()
@@ -46,11 +47,11 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             response = self.http.get(f"{self.config.octopus_endpoint}/{endpoint}", params=params)
             response.raise_for_status()
             if report_service_check:
-                self.gauge('api.can_connect', 1, tags=self.instance.get("tags", []))
+                self.gauge('api.can_connect', 1, tags=self._base_tags)
             return response.json()
         except (Timeout, HTTPError, InvalidURL, ConnectionError) as e:
             if report_service_check:
-                self.gauge('api.can_connect', 0, tags=self.instance.get("tags", []))
+                self.gauge('api.can_connect', 0, tags=self._base_tags)
                 raise CheckException(
                     f"Could not connect to octopus API {self.config.octopus_endpoint} octopus_endpoint: {e}"
                 ) from e
@@ -142,7 +143,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Spaces: %s", spaces)
         for _, _, space, space_config in spaces:
             space_id = space.get("Id")
-            tags = self.instance.get("tags", []) + [f'space_id:{space_id}', f'space_name:{space.get("Name")}']
+            tags = self._base_tags + [f'space_id:{space_id}', f'space_name:{space.get("Name")}']
             self.gauge("space.count", 1, tags=tags)
             self._process_project_groups(space_id, space_config.get("project_groups") if space_config else None)
 
@@ -162,7 +163,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Project Groups: %s", project_groups)
         for _, _, project_group, project_group_config in project_groups:
             project_group_id = project_group.get("Id")
-            tags = self.instance.get("tags", []) + [
+            tags = self._base_tags + [
                 f'space_id:{space_id}',
                 f'project_group_id:{project_group_id}',
                 f'project_group_name:{project_group.get("Name")}',
@@ -190,7 +191,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Projects: %s", projects)
         for _, _, project, _ in projects:
             project_id = project.get("Id")
-            tags = self.instance.get("tags", []) + [
+            tags = self._base_tags + [
                 f'space_id:{space_id}',
                 f'project_group_id:{project_group_id}',
                 f'project_id:{project_id}',
@@ -243,7 +244,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def _process_tasks(self, space_id, project_id, tasks_json):
         for task in tasks_json:
-            tags = self.instance.get("tags", []) + [
+            tags = self._base_tags + [
                 f'space_id:{space_id}',
                 f'project_id:{project_id}',
                 f'task_id:{task.get("Id")}',
