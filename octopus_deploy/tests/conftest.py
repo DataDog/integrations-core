@@ -119,6 +119,7 @@ def mock_http_get(request, monkeypatch, mock_http_call):
     def get(url, *args, **kwargs):
         method = 'GET'
         url = get_url_path(url)
+        print(f"url is {url}")
         if http_error and url in http_error:
             return http_error[url]
         if data and url in data:

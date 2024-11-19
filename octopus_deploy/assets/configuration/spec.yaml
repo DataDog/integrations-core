@@ -41,15 +41,6 @@ files:
           - name: interval
             type: integer
         example: {}
-    # - name: space
-    #   display_priority: 7
-    #   description: |
-    #     Space to monitor
-    #   value:
-    #     example: Default
-    #     type: string
-    #     enabled: true
-    #   required: true
     - name: project_groups
       display_priority: 5
       description: |

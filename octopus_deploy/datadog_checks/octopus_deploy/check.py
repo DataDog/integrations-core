@@ -41,22 +41,27 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         )
         self._to_completed_time = self.current_datetime
 
-    def _process_endpoint(self, endpoint, params=None):
+    def _process_endpoint(self, endpoint, params=None, report_service_check=False):
         try:
             response = self.http.get(f"{self.config.octopus_endpoint}/{endpoint}", params=params)
             response.raise_for_status()
-            self.gauge('api.can_connect', 1, tags=self.instance.get("tags", []))
+            if report_service_check:
+                self.gauge('api.can_connect', 1, tags=self.instance.get("tags", []))
             return response.json()
         except (Timeout, HTTPError, InvalidURL, ConnectionError) as e:
-            self.gauge('api.can_connect', 0, tags=self.instance.get("tags", []))
-            raise CheckException(
-                f"Could not connect to octopus API {self.config.octopus_endpoint} octopus_endpoint: {e}"
-            ) from e
+            if report_service_check:
+                self.gauge('api.can_connect', 0, tags=self.instance.get("tags", []))
+                raise CheckException(
+                    f"Could not connect to octopus API {self.config.octopus_endpoint} octopus_endpoint: {e}"
+                ) from e
+            else:
+                self.warning("Failed to access endpoint: %s: %s", endpoint, e)
+                return {}
 
     def _init_spaces_discovery(self):
         self.log.info("Spaces discovery: %s", self.config.spaces)
         self._spaces_discovery = Discovery(
-            lambda: self._process_endpoint("api/spaces").get('Items', []),
+            lambda: self._process_endpoint("api/spaces", report_service_check=True).get('Items', []),
             limit=self.config.spaces.limit,
             include=normalize_discover_config_include(self.config.spaces),
             exclude=self.config.spaces.exclude,
@@ -68,7 +73,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.info("Default Project Groups discovery: %s", self.config.project_groups)
         if space_id not in self._default_project_groups_discovery:
             self._default_project_groups_discovery[space_id] = Discovery(
-                lambda: self._process_endpoint(f"api/{space_id}/projectgroups").get('Items', []),
+                lambda: self._process_endpoint(f"api/{space_id}/projectgroups", report_service_check=True).get(
+                    'Items', []
+                ),
                 limit=self.config.project_groups.limit,
                 include=normalize_discover_config_include(self.config.project_groups),
                 exclude=self.config.project_groups.exclude,
@@ -80,7 +87,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.info("Project Groups discovery: %s", project_groups_config)
         if space_id not in self._project_groups_discovery:
             self._project_groups_discovery[space_id] = Discovery(
-                lambda: self._process_endpoint(f"api/{space_id}/projectgroups").get('Items', []),
+                lambda: self._process_endpoint(f"api/{space_id}/projectgroups", report_service_check=True).get(
+                    'Items', []
+                ),
                 limit=project_groups_config.limit,
                 include=normalize_discover_config_include(project_groups_config),
                 exclude=project_groups_config.exclude,
@@ -94,9 +103,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._default_projects_discovery[space_id] = {}
         if project_group_id not in self._default_projects_discovery[space_id]:
             self._default_projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._process_endpoint(f"api/{space_id}/projectgroups/{project_group_id}/projects").get(
-                    'Items', []
-                ),
+                lambda: self._process_endpoint(
+                    f"api/{space_id}/projectgroups/{project_group_id}/projects", report_service_check=True
+                ).get('Items', []),
                 limit=self.config.projects.limit,
                 include=normalize_discover_config_include(self.config.projects),
                 exclude=self.config.projects.exclude,
@@ -110,9 +119,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._projects_discovery[space_id] = {}
         if project_group_id not in self._projects_discovery[space_id]:
             self._projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._process_endpoint(f"api/{space_id}/projectgroups/{project_group_id}/projects").get(
-                    'Items', []
-                ),
+                lambda: self._process_endpoint(
+                    f"api/{space_id}/projectgroups/{project_group_id}/projects", report_service_check=True
+                ).get('Items', []),
                 limit=projects_config.limit,
                 include=normalize_discover_config_include(projects_config),
                 exclude=projects_config.exclude,
@@ -128,7 +137,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         else:
             spaces = [
                 (None, space.get("Name"), space, None)
-                for space in self._process_endpoint("api/spaces").get('Items', [])
+                for space in self._process_endpoint("api/spaces", report_service_check=True).get('Items', [])
             ]
         self.log.debug("Spaces: %s", spaces)
         for _, _, space, space_config in spaces:

@@ -3,13 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import datetime
+import logging
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
 
 from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
+
+from .constants import ALL_METRICS
 
 MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
 MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=15)
@@ -52,6 +56,28 @@ def test_can_connect(get_current_datetime, dd_run_check, aggregator, expected_ex
         dd_run_check(check)
 
     aggregator.assert_metric('octopus_deploy.api.can_connect', can_connect)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_all_metrics_covered(
+    get_current_datetime,
+    dd_run_check,
+    aggregator,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+
+    dd_run_check(check)
+
+    aggregator.assert_metric('octopus_deploy.api.can_connect', 1)
+
+    for metric in ALL_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(
@@ -715,3 +741,29 @@ def test_empty_include(get_current_datetime, dd_run_check, aggregator):
     dd_run_check(check)
 
     aggregator.assert_metric('octopus_deploy.space.count', count=0)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'expected_log'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api/Spaces-1/tasks': MockResponse(status_code=500),
+                }
+            },
+            'Failed to access endpoint: api/Spaces-1/tasks: 500 Server Error: None for url: None',
+            id='http error',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_tasks_endpoint_unavailable(get_current_datetime, dd_run_check, expected_log, caplog):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    caplog.set_level(logging.WARNING)
+    dd_run_check(check)
+    assert expected_log in caplog.text
