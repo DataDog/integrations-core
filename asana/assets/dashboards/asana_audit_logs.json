@@ -1,6 +1,6 @@
 {
     "title": "Asana - Audit Logs",
-    "description": "- This dashboard provides insights to help you to track audit events within Asana platform.",
+    "description": "- This dashboard provides insights to help you to track audit events within the Asana platform.",
     "widgets": [
         {
             "id": 3098264915522038,
