@@ -4,7 +4,7 @@
 
 [Bitdefender][1] provides cybersecurity solutions with leading security efficacy, performance and ease of use to small and medium businesses, mid-market enterprises and consumers. Bitdefender EDR effectively stops ransomware and breaches with automated cross-endpoint correlation and seamlessly integrated prevention, protection, detection and response.
 
-The Bitdefender integration ingests the logs using the Webhook. Following are the event types for which integration provides OOTB dashboards and detection rules:
+The Bitdefender integration utilizes a webhook to ingest Bitdefender EDR logs. Following are the event types for which integration provides OOTB dashboards and detection rules:
 
 - **Antiphishing:** This event is generated each time the endpoint agent detects a known phishing attempt when accessing a web page.
 - **Antimalware:** This event is generated each time Bitdefender detects malware on an endpoint in your network.
@@ -28,7 +28,7 @@ The Bitdefender integration ingests the logs using the Webhook. Following are th
 #### Bitdefender Configuration
 
 ##### Steps to Create API Key on Bitdefender Business Security Enterprise Portal:
-1. Log in to Bitdefender Business Security Enterprise Portal.
+1. Log in to Bitdefender Business Security Enterprise Portal using an administrator account. Your account must have the following rights: Manage Networks, Manage Users, Manage Company, and View and analyze data.
 2. On the right-hand side, select **User Role** and click on **My Account**.
 3. Navigate to the **API keys** section.
 4. Click on the **Add**. Pop-up form will open up for API Key Configuration.
@@ -41,8 +41,8 @@ The Bitdefender integration ingests the logs using the Webhook. Following are th
     - Encode the resulting string using a Base64 encoder.
     - For example:
 
-      - If your API key is abc123, the string to encode is abc123:.
-      - After Base64 encoding, the result will be something like: YWJjMTIzOg==.
+      - If your API key is abc123, the string to encode is abc123:
+      - After Base64 encoding, the result will be something like: YWJjMTIzOg==
 
 8. Note down the encoded API key for webhook configuration.
 9. Navigate to the **Control Center API** section and note down the Access URL. This URL will be used in the curl command as **\<control_center_apis_access_url>**.
