@@ -230,6 +230,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
     aggregator.assert_metric(
         'octopus_deploy.deployment.completed_time',
         0,
+        count=0,
         tags=[
             'task_id:ServerTasks-118048',
             'task_name:Deploy',
@@ -263,6 +264,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
     aggregator.assert_metric(
         'octopus_deploy.deployment.executing_time',
         0,
+        count=0,
         tags=[
             'task_id:ServerTasks-118055',
             'task_name:Deploy',
@@ -274,6 +276,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
     aggregator.assert_metric(
         'octopus_deploy.deployment.completed_time',
         0,
+        count=0,
         tags=[
             'task_id:ServerTasks-118055',
             'task_name:Deploy',

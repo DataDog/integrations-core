@@ -235,11 +235,11 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 executing_time = (
                     self.current_datetime - datetime.datetime.fromisoformat(task_start_time)
                 ).total_seconds()
-                completed_time = 0
+                completed_time = -1
         else:
             queued_time = (self.current_datetime - datetime.datetime.fromisoformat(task_queue_time)).total_seconds()
-            executing_time = 0
-            completed_time = 0
+            executing_time = -1
+            completed_time = -1
         return queued_time, executing_time, completed_time
 
     def _process_tasks(self, space_id, project_id, tasks_json):
@@ -254,8 +254,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             queued_time, executing_time, completed_time = self._calculate_task_times(task)
             self.gauge("deployment.count", 1, tags=tags)
             self.gauge("deployment.queued_time", queued_time, tags=tags)
-            self.gauge("deployment.executing_time", executing_time, tags=tags)
-            self.gauge("deployment.completed_time", completed_time, tags=tags)
+            if executing_time != -1:
+                self.gauge("deployment.executing_time", executing_time, tags=tags)
+            if executing_time != -1:
+                self.gauge("deployment.completed_time", completed_time, tags=tags)
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config
