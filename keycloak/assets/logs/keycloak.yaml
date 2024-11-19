@@ -95,7 +95,7 @@ pipeline:
           authSessionParentId="a6790922-e7c1-41c3-aade-c3f40d2fcf58",
           authSessionTabId="t5zOUo-tETQ"
         - type="REFRESH_TOKEN", realmId="f16e7899-3616-4c57-a8db-deab1da434c1",
-          realmName="master", clientId="security-admin-console",
+          realmName="\"master\"", clientId="\"security=admin=console,test1\"",
           userId="15745079-6780-4b93-80d9-c0d3480885d3",
           sessionId="a6790922-e7c1-41c3-aade-c3f40d2fcf58",
           ipAddress="10.10.10.10",
@@ -108,7 +108,9 @@ pipeline:
           client_auth_method="client-secret"
       grok:
         supportRules: ""
-        matchRules: parser_rule_1 %{data::keyvalue("=", " \"\\\\","", ",")}
+        matchRules: parser_rule_1 %{data::keyvalue("=", " \"\\\\,","", ",")}
+          realmName="%{data:realmName}", clientId="%{data:clientId}",
+          userId="%{notSpace:userId}", %{data::keyvalue("=", " \"\\\\,","",",")}
     - type: category-processor
       name: Define `service` from event type
       enabled: true

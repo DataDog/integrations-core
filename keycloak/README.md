@@ -6,7 +6,7 @@
 
 This integration parses the following types of logs:
 - **user-event** : Events generated from activity of users like authentication, profile update, etc.
-- **admin-event** : Events generated from activity of admin.
+- **admin-event** : Events generated from the activity of the admin.
 
 Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, out-of-the-box detection rules are available to help you monitor and respond to potential security threats effectively.
 
