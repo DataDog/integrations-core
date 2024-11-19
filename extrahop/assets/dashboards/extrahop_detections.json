@@ -2486,75 +2486,6 @@
                         }
                     },
                     {
-                        "id": 4620573212045324,
-                        "definition": {
-                            "title": "Top Investigation Last Interactions",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@last_interaction_by",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "cardinality",
-                                                        "metric": "@id"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:extrahop service:investigation"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 13,
-                            "width": 3,
-                            "height": 5
-                        }
-                    },
-                    {
                         "id": 6458090405877186,
                         "definition": {
                             "title": "Distribution by Assessment Status",
@@ -2617,107 +2548,8 @@
                             }
                         },
                         "layout": {
-                            "x": 3,
-                            "y": 13,
-                            "width": 9,
-                            "height": 5
-                        }
-                    },
-                    {
-                        "id": 2822261388112224,
-                        "definition": {
-                            "title": "Investigation Details",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "data_source": "logs",
-                                            "name": "query1",
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "@id"
-                                            },
-                                            "group_by": [
-                                                {
-                                                    "facet": "@description",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "cardinality",
-                                                        "metric": "@id"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@notes",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "cardinality",
-                                                        "metric": "@id"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@assignee",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "cardinality",
-                                                        "metric": "@id"
-                                                    }
-                                                },
-                                                {
-                                                    "facet": "@http.url",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "order": "desc",
-                                                        "aggregation": "cardinality",
-                                                        "metric": "@id"
-                                                    }
-                                                }
-                                            ],
-                                            "search": {
-                                                "query": "source:extrahop service:investigation"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 10000,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "cell_display_mode": "bar",
-                                            "alias": "count",
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto",
-                            "custom_links": [
-                                {
-                                    "label": "URL",
-                                    "link": "{{@http.url.value}}"
-                                }
-                            ]
-                        },
-                        "layout": {
                             "x": 0,
-                            "y": 18,
+                            "y": 13,
                             "width": 12,
                             "height": 5
                         }
@@ -2733,7 +2565,59 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:extrahop service:investigation ",
+                                        "query_string": "source:extrahop service:investigation",
+                                        "indexes": [],
+                                        "storage": "hot",
+                                        "sort": {
+                                            "order": "desc",
+                                            "column": "timestamp"
+                                        }
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "description",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "notes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "assignee",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "last_interaction_by",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "http.url",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 18,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4745866712552,
+                        "definition": {
+                            "title": "Investigation Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:extrahop service:investigation",
                                         "indexes": [],
                                         "storage": "hot",
                                         "sort": {
@@ -2797,7 +2681,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 23,
+                            "y": 22,
                             "width": 12,
                             "height": 4
                         }
@@ -2808,7 +2692,7 @@
                 "x": 0,
                 "y": 61,
                 "width": 12,
-                "height": 28,
+                "height": 27,
                 "is_column_break": true
             }
         }
