@@ -287,6 +287,7 @@ def test_config_with_and_without_port(instance_minimal_defaults, host, port, exp
     assert result_host == expected_host
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
