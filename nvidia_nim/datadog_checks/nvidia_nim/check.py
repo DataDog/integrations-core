@@ -42,7 +42,7 @@ class NvidiaNIMCheck(OpenMetricsBaseCheckV2):
             }
             self.set_metadata('version', version_raw, scheme='semver', part_map=version_parts)
         else:
-            self.log.debug("Invalid Nvidia NIM release format: %s", version)
+            self.log.debug("Invalid NVIDIA NIM release format: %s", version)
 
     def check(self, instance):
         super().check(instance)

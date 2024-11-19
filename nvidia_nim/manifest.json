@@ -43,6 +43,9 @@
         "vllm_nvext.entrypoints.openai.api_server"
       ]
     },
+    "dashboards": {
+      "NVIDIA NIM Overview": "assets/dashboards/nvidia_nim_overview.json"
+    },
     "monitors": {
       "Average Request Latency is High": "assets/monitors/latency.json"
     }

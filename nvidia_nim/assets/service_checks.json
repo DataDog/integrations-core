@@ -1,7 +1,7 @@
 [    
     {
     "agent_version": "7.61.0",
-    "integration": "Nvidia NIM",
+    "integration": "nvidia_nim",
     "check": "nvidia_nim.openmetrics.health",
     "statuses": [
         "ok",
@@ -11,7 +11,7 @@
         "host",
         "endpoint"
     ],
-    "name": "Nvidia NIM OpenMetrics endpoint health",
-    "description": "Returns `CRITICAL` if the Agent is unable to connect to the Nvidia NIM OpenMetrics endpoint, otherwise returns `OK`."
+    "name": "NVIDIA NIM OpenMetrics endpoint health",
+    "description": "Returns `CRITICAL` if the Agent is unable to connect to the NVIDIA NIM OpenMetrics endpoint, otherwise returns `OK`."
     }
 ]
