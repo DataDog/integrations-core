@@ -36,3 +36,16 @@ tests:
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
+ - 
+  sample: "2024-11-15 10:38:24.000103:  4938  ERROR ||NEURON_CC_WRAPPER||:
+    Compilation failed for
+    /tmp/ubuntu/neuroncc_compile_workdir/cf6cf570-d889-4a0c-a821-719e225d9bc8\
+    /model.MODULE_16150394314145281873+d7517139.hlo_module.pb after 0
+    retries."
+  result: null
+ - 
+  sample: 2024-Nov-15
+      13:35:03.0879  6475:6475  ERROR   NRT:nrt_allocate_neuron_cores               NeuronCore(s)
+      not available - Requested:16 Available:4
+  result: null
+
