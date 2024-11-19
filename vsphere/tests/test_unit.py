@@ -3631,7 +3631,7 @@ def test_vsan_cluster_to_redapl(realtime_instance, dd_run_check, caplog):
 
         MockGetConfig.side_effect = lambda key: {
             'api_key': 'test_api_key',
-            'dd_url': 'https://www.test_dd_url.com',
+            'site': 'test_dd_url.com',
         }.get(key)
         mock_response = MagicMock()
         mock_response.status_code = 200

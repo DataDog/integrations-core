@@ -667,10 +667,10 @@ class VSphereCheck(AgentCheck):
             'Content-Type': 'application/x-protobuf',
         }
 
-        base_url = datadog_agent.get_config('dd_url')
-        domain = '.'.join(base_url.split('//')[-1].split('.')[-2:])
         response = self.http.post(
-            f'https://intake.profile.{domain}/api/v2/genresources', headers=headers, data=serialized_redapl_event
+            'https://intake.profile.{}/api/v2/genresources'.format(datadog_agent.get_config('site')),
+            headers=headers,
+            data=serialized_redapl_event,
         )
 
         self.log.debug("Response Code for cluster %s, %s", cluster_reference, response.status_code)
