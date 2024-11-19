@@ -43,9 +43,9 @@ pipeline:
         matchRules: >-
           info_rule %{word:level}:Neuron:( => )?%{data:msg}
 
-          error_rule_1 %{date("yyyy-MM-dd' 'HH:mm:ss.SSSSSS"):date}:  %{number:pid}  %{word:level} %{data:msg}
+          error_rule_1 %{date("yyyy-MM-dd' 'HH:mm:ss.SSSSSS"):date}:  %{integer:pid}  %{word:level} %{data:msg}
 
-          error_rule_2 %{date("yyyy-MMM-dd' 'HH:mm:ss.SSSS"):date}  %{number:pid}:%{number:tid}  %{word:level} %{data:msg}
+          error_rule_2 %{date("yyyy-MMM-dd' 'HH:mm:ss.SSSS"):date}  %{integer:pid}:%{integer:tid}  %{word:level} %{data:msg}
     - type: message-remapper
       name: Define `msg` as the official message of the log
       enabled: true
