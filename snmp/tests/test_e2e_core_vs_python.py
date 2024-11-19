@@ -421,6 +421,7 @@ def test_e2e_profile_cisco_asa(dd_agent_check):
             'temp_state',
             'power_source',
             'connection_type',
+            'rtt_timeout',
         ],  # Ignore tags that have mappings
     )
 
@@ -446,6 +447,7 @@ def test_e2e_profile_cisco_asa_5525(dd_agent_check):
             'temp_state',
             'power_source',
             'connection_type',
+            'rtt_timeout',
         ],  # Ignore tags that have mappings
     )
 
