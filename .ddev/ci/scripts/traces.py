@@ -40,10 +40,10 @@ def replay(*, record_file: str, port: int) -> None:
             record = json.loads(line)
             path = record['path']
             body = b64decode(record['body'])
-
-            print(f'PUT {path} {len(body)} bytes: ', end='')
             conn.request('PUT', path, body=body, headers=record['headers'])
-            print(conn.getresponse().read().decode('utf-8'))
+            response = conn.getresponse()
+            response.read() # Needs to be done to prevent ResponseNotReady.
+            print(response.status, response.reason)
 
 
 def main():
