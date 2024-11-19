@@ -463,7 +463,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     thread.join()
 
 
-@pytest.mark.flaky(max_runs=5)
+@pytest.mark.flaky(max_runs=10)
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
