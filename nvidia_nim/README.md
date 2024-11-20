@@ -49,7 +49,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **https://docs.nvidia.com/nim/large-language-models/latest/observability.html**
+[1]: https://docs.nvidia.com/nim/large-language-models/latest/observability.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/nvidia_nim/datadog_checks/nvidia_nim/data/conf.yaml.example
