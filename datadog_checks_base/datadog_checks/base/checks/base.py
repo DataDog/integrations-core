@@ -12,9 +12,20 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import Deque  # noqa: F401
-from typing import (TYPE_CHECKING, Any, AnyStr, Callable, Dict, List, Optional,
-                    Sequence, Set, Tuple, Union)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AnyStr,
+    Callable,
+    Deque,  # noqa: F401
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+)
 
 import yaml
 from pydantic import BaseModel, ValidationError
@@ -24,13 +35,15 @@ from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..errors import ConfigurationError
-from ..types import AgentConfigType  # noqa: F401
-from ..types import Event  # noqa: F401
-from ..types import ExternalTagType  # noqa: F401
-from ..types import InitConfigType  # noqa: F401
-from ..types import InstanceType  # noqa: F401
-from ..types import ProxySettings  # noqa: F401
-from ..types import ServiceCheckStatus  # noqa: F401
+from ..types import (
+    AgentConfigType,  # noqa: F401
+    Event,  # noqa: F401
+    ExternalTagType,  # noqa: F401
+    InitConfigType,  # noqa: F401
+    InstanceType,  # noqa: F401
+    ProxySettings,  # noqa: F401
+    ServiceCheckStatus,  # noqa: F401
+)
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
 from ..utils.diagnose import Diagnosis
