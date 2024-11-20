@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.0 / 2024-11-20
+
+***Added***:
+
+* Added support for vSAN metric/event collection in the vSphere integration ([#18117](https://github.com/DataDog/integrations-core/pull/18117))
+
 ## 8.0.1 / 2024-10-31
 
 ***Fixed***:
