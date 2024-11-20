@@ -8,7 +8,7 @@
 		"id": 4722049,
 		"name": "[Databricks Model Serving] 4xx error count is higher than usual for endpoint: {{endpoint_name.name}}",
 		"type": "query alert",
-		"query": "avg(last_4h):anomalies(avg:databricks.model_serving.request_4xx_count_total{*} by {endpoint_name}, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true') >= 1",
+		"query": "avg(last_4h):anomalies(max:databricks.model_serving.request_4xx_count_total{*} by {endpoint_name}, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true') >= 1",
 		"message": "The number of 4xx errors for Databricks Model Serving endpoint: {{endpoint_name.name}} is at {{value}}, which is higher than usual.",
 		"tags": [
 			"integration:databricks"
