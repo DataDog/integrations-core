@@ -24,6 +24,10 @@ class TestSimilarAssertionMessages(object):
         expected_msg = '''
     Expected:
         MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None, device=None, flush_first_value=None)
+Difference to closest:
+        Expected name: test.similar_metric
+        Found test.most_similar_metric
+
 Similar submitted:
 Score   Most similar
 0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
