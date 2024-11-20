@@ -51,80 +51,55 @@
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 7097716036853560,
+            "id": 2364160159281040,
             "definition": {
-              "title": "Average CPU Usage",
+              "title": "Resource Utilization Overview",
               "title_size": "16",
               "title_align": "left",
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "query_value",
+              "type": "query_table",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "percent"
-                        }
-                      }
-                    }
-                  ],
                   "queries": [
                     {
-                      "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.cpu_usage_percentage.avg{$workspace_id, $endpoint_name}",
-                      "aggregator": "last"
+                      "name": "query1",
+                      "query": "avg:databricks.model_serving.cpu_usage_percentage{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:databricks.model_serving.mem_usage_percentage{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:databricks.model_serving.gpu_usage_percentage.avg{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:databricks.model_serving.gpu_mem_usage_percentage.avg{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "avg"
                     }
                   ],
                   "response_format": "scalar",
-                  "conditional_formats": [
-                    {
-                      "comparator": "<",
-                      "value": 35,
-                      "palette": "green_on_white"
-                    },
-                    {
-                      "comparator": "<",
-                      "value": 60,
-                      "palette": "yellow_on_white"
-                    },
-                    {
-                      "comparator": ">=",
-                      "value": 60,
-                      "palette": "red_on_white"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 2,
-              "height": 2
-            }
-          },
-          {
-            "id": 1389956830572192,
-            "definition": {
-              "title": "Average CPU Memory Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "query_value",
-              "requests": [
-                {
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
                   "formulas": [
                     {
+                      "cell_display_mode": "bar",
+                      "alias": "avg cpu usage",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -132,243 +107,182 @@
                         }
                       },
                       "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.mem_usage_percentage.avg{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name}",
-                      "aggregator": "last"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "conditional_formats": [
-                    {
-                      "comparator": "<",
-                      "value": 35,
-                      "palette": "green_on_white"
                     },
                     {
-                      "comparator": "<",
-                      "value": 60,
-                      "palette": "yellow_on_white"
+                      "cell_display_mode": "bar",
+                      "alias": "avg cpu mem usage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query2"
                     },
                     {
-                      "comparator": ">=",
-                      "value": 60,
-                      "palette": "red_on_white"
+                      "cell_display_mode": "bar",
+                      "alias": "avg gpu usage",
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "avg gpu mem usage",
+                      "formula": "query4"
                     }
                   ]
                 }
               ],
-              "autoscale": true,
-              "precision": 2
+              "has_search_bar": "auto"
             },
             "layout": {
-              "x": 2,
+              "x": 0,
               "y": 0,
-              "width": 2,
+              "width": 6,
               "height": 2
             }
           },
           {
-            "id": 5275945812755800,
+            "id": 282877050046086,
             "definition": {
-              "title": "Average Requests Per Min",
+              "title": "Top endpoints by request latency",
               "title_size": "16",
               "title_align": "left",
-              "type": "query_value",
+              "type": "query_table",
               "requests": [
                 {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.request_latency_ms.99percentile{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.request_latency_ms.95percentile{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.request_latency_ms.90percentile{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
                   "formulas": [
                     {
+                      "cell_display_mode": "bar",
+                      "alias": "99 percentile",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "95 percentile",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "90 percentile",
+                      "formula": "query3"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 6819245007400226,
+            "definition": {
+              "title": "Top endpoints by cumulative request count",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:databricks.model_serving.request_count_total{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:databricks.model_serving.request_4xx_count_total{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}.weighted()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:databricks.model_serving.request_5xx_count_total{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}.weighted()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Request Count",
+                      "formula": "query1",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
                           "unit_name": "request"
                         }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_rate{$workspace_id, $endpoint_name, $served_entity_name, $workspace_name}",
-                      "aggregator": "last"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 4,
-              "y": 0,
-              "width": 2,
-              "height": 2
-            }
-          },
-          {
-            "id": 3641275610662684,
-            "definition": {
-              "title": "5xx Error Rate",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "request",
-                          "per_unit_name": "minute"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_5xx_count_rate{$workspace_id, $endpoint_name, $served_entity_name, $workspace_name}.as_count()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "conditional_formats": [
-                    {
-                      "comparator": "<",
-                      "value": 10,
-                      "palette": "green_on_white"
+                      }
                     },
                     {
-                      "comparator": "<=",
-                      "value": 30,
-                      "palette": "yellow_on_white"
+                      "cell_display_mode": "bar",
+                      "alias": "4xx Error count",
+                      "formula": "query2"
                     },
                     {
-                      "comparator": ">",
-                      "value": 30,
-                      "palette": "red_on_white"
+                      "cell_display_mode": "bar",
+                      "alias": "5xx Error count",
+                      "formula": "query3"
                     }
                   ]
                 }
               ],
-              "autoscale": true,
-              "precision": 2
+              "has_search_bar": "auto"
             },
             "layout": {
               "x": 0,
-              "y": 2,
-              "width": 2,
-              "height": 2
-            }
-          },
-          {
-            "id": 3445909936231622,
-            "definition": {
-              "title": "4xx Error Rate",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "request",
-                          "per_unit_name": "minute"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_4xx_count_rate{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name}.as_count()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "conditional_formats": [
-                    {
-                      "comparator": "<",
-                      "value": 10,
-                      "palette": "green_on_white"
-                    },
-                    {
-                      "comparator": "<",
-                      "value": 30,
-                      "palette": "yellow_on_white"
-                    },
-                    {
-                      "comparator": ">=",
-                      "value": 30,
-                      "palette": "red_on_white"
-                    }
-                  ]
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 2,
-              "y": 2,
-              "width": 2,
-              "height": 2
-            }
-          },
-          {
-            "id": 1609503785544306,
-            "definition": {
-              "title": "Average request latency",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "millisecond"
-                        }
-                      },
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$workspace_id, $endpoint_name, $served_entity_name, $workspace_name}",
-                      "aggregator": "last"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 4,
-              "y": 2,
-              "width": 2,
+              "y": 4,
+              "width": 6,
               "height": 2
             }
           }
@@ -378,7 +292,7 @@
         "x": 6,
         "y": 0,
         "width": 6,
-        "height": 5
+        "height": 7
       }
     },
     {
@@ -394,7 +308,7 @@
             "id": 7266618368102262,
             "definition": {
               "type": "note",
-              "content": "CPU and memory usage metrics describe how effectively computational and storage resources are being utilized during model serving, indicating whether the current setup meets the demand for processing data and running models efficiently.",
+              "content": "Processing and memory usage metrics describe how effectively computational and storage resources are being utilized during model serving, indicating whether the current setup meets the demand for processing data and running models efficiently.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -475,17 +389,17 @@
             }
           },
           {
-            "id": 8401637794826174,
+            "id": 7409546524688414,
             "definition": {
               "type": "note",
-              "content": "High GPU usage or GPU memory usage highlights heavy computational demands typical of complex models, necessitating careful management to avoid resource exhaustion. Conversely, low usage in these areas indicates potential underutilization, offering opportunities for optimizing workloads or reducing costs. ",
-              "background_color": "white",
+              "content": "GPU metrics are an experimental Databricks feature and are subject to change.",
+              "background_color": "yellow",
               "font_size": "14",
               "text_align": "left",
               "vertical_align": "center",
               "show_tick": true,
-              "tick_pos": "75%",
-              "tick_edge": "top",
+              "tick_pos": "50%",
+              "tick_edge": "left",
               "has_padding": true
             },
             "layout": {
@@ -522,7 +436,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.cpu_usage_percentage.avg{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
+                      "query": "avg:databricks.model_serving.cpu_usage_percentage{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -540,6 +454,27 @@
               "y": 3,
               "width": 6,
               "height": 3
+            }
+          },
+          {
+            "id": 8401637794826174,
+            "definition": {
+              "type": "note",
+              "content": "High GPU usage or GPU memory usage highlights heavy computational demands typical of complex models, necessitating careful management to avoid resource exhaustion. Conversely, low usage in these areas indicates potential underutilization, offering opportunities for optimizing workloads or reducing costs. ",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "75%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 1
             }
           },
           {
@@ -569,7 +504,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.avg{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.gpu_usage_percentage.avg{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -584,245 +519,9 @@
             },
             "layout": {
               "x": 6,
-              "y": 3,
+              "y": 4,
               "width": 6,
               "height": 3
-            }
-          },
-          {
-            "id": 3901347486774608,
-            "definition": {
-              "title": "Maximum CPU Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.cpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 6,
-              "width": 3,
-              "height": 4
-            }
-          },
-          {
-            "id": 5608323536734252,
-            "definition": {
-              "title": "Maximum CPU Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.cpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 3,
-              "y": 6,
-              "width": 3,
-              "height": 4
-            }
-          },
-          {
-            "id": 6988023698748174,
-            "definition": {
-              "title": "Maximum GPU Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 6,
-              "y": 6,
-              "width": 3,
-              "height": 4
-            }
-          },
-          {
-            "id": 7744945329206824,
-            "definition": {
-              "title": "Minimum GPU Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 9,
-              "y": 6,
-              "width": 3,
-              "height": 4
-            }
-          },
-          {
-            "id": 1285382030014396,
-            "definition": {
-              "type": "note",
-              "content": "CPU Memory Usage",
-              "background_color": "blue",
-              "font_size": "24",
-              "text_align": "center",
-              "vertical_align": "center",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 0,
-              "y": 10,
-              "width": 6,
-              "height": 1
-            }
-          },
-          {
-            "id": 207588841139584,
-            "definition": {
-              "type": "note",
-              "content": "GPU Memory Usage\n\n",
-              "background_color": "vivid_blue",
-              "font_size": "24",
-              "text_align": "center",
-              "vertical_align": "center",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "left",
-              "has_padding": true
-            },
-            "layout": {
-              "x": 6,
-              "y": 10,
-              "width": 6,
-              "height": 1
             }
           },
           {
@@ -852,7 +551,7 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.mem_usage_percentage.avg{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
+                      "query": "avg:databricks.model_serving.mem_usage_percentage{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -867,7 +566,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 11,
+              "y": 6,
               "width": 6,
               "height": 3
             }
@@ -887,6 +586,9 @@
                 "value",
                 "sum"
               ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
               "type": "timeseries",
               "requests": [
                 {
@@ -920,209 +622,18 @@
             },
             "layout": {
               "x": 6,
-              "y": 11,
+              "y": 7,
               "width": 6,
               "height": 3
-            }
-          },
-          {
-            "id": 5114327402703978,
-            "definition": {
-              "title": "Maximum CPU Memory Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.mem_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 14,
-              "width": 3,
-              "height": 4
-            }
-          },
-          {
-            "id": 1293016554571970,
-            "definition": {
-              "title": "Minimum CPU Memory Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 3,
-              "y": 14,
-              "width": 3,
-              "height": 4
-            }
-          },
-          {
-            "id": 2116412555585624,
-            "definition": {
-              "title": "Maximum GPU Memory Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.max{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 6,
-              "y": 14,
-              "width": 3,
-              "height": 4
-            }
-          },
-          {
-            "id": 7954191317155982,
-            "definition": {
-              "title": "Minimum GPU Memory Usage",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "max:databricks.model_serving.gpu_mem_usage_percentage.min{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 9,
-              "y": 14,
-              "width": 3,
-              "height": 4
             }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 5,
+        "y": 7,
         "width": 12,
-        "height": 19
+        "height": 11
       }
     },
     {
@@ -1138,7 +649,7 @@
             "id": 8369113540588714,
             "definition": {
               "type": "note",
-              "content": "The request rate measures the volume of requests handled per minute, with high values indicative of increased user traffic or activity, which could strain server resources if not managed properly. \n\nConversely, low request rates might indicate lower user engagement, which could either be typical during off-peak hours or signal potential access issues if unexpected.",
+              "content": "The request count measures the volume of requests handled by the endpoint, with high values indicative of increased user traffic or activity, which could strain server resources if not managed properly. \n\nConversely, a low request count might indicate lower user engagement, which could either be typical during off-peak hours or signal potential access issues if unexpected.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -1159,7 +670,7 @@
             "id": 1333178577565114,
             "definition": {
               "type": "note",
-              "content": "The request error rate tracks the proportion of failed HTTP requests, with high values indicating potential server, code, or client-related issues that could degrade user experience. \n\nLow error rates suggest that the majority of requests are being processed successfully, reflecting a stable application.\n\nA 5xx status code indicates a server error, where the server failed to fulfill a valid request, implying a problem on the server side. A 4xx status code signifies a client error, where the request cannot be processed due to issues such as a malformed request or unauthorized access, suggesting fault lies with the client's request.",
+              "content": "The request error count tracks the number of failed HTTP requests, with high values indicating potential server, code, or client-related issues that could degrade user experience. \n\nLow error count suggests that the majority of requests are being processed successfully, reflecting a stable application.\n\nA 5xx status code indicates a server error, where the server failed to fulfill a valid request, implying a problem on the server side. A 4xx status code signifies a client error, where the request cannot be processed due to issues such as a malformed request or unauthorized access, suggesting fault lies with the client's request.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -1179,7 +690,7 @@
           {
             "id": 8753457556283120,
             "definition": {
-              "title": "Requests Per Minute",
+              "title": "Requests in the last minute",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1196,21 +707,20 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query3",
                       "number_format": {
                         "unit": {
-                          "unit_name": "request",
-                          "per_unit_name": "minute",
-                          "type": "canonical_unit"
+                          "type": "canonical_unit",
+                          "unit_name": "request"
                         }
-                      }
+                      },
+                      "formula": "query3"
                     }
                   ],
                   "queries": [
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_rate{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_count_total{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1219,7 +729,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "line"
+                  "display_type": "bars"
                 }
               ]
             },
@@ -1233,7 +743,7 @@
           {
             "id": 7772095570773674,
             "definition": {
-              "title": "5xx Error Rate",
+              "title": "5xx Error Count",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1245,27 +755,19 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "unit_name": "request",
-                          "per_unit_name": "minute",
-                          "type": "canonical_unit"
-                        }
-                      }
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.request_5xx_count_rate{$workspace_name,$endpoint_name,$served_entity_name}.as_count()"
+                      "query": "sum:databricks.model_serving.request_5xx_count_total{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1321,7 +823,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "line"
+                  "display_type": "area"
                 }
               ]
             },
@@ -1335,7 +837,7 @@
           {
             "id": 7486385226747274,
             "definition": {
-              "title": "4xx Error Rate",
+              "title": "4xx Error Count",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1347,27 +849,19 @@
                 "value",
                 "sum"
               ],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "unit_name": "request",
-                          "per_unit_name": "minute",
-                          "type": "canonical_unit"
-                        }
-                      }
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:databricks.model_serving.request_4xx_count_rate{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}.as_count()"
+                      "query": "sum:databricks.model_serving.request_4xx_count_total{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}.weighted()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1391,7 +885,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 18,
         "width": 12,
         "height": 7,
         "is_column_break": true
@@ -1430,7 +924,7 @@
           {
             "id": 8891554743052240,
             "definition": {
-              "title": "Request Latency (p99)",
+              "title": "Request Latency (p90)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1447,20 +941,20 @@
                 {
                   "formulas": [
                     {
-                      "formula": "query3",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
                           "unit_name": "millisecond"
                         }
-                      }
+                      },
+                      "formula": "query3"
                     }
                   ],
                   "queries": [
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_latency_ms.90percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1483,7 +977,7 @@
           {
             "id": 1597060530161390,
             "definition": {
-              "title": "Request Latency (max)",
+              "title": "Request Latency (p95)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1507,7 +1001,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.max{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_latency_ms.95percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1528,99 +1022,9 @@
             }
           },
           {
-            "id": 5647623305871048,
-            "definition": {
-              "title": "Request Latencies by Endpoint",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:databricks.model_serving.request_latency_ms.50percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query4",
-                      "query": "avg:databricks.model_serving.request_latency_ms.75percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:databricks.model_serving.request_latency_ms.90percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:databricks.model_serving.request_latency_ms.95percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query5",
-                      "query": "avg:databricks.model_serving.request_latency_ms.99percentile{$workspace_name, $endpoint_name, $served_entity_name} by {endpoint_name}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "sort": {
-                    "count": 10,
-                    "order_by": [
-                      {
-                        "type": "formula",
-                        "index": 0,
-                        "order": "desc"
-                      }
-                    ]
-                  },
-                  "formulas": [
-                    {
-                      "alias": "p50",
-                      "formula": "query1"
-                    },
-                    {
-                      "alias": "p75",
-                      "formula": "query4"
-                    },
-                    {
-                      "alias": "p90",
-                      "formula": "query2"
-                    },
-                    {
-                      "alias": "p95",
-                      "formula": "query3"
-                    },
-                    {
-                      "alias": "p99",
-                      "formula": "query5",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "millisecond"
-                        }
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 5,
-              "height": 3
-            }
-          },
-          {
             "id": 6262930933038372,
             "definition": {
-              "title": "Request Latency (min)",
+              "title": "Request Latency (p99)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1632,9 +1036,6 @@
                 "value",
                 "sum"
               ],
-              "time": {
-                "hide_incomplete_cost_data": true
-              },
               "type": "timeseries",
               "requests": [
                 {
@@ -1647,7 +1048,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.max{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1671,7 +1072,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 7,
+        "y": 25,
         "width": 12,
         "height": 7
       }
