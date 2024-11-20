@@ -4,11 +4,11 @@
 
 Oracle Cloud Infrastructure Container Engine for Kubernetes (OKE) is a managed Kubernetes service that simplifies the operations of enterprise-grade Kubernetes at scale. 
 
-This integration helps you monitor and alert on the health, capacity, and performance of Kubernetes clusters managed by Kubernetes Engine.
+This integration collects metrics and tags from the [`oci_oke`][1] namespace to help you monitor your Kubernetes control plane, clusters, and node states. 
 
-Metrics and tags from the [`oci_oke`][1] namespace help you monitor your Kubernetes control plane, clusters, and node states. 
+Deploying the [Datadog Agent][2] on your OKE cluster can also help you track the load on your clusters, pods, and individual nodes to get better insights into how to provision and deploy your resources.
 
-Additionally, deploying the [Datadog Agent][2] on your OKE cluster can help you track the load on your clusters, pods, and individual nodes to get better insights into how to provision and deploy your resources. In addition to monitoring your nodes, pods, and containers, the Agent can also collect and report metrics from the services running in your cluster, so that you can:
+In addition to monitoring your nodes, pods, and containers, the Agent can also collect and report metrics from the services running in your cluster, so that you can:
 
 - Explore your OKE clusters with [pre-conifgured Kubernetes dashboards][3]
 - Monitor containers and processes in real time
