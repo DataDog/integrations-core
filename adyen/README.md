@@ -3,7 +3,7 @@
 ## Overview
 [Adyen][1] is a global payment platform that provides a comprehensive suite of payment solutions for businesses. It enables companies to accept payments across online, mobile, and in-store channels. Adyen supports a wide range of payment methods, including credit cards, mobile wallets, and local payment options, and offers services such as fraud prevention and risk management.
 
-The Adyen integration seamlessly collect the data of transactions, disputes, and payouts using the Adyen webhook capability and ingests them into Datadog for comprehensive analysis.
+The Adyen integration seamlessly collects the data of transactions, disputes, and payouts using the Adyen webhook capability and ingests them into Datadog for comprehensive analysis.
 
 ## Setup
 
