@@ -96,6 +96,7 @@ class MySQLConfig(object):
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
+        self.service = instance.get('service') or init_config.get('service') or ''
         self.configuration_checks()
 
     def _build_tags(self, custom_tags, propagate_agent_tags):

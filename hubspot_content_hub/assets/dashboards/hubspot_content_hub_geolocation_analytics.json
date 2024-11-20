@@ -1,0 +1,2165 @@
+{
+    "title": "HubSpot Content Hub - Geolocation Analytics",
+    "description": "",
+    "widgets": [
+        {
+            "id": 36975770832266,
+            "definition": {
+                "type": "image",
+                "url": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI2LjMuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAzMzguNjU5NjEgOTYiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDMzOC42NTk2MSA5NiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxnPgoJPHBvbHlnb24gZmlsbD0iIzIxMzM0MyIgcG9pbnRzPSIzNi42NzcyNSw1NC4zMzIxOSAxMS44MDkxOCw1NC4zMzIxOSAxMS44MDkxOCw4MC41Mjg1OSAwLDgwLjUyODU5IDAsMTUuODkwODMgMTEuODA5MTgsMTUuODkwODMgCgkJMTEuODA5MTgsNDIuOTcxMDMgMzYuNjc3MjUsNDIuOTcxMDMgMzYuNjc3MjUsMTUuODkwODMgNDguNDgzNzgsMTUuODkwODMgNDguNDgzNzgsODAuNTI4NTkgMzYuNjc3MjUsODAuNTI4NTkgCSIvPgoJPHBhdGggZmlsbD0iIzIxMzM0MyIgZD0iTTg2LjI2OTM2LDU5LjYzNjM0YzAsNS4zODM0NC00LjM4NTMxLDkuNzYzNzUtOS43Njc1NSw5Ljc2Mzc1Yy01LjM4MzY4LDAtOS43NjYxNi00LjM4MDMxLTkuNzY2MTYtOS43NjM3NQoJCXYtMjcuNjg0OUg1NS41NTMzOXYyNy42ODQ5YzAsMTEuNTUwMjUsOS4zOTc2NCwyMC45NDU1OCwyMC45NDg0MiwyMC45NDU1OGMxMS41NDg0MiwwLDIwLjk0NjA1LTkuMzk1MzMsMjAuOTQ2MDUtMjAuOTQ1NTgKCQl2LTI3LjY4NDloLTExLjE3ODVWNTkuNjM2MzR6Ii8+Cgk8cGF0aCBmaWxsPSIjMjEzMzQzIiBkPSJNMTY5LjI0NTU2LDM0LjgwMTljMC01LjY3NjIxLDMuNzU2OTktNy40NzYxNSw3Ljg3MDI1LTcuNDc2MTVjMy4zMTIwMSwwLDcuNjk0NzIsMi41MjA2OSwxMC41NTQyNCw1LjU4MzYxCgkJbDcuMzMzMjUtOC42NDQ0Yy0zLjY2NDUxLTQuOTUxMi0xMS4wODc5MS04LjM3NDEzLTE3LjE3MDc1LTguMzc0MTNjLTEyLjE2NzMxLDAtMjAuOTMzODUsNy4xMTQyNC0yMC45MzM4NSwxOC45MTEwNgoJCWMwLDIxLjg4MDQ2LDI2Ljc0ODIsMTQuOTQ0NzksMjYuNzQ4MiwyNy4xOTQwNGMwLDMuNzc3NTMtMy42NjYzOCw3LjExMjM2LTcuODY5MzQsNy4xMTIzNgoJCWMtNi42MjE3LDAtOC43Njk2MS0zLjI0MTc0LTExLjgwOTg2LTYuNjY0bC04LjE0MTgyLDguNDYyNzJjNS4xOTEyMiw2LjM5MzczLDExLjYzMDA4LDkuNjM3MzYsMTkuMzIzNjUsOS42MzczNgoJCWMxMS41Mzk0OSwwLDIwLjg0MzI1LTcuMjA0MDUsMjAuODQzMjUtMTguNDYxNDlDMTk1Ljk5MjgsMzcuNzcxNDgsMTY5LjI0NTU2LDQ1LjMzNjI3LDE2OS4yNDU1NiwzNC44MDE5eiIvPgoJPHBhdGggZmlsbD0iIzIxMzM0MyIgZD0iTTMzNC43MjA0OSw3MC4yMDI3OGMtNi42MTY5NywwLTguNDk1MDYtMi44NjA5Ni04LjQ5NTA2LTcuMjQ1OThWNDMuNTQ2NThoMTAuMjg0ODJ2LTkuODM4OTJoLTEwLjI4NDgyCgkJVjIwLjczNTE1bC0xMS4zNTc3OSw1LjA5ODI2djM5LjUzOTMxYzAsMTAuMTA5Myw2Ljk3NDY0LDE1LjIwOTIsMTYuNTQyNjYsMTUuMjA5MmMxLjQzMTIxLDAsMy40MDEyMS0wLjA5MjQ4LDQuNDc1NjgtMC4zNTc2NgoJCWwyLjc3MzYyLTEwLjE5NzA2QzMzNy40MDc3NSw3MC4xMTM1NywzMzUuOTc3MDIsNzAuMjAyNzgsMzM0LjcyMDQ5LDcwLjIwMjc4eiIvPgoJPHBhdGggZmlsbD0iIzIxMzM0MyIgZD0iTTEyOC44OTMyMywzMi4yNzUzM2MtNS41NDY3MywwLTkuNDE4MjksMS42MTAwMi0xMy4xNTczNiw1LjI4MDAzVjE2LjI3Njg1aC0xMS4yMTgwOXYzOS40MzU0NgoJCWMwLDE0Ljc2MDQsMTAuNjcxNjEsMjQuODY5NjMsMjIuNjYyMzYsMjQuODY5NjNjMTMuMzI5MDYsMCwyNS4wMDc3Ny0xMC4yODg5OSwyNS4wMDc3Ny0yNC4xNTIzMgoJCUMxNTIuMTg3OTEsNDIuNzQxOTEsMTQxLjQxODY5LDMyLjI3NTMzLDEyOC44OTMyMywzMi4yNzUzM3ogTTEyOC44MjM1LDY5LjI5MTczYy03LjAyNzU0LDAtMTIuNzIzNzQtNS42OTY0Mi0xMi43MjM3NC0xMi43MjM1MwoJCWMwLTcuMDI2ODksNS42OTYyLTEyLjcyMzUzLDEyLjcyMzc0LTEyLjcyMzUzYzcuMDI2NjcsMCwxMi43MjMzMSw1LjY5NjY0LDEyLjcyMzMxLDEyLjcyMzUzCgkJQzE0MS41NDY4MSw2My41OTUzLDEzNS44NTAxNyw2OS4yOTE3MywxMjguODIzNSw2OS4yOTE3M3oiLz4KCTxwYXRoIGZpbGw9IiMyMTMzNDMiIGQ9Ik0yNTAuNjgzNDYsNTUuODQ3MjRjMC0xMy44NjMzMy0xMS42Nzg3My0yNC4xNTIzMi0yNS4wMDc3OC0yNC4xNTIzMgoJCWMtMTEuOTkwNzUsMC0yMi42NjIzNSwxMC4xMDkyMi0yMi42NjIzNSwyNC44Njk2M1Y5NmgxMS4yMTgwOVY3NC43MjE0OWMzLjczOTA2LDMuNjcwMDEsNy42MTA2Myw1LjI4MDAzLDEzLjE1NzM1LDUuMjgwMDMKCQlDMjM5LjkxNDIyLDgwLjAwMTUyLDI1MC42ODM0Niw2OS41MzQ5NCwyNTAuNjgzNDYsNTUuODQ3MjR6IE0yNDAuMDQyMzQsNTUuNzA4NjVjMCw3LjAyNjg5LTUuNjk2NjQsMTIuNzIzNTMtMTIuNzIzMzEsMTIuNzIzNTMKCQljLTcuMDI3NTQsMC0xMi43MjM3NC01LjY5NjY0LTEyLjcyMzc0LTEyLjcyMzUzYzAtNy4wMjcxLDUuNjk2Mi0xMi43MjM1MywxMi43MjM3NC0xMi43MjM1MwoJCUMyMzQuMzQ1Nyw0Mi45ODUxMywyNDAuMDQyMzQsNDguNjgxNTUsMjQwLjA0MjM0LDU1LjcwODY1eiIvPgoJPHBhdGggZmlsbD0iI0ZGNUMzNSIgZD0iTTI4Ni45MzI0NiwzMS4xNTE1NFYxOS44ODMxMmMyLjk0MTE2LTEuMzg5NTEsNS4wMDIwMS00LjM2NTA4LDUuMDAyMDEtNy44MTg1di0wLjI2MDM4CgkJYzAtNC43NjU1Ny0zLjg5OTQ0LTguNjY0OC04LjY2NDgzLTguNjY0OGgtMC4yNjAxNmMtNC43NjU3OCwwLTguNjY1MjIsMy44OTkyMy04LjY2NTIyLDguNjY0OHYwLjI2MDM4CgkJYzAsMy40NTM0MSwyLjA2MTI4LDYuNDI5NDIsNS4wMDI0MSw3LjgxODcydjExLjI2ODQyYy00LjM3OTI0LDAuNjc2NTYtOC4zODA2NSwyLjQ4MjY5LTExLjY4MjE5LDUuMTQwNzlsLTMwLjkzODg3LTI0LjA2NzU2CgkJYzAuMjAzNTEtMC43ODM3NywwLjM0NjQ1LTEuNTkxMjksMC4zNDczMi0yLjQzODY4YzAuMDA2OTctNS4zOTc5MS00LjM2MzEzLTkuNzc5MzMtOS43NjEyNS05Ljc4NjMxCgkJYy01LjM5ODEzLTAuMDA2NzUtOS43Nzk1Niw0LjM2MzU2LTkuNzg2NTMsOS43NjE0N2MtMC4wMDY1Myw1LjM5NzkxLDQuMzYzNTYsOS43NzkzMyw5Ljc2MTY5LDkuNzg2MDkKCQljMS43NTkyOCwwLjAwMjE4LDMuMzg3MzktMC40OTc0NSw0LjgxNDYxLTEuMzA5MTFsMzAuNDM0NjUsMjMuNjc1NzljLTIuNTg4NTksMy45MDY4NS00LjEwNDI1LDguNTg2OC00LjEwNDI1LDEzLjYyNDUyCgkJYzAsNS4yNzQ1OCwxLjY2NjAyLDEwLjE1MjgxLDQuNDgyMDksMTQuMTY1NzdsLTkuMjU1NzQsOS4yNTU3NGMtMC43MzE2OS0wLjIxOTQyLTEuNDkxMjctMC4zNzMwNC0yLjI5NDg2LTAuMzczMDQKCQljLTQuNDM1NDcsMC04LjAzMTYsMy41OTU5Mi04LjAzMTYsOC4wMzE2czMuNTk2MTMsOC4wMzE2LDguMDMxNiw4LjAzMTZjNC40MzU5LDAsOC4wMzE1OS0zLjU5NTkyLDguMDMxNTktOC4wMzE2CgkJYzAtMC44MDMxNi0wLjE1MzM4LTEuNTYyOTYtMC4zNzMwMi0yLjI5NDY1bDkuMTU1NDktOS4xNTUyOGM0LjE1NTcsMy4xNzI1NSw5LjMzMDY5LDUuMDc4MDMsMTQuOTYyODMsNS4wNzgwMwoJCWMxMy42NDU0NSwwLDI0LjcwNzUyLTExLjA2MjI5LDI0LjcwNzUyLTI0LjcwODE3QzMwNy44NDc3NSw0My4xODU4NywyOTguNzcyODYsMzIuOTgwMzMsMjg2LjkzMjQ2LDMxLjE1MTU0eiBNMjgzLjE0MDIzLDY4LjIwNjI4CgkJYy02Ljk5NjE1LDAtMTIuNjY4NC01LjY3MTM3LTEyLjY2ODQtMTIuNjY3NTNjMC02Ljk5NTk0LDUuNjcyMjQtMTIuNjY3NTMsMTIuNjY4NC0xMi42Njc1MwoJCWM2Ljk5NTMsMCwxMi42Njc1NCw1LjY3MTU4LDEyLjY2NzU0LDEyLjY2NzUzQzI5NS44MDc3Nyw2Mi41MzQ5MiwyOTAuMTM1NTMsNjguMjA2MjgsMjgzLjE0MDIzLDY4LjIwNjI4eiIvPgo8L2c+Cjwvc3ZnPgo=",
+                "url_dark_theme": "",
+                "sizing": "contain",
+                "margin": "lg",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 6693616382254052,
+            "definition": {
+                "type": "note",
+                "content": "**[HubSpot Content Hub](https://www.hubspot.com/)** is an all-in-one content marketing software that helps marketers create and manage content at scale. It helps create rich, expertise-backed content across various formats and channels.\n\nThis HubSpot Content Hub **Geolocation Analytics** Dashboard offers insights into user engagement by analyzing sessions, bounces, and views based on geographical data. It provides a comprehensive overview of user interactions by location, enabling effective targeting and optimization of your content strategy.\n\nFor more information, see the [HubSpot Content Hub Integration Documentation](https://docs.datadoghq.com/integrations/hubspot_content_hub/).",
+                "background_color": "orange",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1820005688668668,
+            "definition": {
+                "type": "note",
+                "content": "**Note**:\n- The dashboard widgets display the most recent metric values captured based on location.\n\n**Tip**:\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 9,
+                "y": 0,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 6558929405760580,
+            "definition": {
+                "title": "Total Geolocations",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:hubspot.content_hub.breakdown.count{breakdown_type:geolocation}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1560441357869990,
+            "definition": {
+                "title": "Overview of Geolocations",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {
+                    "type": "live",
+                    "unit": "month",
+                    "value": 1
+                },
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Geolocation Count",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:hubspot.content_hub.breakdown.count{breakdown_type:geolocation}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "datadog16",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 3,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 3049499968341702,
+            "definition": {
+                "title": "View Analytics",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8053029472787656,
+                        "definition": {
+                            "type": "note",
+                            "content": "\nThe View Analytics group includes widgets that display the number of page views, visits, and visitors for your HubSpot content, providing a clear overview of engagement metrics by location.\n\n- Visits: Total number of visits to the content.\n- Visitors: Unique individuals who visit your content.\n- Raw Views: Total number of content views, including duplicates.\n- Standard Views: Total number of content views as provided by HubSpot.\n- Returning Visits: Visits from users who have previously visited.",
+                            "background_color": "yellow",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "75%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4572734186747846,
+                        "definition": {
+                            "title": "Total Visits",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.visits{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6895000997279412,
+                        "definition": {
+                            "title": "Visits by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.visits{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5578701733609312,
+                        "definition": {
+                            "title": "Overview of Visits",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.visits{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 2,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5657737025965768,
+                        "definition": {
+                            "title": "Total Visitors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.visitors{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1180022554285250,
+                        "definition": {
+                            "title": "Visitors by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.visitors{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1228986250869938,
+                        "definition": {
+                            "title": "Overview of Visitors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.visitors{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 5,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3847299900991092,
+                        "definition": {
+                            "title": "Total Raw Views",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.raw_views{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3250125288673860,
+                        "definition": {
+                            "title": "Raw Views by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.raw_views{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7013440790470560,
+                        "definition": {
+                            "title": "Overview of Raw Views",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.raw_views{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 8,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8299574875286414,
+                        "definition": {
+                            "title": "Total Standard Views",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.standard_views{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7681870019473798,
+                        "definition": {
+                            "title": "Standard Views by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.standard_views{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5831256243901362,
+                        "definition": {
+                            "title": "Overview of Standard Views",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.standard_views{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 11,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8539039903259482,
+                        "definition": {
+                            "title": "Total Returning Visits",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.returning_visits{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3786179612392660,
+                        "definition": {
+                            "title": "Returning Visits by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.returning_visits{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 14,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7040517964421790,
+                        "definition": {
+                            "title": "Overview of Returning Visits",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.returning_visits{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 14,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 18
+            }
+        },
+        {
+            "id": 6257292947884934,
+            "definition": {
+                "title": "Session Analytics",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8853250413075586,
+                        "definition": {
+                            "type": "note",
+                            "content": "The Session Analytics group includes widgets that display session time, engagement rates, and pageview statistics for your HubSpot content, offering a clear overview of engagement metrics by location.\n\n- Session Time: A series of visitor activities on your website that expire after 30 minutes of inactivity or restart with a different traffic source.\n- Time per Session: The average duration of a visitor's content session.\n- Pageviews per Session: The average number of page views per session in the given time range.\n- Session Rate (New Visitor): The rate of sessions initiated by new users.",
+                            "background_color": "yellow",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "75%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 280173997831750,
+                        "definition": {
+                            "title": "Total Session Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.time{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5622904787846888,
+                        "definition": {
+                            "title": "Session Time by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.time{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5553901692505396,
+                        "definition": {
+                            "title": "Overview of Session Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.time{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 2,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1953934392447940,
+                        "definition": {
+                            "title": "Average Time per Session",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.time_per_session{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6631722729557850,
+                        "definition": {
+                            "title": "Time per Session by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.time_per_session{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 912291394897068,
+                        "definition": {
+                            "title": "Overview of Time per Session",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.time_per_session{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 5,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5326878283141496,
+                        "definition": {
+                            "title": "Average Pageviews per Session",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.pageviews_per_session{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4290610492033352,
+                        "definition": {
+                            "title": "Pageviews per Session by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.pageviews_per_session{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 8,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 896883626765796,
+                        "definition": {
+                            "title": "Overview of Pageviews per Session",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.pageviews_per_session{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 8,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8001198626356608,
+                        "definition": {
+                            "title": "Average Session Rate (New Visitor)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4,
+                                "hide_incomplete_cost_data": true
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.new_visitor_session_rate{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 159630024115246,
+                        "definition": {
+                            "title": "Session Rate by Location (New Visitor)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4,
+                                "hide_incomplete_cost_data": true
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.new_visitor_session_rate{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "sort": {
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ],
+                                        "count": 500
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 11,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8801439307653252,
+                        "definition": {
+                            "title": "Overview of Session Rate (New Visitor)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1,
+                                "hide_incomplete_cost_data": true
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.new_visitor_session_rate{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 11,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 24,
+                "width": 12,
+                "height": 15,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 3756238628591172,
+            "definition": {
+                "title": "Bounce Analytics",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1675135501817886,
+                        "definition": {
+                            "type": "note",
+                            "content": "The Bounce Analytics group includes widgets that display bounce and bounce rate statistics for your HubSpot content, offering a clear overview of engagement metrics by location.\n\n- Bounce: The total count of visitors who leave your content after viewing only one page.\n- Bounce Rate: The percentage of visitors who navigate away from the content after viewing only one page.",
+                            "background_color": "yellow",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "75%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7894727354730142,
+                        "definition": {
+                            "title": "Total Bounces",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.bounces{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1148224786163842,
+                        "definition": {
+                            "title": "Bounces by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.bounces{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3998151440103280,
+                        "definition": {
+                            "title": "Overview of Bounces",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:hubspot.content_hub.breakdown.bounces{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 2,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7720727427716632,
+                        "definition": {
+                            "title": "Average Bounce Rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.bounce_rate{breakdown_type:geolocation,$geolocation_type}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query1 * 100"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3289370548648120,
+                        "definition": {
+                            "title": "Bounce Rate by Location",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "hour",
+                                "value": 4
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.bounce_rate{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "sort": {
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ],
+                                        "count": 500
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6310913499190148,
+                        "definition": {
+                            "title": "Overview of Bounce Rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "month",
+                                "value": 1
+                            },
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query1 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:hubspot.content_hub.breakdown.bounce_rate{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 5,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 39,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 379027153641694,
+            "definition": {
+                "title": "Overall Geolocation Breakdown Analytics",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "type": "live",
+                    "unit": "hour",
+                    "value": 4
+                },
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:hubspot.content_hub.breakdown.bounces{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query6",
+                                "query": "avg:hubspot.content_hub.breakdown.pageviews_per_session{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query7",
+                                "query": "sum:hubspot.content_hub.breakdown.raw_views{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query8",
+                                "query": "sum:hubspot.content_hub.breakdown.returning_visits{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query9",
+                                "query": "sum:hubspot.content_hub.breakdown.standard_views{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query12",
+                                "query": "avg:hubspot.content_hub.breakdown.time{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query13",
+                                "query": "avg:hubspot.content_hub.breakdown.time_per_session{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query14",
+                                "query": "sum:hubspot.content_hub.breakdown.visits{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query15",
+                                "query": "sum:hubspot.content_hub.breakdown.visitors{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query5",
+                                "query": "avg:hubspot.content_hub.breakdown.new_visitor_session_rate{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "avg:hubspot.content_hub.breakdown.bounce_rate{breakdown_type:geolocation,$geolocation_type} by {breakdown_subtype}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Bounces",
+                                "formula": "query1"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Pageviews Per Session",
+                                "formula": "query6"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Raw Views",
+                                "formula": "query7"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Returning Visits",
+                                "formula": "query8"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Standard Views",
+                                "formula": "query9"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Average Time",
+                                "formula": "query12"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Time Per Session",
+                                "formula": "query13"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Visits",
+                                "formula": "query14"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Visitors",
+                                "formula": "query15"
+                            },
+                            {
+                                "alias": "New Visitor Session Rate %",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "formula": "query5 * 100"
+                            },
+                            {
+                                "alias": "Bounce Rate %",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "formula": "query2 * 100"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "geolocation_type",
+            "prefix": "breakdown_subtype",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

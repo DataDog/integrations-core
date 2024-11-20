@@ -43,6 +43,7 @@ class Azure(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    aggregate_sql_databases: Optional[bool] = None
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
 
@@ -66,6 +67,16 @@ class CustomQuery(BaseModel):
     metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+
+
+class DeadlocksCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_deadlocks: Optional[float] = None
 
 
 class Gcp(BaseModel):
@@ -145,6 +156,7 @@ class QueryMetrics(BaseModel):
     dm_exec_query_stats_row_limit: Optional[int] = None
     enabled: Optional[bool] = None
     enforce_collection_interval_deadline: Optional[bool] = None
+    lookback_window: Optional[int] = None
     max_queries: Optional[int] = None
     samples_per_hour_per_query: Optional[int] = None
 
@@ -185,6 +197,7 @@ class InstanceConfig(BaseModel):
     database_instance_collection_interval: Optional[float] = None
     db_fragmentation_object_names: Optional[tuple[str, ...]] = None
     dbm: Optional[bool] = None
+    deadlocks_collection: Optional[DeadlocksCollection] = None
     disable_generic_tags: Optional[bool] = None
     driver: Optional[str] = None
     dsn: Optional[str] = None
@@ -204,6 +217,7 @@ class InstanceConfig(BaseModel):
     include_secondary_log_shipping_metrics: Optional[bool] = None
     include_task_scheduler_metrics: Optional[bool] = None
     include_tempdb_file_space_usage_metrics: Optional[bool] = None
+    include_xe_metrics: Optional[bool] = None
     index_usage_metrics_interval: Optional[int] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
@@ -217,6 +231,7 @@ class InstanceConfig(BaseModel):
     proc_only_if: Optional[str] = None
     proc_only_if_database: Optional[str] = None
     procedure_metrics: Optional[ProcedureMetrics] = None
+    propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     reported_hostname: Optional[str] = None

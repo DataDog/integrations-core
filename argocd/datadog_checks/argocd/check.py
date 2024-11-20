@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import defaultdict
 
-from six import PY2
-
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
@@ -36,12 +34,6 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
-        if PY2:
-            raise ConfigurationError(
-                "This version of the integration is only available when using py3. "
-                "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                "for more information."
-            )
         super(ArgocdCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
         self.check_initializations.append(self.configure_additional_transformers)

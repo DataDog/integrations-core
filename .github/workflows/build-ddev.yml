@@ -575,6 +575,9 @@ jobs:
     - macos-packaging
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      
     steps:
     - name: Download Python artifacts
       uses: actions/download-artifact@v4

@@ -155,10 +155,6 @@ jobs:
       if: inputs.ci
       run: ddev validate ci
 
-    - name: Validate the CODEOWNERS file
-      if: inputs.codeowners
-      run: ddev validate codeowners
-
     - name: Validate default configuration files
       if: inputs.config
       run: ddev validate config $TARGET
@@ -246,13 +242,25 @@ jobs:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: ddev validate licenses
+      
+    - name: Validate the CODEOWNERS file
+      if: inputs.codeowners
+      run: ddev validate codeowners
+
+    - name: Create token
+      uses: actions/create-github-app-token@v1
+      id: token-generator
+      with:
+        app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
+        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
+        repositories: integrations-core
 
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}
       uses: actions/github-script@v7
       continue-on-error: true
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ steps.token-generator.outputs.token }}
         script: |
           const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
           github.rest.issues.createComment({ issue_number, owner, repo, body: "The `validations` job has failed; please review the `Files changed` tab for possible suggestions to resolve." });

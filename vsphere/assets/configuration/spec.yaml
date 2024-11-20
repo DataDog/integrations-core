@@ -296,7 +296,7 @@ files:
             - 'datacenter'
             - 'cluster'
             - 'storage_pod'
-            - 'vcenter_object_manager'
+            - 'vstorage_object_manager'
           type: array
           display_default: ['vm', 'host']
           items:
@@ -311,8 +311,9 @@ files:
           then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
           and 'Green to Gray' will be included.
           
-          Currently, events can only be collected from the following resources:
-          VMs, hosts, datacenters, datastores, and clusters.
+          Events can only be collected if their event type ID is in the 'vim.event' class:
+          https://vdc-repo.vmware.com/vmwb-repository/dcr-public/d1902b0e-d479-46bf-8ac9-cee0e31e8ec0/
+          07ce8dbd-db48-4261-9b8f-c6d3ad8ba472/vim.event.Event.html
 
           The default events reported are listed here:
           https://github.com/DataDog/integrations-core/tree/master/vsphere#events
@@ -384,6 +385,12 @@ files:
           Note: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
           Warning: Depending on the size of the vSphere environment, property metric collection can be slow,
           very CPU intensive and put pressure on the vCenter Server.
+        value:
+          type: boolean
+          example: false
+      - name: collect_vsan_data
+        description: |
+          If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
         value:
           type: boolean
           example: false
@@ -509,6 +516,16 @@ files:
         value:
           type: boolean
           example: true
+      - name: hostname_transform
+        description: |
+          Should be either 'upper' or 'lower' or 'default'
+          If 'upper', the check will convert the vSphere hostname to uppercase.
+          If 'lower', the check will convert the vSphere hostname to lowercase.
+          If 'default', the check will not transform the vSphere hostname (the default option).
+          Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
+        value:
+          type: string
+          example: default
       - name: rest_api_options
         description: |
           REST API options

@@ -21,37 +21,26 @@ pytestmark = [pytest.mark.integration]
 
 
 AGENT_HISTORY_QUERY = """\
-WITH HISTORY_ENTRIES AS (
+WITH BASE AS (
     SELECT {history_row_limit_filter}
         j.name AS job_name,
-        CAST(sjh1.job_id AS char(36)) AS job_id,
-        sjh1.step_name,
-        sjh1.step_id,
-        sjh1.instance_id AS step_instance_id,
-        (
-            SELECT MIN(sjh2.instance_id)
-            FROM msdb.dbo.sysjobhistory AS sjh2
-            WHERE sjh2.job_id = sjh1.job_id
-            AND sjh2.step_id = 0
-            AND sjh2.instance_id >= sjh1.instance_id
-        ) AS completion_instance_id,
-        (
-            SELECT DATEDIFF(SECOND, '19700101',
-                DATEADD(HOUR, sjh1.run_time / 10000,
-                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
-                        DATEADD(SECOND, sjh1.run_time % 100,
-                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
-                        )
+        CAST(sjh.job_id AS CHAR(36)) AS job_id,
+        sjh.step_name,
+        sjh.step_id,
+        sjh.instance_id AS step_instance_id,
+        DATEDIFF(SECOND, '19700101',
+            DATEADD(HOUR, sjh.run_time / 10000,
+                DATEADD(MINUTE, (sjh.run_time / 100) % 100,
+                    DATEADD(SECOND, sjh.run_time % 100,
+                        CAST(CAST(sjh.run_date AS CHAR(8)) AS DATETIME)
                     )
                 )
-            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
-        ) AS run_epoch_time,
-        (
-            (sjh1.run_duration / 10000) * 3600
-            + ((sjh1.run_duration % 10000) / 100) * 60
-            + (sjh1.run_duration % 100)
-        ) AS run_duration_seconds,
-        CASE sjh1.run_status
+            )
+        ) - DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * 60 AS run_epoch_time,
+        (sjh.run_duration / 10000) * 3600
+        + ((sjh.run_duration % 10000) / 100) * 60
+        + (sjh.run_duration % 100) AS run_duration_seconds,
+        CASE sjh.run_status
             WHEN 0 THEN 'Failed'
             WHEN 1 THEN 'Succeeded'
             WHEN 2 THEN 'Retry'
@@ -59,66 +48,79 @@ WITH HISTORY_ENTRIES AS (
             WHEN 4 THEN 'In Progress'
             ELSE 'Unknown'
         END AS step_run_status,
-        sjh1.message
-    FROM
-        msdb.dbo.sysjobhistory AS sjh1
-    INNER JOIN msdb.dbo.sysjobs AS j
-    ON j.job_id = sjh1.job_id
-    ORDER BY completion_instance_id DESC
-)
-SELECT * FROM HISTORY_ENTRIES
-WHERE
-    EXISTS (
-        SELECT 1
-        FROM msdb.dbo.sysjobhistory AS sjh2
-        WHERE sjh2.instance_id = HISTORY_ENTRIES.completion_instance_id
-        AND (DATEDIFF(SECOND, '19700101',
-                DATEADD(HOUR, sjh2.run_time / 10000,
-                    DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
-                        DATEADD(SECOND, sjh2.run_time % 100,
-                            CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
-                        )
+        sjh.message
+    FROM msdb.dbo.sysjobhistory AS sjh
+    INNER JOIN msdb.dbo.sysjobs AS j ON j.job_id = sjh.job_id
+	ORDER BY step_instance_id DESC
+),
+COMPLETION_CTE AS (
+    SELECT
+        BASE.*,
+        MIN(CASE WHEN BASE.step_id = 0 THEN BASE.step_instance_id END) OVER (
+            PARTITION BY BASE.job_id
+            ORDER BY BASE.step_instance_id
+            ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING
+        ) AS completion_instance_id
+    FROM BASE
+),
+HISTORY_ENTRIES AS (
+    SELECT
+        C.*,
+        DATEDIFF(SECOND, '19700101',
+            DATEADD(HOUR, c_sjh.run_time / 10000,
+                DATEADD(MINUTE, (c_sjh.run_time / 100) % 100,
+                    DATEADD(SECOND, c_sjh.run_time % 100,
+                        CAST(CAST(c_sjh.run_date AS CHAR(8)) AS DATETIME)
                     )
                 )
-            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
-        + (sjh2.run_duration / 10000) * 3600
-        + ((sjh2.run_duration % 10000) / 100) * 60
-        + (sjh2.run_duration % 100)) > 0 + {last_collection_time_filter}
-    )
+            )
+        ) - DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * 60
+        + (c_sjh.run_duration / 10000) * 3600
+        + ((c_sjh.run_duration % 10000) / 100) * 60
+        + (c_sjh.run_duration % 100) AS completion_epoch_time
+    FROM COMPLETION_CTE AS C
+    LEFT JOIN msdb.dbo.sysjobhistory AS c_sjh
+        ON c_sjh.instance_id = C.completion_instance_id
+		WHERE C.completion_instance_id IS NOT NULL
+)
+SELECT
+	job_name,
+	job_id,
+	step_name,
+	step_id,
+	step_instance_id,
+	completion_instance_id,
+	run_epoch_time,
+	run_duration_seconds,
+	step_run_status,
+	message
+FROM HISTORY_ENTRIES
+WHERE
+    completion_epoch_time > {last_collection_time_filter};
 """
 
+
 FORMATTED_HISTORY_QUERY = """\
-WITH HISTORY_ENTRIES AS (
+WITH BASE AS (
     SELECT TOP 10000
         j.name AS job_name,
-        CAST(sjh1.job_id AS char(36)) AS job_id,
-        sjh1.step_name,
-        sjh1.step_id,
-        sjh1.instance_id AS step_instance_id,
-        (
-            SELECT MIN(sjh2.instance_id)
-            FROM msdb.dbo.sysjobhistory AS sjh2
-            WHERE sjh2.job_id = sjh1.job_id
-            AND sjh2.step_id = 0
-            AND sjh2.instance_id >= sjh1.instance_id
-        ) AS completion_instance_id,
-        (
-            SELECT DATEDIFF(SECOND, '19700101',
-                DATEADD(HOUR, sjh1.run_time / 10000,
-                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
-                        DATEADD(SECOND, sjh1.run_time % 100,
-                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
-                        )
+        CAST(sjh.job_id AS CHAR(36)) AS job_id,
+        sjh.step_name,
+        sjh.step_id,
+        sjh.instance_id AS step_instance_id,
+        DATEDIFF(SECOND, '19700101',
+            DATEADD(HOUR, sjh.run_time / 10000,
+                DATEADD(MINUTE, (sjh.run_time / 100) % 100,
+                    DATEADD(SECOND, sjh.run_time % 100,
+                        CAST(CAST(sjh.run_date AS CHAR(8)) AS DATETIME)
                     )
                 )
-            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
-        ) AS run_epoch_time,
-        (
-            (sjh1.run_duration / 10000) * 3600
-            + ((sjh1.run_duration % 10000) / 100) * 60
-            + (sjh1.run_duration % 100)
-        ) AS run_duration_seconds,
-        CASE sjh1.run_status
+            )
+        ) - DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * 60 AS run_epoch_time,
+        (sjh.run_duration / 10000) * 3600
+        + ((sjh.run_duration % 10000) / 100) * 60
+        + (sjh.run_duration % 100) AS run_duration_seconds,
+        CASE sjh.run_status
             WHEN 0 THEN 'Failed'
             WHEN 1 THEN 'Succeeded'
             WHEN 2 THEN 'Retry'
@@ -126,32 +128,55 @@ WITH HISTORY_ENTRIES AS (
             WHEN 4 THEN 'In Progress'
             ELSE 'Unknown'
         END AS step_run_status,
-        sjh1.message
-    FROM
-        msdb.dbo.sysjobhistory AS sjh1
-    INNER JOIN msdb.dbo.sysjobs AS j
-    ON j.job_id = sjh1.job_id
-    ORDER BY completion_instance_id DESC
-)
-SELECT * FROM HISTORY_ENTRIES
-WHERE
-    EXISTS (
-        SELECT 1
-        FROM msdb.dbo.sysjobhistory AS sjh2
-        WHERE sjh2.instance_id = HISTORY_ENTRIES.completion_instance_id
-        AND (DATEDIFF(SECOND, '19700101',
-                DATEADD(HOUR, sjh2.run_time / 10000,
-                    DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
-                        DATEADD(SECOND, sjh2.run_time % 100,
-                            CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
-                        )
+        sjh.message
+    FROM msdb.dbo.sysjobhistory AS sjh
+    INNER JOIN msdb.dbo.sysjobs AS j ON j.job_id = sjh.job_id
+	ORDER BY step_instance_id DESC
+),
+COMPLETION_CTE AS (
+    SELECT
+        BASE.*,
+        MIN(CASE WHEN BASE.step_id = 0 THEN BASE.step_instance_id END) OVER (
+            PARTITION BY BASE.job_id
+            ORDER BY BASE.step_instance_id
+            ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING
+        ) AS completion_instance_id
+    FROM BASE
+),
+HISTORY_ENTRIES AS (
+    SELECT
+        C.*,
+        DATEDIFF(SECOND, '19700101',
+            DATEADD(HOUR, c_sjh.run_time / 10000,
+                DATEADD(MINUTE, (c_sjh.run_time / 100) % 100,
+                    DATEADD(SECOND, c_sjh.run_time % 100,
+                        CAST(CAST(c_sjh.run_date AS CHAR(8)) AS DATETIME)
                     )
                 )
-            ) - DATEPART(tzoffset, SYSDATETIMEOFFSET()) * 60
-        + (sjh2.run_duration / 10000) * 3600
-        + ((sjh2.run_duration % 10000) / 100) * 60
-        + (sjh2.run_duration % 100)) > 0 + 10000
-    )
+            )
+        ) - DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * 60
+        + (c_sjh.run_duration / 10000) * 3600
+        + ((c_sjh.run_duration % 10000) / 100) * 60
+        + (c_sjh.run_duration % 100) AS completion_epoch_time
+    FROM COMPLETION_CTE AS C
+    LEFT JOIN msdb.dbo.sysjobhistory AS c_sjh
+        ON c_sjh.instance_id = C.completion_instance_id
+		WHERE C.completion_instance_id IS NOT NULL
+)
+SELECT
+	job_name,
+	job_id,
+	step_name,
+	step_id,
+	step_instance_id,
+	completion_instance_id,
+	run_epoch_time,
+	run_duration_seconds,
+	step_run_status,
+	message
+FROM HISTORY_ENTRIES
+WHERE
+    completion_epoch_time > 10000;
 """
 
 AGENT_ACTIVITY_DURATION_QUERY = """\
@@ -329,6 +354,26 @@ def agent_jobs_instance(instance_docker):
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
+
+
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "dbm_enabled,agent_jobs_enabled,expected_agent_jobs_enabled",
+    [
+        (True, True, True),
+        (True, False, False),
+        (False, True, False),
+        (False, False, False),
+    ],
+)
+def test_agent_job_enabled(instance_docker, dbm_enabled, agent_jobs_enabled, expected_agent_jobs_enabled):
+    instance_docker['dbm'] = dbm_enabled
+    instance_docker['agent_jobs'] = {'enabled': agent_jobs_enabled}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
+    agent_jobs_metrics = [m for m in check.database_metrics if m.__class__.__name__ == 'SqlserverAgentMetrics']
+    assert agent_jobs_metrics is not None
+    assert agent_jobs_metrics[0].enabled == expected_agent_jobs_enabled
 
 
 @pytest.mark.usefixtures('dd_environment')

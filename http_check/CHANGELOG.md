@@ -2,6 +2,30 @@
 
 <!-- towncrier release notes start -->
 
+## 11.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 10.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
 ## 9.9.0 / 2024-09-05
 
 ***Added***:

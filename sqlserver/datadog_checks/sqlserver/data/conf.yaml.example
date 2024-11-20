@@ -12,6 +12,12 @@ init_config:
     #   - name: sqlserver.clr.execution
     #     counter_name: CLR Execution
 
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
+
     ## @param global_custom_queries - list of mappings - optional
     ## See `custom_queries` defined below.
     ##
@@ -256,6 +262,12 @@ instances:
     #
     # include_tempdb_file_space_usage_metrics: true
 
+    ## @param include_xe_metrics - boolean - optional - default: true
+    ## Include extended events (XE) metrics. The collection of XE metrics is automatically enabled
+    ## when `deadlocks_collection` is enabled.
+    #
+    # include_xe_metrics: true
+
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
     ## SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
@@ -341,6 +353,13 @@ instances:
         ## execution plan.
         #
         # samples_per_hour_per_query: 4
+
+        ## @param lookback_window - integer - optional - default: 2 * collection_interval
+        ## Queries whose last execution completed after the lookback window are excluded from
+        ## metrics collection. Set a longer lookback window (in seconds) to capture infrequently
+        ## run queries.
+        #
+        # lookback_window: 600
 
     ## Configure collection of procedure metrics
     #
@@ -464,6 +483,12 @@ instances:
         ## This value is optional if the value of `host` is already configured to the fully qualified domain name.
         #
         # fully_qualified_domain_name: my-sqlserver-database.database.windows.net
+
+        ## @param aggregate_sql_databases - boolean - optional - default: false
+        ## Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
+        ## Only applicable when `deployment_type` is set to `sql_database`.
+        #
+        # aggregate_sql_databases: false
 
     ## Configuration section used for Azure AD Authentication.
     ##
@@ -678,6 +703,54 @@ instances:
     ## If the DB specified doesn't exist on the server then don't do the check
     #
     # ignore_missing_database: false
+
+    ## Available for Agent 7.56 and newer.
+    ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
+    ## only for the database configured with `database` parameter.
+    #
+    # schemas_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 10
+        ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
+        ## Capped by `schemas_collection.collection_interval`
+        #
+        # max_execution_time: 10
+
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+    ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
+    #
+    # propagate_agent_tags: false
+
+    ## Configure the collection of deadlock data.
+    #
+    # deadlocks_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_deadlocks - number - optional - default: 100
+        ## Set the maximum number of deadlocks to retrieve per collection.
+        #
+        # max_deadlocks: 100
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

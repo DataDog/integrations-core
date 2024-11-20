@@ -10,7 +10,9 @@
             "clustername:my_cluster",
             "hosting_type:self-hosted"
         ],
+        "cloud_metadata": {},
         "timestamp": 1715911398111.2722,
+        "service": "my_service",
         "mongodb_slow_queries": [
             {
                 "timestamp": 1720550483298.0,
@@ -265,6 +267,16 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 5
+                },
+                "queues": {
+                    "ingress": {
+                        "admissions": 7,
+                        "total_time_queued_micros": 0
+                    },
+                    "execution": {
+                        "admissions": 328,
+                        "total_time_queued_micros": 2109
+                    }
                 }
             },
             {
@@ -375,6 +387,17 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 3
+                },
+                "working_millis": 20,
+                "queues": {
+                    "ingress": {
+                        "admissions": 7,
+                        "total_time_queued_micros": 0
+                    },
+                    "execution": {
+                        "admissions": 328,
+                        "total_time_queued_micros": 2109
+                    }
                 }
             },
             {
@@ -429,6 +452,68 @@
                 "flow_control_stats": {
                     "acquire_count": 3
                 }
+            },
+            {
+                "timestamp": 32479987545009.0,
+                "dbname": "test",
+                "op": "command",
+                "ns": "test.myview",
+                "query_signature": "c1df6c33f6b6c258",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"test\"}",
+                "comment": "update customers subscription status by age",
+                "mills": 27,
+                "num_yields": 2,
+                "response_length": 60,
+                "cpu_nanos": 27721625,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 4
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 3
+                },
+                "resolved_views": [
+                    {
+                        "view_namespace": "test.myview",
+                        "dependency_chain": [
+                            "myView",
+                            "myCollection"
+                        ]
+                    }
+                ]
             },
             {
                 "timestamp": 32479987545040.0,

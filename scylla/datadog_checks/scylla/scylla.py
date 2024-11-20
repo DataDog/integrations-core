@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urlparse
 
-from six import PY2
-
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
 from .metrics import ADDITIONAL_METRICS_MAP, INSTANCE_DEFAULT_METRICS
+from .scylla_v2 import ScyllaCheckV2
 
 
 class ScyllaCheck(OpenMetricsBaseCheck):
@@ -27,15 +26,6 @@ class ScyllaCheck(OpenMetricsBaseCheck):
         instance = instances[0]
 
         if instance.get('openmetrics_endpoint'):
-            if PY2:
-                raise ConfigurationError(
-                    'This version of the integration is only available when using Python 3. '
-                    'Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3/ '
-                    'for more information or use the older style config.'
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .scylla_v2 import ScyllaCheckV2
-
             return ScyllaCheckV2(name, init_config, instances)
         else:
             return super(ScyllaCheck, cls).__new__(cls)

@@ -6,11 +6,11 @@ import os
 import mock
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py3, requires_windows
+from datadog_checks.dev.testing import requires_windows
 
 from .utils import SERVER, get_check
 
-pytestmark = [requires_py3, requires_windows]
+pytestmark = [requires_windows]
 
 
 def test(aggregator, dd_run_check):
