@@ -17,6 +17,7 @@ from .constants import (
     MOR_TYPE_AS_STRING,
     PER_RESOURCE_EVENTS,
     SOURCE_TYPE,
+    VSAN_EVENT_PREFIX,
 )
 
 
@@ -55,6 +56,8 @@ class VSphereEvent(object):
                 return True
 
         if self.event_type not in self.exclude_filters:
+            if self.raw_event.eventTypeId and VSAN_EVENT_PREFIX in self.raw_event.eventTypeId:
+                return False
             return True
 
         filters = self.exclude_filters[self.event_type]

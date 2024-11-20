@@ -270,7 +270,13 @@ class SQLServer(AgentCheck):
                     # for Azure SQL Database, each database on a given "server" has isolated compute resources,
                     # meaning that the agent is only able to see query activity for the specific database it's
                     # connected to. For this reason, each Azure SQL database is modeled as an independent host.
-                    self._resolved_hostname = "{}/{}".format(host, configured_database)
+                    azure = self._config.cloud_metadata.get("azure")
+                    if azure and azure.get("aggregate_sql_databases"):
+                        # If the aggregate_sql_databases option is enabled, the agent will group all Azure SQL
+                        # databases and report them as a single database instance.
+                        self._resolved_hostname = host
+                    else:
+                        self._resolved_hostname = "{}/{}".format(host, configured_database)
         # set resource tags to properly tag with updated hostname
         self.set_resource_tags()
 
@@ -739,6 +745,7 @@ class SQLServer(AgentCheck):
 
     def _new_database_metric_executor(self, database_metric_class, db_names=None):
         return database_metric_class(
+            config=self._config,
             instance_config=self.instance,
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,

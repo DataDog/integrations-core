@@ -203,6 +203,9 @@ jobs:
       OUT_DIR: output/macos-x86_64
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
 
+    permissions:
+      packages: write
+
     steps:
     - name: Set up environment
       run: |-
