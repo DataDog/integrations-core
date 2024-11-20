@@ -304,28 +304,6 @@ instances:
     #   - jumbo_chunks
     #   - sharded_data_distribution
 
-    ## The interval in seconds at which to collect certain types of metrics.
-    #
-    # metrics_collection_interval:
-
-        ## @param collection - integer - optional - default: 15
-        ## The interval in seconds at which to collect collection metrics.
-        ## Only applicable when `collection` is added to `additional_metrics`.
-        #
-        # collection: 15
-
-        ## @param collections_indexes_stats - integer - optional - default: 15
-        ## The interval in seconds at which to collect collection indexes stats metrics.
-        ## Only applicable when `collections_indexes_stats` is set to `true`.
-        #
-        # collections_indexes_stats: 15
-
-        ## @param sharded_data_distribution - integer - optional - default: 300
-        ## The interval in seconds at which to collect sharded data distribution metrics.
-        ## Only applicable when `sharded_data_distribution` is added to `additional_metrics`.
-        #
-        # sharded_data_distribution: 300
-
     ## @param collections - list of strings - optional
     ## Collect metrics on specific collections from the database specified
     ## IT Requires `additional_metrics.collection` to be present.

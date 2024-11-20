@@ -350,6 +350,7 @@ files:
     - name: metrics_collection_interval
       description: |
         The interval in seconds at which to collect certain types of metrics.
+      hidden: true
       options:
         - name: collection
           description: |
