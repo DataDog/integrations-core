@@ -314,6 +314,7 @@ def check_replication_slots(aggregator, expected_tags, count=1):
     for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS):
         if 'slot_type:physical' in expected_tags and metric_name in [
             'postgresql.replication_slot.confirmed_flush_delay_bytes',
+            'postgresql.replication_slot.catalog_xmin_age',
         ]:
             continue
         if 'slot_type:logical' in expected_tags and metric_name in [
