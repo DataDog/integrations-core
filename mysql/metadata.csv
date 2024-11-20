@@ -108,7 +108,7 @@ mysql.innodb.queries_inside,gauge,,query,,As shown in the FILE I/O section of th
 mysql.innodb.queries_queued,gauge,,query,,As shown in the FILE I/O section of the SHOW ENGINE INNODB STATUS output.,0,mysql,mysql innodb queries queued,
 mysql.innodb.read_views,gauge,,,,As shown in the FILE I/O section of the SHOW ENGINE INNODB STATUS output.,0,mysql,mysql innodb read views,
 mysql.innodb.row_lock_current_waits,gauge,,,,The number of row locks currently being waited for by operations on InnoDB tables.,0,mysql,mysql innodb row_lock_current_waits,
-mysql.innodb.row_lock_time,gauge,,fraction,,Fraction of time spent (ms/s) acquiring row locks.,-1,mysql,row lock time,
+mysql.innodb.row_lock_time,gauge,,millisecond,,The time spent acquiring row locks.,-1,mysql,row lock time,
 mysql.innodb.row_lock_waits,gauge,,event,second,The number of times per second a row lock had to be waited for.,0,mysql,innodb row lock waits,
 mysql.innodb.rows_deleted,gauge,,row,second,Number of rows deleted from InnoDB tables.,0,mysql,mysql innodb rows_deleted,
 mysql.innodb.rows_inserted,gauge,,row,second,Number of rows inserted into InnoDB tables.,0,mysql,mysql innodb rows_inserted,
