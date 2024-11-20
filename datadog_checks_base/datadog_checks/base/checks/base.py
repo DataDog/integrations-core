@@ -12,20 +12,9 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    Callable,
-    Deque,  # noqa: F401
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
-)
+from typing import Deque  # noqa: F401
+from typing import (TYPE_CHECKING, Any, AnyStr, Callable, Dict, List, Optional,
+                    Sequence, Set, Tuple, Union)
 
 import yaml
 from pydantic import BaseModel, ValidationError
@@ -35,15 +24,13 @@ from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..errors import ConfigurationError
-from ..types import (
-    AgentConfigType,  # noqa: F401
-    Event,  # noqa: F401
-    ExternalTagType,  # noqa: F401
-    InitConfigType,  # noqa: F401
-    InstanceType,  # noqa: F401
-    ProxySettings,  # noqa: F401
-    ServiceCheckStatus,  # noqa: F401
-)
+from ..types import AgentConfigType  # noqa: F401
+from ..types import Event  # noqa: F401
+from ..types import ExternalTagType  # noqa: F401
+from ..types import InitConfigType  # noqa: F401
+from ..types import InstanceType  # noqa: F401
+from ..types import ProxySettings  # noqa: F401
+from ..types import ServiceCheckStatus  # noqa: F401
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_native_string
 from ..utils.diagnose import Diagnosis
@@ -310,7 +297,8 @@ class AgentCheck(object):
         self.__logs_enabled = None
 
         if os.environ.get("GOFIPS", None):
-            self.enable_fips()
+            self.enable_openssl_fips()
+            self.enable_cryptography_fips()
 
     def _create_metrics_pattern(self, metric_patterns, option_name):
         all_patterns = metric_patterns.get(option_name, [])
@@ -1449,24 +1437,29 @@ class AgentCheck(object):
         for m in metrics:
             self.gauge(m.name, m.value, tags=tags, raw=True)
 
-    def enable_fips(self, path_to_embedded: str = None):
-        from pathlib import Path
+    def _set_openssl_env_vars(self, path_to_embedded: str = None):
+        if not (os.getenv("OPENSSL_CONF") and os.getenv("OPENSSL_MODULES")):
+            from pathlib import Path
 
+            if path_to_embedded is None:
+                import sys
+
+                embedded_dir = "embedded3" if os.name == 'nt' else "embedded"
+                path_to_embedded = sys.executable.split("embedded")[0] + embedded_dir
+            path_to_embedded = Path(path_to_embedded)
+            if not path_to_embedded.exists():
+                raise RuntimeError()  # TODO: handle this better
+            # The cryptography package can enter FIPS mode if its internal OpenSSL
+            # can access the FIPS module and configuration.
+            os.environ["OPENSSL_CONF"] = str(path_to_embedded / "ssl" / "openssl.cnf")
+            os.environ["OPENSSL_MODULES"] = str(path_to_embedded / "lib" / "ossl-modules")
+
+    def enable_cryptography_fips(self, path_to_embedded: str = None):
         from cryptography.exceptions import InternalError
         from cryptography.hazmat.backends import default_backend
 
-        if path_to_embedded is None:
-            import sys
+        self._set_fips_env_vars(path_to_embedded)
 
-            embedded_dir = "embedded3" if os.name == 'nt' else "embedded"
-            path_to_embedded = sys.executable.split("embedded")[0] + embedded_dir
-        path_to_embedded = Path(path_to_embedded)
-        if not path_to_embedded.exists():
-            raise RuntimeError()  # TODO: handle this better
-        # The cryptography package can enter FIPS mode if its internal OpenSSL
-        # can access the FIPS module and configuration.
-        os.environ["OPENSSL_CONF"] = str(path_to_embedded / "ssl" / "openssl.cnf")
-        os.environ["OPENSSL_MODULES"] = str(path_to_embedded / "lib" / "ossl-modules")
         cryptography_backend = default_backend()
         try:
             cryptography_backend._enable_fips()
@@ -1476,3 +1469,21 @@ class AgentCheck(object):
         if not cryptography_backend._fips_enabled:
             logging.error("FIPS mode was not enabled successfully.")
             raise RuntimeError("FIPS is not enabled.")
+
+    def enable_openssl_fips(self, path_to_embedded: str = None):
+        from cffi import FFI
+
+        self._set_fips_env_vars(path_to_embedded)
+
+        ffi = FFI()
+        libcrypto = ffi.dlopen("libcrypto.so")
+        ffi.cdef(
+            """
+            int EVP_default_properties_enable_fips(void *ctx, int enable);
+        """
+        )
+
+        if not libcrypto.EVP_default_properties_enable_fips(ffi.NULL, 1):
+            raise RuntimeError("Failed to enable FIPS mode in OpenSSL")
+        else:
+            logging.info("OpenSSL FIPS mode enabled successfully.")
