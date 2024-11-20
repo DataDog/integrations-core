@@ -1449,29 +1449,20 @@ class AgentCheck(object):
         for m in metrics:
             self.gauge(m.name, m.value, tags=tags, raw=True)
 
-    def enable_fips(self, path_to_embedded=None):
+    def enable_fips(self, path_to_embedded: str = None):
         from pathlib import Path
 
         from cryptography.exceptions import InternalError
         from cryptography.hazmat.backends import default_backend
 
         if path_to_embedded is None:
-            if os.name == 'nt':  # Windows
-                import winreg
+            import sys
 
-                registry_hive = winreg.HKEY_LOCAL_MACHINE
-                registry_path = r"SOFTWARE\Datadog\Datadog Agent"
-                try:
-                    registry_key = winreg.OpenKey(registry_hive, registry_path, 0, winreg.KEY_READ)
-                    # The Agent install path is stored in a Windows registry
-                    path_to_agent, _ = winreg.QueryValueEx(registry_key, "InstallPath")
-                    winreg.CloseKey(registry_key)
-                except OSError as e:
-                    logging.error(f'The install path could not be read from the \"{registry_path}\" registry.')
-                    raise e
-                path_to_embedded = Path(path_to_agent) / "embedded3"
-            else:  # Linux
-                path_to_embedded = Path('/opt/datadog-agent/embedded')
+            embedded_dir = "embedded3" if os.name == 'nt' else "embedded"
+            path_to_embedded = sys.executable.split("embedded")[0] + embedded_dir
+        path_to_embedded = Path(path_to_embedded)
+        if not path_to_embedded.exists():
+            raise RuntimeError()  # TODO: handle this better
         # The cryptography package can enter FIPS mode if its internal OpenSSL
         # can access the FIPS module and configuration.
         os.environ["OPENSSL_CONF"] = str(path_to_embedded / "ssl" / "openssl.cnf")
