@@ -12,11 +12,6 @@ jobs:
     name: Publish test results
     runs-on: ubuntu-22.04
 
-    permissions:
-      checks: write
-      pull-requests: write
-      contents: write
-      
     steps:
     - name: Download and extract artifacts
       id: download
