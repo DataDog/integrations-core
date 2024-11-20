@@ -10,7 +10,7 @@ Deploying the [Datadog Agent][2] on your OKE cluster can also help you track the
 
 In addition to monitoring your nodes, pods, and containers, the Agent can also collect and report metrics from the services running in your cluster, so that you can:
 
-- Explore your OKE clusters with [pre-conifgured Kubernetes dashboards][3]
+- Explore your OKE clusters with [pre-configured Kubernetes dashboards][3]
 - Monitor containers and processes in real time
 - Automatically track and monitor containerized services
 
