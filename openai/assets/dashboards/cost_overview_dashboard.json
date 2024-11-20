@@ -6,7 +6,7 @@
             "id": 3636494906945158,
             "definition": {
                 "type": "note",
-                "content": "There are **4 sections** in this dashboard, all require Cloud Cost Management for OpenAI to be set up to see data.\n\n1. **OpenAI Cost Management**: [Set up](https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#setup) Cloud Cost Management and then the OpenAI integration\n2.  **OpenAI Integration (API)**: [Set up](https://docs.datadoghq.com/integrations/openai/?tab=apikey) the **free** API set-up portion\n3. **LLM Observability**: [Set up](https://docs.datadoghq.com/llm_observability/setup/?tab=decorators) LLM Observability \n\nYou can clone and customize this dashboard for your specific tags",
+                "content": "There are **3 sections** in this dashboard, all require Cloud Cost Management for OpenAI to be set up to see data.\n\n1. **OpenAI Cost Management**: [Set up](https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#setup) Cloud Cost Management and then the OpenAI integration\n2.  **OpenAI Integration (API)**: [Set up](https://docs.datadoghq.com/integrations/openai/?tab=apikey) the **free** API set-up portion\n3. **LLM Observability**: [Set up](https://docs.datadoghq.com/llm_observability/setup/?tab=decorators) LLM Observability \n\nYou can clone and customize this dashboard for your specific tags",
                 "background_color": "blue",
                 "font_size": "16",
                 "text_align": "left",
