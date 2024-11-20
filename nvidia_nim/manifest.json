@@ -17,7 +17,8 @@
       "Supported OS::macOS",
       "Category::Log Collection",
       "Category::AI/ML",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -33,7 +34,7 @@
       },
       "metrics": {
         "prefix": "nvidia_nim.",
-        "check": "",
+        "check": "nvidia_nim.num_requests.running",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
