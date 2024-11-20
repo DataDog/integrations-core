@@ -4,9 +4,9 @@
 
 This integration ingests the following logs:
 
-- Audit Logs: Audit logs offer a record of important events, empowering your teams to detect and minimize the impact of incidents when they occur, and scrutinize configuration edits.
+- **Audit Logs**: Audit logs provide a detailed record of significant events, enabling your teams to identify and mitigate the impact of incidents as they arise, while also reviewing configuration changes with precision.
 
-This integration collects audit logs and sends them to Datadog for analysis. Datadog uses the built-in logs pipeline to parse and enrich these logs, enabling effortless search and analysis. The integration provides insight into activities on the Asana platform through the out-of-the-box dashboards. Also, this integration provides out-of-the-box detection rules.
+This integration gathers audit logs and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Asana platform. Additionally, it includes ready-to-use detection rules for enhanced monitoring and security.
 
 ## Setup
 
@@ -14,15 +14,15 @@ This integration collects audit logs and sends them to Datadog for analysis. Dat
 
 #### Get Credentials of Asana
 
-1. Log in to your [Asana admin console][3] as **super admin** of an Enterprise+ organization.
-2. After logging in, click the **Apps** tab from your admin console.
-3. Click **Service accounts**.
-4. Click the **Add service account** button.
-    1. Under **Name**, Enter a descriptive and identifiable service account name.
-    2. Under **Permissions scopes**, choose **Scoped permissions**, and tick the **Audit logs** box.
-5. Click **Save changes** and copy the **Service Account PAT** for later use.
-6. Navigate to the **Settings** tab from your admin console.
-7. Scroll down till the end of the page, where you can find **Domain ID (Workspace ID)**.
+1. Log in to your [Asana Admin Console][3] as a **Super Admin** of an Enterprise+ organization.
+2. Navigate to the **Apps** tab in your Admin Console.
+3. Click on **Service Accounts**.
+4. Select the **Add Service Account** button and complete the following steps:
+    1. Enter a descriptive and identifiable name under **Name**.
+    2. Under **Permission Scopes**, select **Scoped permissions** and check the **Audit Logs** box.
+5. Click **Save Changes** and copy the **Service Account PAT** for later use.
+6. Go to the **Settings** tab in your Admin Console.
+7. Scroll to the bottom of the page to locate the **Domain ID (Workspace ID)**.
 
 #### Add your Asana Credentials
 
@@ -33,7 +33,7 @@ This integration collects audit logs and sends them to Datadog for analysis. Dat
 
 ### Logs
 
-The Asana integration collects and forwards audit logs to Datadog.
+The Asana integration collects and forwards audit logs to Datadog. For more details on the logs we collect with this integration, see the Asana Audit Logs API [Docs][4].
 
 ### Metrics
 
@@ -50,3 +50,4 @@ For any further assistance, contact [Datadog support][2].
 [1]: https://asana.com/
 [2]: https://docs.datadoghq.com/help/
 [3]: https://app.asana.com/admin
+[4]: https://developers.asana.com/docs/audit-log-events
