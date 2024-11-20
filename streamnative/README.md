@@ -4,7 +4,7 @@
 
 [StreamNative][1] provides an enterprise-grade messaging and event streaming platform built on Apache Pulsar. It offers scalable, real-time data streaming solutions with features like multi-tenancy, geo-replication, and seamless integration with cloud services.
 
-The StreamNative integration Collects the following types of [metrics][2]:
+The StreamNative integration collects the following types of [metrics][2]:
 
 1. Health
 2. Pulsar Resource
@@ -18,7 +18,7 @@ The StreamNative integration Collects the following types of [metrics][2]:
 
 #### Get StreamNative credentials
 
-##### Log in to the [StreamNative Cloud Console Account][3].
+Log into the [StreamNative Cloud Console Account][3].
 ##### Get the `Organization ID` and `Instance Name`:
 
 1. Click the profile icon and select **Organizations**.
