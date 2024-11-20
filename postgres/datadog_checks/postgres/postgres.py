@@ -958,8 +958,11 @@ class PostgreSql(AgentCheck):
             self.load_version()
 
             # Add raw version as a tag
-            tags.append(f'postgresql_version:{self.raw_version}')
-            tags_to_add.append(f'postgresql_version:{self.raw_version}')
+            # tags.append(f'postgresql_version:{self.raw_version}')
+            # tags_to_add.append(f'postgresql_version:{self.raw_version}')
+
+            tags.append(f'database_hostname:ahostname')
+            tags_to_add.append(f'database_hostname:ahostname')
 
             # Add system identifier as a tag
             if self.system_identifier:
