@@ -5,7 +5,7 @@
 from pymongo.errors import OperationFailure
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.mongo.collectors.base import MongoCollector
+from datadog_checks.mongo.collectors.base import MongoCollector, collection_interval_checker
 from datadog_checks.mongo.metrics import COLLECTION_METRICS
 
 
@@ -20,6 +20,11 @@ class CollStatsCollector(MongoCollector):
         self.db_name = db_name
         self.max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
         self.coll_stats_pipeline_supported = True
+        self._collection_interval = check._config.metrics_collection_interval['collection']
+        self._collector_key = (
+            self.__class__.__name__,
+            db_name,
+        )  # db_name is part of collector key
 
     def compatible_with(self, deployment):
         # Can only be run once per cluster.
@@ -55,6 +60,7 @@ class CollStatsCollector(MongoCollector):
             self.coll_stats_pipeline_supported = False
             return [api.coll_stats_compatable(self.db_name, coll_name)]
 
+    @collection_interval_checker
     def collect(self, api):
         coll_names = self._get_collections(api)
         for coll_name in coll_names:
