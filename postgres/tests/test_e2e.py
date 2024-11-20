@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import socket
+
 import pytest
 
-import socket
 from .common import _get_expected_tags, check_bgw_metrics, check_common_metrics
 from .utils import _get_conn
-from datadog_checks.dev import get_docker_hostname
+
 
 @pytest.mark.e2e
 def test_e2e(check, dd_agent_check, pg_instance):
