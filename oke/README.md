@@ -20,7 +20,7 @@ Once you set up the [Oracle Cloud Infrastructure][4] integration, ensure that th
 
 Because Datadog already integrates with Kubernetes, it is ready-made to monitor OKE. If you're running the Agent in a Kubernetes cluster and plan to migrate to OKE, you can continue monitoring your cluster with Datadog.
 
-Deploying the Agent as a DaemonSet via our [Helm chart][6] is the most straightforward (and recommended) method, since it ensures that the Agent will run as a pod on every node within your cluster and that each new node automatically has the Agent installed. You can also configure the Agent to collect process data, traces, and logs by adding a few extra lines to a Helm values file. Additionally, OKE node pools are supported.
+Deploying the Agent as a DaemonSet with the [Helm chart][6] is the most straightforward (and recommended) method, since it ensures that the Agent will run as a pod on every node within your cluster and that each new node automatically has the Agent installed. You can also configure the Agent to collect process data, traces, and logs by adding a few extra lines to a Helm values file. Additionally, OKE node pools are supported.
 
 
 ## Troubleshooting
