@@ -28,7 +28,7 @@ MESSAGE_LENGTH = 2500  # https://docs.datadoghq.com/api/v1/service-checks/
 DATA_METHODS = ["POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 
 
-class HTTPCheck(AgentCheck): # Dummy comment to trigger a test run.
+class HTTPCheck(AgentCheck):  # Dummy comment to trigger a test run.
     SOURCE_TYPE_NAME = "system"
     SC_STATUS = "http.can_connect"
     SC_SSL_CERT = "http.ssl_cert"
