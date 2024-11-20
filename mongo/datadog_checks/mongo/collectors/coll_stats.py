@@ -21,10 +21,7 @@ class CollStatsCollector(MongoCollector):
         self.max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
         self.coll_stats_pipeline_supported = True
         self._collection_interval = check._config.metrics_collection_interval['collection']
-        self._collector_key = (
-            self.__class__.__name__,
-            db_name,
-        )  # db_name is part of collector key
+        self._collector_key = (self.__class__.__name__, db_name)  # db_name is part of collector key
 
     def compatible_with(self, deployment):
         # Can only be run once per cluster.
