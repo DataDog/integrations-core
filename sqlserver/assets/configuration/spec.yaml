@@ -764,7 +764,7 @@ files:
       value:
         type: number
         example: 1800
-        display_default: false
+        display_default: 300
     - name: schemas_collection
       description: |
         Available for Agent 7.56 and newer.
