@@ -1,7 +1,7 @@
 # Anthropic
 
 ## Overview
-Use the Anthropic integration to monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatbots or data extraction tools.
+Use the Anthropic integration to monitor, troubleshoot, and evaluate your LLM-powered applications, such as chatbots or data extraction tools, using Anthropic's models. 
 
 If you are building LLM applications, use LLM Observability to investigate the root cause of issues,
 monitor operational performance, and evaluate the quality, privacy, and safety of your LLM applications.
