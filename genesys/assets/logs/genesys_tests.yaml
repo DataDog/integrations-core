@@ -32,6 +32,7 @@ tests:
         "context": {},
         "entityChanges": []
       }
+    service: "audit"
     result: null
   - sample: |-
       {
@@ -66,3 +67,4 @@ tests:
         "entityChanges": []
       }
     result: null
+    service: "audit"
