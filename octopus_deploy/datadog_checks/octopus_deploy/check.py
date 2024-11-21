@@ -141,12 +141,13 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 (None, space.get("Name"), space, None)
                 for space in self._process_endpoint("api/spaces", report_service_check=True).get('Items', [])
             ]
-        self.log.debug("Spaces: %s", spaces)
+        self.log.debug("Monitoring %s spaces", len(spaces))
         for _, _, space, space_config in spaces:
             space_id = space.get("Id")
             space_name = space.get("Name")
             tags = self._base_tags + [f'space_id:{space_id}', f'space_name:{space_name}']
             self.gauge("space.count", 1, tags=tags)
+            self.log.debug("Processing space %s", space_name)
             self._process_project_groups(
                 space_id, space_name, space_config.get("project_groups") if space_config else None
             )
@@ -164,7 +165,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                     (None, project_group.get("Name"), project_group, None)
                     for project_group in self._process_endpoint(f"api/{space_id}/projectgroups").get('Items', [])
                 ]
-        self.log.debug("Project Groups: %s", project_groups)
+        self.log.debug("Monitoring %s Project Groups", len(project_groups))
         for _, _, project_group, project_group_config in project_groups:
             project_group_id = project_group.get("Id")
             project_group_name = project_group.get("Name")
@@ -197,7 +198,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                         f"api/{space_id}/projectgroups/{project_group_id}/projects"
                     ).get('Items', [])
                 ]
-        self.log.debug("Projects: %s", projects)
+        self.log.debug("Monitoring %s Projects", len(projects))
         for _, _, project, _ in projects:
             project_id = project.get("Id")
             project_name = project.get("Name")
@@ -212,18 +213,20 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._process_completed_tasks(space_id, space_name, project_id, project_name)
 
     def _process_queued_and_running_tasks(self, space_id, space_name, project_id, project_name):
+        self.log.debug("Collecting running and queued tasks for project %s", project_name)
         params = {'project': project_id, 'states': ["Queued", "Executing"]}
         response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
+        self._process_tasks(space_name, project_name, response_json.get('Items', []))
 
     def _process_completed_tasks(self, space_id, space_name, project_id, project_name):
+        self.log.debug("Collecting completed tasks for project %s", project_name)
         params = {
             'project': project_id,
             'fromCompletedDate': self._from_completed_time,
             'toCompletedDate': self._to_completed_time,
         }
         response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
+        self._process_tasks(space_name, project_name, response_json.get('Items', []))
 
     def _calculate_task_times(self, task):
         task_queue_time = task.get("QueueTime")
@@ -252,15 +255,18 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             completed_time = -1
         return queued_time, executing_time, completed_time
 
-    def _process_tasks(self, space_id, space_name, project_name, tasks_json):
+    def _process_tasks(self, space_name, project_name, tasks_json):
+        self.log.debug("Discovered %s tasks for project %s", len(tasks_json), project_name)
         for task in tasks_json:
+            task_id = task.get("Id")
             tags = self._base_tags + [
                 f'space_name:{space_name}',
                 f'project_name:{project_name}',
-                f'task_id:{task.get("Id")}',
+                f'task_id:{task_id}',
                 f'task_name:{task.get("Name")}',
                 f'task_state:{task.get("State")}',
             ]
+            self.log.debug("Processing task id %s for project %s", task_id, project_name)
             queued_time, executing_time, completed_time = self._calculate_task_times(task)
             self.gauge("deployment.count", 1, tags=tags)
             self.gauge("deployment.queued_time", queued_time, tags=tags)
