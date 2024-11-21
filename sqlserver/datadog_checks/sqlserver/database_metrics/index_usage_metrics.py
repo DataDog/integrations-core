@@ -4,7 +4,6 @@
 
 import functools
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 
 from .base import SqlserverDatabaseMetricsBase

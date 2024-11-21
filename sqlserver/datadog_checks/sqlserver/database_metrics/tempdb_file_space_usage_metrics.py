@@ -4,7 +4,6 @@
 
 import functools
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.sqlserver.utils import is_azure_sql_database
 
 from .base import SqlserverDatabaseMetricsBase

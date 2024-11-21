@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.config import is_affirmative
-
 from .base import SqlserverDatabaseMetricsBase
 
 DATABASE_REPLICATION_STATS_METRICS_QUERY = {

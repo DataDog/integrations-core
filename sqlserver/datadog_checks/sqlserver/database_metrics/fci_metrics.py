@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
 )

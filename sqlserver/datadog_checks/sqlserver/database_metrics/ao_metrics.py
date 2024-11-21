@@ -4,7 +4,6 @@
 
 from typing import List
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.sqlserver.utils import is_azure_database
 
 from .base import SqlserverDatabaseMetricsBase
