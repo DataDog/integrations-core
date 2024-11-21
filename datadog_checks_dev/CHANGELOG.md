@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 34.1.0 / 2024-11-13
+
+***Added***:
+
+* Add MIT-0 license ([#18936](https://github.com/DataDog/integrations-core/pull/18936))
+
+***Fixed***:
+
+* fix author name not being normalized ([#18718](https://github.com/DataDog/integrations-core/pull/18718))
+
 ## 34.0.0 / 2024-10-25
 
 ***Removed***:

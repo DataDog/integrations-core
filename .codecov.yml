@@ -550,6 +550,10 @@ coverage:
         target: 75
         flags:
         - singlestore
+      Slurm:
+        target: 75
+        flags:
+        - slurm
       Snowflake:
         target: 75
         flags:
@@ -1419,6 +1423,11 @@ flags:
     paths:
     - singlestore/datadog_checks/singlestore
     - singlestore/tests
+  slurm:
+    carryforward: true
+    paths:
+    - slurm/datadog_checks/slurm
+    - slurm/tests
   snmp:
     carryforward: true
     paths:

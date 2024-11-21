@@ -17,6 +17,8 @@ DEFAULT_IGNORE_DATABASES = [
     'rdsadmin',
     'azure_maintenance',
     'cloudsqladmin',
+    'alloydbadmin',
+    'alloydbmetadata',
     'postgres',
 ]
 
