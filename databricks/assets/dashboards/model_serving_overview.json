@@ -922,9 +922,9 @@
             }
           },
           {
-            "id": 8891554743052240,
+            "id": 6262930933038372,
             "definition": {
-              "title": "Request Latency (p90)",
+              "title": "Request Latency (p99)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -941,12 +941,6 @@
                 {
                   "formulas": [
                     {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "millisecond"
-                        }
-                      },
                       "formula": "query3"
                     }
                   ],
@@ -954,7 +948,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.90percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1022,9 +1016,9 @@
             }
           },
           {
-            "id": 6262930933038372,
+            "id": 8891554743052240,
             "definition": {
-              "title": "Request Latency (p99)",
+              "title": "Request Latency (p90)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1041,6 +1035,12 @@
                 {
                   "formulas": [
                     {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
                       "formula": "query3"
                     }
                   ],
@@ -1048,7 +1048,7 @@
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                      "query": "max:databricks.model_serving.request_latency_ms.90percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
                     }
                   ],
                   "response_format": "timeseries",
