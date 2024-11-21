@@ -1461,7 +1461,7 @@ class AgentCheck(object):
                 path_to_embedded = sys.executable.split("embedded")[0] + embedded_dir
             path_to_embedded = Path(path_to_embedded)
             if not path_to_embedded.exists():
-                raise RuntimeError()  # TODO: handle this better
+                raise RuntimeError(f'Path "{path_to_embedded}" does not exist')
             # The cryptography package can enter FIPS mode if its internal OpenSSL
             # can access the FIPS module and configuration.
             os.environ["OPENSSL_CONF"] = str(path_to_embedded / "ssl" / "openssl.cnf")
@@ -1471,7 +1471,7 @@ class AgentCheck(object):
         from cryptography.exceptions import InternalError
         from cryptography.hazmat.backends import default_backend
 
-        self._set_fips_env_vars(path_to_embedded)
+        self._set_openssl_env_vars(path_to_embedded)
 
         cryptography_backend = default_backend()
         try:
@@ -1486,10 +1486,10 @@ class AgentCheck(object):
     def enable_openssl_fips(self, path_to_embedded: str = None):
         from cffi import FFI
 
-        self._set_fips_env_vars(path_to_embedded)
+        self._set_openssl_env_vars(path_to_embedded)
 
         ffi = FFI()
-        libcrypto = ffi.dlopen("libcrypto.so")
+        libcrypto = ffi.dlopen("libcrypto")
         ffi.cdef(
             """
             int EVP_default_properties_enable_fips(void *ctx, int enable);
