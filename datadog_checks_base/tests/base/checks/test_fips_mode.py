@@ -10,15 +10,31 @@ from typing import Any  # noqa: F401
 
 import mock
 import pytest
-from cryptography.hazmat.backends import default_backend
+
+from datadog_checks.base import AgentCheck
 
 
-def test_cryptography():
-    """
-    Test that when GOFIPS=1, cryptography enters FIPS mode.
-    """
-    with mock.patch.dict(os.environ, {'GOFIPS': '1'}):
-        import datadog_checks.base
+def test_md5_before_fips():
+    import ssl
 
-        assert default_backend()._fips_enabled
-        assert default_backend()._enable_fips()
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ctx.set_ciphers("MD5")
+    assert True
+
+
+def test_openssl_fips_toggle():
+    import ssl
+
+    AgentCheck().enable_openssl_fips()
+    with pytest.raises(ssl.SSLError, match='No cipher can be selected.'):
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        ctx.set_ciphers("MD5")
+
+
+def test_cryptography_fips_toggle():
+    from cryptography.exceptions import InternalError
+    from cryptography.hazmat.primitives import hashes
+
+    AgentCheck().enable_cryptography_fips()
+    with pytest.raises(InternalError, match='Unknown OpenSSL error.'):
+        hashes.Hash(hashes.MD5())
