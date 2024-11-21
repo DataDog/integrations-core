@@ -34,6 +34,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
     def check(self, _):
         self._update_times()
         self._process_spaces()
+        self._collect_server_nodes_metrics()
 
     def _update_times(self):
         self.current_datetime = get_current_datetime()
@@ -258,6 +259,22 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 self.gauge("deployment.executing_time", executing_time, tags=tags)
             if executing_time != -1:
                 self.gauge("deployment.completed_time", completed_time, tags=tags)
+
+    def _collect_server_nodes_metrics(self):
+        self.log.debug("Collecting server node metrics.")
+        url = "api/octopusservernodes"
+        response_json = self._process_endpoint(url)
+        server_nodes = response_json.get('Items', [])
+
+        for server_node in server_nodes:
+            node_id = server_node.get("Id")
+            node_name = server_node.get("Name")
+            maintenance_mode = int(server_node.get("IsInMaintenanceMode", False))
+            max_tasks = int(server_node.get("MaxConcurrentTasks", 0))
+            server_tags = [f"server_node_id:{node_id}", f"server_node_name:{node_name}"]
+            self.gauge("server_node.count", 1, tags=self._base_tags + server_tags)
+            self.gauge("server_node.in_maintenance_mode", maintenance_mode, tags=self._base_tags + server_tags)
+            self.gauge("server_node.max_concurrent_tasks", max_tasks, tags=self._base_tags + server_tags)
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config

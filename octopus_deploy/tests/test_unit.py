@@ -13,7 +13,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .constants import ALL_METRICS
+from .constants import ALL_METRICS, SERVER_NODES_METRICS
 
 MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
 MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=15)
@@ -770,3 +770,42 @@ def test_tasks_endpoint_unavailable(get_current_datetime, dd_run_check, expected
     caplog.set_level(logging.WARNING)
     dd_run_check(check)
     assert expected_log in caplog.text
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    for metric in SERVER_NODES_METRICS:
+        aggregator.assert_metric(metric["name"], count=metric["count"], value=metric["value"], tags=metric["tags"])
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'expected_log'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api/octopusservernodes': MockResponse(status_code=500),
+                }
+            },
+            'Failed to access endpoint: api/octopusservernodes: 500 Server Error: None for url: None',
+            id='http error',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggregator, expected_log, caplog):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    caplog.set_level(logging.WARNING)
+    dd_run_check(check)
+    assert expected_log in caplog.text
+    for metric in SERVER_NODES_METRICS:
+        aggregator.assert_metric(metric["name"], count=0, value=metric["value"], tags=metric["tags"])

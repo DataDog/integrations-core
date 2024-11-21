@@ -34,16 +34,12 @@ ALL_METRICS = [
     "octopus_deploy.deployment.queued_time",
     "octopus_deploy.deployment.executing_time",
     "octopus_deploy.deployment.completed_time",
-    # "octopus_deploy.deployment.duration",
     # "octopus_deploy.deployment.has_warnings_or_errors",
-    # "octopus_deploy.deployment.queue_time",
     # "octopus_deploy.deployment.succeeded",
     # "octopus_deploy.deployment.can_rerun",
-    # "octopus_deploy.deployment.queued",
-    # "octopus_deploy.deployment.running",
-    # "octopus_deploy.server_node.count",
-    # "octopus_deploy.server_node.in_maintenance_mode",
-    # "octopus_deploy.server_node.max_concurrent_tasks",
+    "octopus_deploy.server_node.count",
+    "octopus_deploy.server_node.in_maintenance_mode",
+    "octopus_deploy.server_node.max_concurrent_tasks",
 ]
 
 PROJECT_GROUP_ALL_METRICS = [
@@ -915,7 +911,6 @@ SERVER_NODES_METRICS = [
     {
         'name': 'octopus_deploy.server_node.count',
         'tags': [
-            "space_name:Default",
             "server_node_name:octopus-i8932-79236734bc234-09h234n",
             "server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n",
         ],
@@ -925,7 +920,6 @@ SERVER_NODES_METRICS = [
     {
         'name': 'octopus_deploy.server_node.in_maintenance_mode',
         'tags': [
-            "space_name:Default",
             "server_node_name:octopus-i8932-79236734bc234-09h234n",
             "server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n",
         ],
@@ -935,7 +929,6 @@ SERVER_NODES_METRICS = [
     {
         'name': 'octopus_deploy.server_node.max_concurrent_tasks',
         'tags': [
-            "space_name:Default",
             "server_node_name:octopus-i8932-79236734bc234-09h234n",
             "server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n",
         ],
