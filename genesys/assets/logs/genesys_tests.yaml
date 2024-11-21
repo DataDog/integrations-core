@@ -1,0 +1,28 @@
+id: genesys
+tests:
+  - sample: "{'id': '556cd8e4-2b92-4362-a09b-22120cee33d6', 'userHomeOrgId':
+      'cb534072-9f68-426d-81ed-c45536b508c1', 'user': {'id':
+      '69810134-8085-4aed-b0eb-196d2550f489', 'selfUri':
+      '/api/v2/users/69810134-8085-4aed-b0eb-196d2550f489'}, 'client': {'id':
+      ''}, 'remoteIp': ['163.116.205.153'], 'serviceName': 'PeoplePermissions',
+      'level': 'USER', 'eventDate': '2024-11-08T12:05:43Z', 'action': 'Update',
+      'entity': {'id': 'be53fbf3-dd49-4f47-9e1a-81b4c128009d', 'name':
+      'employee', 'selfUri':
+      '/api/v2/authorization/roles/be53fbf3-dd49-4f47-9e1a-81b4c128009d'},
+      'entityType': 'Role', 'status': 'SUCCESS', 'application': '',
+      'initiatingAction': {}, 'transactionInitiator': False, 'propertyChanges':
+      [], 'context': {}, 'entityChanges': []}"
+    result: null
+  - sample: "{'id': '4ab7f51a-e00c-428e-b4d5-82200b95986f', 'userHomeOrgId':
+      'cb534072-9f68-426d-81ed-c45536b508c1', 'user': {'id':
+      '69810134-8085-4aed-b0eb-196d2550f489', 'selfUri':
+      '/api/v2/users/69810134-8085-4aed-b0eb-196d2550f489'}, 'client': {'id':
+      ''}, 'remoteIp': ['163.116.205.153'], 'serviceName': 'PeoplePermissions',
+      'level': 'USER', 'eventDate': '2024-11-08T12:05:55Z', 'action': 'Update',
+      'entity': {'id': 'be53fbf3-dd49-4f47-9e1a-81b4c128009d', 'name':
+      'employee', 'selfUri':
+      '/api/v2/authorization/roles/be53fbf3-dd49-4f47-9e1a-81b4c128009d'},
+      'entityType': 'Role', 'status': 'SUCCESS', 'application': '',
+      'initiatingAction': {}, 'transactionInitiator': False, 'propertyChanges':
+      [], 'context': {}, 'entityChanges': []}"
+    result: null
