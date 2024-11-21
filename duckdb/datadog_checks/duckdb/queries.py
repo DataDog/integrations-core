@@ -4,7 +4,8 @@
 
 TABLE_STATS = {
     'name': 'tables_number',
-    'query': "SELECT table_catalog, COUNT(*) AS num_tables FROM information_schema.tables GROUP BY table_catalog WHERE table_catalog='{}';",
+    'query': "SELECT table_catalog, COUNT(*) AS num_tables FROM information_schema.tables "
+    "GROUP BY table_catalog WHERE table_catalog='{}';",
     'columns': [
         {'name': 'table_catalog', 'type': 'tag'},
         {'name': 'num_tables', 'type': 'gauge'},

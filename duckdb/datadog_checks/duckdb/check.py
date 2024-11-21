@@ -1,23 +1,23 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
 import json
 import time
+from contextlib import closing, contextmanager
+from copy import deepcopy
 from typing import Any, AnyStr, Iterable, Iterator, Sequence  # noqa: F401
+
 import duckdb
-from contextlib import contextmanager, closing
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.db import QueryManager
 
-
-
 from .queries import DEFAULT_QUERIES
 
 SERVICE_CHECK_CONNECT = 'can_connect'
 SERVICE_CHECK_QUERY = 'can_query'
+
 
 class DuckdbCheck(AgentCheck):
 
@@ -49,7 +49,6 @@ class DuckdbCheck(AgentCheck):
         self.check_initializations.append(self.initialize_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
-
     def check(self, instance):
         try:
             with self.connect() as conn:
@@ -74,16 +73,14 @@ class DuckdbCheck(AgentCheck):
                 try:
                     yield self._queries_processor(row, query)
                 except Exception as e:
-                    self.log.debug(
-                        'Unable to process row returned from query "%s", skipping row %s. %s', query, row, e
-                    )
+                    self.log.debug('Unable to process row returned from query "%s", skipping row %s. %s', query, row, e)
                     yield row
 
     def _queries_processor(self, row, query_name):
         # type: (Sequence, AnyStr) -> Sequence
         unprocessed_row = row
 
-        # Return database version 
+        # Return database version
         if query_name == 'version':
             self.submit_version(row)
             return unprocessed_row
@@ -91,8 +88,8 @@ class DuckdbCheck(AgentCheck):
     @contextmanager
     def connect(self):
         conn = None
-        retries=3
-        delay=5
+        retries = 3
+        delay = 5
         for _ in range(retries):
             try:
                 # Try to establish the connection
@@ -108,7 +105,7 @@ class DuckdbCheck(AgentCheck):
                     raise e
             finally:
                 if conn:
-                    conn.close()  
+                    conn.close()
 
     def initialize_config(self):
         self._connect_params = json.dumps(
@@ -118,7 +115,7 @@ class DuckdbCheck(AgentCheck):
                 'password': self.password if self.password is not None else '',
             }
         )
- 
+
     def submit_health_checks(self):
         # Check for connectivity
         connect_status = ServiceCheck.OK
@@ -127,7 +124,6 @@ class DuckdbCheck(AgentCheck):
         # Check if the ddagent can query the database
         query_status = ServiceCheck.CRITICAL if self._query_errors else ServiceCheck.OK
         self.service_check(SERVICE_CHECK_QUERY, query_status, tags=self._tags)
-
 
     @AgentCheck.metadata_entrypoint
     def submit_version(self, row):
