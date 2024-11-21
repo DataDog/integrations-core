@@ -159,7 +159,7 @@ def test_projects(get_current_datetime, dd_run_check, aggregator):
         tags=[
             'project_id:Projects-1',
             'project_name:test-api',
-            'project_group_id:ProjectGroups-1',
+            'project_group_name:Default Project Group',
             'space_id:Spaces-1',
         ],
     )
@@ -169,19 +169,24 @@ def test_projects(get_current_datetime, dd_run_check, aggregator):
         tags=[
             'project_id:Projects-2',
             'project_name:my-project',
-            'project_group_id:ProjectGroups-1',
+            'project_group_name:Default Project Group',
             'space_id:Spaces-1',
         ],
     )
     aggregator.assert_metric(
         'octopus_deploy.project.count',
         1,
-        tags=['project_id:Projects-3', 'project_name:test', 'project_group_id:ProjectGroups-1', 'space_id:Spaces-1'],
+        tags=[
+            'project_id:Projects-3',
+            'project_name:test',
+            'project_group_name:Default Project Group',
+            'space_id:Spaces-1',
+        ],
     )
     aggregator.assert_metric(
         'octopus_deploy.project.count',
         1,
-        tags=['project_id:Projects-4', 'project_name:hi', 'project_group_id:ProjectGroups-2', 'space_id:Spaces-1'],
+        tags=['project_id:Projects-4', 'project_name:hi', 'project_group_name:test-group', 'space_id:Spaces-1'],
     )
 
 
@@ -201,7 +206,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_id:ServerTasks-118048',
             'task_name:Deploy',
             'task_state:Executing',
-            'project_id:Projects-2',
+            'project_name:my-project',
             'space_id:Spaces-1',
         ],
     )
@@ -212,7 +217,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_id:ServerTasks-118048',
             'task_name:Deploy',
             'task_state:Executing',
-            'project_id:Projects-2',
+            'project_name:my-project',
             'space_id:Spaces-1',
         ],
     )
@@ -223,7 +228,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_id:ServerTasks-118048',
             'task_name:Deploy',
             'task_state:Executing',
-            'project_id:Projects-2',
+            'project_name:my-project',
             'space_id:Spaces-1',
         ],
     )
@@ -235,7 +240,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_id:ServerTasks-118048',
             'task_name:Deploy',
             'task_state:Executing',
-            'project_id:Projects-2',
+            'project_name:my-project',
             'space_id:Spaces-1',
         ],
     )
@@ -246,7 +251,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_id:ServerTasks-118055',
             'task_name:Deploy',
             'task_state:Queued',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -257,7 +262,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_id:ServerTasks-118055',
             'task_name:Deploy',
             'task_state:Queued',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -269,7 +274,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_id:ServerTasks-118055',
             'task_name:Deploy',
             'task_state:Queued',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -281,7 +286,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_id:ServerTasks-118055',
             'task_name:Deploy',
             'task_state:Queued',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -297,8 +302,8 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
     dd_run_check(check)
     metrics = aggregator.metrics('octopus_deploy.deployment.count')
     for metric in metrics:
-        assert not ('project_id:Projects-1' in metric.tags and 'task_state:Success' in metric.tags)
-        assert not ('project_id:Projects-3' in metric.tags and 'task_state:Success' in metric.tags)
+        assert not ('project_name:test-api' in metric.tags and 'task_state:Success' in metric.tags)
+        assert not ('project_name:test' in metric.tags and 'task_state:Success' in metric.tags)
 
     get_current_datetime.return_value = MOCKED_TIME2
     dd_run_check(check)
@@ -310,7 +315,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1847',
             'task_name:Deploy',
             'task_state:Failed',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -321,7 +326,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1847',
             'task_name:Deploy',
             'task_state:Failed',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -332,7 +337,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1847',
             'task_name:Deploy',
             'task_state:Failed',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -343,7 +348,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1847',
             'task_name:Deploy',
             'task_state:Failed',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -354,7 +359,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1846',
             'task_name:Deploy',
             'task_state:Success',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -365,7 +370,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1846',
             'task_name:Deploy',
             'task_state:Success',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -376,7 +381,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1846',
             'task_name:Deploy',
             'task_state:Success',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -387,7 +392,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1846',
             'task_name:Deploy',
             'task_state:Success',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -397,7 +402,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1845',
             'task_name:Deploy',
             'task_state:Success',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -408,7 +413,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1845',
             'task_name:Deploy',
             'task_state:Success',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -419,7 +424,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1845',
             'task_name:Deploy',
             'task_state:Success',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -430,7 +435,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_id:ServerTasks-1845',
             'task_name:Deploy',
             'task_state:Success',
-            'project_id:Projects-3',
+            'project_name:test',
             'space_id:Spaces-1',
         ],
     )
@@ -571,7 +576,7 @@ def test_discovery_default_projects(get_current_datetime, dd_run_check, aggregat
         tags=[
             'project_id:Projects-1',
             'project_name:test-api',
-            'project_group_id:ProjectGroups-1',
+            'project_group_name:Default Project Group',
             'space_id:Spaces-1',
         ],
     )
@@ -580,19 +585,24 @@ def test_discovery_default_projects(get_current_datetime, dd_run_check, aggregat
         tags=[
             'project_id:Projects-2',
             'project_name:my-project',
-            'project_group_id:ProjectGroups-1',
+            'project_group_name:Default Project Group',
             'space_id:Spaces-1',
         ],
         count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.project.count',
-        tags=['project_id:Projects-3', 'project_name:test', 'project_group_id:ProjectGroups-1', 'space_id:Spaces-1'],
+        tags=[
+            'project_name:test',
+            'project_name:test',
+            'project_group_name:Default Project Group',
+            'space_id:Spaces-1',
+        ],
         count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.project.count',
-        tags=['project_id:Projects-4', 'project_name:hi', 'project_group_id:ProjectGroups-2', 'space_id:Spaces-1'],
+        tags=['project_id:Projects-4', 'project_name:hi', 'project_group_name:test-group', 'space_id:Spaces-1'],
         count=0,
     )
 

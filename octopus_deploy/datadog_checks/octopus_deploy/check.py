@@ -164,17 +164,21 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Project Groups: %s", project_groups)
         for _, _, project_group, project_group_config in project_groups:
             project_group_id = project_group.get("Id")
+            project_group_name = project_group.get("Name")
             tags = self._base_tags + [
                 f'space_id:{space_id}',
                 f'project_group_id:{project_group_id}',
-                f'project_group_name:{project_group.get("Name")}',
+                f'project_group_name:{project_group_name}',
             ]
             self.gauge("project_group.count", 1, tags=tags)
             self._process_projects(
-                space_id, project_group_id, project_group_config.get("projects") if project_group_config else None
+                space_id,
+                project_group_id,
+                project_group_name,
+                project_group_config.get("projects") if project_group_config else None,
             )
 
-    def _process_projects(self, space_id, project_group_id, projects_config):
+    def _process_projects(self, space_id, project_group_id, project_group_name, projects_config):
         if projects_config:
             self._init_projects_discovery(space_id, project_group_id, Projects(**projects_config))
             projects = list(self._projects_discovery[space_id][project_group_id].get_items())
@@ -192,29 +196,30 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Projects: %s", projects)
         for _, _, project, _ in projects:
             project_id = project.get("Id")
+            project_name = project.get("Name")
             tags = self._base_tags + [
                 f'space_id:{space_id}',
-                f'project_group_id:{project_group_id}',
+                f'project_group_name:{project_group_name}',
                 f'project_id:{project_id}',
-                f'project_name:{project.get("Name")}',
+                f'project_name:{project_name}',
             ]
             self.gauge("project.count", 1, tags=tags)
-            self._process_queued_and_running_tasks(space_id, project_id)
-            self._process_completed_tasks(space_id, project_id)
+            self._process_queued_and_running_tasks(space_id, project_id, project_name)
+            self._process_completed_tasks(space_id, project_id, project_name)
 
-    def _process_queued_and_running_tasks(self, space_id, project_id):
+    def _process_queued_and_running_tasks(self, space_id, project_id, project_name):
         params = {'project': project_id, 'states': ["Queued", "Executing"]}
         response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, project_id, response_json.get('Items', []))
+        self._process_tasks(space_id, project_name, response_json.get('Items', []))
 
-    def _process_completed_tasks(self, space_id, project_id):
+    def _process_completed_tasks(self, space_id, project_id, project_name):
         params = {
             'project': project_id,
             'fromCompletedDate': self._from_completed_time,
             'toCompletedDate': self._to_completed_time,
         }
         response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, project_id, response_json.get('Items', []))
+        self._process_tasks(space_id, project_name, response_json.get('Items', []))
 
     def _calculate_task_times(self, task):
         task_queue_time = task.get("QueueTime")
@@ -243,11 +248,11 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             completed_time = -1
         return queued_time, executing_time, completed_time
 
-    def _process_tasks(self, space_id, project_id, tasks_json):
+    def _process_tasks(self, space_id, project_name, tasks_json):
         for task in tasks_json:
             tags = self._base_tags + [
                 f'space_id:{space_id}',
-                f'project_id:{project_id}',
+                f'project_name:{project_name}',
                 f'task_id:{task.get("Id")}',
                 f'task_name:{task.get("Name")}',
                 f'task_state:{task.get("State")}',
