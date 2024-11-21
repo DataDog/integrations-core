@@ -223,7 +223,7 @@ jobs:
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
-          ddev test --cov --junit ${{ inputs.target }} -- -m unit
+          ddev test --cov --junit ${{ inputs.target }} -- -m "unit or not (integration or e2e)"
 
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.standard && inputs.minimum-base-package
