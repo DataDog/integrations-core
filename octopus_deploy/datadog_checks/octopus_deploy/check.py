@@ -144,11 +144,14 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Spaces: %s", spaces)
         for _, _, space, space_config in spaces:
             space_id = space.get("Id")
-            tags = self._base_tags + [f'space_id:{space_id}', f'space_name:{space.get("Name")}']
+            space_name = space.get("Name")
+            tags = self._base_tags + [f'space_id:{space_id}', f'space_name:{space_name}']
             self.gauge("space.count", 1, tags=tags)
-            self._process_project_groups(space_id, space_config.get("project_groups") if space_config else None)
+            self._process_project_groups(
+                space_id, space_name, space_config.get("project_groups") if space_config else None
+            )
 
-    def _process_project_groups(self, space_id, project_groups_config):
+    def _process_project_groups(self, space_id, space_name, project_groups_config):
         if project_groups_config:
             self._init_project_groups_discovery(space_id, ProjectGroups(**project_groups_config))
             project_groups = list(self._project_groups_discovery[space_id].get_items())
@@ -166,19 +169,20 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             project_group_id = project_group.get("Id")
             project_group_name = project_group.get("Name")
             tags = self._base_tags + [
-                f'space_id:{space_id}',
+                f'space_name:{space_name}',
                 f'project_group_id:{project_group_id}',
                 f'project_group_name:{project_group_name}',
             ]
             self.gauge("project_group.count", 1, tags=tags)
             self._process_projects(
                 space_id,
+                space_name,
                 project_group_id,
                 project_group_name,
                 project_group_config.get("projects") if project_group_config else None,
             )
 
-    def _process_projects(self, space_id, project_group_id, project_group_name, projects_config):
+    def _process_projects(self, space_id, space_name, project_group_id, project_group_name, projects_config):
         if projects_config:
             self._init_projects_discovery(space_id, project_group_id, Projects(**projects_config))
             projects = list(self._projects_discovery[space_id][project_group_id].get_items())
@@ -198,28 +202,28 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             project_id = project.get("Id")
             project_name = project.get("Name")
             tags = self._base_tags + [
-                f'space_id:{space_id}',
+                f'space_name:{space_name}',
                 f'project_group_name:{project_group_name}',
                 f'project_id:{project_id}',
                 f'project_name:{project_name}',
             ]
             self.gauge("project.count", 1, tags=tags)
-            self._process_queued_and_running_tasks(space_id, project_id, project_name)
-            self._process_completed_tasks(space_id, project_id, project_name)
+            self._process_queued_and_running_tasks(space_id, space_name, project_id, project_name)
+            self._process_completed_tasks(space_id, space_name, project_id, project_name)
 
-    def _process_queued_and_running_tasks(self, space_id, project_id, project_name):
+    def _process_queued_and_running_tasks(self, space_id, space_name, project_id, project_name):
         params = {'project': project_id, 'states': ["Queued", "Executing"]}
         response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, project_name, response_json.get('Items', []))
+        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
 
-    def _process_completed_tasks(self, space_id, project_id, project_name):
+    def _process_completed_tasks(self, space_id, space_name, project_id, project_name):
         params = {
             'project': project_id,
             'fromCompletedDate': self._from_completed_time,
             'toCompletedDate': self._to_completed_time,
         }
         response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_id, project_name, response_json.get('Items', []))
+        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
 
     def _calculate_task_times(self, task):
         task_queue_time = task.get("QueueTime")
@@ -248,10 +252,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             completed_time = -1
         return queued_time, executing_time, completed_time
 
-    def _process_tasks(self, space_id, project_name, tasks_json):
+    def _process_tasks(self, space_id, space_name, project_name, tasks_json):
         for task in tasks_json:
             tags = self._base_tags + [
-                f'space_id:{space_id}',
+                f'space_name:{space_name}',
                 f'project_name:{project_name}',
                 f'task_id:{task.get("Id")}',
                 f'task_name:{task.get("Name")}',
