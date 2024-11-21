@@ -13,7 +13,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .constants import ALL_METRICS, SERVER_NODES_METRICS
+from .constants import ALL_METRICS
 
 MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
 MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=15)
@@ -779,8 +779,9 @@ def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
-    for metric in SERVER_NODES_METRICS:
-        aggregator.assert_metric(metric["name"], count=metric["count"], value=metric["value"], tags=metric["tags"])
+    aggregator.assert_metric("octopus_deploy.server_node.count", 1, count=1, tags=['server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n', 'server_node_name:octopus-i8932-79236734bc234-09h234n'])
+    aggregator.assert_metric("octopus_deploy.server_node.max_concurrent_tasks", 5, count=1, tags=['server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n', 'server_node_name:octopus-i8932-79236734bc234-09h234n'])
+    aggregator.assert_metric("octopus_deploy.server_node.in_maintenance_mode", 0, count=1, tags=['server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n', 'server_node_name:octopus-i8932-79236734bc234-09h234n'])
 
 
 @pytest.mark.parametrize(
@@ -807,5 +808,6 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
     caplog.set_level(logging.WARNING)
     dd_run_check(check)
     assert expected_log in caplog.text
-    for metric in SERVER_NODES_METRICS:
-        aggregator.assert_metric(metric["name"], count=0, value=metric["value"], tags=metric["tags"])
+    aggregator.assert_metric("octopus_deploy.server_node.count", 1, count=0, tags=['server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n', 'server_node_name:octopus-i8932-79236734bc234-09h234n'])
+    aggregator.assert_metric("octopus_deploy.server_node.max_concurrent_tasks", 5, count=0, tags=['server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n', 'server_node_name:octopus-i8932-79236734bc234-09h234n'])
+    aggregator.assert_metric("octopus_deploy.server_node.in_maintenance_mode", 5, count=0, tags=['server_node_id:OctopusServerNodes-octopus-i8932-79236734bc234-09h234n', 'server_node_name:octopus-i8932-79236734bc234-09h234n'])
