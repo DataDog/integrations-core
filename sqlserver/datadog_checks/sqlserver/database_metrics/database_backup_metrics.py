@@ -32,7 +32,6 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-tables/backupset-transact-sql?view=sql-server-ver15
     @property
     def enabled(self):
-        # Allen Change here
         if is_azure_sql_database(self.engine_edition):
             return False
         return True
