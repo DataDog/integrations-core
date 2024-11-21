@@ -266,10 +266,10 @@ class MongoConfig(object):
         '''
         return {
             # $collStats and $indexStats are collected on every check run but they can get expensive on large databases
-            'collection': self._metrics_collection_interval.get('collection', self.min_collection_interval),
-            'collections_indexes_stats': self._metrics_collection_interval.get(
-                'collections_indexes_stats', self.min_collection_interval
+            'collection': int(self._metrics_collection_interval.get('collection', self.min_collection_interval)),
+            'collections_indexes_stats': int(
+                self._metrics_collection_interval.get('collections_indexes_stats', self.min_collection_interval)
             ),
             # $shardDataDistribution stats are collected every 5 minutes by default due to the high resource usage
-            'sharded_data_distribution': self._metrics_collection_interval.get('sharded_data_distribution', 300),
+            'sharded_data_distribution': int(self._metrics_collection_interval.get('sharded_data_distribution', 300)),
         }

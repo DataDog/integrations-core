@@ -25,6 +25,7 @@ class MongoCollector(object):
         self.gauge = self.check.gauge
         self.base_tags = tags
         self.metrics_to_collect = self.check.metrics_to_collect
+        self._collection_interval = None
         self._collector_key = (self.__class__.__name__,)
 
     def collect(self, api):
@@ -141,16 +142,10 @@ def collection_interval_checker(func):
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         current_time = time.time()
-        # Check if _collection_interval and _last_collection_timestamp exist
-        # If not, run the function to collect the metrics
-        if not hasattr(self, '_collection_interval'):
-            self.set_last_collection_timestamp(current_time)
-            return func(self, *args, **kwargs)
         # If _collection_interval not set or set to the check default, call the function to collect the metrics
         if (
             self._collection_interval is None
-            or self._collection_interval <= 0  # Ensure the interval is valid
-            or self._collection_interval == self.check._config.min_collection_interval  # Check default
+            or self._collection_interval <= self.check._config.min_collection_interval  # Ensure the interval is valid
         ):
             self.set_last_collection_timestamp(current_time)
             return func(self, *args, **kwargs)
