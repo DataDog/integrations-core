@@ -29,10 +29,18 @@ class SQLServerConfig:
         self.autodiscovery_db_service_check: bool = is_affirmative(instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval: int = instance.get('min_collection_interval', 15)
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
-        self.database_backup_metrics_interval: int = instance.get('database_backup_metrics_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL)
-        self.index_usage_stats_interval: int = instance.get('index_usage_stats_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL)
-        self.db_fragmentation_metrics_interval: int = instance.get('db_fragmentation_metrics_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL)
-        self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL)
+        self.database_backup_metrics_interval: int = instance.get(
+            'database_backup_metrics_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
+        )
+        self.index_usage_stats_interval: int = instance.get(
+            'index_usage_stats_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
+        )
+        self.db_fragmentation_metrics_interval: int = instance.get(
+            'db_fragmentation_metrics_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
+        )
+        self.database_instance_collection_interval: int = instance.get(
+            'database_instance_collection_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
+        )
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
         self._exclude_patterns = self._compile_valid_patterns(self.autodiscovery_exclude)
 
@@ -112,7 +120,7 @@ class SQLServerConfig:
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
-        self.availability_group = instance.get('availability_group') # TODO type hint... string?
+        self.availability_group = instance.get('availability_group')
         self.only_emit_local = is_affirmative(instance.get('only_emit_local', False))
         self.ao_database = instance.get('ao_database')
         self.db_fragmentation_object_names = instance.get('db_fragmentation_object_names', []) or []
@@ -120,14 +128,28 @@ class SQLServerConfig:
         self.include_ao_metrics: bool = is_affirmative(instance.get('include_ao_metrics', False))
         self.include_master_files_metrics: bool = is_affirmative(instance.get('include_master_files_metrics', False))
         self.include_fci_metrics: bool = is_affirmative(instance.get('include_fci_metrics', False))
-        self.include_primary_log_shipping_metrics: bool = is_affirmative(instance.get('include_primary_log_shipping_metrics', False))
-        self.include_secondary_log_shipping_metrics: bool = is_affirmative(instance.get('include_secondary_log_shipping_metrics', False))
-        self.include_task_scheduler_metrics: bool = is_affirmative(instance.get('include_task_scheduler_metrics', False))
-        self.include_db_fragmentation_metrics: bool = is_affirmative(instance.get('include_db_fragmentation_metrics', False))
-        self.include_db_fragmentation_metrics_tempdb: bool = is_affirmative(instance.get('include_db_fragmentation_metrics_tempdb', False))
+        self.include_primary_log_shipping_metrics: bool = is_affirmative(
+            instance.get('include_primary_log_shipping_metrics', False)
+        )
+        self.include_secondary_log_shipping_metrics: bool = is_affirmative(
+            instance.get('include_secondary_log_shipping_metrics', False)
+        )
+        self.include_task_scheduler_metrics: bool = is_affirmative(
+            instance.get('include_task_scheduler_metrics', False)
+        )
+        self.include_db_fragmentation_metrics: bool = is_affirmative(
+            instance.get('include_db_fragmentation_metrics', False)
+        )
+        self.include_db_fragmentation_metrics_tempdb: bool = is_affirmative(
+            instance.get('include_db_fragmentation_metrics_tempdb', False)
+        )
         self.include_index_usage_metrics: bool = is_affirmative(instance.get('include_index_usage_metrics', True))
-        self.include_index_usage_metrics_tempdb: bool = is_affirmative(instance.get('include_index_usage_metrics_tempdb', False))
-        self.include_tempdb_file_space_usage_metrics: bool = is_affirmative(instance.get('include_tempdb_file_space_usage_metrics', True))
+        self.include_index_usage_metrics_tempdb: bool = is_affirmative(
+            instance.get('include_index_usage_metrics_tempdb', False)
+        )
+        self.include_tempdb_file_space_usage_metrics: bool = is_affirmative(
+            instance.get('include_tempdb_file_space_usage_metrics', True)
+        )
         self.include_xe_metrics: bool = is_affirmative(instance.get('include_xe_metrics', False))
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:

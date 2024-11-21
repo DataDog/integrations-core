@@ -932,9 +932,7 @@ def test_sqlserver_db_fragmentation_metrics(
     if db_fragmentation_object_names:
         assert db_fragmentation_metrics.db_fragmentation_object_names == db_fragmentation_object_names
 
-    expected_collection_interval = (
-        db_fragmentation_metrics_interval or db_fragmentation_metrics.collection_interval
-    )
+    expected_collection_interval = db_fragmentation_metrics_interval or db_fragmentation_metrics.collection_interval
     assert db_fragmentation_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
     sqlserver_check._database_metrics = [db_fragmentation_metrics]
@@ -1323,9 +1321,7 @@ def test_sqlserver_database_backup_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
-    expected_collection_interval = (
-        database_backup_metrics_interval or database_backup_metrics.collection_interval
-    )
+    expected_collection_interval = database_backup_metrics_interval or database_backup_metrics.collection_interval
     assert database_backup_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
     sqlserver_check._database_metrics = [database_backup_metrics]

@@ -34,6 +34,7 @@ class SqlserverTempDBFileSpaceUsageMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_tempdb_file_space_usage_metrics(self) -> bool:
         return self.config.include_tempdb_file_space_usage_metrics
+
     @property
     def enabled(self):
         if not self.include_tempdb_file_space_usage_metrics:

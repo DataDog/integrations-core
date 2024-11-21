@@ -50,6 +50,7 @@ class SqlserverAvailabilityReplicasMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_ao_metrics(self) -> bool:
         return self.config.include_ao_metrics
+
     @property
     def availability_group(self):
         return self.config.availability_group
