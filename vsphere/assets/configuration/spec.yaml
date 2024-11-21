@@ -391,6 +391,9 @@ files:
       - name: collect_vsan_data
         description: |
           If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+          Ensure that you have the vSAN Performance Service enabled:
+          https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan-monitoring.doc/
+          GUID-02F67DC3-3D5A-48A4-A445-D2BD6AF2862C.html
         value:
           type: boolean
           example: false
