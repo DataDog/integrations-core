@@ -1,8 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 oracle.active_sessions,gauge,,,,Number of active sessions,0,oracle_database,active sessions,
-oracle.asm_diskgroup.free_mb,gauge,,,,"The state of the disk group relative to the instance, tagged by `state` (DBM only)",,,,
-oracle.asm_diskgroup.total_mb,gauge,,,,"The state of the disk group relative to the instance, tagged by `state` (DBM only)",,,,
-oracle.asm_diskgroup.offline_disks,gauge,,,,"The state of the disk group relative to the instance, tagged by `state` (DBM only)",,,,
+oracle.asm_diskgroup.free_mb,gauge,,,,"The unused capacity of a disk group in megabytes, tagged by `state` (DBM only)",,,,
+oracle.asm_diskgroup.total_mb,gauge,,,,"The total usable capacity of the disk group, tagged by `state` (DBM only)",,,,
+oracle.asm_diskgroup.offline_disks,gauge,,,,"The number of disks in an ASM disk group that are offline, tagged by `state` (DBM only)",,,,
 oracle.buffer_cachehit_ratio,gauge,,percent,,Ratio of buffer cache hits,1,oracle_database,buff cache hit ratio,
 oracle.cache_blocks_corrupt,gauge,,block,,Corrupt cache blocks,0,oracle_database,corrupt cache blocks,
 oracle.cache_blocks_lost,gauge,,block,,Lost cache blocks,0,oracle_database,lost cache blocks,
