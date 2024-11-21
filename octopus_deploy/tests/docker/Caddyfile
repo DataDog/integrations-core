@@ -116,5 +116,14 @@
         rewrite * "/GET/api/Spaces-1/tasks/project=Projects-4/fromCompletedDate=2024-09-23 14:45:00.123000+00:00/toCompletedDate=2024-09-23 14:45:00.123000+00:00/response.json"
         file_server
     }
+    @get_octopusservernodes {
+        method GET
+        path /api/octopusservernodes
+    }
+    route @get_octopusservernodes {
+        rewrite * /GET/api/octopusservernodes/response.json
+        file_server
+    }
+
     file_server browse
 }
