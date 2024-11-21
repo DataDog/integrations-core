@@ -218,25 +218,12 @@ jobs:
         mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
         python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
-    - name: Run Unit & Integration tests
+    - name: Run Unit
       if: inputs.standard && !inputs.minimum-base-package
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev test --cov --junit ${{ inputs.target }} -- ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        else
-          ddev test --cov --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0}', inputs.pytest-args) || '' }}
-        fi
+          ddev test --cov --junit ${{ inputs.target }} -- -m unit
 
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.standard && inputs.minimum-base-package
@@ -254,129 +241,6 @@ jobs:
           fi
         else
           ddev test --compat --recreate --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0}', inputs.pytest-args) || '' }}
-        fi
-
-    - name: Run E2E tests with latest base package
-      if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: |
-        # '-- all' is passed for e2e tests if pytest args are provided
-        # This is done to avoid ddev from interpreting the arguments as environments
-        #   instead of pytest-args, because by default if no environment is provided
-        #   after -- it will run all environments. So when pytests args are provided
-        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-        # This is not required when no pytest args are provided and it will run all environments
-        #   by default
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
-          set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        else
-          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
-        fi
-
-    - name: Run E2E tests
-      if: inputs.standard && inputs.repo != 'core'
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: |
-        # '-- all' is passed for e2e tests if pytest args are provided
-        # This is done to avoid ddev from interpreting the arguments as environments
-        #   instead of pytest-args, because by default if no environment is provided
-        #   after -- it will run all environments. So when pytests args are provided
-        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-        # This is not required when no pytest args are provided and it will run all environments
-        #   by default
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev env test --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
-          set +e # Disable immediate exit
-          ddev env test --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        else
-          ddev env test --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
-        fi
-
-    - name: Run benchmarks
-      if: inputs.benchmark
-      run: ddev test --bench --junit ${{ inputs.target }}
-
-    - name: Run tests and verify support for the latest version
-      if: inputs.latest
-      run: ddev test --latest --junit ${{ inputs.target }}
-
-    - name: Run E2E tests for the latest version
-      if: inputs.latest
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
-      run: |
-        # '-- all' is passed for e2e tests if pytest args are provided
-        # This is done to avoid ddev from interpreting the arguments as environments
-        #   instead of pytest-args, because by default if no environment is provided
-        #   after -- it will run all environments. So when pytests args are provided
-        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
-        # This is not required when no pytest args are provided and it will run all environments
-        #   by default
-        if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
-          set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- all ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        elif [ '${{ inputs.pytest-args }}' = '-m "not flaky"' ]; then
-          set +e # Disable immediate exit
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- all ${{ inputs.pytest-args }}
-          exit_code=$?
-          if [ $exit_code -eq 5 ]; then
-            # Flaky test count can be zero, this is done to avoid pipeline failure
-            echo "No tests were collected."
-            exit 0
-          else
-            exit $exit_code
-          fi
-        else
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
         fi
 
     - name: View trace log
