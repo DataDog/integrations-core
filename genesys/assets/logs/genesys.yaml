@@ -25,7 +25,7 @@ pipeline:
       sources:
         - service
     - type: date-remapper
-      name: Define `eventDate` as the official timestamp of the log
+      name: Define `eventDate` as the official date of the log
       enabled: true
       sources:
         - eventDate
