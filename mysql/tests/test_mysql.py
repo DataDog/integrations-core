@@ -390,6 +390,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         assert mysql_check._is_group_replication_active(db) is False
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     'dbm_enabled, reported_hostname, expected_hostname',
     [
