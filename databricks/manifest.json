@@ -62,7 +62,7 @@
     "dashboards": {
       "Databricks Overview Dashboard": "assets/dashboards/overview_dashboard.json",
       "Databricks Clusters Dashboard": "assets/dashboards/clusters_dashboard.json",
-      "Databricks Cost Overview": "assets/dashboards/databricks_cost_overview.json",
+      "databricks_cost_overview": "assets/dashboards/databricks_cost_overview.json",
       "Databricks Model Serving Overview": "assets/dashboards/model_serving_overview.json"
     },
     "monitors": {
