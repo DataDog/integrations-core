@@ -38,11 +38,10 @@ class SqlserverAvailabilityGroupsMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-availability-group-states-transact-sql?view=sql-server-ver15
     @property
     def include_ao_metrics(self) -> bool:
-        return is_affirmative(self.instance_config.get('include_ao_metrics', False))
-
+        return self.config.include_ao_metrics
     @property
     def availability_group(self):
-        return self.instance_config.get('availability_group')
+        return self.config.availability_group
 
     @property
     def enabled(self):

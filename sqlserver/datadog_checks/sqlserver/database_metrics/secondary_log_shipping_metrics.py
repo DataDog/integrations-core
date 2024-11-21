@@ -37,8 +37,8 @@ QUERY_LOG_SHIPPING_SECONDARY = {
 
 class SqlserverSecondaryLogShippingMetrics(SqlserverDatabaseMetricsBase):
     @property
-    def include_secondary_log_shipping_metrics(self):
-        return is_affirmative(self.instance_config.get('include_secondary_log_shipping_metrics', False))
+    def include_secondary_log_shipping_metrics(self) -> bool:
+        return self.config.include_secondary_log_shipping_metrics
 
     @property
     def enabled(self):

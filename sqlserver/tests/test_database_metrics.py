@@ -78,7 +78,6 @@ def test_sqlserver_file_stats_metrics(
 
     file_stats_metrics = SqlserverFileStatsMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -155,7 +154,6 @@ def test_sqlserver_ao_metrics(
 
     ao_metrics = SqlserverAoMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -265,7 +263,6 @@ def test_sqlserver_availability_groups_metrics(
 
     availability_groups_metrics = SqlserverAvailabilityGroupsMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -355,7 +352,6 @@ def test_sqlserver_database_replication_stats_metrics(
 
     database_replication_stats_metrics = SqlserverDatabaseReplicationStatsMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -490,7 +486,6 @@ def test_sqlserver_availability_replicas_metrics(
 
     availability_replicas_metrics = SqlserverAvailabilityReplicasMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -561,7 +556,6 @@ def test_sqlserver_fci_metrics(
 
     fci_metrics = SqlserverFciMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -609,7 +603,6 @@ def test_sqlserver_primary_log_shipping_metrics(
 
     primary_log_shipping_metrics = SqlserverPrimaryLogShippingMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -669,7 +662,6 @@ def test_sqlserver_secondary_log_shipping_metrics(
 
     primary_log_shipping_metrics = SqlserverSecondaryLogShippingMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -716,7 +708,6 @@ def test_sqlserver_server_state_metrics(
 
     server_state_metrics = SqlserverServerStateMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -757,7 +748,6 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
 
     tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -830,14 +820,13 @@ def test_sqlserver_index_usage_metrics(
 
     index_usage_metrics = SqlserverIndexUsageMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
         databases=AUTODISCOVERY_DBS + ['tempdb'],
     )
 
-    expected_collection_interval = index_usage_stats_interval or index_usage_metrics._default_collection_interval
+    expected_collection_interval = index_usage_stats_interval or index_usage_metrics.collection_interval
     assert index_usage_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
     sqlserver_check._database_metrics = [index_usage_metrics]
@@ -934,7 +923,6 @@ def test_sqlserver_db_fragmentation_metrics(
 
     db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -945,7 +933,7 @@ def test_sqlserver_db_fragmentation_metrics(
         assert db_fragmentation_metrics.db_fragmentation_object_names == db_fragmentation_object_names
 
     expected_collection_interval = (
-        db_fragmentation_metrics_interval or db_fragmentation_metrics._default_collection_interval
+        db_fragmentation_metrics_interval or db_fragmentation_metrics.collection_interval
     )
     assert db_fragmentation_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
@@ -1024,7 +1012,6 @@ def test_sqlserver_os_schedulers_metrics(
 
     os_schedulers_metrics = SqlserverOsSchedulersMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1089,7 +1076,6 @@ def test_sqlserver_os_tasks_metrics(
 
     os_tasks_metrics = SqlserverOsTasksMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1155,7 +1141,6 @@ def test_sqlserver_master_files_metrics(
 
     master_files_metrics = SqlserverMasterFilesMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1226,7 +1211,6 @@ def test_sqlserver_database_files_metrics(
 
     database_files_metrics = SqlserverDatabaseFilesMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1282,7 +1266,6 @@ def test_sqlserver_database_stats_metrics(
 
     database_stats_metrics = SqlserverDatabaseStatsMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
@@ -1335,14 +1318,13 @@ def test_sqlserver_database_backup_metrics(
 
     database_backup_metrics = SqlserverDatabaseBackupMetrics(
         config=sqlserver_check._config,
-        instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
     )
 
     expected_collection_interval = (
-        database_backup_metrics_interval or database_backup_metrics._default_collection_interval
+        database_backup_metrics_interval or database_backup_metrics.collection_interval
     )
     assert database_backup_metrics.queries[0]['collection_interval'] == expected_collection_interval
 

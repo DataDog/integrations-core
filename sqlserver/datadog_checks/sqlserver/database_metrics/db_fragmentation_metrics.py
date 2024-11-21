@@ -52,15 +52,15 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
     @property
     def include_db_fragmentation_metrics(self):
-        return is_affirmative(self.instance_config.get('include_db_fragmentation_metrics', False))
+        return self.config.include_db_fragmentation_metrics
 
     @property
     def include_db_fragmentation_metrics_tempdb(self):
-        return is_affirmative(self.instance_config.get('include_db_fragmentation_metrics_tempdb', False))
+        return self.config.include_db_fragmentation_metrics_tempdb
 
     @property
     def db_fragmentation_object_names(self):
-        return self.instance_config.get('db_fragmentation_object_names', []) or []
+        return self.config.db_fragmentation_object_names
 
     @property
     def enabled(self):
@@ -69,19 +69,12 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
         return True
 
     @property
-    def _default_collection_interval(self) -> int:
-        '''
-        Returns the default interval in seconds at which to collect database index fragmentation metrics.
-        '''
-        return 5 * 60  # 5 minutes
-
-    @property
     def collection_interval(self) -> int:
         '''
         Returns the interval in seconds at which to collect database index fragmentation metrics.
         Note: The index fragmentation metrics query can be expensive, so it is recommended to set a higher interval.
         '''
-        return int(self.instance_config.get('db_fragmentation_metrics_interval', self._default_collection_interval))
+        return self.config.db_fragmentation_metrics_interval
 
     @property
     def databases(self):

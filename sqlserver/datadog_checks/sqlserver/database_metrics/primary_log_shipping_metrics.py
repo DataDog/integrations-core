@@ -29,8 +29,8 @@ QUERY_LOG_SHIPPING_PRIMARY = {
 
 class SqlserverPrimaryLogShippingMetrics(SqlserverDatabaseMetricsBase):
     @property
-    def include_primary_log_shipping_metrics(self):
-        return is_affirmative(self.instance_config.get('include_primary_log_shipping_metrics', False))
+    def include_primary_log_shipping_metrics(self) -> bool:
+        return self.config.include_primary_log_shipping_metrics
 
     @property
     def enabled(self):

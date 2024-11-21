@@ -34,15 +34,15 @@ class SqlserverDatabaseReplicationStatsMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
     @property
     def include_ao_metrics(self) -> bool:
-        return is_affirmative(self.instance_config.get('include_ao_metrics', False))
+        return self.config.include_ao_metrics
 
     @property
     def availability_group(self):
-        return self.instance_config.get('availability_group')
+        return self.config.availability_group
 
     @property
     def only_emit_local(self):
-        return is_affirmative(self.instance_config.get('only_emit_local', False))
+        return self.config.only_emit_local
 
     @property
     def enabled(self):

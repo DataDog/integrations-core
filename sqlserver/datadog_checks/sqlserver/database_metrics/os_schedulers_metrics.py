@@ -34,7 +34,7 @@ class SqlserverOsSchedulersMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
     @property
     def include_task_scheduler_metrics(self):
-        return is_affirmative(self.instance_config.get('include_task_scheduler_metrics', False))
+        return self.config.include_task_scheduler_metrics
 
     @property
     def enabled(self):

@@ -61,7 +61,7 @@ QUERY_AO_FAILOVER_CLUSTER_MEMBER = {
 class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_ao_metrics(self) -> bool:
-        return is_affirmative(self.instance_config.get('include_ao_metrics', False))
+        return self.config.include_ao_metrics
 
     @property
     def enabled(self) -> bool:

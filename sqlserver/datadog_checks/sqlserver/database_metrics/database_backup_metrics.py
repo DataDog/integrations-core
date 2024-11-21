@@ -32,16 +32,10 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-tables/backupset-transact-sql?view=sql-server-ver15
     @property
     def enabled(self):
+        # Allen Change here
         if is_azure_sql_database(self.engine_edition):
             return False
         return True
-
-    @property
-    def _default_collection_interval(self) -> int:
-        '''
-        Returns the default interval in seconds at which to collect database backup metrics.
-        '''
-        return 5 * 60  # 5 minutes
 
     @property
     def collection_interval(self) -> int:
@@ -49,7 +43,7 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
         Returns the interval in seconds at which to collect database backup metrics.
         Note: The database backup metrics query can be expensive, so it is recommended to set a higher interval.
         '''
-        return int(self.instance_config.get('database_backup_metrics_interval', self._default_collection_interval))
+        return self.config.database_backup_metrics_interval
 
     @property
     def queries(self):

@@ -37,8 +37,8 @@ QUERY_FAILOVER_CLUSTER_INSTANCE = {
 
 class SqlserverFciMetrics(SqlserverDatabaseMetricsBase):
     @property
-    def include_fci_metrics(self):
-        return is_affirmative(self.instance_config.get('include_fci_metrics', False))
+    def include_fci_metrics(self) -> bool:
+        return self.config.include_fci_metrics
 
     @property
     def enabled(self):

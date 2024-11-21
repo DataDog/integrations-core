@@ -41,7 +41,7 @@ def instance_database_autodiscovery_interval():
 
 
 def instance_database_instance_collection_interval():
-    return False
+    return 300
 
 
 def instance_dbm():
