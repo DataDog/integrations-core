@@ -17,7 +17,8 @@ The Falco integration seamlessly ingests the data of Falco logs using the Webhoo
 
 - Update the settings in the configuration file (i.e., falco.yaml) as shown below:
 
-  ```json_output: true
+  ```yaml
+  json_output: true
   http_output:
     enabled: true
     url: <Datadog Webhook URL> (e.g., https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco)
@@ -25,11 +26,12 @@ The Falco integration seamlessly ingests the data of Falco logs using the Webhoo
 
 - If Falco is installed using Helm, you can use the following command to add or update the HTTP URL:
 
-  ```helm upgrade -i falco falcosecurity/falco \
-    --set falco.http_output.enabled=true \
-    --set falco.http_output.url="https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco" \
-    --set falco.json_output=true \
-    --set json_include_output_property=true
+  ```bash
+  helm upgrade -i falco falcosecurity/falco \
+  --set falco.http_output.enabled=true \
+  --set falco.http_output.url="https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco" \
+  --set falco.json_output=true \
+  --set json_include_output_property=true
   ```
 
 ## Data Collected
