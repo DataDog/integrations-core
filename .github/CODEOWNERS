@@ -83,6 +83,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /kubernetes/                                    @DataDog/container-integrations @DataDog/agent-integrations
 /kubernetes/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubernetes_admission/                          @DataDog/container-platform     @DataDog/agent-integrations
 /kubernetes_cluster_autoscaler/                 @DataDog/container-integrations @DataDog/agent-integrations 
 /kubernetes_cluster_autoscaler/*.md             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes_cluster_autoscaler/manifest.json    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -280,6 +281,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /greenhouse/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /greenhouse/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/incident_io/                                                        @DataDog/saas-integrations
+/incident_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
+/incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
+/incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /lastpass/                                                          @DataDog/saas-integrations
 /lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /lastpass/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
@@ -354,10 +360,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /trend_micro_vision_one_endpoint_security/manifest.json             @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_vision_one_endpoint_security/assets/logs/              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-hubspot_content_hub/                                                @DataDog/saas-integrations
-hubspot_content_hub/*.md                                            @DataDog/saas-integrations @DataDog/documentation
-hubspot_content_hub/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
-hubspot_content_hub/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+/hubspot_content_hub/                                               @DataDog/saas-integrations
+/hubspot_content_hub/*.md                                           @DataDog/saas-integrations @DataDog/documentation
+/hubspot_content_hub/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
+/hubspot_content_hub/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 
 vonage/                                                @DataDog/saas-integrations
