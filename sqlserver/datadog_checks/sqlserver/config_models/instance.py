@@ -43,6 +43,7 @@ class Azure(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    aggregate_sql_databases: Optional[bool] = None
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
 
@@ -155,6 +156,7 @@ class QueryMetrics(BaseModel):
     dm_exec_query_stats_row_limit: Optional[int] = None
     enabled: Optional[bool] = None
     enforce_collection_interval_deadline: Optional[bool] = None
+    lookback_window: Optional[int] = None
     max_queries: Optional[int] = None
     samples_per_hour_per_query: Optional[int] = None
 
@@ -215,6 +217,7 @@ class InstanceConfig(BaseModel):
     include_secondary_log_shipping_metrics: Optional[bool] = None
     include_task_scheduler_metrics: Optional[bool] = None
     include_tempdb_file_space_usage_metrics: Optional[bool] = None
+    include_xe_metrics: Optional[bool] = None
     index_usage_metrics_interval: Optional[int] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
