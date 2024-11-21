@@ -79,6 +79,7 @@ WHERE
 GROUP BY
     i.object_id,
     i.name,
+    i.index_id,
     i.type,
     i.is_unique,
     i.is_primary_key,
@@ -126,6 +127,7 @@ WHERE
 GROUP BY
     FK.name,
     FK.parent_object_id,
+    FK.object_id,
     FK.referenced_object_id;
 """
 
