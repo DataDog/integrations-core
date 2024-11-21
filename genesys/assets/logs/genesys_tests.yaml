@@ -2,11 +2,12 @@ id: genesys
 tests:
   - sample: |-
       {
-        "id": "556cd8e4-2b9-4362-a09b-22120cee33d6",
-        "userHomeOrgId": "cb534072-968-426d-81ed-c45536b508c1",
+        "id": "2d59394e-a10d-4618-933-67041fa562c3",
+        "userHomeOrgId": "f335b7ab-3de8-40d3-a7d1-597958cca6b",
         "user": {
-            "id": "69810134-8085-4aed-b0e-196d2550f489",
-            "selfUri": "/api/v2/users/69810134-805-4aed-b0eb-196d2550f489"
+            "id": "d1e4ddd6-7cdf-454d-b40c-97b1966b5ad",
+            "selfUri": "/api/v2/users/d1e4ddd6-7cdf-454d-b40c-97b9661b5ad",
+            "name": "abc"
         },
         "client": {
             "id": ""
@@ -14,57 +15,25 @@ tests:
         "remoteIp": [
             "0.0.0.0"
         ],
-        "serviceName": "PeoplePermissions",
+        "serviceName": "Architect",
         "level": "USER",
-        "eventDate": "2024-11-08T12:05:43Z",
-        "action": "Update",
+        "eventDate": "2024-11-21T04:59:22Z",
+        "action": "Save",
         "entity": {
-            "id": "be53fb3-dd49-4f47-9e1a-81b4c128009d",
-            "name": "employee",
-            "selfUri": "/api/v2/authorization/roles/be53fbf3-dd49-4f47-9e1a-81b4c12009d"
+            "id": "426315b4-b10a-41f2-b6b0-8d0d3519d84",
+            "name": "Inbound Call Flow"
         },
-        "entityType": "Role",
+        "entityType": "Flow",
         "status": "SUCCESS",
         "application": "",
         "initiatingAction": {},
-        "transactionInitiator": False,
+        "transactionInitiator": false,
         "propertyChanges": [],
-        "context": {},
+        "context": {
+            "version": "1.0",
+            "flowType": "inboundcall"
+        },
         "entityChanges": []
       }
     service: "audit"
     result: null
-  - sample: |-
-      {
-        "id": "4ab7f51a-e00c-428e-b4d5-8220b95986f",
-        "userHomeOrgId": "cb534072-9f68-426d-81ed-c4553b508c1",
-        "user": {
-            "id": "69810134-8085-4aed-b0eb-196d250f489",
-            "selfUri": "/api/v2/users/69810134-8085-4aed-b0eb-196d250f489"
-        },
-        "client": {
-            "id": ""
-        },
-        "remoteIp": [
-            "0.0.0.0"
-        ],
-        "serviceName": "PeoplePermissions",
-        "level": "USER",
-        "eventDate": "2024-11-08T12:05:55Z",
-        "action": "Update",
-        "entity": {
-            "id": "be53fbf3-dd49-4f47-9e1a-81b4c12809d",
-            "name": "employee",
-            "selfUri": "/api/v2/authorization/roles/be53fbf3-dd49-4f47-9e1a-81b4c12809d"
-        },
-        "entityType": "Role",
-        "status": "SUCCESS",
-        "application": "",
-        "initiatingAction": {},
-        "transactionInitiator": False,
-        "propertyChanges": [],
-        "context": {},
-        "entityChanges": []
-      }
-    result: null
-    service: "audit"
