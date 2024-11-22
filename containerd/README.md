@@ -10,7 +10,7 @@ This check monitors the Containerd container runtime.
 
 Containerd is a core [Datadog Agent][1] check. You must configure Containerd in both `datadog.yaml` and `containerd.d/conf.yaml`.
 
-In `datadog.yaml`, configure your `cri_socket_path` for the Agent to query Containerd. In `containerd.d/conf.yaml`, configure the check instance settings (such as `filters`) for the events.
+In `datadog.yaml`, configure your `cri_socket_path` for the Agent to query Containerd. In `containerd.d/conf.yaml`, configure the check instance settings (such as `filters`) for the events *test change*.
 
 #### Installation on containers
 
