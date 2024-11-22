@@ -259,7 +259,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Total Transferred Interactions",
+                      "alias": "Transferred",
                       "formula": "query1"
                     },
                     {
@@ -267,7 +267,7 @@
                       "formula": "query2"
                     },
                     {
-                      "alias": "Consult Transferred",
+                      "alias": "Consult Transfers",
                       "formula": "query3"
                     }
                   ],
@@ -309,7 +309,7 @@
           {
             "id": 6425089306205858,
             "definition": {
-              "title": "Transferred Consultations",
+              "title": "Consult Transfers",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -409,7 +409,7 @@
           {
             "id": 6982095386386790,
             "definition": {
-              "title": "Outbound Message Conversations over Time",
+              "title": "Outbound Messages over Time",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -426,15 +426,15 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Outbound Conversations",
+                      "alias": "Outbound",
                       "formula": "query1"
                     },
                     {
-                      "alias": "Attempted Outbound Conversations",
+                      "alias": "Attempted Outbound",
                       "formula": "query2"
                     },
                     {
-                      "alias": "Connected Outbound Conversations",
+                      "alias": "Connected Outbound",
                       "formula": "query3"
                     }
                   ],
@@ -541,7 +541,7 @@
           {
             "id": 7510105299683152,
             "definition": {
-              "title": "Blind Transfers",
+              "title": "Blind Transferred",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -588,7 +588,7 @@
           {
             "id": 5747815035830808,
             "definition": {
-              "title": "Errored Conversations",
+              "title": "Errored Messages",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -635,7 +635,7 @@
           {
             "id": 8278736495545408,
             "definition": {
-              "title": "Average Time in After Call Work",
+              "title": "Average After Call Work Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1467,7 +1467,7 @@
           {
             "id": 566182897822726,
             "definition": {
-              "title": "Message Handle Time",
+              "title": "Handle Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1617,15 +1617,15 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Average Talk Time",
+                      "alias": "Average Interaction Time",
                       "formula": "query1"
                     },
                     {
-                      "alias": "Minimum Talk Time",
+                      "alias": "Minimum Interaction Time",
                       "formula": "query2"
                     },
                     {
-                      "alias": "Maximum Talk Time",
+                      "alias": "Maximum Interaction Time",
                       "formula": "query3"
                     }
                   ],
@@ -1684,7 +1684,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Barged Conversation",
+                      "alias": "Barged Conversations",
                       "formula": "query1"
                     },
                     {

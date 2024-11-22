@@ -158,7 +158,7 @@
           {
             "id": 86152202738954,
             "definition": {
-              "title": "Consulted Email Conversations",
+              "title": "Consulted Emails",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -242,7 +242,7 @@
           {
             "id": 6534860483192042,
             "definition": {
-              "title": "Consult Transferred Email Conversations",
+              "title": "Consult Transfers",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -305,7 +305,7 @@
                       "formula": "query1"
                     },
                     {
-                      "alias": "Consult Transferred",
+                      "alias": "Consult Transfers",
                       "formula": "query2"
                     },
                     {
@@ -351,7 +351,7 @@
           {
             "id": 6080065307465582,
             "definition": {
-              "title": "Outbound Email Conversations over Time",
+              "title": "Outbound Emails over Time",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -368,11 +368,11 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Total Outbound Conversation",
+                      "alias": "Total Outbound",
                       "formula": "query1"
                     },
                     {
-                      "alias": "Total Connected Outbound Conversation",
+                      "alias": "Total Connected Outbound",
                       "formula": "query2"
                     }
                   ],
@@ -485,7 +485,7 @@
           {
             "id": 1900168351495458,
             "definition": {
-              "title": "Email Offered to Queue",
+              "title": "Emails Offered to Queue",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -527,7 +527,7 @@
           {
             "id": 2427853405223718,
             "definition": {
-              "title": "Errored Email Conversations",
+              "title": "Errored Emails",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -773,7 +773,7 @@
           {
             "id": 17601474503554,
             "definition": {
-              "title": "Email Handle Time Trend",
+              "title": "Handle Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -858,7 +858,7 @@
           {
             "id": 2337005338731384,
             "definition": {
-              "title": "Average Time in After Call Work",
+              "title": "Average After Call Work Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1274,7 +1274,7 @@
           {
             "id": 6066122750841608,
             "definition": {
-              "title": "Average Conversation Park Time",
+              "title": "Average Park Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1322,7 +1322,7 @@
           {
             "id": 6847352262687320,
             "definition": {
-              "title": "Blind Transfers",
+              "title": "Blind Transferred",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1545,7 +1545,7 @@
           {
             "id": 7355319185242602,
             "definition": {
-              "title": "Trend of Time Spent in IVR",
+              "title": "IVR Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1809,7 +1809,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Average Talk Time",
+                      "alias": "Average Interaction Time",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -1819,7 +1819,7 @@
                       "formula": "query1"
                     },
                     {
-                      "alias": "Minimum Talk Time",
+                      "alias": "Minimum Interaction Time",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -1829,7 +1829,7 @@
                       "formula": "query2"
                     },
                     {
-                      "alias": "Maximum Talk Time",
+                      "alias": "Maximum Interaction Time",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -1894,7 +1894,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Barged Conversation",
+                      "alias": "Barged Conversations",
                       "formula": "query1"
                     },
                     {

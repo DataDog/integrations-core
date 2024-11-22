@@ -243,7 +243,7 @@
           {
             "id": 380743845910744,
             "definition": {
-              "title": "Transferred Voice Interactions Trend",
+              "title": "Transferred Interactions Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -268,7 +268,7 @@
                       "formula": "query2"
                     },
                     {
-                      "alias": "Consult Transferred",
+                      "alias": "Consult Transfers",
                       "formula": "query3"
                     }
                   ],
@@ -327,19 +327,19 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Total Connected Outbound Conversations",
+                      "alias": "Total Connected Outbound",
                       "formula": "query1"
                     },
                     {
-                      "alias": "Total Attempted Outbound Conversations",
+                      "alias": "Total Attempted Outbound",
                       "formula": "query2"
                     },
                     {
-                      "alias": "Total Abandoned Outbound Conversations",
+                      "alias": "Total Abandoned Outbound",
                       "formula": "query3"
                     },
                     {
-                      "alias": "Total Outbound Conversations",
+                      "alias": "Total Outbound",
                       "formula": "query4"
                     }
                   ],
@@ -552,7 +552,7 @@
           {
             "id": 6163200567380856,
             "definition": {
-              "title": "Short Abandoned Voice Conversations",
+              "title": "Short Abandoned Voice Calls",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -653,7 +653,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Maximum Abandoned Time",
+                      "alias": "Maximum Abandon Time",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -663,7 +663,7 @@
                       "formula": "query1"
                     },
                     {
-                      "alias": "Average Abandoned Time",
+                      "alias": "Average Abandon Time",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -673,7 +673,7 @@
                       "formula": "query2"
                     },
                     {
-                      "alias": "Minimum Abandoned Time",
+                      "alias": "Minimum Abandon Time",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
@@ -1168,7 +1168,7 @@
           {
             "id": 2425882385211956,
             "definition": {
-              "title": "Average Time in After Call Work",
+              "title": "Average After Call Work Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1595,7 +1595,7 @@
           {
             "id": 1653510909591376,
             "definition": {
-              "title": "Trend of Time Spent in IVR",
+              "title": "IVR Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1698,7 +1698,7 @@
           {
             "id": 226249885844649,
             "definition": {
-              "title": "Blind Transfers",
+              "title": "Blind Transferred",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1740,7 +1740,7 @@
           {
             "id": 1913096926699710,
             "definition": {
-              "title": "Consult Transferred Voice Calls",
+              "title": "Consult Transfers",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1937,7 +1937,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Barged Conversation",
+                      "alias": "Barged Conversations",
                       "formula": "query1"
                     },
                     {

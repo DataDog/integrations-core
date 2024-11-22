@@ -242,7 +242,7 @@
           {
             "id": 4932450136717348,
             "definition": {
-              "title": "Chat over Time",
+              "title": "Chats over Time",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -367,7 +367,7 @@
                       "formula": "query2"
                     },
                     {
-                      "alias": "Consult Transferred",
+                      "alias": "Consult Transfers",
                       "formula": "query3"
                     }
                   ],
@@ -409,7 +409,7 @@
           {
             "id": 8144612006774222,
             "definition": {
-              "title": "Transferred Consultations",
+              "title": "Consult Transfers",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -511,7 +511,7 @@
           {
             "id": 6575288661061842,
             "definition": {
-              "title": "Blind Transfers",
+              "title": "Blind Transferred",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -553,7 +553,7 @@
           {
             "id": 8892656529285754,
             "definition": {
-              "title": "Errored Conversations",
+              "title": "Errored Chats",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -595,7 +595,7 @@
           {
             "id": 1384681329286894,
             "definition": {
-              "title": "Average Time in After Call Work",
+              "title": "Average After Call Work Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -679,7 +679,7 @@
           {
             "id": 3613331179677354,
             "definition": {
-              "title": "Abandoned Time",
+              "title": "Abandoned Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1463,7 +1463,7 @@
           {
             "id": 1347266889597900,
             "definition": {
-              "title": "Chat Handle Time",
+              "title": "Handle Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1589,14 +1589,14 @@
             "layout": {
               "x": 0,
               "y": 0,
-              "width": 2,
+              "width": 3,
               "height": 3
             }
           },
           {
             "id": 6832347081399038,
             "definition": {
-              "title": "Interaction Time",
+              "title": "Interaction Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1613,15 +1613,15 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Average Talk Time",
+                      "alias": "Average Interaction Time",
                       "formula": "query1"
                     },
                     {
-                      "alias": "Minimum Talk Time",
+                      "alias": "Minimum Interaction Time",
                       "formula": "query2"
                     },
                     {
-                      "alias": "Maximum Talk Time",
+                      "alias": "Maximum Interaction Time",
                       "formula": "query3"
                     }
                   ],
@@ -1654,16 +1654,16 @@
               ]
             },
             "layout": {
-              "x": 2,
+              "x": 3,
               "y": 0,
-              "width": 10,
+              "width": 9,
               "height": 3
             }
           },
           {
             "id": 1146655836114176,
             "definition": {
-              "title": "Trend of Time Spent in IVR",
+              "title": "IVR Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1747,7 +1747,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Barged Conversation",
+                      "alias": "Barged Conversations",
                       "formula": "query1"
                     },
                     {

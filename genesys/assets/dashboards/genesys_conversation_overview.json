@@ -483,7 +483,7 @@
           {
             "id": 6055382138957310,
             "definition": {
-              "title": "Maximum Wait Time",
+              "title": "Maximum Queue Wait Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -531,7 +531,7 @@
           {
             "id": 251638852119456,
             "definition": {
-              "title": "Average Wait Time",
+              "title": "Average Queue Wait Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -812,7 +812,8 @@
         "x": 0,
         "y": 14,
         "width": 12,
-        "height": 12
+        "height": 12,
+        "is_column_break": true
       }
     }
   ],

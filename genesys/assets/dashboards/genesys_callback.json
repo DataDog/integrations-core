@@ -242,7 +242,7 @@
           {
             "id": 8111856576613298,
             "definition": {
-              "title": "Transferred Consultations",
+              "title": "Consult Transfers",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -284,7 +284,7 @@
           {
             "id": 2110135704728254,
             "definition": {
-              "title": "Blind Transfers",
+              "title": "Blind Transferred",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -343,15 +343,15 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Total Transferred",
+                      "alias": "Transferred",
                       "formula": "query1"
                     },
                     {
-                      "alias": "Total Blind Transferred",
+                      "alias": "Blind Transferred",
                       "formula": "query2"
                     },
                     {
-                      "alias": "Total Consult Transferred",
+                      "alias": "Consult Transfers",
                       "formula": "query3"
                     }
                   ],
@@ -1010,7 +1010,7 @@
           {
             "id": 7035544515899466,
             "definition": {
-              "title": "Average Active Callback Complete Time",
+              "title": "Average Active Callback Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1052,7 +1052,7 @@
           {
             "id": 6436659893782942,
             "definition": {
-              "title": "Average Time in After Call Work",
+              "title": "Average After Call Work Time",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -1094,7 +1094,7 @@
           {
             "id": 593988063851406,
             "definition": {
-              "title": "Callback Handle Time Trend",
+              "title": "Handle Time Trend",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1643,7 +1643,7 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Barged Conversation",
+                      "alias": "Barged Conversations",
                       "formula": "query1"
                     },
                     {
