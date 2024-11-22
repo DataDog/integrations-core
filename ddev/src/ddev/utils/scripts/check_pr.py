@@ -91,7 +91,9 @@ def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
 
         # --- a/file
         # +++ /dev/null
+        print(f'Before: {before}')
         before = before.split(maxsplit=1)[1]
+        print(f'After: {after}')
         after = after.split(maxsplit=1)[1]
         filename = before[2:] if after == '/dev/null' else after[2:]
         added = files[filename] = {}
