@@ -62,6 +62,7 @@ def git(*args) -> str:
 
 
 def get_added_lines(git_diff: str) -> dict[str, dict[int, str]]:
+    print(f'Git diff: {git_diff}')
     files: dict[str, dict[int, str]] = {}
     for modification in re.split(r'^diff --git ', git_diff, flags=re.MULTILINE):
         if not modification:
