@@ -13,12 +13,12 @@ import traceback
 import unicodedata
 from collections import deque
 from os.path import basename
-from typing import (
+from typing import (  # noqa: F401
     TYPE_CHECKING,
     Any,
     AnyStr,
     Callable,
-    Deque,  # noqa: F401
+    Deque,
     Dict,
     List,
     Optional,
