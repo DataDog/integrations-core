@@ -20,9 +20,6 @@ jobs:
     name: Check PR
     runs-on: ubuntu-22.04
 
-    permissions:
-      pull-requests: write
-      
     steps:
     # Uncomment for testing purposes
     # - uses: actions/checkout@v4
