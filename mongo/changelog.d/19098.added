@@ -1,0 +1,3 @@
+Add `metrics_collection_interval` config option to customize the collection interval for collection stats, index stats, and sharded data distribution metrics.
+The default collection interval for collection stats and index stats remains unchanged at check min collection interval of 15 seconds.
+The default collection interval for sharded data distribution metrics is 300 seconds.
