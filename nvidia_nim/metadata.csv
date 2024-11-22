@@ -11,7 +11,7 @@ nvidia_nim.process.cpu_seconds.count,count,,second,,Total user and system CPU ti
 nvidia_nim.process.max_fds,gauge,,file,,Maximum number of open file descriptors.,0,nvidia_nim,,,
 nvidia_nim.process.open_fds,gauge,,file,,Number of open file descriptors.,0,nvidia_nim,,,
 nvidia_nim.process.resident_memory_bytes,gauge,,byte,,Resident memory size in bytes.,0,nvidia_nim,,,
-nvidia_nim.process.start_time_seconds,gauge,,second,,Start time of the process since unix epoch in seconds.,0,nvidia_nim,,,
+nvidia_nim.process.start_time_seconds,gauge,,second,,Time in seconds since process started.,0,nvidia_nim,,,
 nvidia_nim.process.virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes.,0,nvidia_nim,,,
 nvidia_nim.prompt_tokens.count,count,,token,,Number of prefill tokens processed.,0,nvidia_nim,,,
 nvidia_nim.python.gc.collections.count,count,,,,Number of times this generation was collected,0,nvidia_nim,,,
