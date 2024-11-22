@@ -1467,6 +1467,10 @@ class AgentCheck(object):
             os.environ["OPENSSL_CONF"] = str(path_to_embedded / "ssl" / "openssl.cnf")
             os.environ["OPENSSL_MODULES"] = str(path_to_embedded / "lib" / "ossl-modules")
 
+    def _clear_openssl_env_vars(self):
+        os.environ.pop("OPENSSL_CONF", None)
+        os.environ.pop("OPENSSL_MODULES", None)
+
     def enable_cryptography_fips(self, path_to_embedded: str = None):
         from cryptography.exceptions import InternalError
         from cryptography.hazmat.backends import default_backend
@@ -1489,7 +1493,7 @@ class AgentCheck(object):
         self._set_openssl_env_vars(path_to_embedded)
 
         ffi = FFI()
-        libcrypto = ffi.dlopen("libcrypto")
+        libcrypto = ffi.dlopen("libcrypto-3.dll" if os.name=="nt" else "libcrypto.so")
         ffi.cdef(
             """
             int EVP_default_properties_enable_fips(void *ctx, int enable);
@@ -1500,3 +1504,22 @@ class AgentCheck(object):
             raise RuntimeError("Failed to enable FIPS mode in OpenSSL")
         else:
             logging.info("OpenSSL FIPS mode enabled successfully.")
+
+    def disable_openssl_fips(self):
+        from cffi import FFI
+
+        # Reset the OpenSSL environment variables if needed
+        self._clear_openssl_env_vars()
+
+        ffi = FFI()
+        libcrypto = ffi.dlopen("libcrypto-3.dll" if os.name=="nt" else "libcrypto.so")
+        ffi.cdef(
+            """
+            int EVP_default_properties_enable_fips(void *ctx, int enable);
+        """
+        )
+
+        if not libcrypto.EVP_default_properties_enable_fips(ffi.NULL, 0):
+            raise RuntimeError("Failed to disable FIPS mode in OpenSSL")
+        else:
+            logging.info("OpenSSL FIPS mode disabled successfully.")
