@@ -21,10 +21,15 @@ pipeline:
         - "[1730325496.647520] [dd317ab0670e:126  :0]          parser.c:2305 UCX  WARN  (set UCX_WARN_UNUSED_ENV_VARS=n to suppress this warning)"
       grok:
         matchRules: |
-          nvidia_nim %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp} \[%{word:level}\] \[%{data:component_name}\] \[%{word}\] %{data:msg}
-          nvidia_nim_logger %{word:level} %{date("yyyy-MM-dd HH:mm:ss.SSS"):timestamp} %{data:logger.name}:%{data:logger.line}\] %{data:msg}
-          generic_log %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp} \[%{word:level}\] %{data:msg}
-          componont_log \[%{number:timestamp}\]\W+\[%{data:container_id}:%{number:pid}\W+:%{number:thread_id}\W+%{data:logger.name}:%{data:logger.line} %{word:component_name}\W+%{word:level}\W+\(%{data:msg}\)
+          nvidia_nim %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp} \[%{_level}\] \[%{data:component_name}\] \[%{word}\] %{_msg}
+          nvidia_nim_logger %{_level} %{date("yyyy-MM-dd HH:mm:ss.SSS"):timestamp} %{_logger_name}:%{_logger_line}\] %{_msg}
+          generic_log %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp} \[%{_level}\] %{_msg}
+          componont_log \[%{number:timestamp}\]\W+\[%{data:container_id}:%{number:pid}\W+:%{number:thread_id}\W+%{_logger_name}:%{_logger_line} %{word:component_name}\W+%{_level}\W+\(%{_msg}\)
+        supportRules: |
+          _logger_line %{data:logger.line}
+          _logger_name %{data:logger.name}
+          _level %{word:level}
+          _msg %{data:msg}
     - type: message-remapper
       name: Define `msg` as the official message of the log
       enabled: true

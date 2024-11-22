@@ -27,9 +27,9 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1730325506914
  -
- sample: |-
-   "INFO 2024-10-30 21:56:28.831 ngc_injector.py:152] Valid profile: e45b4b991bbc51d0df3ce53e87060fc3a7f76555406ed534a8479c6faa706987 (tensorrt_llm-a10g-bf16-tp4-latency) on GPUs [0, 1, 2, 3]"
- result:
+  sample: |-
+    "INFO 2024-10-30 21:56:28.831 ngc_injector.py:152] Valid profile: e45b4b991bbc51d0df3ce53e87060fc3a7f76555406ed534a8479c6faa706987 (tensorrt_llm-a10g-bf16-tp4-latency) on GPUs [0, 1, 2, 3]"
+  result:
     custom:
       level: "INFO"
       timestamp: 1730325388831
