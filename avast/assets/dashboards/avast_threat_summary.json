@@ -26,7 +26,7 @@
             "id": 8113128730448846,
             "definition": {
                 "type": "note",
-                "content": "**[Avast Business Hub](https://www.avast.com/business/business-hub)** is a cloud-based platform that helps businesses manage their Avast security solutions. It offers real-time threat monitoring, detailed reporting, and centralized security control for endpoints.\n\n**Avast - Threat Summary** Dashboard provides a comprehensive overview of threats categorized by type, action and detection source, and other relevant details.\n\n**Tips:**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n\n\nFor more information, see the [Avast Integration Documentation](https://docs.datadoghq.com/integrations/avast/).",
+                "content": "**[Avast Business Hub](https://www.avast.com/business/business-hub)** is a cloud-based platform that helps businesses manage their Avast security solutions. It offers real-time threat monitoring, detailed reporting, and centralized security control for endpoints.\n\n**Avast - Threat Summary** Dashboard provides a comprehensive overview of threats categorized by type, action and detection source, and other relevant details.\n\n**Tips:**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n\nFor more information, see the [Avast Integration Documentation](https://docs.datadoghq.com/integrations/avast/).",
                 "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
@@ -99,7 +99,7 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 3,
+                            "width": 4,
                             "height": 3
                         }
                     },
@@ -156,9 +156,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 0,
-                            "width": 9,
+                            "width": 8,
                             "height": 3
                         }
                     },
@@ -522,17 +522,17 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat @evt.outcome:CHEST $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat @actionType:CHEST $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -573,17 +573,17 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat @evt.outcome:AUTOFIX $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat @actionType:AUTOFIX $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -624,17 +624,17 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat @evt.outcome:BLOCKED $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat @actionType:BLOCKED $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -675,17 +675,17 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat @evt.outcome:NONE $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat @actionType:NONE $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -726,17 +726,17 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat @evt.outcome:DELETE $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat @actionType:DELETE $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -777,17 +777,17 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "data_source": "logs",
                                             "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:avast service:threat @evt.outcome:REPAIR $threat_name $device_name $infection_type $company_name $action $detection_source"
+                                            },
                                             "indexes": [
                                                 "*"
                                             ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
-                                            },
-                                            "group_by": [],
-                                            "search": {
-                                                "query": "source:avast service:threat @actionType:REPAIR $threat_name $device_name $infection_type $company_name $action $detection_source"
                                             },
                                             "storage": "hot"
                                         }
@@ -900,8 +900,8 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 3,
-                            "height": 4
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
@@ -968,10 +968,10 @@
                             ]
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 0,
-                            "width": 9,
-                            "height": 4
+                            "width": 8,
+                            "height": 3
                         }
                     },
                     {
@@ -1038,9 +1038,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 4,
-                            "width": 3,
-                            "height": 4
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
@@ -1107,10 +1107,10 @@
                             ]
                         },
                         "layout": {
-                            "x": 3,
-                            "y": 4,
-                            "width": 9,
-                            "height": 4
+                            "x": 4,
+                            "y": 3,
+                            "width": 8,
+                            "height": 3
                         }
                     },
                     {
@@ -1177,9 +1177,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 8,
-                            "width": 3,
-                            "height": 4
+                            "y": 6,
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
@@ -1246,10 +1246,10 @@
                             ]
                         },
                         "layout": {
-                            "x": 3,
-                            "y": 8,
-                            "width": 9,
-                            "height": 4
+                            "x": 4,
+                            "y": 6,
+                            "width": 8,
+                            "height": 3
                         }
                     },
                     {
@@ -1323,9 +1323,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 12,
+                            "y": 9,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -1399,9 +1399,9 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 12,
+                            "y": 9,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -1475,9 +1475,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 16,
+                            "y": 12,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -1551,9 +1551,9 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 16,
+                            "y": 12,
                             "width": 6,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -1623,7 +1623,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 20,
+                            "y": 15,
                             "width": 12,
                             "height": 4
                         }
@@ -1634,7 +1634,7 @@
                 "x": 0,
                 "y": 13,
                 "width": 12,
-                "height": 25,
+                "height": 20,
                 "is_column_break": true
             }
         },
@@ -2151,9 +2151,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 38,
+                "y": 33,
                 "width": 12,
-                "height": 10
+                "height": 1
             }
         }
     ],

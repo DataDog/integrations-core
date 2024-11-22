@@ -4,13 +4,12 @@
 
 [Avast Business Hub][1] is a cloud-based platform that helps businesses manage their Avast security solutions. It offers real-time threat monitoring, detailed reporting, and centralized security control for endpoints, ensuring comprehensive protection across the network and safeguarding against cyberthreats.
 
-The Avast integration collects below types of data:
+The Avast integration collects the following types of logs:
 
-1. Logs:
-    * **Threat**: This endpoint contains information about devices with detected threats, including the type of threat and detection time.
-    * **Task**: This endpoint contains a summary of tasks performed on devices, including execution details, progress, and completion status.
-    * **Patch**: This endpoint contains details about patches for devices, allowing monitoring of the health and security of device software and applications.
-    * **Audit**: This endpoint contains details about user activities, including changes to policies and user access.
+- **Threat**: This endpoint contains information about devices with detected threats, including the type of threat and detection time.
+- **Task**: This endpoint contains a summary of tasks performed on devices, including execution details, progress, and completion status.
+- **Patch**: This endpoint contains details about patches for devices, allowing monitoring of the health and security of device software and applications.
+- **Audit**: This endpoint contains details about user activities, including changes to policies and user access.
 
 This integration collects logs from the sources listed above and sends them to Datadog for analysis with our Log Explorer and Cloud SIEM products.
 
@@ -21,7 +20,7 @@ This integration collects logs from the sources listed above and sends them to D
 
 ### Configuration
 
-Avast integration requires a Avast Business Hub account and its Client Id, and Client Secret. Below are the steps to fetch these details from Avast Business Hub console:
+Avast integration requires an Avast Business Hub account and its Client ID, and Client Secret. Below are the steps to fetch these details from Avast Business Hub console:
 
 #### Get Avast Credentials
 
@@ -42,7 +41,7 @@ Avast integration requires a Avast Business Hub account and its Client Id, and C
 
 ### Logs 
 
-The Avast integration collects and forward security logs to Datadog.
+The Avast integration collects and forwards security logs to Datadog.
 
 ### Metrics
 

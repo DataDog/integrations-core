@@ -26,7 +26,7 @@
             "id": 1327646369801102,
             "definition": {
                 "type": "note",
-                "content": "**[Avast Business Hub](https://www.avast.com/business/business-hub)** is a cloud-based platform that helps businesses manage their Avast security solutions. It offers real-time threat monitoring, detailed reporting, and centralized security control for endpoints.\n\n**Avast - Audit Summary** Dashboard provides a comprehensive overview of user and system activities.\n\n**Tips:**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n\n\nFor more information, see the [Avast Integration Documentation](https://docs.datadoghq.com/integrations/avast/).",
+                "content": "**[Avast Business Hub](https://www.avast.com/business/business-hub)** is a cloud-based platform that helps businesses manage their Avast security solutions. It offers real-time threat monitoring, detailed reporting, and centralized security control for endpoints.\n\n**Avast - Audit Summary** Dashboard provides a comprehensive overview of user and system activities.\n\n**Tips:**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n\nFor more information, see the [Avast Integration Documentation](https://docs.datadoghq.com/integrations/avast/).",
                 "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
@@ -99,8 +99,8 @@
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 3,
-                            "height": 4
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
@@ -156,10 +156,10 @@
                             ]
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 0,
-                            "width": 9,
-                            "height": 4
+                            "width": 8,
+                            "height": 3
                         }
                     },
                     {
@@ -226,9 +226,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 4,
-                            "width": 3,
-                            "height": 4
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
@@ -295,10 +295,10 @@
                             ]
                         },
                         "layout": {
-                            "x": 3,
-                            "y": 4,
-                            "width": 9,
-                            "height": 4
+                            "x": 4,
+                            "y": 3,
+                            "width": 8,
+                            "height": 3
                         }
                     },
                     {
@@ -361,9 +361,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 8,
+                            "y": 6,
                             "width": 12,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -428,9 +428,9 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 12,
+                            "y": 9,
                             "width": 4,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -503,9 +503,9 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 12,
+                            "y": 9,
                             "width": 4,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -578,9 +578,9 @@
                         },
                         "layout": {
                             "x": 8,
-                            "y": 12,
+                            "y": 9,
                             "width": 4,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -646,7 +646,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 16,
+                            "y": 12,
                             "width": 12,
                             "height": 4
                         }
@@ -714,7 +714,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 20,
+                            "y": 16,
                             "width": 12,
                             "height": 4
                         }
@@ -725,7 +725,7 @@
                 "x": 0,
                 "y": 3,
                 "width": 12,
-                "height": 25
+                "height": 21
             }
         },
         {
@@ -1241,7 +1241,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 28,
+                "y": 24,
                 "width": 12,
                 "height": 10,
                 "is_column_break": true
