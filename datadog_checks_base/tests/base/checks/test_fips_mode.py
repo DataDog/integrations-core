@@ -3,15 +3,11 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-import logging
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any  # noqa: F401
 
-import _hashlib
-import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
@@ -33,7 +29,7 @@ def create_fipsmodule_config():
     ]
 
     try:
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        subprocess.run(command, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError:
         pytest.exit("Failed to set up FIPS mode. Exiting tests.", returncode=1)
     yield
