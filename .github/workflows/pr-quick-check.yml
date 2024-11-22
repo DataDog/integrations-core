@@ -22,7 +22,8 @@ jobs:
 
     permissions:
       pull-requests: write
-      
+      contents: read
+
     steps:
     # Uncomment for testing purposes
     # - uses: actions/checkout@v4
