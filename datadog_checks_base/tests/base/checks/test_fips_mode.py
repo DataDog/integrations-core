@@ -5,40 +5,46 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
+import subprocess
 import sys
+from pathlib import Path
 from typing import Any  # noqa: F401
 
+import _hashlib
 import mock
 import pytest
-import subprocess
 
 from datadog_checks.base import AgentCheck
-from pathlib import Path
-import _hashlib
 
 PATH_TO_EMBEDDED = str(Path(__file__).resolve().parent.parent.parent / "fixtures" / "fips" / "embedded")
 
-@pytest.fixture(scope="function", autouse=True)
-def create_conf():
+
+@pytest.fixture(scope="session", autouse=True)
+def create_fipsmodule_config():
     command = [
         "openssl",
         "fipsinstall",
-        "-module", f'{PATH_TO_EMBEDDED}/lib/ossl-modules/fips.so',
-        "-out", f'{PATH_TO_EMBEDDED}/ssl/fipsmodule.cnf',
-        "-provider_name", "fips"
+        "-module",
+        f'{PATH_TO_EMBEDDED}/lib/ossl-modules/fips.so',
+        "-out",
+        f'{PATH_TO_EMBEDDED}/ssl/fipsmodule.cnf',
+        "-provider_name",
+        "fips",
     ]
 
     try:
         result = subprocess.run(command, check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         pytest.exit("Failed to set up FIPS mode. Exiting tests.", returncode=1)
     yield
-    subprocess.run(["rm", f'{PATH_TO_EMBEDDED}/ssl/fipsmodule.cnf'], check=True)
+    # subprocess.run(["rm", f'{PATH_TO_EMBEDDED}/ssl/fipsmodule.cnf'], check=True)
+
 
 @pytest.fixture(scope="function")
 def clean_environment():
     AgentCheck().disable_openssl_fips()
     yield
+
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
 def test_openssl_default_non_fips():
@@ -79,6 +85,7 @@ def test_md5_after_fips(clean_environment):
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
 def test_cryptography_md5_cryptography():
     from cryptography.hazmat.primitives import hashes
+
     hashes.Hash(hashes.MD5())
 
 
@@ -90,4 +97,3 @@ def test_cryptography_md5_fips():
     AgentCheck().enable_cryptography_fips(path_to_embedded=PATH_TO_EMBEDDED)
     with pytest.raises(InternalError, match='Unknown OpenSSL error.'):
         hashes.Hash(hashes.MD5())
-

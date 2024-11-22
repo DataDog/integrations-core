@@ -1493,7 +1493,7 @@ class AgentCheck(object):
         self._set_openssl_env_vars(path_to_embedded)
 
         ffi = FFI()
-        libcrypto = ffi.dlopen("libcrypto-3.dll" if os.name=="nt" else "libcrypto.so")
+        libcrypto = ffi.dlopen("libcrypto-3.dll" if os.name == "nt" else "libcrypto.so")
         ffi.cdef(
             """
             int EVP_default_properties_enable_fips(void *ctx, int enable);
@@ -1512,7 +1512,7 @@ class AgentCheck(object):
         self._clear_openssl_env_vars()
 
         ffi = FFI()
-        libcrypto = ffi.dlopen("libcrypto-3.dll" if os.name=="nt" else "libcrypto.so")
+        libcrypto = ffi.dlopen("libcrypto-3.dll" if os.name == "nt" else "libcrypto.so")
         ffi.cdef(
             """
             int EVP_default_properties_enable_fips(void *ctx, int enable);
