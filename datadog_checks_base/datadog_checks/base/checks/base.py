@@ -8,6 +8,7 @@ import inspect
 import logging
 import os
 import re
+import sys
 import traceback
 import unicodedata
 from collections import deque
@@ -1493,7 +1494,7 @@ class AgentCheck(object):
         self._set_openssl_env_vars(path_to_embedded)
 
         ffi = FFI()
-        libcrypto = ffi.dlopen("libcrypto-3.dll" if os.name == "nt" else "libcrypto.so")
+        libcrypto = ffi.dlopen("libcrypto-3.dll" if sys.platform == "win32" else "libcrypto.so")
         ffi.cdef(
             """
             int EVP_default_properties_enable_fips(void *ctx, int enable);
@@ -1508,11 +1509,10 @@ class AgentCheck(object):
     def disable_openssl_fips(self):
         from cffi import FFI
 
-        # Reset the OpenSSL environment variables if needed
         self._clear_openssl_env_vars()
 
         ffi = FFI()
-        libcrypto = ffi.dlopen("libcrypto-3.dll" if os.name == "nt" else "libcrypto.so")
+        libcrypto = ffi.dlopen("libcrypto-3.dll" if sys.platform == "win32" else "libcrypto.so")
         ffi.cdef(
             """
             int EVP_default_properties_enable_fips(void *ctx, int enable);

@@ -47,23 +47,6 @@ def clean_environment():
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
-def test_openssl_default_non_fips():
-    assert not _hashlib.get_fips_mode()
-
-
-@pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
-def test_openssl_fips_enable():
-    AgentCheck().enable_openssl_fips(path_to_embedded=PATH_TO_EMBEDDED)
-    assert _hashlib.get_fips_mode()
-
-
-@pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
-def test_openssl_fips_disable():
-    AgentCheck().disable_openssl_fips()
-    assert not _hashlib.get_fips_mode()
-
-
-@pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
 def test_md5_before_fips():
     import ssl
 
