@@ -317,6 +317,8 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/llamaindex:
+- llamaindex/**/*
 integration/lastpass:
 - lastpass/**/*
 integration/lighttpd:
