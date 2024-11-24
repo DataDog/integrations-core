@@ -153,8 +153,8 @@ def test_non_datadog_distribution():
     [
         (
             "datadog-active-directory",
-            "1.10.0",
-            "simple/datadog-active-directory/datadog_active_directory-1.10.0-py2.py3-none-any.whl",
+            "4.0.0",
+            "simple/datadog-active-directory/datadog_active_directory-4.0.0-py2.py3-none-any.whl",
         ),
     ],
 )
