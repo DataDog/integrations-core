@@ -22,7 +22,7 @@ build-agent-auto:
   extends: .build-agent-tpl
   rules:
     - changes:
-        compare_to: "$CI_DEFAULT_BRANCH"
+        compare_to: $CI_DEFAULT_BRANCH
         paths:
           - .deps/*
           - .gitlab/build_agent.yaml
