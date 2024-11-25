@@ -1,25 +1,25 @@
 ---
 .build-agent-tpl:
+  variables:
+    _AGENT_BRANCH: main # Used only by this job
+    # Pass these to triggered agent build job.
+    RELEASE_VERSION_6: "nightly"
+    RELEASE_VERSION_7: "nightly-a7"
+    BUCKET_BRANCH: "dev"
+    DEPLOY_AGENT: "false"
+    INTEGRATIONS_CORE_VERSION: ${CI_COMMIT_REF_NAME}
+    # disable kitchen and e2e tests
+    RUN_KITCHEN_TESTS: "false"
+    RUN_E2E_TESTS: "off"
   stage: build
   trigger:
     project: DataDog/datadog-agent
-    branch: main
+    branch: ${_AGENT_BRANCH}
     # It's more convenient to directly show if downstream pipeline succeeded.
     strategy: depend
-    variables:
-      RELEASE_VERSION_6: "nightly"
-      RELEASE_VERSION_7: "nightly-a7"
-      BUCKET_BRANCH: "dev"
-      DEPLOY_AGENT: "false"
-      INTEGRATIONS_CORE_VERSION: ${CI_COMMIT_REF_NAME}
-      # disable kitchen and e2e tests
-      RUN_KITCHEN_TESTS: "false"
-      RUN_E2E_TESTS: "off"
 
 build-agent-auto:
   extends: .build-agent-tpl
-  variables:
-    AGENT_BRANCH: main
   rules:
     - changes:
         compare_to: "$CI_DEFAULT_BRANCH"
@@ -30,11 +30,9 @@ build-agent-auto:
 build-agent-manual:
   extends: .build-agent-tpl
   when: manual
-  variables:
-    AGENT_BRANCH: main
   rules:
     # By default we test with Agent's main branch.
     # From a release branch we want to use the same release branch in the agent repo.
     - if: $CI_COMMIT_BRANCH =~ "/^7.\d+.x$/"
       variables:
-        AGENT_BRANCH: ${CI_COMMIT_BRANCH}
+        _AGENT_BRANCH: ${CI_COMMIT_BRANCH}
