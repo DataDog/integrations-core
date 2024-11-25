@@ -75,6 +75,48 @@ instances:
     #   - TLSv1.2
     #   - TLSv1.3
 
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers to use when connecting to `server`. If not specified, the default
+    ## list of ciphers is used. The list of ciphers is a colon-separated list of cipher names.
+    ## See: https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    ## Defaults are: 
+    ## "TLS_AES_256_GCM_SHA384", 
+    ## "TLS_CHACHA20_POLY1305_SHA256", 
+    ## "TLS_AES_128_GCM_SHA256",
+    ## "ECDHE-ECDSA-AES256-GCM-SHA384", 
+    ## "ECDHE-RSA-AES256-GCM-SHA384", 
+    ## "ECDHE-ECDSA-AES128-GCM-SHA256",
+    ## "ECDHE-RSA-AES128-GCM-SHA256", 
+    ## "ECDHE-ECDSA-CHACHA20-POLY1305", 
+    ## "ECDHE-RSA-CHACHA20-POLY1305", 
+    ## "ECDHE-ECDSA-AES256-SHA384", 
+    ## "ECDHE-RSA-AES256-SHA384", 
+    ## "ECDHE-ECDSA-AES128-SHA256", 
+    ## "ECDHE-RSA-AES128-SHA256", 
+    ## "DHE-RSA-AES256-GCM-SHA384", 
+    ## "DHE-RSA-AES128-GCM-SHA256", 
+    ## "DHE-RSA-AES256-SHA256", 
+    ## "DHE-RSA-AES128-SHA256"
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
+    #   - ECDHE-ECDSA-AES256-GCM-SHA384
+    #   - ECDHE-RSA-AES256-GCM-SHA384
+    #   - ECDHE-ECDSA-AES128-GCM-SHA256
+    #   - ECDHE-RSA-AES128-GCM-SHA256
+    #   - ECDHE-ECDSA-CHACHA20-POLY1305
+    #   - ECDHE-RSA-CHACHA20-POLY1305
+    #   - ECDHE-ECDSA-AES256-SHA384
+    #   - ECDHE-RSA-AES256-SHA384
+    #   - ECDHE-ECDSA-AES128-SHA256
+    #   - ECDHE-RSA-AES128-SHA256
+    #   - DHE-RSA-AES256-GCM-SHA384
+    #   - DHE-RSA-AES128-GCM-SHA256
+    #   - DHE-RSA-AES256-SHA256
+    #   - DHE-RSA-AES128-SHA256
+
     ## @param fetch_intermediate_certs - boolean - optional - default: false
     ## Whether or not to perform AIA chasing in order to load the full certificate chain.
     ##
