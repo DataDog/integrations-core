@@ -21,11 +21,11 @@ build-agent-auto:
   variables:
     AGENT_BRANCH: main
   only:
-    changes:
-      paths:
-        - .deps/*
-        - .gitlab/build_agent.yaml
-      compare_to: "$CI_DEFAULT_BRANCH"
+    - changes:
+        compare_to: "$CI_DEFAULT_BRANCH"
+        paths:
+          - .deps/*
+          - .gitlab/build_agent.yaml
 
 build-agent-manual:
   extends: .build-agent-tpl
