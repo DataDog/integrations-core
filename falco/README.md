@@ -24,6 +24,12 @@ The Falco integration seamlessly ingests the data of Falco logs using the Webhoo
     url: <Datadog Webhook URL> (e.g., https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=falco)
   ```
 
+  - Restart the Falco using below command:
+
+    ```bash
+    systemctl restart falco
+    ```
+
 - If Falco is installed using Helm, you can use the following command to add or update the HTTP URL:
 
   ```bash
