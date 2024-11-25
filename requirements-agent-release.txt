@@ -159,7 +159,7 @@ datadog-scylla==4.0.0
 datadog-sidekiq==3.0.0
 datadog-silk==4.0.0
 datadog-singlestore==4.0.0
-datadog-slurm==1.0.0; sys_platform == 'linux2'
+datadog-slurm==1.0.1; sys_platform == 'linux2'
 datadog-snmp==9.0.0
 datadog-snowflake==7.0.0
 datadog-solr==2.1.0
