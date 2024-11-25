@@ -224,8 +224,14 @@ Score   Most similar
         assert similar.dict_diff({'a': 1, 'b': 2}, {'a': 1, 'b': 3}) == [('b', 2, 3)]
         assert similar.dict_diff({'a': 1}, {'b': 3}) == [('a', 1, None)]
         assert similar.dict_diff({'a': 1}, {'a': 1}) == []
+        assert similar.dict_diff({'a': 1}, {}) == [('a', 1, None)]
+        assert similar.dict_diff({}, {'a': 1}) == []
+        assert similar.dict_diff({}, {}) == []
 
     def test_tags_diff(self):
         assert similar.tags_diff(['a:1', 'b:2'], ['a:1', 'c:2']) == [('b', '2', None), ('c', None, '2')]
         assert similar.tags_diff(['a:1', 'b:2'], ['a:2', 'b:2']) == [('a', '1', '2')]
         assert similar.tags_diff(['a:1'], ['a:1']) == []
+        assert similar.tags_diff([], []) == []
+        assert similar.tags_diff(['a:1'], []) == [("a", "1", None)]
+        assert similar.tags_diff([], ['a:1']) == [("a", None, "1")]
