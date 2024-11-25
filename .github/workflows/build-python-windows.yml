@@ -7,46 +7,63 @@ on:
         required: true
         type: string
         description: 'The version of CPython to build (e.g., 3.12)'
+      openssl_version:
+        required: true
+        type: string
+        description: 'The version of OpenSSL to build (e.g., 3.0.15)'
+      openssl_fips_version:
+        required: true
+        type: string
+        description: 'The version of OpenSSL FIPS to build (e.g., 3.0.9)'
 
 jobs:
-  build_cpython:
-    runs-on: windows-latest
-    timeout-minutes: 60
+  build-python:
+    runs-on: windows-2019
+
     env:
-      IncludeFreethreaded: false # Todo: Check if we are using free-threading in our embedded Python. It's enabled in 3.13+ by default.
+      PYTHON_TAG: v${{ inputs.python_version }}
+      PYTHON_REPO_PATH: C:/repos/cpython
+      OPENSSL_VERSION: openssl-${{ inputs.openssl_version }}
+      OPENSSL_FIPS_VERSION: openssl-${{ inputs.openssl_fips_version }}
+      MSYS2_PATH: C:/msys64/
+
     steps:
-      - name: Checkout CPython Source
+      - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          repository: python/cpython
-          ref: v${{ inputs.python_version }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.x
-      
-      - name: Build CPython installer
-        run: | 
-          .\tools\msi\buildrelease.bat -x64
+      - name: Install dotnet PowerShell
+        run: dotnet tool install --global PowerShell
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: python-${{ inputs.python_version }}-amd64.exe
-          path: PCbuild\amd64\en-us\python-${{ inputs.python_version }}-amd64.exe
-          if-no-files-found: error
-          retention-days: 1
-          
-      - name: Create Python Zip
-        run: |
-          curl -L https://raw.githubusercontent.com/DataDog/integrations-core/refs/heads/nubtron/python-build-experiments/.github/workflows/scripts/Generate-Pyzip.ps1 -o Generate-Pyzip.ps1
-          $outDir = ".\out"
-          mkdir $outDir
-          .\Generate-Pyzip.ps1 -Version ${{ inputs.python_version }} -OutDir $outDir -InputFile "PCbuild\amd64\en-us\python-${{ inputs.python_version }}-amd64.exe"
+      - name: Clone CPython repository
+        run: git clone --branch $env:PYTHON_TAG --depth 1 https://github.com/python/cpython.git $env:PYTHON_REPO_PATH
+
+      - name: Install OpenSSL dependencies
+        run: pwsh -File .github/workflows/scripts/python-build/install-openssl-dependencies.ps1 -Msys2Path $env:MSYS2_PATH
+
+      - name: Download and configure OpenSSL
+        run: pwsh -File .github/workflows/scripts/python-build/download-and-configure-openssl.ps1 -Msys2Path $env:MSYS2_PATH -OpenSSLVersion $env:OPENSSL_VERSION
+
+      - name: Build OpenSSL
+        run: pwsh -File .github/workflows/scripts/python-build/build-openssl.ps1 -Msys2Path $env:MSYS2_PATH -OpenSSLVersion $env:OPENSSL_VERSION
+
+      - name: Integrate OpenSSL with Python
+        run: pwsh -File .github/workflows/scripts/python-build/integrate-with-python.ps1 -Msys2Path $env:MSYS2_PATH -OpenSSLVersion $env:OPENSSL_VERSION -PythonRepoPath $env:PYTHON_REPO_PATH
+
+      - name: Build Python
+        run: pwsh -File .github/workflows/scripts/python-build/build-python.ps1 -PythonRepoPath $env:PYTHON_REPO_PATH -Pgo
+
+      - name: Build FIPS Module - Download and Configure OpenSSL
+        run: pwsh -File .github/workflows/scripts/python-build/download-and-configure-openssl.ps1 -Msys2Path $env:MSYS2_PATH -OpenSSLVersion $env:OPENSSL_FIPS_VERSION -Fips
+
+      - name: Build FIPS Module
+        run: pwsh -File .github/workflows/scripts/python-build/build-openssl.ps1 -Msys2Path $env:MSYS2_PATH -OpenSSLVersion $env:OPENSSL_FIPS_VERSION -Fips
+
+      - name: Package Python
+        run: pwsh -File .github/workflows/scripts/python-build/package-python.ps1 -PythonRepoPath $env:PYTHON_REPO_PATH -Msys2Path $env:MSYS2_PATH
 
       - uses: actions/upload-artifact@v4
         with:
           name: python-windows-${{ inputs.python_version }}-amd64.zip
-          path: ./out/python-windows-${{ inputs.python_version }}-amd64.zip
+          path: $env:PYTHON_REPO_PATH/installed
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 30

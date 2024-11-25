@@ -21,4 +21,6 @@ jobs:
     uses: ./.github/workflows/build-python-windows.yml
     with:
       python_version: '3.12.6'
+      openssl_version: '3.0.15'
+      openssl_fips_version: '3.0.9'
     secrets: inherit
