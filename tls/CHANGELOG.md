@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.1.0-beta.1 / 2024-11-25
+
+***Added***:
+
+* Allow Cipher Specs to be added ([#19132](https://github.com/DataDog/integrations-core/pull/19132))
+
 ## 3.0.0 / 2024-10-01
 
 ***Changed***:
