@@ -39,7 +39,7 @@ if (Test-Path $Msys2Bin/$OpenSSLVersion) {
 git clone --branch $OpenSSLVersion --depth 1 https://github.com/openssl/openssl.git "$Msys2Path/$OpenSSLVersion"
 if (!$?) { throw "Failed to clone OpenSSL repository" }
 
-Invoke-Msys2 'echo "pwd: `$(pwd) "'
+Invoke-Msys2 "echo `"pwd: `$(pwd) `""
 Write-Output "Configuring OpenSSL..."
 $configure_command = "cd $OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" perl ./Configure --prefix=$OutDir/ mingw64"
 if ($Fips) {
