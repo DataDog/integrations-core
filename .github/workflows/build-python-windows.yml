@@ -64,6 +64,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: python-windows-${{ inputs.python_version }}-amd64.zip
-          path: $env:PYTHON_REPO_PATH/installed
+          path: C:/repos/cpython/installed
           if-no-files-found: error
           retention-days: 30
