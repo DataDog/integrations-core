@@ -1,0 +1,18 @@
+otel,dd,description,filter
+container.blockio.io_serviced_recursive,container.io.read.operations,Number of IOs (bio) issued to the disk by the group and descendant groups (Only available with cgroups v1).,`operation`: `read`
+container.blockio.io_serviced_recursive,container.io.write.operations,Number of IOs (bio) issued to the disk by the group and descendant groups (Only available with cgroups v1).,`operation`: `write`
+container.cpu.throttling_data.throttled_periods,container.cpu.throttled.periods,Number of periods when the container hits its throttling limit.,
+container.cpu.throttling_data.throttled_time,container.cpu.throttled,Aggregate time the container was throttled.,
+container.cpu.usage.system,container.cpu.system,"System CPU usage, as reported by docker.",
+container.cpu.usage.total,container.cpu.usage,Total CPU time consumed.,
+container.cpu.usage.usermode,container.cpu.user,Time spent by tasks of the cgroup in user mode (Linux). Time spent by all container processes in user mode (Windows).,
+container.memory.active_anon,container.memory.kernel,The amount of anonymous memory that has been identified as active by the kernel.,
+container.memory.hierarchical_memory_limit,container.memory.limit,The maximum amount of physical memory that can be used by the processes of this control group (Only available with cgroups v1).,
+container.memory.rss,kubernetes.memory.rss,"The amount of memory that doesn’t correspond to anything on disk: stacks, heaps, and anonymous memory maps (Only available with cgroups v1).",
+container.memory.total_cache,container.memory.cache,Total amount of memory used by the processes of this cgroup (and descendants) that can be associated with a block on a block device. Also accounts for memory used by tmpfs (Only available with cgroups v1).,
+container.memory.usage.limit,container.memory.soft_limit,Memory limit of the container.,
+container.memory.usage.total,container.memory.usage,Memory usage of the container. This excludes the cache.,
+container.network.io.usage.rx_bytes,container.net.rcvd,Bytes received by the container.,
+container.network.io.usage.rx_packets,container.net.rcvd.packets,Packets received.,
+container.network.io.usage.tx_bytes,container.net.sent,Bytes sent.,
+container.network.io.usage.tx_packets,container.net.sent.packets,Packets sent.,

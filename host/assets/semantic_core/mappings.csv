@@ -1,0 +1,17 @@
+otel,dd,description,filter,transform
+system.cpu.load_average.15m,system.load.15,Average CPU Load over 15 minutes.,,
+system.cpu.load_average.1m,system.load.1,Average CPU Load over 1 minute.,,
+system.cpu.load_average.5m,system.load.5,Average CPU Load over 5 minutes.,,
+system.cpu.utilization,system.cpu.idle,"Difference in system.cpu.time since the last measurement per logical CPU, divided by the elapsed time (value in interval [0,1]).",`state`: `idle`,× 100
+system.cpu.utilization,system.cpu.iowait,"Difference in system.cpu.time since the last measurement per logical CPU, divided by the elapsed time (value in interval [0,1]).",`state`: `wait`,× 100
+system.cpu.utilization,system.cpu.stolen,"Difference in system.cpu.time since the last measurement per logical CPU, divided by the elapsed time (value in interval [0,1]).",`state`: `steal`,× 100
+system.cpu.utilization,system.cpu.system,"Difference in system.cpu.time since the last measurement per logical CPU, divided by the elapsed time (value in interval [0,1]).",`state`: `system`,× 100
+system.cpu.utilization,system.cpu.user,"Difference in system.cpu.time since the last measurement per logical CPU, divided by the elapsed time (value in interval [0,1]).",`state`: `user`,× 100
+system.filesystem.utilization,system.disk.in_use,Fraction of filesystem bytes used.,,
+system.filesystem.utilization,system.disk.in_use,Fraction of filesystem bytes used.,,
+system.memory.usage,system.mem.total,Bytes of memory in use.,,× 1048576
+system.memory.usage,system.mem.usable,Bytes of memory in use.,"`state`: `free, cached, buffered`",× 1048576
+system.network.io,system.net.bytes_rcvd,The number of bytes transmitted and received.,`direction`: `receive`,
+system.network.io,system.net.bytes_sent,The number of bytes transmitted and received.,`direction`: `transmit`,
+system.paging.usage,system.swap.free,Swap (unix) or pagefile (windows) usage.,`state`: `free`,× 1048576
+system.paging.usage,system.swap.used,Swap (unix) or pagefile (windows) usage.,`state`: `used`,× 1048576

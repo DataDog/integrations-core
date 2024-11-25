@@ -1,0 +1,14 @@
+otel,dd,description,filter
+iis.connection.active,iis.net.num_connections,Number of active connections.,
+iis.connection.anonymous,iis.users.anon,Number of connections established anonymously.,
+iis.network.file.count,iis.net.files_rcvd,Number of transmitted files.,`direction`: `received`
+iis.network.file.count,iis.net.files_sent,Number of transmitted files.,`direction`: `sent`
+iis.network.io,iis.net.bytes_rcvd,Total amount of bytes sent and received.,`direction`: `received`
+iis.network.io,iis.net.bytes_sent,Total amount of bytes sent and received.,`direction`: `sent`
+iis.request.count,iis.httpd_request_method.delete,Total number of requests of a given type.,`request`: `delete`
+iis.request.count,iis.httpd_request_method.get,Total number of requests of a given type.,`request`: `get`
+iis.request.count,iis.httpd_request_method.head,Total number of requests of a given type.,`request`: `head`
+iis.request.count,iis.httpd_request_method.options,Total number of requests of a given type.,`request`: `options`
+iis.request.count,iis.httpd_request_method.post,Total number of requests of a given type.,`request`: `post`
+iis.request.count,iis.httpd_request_method.put,Total number of requests of a given type.,`request`: `put`
+iis.request.count,iis.httpd_request_method.trace,Total number of requests of a given type.,`request`: `trace`

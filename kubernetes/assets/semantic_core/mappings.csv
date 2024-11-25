@@ -1,0 +1,47 @@
+otel,dd,description,filter
+container.filesystem.usage,kubernetes.filesystem.usage,Container filesystem usage,
+container.filesystem.usage,kubernetes.filesystem.usage,Container filesystem usage,
+container.memory.rss,kubernetes.memory.rss,Container memory rss,
+k8s.container.cpu_limit,kubernetes.cpu.limits,Maximum resource limit set for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details,
+k8s.container.cpu_request,kubernetes.cpu.requests,Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details,
+k8s.container.memory_request,kubernetes.memory.requests,Resource requested for the container. See https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#resourcerequirements-v1-core for details,
+k8s.job.active_pods,kubernetes.pods.running,The number of actively running pods for a job,
+k8s.node.filesystem.usage,kubernetes.filesystem.usage,Node filesystem usage,
+k8s.node.filesystem.usage,kubernetes.filesystem.usage,Node filesystem usage,
+k8s.node.memory.rss,kubernetes.memory.rss,Node memory rss,
+k8s.node.memory.usage,kubernetes.memory.usage,Memory usage of the Node Note: Total memory usage of the Node,
+k8s.node.memory.usage,kubernetes.memory.usage,Node memory usage,
+k8s.node.memory.usage,kubernetes.memory.usage,Memory usage of the Node Note: Total memory usage of the Node,
+k8s.node.memory.usage,kubernetes.memory.usage,Node memory usage,
+k8s.node.network.errors,kubernetes.network.tx_errors,Node network errors,`direction`: `transmit`
+k8s.node.network.errors,kubernetes.network.tx_errors,Node network errors,`direction`: `transmit`
+k8s.node.network.errors,kubernetes.network.rx_errors,Node network errors,`direction`: `receive`
+k8s.node.network.errors,kubernetes.network.rx_errors,Node network errors,`direction`: `receive`
+k8s.node.network.io,kubernetes.io.write_bytes,Network bytes for the Node,`direction`: `transmit`
+k8s.node.network.io,kubernetes.io.write_bytes,Node network IO,`direction`: `transmit`
+k8s.node.network.io,kubernetes.io.read_bytes,Network bytes for the Node,`direction`: `receive`
+k8s.node.network.io,kubernetes.io.read_bytes,Node network IO,`direction`: `receive`
+k8s.node.network.io,kubernetes.network.tx_bytes,Network bytes for the Node,`direction`: `transmit`
+k8s.node.network.io,kubernetes.network.rx_bytes,Node network IO,`direction`: `receive`
+k8s.node.network.io,kubernetes.network.rx_bytes,Network bytes for the Node,`direction`: `receive`
+k8s.node.network.io,kubernetes.network.tx_bytes,Node network IO,`direction`: `transmit`
+k8s.pod.filesystem.usage,kubernetes.filesystem.usage,Pod filesystem usage,
+k8s.pod.filesystem.usage,kubernetes.filesystem.usage,Pod filesystem usage,
+k8s.pod.memory.node.utilization,kubernetes.memory.usage_pct,Pod memory utilization as a ratio of the node's capacity,
+k8s.pod.memory.rss,kubernetes.memory.rss,Pod memory rss,
+k8s.pod.memory.usage,kubernetes.memory.usage,Memory usage of the Pod Note: Total memory usage of the Pod,
+k8s.pod.memory.usage,kubernetes.memory.usage,Pod memory usage,
+k8s.pod.memory.usage,kubernetes.memory.usage,Pod memory usage,
+k8s.pod.memory.usage,kubernetes.memory.usage,Memory usage of the Pod Note: Total memory usage of the Pod,
+k8s.pod.network.errors,kubernetes.network.tx_errors,Pod network errors,`direction`: `transmit`
+k8s.pod.network.errors,kubernetes.network.rx_errors,Pod network errors,`direction`: `receive`
+k8s.pod.network.errors,kubernetes.network.rx_errors,Pod network errors,`direction`: `receive`
+k8s.pod.network.errors,kubernetes.network.tx_errors,Pod network errors,`direction`: `transmit`
+k8s.pod.network.io,kubernetes.network.tx_bytes,Pod network IO,`direction`: `transmit`
+k8s.pod.network.io,kubernetes.network.rx_bytes,Network bytes for the Pod,`direction`: `receive`
+k8s.pod.network.io,kubernetes.network.rx_bytes,Pod network IO,`direction`: `receive`
+k8s.pod.network.io,kubernetes.io.write_bytes,Network bytes for the Pod,`direction`: `transmit`
+k8s.pod.network.io,kubernetes.io.write_bytes,Pod network IO,`direction`: `transmit`
+k8s.pod.network.io,kubernetes.io.read_bytes,Network bytes for the Pod,`direction`: `receive`
+k8s.pod.network.io,kubernetes.io.read_bytes,Pod network IO,`direction`: `receive`
+k8s.pod.network.io,kubernetes.network.tx_bytes,Network bytes for the Pod,`direction`: `transmit`
