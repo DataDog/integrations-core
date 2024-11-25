@@ -76,7 +76,7 @@ class TLSRemoteCheck(object):
                     context.set_ciphers(updated_ciphers)
                     self.log.debug('Set ciphers to %s', context.get_ciphers())
                     self.log.debug('Context options %s', context.options)
-                    self.log.debug('Context verify mode %s', context.verify_mode)
+                    self.log.debug('Context verify mode %s', context.verify_mode.name)
                     self.log.debug('Context check hostname %s', context.check_hostname)
                     self.log.debug('Context minimum version %s', context.minimum_version.name)
                     self.log.debug('Context maximum version %s', context.maximum_version.name)
