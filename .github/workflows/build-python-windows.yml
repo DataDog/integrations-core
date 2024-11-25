@@ -41,8 +41,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
-          toolset: v143
-          sdk: 10.0.22621.0
+          sdk: 10.0.19041.0
 
       - name: Install dotnet PowerShell
         run: dotnet tool install --global PowerShell
