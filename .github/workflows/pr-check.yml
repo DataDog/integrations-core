@@ -12,6 +12,10 @@ jobs:
   run:
     uses: ./.github/workflows/pr-quick-check.yml
     if: ${{ github.base_ref == 'master' }}
+    permissions:
+      pull-requests: write
+      contents: read
     with:
       repo: core
     secrets: inherit
+      
