@@ -25,6 +25,8 @@ STATUS_VARS = [
     # Table Cache Metrics
     'mysql.performance.open_files',
     'mysql.performance.open_tables',
+    # Performance schema metrics
+    'mysql.performance.performance_schema_digest_lost',
     # Network Metrics
     'mysql.performance.bytes_sent',
     'mysql.performance.bytes_received',
@@ -137,7 +139,6 @@ OPTIONAL_STATUS_VARS = [
     'mysql.performance.handler_update',
     'mysql.performance.handler_write',
     'mysql.performance.opened_tables',
-    'mysql.performance.performance_schema_digest_lost',
     'mysql.performance.qcache_total_blocks',
     'mysql.performance.qcache_free_blocks',
     'mysql.performance.qcache_free_memory',
