@@ -590,7 +590,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:genesys.conversations.state_transitions_errors_count{*}.as_count()",
+                      "query": "sum:genesys.conversations.state_transition_errors_count{*}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
