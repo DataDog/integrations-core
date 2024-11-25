@@ -3,6 +3,7 @@
 <!-- towncrier release notes start -->
 
 ## 3.1.0 / 2024-10-04 / Agent 7.59.0
+
 * Align OMv2 labels with Kubernetes agent tags ([#18654](https://github.com/DataDog/integrations-core/pull/18654))
 
 ***Fixed***:

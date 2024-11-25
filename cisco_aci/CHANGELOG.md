@@ -29,13 +29,13 @@
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
 
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
-
 ***Security***:
 
 * Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 2.12.0 / 2024-09-06
 
