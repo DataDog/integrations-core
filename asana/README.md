@@ -6,7 +6,7 @@ This integration ingests the following logs:
 
 - **Audit Logs**: Audit logs provide a detailed record of significant events, enabling your teams to identify and mitigate the impact of incidents as they arise, while also reviewing configuration changes with precision.
 
-This integration gathers audit logs and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Asana platform. Additionally, it includes ready-to-use detection rules for enhanced monitoring and security.
+This integration gathers audit logs and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Asana platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
