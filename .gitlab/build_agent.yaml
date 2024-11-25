@@ -20,7 +20,7 @@ build-agent-auto:
   extends: .build-agent-tpl
   variables:
     AGENT_BRANCH: main
-  only:
+  rules:
     - changes:
         compare_to: "$CI_DEFAULT_BRANCH"
         paths:
