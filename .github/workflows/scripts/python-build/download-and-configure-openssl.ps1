@@ -41,7 +41,7 @@ if (!$?) { throw "Failed to clone OpenSSL repository" }
 
 Invoke-Msys2 "echo `"pwd: `$(pwd) `""
 Write-Output "Configuring OpenSSL..."
-$configure_command = "cd $OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" perl ./Configure --prefix=$OutDir/ mingw64"
+$configure_command = "cd /$OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" perl ./Configure --prefix=$OutDir/ mingw64"
 if ($Fips) {
     $configure_command += " enable-fips"
 }
