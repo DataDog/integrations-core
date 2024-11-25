@@ -4,7 +4,7 @@
 
 [Shopify][1] is a comprehensive commerce platform designed to help individuals start, manage, and grow their businesses. It provides tools to build an online store, manage sales, market to customers, and accept payments in both digital and physical locations.
 
-The Shopify Integration collects Event, Product, Customer and Order logs, sending them to Datadog for detailed analysis.
+The Shopify Integration collects Event, Product, Customer, and Order logs, sending them to Datadog for detailed analysis.
 
 It includes dashboards that show and analyze logs, making it easier to monitor and understand patterns.
 
@@ -12,12 +12,12 @@ It includes dashboards that show and analyze logs, making it easier to monitor a
 
 ### Configuration
 
-#### Get Shopify Credentials
-1. Log in to [Shopify][2] admin account 
-2. Shopify Store name is the `xxxx` part of the Store URL (`https://admin.shopify.com/store/xxxx`)
+#### Get Shopify credentials
+1. Log in to [Shopify][2] admin account.
+2. The Shopify Store name is the `xxxx` part of the Store URL (`https://admin.shopify.com/store/xxxx`).
 3. Navigate to **Settings > Apps and sales channels**.
-4. Select **Develop apps** and Click **Allow custom app development**.
-5. Click **Create a custom app**, provide the necessary details and Click on **Create app**.
+4. Select **Develop apps** and click **Allow custom app development**.
+5. Click **Create a custom app**, provide the necessary details and click **Create app**.
 6. Click **Configure Admin API Scopes** under the Overview tab.
 7. In the **Admin API access scopes section**, select the following scopes:
     - **read_orders** 
@@ -25,11 +25,11 @@ It includes dashboards that show and analyze logs, making it easier to monitor a
     - **read_customers** 
     - **read_content** 
     - **read_price_rules** 
-8. Click on **Save** to apply the changes.
-9. Click on **Install app**.
-10. Under the **Admin API access token** section, Click on **Reveal token once**.
+8. Click **Save** to apply the changes.
+9. Click **Install app**.
+10. Under the **Admin API access token** section, click **Reveal token once**.
 
-#### Add Shopify Credentials
+#### Add Shopify credentials
 - Shopify Store Name 
 - Shopify Access Token
 
@@ -37,7 +37,7 @@ It includes dashboards that show and analyze logs, making it easier to monitor a
 
 ### Logs 
 
-The Shopify integration collects and forward Event, Product, Customer and Order logs to Datadog.
+The Shopify integration collects and forwards Event, Product, Customer, and Order logs to Datadog.
 
 ### Metrics
 

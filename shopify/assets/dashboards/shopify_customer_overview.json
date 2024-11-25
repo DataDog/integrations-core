@@ -26,7 +26,7 @@
             "id": 7447057642776924,
             "definition": {
                 "type": "note",
-                "content": "\n**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform designed to help individuals start, manage, and grow their businesses. It provides tools to build an online store, manage sales, market to customers, and accept payments in both digital and physical locations.\n\nThe **Shopify Customer Overview** Dashboard provides an overview of customers within your store. It provides insights into customer's marketing and order details.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n",
+                "content": "\n**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform designed to help individuals start, manage, and grow their businesses. It provides tools to build an online store, manage sales, market to customers, and accept payments in both digital and physical locations.\n\nThe **Shopify Customer Overview** Dashboard provides an overview of customers within your store. It provides insights into customer's marketing and order details.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n",
                 "background_color": "green",
                 "font_size": "14",
                 "text_align": "left",

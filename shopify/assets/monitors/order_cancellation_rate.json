@@ -3,7 +3,7 @@
 	"created_at": "2024-10-01",
 	"last_updated_at": "2024-10-01",
 	"title": "Order Cancellation Rate is High",
-	"description": "High order cancellation rate is monitored.",
+	"description": "The order cancellation rate is the percentage of orders that are canceled, compared to the total number of orders placed within a time interval. This monitor tracks the order cancellations to help identify issues, improve the shopping experience, and reduce lost sales.",
 	"definition": {
 		"id": 155142683,
 		"name": "Order Cancellation Rate is High",

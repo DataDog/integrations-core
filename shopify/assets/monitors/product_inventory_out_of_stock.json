@@ -3,7 +3,7 @@
 	"created_at": "2024-10-01",
 	"last_updated_at": "2024-10-01",
 	"title": "Product Inventory is Out of Stock",
-	"description": "Out of stock product inventory is monitored.",
+	"description": "Out-of-stock inventory refers to products that are sold out and unavailable for purchase.This monitor tracks product inventory to help manage stock levels, prevent overselling, and ensure timely restocking.",
 	"definition": {
 		"id": 155142623,
 		"name": "Product Inventory is Out of Stock",
