@@ -12,7 +12,7 @@ jobs:
   run:
     uses: ./.github/workflows/pr-quick-check.yml
     if: ${{ github.base_ref == 'master' }}
-    permissions:
+    permissions: # These permissions need to match the ones in the included workflow, see pr-quick-check.yml for details
       pull-requests: write
       contents: read
     with:
