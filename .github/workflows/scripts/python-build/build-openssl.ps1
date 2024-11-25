@@ -27,10 +27,10 @@ function Invoke-Msys2 {
 }
 
 Write-Output "Building OpenSSL..."
-Invoke-Msys2 "cd $OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" make -j`$(nproc)"
+Invoke-Msys2 "cd /$OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" make -j`$(nproc)"
 if ($Fips) {
-    Invoke-Msys2 "cd $OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" make install_fips"
+    Invoke-Msys2 "cd /$OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" make install_fips"
 } else {
-    Invoke-Msys2 "cd $OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" make install_sw install_ssldirs"
+    Invoke-Msys2 "cd /$OpenSSLVersion && PATH=`"/mingw64/bin:`$PATH`" make install_sw install_ssldirs"
 }
 
