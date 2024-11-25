@@ -32,9 +32,6 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {
-      "LLM Observability Overview Dashboard": "assets/dashboards/llm_observability_overview_dashboard.json"
     }
   },
   "author": {
