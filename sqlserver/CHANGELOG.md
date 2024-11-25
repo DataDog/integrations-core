@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 20.1.1 / 2024-11-25
+
+***Fixed***:
+
+* Use alternative schema collection query for sqlserver 2016 and older due to STRING_AGG not being supported until SQLServer 2017 ([#19110](https://github.com/DataDog/integrations-core/pull/19110))
+
 ## 20.1.0 / 2024-10-31
 
 ***Added***:
@@ -34,7 +40,7 @@
 * Prevent hostname evaluating to None in sqlserver check ([#18237](https://github.com/DataDog/integrations-core/pull/18237))
 * Update sqlserver metric collection row_key to prevent overwriting metric information for two queries with the same query_plan_hash but part of two different stored procedures. ([#18882](https://github.com/DataDog/integrations-core/pull/18882))
 
-## 20.0.0 / 2024-10-10
+## 20.0.0 / 2024-10-10 / Agent 7.59.0
 
 ***Changed***:
 

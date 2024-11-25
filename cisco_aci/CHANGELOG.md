@@ -12,7 +12,7 @@
 
 * [NDM] [Cisco ACI] Improve integration performance ([#18747](https://github.com/DataDog/integrations-core/pull/18747))
 
-## 4.0.0 / 2024-10-04
+## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 

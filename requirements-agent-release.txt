@@ -91,7 +91,7 @@ datadog-impala==3.1.0
 datadog-istio==8.0.0
 datadog-jboss-wildfly==3.1.0
 datadog-journald==3.0.0
-datadog-kafka-consumer==6.0.0
+datadog-kafka-consumer==6.1.0
 datadog-kafka==4.0.0
 datadog-karpenter==2.1.0
 datadog-kong==5.0.0
@@ -120,8 +120,8 @@ datadog-marklogic==6.0.0
 datadog-mcache==6.0.0; sys_platform != 'win32'
 datadog-mesos-master==5.0.0; sys_platform != 'win32'
 datadog-mesos-slave==5.0.0; sys_platform != 'win32'
-datadog-mongo==8.2.0
-datadog-mysql==14.1.0
+datadog-mongo==8.2.1
+datadog-mysql==14.2.0
 datadog-nagios==3.0.0
 datadog-network==5.1.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
@@ -141,7 +141,7 @@ datadog-pgbouncer==8.0.0; sys_platform != 'win32'
 datadog-php-fpm==5.0.0
 datadog-ping-federate==2.0.0
 datadog-postfix==3.0.0; sys_platform != 'win32'
-datadog-postgres==22.1.0
+datadog-postgres==22.2.0
 datadog-powerdns-recursor==4.0.0
 datadog-presto==3.1.0
 datadog-process==5.0.0
@@ -159,12 +159,13 @@ datadog-scylla==4.0.0
 datadog-sidekiq==3.0.0
 datadog-silk==4.0.0
 datadog-singlestore==4.0.0
+datadog-slurm==1.0.1; sys_platform == 'linux2'
 datadog-snmp==9.0.0
 datadog-snowflake==7.0.0
 datadog-solr==2.1.0
 datadog-sonarqube==5.0.0
 datadog-spark==6.1.0
-datadog-sqlserver==20.1.0
+datadog-sqlserver==20.1.1
 datadog-squid==4.0.0
 datadog-ssh-check==4.0.0
 datadog-statsd==3.0.0
@@ -194,7 +195,7 @@ datadog-vault==6.0.0
 datadog-vertica==6.0.0
 datadog-vllm==2.1.0
 datadog-voltdb==5.0.0
-datadog-vsphere==8.0.1
+datadog-vsphere==8.1.0
 datadog-weaviate==3.1.0
 datadog-weblogic==3.0.0
 datadog-win32-event-log==5.0.0; sys_platform == 'win32'

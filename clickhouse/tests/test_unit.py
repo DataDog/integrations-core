@@ -30,6 +30,7 @@ def test_config(instance):
             compression=False,
             secure=False,
             ca_certs=None,
+            verify=True,
             settings={},
             client_name='datadog-test-clickhouse',
         )

@@ -701,6 +701,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert deep_compare(expected_data_for_db[db_name], actual_payload)
 
 
+@pytest.mark.integration
 def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
 
     dbm_instance['dbm'] = True
