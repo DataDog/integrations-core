@@ -27,8 +27,10 @@ def dict_diff(expected, closest):
 
     return diff
 
+
 def tags_list_to_dict(tags):
     return {tag.split(':', 1)[0]: (tag.split(':', 1)[1] if ":" in tag else '') for tag in tags}
+
 
 def tags_diff(expected, closest):
     """
