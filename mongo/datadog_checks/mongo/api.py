@@ -100,7 +100,7 @@ class MongoApi(object):
 
     def get_collection_stats(self, db_name, coll_name, stats=None, session=None):
         if not self.coll_stats_pipeline_supported:
-            return [self.coll_stats_compatable(db_name, coll_name, session)]
+            return [self.coll_stats_compatible(db_name, coll_name, session)]
         try:
             return self.coll_stats(db_name, coll_name, stats, session)
         except OperationFailure as e:
@@ -109,12 +109,12 @@ class MongoApi(object):
                 raise e
             # Failed to get collection stats using $collStats aggregation
             self._log.debug(
-                "Failed not collect stats for collection %s with $collStats, fallback to collStats command",
+                "Failed to collect stats for collection %s with $collStats, fallback to collStats command",
                 coll_name,
                 e.details,
             )
             self.coll_stats_pipeline_supported = False
-            return [self.coll_stats_compatable(db_name, coll_name, session)]
+            return [self.coll_stats_compatible(db_name, coll_name, session)]
 
     def coll_stats(self, db_name, coll_name, stats=None, session=None):
         if not stats:
@@ -130,7 +130,7 @@ class MongoApi(object):
             session=session,
         )
 
-    def coll_stats_compatable(self, db_name, coll_name, session=None):
+    def coll_stats_compatible(self, db_name, coll_name, session=None):
         # collStats is deprecated in MongoDB 6.2. Use the $collStats aggregation stage instead.
         return self[db_name].command({'collStats': coll_name}, session=session)
 
