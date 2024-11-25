@@ -13,10 +13,6 @@ class ReplicationOpLogCollector(MongoCollector):
     """Additional replication metrics regarding the operation log. Useful to check how backed up is a secondary
     compared to the primary."""
 
-    def __init__(self, tags):
-        super(ReplicationOpLogCollector, self).__init__(tags)
-        self.coll_stats_pipeline_supported = True
-
     def compatible_with(self, deployment):
         # Can only be run on mongod node that is part of a replica set. Not possible on arbiters.
         if not isinstance(deployment, ReplicaSetDeployment):
