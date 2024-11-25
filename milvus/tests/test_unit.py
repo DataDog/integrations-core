@@ -4,9 +4,11 @@
 
 from typing import Any, Callable, Dict  # noqa: F401
 
+import pytest
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from datadog_checks.milvus import MilvusCheck
 
 
@@ -24,3 +26,21 @@ def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggrega
     check = MilvusCheck('milvus', {}, [instance])
     dd_run_check(check)
     aggregator.assert_service_check('milvus.can_connect', MilvusCheck.CRITICAL)
+
+def test_empty_instance(dd_run_check):
+    with pytest.raises(
+        Exception,
+        match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
+    ):
+        check = MilvusCheck('aws_neuron', {}, [{}])
+        dd_run_check(check)
+
+
+def test_custom_validation(dd_run_check):
+    endpoint = 'aws_neuron:2112/metrics'
+    with pytest.raises(
+        Exception,
+        match='openmetrics_endpoint: {} is incorrectly configured'.format(endpoint),
+    ):
+        check = MilvusCheck('aws_neuron', {}, [{'openmetrics_endpoint': endpoint}])
+        dd_run_check(check)
