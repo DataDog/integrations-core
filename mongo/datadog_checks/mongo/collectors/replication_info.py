@@ -28,7 +28,7 @@ class ReplicationOpLogCollector(MongoCollector):
             return False
 
         return True
-    
+
     def _get_oplog_size(self, api, oplog_collection_name):
         try:
             oplog_storage_stats = api.get_collection_stats("local", oplog_collection_name, stats=["storageStats"])[0]
@@ -38,9 +38,11 @@ class ReplicationOpLogCollector(MongoCollector):
             )
             return
         except Exception as e:
-            self.log.error("Unexpected error when fetch oplog used size for collection %s: %s", oplog_collection_name, e)
+            self.log.error(
+                "Unexpected error when fetch oplog used size for collection %s: %s", oplog_collection_name, e
+            )
             return
-    
+
         if api.coll_stats_pipeline_supported:
             return oplog_storage_stats.get("storageStats", {}).get("size")
         return oplog_storage_stats.get('size')

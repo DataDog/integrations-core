@@ -114,7 +114,7 @@ class MongoApi(object):
                 e.details,
             )
             self.coll_stats_pipeline_supported = False
-            return [self.coll_stats_compatable(db_name, coll_nam, session)]
+            return [self.coll_stats_compatable(db_name, coll_name, session)]
 
     def coll_stats(self, db_name, coll_name, stats=None, session=None):
         if not stats:
