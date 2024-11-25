@@ -97,6 +97,7 @@ class PostgreSql(AgentCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self._db = None
         self.version = None
         self.raw_version = None
@@ -168,6 +169,8 @@ class PostgreSql(AgentCheck):
         return discovery
 
     def set_resource_tags(self):
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -475,6 +478,13 @@ class PostgreSql(AgentCheck):
         if self._agent_hostname is None:
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
+
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            self._database_hostname = self.resolve_db_host()
+        return self._database_hostname
 
     def resolve_db_host(self):
         return agent_host_resolver(self._config.host)
@@ -912,6 +922,7 @@ class PostgreSql(AgentCheck):
             event = {
                 "host": self.resolved_hostname,
                 "port": self._config.port,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
                 "kind": "database_instance",
