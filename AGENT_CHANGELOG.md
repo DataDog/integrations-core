@@ -229,7 +229,7 @@
 * Cassandra [2.0.0](https://github.com/DataDog/integrations-core/blob/master/cassandra/CHANGELOG.md) **BREAKING CHANGE**
 * Ceph [3.0.0](https://github.com/DataDog/integrations-core/blob/master/ceph/CHANGELOG.md) **BREAKING CHANGE**
 * cert-manager [5.0.0](https://github.com/DataDog/integrations-core/blob/master/cert_manager/CHANGELOG.md) **BREAKING CHANGE**
-* Datadog Checks Base [36.16.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
+* Datadog Checks Base [37.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md) **BREAKING CHANGE**
 * datadog_checks_dependency_provider [2.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dependency_provider/CHANGELOG.md) **BREAKING CHANGE**
 * Datadog Checks Downloader [5.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
 * Cilium [4.0.0](https://github.com/DataDog/integrations-core/blob/master/cilium/CHANGELOG.md) **BREAKING CHANGE**

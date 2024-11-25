@@ -231,7 +231,7 @@
 * datadog-ceph: 3.0.0
 * datadog-cert-manager: 5.0.0
 * datadog-checkpoint-quantum-firewall: 1.0.0
-* datadog-checks-base: 36.16.0
+* datadog-checks-base: 37.0.0
 * datadog-checks-dependency-provider: 2.0.0
 * datadog-checks-downloader: 5.0.0
 * datadog-cilium: 4.0.0
@@ -432,7 +432,7 @@
 * datadog-ceph: 3.0.0
 * datadog-cert-manager: 5.0.0
 * datadog-checkpoint-quantum-firewall: 1.0.0
-* datadog-checks-base: 36.16.0
+* datadog-checks-base: 37.0.0
 * datadog-checks-dependency-provider: 2.0.0
 * datadog-checks-downloader: 5.0.0
 * datadog-cilium: 4.0.0
@@ -633,7 +633,7 @@
 * datadog-ceph: 3.0.0
 * datadog-cert-manager: 5.0.0
 * datadog-checkpoint-quantum-firewall: 1.0.0
-* datadog-checks-base: 36.16.0
+* datadog-checks-base: 37.0.0
 * datadog-checks-dependency-provider: 2.0.0
 * datadog-checks-downloader: 5.0.0
 * datadog-cilium: 4.0.0
