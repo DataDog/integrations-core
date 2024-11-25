@@ -109,6 +109,7 @@ class MySql(AgentCheck):
         self.is_mariadb = None
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self._is_aurora = None
         self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
@@ -170,7 +171,16 @@ class MySql(AgentCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            self._database_hostname = self.resolve_db_host()
+        return self._database_hostname
+
     def set_resource_tags(self):
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -1303,6 +1313,7 @@ class MySql(AgentCheck):
             event = {
                 "host": self.resolved_hostname,
                 "port": self._config.port,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "mysql",
                 "kind": "database_instance",
