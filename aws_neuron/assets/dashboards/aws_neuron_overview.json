@@ -1,6 +1,6 @@
 {
-  "title": "AWS Neuron Dashboard",
-  "description": "# Description\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency and memory usage.\n\n# Useful Links\n[AWS Neuron Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
+  "title": "AWS Inferentia and AWS Trainium Monitoring Dashboard",
+  "description": "# Description\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency, and memory usage.\n\n# Useful Links\n\n[AWS Inferentia and AWS Trainium Monitoring Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
   "widgets": [
     {
       "id": 6979231130018708,
@@ -15,7 +15,7 @@
             "id": 56755139831890,
             "definition": {
               "type": "note",
-              "content": "# AWS Neuron\n\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency and memory usage.",
+              "content": "# AWS Trainium and AWS Inferentia Monitoring\n\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your AWS machine learning (ML) chips as well as insights into the execution and training of your models, including error rates, latency, and memory usage.",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -36,7 +36,7 @@
             "id": 4721541429420236,
             "definition": {
               "type": "note",
-              "content": "# Useful Links\n\n[AWS Neuron Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
+              "content": "# Useful Links\n\n[AWS Inferentia and AWS Trainium Monitoring Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -75,7 +75,7 @@
             "id": 5198931877490734,
             "definition": {
               "type": "note",
-              "content": "This overview provides a quick look into the general status and health of your Neuron instances.",
+              "content": "This overview provides a quick look into the general status and health of your Trainium and Inferentia instances.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "center",
@@ -478,7 +478,7 @@
             "id": 5529167122831830,
             "definition": {
               "type": "note",
-              "content": "Make the most out of your system by monitoring resource utilization at multiple scales. Tracking NeuronCore utilization helps assess how effectively the model is using the allocated Neuron cores, guiding optimization for better performance. Additionally, the system utilization metrics provide a bird's eye view of the system resources.",
+              "content": "Make the most out of your system by monitoring resource utilization at multiple scales. Tracking NeuronCore utilization helps assess how effectively the model is using the allocated device cores, guiding optimization for better performance. Additionally, the system utilization metrics provide a bird's eye view of the system resources.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "center",
@@ -1066,7 +1066,7 @@
                       "name": "a",
                       "data_source": "logs",
                       "search": {
-                        "query": "source:aws-neuron status:ERROR "
+                        "query": "source:aws_neuron status:error"
                       },
                       "indexes": [
                         "*"
@@ -1076,7 +1076,7 @@
                         "aggregation": "count",
                         "metric": "count"
                       },
-                      "storage": "online_archives"
+                      "storage": "flex_tier"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1188,8 +1188,6 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
-  "reflow_type": "fixed",
-  "tags": [
-    "team:agent-integrations"
-  ]
+  "reflow_type": "fixed"
 }
+
