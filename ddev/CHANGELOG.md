@@ -15,6 +15,10 @@
 * Don't hardcode location of payload file in script that serves static OpenMetrics payloads. ([#18993](https://github.com/DataDog/integrations-core/pull/18993))
 
 ## 10.3.0 / 2024-10-28
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 * add bit family as valid units ([#18845](https://github.com/DataDog/integrations-core/pull/18845))
 * Bumped datadog_checks_dev version to 34.0.0 ([#18918](https://github.com/DataDog/integrations-core/pull/18918))
 

@@ -21,9 +21,6 @@
 ***Added***:
 
 * Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
-
-***Added***:
-
 * Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
 
 ## 6.4.0 / 2024-09-05

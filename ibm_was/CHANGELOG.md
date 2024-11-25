@@ -21,9 +21,6 @@
 ***Added***:
 
 * Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
-
-***Added***:
-
 * Bump lxml version for py3.12 E2E tests ([#18637](https://github.com/DataDog/integrations-core/pull/18637))
 
 ## 3.3.2 / 2024-08-28 / Agent 7.57.0

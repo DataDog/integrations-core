@@ -21,9 +21,6 @@
 ***Added***:
 
 * Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
-
-***Added***:
-
 * Bump RethinkDB version for py3.12 E2E tests ([#18636](https://github.com/DataDog/integrations-core/pull/18636))
 
 ## 3.1.0 / 2024-01-05 / Agent 7.51.0
