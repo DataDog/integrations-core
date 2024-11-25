@@ -9,8 +9,62 @@ Build similar message for better test assertion failure message.
 MAX_SIMILAR_TO_DISPLAY = 15
 
 
+def dict_diff(expected, closest):
+    """
+    Returns an array of key/value pairs that are different between the two dicts.
+    The number of keys is fairly small so we can prioritize clarity over performance.
+    """
+    diff = []
+    for key in closest:
+        expected_value = expected.get(key)
+        closest_value = closest.get(key)
+
+        if expected_value is not None and expected_value != closest_value:
+            diff.append((key, expected_value, closest_value))
+    for key in expected:
+        if expected[key] is not None and key not in closest:
+            diff.append((key, expected[key], None))
+
+    return diff
+
 def tags_list_to_dict(tags):
     return {tag.split(':', 1)[0]: (tag.split(':', 1)[1] if ":" in tag else '') for tag in tags}
+
+def tags_diff(expected, closest):
+    """
+    Returns an array of key/value pairs that are different between the two lists of tags.
+    """
+    diff = []
+    expected_tags_dict = tags_list_to_dict(expected)
+    closest_tags_dict = tags_list_to_dict(closest)
+    for tag in expected_tags_dict:
+        if expected_tags_dict[tag] != closest_tags_dict.get(tag):
+            diff.append((tag, expected_tags_dict[tag], closest_tags_dict.get(tag)))
+    for tag in closest_tags_dict:
+        if tag not in expected_tags_dict:
+            diff.append((tag, None, closest_tags_dict[tag]))
+    return diff
+
+
+def metric_stub_diff(expected, closest):
+    """
+    Return formatted difference between expected and closest metric stubs
+    """
+    diff = []
+
+    closest_dict = closest._asdict()
+    expected_dict = expected._asdict()
+    dict_diffs = dict_diff(expected_dict, closest_dict)
+    for key, expected_value, closest_value in dict_diffs:
+        if key == "tags":
+            tag_diffs = tags_diff(expected_value, closest_value)
+            for tag, expected_tag_value, closest_tag_value in tag_diffs:
+                diff.append(
+                    f"        Expected tag {tag}:{expected_tag_value}\n" + f"        Found {tag}:{closest_tag_value}"
+                )
+        else:
+            diff.append(f"        Expected {key}: {expected_value}\n        Found {closest_value}")
+    return diff
 
 
 def build_similar_elements_msg(expected, submitted_elements):
@@ -29,24 +83,7 @@ def build_similar_elements_msg(expected, submitted_elements):
     closest_diff = []
     if len(similar_metrics) > 0:
         [_, closest] = similar_metrics[0]
-        closest_dict = closest._asdict()
-        expected_dict = expected._asdict()
-        for key in closest_dict:
-            expected_value = expected_dict[key]
-            closest_value = closest_dict[key]
-
-            if expected_value is not None and expected_value != closest_value:
-                if key == "tags":
-                    expected_tags_dict = tags_list_to_dict(expected_value)
-                    closest_tags_dict = tags_list_to_dict(closest_value)
-                    for tag in expected_tags_dict:
-                        if closest_tags_dict[tag] != expected_tags_dict[tag]:
-                            closest_diff.append(
-                                f"        Expected tag {tag}:{expected_tags_dict[tag]}\n"
-                                + f"        Found {tag}:{closest_tags_dict[tag]}"
-                            )
-                else:
-                    closest_diff.append(f"        Expected {key}: {expected_value}\n        Found {closest_value}")
+        closest_diff = metric_stub_diff(expected, closest)
 
     return (
         "Expected:\n"

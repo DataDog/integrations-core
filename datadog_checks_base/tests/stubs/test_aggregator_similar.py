@@ -218,3 +218,14 @@ Score   Most similar
         assert similar_histogram_bucket[3][1].name == 'histogram.bucket4'  # value/monotonic/tag match
         assert similar_histogram_bucket[4][1].name == 'histogram.bucket5'  # value/monotonic match
         assert similar_histogram_bucket[5][1].name == 'histogram.bucket0'  # no match
+
+    # Test diff methods used in showing the difference to the closest match
+    def test_dict_diff(self):
+        assert similar.dict_diff({'a': 1, 'b': 2}, {'a': 1, 'b': 3}) == [('b', 2, 3)]
+        assert similar.dict_diff({'a': 1}, {'b': 3}) == [('a', 1, None)]
+        assert similar.dict_diff({'a': 1}, {'a': 1}) == []
+
+    def test_tags_diff(self):
+        assert similar.tags_diff(['a:1', 'b:2'], ['a:1', 'c:2']) == [('b', '2', None), ('c', None, '2')]
+        assert similar.tags_diff(['a:1', 'b:2'], ['a:2', 'b:2']) == [('a', '1', '2')]
+        assert similar.tags_diff(['a:1'], ['a:1']) == []
