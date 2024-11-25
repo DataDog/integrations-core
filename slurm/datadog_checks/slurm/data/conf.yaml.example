@@ -99,7 +99,7 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 15
+    ## @param min_collection_interval - number - optional - default: 60
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     ##
@@ -146,9 +146,12 @@ instances:
 #   - type: file
 #     path: /var/log/slurm/slurmd.log
 #     source: slurm
+#     service: slurm
 #   - type: file
 #     path: /var/log/slurm/slurmdbd.log
 #     source: slurm
+#     service: slurm
 #   - type: file
 #     path: /var/log/slurm/slurmctld.log
 #     source: slurm
+#     service: slurm
