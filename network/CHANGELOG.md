@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.0.0 / 2024-10-04
+## 5.1.0 / 2024-10-31
+
+***Added***:
+
+* Add mtu and speed tags to interfaces that support it ([#18819](https://github.com/DataDog/integrations-core/pull/18819))
+
+## 5.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 

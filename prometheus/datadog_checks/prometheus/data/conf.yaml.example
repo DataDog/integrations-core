@@ -1,0 +1,158 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param prometheus_url - string - required
+    ## The URL where your application metrics are exposed by Prometheus.
+    #
+  - prometheus_url: http://localhost:10055/metrics
+
+    ## @param namespace - string - required
+    ## The namespace to be prepended to all metrics.
+    #
+    namespace: <SERVICE_NAME>
+
+    ## @param metrics - (list of mapping or string) - required
+    ## List of `<METRIC_TO_FETCH>: <NEW_METRIC_NAME>` for metrics to be fetched from the Prometheus endpoint.
+    ## `<NEW_METRIC_NAME>` is optional. If set, it transforms the name in Datadog.
+    ## This list should contain at least one metric.
+    #
+    metrics:
+      - <METRIC_TO_FETCH>: <NEW_METRIC_NAME>
+      - <METRIC_TO_FETCH>
+
+    ## @param prometheus_metrics_prefix - string - optional
+    ## Prefix for exposed Prometheus metrics.
+    #
+    # prometheus_metrics_prefix: <PREFIX>_
+
+    ## @param health_service_check - boolean - optional - default: true
+    ## Send a service check reporting about the health of the Prometheus endpoint.
+    ## The service check is named `<NAMESPACE>.prometheus.health`.
+    #
+    # health_service_check: true
+
+    ## @param label_to_hostname - string - optional
+    ## Override the hostname with the value of one label.
+    #
+    # label_to_hostname: <LABEL>
+
+    ## @param label_joins - mapping - optional
+    ## Allows the targeting of a metric to retrieve its label with a 1:1 mapping.
+    #
+    # label_joins:
+    #   target_metric:
+    #     label_to_match: <MATCHED_LABEL>
+    #     labels_to_get:
+    #     - <EXTRA_LABEL_1>
+    #     - <EXTRA_LABEL_2>
+
+    ## @param labels_mapper - mapping - optional
+    ## The label mapper allows you to rename labels.
+    ## Format is `<LABEL_TO_RENAME>: <NEW_LABEL_NAME>`.
+    #
+    # labels_mapper:
+    #   flavor: origin
+
+    ## @param type_overrides - mapping - optional
+    ## Override a type in the Prometheus payload or type an untyped metric (ignored by default).
+    ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, and `summary`.
+    #
+    # type_overrides:
+    #   <METRIC_NAME>: <METRIC_TYPE>
+
+    ## @param send_histograms_buckets - boolean - optional - default: true
+    ## Set send_histograms_buckets to true to send the histograms bucket.
+    #
+    # send_histograms_buckets: true
+
+    ## @param send_monotonic_counter - boolean - optional - default: true
+    ## Set send_monotonic_counter to true to send counters as monotonic counter.
+    #
+    # send_monotonic_counter: true
+
+    ## @param exclude_labels - list of strings - optional
+    ## A list of labels to be excluded.
+    #
+    # exclude_labels:
+    #   - timestamp
+
+    ## @param ssl_cert - string - optional
+    ## If your Prometheus endpoint is secured, here are the settings to configure it:
+    ## Can either be only the path to the certificate where you specify the private key
+    ## or it can be the path to a file containing both the certificate and the private key.
+    #
+    # ssl_cert: <CERT_PATH>
+
+    ## @param ssl_private_key - string - optional
+    ## Needed if the certificate does not include the private key.
+    ## WARNING: The private key to your local certificate must be unencrypted.
+    #
+    # ssl_private_key: <KEY_PATH>
+
+    ## @param ssl_ca_cert - string - optional
+    ## The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL
+    ## certificate verification.
+    #
+    # ssl_ca_cert: <CA_CERT_PATH>
+
+    ## @param prometheus_timeout - integer - optional - default: 10
+    ## Set a timeout in seconds for the Prometheus query.
+    #
+    # prometheus_timeout: 10
+
+    ## @param max_returned_metrics - integer - optional - default: 2000
+    ## The check limits itself to 2000 metrics by default, increase this limit if needed.
+    #
+    # max_returned_metrics: 2000
+
+## @param tags - list of strings - optional
+## A list of tags to attach to every metric and service check emitted by this instance.
+##
+## Learn more about tagging at https://docs.datadoghq.com/tagging
+#
+# tags:
+#   - <KEY_1>:<VALUE_1>
+#   - <KEY_2>:<VALUE_2>
+
+## @param service - string - optional
+## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+##
+## Overrides any `service` defined in the `init_config` section.
+#
+# service: <SERVICE>
+
+## @param min_collection_interval - number - optional - default: 15
+## This changes the collection interval of the check. For more information, see:
+## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+#
+# min_collection_interval: 15
+
+## @param empty_default_hostname - boolean - optional - default: false
+## This forces the check to send metrics with no hostname.
+##
+## This is useful for cluster-level checks.
+#
+# empty_default_hostname: false
+
+## @param metric_patterns - mapping - optional
+## A mapping of metrics to include or exclude, with each entry being a regular expression.
+##
+## Metrics defined in `exclude` will take precedence in case of overlap.
+#
+# metric_patterns:
+#   include:
+#   - <INCLUDE_REGEX>
+#   exclude:
+#   - <EXCLUDE_REGEX>
