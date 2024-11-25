@@ -200,7 +200,7 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
 /openai/            @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
-
+/anthropic/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
 
 # Windows agent
 datadog_checks_base/datadog_checks/base/checks/win/                  @DataDog/windows-agent @DataDog/agent-integrations
