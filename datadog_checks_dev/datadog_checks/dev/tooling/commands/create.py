@@ -16,7 +16,7 @@ from ..create import (
     get_valid_templates,
     prefill_template_fields_for_check_only,
 )
-from ..utils import kebab_case_name, normalize_package_name
+from ..utils import kebab_case_name, normalize_display_name, normalize_package_name
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
@@ -190,6 +190,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             author = manifest.get("author", {}).get("name")
             if author is None:
                 abort("Unable to determine author from manifest")
+            author = normalize_display_name(author)
             integration_dir_name = integration_dir_name.removeprefix(f"{author}_")
     else:
         if os.path.exists(integration_dir):

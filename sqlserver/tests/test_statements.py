@@ -572,6 +572,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
+                    'aggregate_sql_databases': False,
                 },
             },
         ),
@@ -586,6 +587,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
+                    'aggregate_sql_databases': False,
                 },
             },
         ),
@@ -606,6 +608,7 @@ def test_statement_metadata(
                 'azure': {
                     'deployment_type': 'managed_instance',
                     'name': 'my-instance.abcea3661b20.database.windows.net',
+                    'aggregate_sql_databases': False,
                 },
             },
         ),
@@ -1019,6 +1022,16 @@ def test_metrics_lookback_multiplier(instance_docker):
 
     check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
     mock_cursor.execute.assert_called_with(ANY, (6,))
+
+
+@pytest.mark.unit
+def test_metrics_lookback_window_config(instance_docker):
+    instance_docker['query_metrics'] = {'lookback_window': 86400}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    _, mock_cursor = _mock_database_list()
+
+    check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
+    mock_cursor.execute.assert_called_with(ANY, (86400,))
 
 
 @pytest.mark.flaky
