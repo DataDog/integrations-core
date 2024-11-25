@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 20.1.1 / 2024-11-25
+
+***Fixed***:
+
+* Use alternative schema collection query for sqlserver 2016 and older due to STRING_AGG not being supported until SQLServer 2017 ([#19110](https://github.com/DataDog/integrations-core/pull/19110))
+
 ## 20.1.0 / 2024-10-31
 
 ***Added***:
