@@ -21,7 +21,9 @@ jobs:
     strategy:
       matrix:
         os: [windows-2019, windows-2022]
+      fail-fast: false
     runs-on: ${{ matrix.os }}
+    
 
     env:
       PYTHON_TAG: v${{ inputs.python_version }}
@@ -33,6 +35,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Select Toolchain
+        if: matrix.os == 'windows-2022'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          toolset: v142
+          sdk: 10.0.22621.0
 
       - name: Install dotnet PowerShell
         run: dotnet tool install --global PowerShell
