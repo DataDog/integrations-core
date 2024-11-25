@@ -18,7 +18,10 @@ on:
 
 jobs:
   build-python:
-    runs-on: windows-2019
+    strategy:
+      matrix:
+        os: [windows-2019, windows-2022]
+    runs-on: ${{ matrix.os }}
 
     env:
       PYTHON_TAG: v${{ inputs.python_version }}
@@ -63,7 +66,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: python-windows-${{ inputs.python_version }}-amd64.zip
+          name: python-${{ matrix.os }}-${{ inputs.python_version }}-amd64.zip
           path: C:/repos/cpython/installed
           if-no-files-found: error
           retention-days: 30
