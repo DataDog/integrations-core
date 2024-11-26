@@ -1,0 +1,731 @@
+{
+  "title": "Docusign Template",
+  "description": "",
+  "widgets": [
+    {
+      "id": 7253806450166756,
+      "definition": {
+        "type": "image",
+        "url": "https://docucdn-a.akamaihd.net/olive/images/2.69.0/global-assets/ds-logo-default.svg",
+        "url_dark_theme": "https://developers.docusign.com/img/docusign-logo.svg",
+        "sizing": "contain",
+        "margin": "lg",
+        "has_background": false,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 2
+      }
+    },
+    {
+      "id": 3005178805641430,
+      "definition": {
+        "title": "Template Events by Action",
+        "type": "treemap",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [
+                  {
+                    "facet": "@activity_log.action",
+                    "limit": 25,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "style": {
+              "palette": "datadog16"
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 7,
+        "height": 5
+      }
+    },
+    {
+      "id": 1268368864789646,
+      "definition": {
+        "type": "note",
+        "content": "This **Docusign** Template dashboard provides an overview of template activities. It tracks user actions, categorizes events by operating system, browser, country, and source.\n\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.\n\n\nFor more information, see the [Docusign Integration Documentation](https://docs.datadoghq.com/integrations/docusign/).",
+        "background_color": "blue",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "top",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 5,
+        "height": 3
+      }
+    },
+    {
+      "id": 3101226137351108,
+      "definition": {
+        "title": "Total Template Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "default_zero(query1)"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 0,
+                "palette": "black_on_light_green",
+                "custom_fg_color": "#0000c8",
+                "custom_bg_color": "#61c4e5"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 3,
+        "height": 4
+      }
+    },
+    {
+      "id": 3528768665347480,
+      "definition": {
+        "title": "Template Events Overview",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "alias": "Events",
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [
+                  {
+                    "facet": "@activity_log.action",
+                    "limit": 10,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "order_by": "values",
+              "color_order": "shuffled",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ]
+      },
+      "layout": {
+        "x": 3,
+        "y": 5,
+        "width": 9,
+        "height": 4
+      }
+    },
+    {
+      "id": 5538206073291132,
+      "definition": {
+        "title": "Template Events by User",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [
+                  {
+                    "facet": "@usr.name",
+                    "limit": 25,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 25,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 9,
+        "width": 4,
+        "height": 4
+      }
+    },
+    {
+      "id": 1584991942528646,
+      "definition": {
+        "title": "Template Events by User Action",
+        "type": "query_table",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [
+                  {
+                    "facet": "@usr.name",
+                    "limit": 25,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  },
+                  {
+                    "facet": "@activity_log.action",
+                    "limit": 25,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "sort": {
+              "count": 625,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            },
+            "formulas": [
+              {
+                "cell_display_mode": "number",
+                "alias": "Action Count",
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "has_search_bar": "auto"
+      },
+      "layout": {
+        "x": 4,
+        "y": 9,
+        "width": 8,
+        "height": 4
+      }
+    },
+    {
+      "id": 8317153728805930,
+      "definition": {
+        "title": "Template Events by City",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [
+                  {
+                    "facet": "@network.client.geoip.city.name",
+                    "limit": 25,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "conditional_formats": [
+              {
+                "comparator": ">=",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#77e4d2"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 25,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          },
+          "palette": "datadog16"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 4,
+        "height": 4
+      }
+    },
+    {
+      "id": 3516260821653102,
+      "definition": {
+        "title": "Template Events by OS",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [
+                  {
+                    "facet": "@http.useragent_details.os.family",
+                    "limit": 25,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 25,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          },
+          "palette": "datadog16"
+        }
+      },
+      "layout": {
+        "x": 4,
+        "y": 13,
+        "width": 4,
+        "height": 4
+      }
+    },
+    {
+      "id": 7755576521631044,
+      "definition": {
+        "title": "Template Events by Browser",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [
+                  {
+                    "facet": "@http.useragent_details.browser.family",
+                    "limit": 25,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 25,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          },
+          "palette": "datadog16"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 13,
+        "width": 4,
+        "height": 4
+      }
+    },
+    {
+      "id": 4145562480002310,
+      "definition": {
+        "title": "Template Events by Source",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "geomap",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "cardinality",
+                  "metric": "@activity_log.eventId"
+                },
+                "group_by": [
+                  {
+                    "facet": "@network.client.geoip.country.iso_code",
+                    "limit": 250,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "cardinality",
+                      "metric": "@activity_log.eventId"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:docusign @activity_log.object:Template $Action $UserName"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "palette": "hostmap_blues",
+          "palette_flip": false
+        },
+        "view": {
+          "focus": "WORLD"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 17,
+        "width": 12,
+        "height": 4
+      }
+    },
+    {
+      "id": 3183334723044098,
+      "definition": {
+        "title": "Template Event Details",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "response_format": "event_list",
+            "query": {
+              "data_source": "logs_stream",
+              "query_string": "source:docusign @activity_log.object:Template $Action $UserName ",
+              "indexes": [],
+              "storage": "hot"
+            },
+            "columns": [
+              {
+                "field": "status_line",
+                "width": "auto"
+              },
+              {
+                "field": "timestamp",
+                "width": "auto"
+              },
+              {
+                "field": "activity_log.object",
+                "width": "auto"
+              },
+              {
+                "field": "activity_log.action",
+                "width": "auto"
+              },
+              {
+                "field": "usr.name",
+                "width": "auto"
+              },
+              {
+                "field": "network.client.geoip.country.name",
+                "width": "auto"
+              },
+              {
+                "field": "http.useragent_details.os.family",
+                "width": "auto"
+              },
+              {
+                "field": "http.useragent_details.browser.family",
+                "width": "auto"
+              },
+              {
+                "field": "content",
+                "width": "auto"
+              }
+            ]
+          }
+        ],
+        "type": "list_stream"
+      },
+      "layout": {
+        "x": 0,
+        "y": 21,
+        "width": 12,
+        "height": 4
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Action",
+      "prefix": "@activity_log.action",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "UserName",
+      "prefix": "@usr.name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

@@ -11,7 +11,14 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS, get_deadlocks_query
+from datadog_checks.sqlserver.queries import (
+    DEADLOCK_TIMESTAMP_ALIAS,
+    DEADLOCK_XML_ALIAS,
+    XE_SESSION_DATADOG,
+    XE_SESSION_SYSTEM,
+    XE_SESSIONS_QUERY,
+    get_deadlocks_query,
+)
 
 try:
     import datadog_agent
@@ -25,6 +32,8 @@ MAX_PAYLOAD_BYTES = 19e6
 PAYLOAD_TIMESTAMP = "deadlock_timestamp"
 PAYLOAD_QUERY_SIGNATURE = "query_signatures"
 PAYLOAD_XML = "xml"
+
+NO_XE_SESSION_ERROR = f"No XE session `{XE_SESSION_DATADOG}` found"
 
 
 def agent_check_getter(self):
@@ -42,6 +51,7 @@ class Deadlocks(DBMAsyncJob):
         self._deadlock_payload_max_bytes = MAX_PAYLOAD_BYTES
         self.collection_interval = config.deadlocks_config.get("collection_interval", DEFAULT_COLLECTION_INTERVAL)
         self._force_convert_xml_to_str = False
+        self._xe_session_name = None
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
@@ -104,13 +114,43 @@ class Deadlocks(DBMAsyncJob):
     def _get_connector(self):
         return self._check.connection.connector
 
+    def _set_xe_session_name(self):
+        with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
+            with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                if self._xe_session_name is None:
+                    cursor.execute(XE_SESSIONS_QUERY)
+                    rows = cursor.fetchall()
+                    if not rows:
+                        raise NoXESessionError(NO_XE_SESSION_ERROR)
+                    xe_system_found = False
+                    for row in rows:
+                        if (session := row[0]) in (XE_SESSION_DATADOG):
+                            self._xe_session_name = session
+                            return
+                        if session == XE_SESSION_SYSTEM:
+                            xe_system_found = True
+                    if xe_system_found:
+                        self._xe_session_name = XE_SESSION_SYSTEM
+                        return
+        raise NoXESessionError(NO_XE_SESSION_ERROR)
+
     def _query_deadlocks(self):
+        if self._xe_session_name is None:
+            try:
+                self._set_xe_session_name()
+            except NoXESessionError as e:
+                self._log.error(str(e))
+                return
+            self._log.info(f'Using XE session {self._xe_session_name} to collect deadlocks')
+
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 convert_xml_to_str = False
                 if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
                     convert_xml_to_str = True
-                query = get_deadlocks_query(convert_xml_to_str)
+                query = get_deadlocks_query(
+                    convert_xml_to_str=convert_xml_to_str, xe_session_name=self._xe_session_name
+                )
                 self._log.debug(
                     "Running query [%s] with max deadlocks %s and timestamp %s",
                     query,
@@ -192,9 +232,14 @@ class Deadlocks(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
+            'service': self._config.service,
             "sqlserver_deadlocks": deadlock_rows,
         }
         return event
 
     def run_job(self):
         self.collect_deadlocks()
+
+
+class NoXESessionError(Exception):
+    pass

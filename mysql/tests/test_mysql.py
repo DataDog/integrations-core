@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
-from os import environ
 
 import mock
 import pytest
@@ -118,7 +117,7 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     _assert_complex_config(
         aggregator,
         tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
-        tags.METRIC_TAGS,
+        tags.METRIC_TAGS + ['dbms_flavor:{}'.format(MYSQL_FLAVOR.lower())],
         hostname=dd_default_hostname,
         e2e=True,
     )
@@ -313,7 +312,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.REPLICATION_OPERATION_TIME_METRICS
     )
 
-    if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
+    if MYSQL_VERSION_PARSED >= parse_version('5.6') and MYSQL_FLAVOR != 'mariadb':
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
         operation_time_metrics.extend(
             variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
@@ -391,6 +390,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         assert mysql_check._is_group_replication_active(db) is False
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     'dbm_enabled, reported_hostname, expected_hostname',
     [

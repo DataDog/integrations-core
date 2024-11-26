@@ -108,6 +108,8 @@ AGENT_ACTIVE_SESSION_DURATION_QUERY = {
 class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_agent_metrics(self) -> bool:
+        if not self.config.dbm_enabled:
+            return False
         agent_jobs_config = self.instance_config.get('agent_jobs', {})
         if agent_jobs_config:
             return is_affirmative(agent_jobs_config.get('enabled', False))

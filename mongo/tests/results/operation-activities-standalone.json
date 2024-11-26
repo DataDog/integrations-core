@@ -5,12 +5,14 @@
         "ddsource": "mongo",
         "dbm_type": "activity",
         "collection_interval": 10,
+        "cloud_metadata": {},
         "ddtags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
             "hosting_type:self-hosted"
         ],
         "timestamp": 1715911398111.2722,
+        "service": "my_service",
         "mongodb_activity": [
             {
                 "now": 1715911398.1112723,
