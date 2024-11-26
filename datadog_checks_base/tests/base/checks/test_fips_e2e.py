@@ -12,6 +12,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import docker_run, get_here
+from datadog_checks.dev.conditions import WaitForPortListening
 
 HERE = get_here()
 EMBEDDED = os.path.join(HERE, '..', '..', 'fixtures', 'fips', 'embeded')
@@ -20,10 +21,12 @@ FIPS_SERVER_PORT = 8443
 
 @pytest.fixture(scope="session")
 def non_fips_server():
-    with docker_run(os.path.join(HERE, 'docker', 'fips_compose.yaml')):
+    conditions = [WaitForPortListening("localhost", 443)]
+    with docker_run(os.path.join(HERE, 'docker', 'fips_compose.yaml'), conditions=conditions):
         yield
 
 
+@pytest.mark.e2e
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
 def test_connection_before_fips():
     """
@@ -37,6 +40,7 @@ def test_connection_before_fips():
         pytest.fail(f"Connection failed due to SSL error: {e}")
 
 
+@pytest.mark.e2e
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
 def test_connection_after_fips():
     """
