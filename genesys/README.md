@@ -10,15 +10,13 @@ The Genesys integration collects conversations (Voice, Email, Message, Callback,
 
 ### Configuration
 
-#### Get config parameters from Genesys
-
-#### Steps to get Client ID and Client Secret
+#### Get Client ID and Client Secret config parameters from Genesys
 1. Login to your [Genesys account][2] with **Admin** role.
-2. [Add a new role][3] with below permissions:
+2. [Add a new role][3] with the following permissions:
     1. Analytics > Conversation Aggregate > View (Query for conversation aggregates)
-    2. Analytics > Conversation Detail > View (Query for conversation Details)
+    2. Analytics > Conversation Detail > View (Query for conversation details)
     3. Audits > Audit > View (View audits)
-3. Ensure the role created in step 2 is assigned to the logged-in user. (Refer to the [guide on assigning roles to users][4])
+3. Ensure the role created in the previous step is assigned to the logged-in user. For more information on assigning roles to users, see the Genesys guide to [Assign roles, divisions, licenses, and add-ons][4].
 4. Navigate to **Admin > Integrations > OAuth** section.
 5. Click **Add Client**.
 6. Enter an appropriate name.
