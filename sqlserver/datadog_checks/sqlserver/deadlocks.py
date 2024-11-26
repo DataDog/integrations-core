@@ -151,14 +151,15 @@ class Deadlocks(DBMAsyncJob):
                 query = get_deadlocks_query(
                     convert_xml_to_str=convert_xml_to_str, xe_session_name=self._xe_session_name
                 )
+                lookback = self._get_lookback_seconds()
                 self._log.debug(
-                    "Running query [%s] with max deadlocks %s and timestamp %s",
+                    "Running query %s with max deadlocks %s and timestamp %s",
                     query,
                     self._max_deadlocks,
-                    self._last_deadlock_timestamp,
+                    lookback,
                 )
                 try:
-                    cursor.execute(query, (self._max_deadlocks, self._get_lookback_seconds()))
+                    cursor.execute(query, (self._max_deadlocks, lookback))
                 except Exception as e:
                     if "Data column of Unknown ADO type" in str(e):
                         raise Exception(f"{str(e)} | cursor.description: {cursor.description} | query: {query}")
