@@ -521,6 +521,8 @@ integration/teleport:
 - teleport/**/*
 integration/temporal:
 - temporal/**/*
+integration/temporal_cloud:
+- temporal_cloud/**/*
 integration/tenable:
 - tenable/**/*
 integration/teradata:
