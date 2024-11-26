@@ -16,7 +16,7 @@ from datadog_checks.dev.conditions import WaitForPortListening
 
 HERE = get_here()
 EMBEDDED = os.path.join(HERE, '..', '..', 'fixtures', 'fips', 'embedded')
-FIPS_SERVER_PORT = 8443
+FIPS_SERVER_PORT = 443
 
 
 @pytest.fixture(scope="session")
