@@ -36,9 +36,15 @@ def create_fipsmodule_config():
     try:
         subprocess.run(command, check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError as e:
-        pytest.exit(f"Failed to set up FIPS mode. Exiting tests.\n {e.output}", returncode=1)
+        error_message = (
+            f"Failed to set up FIPS mode. Exiting tests.\n"
+            f"Command: {' '.join(command)}\n"
+            f"Return Code: {e.returncode}\n"
+            f"Output: {e.stdout}\n"
+            f"Error: {e.stderr}\n"
+        )
+        pytest.exit(error_message, returncode=1)
     yield
-    # subprocess.run(["rm", f'{PATH_TO_EMBEDDED}/ssl/fipsmodule.cnf'], check=True)
 
 
 @pytest.fixture(scope="session", autouse=True)
