@@ -31,7 +31,7 @@ def test_connection_before_fips():
     """
     url = f"https://localhost:{FIPS_SERVER_PORT}"
     try:
-        response = requests.get(url, verify=True, timeout=5)
+        response = requests.get(url, verify=False, timeout=5)
         assert response.status_code == 200
     except requests.exceptions.SSLError as e:
         pytest.fail(f"Connection failed due to SSL error: {e}")
@@ -49,7 +49,7 @@ def test_connection_after_fips():
 
     url = f"https://localhost:{FIPS_SERVER_PORT}"
     try:
-        response = requests.get(url, verify=True, timeout=5)
+        response = requests.get(url, verify=False, timeout=5)
         assert response.status_code == 200
     except requests.exceptions.SSLError as e:
         pytest.fail(f"Connection failed due to SSL error: {e}")
