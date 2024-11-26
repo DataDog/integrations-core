@@ -4,7 +4,7 @@
 
 This check monitors [Spinnaker][1].
 
-Spinnaker is an open-source, multi-cloud continuous delivery (CD) platform originally developed by Netflix. It's designed to automate and streamline the software release process, enabling faster and more reliable deployments to the cloud.
+Spinnaker is an open source, multi-cloud continuous delivery (CD) platform originally developed by Netflix. It's designed to automate and streamline the software release process, enabling faster and more reliable deployments to the cloud.
 
 This integration integrates Spinnaker with Datadog, providing comprehensive monitoring and visibility across all Spinnaker components. It centralizes logs from Clouddriver, Orca, Redis, Rosco, Deck, and Echo, enabling teams to monitor, analyze, and troubleshoot deployment workflows and infrastructure operations efficiently
 
