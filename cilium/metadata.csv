@@ -1,5 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-cilium.,gauge,,event,,[OpenMetrics V1 and V2] How many seconds has the longest running processor for workqueue been running.,0,cilium,k8s workqueue running processor,,
 cilium.agent.api_process_time.seconds.bucket,count,,second,,[OpenMetrics V2] Amount of processing time for all API calls,0,cilium,api proc time bucket,,
 cilium.agent.api_process_time.seconds.count,count,,request,,[OpenMetrics V1 and V2] Count of processing time for all API calls,0,cilium,api proc time count,,
 cilium.agent.api_process_time.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of processing time for all API calls,0,cilium,api proc time sum,,
