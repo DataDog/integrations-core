@@ -1394,7 +1394,6 @@
                             "title": "Process Details",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -2231,68 +2230,6 @@
                         }
                     },
                     {
-                        "id": 8802593395177676,
-                        "definition": {
-                            "title": "Distribution by Asynchronous Events",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:falco"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@output_fields.evt.is_async",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count",
-                                                "metric": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 4,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
                         "id": 7025588490235368,
                         "definition": {
                             "title": "Distribution by Asynchronous Event Types",
@@ -2355,9 +2292,9 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
+                            "x": 4,
                             "y": 4,
-                            "width": 4,
+                            "width": 8,
                             "height": 4
                         }
                     },
@@ -2946,7 +2883,6 @@
                 "title": "Alert Log Details",
                 "title_size": "16",
                 "title_align": "left",
-                "time": {},
                 "requests": [
                     {
                         "response_format": "event_list",
