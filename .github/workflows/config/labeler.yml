@@ -317,6 +317,8 @@ integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/anthropic:
+- anthropic/**/*
 integration/lastpass:
 - lastpass/**/*
 integration/lighttpd:
@@ -501,6 +503,8 @@ integration/supervisord:
 - supervisord/**/*
 integration/suricata:
 - suricata/**/*
+integration/symantec_endpoint_protection:
+- symantec_endpoint_protection/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
@@ -565,6 +569,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/wazuh:
+- wazuh/**/*
 integration/weaviate:
 - weaviate/**/*
 integration/weblogic:

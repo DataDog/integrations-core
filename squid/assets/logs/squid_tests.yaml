@@ -20,8 +20,10 @@ tests:
       network:
         bytes_written: 491.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "99.86.88.89"
         protocol: "TCP"
       squid:
@@ -53,8 +55,10 @@ tests:
       network:
         bytes_written: 491.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "99.86.88.128"
         protocol: "TCP"
       squid:
@@ -85,6 +89,7 @@ tests:
       network:
         bytes_written: 4114.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         protocol: "TCP"
       squid:
@@ -111,8 +116,10 @@ tests:
       network:
         bytes_written: 0.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "8.8.8.8"
         protocol: "TCP"
       squid:
@@ -142,8 +149,10 @@ tests:
       network:
         bytes_written: 1380.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "99.86.88.128"
         protocol: "TCP"
       squid:
@@ -174,8 +183,10 @@ tests:
       network:
         bytes_written: 12712.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "172.217.20.68"
         protocol: "TCP"
       squid:
@@ -197,12 +208,15 @@ tests:
         status_category: "Success"
         status_code: 200
         url_details:
-          path: "www.google.com:443"
+          host: "www.google.com"
+          port: 443
       network:
         bytes_written: 15851.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "172.217.20.68"
         protocol: "TCP"
       squid:
@@ -224,12 +238,16 @@ tests:
         status_category: "Success"
         status_code: 200
         url_details:
-          path: "8.8.8.8:443/"
+          host: "8.8.8.8"
+          path: "/"
+          port: 443
       network:
         bytes_written: 4094.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "8.8.8.8"
         protocol: "TCP"
       squid:
@@ -261,8 +279,10 @@ tests:
       network:
         bytes_written: 4006.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         destination:
+          geoip: {}
           ip: "172.217.20.68"
         protocol: "TCP"
       squid:
@@ -294,6 +314,7 @@ tests:
       network:
         bytes_written: 3903.0
         client:
+          geoip: {}
           ip: "127.0.0.1"
         protocol: "TCP"
       squid:
@@ -340,4 +361,160 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570785289000
-
+ - 
+  sample: "10.10.10.10 - testuser1 [25/Sep/2024:11:25:20 +0530] \"CONNECT ssl.gstatic.com:443 HTTP/1.1\" 200 3139 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36\" TCP_TUNNEL:HIER_DIRECT"
+  result:
+    custom:
+      http:
+        method: "CONNECT"
+        status_category: "Success"
+        status_code: 200.0
+        url_details:
+          host: "ssl.gstatic.com"
+          port: 443
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "129"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+        version: "HTTP/1.1"
+      network:
+        bytes_written: 3139.0
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+        protocol: "TCP"
+      squid:
+        peer_status: "HIER_DIRECT"
+        status: "TUNNEL"
+        user_identity: "testuser1"
+      timestamp: 1727243720000
+      usr:
+        name: "testuser1"
+    message: "10.10.10.10 - testuser1 [25/Sep/2024:11:25:20 +0530] \"CONNECT ssl.gstatic.com:443 HTTP/1.1\" 200 3139 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36\" TCP_TUNNEL:HIER_DIRECT"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1727243720000
+ - 
+  sample: "10.10.10.10 - testuser1 [25/Sep/2024:15:20:11 +0530] \"GET http://proxy.squid.local:3128/squid-internal-mgr/counters HTTP/1.1\" 407 4724 TCP_DENIED:HIER_NONE'"
+  result:
+    custom:
+      http:
+        method: "GET"
+        status_category: "Warning"
+        status_code: 407.0
+        url: "http://proxy.squid.local:3128/squid-internal-mgr/counters"
+        url_details:
+          host: "proxy.squid.local"
+          path: "/squid-internal-mgr/counters"
+          port: 3128
+          scheme: "http"
+        version: "HTTP/1.1"
+      network:
+        bytes_written: 4724.0
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+        protocol: "TCP"
+      squid:
+        peer_status: "HIER_NONE"
+        status: "DENIED"
+        user_identity: "testuser1"
+      timestamp: 1727257811000
+      usr:
+        name: "testuser1"
+    message: "10.10.10.10 - testuser1 [25/Sep/2024:15:20:11 +0530] \"GET http://proxy.squid.local:3128/squid-internal-mgr/counters HTTP/1.1\" 407 4724 TCP_DENIED:HIER_NONE'"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1727257811000
+ - 
+  sample: "10.10.10.10 - testuser1 [25/Sep/2024:15:20:17 +0530] \"CONNECT ssl.gstatic.com:443 HTTP/1.1\" 200 0 NONE_NONE:HIER_DIRECT"
+  result:
+    custom:
+      http:
+        method: "CONNECT"
+        status_category: "Success"
+        status_code: 200.0
+        url_details:
+          host: "ssl.gstatic.com"
+          port: 443
+        version: "HTTP/1.1"
+      network:
+        bytes_written: 0.0
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+        protocol: "NONE"
+      squid:
+        peer_status: "HIER_DIRECT"
+        status: "NONE"
+        user_identity: "testuser1"
+      timestamp: 1727257817000
+      usr:
+        name: "testuser1"
+    message: "10.10.10.10 - testuser1 [25/Sep/2024:15:20:17 +0530] \"CONNECT ssl.gstatic.com:443 HTTP/1.1\" 200 0 NONE_NONE:HIER_DIRECT"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1727257817000
+ - 
+  sample: "1726124251      0 10.10.10.10 TCP_DENIED/403 3920 CONNECT ts01-gyr-maverick.cloudsink.net:443 - HIER_NONE/- text/html"
+  result:
+    custom:
+      duration: 0.0
+      http:
+        method: "CONNECT"
+        resource:
+          content_type: "text/html"
+        status_category: "Warning"
+        status_code: 403
+        url_details:
+          host: "ts01-gyr-maverick.cloudsink.net"
+          port: 443
+      network:
+        bytes_written: 3920.0
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+        protocol: "TCP"
+      squid:
+        peer_status: "HIER_NONE"
+        status: "DENIED"
+      timestamp: 1.726124251E12
+    message: "1726124251      0 10.10.10.10 TCP_DENIED/403 3920 CONNECT ts01-gyr-maverick.cloudsink.net:443 - HIER_NONE/- text/html"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1726124251000
+ - 
+  sample: "1726124255.221      0 10.10.10.10 NONE_NONE/000 0 - error:transaction-end-before-headers - HIER_NONE/- -"
+  result:
+    custom:
+      duration: 0.0
+      error:
+        message: "transaction-end-before-headers"
+      network:
+        bytes_written: 0.0
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+        protocol: "NONE"
+      squid:
+        peer_status: "HIER_NONE"
+        status: "NONE"
+      timestamp: 1.726124255221E12
+    message: "1726124255.221      0 10.10.10.10 NONE_NONE/000 0 - error:transaction-end-before-headers - HIER_NONE/- -"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1726124255221
