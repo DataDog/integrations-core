@@ -33,7 +33,7 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_database_backup_metrics(self) -> bool:
         return self.config.database_metrics_config["db_backup_metrics"]["enabled"]
-    
+
     @property
     def enabled(self):
         if not self.include_database_backup_metrics or is_azure_sql_database(self.engine_edition):

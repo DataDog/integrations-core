@@ -49,6 +49,7 @@ class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_database_files_metrics(self) -> bool:
         return self.config.database_metrics_config["db_files_metrics"]["enabled"]
+
     @property
     def enabled(self):
         if not self.include_database_files_metrics:
@@ -65,6 +66,7 @@ class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
             f"enabled={self.enabled}, "
             f"include_database_files_metrics={self.include_database_files_metrics})"
         )
+
     def _build_query_executors(self):
         executors = []
         for database in self.databases:

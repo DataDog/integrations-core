@@ -45,7 +45,9 @@ class SQLServerXESessionMetrics(SqlserverDatabaseMetricsBase):
     @property
     def enabled(self):
         self.deadlocks_config: dict = self.config.deadlocks_config
-        return self.config.database_metrics_config["xe_metrics"]["enabled"] or is_affirmative(self.deadlocks_config.get('enabled', False))
+        return self.config.database_metrics_config["xe_metrics"]["enabled"] or is_affirmative(
+            self.deadlocks_config.get('enabled', False)
+        )
 
     @property
     def collection_interval(self) -> int:

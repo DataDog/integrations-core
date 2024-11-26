@@ -713,11 +713,7 @@ def test_sqlserver_secondary_log_shipping_metrics(
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('include_server_state_metrics', [True, False])
 def test_sqlserver_server_state_metrics(
-    aggregator,
-    dd_run_check,
-    init_config,
-    instance_docker_metrics,
-    include_server_state_metrics
+    aggregator, dd_run_check, init_config, instance_docker_metrics, include_server_state_metrics
 ):
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
@@ -818,12 +814,15 @@ def test_sqlserver_index_usage_metrics(
 ):
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
-        'index_usage_metrics': {'enabled': include_index_usage_metrics,
-                                'enabled_tempdb': include_index_usage_metrics_tempdb
-                               },
+        'index_usage_metrics': {
+            'enabled': include_index_usage_metrics,
+            'enabled_tempdb': include_index_usage_metrics_tempdb,
+        },
     }
     if index_usage_stats_interval:
-        instance_docker_metrics['database_metrics']['index_usage_metrics']['collection_interval'] = index_usage_stats_interval
+        instance_docker_metrics['database_metrics']['index_usage_metrics'][
+            'collection_interval'
+        ] = index_usage_stats_interval
 
     mocked_results_non_tempdb = [
         [
@@ -910,11 +909,15 @@ def test_sqlserver_db_fragmentation_metrics(
 ):
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['database_metrics'] = {
-        'db_fragmentation_metrics': {'enabled': include_db_fragmentation_metrics,
-                                     'enabled_tempdb': include_db_fragmentation_metrics_tempdb},
+        'db_fragmentation_metrics': {
+            'enabled': include_db_fragmentation_metrics,
+            'enabled_tempdb': include_db_fragmentation_metrics_tempdb,
+        },
     }
     if db_fragmentation_metrics_interval:
-        instance_docker_metrics['database_metrics']['db_fragmentation_metrics']['collection_interval'] = db_fragmentation_metrics_interval
+        instance_docker_metrics['database_metrics']['db_fragmentation_metrics'][
+            'collection_interval'
+        ] = db_fragmentation_metrics_interval
     print(instance_docker_metrics)
     mocked_results = [
         [
@@ -1358,7 +1361,9 @@ def test_sqlserver_database_backup_metrics(
         'db_backup_metrics': {'enabled': include_database_backup_metrics},
     }
     if database_backup_metrics_interval:
-        instance_docker_metrics['database_metrics']['db_backup_metrics']['collection_interval'] = database_backup_metrics_interval
+        instance_docker_metrics['database_metrics']['db_backup_metrics'][
+            'collection_interval'
+        ] = database_backup_metrics_interval
 
     mocked_results = [
         ('master', 'master', 0),
@@ -1432,6 +1437,7 @@ def test_sqlserver_xe_session_metrics(
     expected_tags.append('session_name:datadog')
     aggregator.assert_metric("sqlserver.xe.session_status", value=1, tags=expected_tags)
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_sqlserver_database_metrics_defaults(
@@ -1441,24 +1447,24 @@ def test_sqlserver_database_metrics_defaults(
     instance_docker_metrics,
 ):
     include_defaults = {
-        SqlserverAoMetrics : False,
-        SqlserverAvailabilityGroupsMetrics : False,
-        SqlserverAvailabilityReplicasMetrics : False,
-        SqlserverDatabaseBackupMetrics : True,
-        SqlserverDatabaseFilesMetrics : True,
-        SqlserverDatabaseReplicationStatsMetrics : False,
-        SqlserverDatabaseStatsMetrics : True,
-        SqlserverDBFragmentationMetrics : False,
-        SqlserverFciMetrics : False,
-        SqlserverFileStatsMetrics : True,
-        SqlserverIndexUsageMetrics : True,
-        SqlserverMasterFilesMetrics : False,
-        SqlserverOsSchedulersMetrics : False,
-        SqlserverOsTasksMetrics : False,
-        SqlserverPrimaryLogShippingMetrics : False,
-        SqlserverSecondaryLogShippingMetrics : False,
-        SqlserverServerStateMetrics : True,
-        SqlserverTempDBFileSpaceUsageMetrics : False,
+        SqlserverAoMetrics: False,
+        SqlserverAvailabilityGroupsMetrics: False,
+        SqlserverAvailabilityReplicasMetrics: False,
+        SqlserverDatabaseBackupMetrics: True,
+        SqlserverDatabaseFilesMetrics: True,
+        SqlserverDatabaseReplicationStatsMetrics: False,
+        SqlserverDatabaseStatsMetrics: True,
+        SqlserverDBFragmentationMetrics: False,
+        SqlserverFciMetrics: False,
+        SqlserverFileStatsMetrics: True,
+        SqlserverIndexUsageMetrics: True,
+        SqlserverMasterFilesMetrics: False,
+        SqlserverOsSchedulersMetrics: False,
+        SqlserverOsTasksMetrics: False,
+        SqlserverPrimaryLogShippingMetrics: False,
+        SqlserverSecondaryLogShippingMetrics: False,
+        SqlserverServerStateMetrics: True,
+        SqlserverTempDBFileSpaceUsageMetrics: False,
     }
     instance_docker_metrics['database_autodiscovery'] = True
 

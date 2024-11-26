@@ -36,6 +36,7 @@ class SqlserverDatabaseStatsMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_database_stats_metrics(self) -> bool:
         return self.config.database_metrics_config["db_stats_metrics"]["enabled"]
+
     @property
     def enabled(self):
         if not self.include_database_stats_metrics:
