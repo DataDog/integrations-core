@@ -20,6 +20,15 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, deprecations, validators
 
 
+class Aws(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    cluster_identifier: Optional[str] = None
+    instance_endpoint: Optional[str] = None
+
+
 class Field(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -64,6 +73,16 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class MetricsCollectionInterval(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection: Optional[int] = None
+    collections_indexes_stats: Optional[int] = None
+    sharded_data_distribution: Optional[int] = None
+
+
 class OperationSamples(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -103,6 +122,7 @@ class InstanceConfig(BaseModel):
     )
     add_node_tag_to_events: Optional[bool] = None
     additional_metrics: Optional[tuple[str, ...]] = None
+    aws: Optional[Aws] = None
     cluster_name: Optional[str] = None
     collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None
@@ -118,6 +138,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     hosts: Optional[Union[str, tuple[str, ...]]] = None
     metric_patterns: Optional[MetricPatterns] = None
+    metrics_collection_interval: Optional[MetricsCollectionInterval] = None
     min_collection_interval: Optional[float] = None
     operation_samples: Optional[OperationSamples] = None
     options: Optional[MappingProxyType[str, Any]] = None

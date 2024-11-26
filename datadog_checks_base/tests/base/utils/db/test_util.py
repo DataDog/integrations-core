@@ -39,6 +39,7 @@ from datadog_checks.base.utils.serialization import json
         ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", "192.0.2.1"),
         ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
         ("192.0.2.1", "192.0.2.254", "192.0.2.1"),
+        ("postgres.svc.local", "some-pod", "postgres.svc.local"),
     ],
 )
 def test_resolve_db_host(db_host, agent_hostname, want):

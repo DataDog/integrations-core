@@ -41,6 +41,9 @@ on:
         required: false
         default: false
         type: boolean
+      # integrations-core repo no longer tests Python 2, only Python 3.
+      # We keep the options in the workflow for community and marketplace partners.
+      # They may still continue to test Python 2 and Agent 6.
       test-py2:
         required: false
         default: false
@@ -182,8 +185,7 @@ jobs:
         ddev config set repo ${{ inputs.repo }}
 
     - name: Lint
-      # TODO: use the more descriptive `--lint` variant when ddev is released
-      run: ddev test -s ${{ inputs.target }}
+      run: ddev test --lint ${{ inputs.target }}
 
     - name: Prepare for testing
       env: >-
