@@ -35,8 +35,8 @@ def create_fipsmodule_config():
 
     try:
         subprocess.run(command, check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError:
-        pytest.exit("Failed to set up FIPS mode. Exiting tests.", returncode=1)
+    except subprocess.CalledProcessError as e:
+        pytest.exit(f"Failed to set up FIPS mode. Exiting tests.\n {e.output}", returncode=1)
     yield
     # subprocess.run(["rm", f'{PATH_TO_EMBEDDED}/ssl/fipsmodule.cnf'], check=True)
 
@@ -81,7 +81,7 @@ def test_cryptography_md5_cryptography():
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
-def test_cryptography_md5_fips():
+def test_cryptography_md5_fips(clan_environment):
     from cryptography.exceptions import InternalError
     from cryptography.hazmat.primitives import hashes
 
@@ -93,7 +93,7 @@ def test_cryptography_md5_fips():
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
 def test_connection_before_fips():
     """
-    Test connection to the FIPS server before enabling FIPS mode.
+    Test connection to the non-FIPS server before enabling FIPS mode.
     """
     url = f"https://localhost:{FIPS_SERVER_PORT}"
     try:
@@ -104,9 +104,9 @@ def test_connection_before_fips():
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
-def test_connection_after_fips():
+def test_connection_after_fips(clean_environment):
     """
-    Test connection to the FIPS server after enabling FIPS mode.
+    Test connection to the non-FIPS server after enabling FIPS mode.
     """
     os.environ["OPENSSL_CONF"] = os.path.join(EMBEDDED, 'ssl', 'openssl.cnf')
     os.environ["OPENSSL_MODULES"] = os.path.join(EMBEDDED, 'lib', 'ossl-modules')
