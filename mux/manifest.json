@@ -12,11 +12,6 @@
     "title": "Mux",
     "media": [
       {
-        "caption": "Mux - Overview",
-        "image_url": "images/mux_overview.png",
-        "media_type": "image"
-      },
-      {
         "caption": "Mux - Metrics",
         "image_url": "images/mux_metrics_1.png",
         "media_type": "image"
@@ -24,6 +19,21 @@
       {
         "caption": "Mux - Metrics",
         "image_url": "images/mux_metrics_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mux - Metrics",
+        "image_url": "images/mux_metrics_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mux - Metrics",
+        "image_url": "images/mux_metrics_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mux - Metrics",
+        "image_url": "images/mux_metrics_5.png",
         "media_type": "image"
       }
     ],
@@ -51,7 +61,6 @@
       }
     },
     "dashboards": {
-      "Mux - Overview": "assets/dashboards/mux_overview.json",
       "Mux - Metrics": "assets/dashboards/mux_metrics.json"
     },
     "monitors": {

@@ -16,7 +16,7 @@ Integrate Mux with Datadog to gain insights into mux video performance data.
 3. Click on **Access Tokens**.
 4. Select **Generate new token**.
 5. Choose the environment.
-6. Under the **permission** section select **Mux Data(read-only)**.
+6. Under the **permission** section, select **Mux Data(read-only)**.
 7. Enter the access token name.
 8. Click on **Generate Token**.
 9. Save the Access Token ID and Secret Key from the **Here's your new Access Token** tab.
