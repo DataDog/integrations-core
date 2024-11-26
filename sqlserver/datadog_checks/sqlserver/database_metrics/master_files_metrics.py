@@ -46,7 +46,7 @@ class SqlserverMasterFilesMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
     @property
     def include_master_files_metrics(self):
-        return self.config.include_master_files_metrics
+        return self.config.database_metrics_config["master_files_metrics"]["enabled"]
 
     @property
     def enabled(self):

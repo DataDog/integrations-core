@@ -44,11 +44,11 @@ INDEX_USAGE_STATS_QUERY = {
 class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_index_usage_metrics(self) -> bool:
-        return self.config.include_index_usage_metrics
+        return self.config.database_metrics_config["index_usage_metrics"]["enabled"]
 
     @property
     def include_index_usage_metrics_tempdb(self) -> bool:
-        return self.config.include_index_usage_metrics_tempdb
+        return self.config.database_metrics_config["index_usage_metrics"]["enabled_tempdb"]
 
     @property
     def collection_interval(self) -> int:
@@ -56,7 +56,7 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
         Returns the interval in seconds at which to collect index usage metrics.
         Note: The index usage metrics query can be expensive, so it is recommended to set a higher interval.
         '''
-        return self.config.index_usage_stats_interval
+        return self.config.database_metrics_config["index_usage_metrics"]["collection_interval"]
 
     @property
     def databases(self):

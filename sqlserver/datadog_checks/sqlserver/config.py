@@ -29,15 +29,6 @@ class SQLServerConfig:
         self.autodiscovery_db_service_check: bool = is_affirmative(instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval: int = instance.get('min_collection_interval', 15)
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
-        self.database_backup_metrics_interval: int = instance.get(
-            'database_backup_metrics_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
-        )
-        self.index_usage_stats_interval: int = instance.get(
-            'index_usage_stats_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
-        )
-        self.db_fragmentation_metrics_interval: int = instance.get(
-            'db_fragmentation_metrics_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
-        )
         self.database_instance_collection_interval: int = instance.get(
             'database_instance_collection_interval', DEFAULT_LONG_METRICS_COLLECTION_INTERVAL
         )
@@ -55,6 +46,7 @@ class SQLServerConfig:
 
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
+        self.database_metrics_config: dict = self._build_database_metrics_configs(instance)
         self.statement_metrics_config: dict = instance.get('query_metrics', {}) or {}
         self.agent_jobs_config: dict = instance.get('agent_jobs', {}) or {}
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
@@ -120,37 +112,7 @@ class SQLServerConfig:
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
-        self.availability_group = instance.get('availability_group')
-        self.only_emit_local = is_affirmative(instance.get('only_emit_local', False))
-        self.ao_database = instance.get('ao_database')
         self.db_fragmentation_object_names = instance.get('db_fragmentation_object_names', []) or []
-        # DBM Metrics Includes
-        self.include_ao_metrics: bool = is_affirmative(instance.get('include_ao_metrics', False))
-        self.include_master_files_metrics: bool = is_affirmative(instance.get('include_master_files_metrics', False))
-        self.include_fci_metrics: bool = is_affirmative(instance.get('include_fci_metrics', False))
-        self.include_primary_log_shipping_metrics: bool = is_affirmative(
-            instance.get('include_primary_log_shipping_metrics', False)
-        )
-        self.include_secondary_log_shipping_metrics: bool = is_affirmative(
-            instance.get('include_secondary_log_shipping_metrics', False)
-        )
-        self.include_task_scheduler_metrics: bool = is_affirmative(
-            instance.get('include_task_scheduler_metrics', False)
-        )
-        self.include_db_fragmentation_metrics: bool = is_affirmative(
-            instance.get('include_db_fragmentation_metrics', False)
-        )
-        self.include_db_fragmentation_metrics_tempdb: bool = is_affirmative(
-            instance.get('include_db_fragmentation_metrics_tempdb', False)
-        )
-        self.include_index_usage_metrics: bool = is_affirmative(instance.get('include_index_usage_metrics', True))
-        self.include_index_usage_metrics_tempdb: bool = is_affirmative(
-            instance.get('include_index_usage_metrics_tempdb', False)
-        )
-        self.include_tempdb_file_space_usage_metrics: bool = is_affirmative(
-            instance.get('include_tempdb_file_space_usage_metrics', True)
-        )
-        self.include_xe_metrics: bool = is_affirmative(instance.get('include_xe_metrics', False))
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:
         valid_patterns = []
@@ -207,3 +169,66 @@ class SQLServerConfig:
             return init_config_propagate_agent_tags
         # if neither the instance nor the init_config has set the value, return False
         return False
+
+    def _build_database_metrics_configs(self, instance):
+        # Set defaults for database metrics
+        configurable_metrics = {
+            "ao_metrics" : {'enabled' : False,
+                            'availability_group' : None,
+                            'ao_database' : None,
+                            'only_emit_local' : False},
+            "db_backup_metrics": {'enabled' : True,
+                                  'collection_interval' : DEFAULT_LONG_METRICS_COLLECTION_INTERVAL},
+            "db_files_metrics": {'enabled' : True},
+            "db_stats_metrics": {'enabled' : True},
+            "db_fragmentation_metrics" : {'enabled' : False,
+                                          'enabled_tempdb' : False,
+                                          'collection_interval' : DEFAULT_LONG_METRICS_COLLECTION_INTERVAL},
+            "fci_metrics": {'enabled' : False},
+            "file_stats_metrics": {'enabled' : True},
+            "index_usage_metrics": {'enabled' : True, 
+                                    'collection_interval' : DEFAULT_LONG_METRICS_COLLECTION_INTERVAL,
+                                    'enabled_tempdb' : False},
+            "instance_metrics": {'enabled' : True},
+            "master_files_metrics": {'enabled' : False},
+            "primary_log_shipping_metrics": {'enabled' : False},
+            "secondary_log_shipping_metrics": {'enabled' : False},
+            "server_state_metrics": {'enabled' : True},
+            "task_scheduler_metrics": {'enabled' : False},
+            "tempdb_file_space_usage_metrics": {'enabled' : False},
+            "xe_metrics": {'enabled' : True},
+        }
+        # Check if the instance has any configuration for the metrics in legacy structure
+        legacy_configuration_metrics = {
+            "include_ao_metrics" : "ao_metrics",
+            "include_master_files_metrics" : "master_files_metrics",
+            "include_fci_metrics" : "fci_metrics",
+            "include_primary_log_shipping_metrics" : "primary_log_shipping_metrics",
+            "include_secondary_log_shipping_metrics" : "secondary_log_shipping_metrics",
+            "include_instance_metrics" : "instance_metrics",
+            "include_task_scheduler_metrics" : "task_scheduler_metrics",
+            "include_db_fragmentation_metrics" : "db_fragmentation_metrics",
+            "include_index_usage_metrics" : "index_usage_metrics",
+            "include_tempdb_file_space_usage_metrics" : "tempdb_file_space_usage_metrics",
+            "include_xe_metrics" : "xe_metrics",
+        }
+        for metric, config_key in legacy_configuration_metrics.items():
+            if instance.get(metric) is not None:
+                configurable_metrics[config_key]['enabled'] = instance[metric]
+        # Manual look ups for legacy configuration structure
+        configurable_metrics['ao_metrics']['availability_group'] = instance.get('availability_group', configurable_metrics['ao_metrics']['availability_group'])
+        configurable_metrics['ao_metrics']['ao_database'] = instance.get('ao_database', configurable_metrics['ao_metrics']['ao_database'])
+        configurable_metrics['ao_metrics']['only_emit_local'] = instance.get('only_emit_local', configurable_metrics['ao_metrics']['only_emit_local'])
+        configurable_metrics['db_backup_metrics']['collection_interval'] = instance.get('database_backup_metrics_interval', configurable_metrics['db_backup_metrics']['collection_interval'])
+        configurable_metrics['db_fragmentation_metrics']['enabled_tempdb'] = instance.get('include_db_fragmentation_metrics_tempdb', configurable_metrics['db_fragmentation_metrics']['enabled_tempdb'])
+        configurable_metrics['db_fragmentation_metrics']['collection_interval'] = instance.get('db_fragmentation_metrics_interval', configurable_metrics['db_fragmentation_metrics']['collection_interval'])
+        configurable_metrics['index_usage_metrics']['enabled_tempdb'] = instance.get('include_index_usage_metrics_tempdb', configurable_metrics['index_usage_metrics']['enabled_tempdb'])
+        configurable_metrics['index_usage_metrics']['collection_interval'] = instance.get('index_usage_stats_interval', configurable_metrics['index_usage_metrics']['collection_interval'])
+        # Check if the instance has any configuration for the metrics
+        database_metrics = instance.get('database_metrics', {})
+        for metric, config in configurable_metrics.items():
+            metric_config = database_metrics.get(metric, {})
+            for key, value in metric_config.items():
+                if value is not None:
+                    config[key] = value
+        return configurable_metrics

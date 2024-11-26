@@ -31,8 +31,12 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
     # contains the backup from a single, successful backup operation.
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-tables/backupset-transact-sql?view=sql-server-ver15
     @property
+    def include_database_backup_metrics(self) -> bool:
+        return self.config.database_metrics_config["db_backup_metrics"]["enabled"]
+    
+    @property
     def enabled(self):
-        if is_azure_sql_database(self.engine_edition):
+        if not self.include_database_backup_metrics or is_azure_sql_database(self.engine_edition):
             return False
         return True
 
@@ -42,7 +46,7 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
         Returns the interval in seconds at which to collect database backup metrics.
         Note: The database backup metrics query can be expensive, so it is recommended to set a higher interval.
         '''
-        return self.config.database_backup_metrics_interval
+        return self.config.database_metrics_config["db_backup_metrics"]["collection_interval"]
 
     @property
     def queries(self):
@@ -56,6 +60,7 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
+            f"include_database_backup_metrics={self.include_database_backup_metrics}), "
             f"engine_edition={self.engine_edition}, "
             f"collection_interval={self.collection_interval})"
         )

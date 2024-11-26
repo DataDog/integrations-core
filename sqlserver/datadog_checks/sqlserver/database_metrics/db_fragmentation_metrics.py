@@ -51,11 +51,11 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
     @property
     def include_db_fragmentation_metrics(self):
-        return self.config.include_db_fragmentation_metrics
+        return self.config.database_metrics_config["db_fragmentation_metrics"]["enabled"]
 
     @property
     def include_db_fragmentation_metrics_tempdb(self):
-        return self.config.include_db_fragmentation_metrics_tempdb
+        return self.config.database_metrics_config["db_fragmentation_metrics"]["enabled_tempdb"]
 
     @property
     def db_fragmentation_object_names(self):
@@ -73,7 +73,7 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
         Returns the interval in seconds at which to collect database index fragmentation metrics.
         Note: The index fragmentation metrics query can be expensive, so it is recommended to set a higher interval.
         '''
-        return self.config.db_fragmentation_metrics_interval
+        return self.config.database_metrics_config["db_fragmentation_metrics"]["collection_interval"]
 
     @property
     def databases(self):
