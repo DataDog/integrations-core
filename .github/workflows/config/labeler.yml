@@ -569,6 +569,8 @@ integration/vonage:
 - vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/wazuh:
+- wazuh/**/*
 integration/weaviate:
 - weaviate/**/*
 integration/weblogic:
