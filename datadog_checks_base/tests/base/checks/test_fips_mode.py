@@ -17,7 +17,7 @@ from datadog_checks.dev.conditions import WaitForPortListening
 
 HERE = get_here()
 EMBEDDED = os.path.join(HERE, '..', '..', 'fixtures', 'fips', 'embedded')
-FIPS_SERVER_PORT = 443
+FIPS_SERVER_PORT = 8443
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -39,6 +39,13 @@ def create_fipsmodule_config():
         pytest.exit("Failed to set up FIPS mode. Exiting tests.", returncode=1)
     yield
     # subprocess.run(["rm", f'{PATH_TO_EMBEDDED}/ssl/fipsmodule.cnf'], check=True)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def non_fips_server():
+    conditions = [WaitForPortListening("localhost", 443)]
+    with docker_run(os.path.join(HERE, 'docker', 'fips_compose.yaml'), conditions=conditions):
+        yield
 
 
 @pytest.fixture(scope="function")
@@ -81,13 +88,6 @@ def test_cryptography_md5_fips():
     AgentCheck().enable_cryptography_fips(path_to_embedded=EMBEDDED)
     with pytest.raises(InternalError, match='Unknown OpenSSL error.'):
         hashes.Hash(hashes.MD5())
-
-
-@pytest.fixture(scope="session")
-def non_fips_server():
-    conditions = [WaitForPortListening("localhost", 443)]
-    with docker_run(os.path.join(HERE, 'docker', 'fips_compose.yaml'), conditions=conditions):
-        yield
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
