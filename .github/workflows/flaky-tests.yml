@@ -36,7 +36,7 @@ jobs:
     concurrency:
       group: test-results
 
-    uses: ./.github/workflows/test-results-master.yml
+    uses: ./.github/workflows/reusable/test-results-master.yml
     secrets: inherit
 
   submit-traces:

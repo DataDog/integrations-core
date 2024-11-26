@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   run:
-    uses: ./.github/workflows/run-validations.yml
+    uses: ./.github/workflows/reusable/run-validations.yml
     with:
       repo: core
 

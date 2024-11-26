@@ -2,7 +2,7 @@
 
 -----
 
-Various validations are [ran](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/validate.yml) to check for correctness. There is a [reusable workflow](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/run-validations.yml) that repositories may call with input parameters defining which validations to use, with each input parameter corresponding to a subcommand under the `ddev validate` command group.
+Various validations are [ran](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/validate.yml) to check for correctness. There is a [reusable workflow](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/resuable/run-validations.yml) that repositories may call with input parameters defining which validations to use, with each input parameter corresponding to a subcommand under the `ddev validate` command group.
 
 ## Agent requirements
 

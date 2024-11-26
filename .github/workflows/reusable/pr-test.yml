@@ -36,7 +36,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
 
-    uses: ./.github/workflows/test-target.yml
+    uses: ./.github/workflows/reusable/test-results-pr.yml
     with:
       job-name: "${{ matrix.name }}"
       target: "${{ matrix.target }}"

@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    uses: ./.github/workflows/test-results-pr.yml
+    uses: ./.github/workflows/reusable/test-results-pr.yml
     if: github.event.workflow_run.conclusion != 'skipped'
     permissions:
       checks: write

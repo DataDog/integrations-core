@@ -56,9 +56,9 @@ def ci(app: Application, sync: bool):
     is_core = app.repo.name == 'core'
     is_marketplace = app.repo.name == 'marketplace'
     test_workflow = (
-        './.github/workflows/test-target.yml'
+        './.github/workflows/reusable/test-results-pr.yml'
         if app.repo.name == 'core'
-        else 'DataDog/integrations-core/.github/workflows/test-target.yml@master'
+        else 'DataDog/integrations-core/.github/workflows/reusable/test-results-pr.yml@master'
     )
     jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
     original_jobs_workflow = jobs_workflow_path.read_text() if jobs_workflow_path.is_file() else ''

@@ -42,7 +42,7 @@ jobs:
       pull-requests: write
       contents: write
 
-    uses: ./.github/workflows/test-results-master.yml
+    uses: ./.github/workflows/reusable/test-results-master.yml
     secrets: inherit
 
   submit-traces:

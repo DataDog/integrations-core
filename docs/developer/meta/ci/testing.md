@@ -13,11 +13,11 @@
 
 ## Reusable workflows
 
-These can be [used](https://docs.github.com/en/actions/using-workflows/reusing-workflows) by other repositories.
+The worflows in the .github/workflows/reusuable directory can be [used](https://docs.github.com/en/actions/using-workflows/reusing-workflows) by other repositories. Others workflows can be re-used too, but they might have unnanounced breaking changes.
 
 ### PR test
 
-This [workflow](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/pr-test.yml) is meant to be used on pull requests.
+This [workflow](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/reusable/pr-test.yml) is meant to be used on pull requests.
 
 First it [computes the job matrix](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/compute-matrix.yml) based on what was changed. Since this is time sensitive, rather than fetching the entire history we use GitHub's API to find out the precise depth to fetch in order to reach the merge base. Then it runs the [test workflow](#test-target) for every job in the matrix.
 
@@ -36,7 +36,7 @@ First it [computes the job matrix](https://github.com/DataDog/integrations-core/
 
 ### Test target
 
-This [workflow](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/test-target.yml) runs a single job that is the foundation of how all tests are executed. Depending on the input parameters, the order of operations is as follows:
+This [workflow](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/reusable/test-results-pr.yml) runs a single job that is the foundation of how all tests are executed. Depending on the input parameters, the order of operations is as follows:
 
 - [Checkout](https://github.com/actions/checkout) code (on pull requests this is a [merge commit](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request))
 - [Set up](https://github.com/actions/setup-python) Python 2.7
@@ -69,7 +69,7 @@ Both the [PR test](#pr-test) and [Test target](#test-target) reusable workflows 
 ```yaml
 jobs:
   test:
-    uses: DataDog/integrations-core/.github/workflows/pr-test.yml@master
+    uses: DataDog/integrations-core/.github/workflows/reusable/pr-test.yml@master
     with:
       repo: "<NAME>"
       setup-env-vars: >-
@@ -160,11 +160,11 @@ We maintain a [public dashboard](https://p.datadoghq.com/sb/yB5yjZ-e9572aadd5162
 
 After all test jobs in a workflow complete we [publish](https://github.com/EnricoMi/publish-unit-test-result-action) the results.
 
-On pull requests we [create](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/test-results-pr.yml) a single comment that remains updated:
+On pull requests we [create](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/reusable/test-results-pr.yml) a single comment that remains updated:
 
 ![Example comment](../../assets/images/pr-test-results-comment.png){ loading=lazy }
 
-On merges to the `master` branch we [generate](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/test-results-master.yml) a [badge](https://github.com/DataDog/integrations-core/blob/badges/test-results.svg) with stats about all tests:
+On merges to the `master` branch we [generate](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/reusable/test-results-master.yml) a [badge](https://github.com/DataDog/integrations-core/blob/badges/test-results.svg) with stats about all tests:
 
 [![CI testing badge](https://raw.githubusercontent.com/DataDog/integrations-core/badges/test-results.svg){ loading=lazy }](https://github.com/DataDog/integrations-core/actions/workflows/master.yml)
 
@@ -179,8 +179,8 @@ During [testing](#test-target) the cache is restored, with a fallback to an olde
 Tests by default use the Python version the Agent currently ships. This value must be changed in the following locations:
 
 - `PYTHON_VERSION` environment variable in [/.github/workflows/cache-shared-deps.yml](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/cache-shared-deps.yml)
-- `PYTHON_VERSION` environment variable in [/.github/workflows/run-validations.yml](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/run-validations.yml)
-- `PYTHON_VERSION` environment variable fallback in [/.github/workflows/test-target.yml](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/test-target.yml)
+- `PYTHON_VERSION` environment variable in [/.github/workflows/reusable/run-validations.yml](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/reusable/run-validations.yml)
+- `PYTHON_VERSION` environment variable fallback in [/.github/workflows/reusable/test-results-pr.yml](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/reusable/test-results-pr.yml)
 
 ## Caveats
 
