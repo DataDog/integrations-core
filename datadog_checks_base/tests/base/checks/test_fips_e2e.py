@@ -14,6 +14,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.dev import docker_run, get_here
 
 HERE = get_here()
+EMBEDDED = os.path.join(HERE, '..', '..', 'fixtures', 'fips', 'embeded')
 FIPS_SERVER_PORT = 8443
 
 
@@ -41,6 +42,8 @@ def test_connection_after_fips():
     """
     Test connection to the FIPS server after enabling FIPS mode.
     """
+    os.environ["OPENSSL_CONF"] = os.path.join(EMBEDDED, 'ssl', 'openssl.cnf')
+    os.environ["OPENSSL_MODULES"] = os.path.join(EMBEDDED, 'lib', 'ossl-modules')
     os.environ["GOFIPS"] = "1"
     AgentCheck()
 
