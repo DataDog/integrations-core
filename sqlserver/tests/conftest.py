@@ -245,11 +245,7 @@ def instance_e2e(instance_docker):
 
 @pytest.fixture
 def instance_ao_docker_primary(instance_docker):
-    instance_docker['database_metrics'] = {
-        'ao_metrics': {
-            'enabled': True,
-        }
-    }
+    instance_docker['database_metrics']['ao_metrics']['enabled'] = True
     return instance_docker
 
 
