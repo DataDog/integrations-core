@@ -74,20 +74,10 @@ class AoMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    ao_database: Optional[str] = Field(
-        None, description='AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.\n'
-    )
-    availability_group: Optional[str] = Field(
-        None,
-        description='When the `ao_metrics` is enabled, you can provide the resource \ngroup id of a specific availability group that you would like to monitor.\nIf no availability group is specified, then we will collect AlwaysOn metrics \nfor all availability groups on the current replica.\n',
-        examples=['<RESOURCE_GROUP_ID>'],
-    )
+    ao_database: Optional[str] = None
+    availability_group: Optional[str] = None
     enabled: Optional[bool] = Field(None, examples=[False])
-    only_emit_local: Optional[bool] = Field(
-        None,
-        description='Primary replicas may emit metrics for remote secondary replicas\nin the same availability group. If this option is set to true,\nthe primary replica will only emit information local to itself.\n',
-        examples=[False],
-    )
+    only_emit_local: Optional[bool] = Field(None, examples=[False])
 
 
 class DbBackupMetrics(BaseModel):
@@ -95,11 +85,7 @@ class DbBackupMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[int] = Field(
-        None,
-        description='Set the interval (in seconds) for the collection of database backup metrics.\nDefaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended\nto use a consistent value throughout all SQL Server agent deployments.\n',
-        examples=[300],
-    )
+    collection_interval: Optional[int] = Field(None, examples=[300])
     enabled: Optional[bool] = Field(None, examples=[True])
 
 
@@ -116,17 +102,9 @@ class DbFragmentationMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[int] = Field(
-        None,
-        description='Configure the interval (in seconds) for the collection of database fragmentation metrics from the\n`sys.dm_db_index_physical_stats` DMF.\nDefaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended\nto use a consistent value throughout all SQL Server agent deployments.\n',
-        examples=[300],
-    )
+    collection_interval: Optional[int] = Field(None, examples=[300])
     enabled: Optional[bool] = Field(None, examples=[False])
-    enabled_tempdb: Optional[bool] = Field(
-        None,
-        description="Enable collection of database index fragmentation statistics in tempdb database from the\n`sys.dm_db_index_physical_stats` DMF.\n\nBy default, we do not collect index fragmentation statistics in the tempdb database, as those queries\nmight cause blocking. This configuration parameter allows enabling the collection of this metric.\nThis parameter is ignored if the 'enabled' option for 'db_fragmentation_metrics' is set to false.\n",
-        examples=[False],
-    )
+    enabled_tempdb: Optional[bool] = Field(None, examples=[False])
 
 
 class DbStatsMetrics(BaseModel):
@@ -158,17 +136,9 @@ class IndexUsageMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[int] = Field(
-        None,
-        description='Configure the interval (in seconds) for the collection of index usage statistics from the\n`sys.dm_db_index_usage_stats` DMV.\nDefaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended\nto use a consistent value throughout all SQL Server agent deployments.\n',
-        examples=[300],
-    )
+    collection_interval: Optional[int] = Field(None, examples=[300])
     enabled: Optional[bool] = Field(None, examples=[False])
-    enabled_tempdb: Optional[bool] = Field(
-        None,
-        description="Enable the collection of user table index usage statistics in tempdb database from the\n`sys.dm_db_index_usage_stats` DMV.\n\nBy default, we do not collect index usage statistics in the tempdb database, as those queries\nmight cause blocking. This configuration parameter allows enabling the collection of this metric.\nThis parameter is ignored if the 'enabled' option for 'index_usage_metrics' is set to false.\n",
-        examples=[False],
-    )
+    enabled_tempdb: Optional[bool] = Field(None, examples=[False])
 
 
 class InstanceMetrics(BaseModel):
