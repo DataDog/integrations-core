@@ -12,7 +12,9 @@ jobs:
   publish:
     uses: ./.github/workflows/test-results-pr.yml
     if: github.event.workflow_run.conclusion != 'skipped'
-    permissions:
+    permissions: # These permissions need to match the ones in the included workflow, see test-results-pr.yml for details
       checks: write
       pull-requests: write
+      contents: read
+      actions: read
     secrets: inherit

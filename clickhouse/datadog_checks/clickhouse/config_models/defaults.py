@@ -50,3 +50,7 @@ def instance_use_global_custom_queries():
 
 def instance_username():
     return 'default'
+
+
+def instance_verify():
+    return True
