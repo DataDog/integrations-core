@@ -153,7 +153,7 @@ class Deadlocks(DBMAsyncJob):
                 )
                 lookback = self._get_lookback_seconds()
                 self._log.debug(
-                    "Running query %s with max deadlocks %s and timestamp %s",
+                    "Running query %s with max deadlocks %s and lookback %s",
                     query,
                     self._max_deadlocks,
                     lookback,
