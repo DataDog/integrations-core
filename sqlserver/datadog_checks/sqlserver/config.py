@@ -195,8 +195,8 @@ class SQLServerConfig:
             "secondary_log_shipping_metrics": {'enabled': False},
             "server_state_metrics": {'enabled': True},
             "task_scheduler_metrics": {'enabled': False},
-            "tempdb_file_space_usage_metrics": {'enabled': False},
-            "xe_metrics": {'enabled': True},
+            "tempdb_file_space_usage_metrics": {'enabled': True},
+            "xe_metrics": {'enabled': False},
         }
         # Check if the instance has any configuration for the metrics in legacy structure
         legacy_configuration_metrics = {

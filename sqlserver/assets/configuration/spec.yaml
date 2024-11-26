@@ -316,7 +316,7 @@ files:
                 when `deadlocks_collection` is enabled.
               value:
                 type: boolean
-                example: true
+                example: false
         - name: db_backup_metrics
           description: |
             Database backup metrics.

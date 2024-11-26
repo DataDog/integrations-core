@@ -759,7 +759,7 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
     include_tempdb_file_space_usage_metrics,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
-    instance_docker_metrics['tempdb_file_space_usage_metrics'] = {
+    instance_docker_metrics['database_metrics'] = {
         'tempdb_file_space_usage_metrics': {'enabled': include_tempdb_file_space_usage_metrics}
     }
     mocked_results = [
@@ -1464,7 +1464,7 @@ def test_sqlserver_database_metrics_defaults(
         SqlserverPrimaryLogShippingMetrics: False,
         SqlserverSecondaryLogShippingMetrics: False,
         SqlserverServerStateMetrics: True,
-        SqlserverTempDBFileSpaceUsageMetrics: False,
+        SqlserverTempDBFileSpaceUsageMetrics: True,
     }
     instance_docker_metrics['database_autodiscovery'] = True
 
