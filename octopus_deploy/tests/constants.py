@@ -39,21 +39,24 @@ ALL_METRICS = [
 
 ALL_DEPLOYMENT_LOGS = [
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment failed because one or more steps failed. Please see the deployment log for details.',
         'timestamp': 1727104203218,
         'status': 'Fatal',
         'stage_name': 'Deploy test release 0.0.2 to Development',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
         'timestamp': 1727104198525,
         'status': 'Info',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': "The step failed: Activity Run a Script on the Octopus Server failed with error "
         "'The remote script failed with exit code 1'.",
         'timestamp': 1727104202767,
@@ -61,7 +64,8 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Step 2: Run a Script',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'ParserError: At /home/octopus/.octopus/OctopusServer/Server/Work/'
         '09234928998123-1847-68/Script.ps1:1 char:6',
         'timestamp': 1727104202599,
@@ -69,56 +73,64 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+ echo "stop',
         'timestamp': 1727104202599,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+      ~~~~~',
         'timestamp': 1727104202599,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The string is missing the terminator: ".',
         'timestamp': 1727104202599,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'At /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/Script.ps1:1 char:6',
         'timestamp': 1727104202605,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+ echo "stop',
         'timestamp': 1727104202605,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+      ~~~~~',
         'timestamp': 1727104202605,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
         'timestamp': 1727104202606,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/'
         'Octopus.FunctionAppenderContext.ps1: line 258',
         'timestamp': 1727104202606,
@@ -126,7 +138,8 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/'
         'Bootstrap.Octopus.FunctionAppenderContext.ps1: line 1505',
         'timestamp': 1727104202607,
@@ -134,56 +147,64 @@ ALL_DEPLOYMENT_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
         'timestamp': 1727104202607,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
         'timestamp': 1727104202607,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The remote script failed with exit code 1',
         'timestamp': 1727104202733,
         'status': 'Fatal',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The action Run a Script on the Octopus Server failed',
         'timestamp': 1727104202758,
         'status': 'Fatal',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1846,task_name:Deploy,task_state:Success',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1846,'
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
         'timestamp': 1727103628255,
         'status': 'Info',
         'stage_name': 'Deploy test release 0.0.1 to Staging',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1846,task_name:Deploy,task_state:Success',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1846,'
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
         'timestamp': 1727103627639,
         'status': 'Info',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1845,task_name:Deploy,task_state:Success',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1845,'
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
         'timestamp': 1727103621669,
         'status': 'Info',
         'stage_name': 'Deploy test release 0.0.1 to Development',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1845,task_name:Deploy,task_state:Success',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1845,'
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
         'timestamp': 1727103621208,
         'status': 'Info',
@@ -191,7 +212,7 @@ ALL_DEPLOYMENT_LOGS = [
     },
     {
         'ddtags': 'space_name:Default,project_name:test-api,task_id:ServerTasks-1844,'
-        'task_name:Deploy,task_state:Success',
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
         'timestamp': 1727103442532,
         'status': 'Info',
@@ -199,7 +220,7 @@ ALL_DEPLOYMENT_LOGS = [
     },
     {
         'ddtags': 'space_name:Default,project_name:test-api,task_id:ServerTasks-1844,'
-        'task_name:Deploy,task_state:Success',
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'Testing',
         'timestamp': 1727103440967,
         'status': 'Info',
@@ -207,7 +228,7 @@ ALL_DEPLOYMENT_LOGS = [
     },
     {
         'ddtags': 'space_name:Default,project_name:test-api,task_id:ServerTasks-1844,'
-        'task_name:Deploy,task_state:Success',
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'test',
         'timestamp': 1727103442029,
         'status': 'Info',
@@ -217,21 +238,24 @@ ALL_DEPLOYMENT_LOGS = [
 
 ONLY_TEST_LOGS = [
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment failed because one or more steps failed. Please see the deployment log for details.',
         'timestamp': 1727104203218,
         'status': 'Fatal',
         'stage_name': 'Deploy test release 0.0.2 to Development',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
         'timestamp': 1727104198525,
         'status': 'Info',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': "The step failed: Activity Run a Script on the Octopus Server failed with error "
         "'The remote script failed with exit code 1'.",
         'timestamp': 1727104202767,
@@ -239,7 +263,8 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Step 2: Run a Script',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'ParserError: At /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/'
         'Script.ps1:1 char:6',
         'timestamp': 1727104202599,
@@ -247,56 +272,64 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+ echo "stop',
         'timestamp': 1727104202599,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+      ~~~~~',
         'timestamp': 1727104202599,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The string is missing the terminator: ".',
         'timestamp': 1727104202599,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'At /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/Script.ps1:1 char:6',
         'timestamp': 1727104202605,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+ echo "stop',
         'timestamp': 1727104202605,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': '+      ~~~~~',
         'timestamp': 1727104202605,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
         'timestamp': 1727104202606,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/'
         'Octopus.FunctionAppenderContext.ps1: line 258',
         'timestamp': 1727104202606,
@@ -304,7 +337,8 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/'
         'Bootstrap.Octopus.FunctionAppenderContext.ps1: line 1505',
         'timestamp': 1727104202607,
@@ -312,56 +346,64 @@ ONLY_TEST_LOGS = [
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
         'timestamp': 1727104202607,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'at <ScriptBlock>, <No file>: line 1',
         'timestamp': 1727104202607,
         'status': 'Error',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The remote script failed with exit code 1',
         'timestamp': 1727104202733,
         'status': 'Fatal',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,task_name:Deploy,task_state:Failed',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
+        'task_name:Deploy,task_state:Failed,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The action Run a Script on the Octopus Server failed',
         'timestamp': 1727104202758,
         'status': 'Fatal',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1846,task_name:Deploy,task_state:Success',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1846,'
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
         'timestamp': 1727103628255,
         'status': 'Info',
         'stage_name': 'Deploy test release 0.0.1 to Staging',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1846,task_name:Deploy,task_state:Success',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1846,'
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
         'timestamp': 1727103627639,
         'status': 'Info',
         'stage_name': 'Octopus Server',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1845,task_name:Deploy,task_state:Success',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1845,'
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'The deployment completed successfully.',
         'timestamp': 1727103621669,
         'status': 'Info',
         'stage_name': 'Deploy test release 0.0.1 to Development',
     },
     {
-        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1845,task_name:Deploy,task_state:Success',
+        'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1845,'
+        'task_name:Deploy,task_state:Success,server_node:OctopusServerNodes-50c3dfbarc82',
         'message': 'hello',
         'timestamp': 1727103621208,
         'status': 'Info',

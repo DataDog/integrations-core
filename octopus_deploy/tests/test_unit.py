@@ -209,6 +209,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -220,6 +221,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -231,6 +233,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -243,6 +246,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -254,6 +258,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
         ],
     )
     aggregator.assert_metric(
@@ -265,6 +270,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
         ],
     )
     aggregator.assert_metric(
@@ -277,6 +283,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
         ],
     )
     aggregator.assert_metric(
@@ -289,6 +296,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
         ],
     )
 
@@ -318,6 +326,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -329,6 +338,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -340,6 +350,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -351,6 +362,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -362,6 +374,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -373,6 +386,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -384,6 +398,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -395,6 +410,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -405,6 +421,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -416,6 +433,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -427,6 +445,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -438,6 +457,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
 

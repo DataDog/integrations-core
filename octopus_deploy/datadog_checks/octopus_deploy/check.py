@@ -266,6 +266,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 f'task_id:{task_id}',
                 f'task_name:{task_name}',
                 f'task_state:{task.get("State")}',
+                f'server_node:{task.get("ServerNode")}',
             ]
             self.log.debug("Processing task id %s for project %s", task_id, project_name)
             queued_time, executing_time, completed_time = self._calculate_task_times(task)
