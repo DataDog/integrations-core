@@ -18,8 +18,8 @@ from datadog_checks.vault import Vault
 from .common import (
     COMPOSE_FILE,
     HEALTH_ENDPOINT,
-    METRICS_GENERATION_ENDPOINT,
     INSTANCES,
+    METRICS_GENERATION_ENDPOINT,
     VAULT_VERSION,
     get_vault_server_config_file,
 )
