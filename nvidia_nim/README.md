@@ -18,8 +18,8 @@ The NVIDIA NIM check is included in the [Datadog Agent][2] package. No additiona
 
 NVIDIA NIM provides Prometheus [metrics][1] indicating request statistics. By default, these metrics are available at http://localhost:8000/metrics. The Datadog Agent can collect the exposed metrics using this integration. Follow the instructions below to configure data collection from any or all of the components.
 
-**Note**: This check uses [OpenMetrics][10] for metric collection, which requires Python 3.
 
+To start collecting your NVIDIA NIM performance data:
 1. Edit the `nvidia_nim.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your NVIDIA NIM performance data. See the [sample nvidia_nim.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
