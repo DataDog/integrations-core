@@ -114,7 +114,7 @@ class Deadlocks(DBMAsyncJob):
                     inputbuf.text = self.obfuscate_no_except_wrapper(inputbuf.text)
                     if signature is None and inputbuf.text != OBFUSCATION_ERROR:
                         signature = compute_sql_signature(inputbuf.text)
-        
+
             query_signatures.append({"spid": spid, "signature": signature})
 
         return query_signatures
