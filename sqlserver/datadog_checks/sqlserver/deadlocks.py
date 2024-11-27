@@ -34,6 +34,7 @@ PAYLOAD_QUERY_SIGNATURE = "query_signatures"
 PAYLOAD_XML = "xml"
 
 NO_XE_SESSION_ERROR = f"No XE session `{XE_SESSION_DATADOG}` found"
+OBFUSCATION_ERROR = "ERROR: failed to obfuscate"
 
 
 def agent_check_getter(self):
@@ -74,7 +75,7 @@ class Deadlocks(DBMAsyncJob):
                 sql_text, self._config.obfuscator_options, replace_null_character=True
             )['query']
         except Exception as e:
-            sql_text = "ERROR: failed to obfuscate"
+            sql_text = OBFUSCATION_ERROR
             error_text = "Failed to obfuscate sql text within a deadlock"
             if self._config.log_unobfuscated_queries:
                 error_text += "=[%s]" % sql_text
@@ -88,24 +89,34 @@ class Deadlocks(DBMAsyncJob):
             raise Exception("process-list element not found. The deadlock XML is in an unexpected format.")
         query_signatures = []
         for process in process_list.findall('process'):
+            spid = process.get('spid')
+            if spid is not None:
+                try:
+                    spid = int(spid)
+                except ValueError:
+                    self._log.error("spid not an integer. Skipping query signature computation.")
+                    continue
+                if spid in query_signatures:
+                    continue
+            else:
+                self._log.error("spid not found in process element. Skipping query signature computation.")
+
+            # Setting `signature` for the first function on the stack
+            signature = None
+            for frame in process.findall('.//frame'):
+                if frame.text is not None and frame.text != "unknown":
+                    frame.text = self.obfuscate_no_except_wrapper(frame.text)
+                    if signature is not None and frame.text != OBFUSCATION_ERROR:
+                        signature = compute_sql_signature(frame.text)
+
             for inputbuf in process.findall('.//inputbuf'):
                 if inputbuf.text is not None:
                     inputbuf.text = self.obfuscate_no_except_wrapper(inputbuf.text)
-                    spid = process.get('spid')
-                    if spid is not None:
-                        try:
-                            spid = int(spid)
-                        except ValueError:
-                            self._log.error("spid not an integer. Skipping query signature computation.")
-                            continue
-                        if spid in query_signatures:
-                            continue
-                        query_signatures.append({"spid": spid, "signature": compute_sql_signature(inputbuf.text)})
-                    else:
-                        self._log.error("spid not found in process element. Skipping query signature computation.")
-            for frame in process.findall('.//frame'):
-                if frame.text is not None:
-                    frame.text = self.obfuscate_no_except_wrapper(frame.text)
+                    if signature is None and inputbuf.text != OBFUSCATION_ERROR:
+                        signature = compute_sql_signature(inputbuf.text)
+
+            query_signatures.append({"spid": spid, "signature": signature})
+
         return query_signatures
 
     def _get_lookback_seconds(self):
