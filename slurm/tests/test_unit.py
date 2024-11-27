@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
 from unittest.mock import patch
 
 import pytest
 
 from datadog_checks.slurm import SlurmCheck
+from datadog_checks.slurm.constants import SACCT_PARAMS
 
 from .common import (
     DEFAULT_SINFO_PATH,
@@ -48,6 +50,23 @@ def test_sinfo_command_params(collection_level, gpu_stats, expected_params, inst
         assert check.sinfo_node_cmd == expected_params
     else:
         assert check.sinfo_partition_cmd == expected_params
+
+
+def test_acct_command_params(instance):
+    # Mock the instance configuration
+    instance['collect_sacct_stats'] = True
+
+    check = SlurmCheck('slurm', {}, [instance])
+    base_cmd = ['/usr/bin/sacct'] + SACCT_PARAMS
+
+    # Test to ensure that the sacct is being constructed correctly
+    loops = [0, 1, 2]
+    for loop in loops:
+        if loop > 0:
+            time.sleep(loop)
+        check._update_sacct_params()
+        expected_cmd = base_cmd + ([f'--starttime=now-{loop}seconds'] if loop > 0 else [])
+        assert check.sacct_cmd == expected_cmd
 
 
 @pytest.mark.parametrize(
