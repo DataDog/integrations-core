@@ -71,7 +71,7 @@ def e2e_instance(dd_get_state):
         inst = INSTANCES['main'].copy()
 
         if use_auth_file:
-            inst['client_token_path'] = '/home/vault-sink/token'
+            inst['client_token_path'] = dd_get_state('client_token_path')
         else:
             with open(dd_get_state('client_token_path'), 'r') as auth_file:
                 inst['client_token'] = auth_file.read()
@@ -105,7 +105,7 @@ def dd_environment(e2e_instance, dd_save_state):
             sleep=10,
             mount_logs=True,
         ):
-            yield e2e_instance(), {'docker_volumes': ['{}:/home/vault-sink'.format(sink_dir)]}
+            yield e2e_instance(), {'docker_volumes': ['{}:/home/sink'.format(sink_dir)]}
 
 
 class ApplyPermissions(LazyFunction):

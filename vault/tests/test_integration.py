@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import time
+
 import pytest
 
 from .common import auth_required, noauth_required
@@ -19,6 +21,7 @@ def test_integration(aggregator, dd_run_check, check, instance, global_tags, use
 
     check = check(instance)
     dd_run_check(check)
+    time.sleep(5)
 
     assert_collection(aggregator, global_tags, use_openmetrics)
 
@@ -33,5 +36,6 @@ def test_integration_noauth(aggregator, dd_run_check, check, no_token_instance, 
 
     check = check(instance)
     dd_run_check(check)
+    time.sleep(5)
 
     assert_collection(aggregator, global_tags, use_openmetrics)
