@@ -1,0 +1,72 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a15e2697-01d4-4fd6-a50a-66dcc169fdc1",
+  "app_id": "spinnaker",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Centralizes logs for efficient monitoring, analysis, and troubleshooting of deployment workflows and infrastructure.",
+    "title": "Spinnaker",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Spinnaker Overview",
+        "image_url": "images/spinnaker_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Echo Logs",
+        "image_url": "images/echo_logs_example.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Deck Logs",
+        "image_url": "images/deck_logs_example.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Clouddriver Logs",
+        "image_url": "images/clouddriver_logs_example.png"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 31040595,
+      "source_type_name": "Spinnaker",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "spinnaker.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+        "Spinnaker Dashboard Overview": "assets/dashboards/spinnaker_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
