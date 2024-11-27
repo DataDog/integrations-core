@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   ray-head:
     container_name: ray-head
