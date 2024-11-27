@@ -15,7 +15,14 @@ from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
-from .common import COMPOSE_FILE, HEALTH_ENDPOINT, METRICS_GENERATION_ENDPOINT, INSTANCES, VAULT_VERSION, get_vault_server_config_file
+from .common import (
+    COMPOSE_FILE,
+    HEALTH_ENDPOINT,
+    METRICS_GENERATION_ENDPOINT,
+    INSTANCES,
+    VAULT_VERSION,
+    get_vault_server_config_file,
+)
 
 
 @pytest.fixture
