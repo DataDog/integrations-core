@@ -5,7 +5,7 @@
 METRIC_MAP = {
     'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
     'process_resident_memory_bytes': 'process.resident_memory_bytes',
-    'process_start_time_seconds': 'process.start_time_seconds',
+    'process_start_time_seconds': {'name': 'process.start_time_seconds', 'type': 'time_elapsed'},
     'process_cpu_seconds': 'process.cpu_seconds',
     'process_open_fds': 'process.open_fds',
     'process_max_fds': 'process.max_fds',

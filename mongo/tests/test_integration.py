@@ -137,6 +137,19 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
         cluster_name='my_cluster',
         modules=['enterprise'],
     )
+    # run the check again to verify sharded data distribution metrics are NOT collected
+    # because the collection interval is not reached
+    aggregator.reset()
+    with mock_pymongo("mongos"):
+        dd_run_check(mongos_check)
+
+    assert_metrics(
+        mongos_check,
+        aggregator,
+        ['sharded-data-distribution'],
+        ['sharding_cluster_role:mongos', 'clustername:my_cluster', 'hosting_type:self-hosted'],
+        count=0,
+    )
 
 
 def test_integration_replicaset_primary_in_shard(instance_integration, aggregator, check, dd_run_check):

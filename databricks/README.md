@@ -9,12 +9,17 @@ This page is limited to documentation for ingesting Databricks cluster utilizati
 
 ## Overview
 
-Monitor your [Databricks][1] clusters with the Datadog [Spark integration][2].
+Datadog offers several Databricks monitoring capabilities.
 
-This integration unifies logs, infrastructure metrics, and Spark performance metrics, providing real-time visibility into the health of your nodes and the performance of your jobs. It can help you debug errors, fine-tune performance, and identify issues such as inefficient data partitioning or clusters running out of memory.
+[Data Jobs Monitoring][25] provides monitoring for your Databricks jobs and clusters. You can detect problematic Databricks jobs and workflows anywhere in your data pipelines, remediate failed and long-running-jobs faster, and optimize cluster resources to reduce costs.
 
-For feature details, see [Monitor Databricks with Datadog][22].
+[Cloud Cost Management][26] gives you a view to analyze all your Databricks DBU costs alongside the associated cloud spend.
 
+[Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Jobs Monitoring][25].
+
+[Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
+
+Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
 
 ### Installation
@@ -492,3 +497,7 @@ Additional helpful documentation, links, and articles:
 [22]: https://www.datadoghq.com/blog/databricks-monitoring-datadog/
 [23]: https://app.datadoghq.com/integrations/spark
 [24]: https://docs.databricks.com/en/ingestion/add-data/upload-to-volume.html#upload-files-to-a-unity-catalog-volume
+[25]: https://www.datadoghq.com/product/data-jobs-monitoring/
+[26]: https://www.datadoghq.com/product/cloud-cost-management/
+[27]: https://www.datadoghq.com/product/log-management/
+[28]: https://docs.datadoghq.com/integrations/databricks/?tab=driveronly

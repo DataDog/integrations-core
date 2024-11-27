@@ -8,11 +8,7 @@
 
 * [cloudera] Configure the number of connection pools to cache ([#18886](https://github.com/DataDog/integrations-core/pull/18886))
 
-## 3.1.0 / 2024-10-04
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+## 3.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:
 
@@ -23,6 +19,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 2.2.0 / 2024-06-12 / Agent 7.56.0
 
