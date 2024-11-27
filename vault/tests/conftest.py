@@ -170,7 +170,7 @@ class WaitAndUnsealVault(WaitFor):
 
         # ping endpoint to generate metrics
         requests.get(METRICS_GENERATION_ENDPOINT, timeout=1)
-        time.sleep(30)
+        time.sleep(2)
 
 
 def api_working(api_endpoint):

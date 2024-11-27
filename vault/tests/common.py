@@ -23,7 +23,7 @@ INSTANCES = {
     'invalid': {},
 }
 HEALTH_ENDPOINT = '{}/sys/health'.format(INSTANCES['main']['api_url'])
-METRICS_GENERATION_ENDPOINT = '{}/auth/userpass/login/foo'.format(INSTANCES['main']['api_url'])
+METRICS_GENERATION_ENDPOINT = '{}/v1/consul/roles/foo'.format(INSTANCES['main']['api_url'])
 
 VAULT_VERSION = os.environ['VAULT_VERSION']
 
