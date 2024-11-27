@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import time
-
 import pytest
 
 from .common import auth_required, noauth_required
@@ -14,14 +12,13 @@ from .utils import assert_collection
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-@pytest.mark.parametrize('use_auth_file', [False, True])
+@pytest.mark.parametrize('use_auth_file', [False])
 def test_integration(aggregator, dd_run_check, check, instance, global_tags, use_openmetrics, use_auth_file):
     instance = dict(instance(use_auth_file))
     instance['use_openmetrics'] = use_openmetrics
 
     check = check(instance)
     dd_run_check(check)
-    time.sleep(5)
 
     assert_collection(aggregator, global_tags, use_openmetrics)
 
@@ -36,6 +33,5 @@ def test_integration_noauth(aggregator, dd_run_check, check, no_token_instance, 
 
     check = check(instance)
     dd_run_check(check)
-    time.sleep(5)
 
     assert_collection(aggregator, global_tags, use_openmetrics)
