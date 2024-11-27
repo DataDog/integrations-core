@@ -131,223 +131,131 @@ instances:
     #
     # database_metrics:
 
-        ## AlwaysOn availability group metrics.
+        ## @param ao_metrics - mapping - optional
+        ## Configure collection of AlwaysOn availability group metrics.
+        ##
+        ## When the `ao_metrics.enabled` is True, use `ao_metrics.availability_group` to specify the 
+        ## resource group id of a specific availability group that you would like to monitor. 
+        ## If no availability group is specified, then we will collect AlwaysOn metrics for all 
+        ## availability groups on the current replica.
+        ##
+        ## Primary replicas may emit metrics for remote secondary replicas
+        ## in the same availability group. If `ao_metrics.only_emit_local` is set to true,
+        ## the primary replica will only emit information local to itself.
+        ##
+        ## If `ao_metrics.ao_database` is set, AlwaysOn metrics are only emitted for the selected `ao_database`.
         #
-        # ao_metrics:
+        # ao_metrics: {}
 
-            ## @param enabled - boolean - optional - default: false
-            ## Enable collection of AlwaysOn availability group metrics.
-            #
-            # enabled: false
-
-            ## @param availability_group - string - optional
-            ## When the `ao_metrics` is enabled, you can provide the resource 
-            ## group id of a specific availability group that you would like to monitor.
-            ## If no availability group is specified, then we will collect AlwaysOn metrics 
-            ## for all availability groups on the current replica.
-            #
-            # availability_group: <AVAILABILITY_GROUP>
-
-            ## @param only_emit_local - boolean - optional - default: false
-            ## Primary replicas may emit metrics for remote secondary replicas
-            ## in the same availability group. If this option is set to true,
-            ## the primary replica will only emit information local to itself.
-            #
-            # only_emit_local: false
-
-            ## @param ao_database - string - optional
-            ## AlwaysOn metrics are only emitted for the selected `ao_database` if not empty.
-            #
-            # ao_database: <AO_DATABASE>
-
-        ## Database fragmentation metrics. Note these queries can be resource intensive on large datasets.
-        ## Recommend to limit these via autodiscovery or specific database instances.
+        ## @param db_backup_metrics - mapping - optional
+        ## Configure collection of database backup metrics.
+        ## Use `db_backup_metrics.collection_interval` to set the interval (in seconds) for the collection of 
+        ## database backup metrics. Defaults to 300 seconds (5 minutes). If you intend on updating this value,
+        ## it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
         #
-        # db_fragmentation_metrics:
+        # db_backup_metrics: {}
 
-            ## @param enabled - boolean - optional - default: false
-            ## Enable collection of database fragmentation metrics.
-            #
-            # enabled: false
+        ## @param db_files_metrics - mapping - optional
+        ## Configure collection of database files metrics.
+        #
+        # db_files_metrics: {}
 
-            ## @param enabled_tempdb - boolean - optional - default: false
-            ## Enable collection of database index fragmentation statistics in tempdb database from the
-            ## `sys.dm_db_index_physical_stats` DMF.
-            ##
-            ## By default, we do not collect index fragmentation statistics in the tempdb database, as those queries
-            ## might cause blocking. This configuration parameter allows enabling the collection of this metric.
-            ## This parameter is ignored if the 'enabled' option for 'db_fragmentation_metrics' is set to false.
-            #
-            # enabled_tempdb: false
+        ## @param db_stats_metrics - mapping - optional
+        ## Configure collection of database stats metrics
+        #
+        # db_stats_metrics: {}
 
-            ## @param collection_interval - integer - optional - default: 300
-            ## Configure the interval (in seconds) for the collection of database fragmentation metrics from the
-            ## `sys.dm_db_index_physical_stats` DMF.
-            ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
-            ## to use a consistent value throughout all SQL Server agent deployments.
-            #
-            # collection_interval: 300
+        ## @param db_fragmentation_metrics - mapping - optional
+        ## Configure collection of database fragmentation metrics. 
+        ## Note these queries can be resource intensive on large datasets. Recommend to limit these via 
+        ## autodiscovery or specific database instances.
+        ##
+        ## Use `db_fragmentation_metrics.enabled_tempdb` to enable collection of database index fragmentation statistics
+        ## in tempdb database from the `sys.dm_db_index_physical_stats` DMF.
+        ## By default, we do not collect index fragmentation statistics in the tempdb database, as those queries
+        ## might cause blocking. This configuration parameter allows enabling the collection of this metric.
+        ## This parameter is ignored if the 'enabled' option for 'db_fragmentation_metrics' is set to false.
+        ##
+        ## Use `db_fragmentation_metrics.collection_interval` to set the interval (in seconds) for the collection of
+        ## database fragmentation metrics from the `sys.dm_db_index_physical_stats` DMF.
+        ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
+        ## to use a consistent value throughout all SQL Server agent deployments.
+        #
+        # db_fragmentation_metrics: {}
 
-        ## Failover Cluster Instance metrics. Note that these metrics
+        ## @param fci_metrics - mapping - optional
+        ## Configure collection of failover Cluster Instance metrics. Note that these metrics
         ## requires a SQLServer set up with Failover Clustering enabled.
         #
-        # fci_metrics:
+        # fci_metrics: {}
 
-            ## @param enabled - boolean - optional - default: false
-            ## Enable collection of Failover Cluster Instance metrics.
-            #
-            # enabled: false
+        ## @param file_stats_metrics - mapping - optional
+        ## Configure collection of file stats metrics.
+        #
+        # file_stats_metrics: {}
 
-        ## User table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
-        ##
+        ## @param index_usage_metrics - mapping - optional
+        ## Configure collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
         ## Because the `sys.dm_db_index_usage_stats` view is scoped to the current database, enable
         ## `database_autodiscovery` or set `database`.
+        ##
+        ## Use `index_usage_metrics.enabled_tempdb` to enable collection of user table index usage statistics in tempdb
+        ## database from the `sys.dm_db_index_usage_stats` DMV.
+        ## By default, we do not collect index usage statistics in the tempdb database, as those queries
+        ## might cause blocking. This configuration parameter allows enabling the collection of this metric.
+        ## This parameter is ignored if 'index_usage_metrics.enabled' is set to false.
+        ##
+        ## Use `index_usage_metrics.collection_interval` to set the interval (in seconds) for the collection of index
+        ## usage statistics from the `sys.dm_db_index_usage_stats` DMV.
+        ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
+        ## to use a consistent value throughout all SQL Server agent deployments.
         #
-        # index_usage_metrics:
+        # index_usage_metrics: {}
 
-            ## @param enabled - boolean - optional - default: true
-            ## Enable collection of index usage metrics.
-            #
-            # enabled: true
-
-            ## @param enabled_tempdb - boolean - optional - default: false
-            ## Enable the collection of user table index usage statistics in tempdb database from the
-            ## `sys.dm_db_index_usage_stats` DMV.
-            ##
-            ## By default, we do not collect index usage statistics in the tempdb database, as those queries
-            ## might cause blocking. This configuration parameter allows enabling the collection of this metric.
-            ## This parameter is ignored if the 'enabled' option for 'index_usage_metrics' is set to false.
-            #
-            # enabled_tempdb: false
-
-            ## @param collection_interval - integer - optional - default: 300
-            ## Configure the interval (in seconds) for the collection of index usage statistics from the
-            ## `sys.dm_db_index_usage_stats` DMV.
-            ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
-            ## to use a consistent value throughout all SQL Server agent deployments.
-            #
-            # collection_interval: 300
-
-        ## Server-level instance metrics.  When setting up multiple instances for
+        ## @param instance_metrics - mapping - optional
+        ## Configure collection of server-level instance metrics.  When setting up multiple instances for
         ## different databases on the same host these metrics will be duplicated unless this option is turned off.
         #
-        # instance_metrics:
+        # instance_metrics: {}
 
-            ## @param enabled - boolean - optional - default: true
-            ## Enable collection of instance metrics.
-            #
-            # enabled: true
-
-        ## Database file size and state from `sys.master_files` 
+        ## @param master_files_metrics - mapping - optional
+        ## Configure collection of database file size and state from `sys.master_files`
         #
-        # master_files_metrics:
+        # master_files_metrics: {}
 
-            ## @param enabled - boolean - optional - default: false
-            ## Enable collection of master files metrics.
-            #
-            # enabled: false
-
-        ## Metrics for a log shipping setup. Required to run against the 
+        ## @param primary_log_shipping_metrics - mapping - optional
+        ## Configure collection of metrics for a log shipping setup. Required to run against the 
         ## primary instance in a transaction log shipping configuration. Note that
         ## the Datadog user needs to be present in msdb and must be added to the db_datareader role.
         #
-        # primary_log_shipping_metrics:
+        # primary_log_shipping_metrics: {}
 
-            ## @param enabled - boolean - optional - default: false
-            ## Enable collection of primary log shipping metrics.
-            #
-            # enabled: false
-
-        ## Metrics for a log shipping setup. Required to run against the 
+        ## @param secondary_log_shipping_metrics - mapping - optional
+        ## Configure collection of metrics for a log shipping setup. Required to run against the 
         ## secondary instance in a transaction log shipping configuration. Note that
         ## the Datadog user needs to be present in msdb and must be added to the db_datareader role.
         #
-        # secondary_log_shipping_metrics:
+        # secondary_log_shipping_metrics: {}
 
-            ## @param enabled - boolean - optional - default: false
-            ## Enable collection of secondary log shipping metrics.
-            #
-            # enabled: false
-
-        ## Additional Task and Scheduler metrics.
+        ## @param server_state_metrics - mapping - optional
+        ## Configure collection of server state metrics
         #
-        # task_scheduler_metrics:
+        # server_state_metrics: {}
 
-            ## @param enabled - boolean - optional - default: false
-            ## Enable collection of Task and Scheduler metrics.
-            #
-            # enabled: false
-
-        ## tempdb file space usage metrics for how space is used in tempdb data files.
+        ## @param task_scheduler_metrics - mapping - optional
+        ## Configure collection of additional Task and Scheduler metrics.
         #
-        # tempdb_file_space_usage_metrics:
+        # task_scheduler_metrics: {}
 
-            ## @param enabled - boolean - optional - default: true
-            ## Enable collection of tempdb file space usage metrics.
-            #
-            # enabled: true
-
-        ## Extended events (XE) metrics. 
+        ## @param tempdb_file_space_usage_metrics - mapping - optional
+        ## Configure collection of tempdb file space usage metrics for how space is used in tempdb data files.
         #
-        # xe_metrics:
+        # tempdb_file_space_usage_metrics: {}
 
-            ## @param enabled - boolean - optional - default: false
-            ## Enable collection of extended events (XE) metrics. The collection of XE metrics is automatically enabled
-            ## when `deadlocks_collection` is enabled.
-            #
-            # enabled: false
-
-        ## Database backup metrics.
+        ## @param xe_metrics - mapping - optional
+        ## Configure collection of extended events (XE) metrics. 
         #
-        # db_backup_metrics:
-
-            ## @param enabled - boolean - optional - default: true
-            ## Enable collection of database backup metrics
-            #
-            # enabled: true
-
-            ## @param collection_interval - integer - optional - default: 300
-            ## Set the interval (in seconds) for the collection of database backup metrics.
-            ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
-            ## to use a consistent value throughout all SQL Server agent deployments.
-            #
-            # collection_interval: 300
-
-        ## Database files metrics.
-        #
-        # db_files_metrics:
-
-            ## @param enabled - boolean - optional - default: true
-            ## Enable collection of database files metrics
-            #
-            # enabled: true
-
-        ## Database stats metrics
-        #
-        # db_stats_metrics:
-
-            ## @param enabled - boolean - optional - default: true
-            ## Enable collection of database stats metrics
-            #
-            # enabled: true
-
-        ## File stats metrics
-        #
-        # file_stats_metrics:
-
-            ## @param enabled - boolean - optional - default: true
-            ## Enable collection of file stats metrics
-            #
-            # enabled: true
-
-        ## Server state metrics
-        #
-        # server_state_metrics:
-
-            ## @param enabled - boolean - optional - default: true
-            ## Enable collection of server state metrics
-            #
-            # enabled: true
+        # xe_metrics: {}
 
     ## Configure collection of agent jobs events and metrics
     #
