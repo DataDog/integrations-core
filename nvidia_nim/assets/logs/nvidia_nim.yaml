@@ -1,5 +1,5 @@
 id: nvidia_nim
-metric_id: nvidia_nim
+metric_id: nvidia-nim
 backend_only: false
 facets:
 pipeline:
