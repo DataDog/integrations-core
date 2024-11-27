@@ -83,16 +83,13 @@ def e2e_instance(dd_get_state):
 @pytest.fixture(scope='session')
 def dd_environment(e2e_instance, dd_save_state):
     with TempDir('vault-jwt') as jwt_dir, TempDir('vault-sink') as sink_dir:
-        print(f"sinkdir:{sink_dir}")
         token_file = os.path.join(sink_dir, 'token')
 
-        if not os.path.exists(token_file):
-            print(f"creating token file:{token_file}")
-            os.chmod(sink_dir, 0o777)
-            create_file(token_file)
-            os.chmod(token_file, 0o777)
-
+        os.chmod(sink_dir, 0o777)
+        create_file(token_file)
+        os.chmod(token_file, 0o777)
         dd_save_state('client_token_path', token_file)
+
         with docker_run(
             COMPOSE_FILE,
             env_vars={
