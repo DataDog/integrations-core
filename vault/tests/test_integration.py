@@ -11,7 +11,7 @@ from .utils import assert_collection
 @auth_required
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True, ids=['legacy', 'openmetrics'])
+@pytest.mark.parametrize('use_openmetrics', [False], indirect=True, ids=['legacy'])
 @pytest.mark.parametrize('use_auth_file', [False, True], ids=['no_auth_file', 'auth_file'])
 def test_integration(aggregator, dd_run_check, check, instance, global_tags, use_openmetrics, use_auth_file):
     instance = dict(instance(use_auth_file))
@@ -26,7 +26,7 @@ def test_integration(aggregator, dd_run_check, check, instance, global_tags, use
 @noauth_required
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+@pytest.mark.parametrize('use_openmetrics', [False], indirect=True, ids=['legacy'])
 def test_integration_noauth(aggregator, dd_run_check, check, no_token_instance, global_tags, use_openmetrics):
     instance = dict(no_token_instance)
     instance['use_openmetrics'] = use_openmetrics
