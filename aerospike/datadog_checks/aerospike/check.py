@@ -15,12 +15,14 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
-    # enabling histogram to be treated as distribution
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
+            
+             # enabling histogram to be treated as distribution
             'collect_histogram_buckets': 'true',
             'histogram_buckets_as_distributions': 'true',
             'collect_counters_with_distributions': 'true',
-            'rename_labels': {'cluster_name': 'aerospike_cluster', 'service': 'aerospike_service'},
+            
+            'rename_labels': { 'service': 'aerospike_service'},
         }
