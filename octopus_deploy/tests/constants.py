@@ -37,6 +37,21 @@ ALL_METRICS = [
     "octopus_deploy.server_node.max_concurrent_tasks",
 ]
 
+E2E_METRICS = [
+    "octopus_deploy.space.count",
+    "octopus_deploy.project_group.count",
+    "octopus_deploy.project.count",
+    "octopus_deploy.deployment.count",
+    "octopus_deploy.deployment.queued_time",
+    "octopus_deploy.deployment.executing_time",
+    "octopus_deploy.deployment.completed_time",
+    "octopus_deploy.server_node.count",
+    "octopus_deploy.server_node.in_maintenance_mode",
+    "octopus_deploy.server_node.max_concurrent_tasks",
+]
+
+ALL_METRICS = ["octopus_deploy.deployment.completed_time"] + E2E_METRICS
+
 ALL_DEPLOYMENT_LOGS = [
     {
         'ddtags': 'space_name:Default,project_name:test,task_id:ServerTasks-1847,'
