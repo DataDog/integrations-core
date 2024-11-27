@@ -212,7 +212,7 @@ def test_local_dir_download(capfd, local_dir, distribution_name, distribution_ve
 @pytest.mark.parametrize(
     "distribution_name,distribution_version",
     [
-        ("datadog-active-directory", "1.10.0"),
+        ("datadog-active-directory", "4.0.0"),
     ],
 )
 def test_local_expired_metadata_error(distribution_name, distribution_version):
@@ -250,7 +250,7 @@ def test_local_unreachable_repository():
 @pytest.mark.parametrize(
     "distribution_name,distribution_version",
     [
-        ("datadog-active-directory", "1.10.0"),
+        ("datadog-active-directory", "4.0.0"),
     ],
 )
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
@@ -287,12 +287,12 @@ def test_local_wheels_signer_signature_leaf_error(distribution_name, distributio
 @freeze_time(_LOCAL_TESTS_DATA_TIMESTAMP)
 def test_local_tampered_target_triggers_failure():
     distribution_name = "datadog-active-directory"
-    distribution_version = "1.10.0"
+    distribution_version = "4.0.0"
 
     def tamper(repo_dir):
         """Modify the target that we want to download."""
         files_to_change = (repo_dir / 'targets' / 'simple' / 'datadog-active-directory').glob(
-            '*.datadog_active_directory-1.10.0-*.whl'
+            '*.datadog_active_directory-4.0.0-*.whl'
         )
 
         for path in files_to_change:
@@ -319,7 +319,7 @@ def test_local_tampered_target_triggers_failure():
 def test_local_download_non_existing_package():
     """Test local verification of a wheel file."""
 
-    with local_http_server("datadog-active-directory-1.10.0".format()) as http_url:
+    with local_http_server("datadog-active-directory-4.0.0".format()) as http_url:
         argv = [
             "datadog-a-nonexisting",
             "--version",
