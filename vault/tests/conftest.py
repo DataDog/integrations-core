@@ -15,7 +15,7 @@ from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
-from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, VAULT_VERSION, get_vault_server_config_file
+from .common import COMPOSE_FILE, HEALTH_ENDPOINT, METRICS_GENERATION_ENDPOINT, INSTANCES, VAULT_VERSION, get_vault_server_config_file
 
 
 @pytest.fixture
@@ -160,6 +160,9 @@ class WaitAndUnsealVault(WaitFor):
         ):
             time.sleep(2)
             run_command('docker exec vault-leader vault {}'.format(command), capture=True, check=True)
+
+        # ping endpoint to generate metrics
+        requests.get(METRICS_GENERATION_ENDPOINT, timeout=1)
 
 
 def api_working(api_endpoint):
