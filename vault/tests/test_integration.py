@@ -12,9 +12,21 @@ from .utils import assert_collection
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True, ids=['legacy', 'openmetrics'])
-@pytest.mark.parametrize('use_auth_file', [False, True], ids=['no_auth_file', 'auth_file'])
-def test_integration(aggregator, dd_run_check, check, instance, global_tags, use_openmetrics, use_auth_file):
-    instance = dict(instance(use_auth_file))
+def test_integration(aggregator, dd_run_check, check, instance, global_tags, use_openmetrics):
+    instance = dict(instance(False))
+    instance['use_openmetrics'] = use_openmetrics
+
+    check = check(instance)
+    dd_run_check(check)
+
+    assert_collection(aggregator, global_tags, use_openmetrics)
+
+@auth_required
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+@pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True, ids=['legacy', 'openmetrics'])
+def test_integration_auth_file(aggregator, dd_run_check, check, instance, global_tags, use_openmetrics):
+    instance = dict(instance(True))
     instance['use_openmetrics'] = use_openmetrics
 
     check = check(instance)
