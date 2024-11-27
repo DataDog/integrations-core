@@ -265,13 +265,27 @@
                             "title": "Requests Waiting",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "request"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -305,7 +319,6 @@
                             "title": "Requests Waiting",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -370,13 +383,27 @@
                             "title": "Requests Failed",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "request"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -514,7 +541,6 @@
                             "title": "Requests Running",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -550,10 +576,18 @@
                     {
                         "id": 2448557456884510,
                         "definition": {
-                            "title": "K/V Cache Utilization",
+                            "title": "GPU Cache Utilization",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -705,13 +739,18 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 / query2"
+                                            "formula": "query1 / query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -759,7 +798,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -818,13 +856,18 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 / query2"
+                                            "formula": "query1 / query2",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
@@ -861,7 +904,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 0,
                 "width": 12,
                 "height": 10,
                 "is_column_break": true
@@ -998,7 +1041,7 @@
                             "title": "Uncollectable Objects",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "show_legend": false,
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1047,7 +1090,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1131,7 +1173,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 30,
+                "y": 10,
                 "width": 12,
                 "height": 8
             }
