@@ -15,14 +15,7 @@ from datadog_checks.dev.fs import create_file
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.vault import Vault
 
-from .common import (
-    COMPOSE_FILE,
-    HEALTH_ENDPOINT,
-    INSTANCES,
-    METRICS_GENERATION_ENDPOINT,
-    VAULT_VERSION,
-    get_vault_server_config_file,
-)
+from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, VAULT_VERSION, get_vault_server_config_file
 
 
 @pytest.fixture
@@ -71,7 +64,7 @@ def e2e_instance(dd_get_state):
         inst = INSTANCES['main'].copy()
 
         if use_auth_file:
-            inst['client_token_path'] = dd_get_state('client_token_path')
+            inst['client_token_path'] = '/home/vault-sink/token'
         else:
             with open(dd_get_state('client_token_path'), 'r') as auth_file:
                 inst['client_token'] = auth_file.read()
@@ -85,10 +78,10 @@ def dd_environment(e2e_instance, dd_save_state):
     with TempDir('vault-jwt') as jwt_dir, TempDir('vault-sink') as sink_dir:
         token_file = os.path.join(sink_dir, 'token')
 
-        os.chmod(sink_dir, 0o777)
-        create_file(token_file)
-        os.chmod(token_file, 0o777)
-        dd_save_state('client_token_path', token_file)
+        if not os.path.exists(token_file):
+            os.chmod(sink_dir, 0o777)
+            create_file(token_file)
+            os.chmod(token_file, 0o777)
 
         with docker_run(
             COMPOSE_FILE,
@@ -102,7 +95,9 @@ def dd_environment(e2e_instance, dd_save_state):
             sleep=10,
             mount_logs=True,
         ):
-            yield e2e_instance(), {'docker_volumes': ['{}:/home/sink'.format(sink_dir)]}
+            dd_save_state('client_token_path', token_file)
+
+            yield e2e_instance(), {'docker_volumes': ['{}:/home/vault-sink'.format(sink_dir)]}
 
 
 class ApplyPermissions(LazyFunction):
@@ -165,10 +160,6 @@ class WaitAndUnsealVault(WaitFor):
         ):
             time.sleep(2)
             run_command('docker exec vault-leader vault {}'.format(command), capture=True, check=True)
-
-        # ping endpoint to generate metrics
-        requests.get(METRICS_GENERATION_ENDPOINT, timeout=1)
-        time.sleep(2)
 
 
 def api_working(api_endpoint):
