@@ -21,6 +21,7 @@ def test_integration(aggregator, dd_run_check, check, instance, global_tags, use
 
     assert_collection(aggregator, global_tags, use_openmetrics)
 
+
 @auth_required
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
