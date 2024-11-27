@@ -1,0 +1,216 @@
+{
+    "Task": {
+        "Id": "ServerTasks-1847",
+        "SpaceId": "Spaces-1",
+        "Name": "Deploy",
+        "Description": "Deploy test release 0.0.2 to Development",
+        "Arguments": {
+            "DeploymentId": "Deployments-19"
+        },
+        "State": "Failed",
+        "Completed": "Monday, 23 September 2024 3:10:03 PM +00:00",
+        "QueueTime": "2024-09-23T14:42:30.123+00:00",
+        "QueueTimeExpiry": null,
+        "StartTime": "2024-09-23T14:44:20.123+00:00",
+        "LastUpdatedTime": "2024-09-23T15:10:03.262+00:00",
+        "CompletedTime": "2024-09-23T14:45:10.123+00:00",
+        "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+        "Duration": "6 seconds",
+        "ErrorMessage": "The deployment failed because one or more steps failed. Please see the deployment log for details.",
+        "HasBeenPickedUpByProcessor": true,
+        "IsCompleted": true,
+        "FinishedSuccessfully": false,
+        "HasPendingInterruptions": false,
+        "CanRerun": false,
+        "HasWarningsOrErrors": true,
+        "UnmetPreconditions": null,
+        "ProjectId": "Projects-3",
+        "Links": {
+            "Self": "/api/tasks/ServerTasks-1847",
+            "Web": "/app#/Spaces-1/tasks/ServerTasks-1847",
+            "Raw": "/api/tasks/ServerTasks-1847/raw",
+            "Rerun": "/api/tasks/rerun/ServerTasks-1847",
+            "Cancel": "/api/tasks/ServerTasks-1847/cancel",
+            "State": "/api/tasks/ServerTasks-1847/state",
+            "BlockedBy": "/api/tasks/ServerTasks-1847/blockedby",
+            "QueuedBehind": "/api/tasks/ServerTasks-1847/queued-behind{?skip,take}",
+            "Details": "/api/tasks/ServerTasks-1847/details{?verbose,tail,ranges}",
+            "StatusMessages": "/api/tasks/ServerTasks-1847/status/messages",
+            "Prioritize": "/api/tasks/ServerTasks-1847/prioritize",
+            "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-1847",
+            "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-1847"
+        }
+    },
+    "ActivityLogs": [
+        {
+            "Id": "ServerTasks-1847_093204AA234",
+            "Name": "Deploy test release 0.0.2 to Development",
+            "Started": "2024-09-23T15:09:57.023+00:00",
+            "Ended": "2024-09-23T15:10:03.218+00:00",
+            "Status": "Failed",
+            "ShowAtSummaryLevel": true,
+            "Children": [
+                {
+                    "Id": "ServerTasks-1847_093204AA234/bbasd091232ee32398yfa12321",
+                    "Name": "Step 1: run hello",
+                    "Started": "2024-09-23T15:09:57.776+00:00",
+                    "Ended": "2024-09-23T15:09:58.564+00:00",
+                    "Status": "Success",
+                    "ShowAtSummaryLevel": true,
+                    "Children": [
+                        {
+                            "Id": "ServerTasks-1847_093204AA234/bbasd091232ee32398yfa12321/1532abbe1231cc0998ae121",
+                            "Name": "Octopus Server",
+                            "Started": "2024-09-23T15:09:57.776+00:00",
+                            "Ended": "2024-09-23T15:09:58.564+00:00",
+                            "Status": "Success",
+                            "ShowAtSummaryLevel": true,
+                            "Children": [],
+                            "LogElements": [
+                                {
+                                    "OccurredAt": "2024-09-23T15:09:58.525+00:00",
+                                    "Category": "Info",
+                                    "MessageText": "hello",
+                                    "Number": 44
+                                }
+                            ]
+                        }
+                    ],
+                    "LogElements": []
+                },
+                {
+                    "Id": "ServerTasks-1847_093204AA234/0932432a12bc2198ab12321",
+                    "Name": "Step 2: Run a Script",
+                    "Started": "2024-09-23T15:09:58.823+00:00",
+                    "Ended": "2024-09-23T15:10:02.814+00:00",
+                    "Status": "Failed",
+                    "ShowAtSummaryLevel": true,
+                    "Children": [
+                        {
+                            "Id": "ServerTasks-1847_093204AA234/0932432a12bc2198ab12321/ab1231ebf3242342f23423",
+                            "Name": "Octopus Server",
+                            "Started": "2024-09-23T15:09:58.823+00:00",
+                            "Ended": "2024-09-23T15:10:02.758+00:00",
+                            "Status": "Failed",
+                            "ShowAtSummaryLevel": true,
+                            "Children": [],
+                            "LogElements": [
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.599+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "ParserError: At /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/Script.ps1:1 char:6",
+                                    "Number": 56
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.599+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "+ echo \"stop",
+                                    "Number": 57
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.599+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "+      ~~~~~",
+                                    "Number": 58
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.599+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "The string is missing the terminator: \".",
+                                    "Number": 59
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.605+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "At /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/Script.ps1:1 char:6",
+                                    "Number": 60
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.605+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "+ echo \"stop",
+                                    "Number": 61
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.605+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "+      ~~~~~",
+                                    "Number": 62
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.606+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "at <ScriptBlock>, <No file>: line 1",
+                                    "Number": 63
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.606+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/Octopus.FunctionAppenderContext.ps1: line 258",
+                                    "Number": 64
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.607+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "at <ScriptBlock>, /home/octopus/.octopus/OctopusServer/Server/Work/09234928998123-1847-68/Bootstrap.Octopus.FunctionAppenderContext.ps1: line 1505",
+                                    "Number": 65
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.607+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "at <ScriptBlock>, <No file>: line 1",
+                                    "Number": 66
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.607+00:00",
+                                    "Category": "Error",
+                                    "MessageText": "at <ScriptBlock>, <No file>: line 1",
+                                    "Number": 67
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.733+00:00",
+                                    "Category": "Fatal",
+                                    "MessageText": "The remote script failed with exit code 1",
+                                    "Number": 73
+                                },
+                                {
+                                    "OccurredAt": "2024-09-23T15:10:02.758+00:00",
+                                    "Category": "Fatal",
+                                    "MessageText": "The action Run a Script on the Octopus Server failed",
+                                    "Number": 74
+                                }
+                            ]
+                        }
+                    ],
+                    "LogElements": [
+                        {
+                            "OccurredAt": "2024-09-23T15:10:02.767+00:00",
+                            "Category": "Fatal",
+                            "MessageText": "The step failed: Activity Run a Script on the Octopus Server failed with error 'The remote script failed with exit code 1'.",
+                            "Number": 1
+                        }
+                    ]
+                }
+            ],
+            "LogElements": [
+                {
+                    "OccurredAt": "2024-09-23T15:10:03.218+00:00",
+                    "Category": "Fatal",
+                    "MessageText": "The deployment failed because one or more steps failed. Please see the deployment log for details.",
+                    "Number": 3
+                }
+            ]
+        }
+    ],
+    "PhysicalLogSize": 28609,
+    "Progress": {
+        "ProgressPercentage": 0,
+        "EstimatedTimeRemaining": null
+    },
+    "Links": {
+        "Self": "/api/tasks/ServerTasks-1847/details",
+        "Task": "/api/tasks/ServerTasks-1847",
+        "Web": "/app#/Spaces-1/tasks/ServerTasks-1847",
+        "Raw": "/api/tasks/ServerTasks-1847/raw"
+    }
+}

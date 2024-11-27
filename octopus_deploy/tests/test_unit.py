@@ -13,7 +13,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .constants import ALL_METRICS
+from .constants import ALL_DEPLOYMENT_LOGS, ALL_METRICS, ONLY_TEST_LOGS
 
 MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
 MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=15)
@@ -68,7 +68,8 @@ def test_all_metrics_covered(
     instance = {'octopus_endpoint': 'http://localhost:80'}
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
-
+    dd_run_check(check)
+    get_current_datetime.return_value = MOCKED_TIME2
     dd_run_check(check)
 
     aggregator.assert_metric('octopus_deploy.api.can_connect', 1)
@@ -869,3 +870,39 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
     )
+
+
+@pytest.mark.parametrize(
+    ('logs_enabled, project_groups, expected_logs'),
+    [
+        pytest.param(True, None, ALL_DEPLOYMENT_LOGS, id='logs enabled'),
+        pytest.param(False, None, [], id='logs disabled'),
+        pytest.param(
+            True,
+            {'include': [{'.*': {'projects': {'include': [r'^test$']}}}]},
+            ONLY_TEST_LOGS,
+            id='logs enabled only test',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_deployment_logs(
+    get_current_datetime,
+    datadog_agent,
+    dd_run_check,
+    instance,
+    logs_enabled,
+    project_groups,
+    expected_logs,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['project_groups'] = project_groups
+    datadog_agent._config['logs_enabled'] = logs_enabled
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    get_current_datetime.return_value = MOCKED_TIME2
+    dd_run_check(check)
+    datadog_agent.assert_logs(check.check_id, expected_logs)
