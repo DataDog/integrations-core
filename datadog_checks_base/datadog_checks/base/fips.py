@@ -11,12 +11,12 @@ class FIPSSwitch():
 
     def enable(self, path_to_embedded: str = None):
         self._set_openssl_env_vars(path_to_embedded)
-        self._enable_openssl_fips(path_to_embedded)
-        self._enable_cryptography_fips(path_to_embedded)
+        # self._enable_openssl_fips(path_to_embedded)
+        # self._enable_cryptography_fips(path_to_embedded)
 
     def disable(self):
         self._clear_openssl_env_vars()
-        self._disable_openssl_fips()
+        # self._disable_openssl_fips()
 
     def _set_openssl_env_vars(self, path_to_embedded: str = None):
         if not (os.getenv("OPENSSL_CONF") and os.getenv("OPENSSL_MODULES")):
