@@ -165,6 +165,7 @@ datadog-snmp==9.0.0
 datadog-snowflake==7.0.0
 datadog-solr==2.1.0
 datadog-sonarqube==5.0.0
+datadog-sonicwall-firewall==1.0.0
 datadog-spark==6.1.0
 datadog-sqlserver==20.1.1
 datadog-squid==4.0.0
