@@ -57,7 +57,7 @@ def non_fips_server():
 @pytest.fixture(scope="function", autouse=True)
 def clean_environment():
     yield
-    os.environ["GOFIPS"]="0"
+    os.environ["GOFIPS"] = "0"
     AgentCheck().fips.disable()
 
 

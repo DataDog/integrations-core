@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import sys
-import os
 import logging
+import os
+import sys
 
 
-class FIPSSwitch():
+class FIPSSwitch:
 
     def enable(self, path_to_embedded: str = None):
         self._set_openssl_env_vars(path_to_embedded)
@@ -85,4 +85,3 @@ class FIPSSwitch():
             raise RuntimeError("Failed to disable FIPS mode in OpenSSL")
         else:
             logging.info("OpenSSL FIPS mode disabled successfully.")
-
