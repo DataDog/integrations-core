@@ -54,10 +54,11 @@ def non_fips_server():
         yield
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="function", autouse=True)
 def clean_environment():
-    AgentCheck().disable_openssl_fips()
     yield
+    os.environ["GOFIPS"]="0"
+    AgentCheck().fips.disable()
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
@@ -70,7 +71,7 @@ def test_md5_before_fips():
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
-def test_md5_after_fips(clean_environment):
+def test_md5_after_fips():
     import ssl
 
     AgentCheck().enable_openssl_fips(path_to_embedded=EMBEDDED)
@@ -87,7 +88,7 @@ def test_cryptography_md5_cryptography():
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
-def test_cryptography_md5_fips(clan_environment):
+def test_cryptography_md5_fips():
     from cryptography.exceptions import InternalError
     from cryptography.hazmat.primitives import hashes
 
@@ -110,7 +111,7 @@ def test_connection_before_fips():
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
-def test_connection_after_fips(clean_environment):
+def test_connection_after_fips():
     """
     Test connection to the non-FIPS server after enabling FIPS mode.
     """
