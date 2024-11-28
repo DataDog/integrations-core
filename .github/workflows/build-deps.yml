@@ -196,7 +196,7 @@ jobs:
 
   build-macos:
     name: Target macOS
-    runs-on: macos-12
+    runs-on: macos-13
 
     env:
       TARGET_NAME: macos-x86_64
