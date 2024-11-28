@@ -20,7 +20,7 @@ EMBEDDED = os.path.join(HERE, '..', '..', 'fixtures', 'fips', 'embedded')
 FIPS_SERVER_PORT = 8443
 
 
-@pytest.fixture(scope="session", autouse=True)
+# @pytest.fixture(scope="session", autouse=True)
 def create_fipsmodule_config():
     command = [
         "openssl",

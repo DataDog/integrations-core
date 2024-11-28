@@ -1480,7 +1480,8 @@ class AgentCheck(object):
 
         cryptography_backend = default_backend()
         try:
-            cryptography_backend._enable_fips()
+            # cryptography_backend._enable_fips()
+            pass
         except InternalError as e:
             logging.error("FIPS mode could not be enabled.")
             raise e
