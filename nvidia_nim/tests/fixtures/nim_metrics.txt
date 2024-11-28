@@ -1,0 +1,159 @@
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 12502.0
+python_gc_objects_collected_total{generation="1"} 5884.0
+python_gc_objects_collected_total{generation="2"} 1228.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections_total Number of times this generation was collected
+# TYPE python_gc_collections_total counter
+python_gc_collections_total{generation="0"} 2991.0
+python_gc_collections_total{generation="1"} 271.0
+python_gc_collections_total{generation="2"} 13.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="10",patchlevel="12",version="3.10.12"} 1.0
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.15891634176e+011
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 1.0463768576e+010
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.7303128549e+09
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 44.87
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 159.0
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP num_requests_running Number of requests currently running on GPU.
+# TYPE num_requests_running gauge
+num_requests_running{model_name="meta/llama-3.1-8b-instruct"} 1.0
+# HELP num_requests_waiting Number of requests waiting to be processed.
+# TYPE num_requests_waiting gauge
+num_requests_waiting{model_name="meta/llama-3.1-8b-instruct"} 0.0
+# HELP num_request_max Max number of concurrently running requests.
+# TYPE num_request_max gauge
+num_request_max{model_name="meta/llama-3.1-8b-instruct"} 64.0
+# HELP gpu_cache_usage_perc GPU KV-cache usage. 1 means 100 percent usage.
+# TYPE gpu_cache_usage_perc gauge
+gpu_cache_usage_perc{model_name="meta/llama-3.1-8b-instruct"} 0.0002848191398461977
+# HELP prompt_tokens_total Number of prefill tokens processed.
+# TYPE prompt_tokens_total counter
+prompt_tokens_total{model_name="meta/llama-3.1-8b-instruct"} 109.0
+# HELP generation_tokens_total Number of generation tokens processed.
+# TYPE generation_tokens_total counter
+generation_tokens_total{model_name="meta/llama-3.1-8b-instruct"} 174.0
+# HELP time_to_first_token_seconds Histogram of time to first token in seconds.
+# TYPE time_to_first_token_seconds histogram
+time_to_first_token_seconds_bucket{le="0.001",model_name="meta/llama-3.1-8b-instruct"} 0.0
+time_to_first_token_seconds_bucket{le="0.005",model_name="meta/llama-3.1-8b-instruct"} 0.0
+time_to_first_token_seconds_bucket{le="0.01",model_name="meta/llama-3.1-8b-instruct"} 0.0
+time_to_first_token_seconds_bucket{le="0.02",model_name="meta/llama-3.1-8b-instruct"} 2.0
+time_to_first_token_seconds_bucket{le="0.04",model_name="meta/llama-3.1-8b-instruct"} 4.0
+time_to_first_token_seconds_bucket{le="0.06",model_name="meta/llama-3.1-8b-instruct"} 4.0
+time_to_first_token_seconds_bucket{le="0.08",model_name="meta/llama-3.1-8b-instruct"} 4.0
+time_to_first_token_seconds_bucket{le="0.1",model_name="meta/llama-3.1-8b-instruct"} 4.0
+time_to_first_token_seconds_bucket{le="0.25",model_name="meta/llama-3.1-8b-instruct"} 4.0
+time_to_first_token_seconds_bucket{le="0.5",model_name="meta/llama-3.1-8b-instruct"} 4.0
+time_to_first_token_seconds_bucket{le="0.75",model_name="meta/llama-3.1-8b-instruct"} 5.0
+time_to_first_token_seconds_bucket{le="1.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+time_to_first_token_seconds_bucket{le="2.5",model_name="meta/llama-3.1-8b-instruct"} 5.0
+time_to_first_token_seconds_bucket{le="5.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+time_to_first_token_seconds_bucket{le="7.5",model_name="meta/llama-3.1-8b-instruct"} 5.0
+time_to_first_token_seconds_bucket{le="10.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+time_to_first_token_seconds_bucket{le="+Inf",model_name="meta/llama-3.1-8b-instruct"} 5.0
+time_to_first_token_seconds_count{model_name="meta/llama-3.1-8b-instruct"} 5.0
+time_to_first_token_seconds_sum{model_name="meta/llama-3.1-8b-instruct"} 0.6119842529296875
+# HELP time_per_output_token_seconds Histogram of time per output token in seconds.
+# TYPE time_per_output_token_seconds histogram
+time_per_output_token_seconds_bucket{le="0.01",model_name="meta/llama-3.1-8b-instruct"} 0.0
+time_per_output_token_seconds_bucket{le="0.025",model_name="meta/llama-3.1-8b-instruct"} 168.0
+time_per_output_token_seconds_bucket{le="0.05",model_name="meta/llama-3.1-8b-instruct"} 168.0
+time_per_output_token_seconds_bucket{le="0.075",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="0.1",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="0.15",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="0.2",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="0.3",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="0.4",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="0.5",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="0.75",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="1.0",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="2.5",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_bucket{le="+Inf",model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_count{model_name="meta/llama-3.1-8b-instruct"} 169.0
+time_per_output_token_seconds_sum{model_name="meta/llama-3.1-8b-instruct"} 1.856855869293213
+# HELP e2e_request_latency_seconds Histogram of end to end request latency in seconds.
+# TYPE e2e_request_latency_seconds histogram
+e2e_request_latency_seconds_bucket{le="1.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="2.5",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="5.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="10.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="15.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="20.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="30.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="40.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="50.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="60.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_bucket{le="+Inf",model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_count{model_name="meta/llama-3.1-8b-instruct"} 5.0
+e2e_request_latency_seconds_sum{model_name="meta/llama-3.1-8b-instruct"} 2.4688401222229004
+# HELP request_prompt_tokens Number of prefill tokens processed.
+# TYPE request_prompt_tokens histogram
+request_prompt_tokens_bucket{le="1.0",model_name="meta/llama-3.1-8b-instruct"} 0.0
+request_prompt_tokens_bucket{le="2.0",model_name="meta/llama-3.1-8b-instruct"} 0.0
+request_prompt_tokens_bucket{le="5.0",model_name="meta/llama-3.1-8b-instruct"} 3.0
+request_prompt_tokens_bucket{le="10.0",model_name="meta/llama-3.1-8b-instruct"} 3.0
+request_prompt_tokens_bucket{le="20.0",model_name="meta/llama-3.1-8b-instruct"} 3.0
+request_prompt_tokens_bucket{le="50.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="100.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="200.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="500.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="1000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="2000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="5000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="10000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="20000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="50000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="100000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_bucket{le="+Inf",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_count{model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_prompt_tokens_sum{model_name="meta/llama-3.1-8b-instruct"} 109.0
+# HELP request_generation_tokens Number of generation tokens processed.
+# TYPE request_generation_tokens histogram
+request_generation_tokens_bucket{le="1.0",model_name="meta/llama-3.1-8b-instruct"} 0.0
+request_generation_tokens_bucket{le="2.0",model_name="meta/llama-3.1-8b-instruct"} 0.0
+request_generation_tokens_bucket{le="5.0",model_name="meta/llama-3.1-8b-instruct"} 0.0
+request_generation_tokens_bucket{le="10.0",model_name="meta/llama-3.1-8b-instruct"} 0.0
+request_generation_tokens_bucket{le="20.0",model_name="meta/llama-3.1-8b-instruct"} 3.0
+request_generation_tokens_bucket{le="50.0",model_name="meta/llama-3.1-8b-instruct"} 3.0
+request_generation_tokens_bucket{le="100.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="200.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="500.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="1000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="2000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="5000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="10000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="20000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="50000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="100000.0",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_bucket{le="+Inf",model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_count{model_name="meta/llama-3.1-8b-instruct"} 5.0
+request_generation_tokens_sum{model_name="meta/llama-3.1-8b-instruct"} 174.0
+# HELP request_finish_total Count of finished requests, differentiated by finish reason as label.
+# TYPE request_finish_total counter
+request_finish_total{finished_reason="length",model_name="meta/llama-3.1-8b-instruct"} 5.0
+# HELP request_success_total Count of successful requests.
+# TYPE request_success_total counter
+request_success_total{model_name="meta/llama-3.1-8b-instruct"} 5.0
+# HELP request_failure_total Count of failed requests.
+# TYPE request_failure_total counter
+request_failure_total{model_name="meta/llama-3.1-8b-instruct"} 0.0
