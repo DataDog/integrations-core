@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 22.3.0 / 2024-11-28
+
+***Added***:
+
+* Submit database_hostname with database instance and metrics for MySQL, Postgres, and SQLServer ([#18969](https://github.com/DataDog/integrations-core/pull/18969))
+* Track logical replication slot catalog_xmin age ([#19083](https://github.com/DataDog/integrations-core/pull/19083))
+
+***Fixed***:
+
+* Add alloydbadmin & alloydbmetadata to default list of databases to exclude from autodiscovery and databases to ignore to prevent failures on GCP AlloyDB for PostgreSQL. ([#19061](https://github.com/DataDog/integrations-core/pull/19061))
+
 ## 22.2.0 / 2024-11-06
 
 ***Added***:
