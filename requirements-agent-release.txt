@@ -127,6 +127,7 @@ datadog-network==5.1.0
 datadog-nfsstat==3.0.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==4.0.0
 datadog-nginx==8.0.0
+datadog-nvidia-nim==1.0.0
 datadog-nvidia-triton==2.1.0
 datadog-openldap==3.0.0
 datadog-openmetrics==6.0.0
@@ -164,6 +165,7 @@ datadog-snmp==9.0.0
 datadog-snowflake==7.0.0
 datadog-solr==2.1.0
 datadog-sonarqube==5.0.0
+datadog-sonicwall-firewall==1.0.0
 datadog-spark==6.1.0
 datadog-sqlserver==20.1.1
 datadog-squid==4.0.0
@@ -172,6 +174,7 @@ datadog-statsd==3.0.0
 datadog-strimzi==3.1.0
 datadog-supervisord==4.0.0
 datadog-suricata==2.0.0
+datadog-symantec-endpoint-protection==1.0.0
 datadog-system-core==4.0.0
 datadog-system-swap==3.0.0
 datadog-tcp-check==6.0.0
@@ -196,6 +199,7 @@ datadog-vertica==6.0.0
 datadog-vllm==2.1.0
 datadog-voltdb==5.0.0
 datadog-vsphere==8.1.0
+datadog-wazuh==1.0.0
 datadog-weaviate==3.1.0
 datadog-weblogic==3.0.0
 datadog-win32-event-log==5.0.0; sys_platform == 'win32'
