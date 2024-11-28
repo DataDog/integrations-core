@@ -92,8 +92,11 @@ defaults:
 
 jobs:
   run:
-    name: "${{ inputs.job-name }}"
+    strategy:
+      matrix:
+        test_type: ['unit', 'e2e']
     runs-on: ${{ fromJson(inputs.runner) }}
+    name: "${{ inputs.job-name }} - ${{ matrix.test_type }}"
 
     env:
       FORCE_COLOR: "1"
@@ -121,8 +124,8 @@ jobs:
         # We want to replace leading dots as they will make directories hidden, which will cause them to be ignored by upload-artifact and EnricoMi/publish-unit-test-result-action
         JOB_NAME=$(echo "${{ inputs.job-name }}" | sed 's/^\./Dot/')
 
-        echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
-        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+        echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME/${{ matrix.test_type }}" >> $GITHUB_ENV
+        echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME/${{ matrix.test_type }}" >> $GITHUB_ENV
 
     - name: Set up Windows
       if: runner.os == 'Windows'
@@ -215,11 +218,11 @@ jobs:
       env:
         PYTHONUNBUFFERED: "1"
       run: |-
-        mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
+        mkdir -p "${{ env.TRACE_CAPTURE_BASE_DIR }}"
         python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
     - name: Run Unit & Integration tests
-      if: inputs.standard && !inputs.minimum-base-package
+      if: matrix.test_type == 'unit' && !inputs.minimum-base-package
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
@@ -239,7 +242,7 @@ jobs:
         fi
 
     - name: Run Unit & Integration tests with minimum version of base package
-      if: inputs.standard && inputs.minimum-base-package
+      if: matrix.test_type == 'unit' && inputs.minimum-base-package
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
@@ -257,7 +260,7 @@ jobs:
         fi
 
     - name: Run E2E tests with latest base package
-      if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
+      if: matrix.test_type == 'e2e' && inputs.repo == 'core' && !inputs.minimum-base-package
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -295,7 +298,7 @@ jobs:
         fi
 
     - name: Run E2E tests
-      if: inputs.standard && inputs.repo != 'core'
+      if: matrix.test_type == 'e2e' && inputs.repo != 'core'
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -387,7 +390,7 @@ jobs:
       if: inputs.repo == 'core' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ inputs.traces-artifact-name }}-${{ inputs.target }}-${{ inputs.platform }}"
+        name: "${{ inputs.traces-artifact-name }}-${{ inputs.target }}-${{ inputs.platform }}-${{ matrix.test_type }}"
         path: "${{ env.TRACE_CAPTURE_FILE }}"
 
     - name: Finalize test results
@@ -402,7 +405,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: "test-results-${{ inputs.target }}-${{ inputs.platform }}"
+        name: "test-results-${{ inputs.target }}-${{ inputs.platform }}-${{ matrix.test_type }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
