@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.1.1 / 2024-11-28
+
+***Fixed***:
+
+* When resolving database hosts, always resolve a .local database host to itself ([#19039](https://github.com/DataDog/integrations-core/pull/19039))
+
 ## 37.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Added***:
