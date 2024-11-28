@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 8.3.0 / 2024-11-28
+
+***Added***:
+
+* Add `metrics_collection_interval` config option to customize the collection interval for collection stats, index stats, and sharded data distribution metrics.
+  The default collection interval for collection stats and index stats remains unchanged at check min collection interval of 15 seconds.
+  The default collection interval for sharded data distribution metrics is 300 seconds. ([#19098](https://github.com/DataDog/integrations-core/pull/19098))
+
+***Fixed***:
+
+* Fixes timezone parsing bug in slow query log, preventing incorrect timestamp conversions on non-UTC servers. ([#19057](https://github.com/DataDog/integrations-core/pull/19057))
+* Fix crash in DBM operation samples collection when a node is in recovering mode. ([#19080](https://github.com/DataDog/integrations-core/pull/19080))
+* Resolved deprecation warning for `collStats` by using `$collStats` aggregation pipeline to collect oplog size in MongoDB 6.2+. ([#19133](https://github.com/DataDog/integrations-core/pull/19133))
+
 ## 8.2.1 / 2024-11-06
 
 ***Fixed***:
