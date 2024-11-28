@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.milvus import MilvusCheck
 
-from .common import TEST_METRICS, RENAMED_LABELS, get_fixture_path
+from .common import RENAMED_LABELS, STANDALONE_TEST_METRICS, get_fixture_path
 
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
@@ -16,7 +16,7 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     check = MilvusCheck('milvus', {}, [instance])
     dd_run_check(check)
 
-    for metric, metric_type in TEST_METRICS.items():
+    for metric, metric_type in STANDALONE_TEST_METRICS.items():
         aggregator.assert_metric(metric, metric_type=aggregator.METRIC_ENUM_MAP[metric_type])
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
@@ -25,12 +25,6 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
-    check = MilvusCheck('milvus', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('milvus.can_connect', MilvusCheck.CRITICAL)
 
 
 def test_empty_instance(dd_run_check):

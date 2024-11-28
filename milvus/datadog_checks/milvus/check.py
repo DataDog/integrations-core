@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.milvus.metrics import METRIC_MAP, RENAME_LABELS_MAP
 from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.milvus.metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class MilvusCheck(OpenMetricsBaseCheckV2):
