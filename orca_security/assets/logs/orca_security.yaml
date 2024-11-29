@@ -1,0 +1,41 @@
+id: REPLACE_WITH_APP_ID
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+metric_id: REPLACE_WITH_APP_ID
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Orca Security
+  enabled: true
+  filter:
+    query: source:orca_security
+  processors:
+    - type: date-remapper
+      name: Define `state.last_updated` as the official date of the log
+      enabled: true
+      sources:
+        - state.last_updated
+    - name: Lookup on `state.risk_level` to `status`
+      enabled: true
+      source: state.risk_level
+      target: status
+      lookupTable: |-
+        informational,info
+        low,info
+        medium,warning
+        high,critical
+        critical,critical
+      type: lookup-processor
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: message-remapper
+      name: Define `data.title` as the official message of the log
+      enabled: true
+      sources:
+        - data.title
