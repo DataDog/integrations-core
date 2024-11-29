@@ -1,1 +1,0 @@
-Fixes timezone parsing bug in slow query log, preventing incorrect timestamp conversions on non-UTC servers.
