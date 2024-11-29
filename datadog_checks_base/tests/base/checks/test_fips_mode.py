@@ -12,7 +12,7 @@ import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev import docker_run, get_here
+from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitForPortListening
 
 HERE = os.path.dirname(os.path.abspath(__file__))
