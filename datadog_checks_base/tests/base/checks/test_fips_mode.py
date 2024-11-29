@@ -74,7 +74,7 @@ def test_md5_before_fips():
 def test_md5_after_fips():
     import ssl
 
-    AgentCheck().enable_openssl_fips(path_to_embedded=EMBEDDED)
+    AgentCheck().fips.enable(path_to_embedded=EMBEDDED)
     with pytest.raises(ssl.SSLError, match='No cipher can be selected.'):
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         ctx.set_ciphers("MD5")
@@ -92,7 +92,7 @@ def test_cryptography_md5_fips():
     from cryptography.exceptions import InternalError
     from cryptography.hazmat.primitives import hashes
 
-    AgentCheck().enable_cryptography_fips(path_to_embedded=EMBEDDED)
+    AgentCheck().fips.enable(path_to_embedded=EMBEDDED)
     with pytest.raises(InternalError, match='Unknown OpenSSL error.'):
         hashes.Hash(hashes.MD5())
 
