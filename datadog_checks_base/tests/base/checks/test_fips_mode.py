@@ -16,7 +16,7 @@ from datadog_checks.dev import docker_run, get_here
 from datadog_checks.dev.conditions import WaitForPortListening
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-EMBEDDED = os.path.abspath(os.path.join(HERE, '..', '..', 'fixtures', 'fips', 'embedded'))
+EMBEDDED = os.path.join(HERE, '..', '..', 'fixtures', 'fips', 'embedded')
 FIPS_SERVER_PORT = 8443
 
 
@@ -61,7 +61,7 @@ def clean_environment():
     yield
 
 
-@pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
+# @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
 def test_md5_before_fips():
     import ssl
 
