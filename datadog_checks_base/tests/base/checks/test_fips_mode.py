@@ -20,7 +20,7 @@ EMBEDDED = os.path.join(HERE, '..', '..', 'fixtures', 'fips', 'embedded')
 FIPS_SERVER_PORT = 8443
 
 
-# @pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def create_fipsmodule_config():
     command = [
         "openssl",
@@ -56,9 +56,9 @@ def non_fips_server():
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_environment():
-    yield
     os.environ["GOFIPS"] = "0"
     AgentCheck().fips.disable()
+    yield
 
 
 @pytest.mark.skipif(not sys.platform == "linux", reason="only testing on Linux")
