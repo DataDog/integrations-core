@@ -1,11 +1,11 @@
-# Agent Integration: keycloak
+# Agent Integration: Keycloak
 
 ## Overview
 
 [Keycloak][3] is an open-source identity and access management tool. It helps add authentication to applications and secure services with minimum effort. Keycloak provides user federation, strong authentication, user management, fine-grained authorization, and more.
 
 This integration parses the following types of logs:
-- **user-event** : Events generated from activity of users like authentication, profile update, etc.
+- **user-event** : Events generated from activity of users like authentication, and profile updates.
 - **admin-event** : Events generated from the activity of the admin.
 
 Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, out-of-the-box detection rules are available to help you monitor and respond to potential security threats effectively.
@@ -28,14 +28,14 @@ Linux command
 
 #### Log collection
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the`datadog.yaml`:
 
     ```yaml
       logs_enabled: true
     ```
 2. Add this configuration block to your `keycloak.d/conf.yaml` file to start collecting your logs.
 
-    See the sample [keycloak.d/conf.yaml][6] for available configuration options. Here the appropriate protocol (either TCP or UDP) should be chosen based on the Keycloak syslog forwarding configuration. By default, Keycloak uses TCP.
+    See the sample [keycloak.d/conf.yaml][6] for available configuration options. The appropriate protocol (either TCP or UDP) should be chosen based on the Keycloak syslog forwarding configuration. By default, Keycloak uses TCP.
 
     - **TCP**: If TCP protocol is used for syslog forwarding, set the type to `tcp`.
     - **UDP**: If UDP protocol is used for syslog forwarding, modify the type to `udp`.
@@ -48,7 +48,7 @@ Linux command
         service: keycloak
     ```
     **Note**: 
-      - `PORT`: port should be similar to port provided in **Configure syslog message forwarding from keycloak** section.
+      - `PORT`: Port should be similar to the port provided in **Configure syslog message forwarding from keycloak** section.
       - It is recommended not to change the service and source values, as these parameters are integral to the pipeline's operation.
 
 3. [Restart the Agent][2].
@@ -57,7 +57,7 @@ Linux command
 
   1. Connect to the remote machine where Keycloak is installed.
   2. Navigate to the directory where Keycloak is installed (typically located at `/opt/keycloak`, depending on the configuration).
-  3. Add the following options in the start command to configure Keycloak to forward logs on the datadog-agent server and execute the same on the Keycloak server terminal.
+  3. Add the following options in the start command to configure Keycloak to forward logs on the Datadog Agent server and execute the same options on the Keycloak server terminal.
   ```
     --log="syslog"
     --log-level=org.keycloak.events:debug
@@ -71,13 +71,13 @@ Linux command
     --log-syslog-protocol=udp
   ```
 
-  4. After adding the above configuration option, start command would look like below:
+  4. After adding the above configuration option, the start command would look like the following:
   ```shell
     bin/kc.[sh|bat] start --log="syslog" --log-syslog-endpoint=<IP Address>:<Port> --log-level=org.keycloak.events:debug --log-syslog-output=json
   ```
-  `IP ADDRESS`: ip address where your datadog-agent is running.
+  `IP ADDRESS`: IP address where your Datadog Agent is running.
   
-  `PORT`: port number to send syslog messages.
+  `PORT`: Port number to send syslog messages.
 
   Reference: [Keycloak Syslog Configuration][7] 
 
@@ -132,7 +132,6 @@ If you see a **Permission denied** error while port binding in the Agent logs:
 
 3. [Restart the Agent][2].
 
-Here is how to troubleshoot some possible issues.
 
 **Data is not being collected:**
 
@@ -140,7 +139,7 @@ Ensure traffic is bypassed from the configured port if the firewall is enabled.
 
 **Port already in use:**
 
-If you see the **Port <PORT_NUMBER> Already in Use** error, see the following instructions. The example below is for port 514:
+If you see the **Port <PORT_NUMBER> Already in Use** error, see the following instructions. The following example is for port 514:
 
 - On systems using Syslog, if the Agent listens for events on port 514, the following error can appear in the Agent logs: `Can't start UDP forwarder on port 514: listen udp :514: bind: address already in use`. This error occurs because by default, Syslog listens on port 514. To resolve this error, take **one** of the following steps: 
     - Disable Syslog.
