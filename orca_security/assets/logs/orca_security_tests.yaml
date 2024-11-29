@@ -1,4 +1,4 @@
-id: REPLACE_WITH_ID_FIELD_FROM_YAML_FILE
+id: "orca-security"
 tests:
   - sample: >-
       {
@@ -102,7 +102,7 @@ tests:
               "tags_info_list": ["ODS|JAY"],
               "is_rule": True,
               "cloud_provider": "aws",
-              "organization_name": "CrestDataSystems",
+              "organization_name": "test",
               "cloud_vendor_id": "748335378900",
               "type_key": "ad59fd836bc225b159dcfbf413191c77",
               "rule_id": "r4c1559f2e0",
