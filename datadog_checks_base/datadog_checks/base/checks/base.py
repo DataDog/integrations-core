@@ -312,7 +312,7 @@ class AgentCheck(object):
 
         self.fips = FIPSSwitch()
 
-        if os.environ.get("GOFIPS", None):
+        if os.environ.get("GOFIPS", None) == "1":
             self.fips.enable()
 
     def _create_metrics_pattern(self, metric_patterns, option_name):
