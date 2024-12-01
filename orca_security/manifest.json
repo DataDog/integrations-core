@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
   "app_uuid": "c5503835-004d-4f4b-bf61-57845767f8e1",
-  "app_id": "orca_security",
+  "app_id": "orca-security",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -40,7 +40,7 @@
         "Orca Security - Alerts": "assets/dashboards/orca_security_alerts.json"
     },
     "logs": {
-      "source": "orca_security"
+      "source": "orca-security"
     }
   },
   "author": {

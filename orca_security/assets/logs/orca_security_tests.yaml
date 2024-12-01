@@ -1,4 +1,4 @@
-id: "orca_security"
+id: "orca-security"
 tests:
   - sample: >-
       {
