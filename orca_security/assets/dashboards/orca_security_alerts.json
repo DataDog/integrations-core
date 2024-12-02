@@ -1576,7 +1576,7 @@
                     {
                         "id": 699282245251860,
                         "definition": {
-                            "title": "Data Security Alerts",
+                            "title": "Top Data Security Alerts",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2009,7 +2009,7 @@
                     {
                         "id": 1938142781600414,
                         "definition": {
-                            "title": "Vulnerabilities - Critical and High Alerts by Source",
+                            "title": "Top Vulnerabilities - Critical and High Alerts by Source",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2641,6 +2641,965 @@
             }
         },
         {
+            "id": 6425855102852124,
+            "definition": {
+                "title": "Alert Category Details",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5764059718686724,
+                        "definition": {
+                            "title": "Top Alert Categories",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@category",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7710341617235570,
+                        "definition": {
+                            "title": "Top Suspicious Activity by Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Suspicious activity\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@type_string",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3107848776418196,
+                        "definition": {
+                            "title": "Top Malicious Activity by Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Malicious activity\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@type_string",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6536253324478998,
+                        "definition": {
+                            "title": "Total Vulnerabilities Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Vulnerabilities $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5786710683253084,
+                        "definition": {
+                            "title": "Vulnerabilities over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Vulnerabilities $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 4,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5537701599950778,
+                        "definition": {
+                            "title": "Total Data Protection Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Data protection\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#ffebeb"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6776126391678614,
+                        "definition": {
+                            "title": "Data Protection Alerts over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Data protection\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 7,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8566337838933810,
+                        "definition": {
+                            "title": "Total Network Misconfiguration Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Network misconfigurations\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8421085371799994,
+                        "definition": {
+                            "title": "Network Misconfiguration Alerts over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Network misconfigurations\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 10,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5036020458207494,
+                        "definition": {
+                            "title": "Total Data Risk Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Data at risk\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5375795056189494,
+                        "definition": {
+                            "title": "Data Risk Alerts over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Data at risk\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 13,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8257346006352384,
+                        "definition": {
+                            "title": "Total Authentication Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Authentication $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#ffe0e0"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3096738400070790,
+                        "definition": {
+                            "title": "Authentication Alerts over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Authentication $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 16,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5285146091532866,
+                        "definition": {
+                            "title": "Total Logging and Monitoring Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Logging and monitoring\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 19,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4373363001620230,
+                        "definition": {
+                            "title": "Logging and Monitoring Alerts over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Logging and monitoring\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 19,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 510905734689330,
+                        "definition": {
+                            "title": "Total Lateral Movement Alerts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Lateral movement\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#ffeae0"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 22,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 919128107437272,
+                        "definition": {
+                            "title": "Lateral Movement Alerts over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Lateral movement\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 22,
+                            "width": 8,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 59,
+                "width": 12,
+                "height": 26
+            }
+        },
+        {
             "id": 2641086880097668,
             "definition": {
                 "title": "Asset Details",
@@ -3116,7 +4075,7 @@
                     {
                         "id": 5318819323836612,
                         "definition": {
-                            "title": "Serverless Assets with High Risk Score",
+                            "title": "Top Serverless Assets with High Risk Score",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3185,7 +4144,7 @@
                     {
                         "id": 1939791328883106,
                         "definition": {
-                            "title": "Assets with Sensitive Data",
+                            "title": "Top Assets with Sensitive Data",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -3265,7 +4224,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @state.status:(open OR in_progress) @category:Vulnerabilities @asset_labels:internet_facing $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
+                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Vulnerabilities @asset_labels:internet_facing $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3324,7 +4283,7 @@
                     {
                         "id": 3355324497921286,
                         "definition": {
-                            "title": "Risky Neglected Assets by Type",
+                            "title": "Top Risky Neglected Assets by Type",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -4029,976 +4988,225 @@
             },
             "layout": {
                 "x": 0,
-                "y": 59,
+                "y": 85,
                 "width": 12,
                 "height": 33
             }
         },
         {
-            "id": 6425855102852124,
+            "id": 6113071595393960,
             "definition": {
-                "title": "Alert Category Details",
-                "background_color": "vivid_blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
                     {
-                        "id": 5764059718686724,
-                        "definition": {
-                            "title": "Top Alert Categories",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@category",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:orca_security service:\"Orca Alerts\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions",
+                            "indexes": [],
+                            "storage": "hot",
+                            "sort": {
+                                "order": "desc",
+                                "column": "timestamp"
                             }
                         },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 7710341617235570,
-                        "definition": {
-                            "title": "Top Suspicious Activity by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Suspicious activity\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@type_string",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    }
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
+                        "columns": [
+                            {
+                                "field": "state.status",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "message",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.risk_level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "category",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "alert_labels",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "type_string",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_category",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "host",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.alert_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.created_at",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.in_verification",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.last_seen",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.last_updated",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.low_since",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.orca_score",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.risk_level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.rule_source",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.score",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.severity",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "state.status_time",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "alert_source",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "data.mitre_category",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "account_name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "source",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cloud_provider",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cloud_account_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cloud_account_type",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cloud_provider_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cloud_vendor_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cluster_name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cluster_type",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cluster_unique_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "group_type",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "group_name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "group_type_string",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "group_unique_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "group_val",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_state",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_type_string",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_labels",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_tags_info_list",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_role_names",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_regions",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_unique_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "asset_vendor_id",
+                                "width": "auto"
                             }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3107848776418196,
-                        "definition": {
-                            "title": "Top Malicious Activity by Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Malicious activity\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@type_string",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6536253324478998,
-                        "definition": {
-                            "title": "Total Vulnerabilities Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Vulnerabilities $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4485902601593710,
-                        "definition": {
-                            "title": "Vulnerabilities over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "count",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Vulnerabilities $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Region $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 4,
-                            "width": 8,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5537701599950778,
-                        "definition": {
-                            "title": "Total Data Protection Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Data protection\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_bg",
-                                            "custom_bg_color": "#ffebeb"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 8,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6776126391678614,
-                        "definition": {
-                            "title": "Data Protection Alerts over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "count",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Data protection\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 8,
-                            "width": 8,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8566337838933810,
-                        "definition": {
-                            "title": "Total Network Misconfiguration Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Network misconfigurations\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_yellow"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 12,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8421085371799994,
-                        "definition": {
-                            "title": "Network Misconfiguration Alerts over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "count",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Network misconfigurations\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 12,
-                            "width": 8,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5036020458207494,
-                        "definition": {
-                            "title": "Total Data Risk Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Data at risk\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_red"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 16,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5375795056189494,
-                        "definition": {
-                            "title": "Data Risk Alerts over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "count",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Data at risk\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 16,
-                            "width": 8,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8257346006352384,
-                        "definition": {
-                            "title": "Total Authentication Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Authentication $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_bg",
-                                            "custom_bg_color": "#ffe0e0"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 20,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3096738400070790,
-                        "definition": {
-                            "title": "Authentication Alerts over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "count",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:Authentication $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 20,
-                            "width": 8,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5285146091532866,
-                        "definition": {
-                            "title": "Total Logging and Monitoring Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Logging and monitoring\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_yellow"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 24,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4373363001620230,
-                        "definition": {
-                            "title": "Logging and Monitoring Alerts over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "count",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Logging and monitoring\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 24,
-                            "width": 8,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 510905734689330,
-                        "definition": {
-                            "title": "Total Lateral Movement Alerts",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Lateral movement\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_bg",
-                                            "custom_bg_color": "#ffeae0"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 28,
-                            "width": 4,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 919128107437272,
-                        "definition": {
-                            "title": "Lateral Movement Alerts over Time",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "count",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:orca_security service:\"Orca Alerts\" @category:\"Lateral movement\" $Risk-Level $Alert-Status $Host $Source $Asset-State $Asset-Regions"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 28,
-                            "width": 8,
-                            "height": 4
-                        }
+                        ]
                     }
-                ]
+                ],
+                "type": "list_stream"
             },
             "layout": {
                 "x": 0,
-                "y": 92,
+                "y": 0,
                 "width": 12,
-                "height": 33
+                "height": 4
             }
         }
     ],
