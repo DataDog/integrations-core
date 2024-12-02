@@ -2,9 +2,6 @@
 
 [[envs.default.matrix]]
 python = ["3.12"]
-
-[[envs.default.matrix]]
-python = ["3.12"]
 setup = ["sandbox"]
 
 [envs.default.overrides]
