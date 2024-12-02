@@ -92,5 +92,6 @@ jobs:
         run: |
           $env:AWS_ACCESS_KEY_ID = "${{ secrets.PYTHON_BUILD_SANDBOX_AWS_ACCESS_KEY_ID }}"
           $env:AWS_SECRET_ACCESS_KEY = "${{ secrets.PYTHON_BUILD_SANDBOX_AWS_SECRET_ACCESS_KEY }}"
-          aws s3 cp python-windows-3.12.6-amd64.zip s3://agent-ints-python-build-sandbox/ --region eu-north-1
+          aws s3 cp $env:PYTHON_REPO_PATH/$env:ARTIFACT_NAME.zip s3://agent-ints-python-build-sandbox/ --region eu-north-1
+          aws s3 cp $env:PYTHON_REPO_PATH/$env:ARTIFACT_NAME.zip.sha256 s3://agent-ints-python-build-sandbox/ --region eu-north-1
         
