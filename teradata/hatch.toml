@@ -2,20 +2,18 @@
 
 [[envs.default.matrix]]
 python = ["3.12"]
-
-[[envs.default.matrix]]
-python = ["3.12"]
-setup = ["sandbox"]
+# The sandbox env requires setting up a teradata instance with the datadog user.
+# The instance may be running locally or cloud-hosted.
+# See the integration's README on how to set this up.
+setup = ["no-sandbox", "sandbox"]
 
 [envs.default.overrides]
-name."^py3.12$".e2e-env = { value = true }
-matrix.setup.e2e-env = { value = true, if = ["sandbox"], env = ["TERADATA_SERVER"] }
 matrix.setup.env-vars = [
   { key = "USE_TD_SANDBOX", value = "true", if = ["sandbox"] },
 ]
 
 [envs.default]
-e2e-env = false
+e2e-env = true
 dependencies = [
   "teradatasql==17.10.0.12",
 ]
