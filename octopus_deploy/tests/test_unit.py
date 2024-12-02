@@ -12,7 +12,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .constants import ALL_DEPLOYMENT_LOGS, ALL_METRICS, MOCKED_TIME1, MOCKED_TIME2, ONLY_TEST_LOGS
+from .constants import ALL_DEPLOYMENT_LOGS, ALL_EVENTS, ALL_METRICS, MOCKED_TIME1, MOCKED_TIME2, ONLY_TEST_LOGS
 
 
 @pytest.mark.parametrize(
@@ -305,10 +305,32 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
 
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
-    metrics = aggregator.metrics('octopus_deploy.deployment.count')
-    for metric in metrics:
-        assert not ('project_name:test-api' in metric.tags and 'task_state:Success' in metric.tags)
-        assert not ('project_name:test' in metric.tags and 'task_state:Success' in metric.tags)
+    aggregator.assert_metric(
+        'octopus_deploy.deployment.count',
+        tags=[
+            'project_name:test',
+            'space_name:Default',
+            'server_node:None',
+            'task_id:ServerTasks-118055',
+            'task_name:Deploy',
+            'task_state:Queued',
+        ],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.deployment.count',
+        tags=[
+            'space_name:Default',
+            'project_name:my-project',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
+            'task_id:ServerTasks-118048',
+            'task_name:Deploy',
+            'task_state:Executing',
+        ],
+        count=1,
+    )
+    deployment_metrics = aggregator.metrics('octopus_deploy.deployment.count')
+    assert len(deployment_metrics) == 2
 
     get_current_datetime.return_value = MOCKED_TIME2
     dd_run_check(check)
@@ -923,3 +945,21 @@ def test_deployment_logs(
     get_current_datetime.return_value = MOCKED_TIME2
     dd_run_check(check)
     datadog_agent.assert_logs(check.check_id, expected_logs)
+
+
+@pytest.mark.parametrize(
+    ('expected_events', 'events_enabled'),
+    [pytest.param([], False, id='events disabled'), pytest.param(ALL_EVENTS, True, id='events enabled')],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_events(get_current_datetime, dd_run_check, aggregator, expected_events, events_enabled):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['collect_events'] = events_enabled
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    get_current_datetime.return_value = MOCKED_TIME2
+    dd_run_check(check)
+    for event in expected_events:
+        aggregator.assert_event(event['message'], tags=event['tags'], count=1)

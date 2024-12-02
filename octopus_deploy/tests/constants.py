@@ -23,19 +23,6 @@ DEFAULT_COLLECTION_INTERVAL = 15
 MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
 MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=DEFAULT_COLLECTION_INTERVAL)
 
-ALL_METRICS = [
-    "octopus_deploy.space.count",
-    "octopus_deploy.project_group.count",
-    "octopus_deploy.project.count",
-    "octopus_deploy.deployment.count",
-    "octopus_deploy.deployment.queued_time",
-    "octopus_deploy.deployment.executing_time",
-    "octopus_deploy.deployment.completed_time",
-    "octopus_deploy.server_node.count",
-    "octopus_deploy.server_node.in_maintenance_mode",
-    "octopus_deploy.server_node.max_concurrent_tasks",
-]
-
 E2E_METRICS = [
     "octopus_deploy.space.count",
     "octopus_deploy.project_group.count",
@@ -421,5 +408,20 @@ ONLY_TEST_LOGS = [
         'timestamp': 1727103621208,
         'status': 'Info',
         'stage_name': 'Octopus Server',
+    },
+]
+
+ALL_EVENTS = [
+    {
+        'message': 'Machine test is unhealthy',
+        'tags': ['space_name:Default'],
+    },
+    {
+        'message': 'Deploy to dev failed for new-project-from-group release 0.0.2 to dev',
+        'tags': ['space_name:Default'],
+    },
+    {
+        'message': 'Deploy to dev failed for project-new-2 release 0.0.2 to dev',
+        'tags': ['space_name:Default'],
     },
 ]
