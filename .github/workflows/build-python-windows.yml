@@ -85,7 +85,7 @@ jobs:
       - name: Rename Artifacts
         run: | 
           mv $env:PYTHON_REPO_PATH/python.zip $env:PYTHON_REPO_PATH/$env:ARTIFACT_NAME.zip
-          mv $env:PYTHON_REPO_PATH/python.sha256 $env:PYTHON_REPO_PATH/$env:ARTIFACT_NAME.sha256
+          mv $env:PYTHON_REPO_PATH/python.zip.sha256 $env:PYTHON_REPO_PATH/$env:ARTIFACT_NAME.zip.sha256
 
       - name: Upload artifact to S3
         shell: powershell
