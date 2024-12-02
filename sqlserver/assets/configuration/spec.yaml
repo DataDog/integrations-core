@@ -132,6 +132,7 @@ files:
     - name: database_metrics
       description: |
         Configure the collection of database metrics
+      hidden: true
       options:
         - name: ao_metrics
           description: |
