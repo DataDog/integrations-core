@@ -1,6 +1,6 @@
 {
   "title": "Plivo Messages",
-  "description": "This dashboard provides an overview of messaging activity, tracking total messages for SMS, MMS, and WhatsApp across Plivo. It monitors key aspects such as delivered, sent, undelivered, failed, and rejected messages. Geographic and directional insights are offered through messages by state, source and destination number by location, and domestic vs international calls. It also highlights messages by mobile country code and mobile network code.",
+  "description": "This dashboard provides an overview of messaging activity, tracking total messages for SMS, MMS, and WhatsApp across Plivo. It monitors key aspects such as delivered, sent, undelivered, failed, and rejected messages. It offers geographic and directional insights through messages by state, source and destination number by location, and domestic vs international calls. It also highlights messages by mobile country code and mobile network code.",
   "widgets": [
     {
       "id": 2013071669494946,
@@ -68,7 +68,7 @@
       "id": 7359921821269134,
       "definition": {
         "type": "note",
-        "content": "**Overview**\n\nThis dashboard provides an overview of messaging activity, tracking total messages for SMS, MMS, and WhatsApp across Plivo. It monitors key aspects such as delivered, sent, undelivered, failed, and rejected messages. Geographic and directional insights are offered through messages by state, source and destination number by location, and domestic vs international calls. It also highlights messages by mobile country code and mobile network code.\n\nFor more information, see the [Plivo Integration Documentation](https://docs.datadoghq.com/integrations/plivo/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "content": "**Overview**\n\nThis dashboard provides an overview of messaging activity, tracking total messages for SMS, MMS, and WhatsApp across Plivo. It monitors key aspects such as delivered, sent, undelivered, failed, and rejected messages. It offers geographic and directional insights through messages by state, source and destination number by location, and domestic vs international calls. It also highlights messages by mobile country code and mobile network code.\n\nFor more information, see the [Plivo Integration Documentation](https://docs.datadoghq.com/integrations/plivo/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",

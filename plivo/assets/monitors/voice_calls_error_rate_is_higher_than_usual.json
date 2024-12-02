@@ -9,7 +9,7 @@
 		"name": "Voice calls error rate is higher than usual",
 		"type": "log alert",
 		"query": "formula(\"(query - query1) / query\").last(\"5m\") > 0.1",
-		"message": "{{#is_alert}}\nHigh number of Plivo voice calls detected with hangup reason other than normal hangup. Please take necessary steps to manage your plivo account accordingly.\n{{/is_alert}}",
+		"message": "{{#is_alert}}\nA high number of Plivo voice calls with a hangup reason other than normal hangup have been detected. Please take necessary steps to manage your Plivo account accordingly.\n{{/is_alert}}",
 		"tags": [
 			"source:plivo",
 			"service:voice"

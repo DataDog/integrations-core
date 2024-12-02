@@ -1,6 +1,6 @@
 {
     "title": "Plivo Voice Calls",
-    "description": "The Plivo Voice Calls dashboard offers a comprehensive view of call data, including total call duration, call volume, and average call duration. It visualizes call patterns over time, provides insights into call directions, hangup causes, and displays the top caller and recipient numbers. The dashboard also tracks billed call duration and charges, analyzes STIR verification for caller identity, and shows geographic IP information.",
+    "description": "The Plivo Voice Calls dashboard offers a comprehensive view of call data, including total call duration, call volume, and average call duration. It visualizes call patterns over time, provides insights into call directions and hangup causes, and displays the top caller and recipient numbers. The dashboard also tracks billed call duration and charges, analyzes STIR verification for caller identity, and shows geographic IP information.",
     "widgets": [
       {
         "id": 2285518333153340,
@@ -68,7 +68,7 @@
         "id": 421743545140594,
         "definition": {
           "type": "note",
-          "content": "**Overview**\n\nThe Plivo Voice Calls dashboard offers a comprehensive view of call data, including total call duration, call volume, and average call duration. It visualizes call patterns over time, provides insights into call directions, hangup causes, and displays the top caller and recipient numbers. The dashboard also tracks billed call duration and charges, analyzes STIR verification for caller identity, and shows geographic IP information. \n\nFor more information, see the [Plivo Integration Documentation](https://docs.datadoghq.com/integrations/plivo/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+          "content": "**Overview**\n\nThe Plivo Voice Calls dashboard offers a comprehensive view of call data, including total call duration, call volume, and average call duration. It visualizes call patterns over time, provides insights into call directions and hangup causes, and displays the top caller and recipient numbers. The dashboard also tracks billed call duration and charges, analyzes STIR verification for caller identity, and shows geographic IP information. \n\nFor more information, see the [Plivo Integration Documentation](https://docs.datadoghq.com/integrations/plivo/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
           "background_color": "white",
           "font_size": "14",
           "text_align": "left",

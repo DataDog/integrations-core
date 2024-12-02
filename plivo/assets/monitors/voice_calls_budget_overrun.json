@@ -9,7 +9,7 @@
 			"name": "Voice calls budget overrun",
 			"type": "log alert",
 			"query": "logs(\"source:plivo service:voice\").index(\"*\").rollup(\"sum\", \"@plivo.total_amount\").last(\"1d\") > 500",
-			"message": "{{#is_alert}}\nThe total cost for Plivo Voice calls has exceeded the alert threshold of {{threshold}}.\nThe total cost incurred is {{value}}. Please review your Plivo account.\n{{/is_alert}}\n\n{{#is_warning}}\nThe total cost for Plivo Voice calls has exceeded the warning threshold of {{warn_threshold}}.\nThe total cost incurred is {{value}} . Please review your Plivo account.\n{{/is_warning}}",
+			"message": "{{#is_alert}}\nThe total cost for Plivo voice calls has exceeded the alert threshold of {{threshold}}.\nThe total cost incurred is {{value}}. Please review your Plivo account.\n{{/is_alert}}\n\n{{#is_warning}}\nThe total cost for Plivo voice calls has exceeded the warning threshold of {{warn_threshold}}.\nThe total cost incurred is {{value}} . Please review your Plivo account.\n{{/is_warning}}",
 			"tags": [
 				"source:plivo",
 				"service:voice"
