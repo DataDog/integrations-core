@@ -15,15 +15,12 @@ def dict_diff(expected, closest):
     The number of keys is fairly small so we can prioritize clarity over performance.
     """
     diff = []
-    for key in closest:
+    for key in closest.keys() | expected.keys():
         expected_value = expected.get(key)
         closest_value = closest.get(key)
 
         if expected_value is not None and expected_value != closest_value:
             diff.append((key, expected_value, closest_value))
-    for key in expected:
-        if expected[key] is not None and key not in closest:
-            diff.append((key, expected[key], None))
 
     return diff
 
@@ -48,7 +45,7 @@ def tags_diff(expected, closest):
     return diff
 
 
-def metric_stub_diff(expected, closest):
+def format_metric_stub_diff(expected, closest):
     """
     Return formatted difference between expected and closest metric stubs
     """
@@ -83,9 +80,9 @@ def build_similar_elements_msg(expected, submitted_elements):
         similar_metrics_to_print.append("{:.2f}    {}".format(score, metric_stub))
 
     closest_diff = []
-    if len(similar_metrics) > 0:
+    if similar_metrics:
         [_, closest] = similar_metrics[0]
-        closest_diff = metric_stub_diff(expected, closest)
+        closest_diff = format_metric_stub_diff(expected, closest)
 
     return (
         "Expected:\n"
