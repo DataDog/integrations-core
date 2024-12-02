@@ -31,13 +31,15 @@ jobs:
       OPENSSL_VERSION: openssl-${{ inputs.openssl_version }}
       OPENSSL_FIPS_VERSION: openssl-${{ inputs.openssl_fips_version }}
       MSYS2_PATH: C:/msys64/
+      ARTIFACT_NAME: python-${{ matrix.os }}-${{ inputs.python_version }}-amd64.zip
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Disabe for now
       - name: Select Toolchain
-        if: matrix.os == 'windows-2022'
+        if: matrix.os == 'windows-2022' && false
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
@@ -78,4 +80,17 @@ jobs:
           name: python-${{ matrix.os }}-${{ inputs.python_version }}-amd64.zip
           path: C:/repos/cpython/installed
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
+
+      - name: Rename Artifacts
+        run: | 
+          mv $env:PYTHON_REPO_PATH/python.zip $env:PYTHON_REPO_PATH/$env:ARTIFACT_NAME.zip
+          mv $env:PYTHON_REPO_PATH/python.sha256 $env:PYTHON_REPO_PATH/$env:ARTIFACT_NAME.sha256
+
+      - name: Upload artifact to S3
+        shell: powershell
+        run: |
+          $env:AWS_ACCESS_KEY_ID = "${{ secrets.PYTHON_BUILD_SANDBOX_AWS_ACCESS_KEY_ID }}"
+          $env:AWS_SECRET_ACCESS_KEY = "${{ secrets.PYTHON_BUILD_SANDBOX_AWS_SECRET_ACCESS_KEY }}"
+          aws s3 cp python-windows-3.12.6-amd64.zip s3://agent-ints-python-build-sandbox/ --region eu-north-1
+        
