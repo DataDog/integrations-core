@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.config import is_affirmative
-
 from .base import SqlserverDatabaseMetricsBase
 
 MASTER_FILES_METRICS_QUERY = {
@@ -48,7 +46,7 @@ class SqlserverMasterFilesMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
     @property
     def include_master_files_metrics(self):
-        return is_affirmative(self.instance_config.get('include_master_files_metrics', False))
+        return self.config.database_metrics_config["master_files_metrics"]["enabled"]
 
     @property
     def enabled(self):
