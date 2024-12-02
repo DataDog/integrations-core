@@ -4,4 +4,4 @@
 
 ***Added***:
 
-* Initial release
+* Initial Release
