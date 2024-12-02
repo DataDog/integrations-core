@@ -71,8 +71,19 @@ For more information, see the [API Key and Authentication Reference Document][3]
     After you make the curl request, you should receive a response indicating your connection has been established successfully.
 5. In Datadog, filter your logs in Log Explorer to ensure data is populating properly in your dashboard.
 
-## Data collected
-The Bitdefender integration collects and forwards Bitdefender logs to Datadog. It does not include any metrics or events.
+## Data Collected
+
+### Logs
+
+The Bitdefender integration collects and forwards Bitdefender logs to Datadog.
+
+### Metrics
+
+The Bitdefender integration does not include any metrics.
+
+### Events
+
+The Bitdefender integration does not include any events.
 
 ## Support
 
