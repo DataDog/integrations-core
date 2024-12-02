@@ -4,7 +4,6 @@
 import datetime
 import os
 
-from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.fs import get_here
 
 USE_OCTOPUS_LAB = os.environ.get("USE_OCTOPUS_LAB")
@@ -20,9 +19,9 @@ LAB_INSTANCE = {
     'headers': {'X-Octopus-ApiKey': OCTOPUS_API_KEY},
 }
 
-
-BASE_TIME = ensure_aware_datetime(datetime.datetime.strptime("2024-09-23 14:45:58.888492", '%Y-%m-%d %H:%M:%S.%f'))
-MOCKED_TIMESTAMPS = [BASE_TIME] * 20
+DEFAULT_COLLECTION_INTERVAL = 15
+MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
+MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=DEFAULT_COLLECTION_INTERVAL)
 
 ALL_METRICS = [
     "octopus_deploy.space.count",

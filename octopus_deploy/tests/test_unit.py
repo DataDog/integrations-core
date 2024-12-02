@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import datetime
 import logging
 from contextlib import nullcontext as does_not_raise
 
@@ -13,10 +12,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .constants import ALL_DEPLOYMENT_LOGS, ALL_METRICS, ONLY_TEST_LOGS
-
-MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
-MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=15)
+from .constants import ALL_DEPLOYMENT_LOGS, ALL_METRICS, MOCKED_TIME1, MOCKED_TIME2, ONLY_TEST_LOGS
 
 
 @pytest.mark.parametrize(
@@ -901,7 +897,7 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
             True,
             {'include': [{'.*': {'projects': {'include': [r'^test$']}}}]},
             ONLY_TEST_LOGS,
-            id='logs enabled only test',
+            id='logs enabled only test logs',
         ),
     ],
 )
