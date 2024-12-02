@@ -919,6 +919,7 @@ def test_deployment_logs(
 
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
+    datadog_agent.assert_logs(check.check_id, [])
     get_current_datetime.return_value = MOCKED_TIME2
     dd_run_check(check)
     datadog_agent.assert_logs(check.check_id, expected_logs)
