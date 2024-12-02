@@ -132,7 +132,6 @@ files:
     - name: database_metrics
       description: |
         Configure the collection of database metrics
-      hidden: true
       options:
         - name: ao_metrics
           description: |
@@ -167,6 +166,7 @@ files:
             Use `db_backup_metrics.collection_interval` to set the interval (in seconds) for the collection of 
             database backup metrics. Defaults to 300 seconds (5 minutes). If you intend on updating this value,
             it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+          hidden: true
           value:
             type: object
             properties:
@@ -180,6 +180,7 @@ files:
         - name: db_files_metrics
           description: |
             Configure collection of database files metrics.
+          hidden: true
           value:
             type: object
             properties:
@@ -189,6 +190,7 @@ files:
         - name: db_stats_metrics
           description: |
             Configure collection of database stats metrics
+          hidden: true
           value:
             type: object
             properties:
@@ -237,6 +239,7 @@ files:
         - name: file_stats_metrics
           description: |
             Configure collection of file stats metrics.
+          hidden: true
           value:
             type: object
             properties:
@@ -316,6 +319,7 @@ files:
         - name: server_state_metrics
           description: |
             Configure collection of server state metrics
+          hidden: true
           value:
             type: object
             properties:
