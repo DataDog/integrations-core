@@ -367,6 +367,8 @@ integration/ntp:
 - ntp/**/*
 integration/nvidia_jetson:
 - nvidia_jetson/**/*
+integration/nvidia_nim:
+- nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
 integration/oke:
@@ -445,6 +447,8 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/shopify:
+- shopify/**/*
 integration/sidekiq:
 - sidekiq/**/*
 integration/silk:

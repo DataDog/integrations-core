@@ -7,6 +7,13 @@ os = ["linux"]
 version = ["2017", "2019", "2022"]
 setup = ["single", "ha"]
 
+# test the compatibility of sqlserver running on non-utc timezone
+[[envs.default.matrix]]
+python = ["3.12"]
+os = ["linux"]
+version = ["2022"]
+tz = ["newyork", "tokyo"]
+
 # test the full combination of python-version/driver against a the latest sql server version
 # ideally we'd test this against all sql server versions but that makes the test take too long and time out.
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
@@ -32,6 +39,7 @@ setup = ["single"]
 [envs.default.env-vars]
 ODBCSYSINI = "{root}{/}tests{/}odbc"
 COMPOSE_FOLDER = "compose"
+TZ="UTC"
 PIP_EXTRA_INDEX_URL = "https://datadoghq.dev/ci-wheels/bin"
 
 [envs.default.overrides]
@@ -61,6 +69,10 @@ matrix.version.env-vars = [
 ]
 matrix.driver.env-vars = [
   { key = "WINDOWS_SQLSERVER_DRIVER", platform = ["windows"] },
+]
+matrix.tz.env-vars = [
+  { key = "TZ", value = "America/New_York", if = ["newyork"] },
+  { key = "TZ", value = "Asia/Tokyo", if = ["tokyo"] },
 ]
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
