@@ -2,7 +2,7 @@
 
 [[envs.default.matrix]]
 python = ["3.12"]
-# The sandbox env requires setting up a teradata instance with the datadog user.
+# The sandbox env requires setting up a Teradata instance with the Datadog user.
 # The instance may be running locally or cloud-hosted.
 # See the integration's README on how to set this up.
 setup = ["no-sandbox", "sandbox"]
