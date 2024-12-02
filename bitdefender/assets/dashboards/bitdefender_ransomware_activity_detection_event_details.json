@@ -1,6 +1,6 @@
 {
     "title": "Bitdefender - Ransomware Activity Detection Event Details",
-    "description": "Bitdefender Ransomware Activity Detection Event Details dashboard provides insights about detected ransomware.",
+    "description": "The Bitdefender Ransomware Activity Detection Event Details dashboard provides insights about detected ransomware.",
     "widgets": [
         {
             "id": 1297240239339618,
@@ -25,7 +25,7 @@
             "id": 2723456080788240,
             "definition": {
                 "type": "note",
-                "content": "**Dashboard Overview**\n\n- Bitdefender Ransomware Activity Detection Event Details dashboard provides insights about detected ransomware.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "**Dashboard Overview**\n\nThe Bitdefender Ransomware Activity Detection Event Details dashboard provides insights about detected ransomware.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

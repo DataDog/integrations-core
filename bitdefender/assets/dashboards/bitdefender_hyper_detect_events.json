@@ -1,6 +1,6 @@
 {
     "title": "Bitdefender - Hyper Detect Events",
-    "description": "Bitdefender Hyper Detect Events dashboard provides insights about malware detected by hyper detect module.",
+    "description": "The Bitdefender Hyper Detect Events dashboard provides insights about malware your Hyper Detect module has detected.",
     "widgets": [
         {
             "id": 3275655253173568,
@@ -25,7 +25,7 @@
             "id": 2831676866046724,
             "definition": {
                 "type": "note",
-                "content": "**Dashboard Overview**\n\n- Bitdefender Hyper Detect Events dashboard provides insights about malware detected by hyper detect module. \n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "**Dashboard Overview**\n\nThe Bitdefender Hyper Detect Events dashboard provides insights about malware your Hyper Detect module has detected.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

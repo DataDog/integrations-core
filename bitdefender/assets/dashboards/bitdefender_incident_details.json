@@ -1,6 +1,6 @@
 {
     "title": "Bitdefender - Incident Details",
-    "description": "Bitdefender Incident Details dashboard provides insights about Root Cause Analysis and threats detected by Sandbox Analyzer.",
+    "description": "The Bitdefender Incident Details dashboard provides insights about root cause analysis and threats Sandbox Analyzer has detected.",
     "widgets": [
       {
         "id": 5837391553621968,
@@ -25,7 +25,7 @@
         "id": 523955291856876,
         "definition": {
           "type": "note",
-          "content": "**Dashboard Overview**\n\n- Bitdefender Incident Details dashboard provides insights about Root Cause Analysis and threats detected by Sandbox Analyzer.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+          "content": "**Dashboard Overview**\n\nThe Bitdefender Incident Details dashboard provides insights about root cause analysis and threats Sandbox Analyzer has detected.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
           "background_color": "white",
           "font_size": "14",
           "text_align": "left",

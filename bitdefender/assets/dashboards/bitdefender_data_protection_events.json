@@ -1,6 +1,6 @@
 {
     "title": "Bitdefender - Data Protection Events",
-    "description": "Bitdefender Data Protection Events provides insights about blocked data traffic according to data protection rule.",
+    "description": "Bitdefender Data Protection Events provides insights about data traffic that has been blocked according to your data protection rules.",
     "widgets": [
         {
             "id": 8492135043653654,
@@ -25,7 +25,7 @@
             "id": 4557215224981766,
             "definition": {
                 "type": "note",
-                "content": "**Dashboard Overview**\n\n- Bitdefender Data Protection Events provides insights about blocked data traffic according to data protection rule.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "**Dashboard Overview**\n\nBitdefender Data Protection Events provides insights about data traffic that has been blocked according to your data protection rules.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

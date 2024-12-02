@@ -1,6 +1,6 @@
 {
     "title": "Bitdefender - Firewall Event Details",
-    "description": "Bitdefender Firewall Event Details dashboard provides insights about blocked application and port according to firewall policy.",
+    "description": "The Bitdefender Firewall Event Details dashboard provides insights about applications and ports that have been blocked according to your firewall policy.",
     "widgets": [
       {
         "id": 4787470736470016,
@@ -25,7 +25,7 @@
         "id": 8209244592791048,
         "definition": {
           "type": "note",
-          "content": "**Dashboard Overview**\n\n- Bitdefender Firewall Event Details dashboard provides insights about blocked application and port according to firewall policy.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+          "content": "**Dashboard Overview**\n\nThe Bitdefender Firewall Event Details dashboard provides insights about applications and ports that have been blocked according to your firewall policy.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
           "background_color": "white",
           "font_size": "14",
           "text_align": "left",

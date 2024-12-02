@@ -1,6 +1,6 @@
 {
     "title": "Bitdefender - Advanced Threat Control Events",
-    "description": "Bitdefender Advanced Threat Control Events dashboard provides insights about potentially dangerous applications detected and blocked on an endpoint.",
+    "description": "The Bitdefender Advanced Threat Control Events dashboard provides insights about potentially dangerous applications running on an endpoint that have been detected and blocked.",
     "widgets": [
         {
             "id": 6497261328885784,
@@ -25,7 +25,7 @@
             "id": 8492577008748590,
             "definition": {
                 "type": "note",
-                "content": "**Dashboard Overview**\n\n- Bitdefender Advanced Threat Control Events dashboard provides insights about potentially dangerous applications  detected and blocked on an endpoint. \n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "**Dashboard overview**\n\nThe Bitdefender Advanced Threat Control Events dashboard provides insights about potentially dangerous applications running on an endpoint that have been detected and blocked. \n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

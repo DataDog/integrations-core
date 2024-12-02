@@ -1,6 +1,6 @@
 {
     "title": "Bitdefender - User Control Event Details",
-    "description": "Bitdefender User Control Event Details dashboard provides insights about blocked user activity on the endpoint according to the applied policy.",
+    "description": "The Bitdefender User Control Event Details dashboard provides insights about endpoint user activity that has been blocked according to your applied policy.",
     "widgets": [
       {
         "id": 7040578069690868,
@@ -25,7 +25,7 @@
         "id": 6106324979267452,
         "definition": {
           "type": "note",
-          "content": "**Dashboard Overview**\n\n- Bitdefender User Control Event Details dashboard provides insights  about blocked user activity on the endpoint according to the applied policy.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+          "content": "**Dashboard Overview**\n\nThe Bitdefender User Control Event Details dashboard provides insights about endpoint user activity that has been blocked according to your applied policy.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
           "background_color": "white",
           "font_size": "14",
           "text_align": "left",

@@ -1,6 +1,6 @@
 {
-    "title": "Bitdefender - Antiphising Events",
-    "description": "Bitdefender Antiphishing Events dashboard provides quick insights about detected phishing attempts when accessing a web page.",
+    "title": "Bitdefender - Antiphishing Events",
+    "description": "The Bitdefender Antiphishing Events dashboard provides quick insights about detected phishing attempts on known dangerous web pages.",
     "widgets": [
       {
         "id": 671543367285976,
@@ -25,7 +25,7 @@
         "id": 4147155121275134,
         "definition": {
           "type": "note",
-          "content": "**Dashboard Overview**\n\n- Bitdefender Antiphishing Events dashboard provides quick insights about detected phishing attempts when accessing a web page.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+          "content": "**Dashboard Overview**\n\nThe Bitdefender Antiphishing Events dashboard provides quick insights about detected phishing attempts on known dangerous web pages.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
           "background_color": "white",
           "font_size": "14",
           "text_align": "left",
@@ -54,7 +54,7 @@
             {
               "id": 357072723367082,
               "definition": {
-                "title": "Total Antiphising Logs Count",
+                "title": "Total Antiphishing Logs Count",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_value",

@@ -1,6 +1,6 @@
 {
     "title": "Bitdefender - Network Attack Defense Event Details",
-    "description": "Bitdefender Network Attack Defense Monitor dashboard provides insights about attacks detected by network attack defense module.",
+    "description": "The Bitdefender Network Attack Defense Monitor dashboard provides insights about attacks the network attack defense module has detected.",
     "widgets": [
         {
             "id": 411057555126238,
@@ -25,7 +25,7 @@
             "id": 1345015312625098,
             "definition": {
                 "type": "note",
-                "content": "**Dashboard Overview**\n\n- Bitdefender Network Attack Defense Monitor dashboard provides insights about attacks detected by network attack defense module.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "**Dashboard Overview**\n\nThe Bitdefender Network Attack Defense Monitor dashboard provides insights about attacks the network attack defense module has detected.\n\nFor more information, see the [Bitdefender Integration Documentation](https://docs.datadoghq.com/integrations/bitdefender/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

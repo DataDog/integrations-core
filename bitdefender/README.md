@@ -1,92 +1,78 @@
-# Bitdefender Integration For Datadog
+# Bitdefender integration for Datadog
 
 ## Overview
 
-[Bitdefender][1] provides cybersecurity solutions with leading security efficacy, performance and ease of use to small and medium businesses, mid-market enterprises and consumers. Bitdefender EDR effectively stops ransomware and breaches with automated cross-endpoint correlation and seamlessly integrated prevention, protection, detection and response.
+[Bitdefender][1] provides cybersecurity solutions with leading security efficacy, performance, and ease of use to small and medium businesses, mid-market enterprises, and consumers. Bitdefender EDR effectively stops ransomware and breaches with automated cross-endpoint correlation and seamlessly integrated prevention, protection, detection, and response.
 
-The Bitdefender integration utilizes a webhook to ingest Bitdefender EDR logs. Following are the event types for which integration provides OOTB dashboards and detection rules:
+The Bitdefender integration uses a webhook to ingest Bitdefender EDR logs. The integration provides OOTB dashboards and detection rules for the following event types:
 
-- **Antiphishing:** This event is generated each time the endpoint agent detects a known phishing attempt when accessing a web page.
-- **Antimalware:** This event is generated each time Bitdefender detects malware on an endpoint in your network.
-- **Advanced Threat Control (ATC):** This event is created whenever a potentially dangerous applications is detected and blocked on an endpoint.
-- **Data Protection:** This event is generated each time the data traffic is blocked on an endpoint, according to data protection rules.
-- **Exchange Malware Detection:** This event is created when Bitdefender detects malware on an Exchange server in your network.
-- **Firewall:** This event is generated when the endpoint agent blocks a port scan or an application from accessing the network, according to the applied policy.
-- **Hyper Detect event:** This event is generated when a malware is detected by the Hyper Detect module.
-- **Sandbox Analyzer Detection:** This event is generated each time Sandbox Analyzer detects a new threat among the submitted files.
-- **Antiexploit Event:** This event is generated when Advanced Anti-Exploit triggers a detection.
-- **Network Attack Defense Event:** This event is generated when the Network Attack Defense module triggers a detection.
-- **User Control/Content Control:** This event is generated when a user activity such as web browsing of software application is blocked on the endpoint according to the applied policy.
-- **Storage Antimalware Event:** This event is generated each time SVA detects a new threat among the protected storage (NAS).
-- **Ransomware activity detection:** This event occurs when the endpoint agent blocks ransomware attack.
-- **New Incident:** This event is generated every time a new Root Cause Analysis (RCA) is displayed under the Incidents section of Control Center. The event contains a list of relevant items extracted from the RCA JSON.
+| Event                         | Trigger                                                                                                                                                           |
+|-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Antiphishing                  | Endpoint agent detects a known phishing attempt when accessing a web page                                                                                         |
+| Antimalware                   | Bitdefender detects malware on an endpoint in your network                                                                                                        |
+| Advanced Threat Control (ATC) | Potentially dangerous application is detected and blocked on an endpoint                                                                                          |
+| Data Protection               | Data traffic is blocked on an endpoint, according to data protection rules                                                                                        |
+| Exchange Malware Detection    | Bitdefender detects malware on an Exchange server in your network                                                                                                 |
+| Firewall                      | Endpoint agent blocks a port scan or an application from accessing the network, according to the applied policy                                                   |
+| Hyper Detect event            | Hyper Detect module detects malware                                                                                                                               |
+| Sandbox Analyzer Detection    | Sandbox Analyzer detects a new threat among the submitted files                                                                                                   |
+| Antiexploit Event             | Advanced Anti-Exploit triggers a detection                                                                                                                        |
+| Network Attack Defense Event  | Network Attack Defense module triggers a detection                                                                                                                |
+| User Control/Content Control  | User activity, such as web browsing of software application, is blocked on the endpoint according to the applied policy                                           |
+| Storage Antimalware Event     | SVA detects a new threat among the protected storage (NAS)                                                                                                        |
+| Ransomware activity detection | Endpoint agent blocks ransomware attack                                                                                                                           |
+| New Incident                  | New Root Cause Analysis (RCA) is displayed under the Incidents section of Control Center. The event contains a list of relevant items extracted from the RCA JSON |
 
 ## Setup
 
-### Configuration
+### Create a Bitdefender API Key
 
-#### Bitdefender Configuration
-
-##### Steps to Create API Key on Bitdefender Business Security Enterprise Portal:
-1. Log in to Bitdefender Business Security Enterprise Portal using an administrator account. Your account must have the following rights: Manage Networks, Manage Users, Manage Company, and View and analyze data.
-2. On the right-hand side, select **User Role** and click on **My Account**.
+1. Log in to Bitdefender Business Security Enterprise Portal using an administrator account. Your account must have the following rights:
+   - Manage Networks
+   - Manage Users
+   - Manage Company
+   - View and analyze data
+2. Click **User Role**, then click **My Account**.
 3. Navigate to the **API keys** section.
-4. Click on the **Add**. Pop-up form will open up for API Key Configuration.
+4. Click **Add**. The API Key Configuration window opens.
 5. Provide the following information:
-    - API Key Description: <\Provide any relevant name>
-    - Enabled APIs: Select Event Push Service.
-6. Click on **Generate** and copy the generated Api key. 
-7. Perform Base64 encoding on the generated Api key as described below:
-    - Take your API key and append a colon (\:) to it, like this: ```<api_key>:```
-    - Encode the resulting string using a Base64 encoder.
-    - For example:
+    - **API Key Description**: A relevant name for your API key
+    - **Enabled APIs**: Select **Event Push Service**
+6. Click **Generate** and copy the generated API key. 
+7. Perform Base64 encoding on the generated API key. You'll use the encoded API key for webhook configuration.
+    1. Take your API key and append a colon (\:) to it, like this: `<api_key>:`
+    2. Encode the resulting string using a Base64 encoder.
+    
+    For example, if your API key is abc123, the string to encode is `abc123:` After Base64 encoding, the result will be something 
+    like `YWJjMTIzOg==`.
 
-      - If your API key is abc123, the string to encode is abc123:
-      - After Base64 encoding, the result will be something like: YWJjMTIzOg==
+8. Navigate to the **Control Center API** section and note the Access URL. In the next section, you'll use this URL in the curl command as **\<control_center_apis_access_url>**.
 
-8. Note down the encoded API key for webhook configuration.
-9. Navigate to the **Control Center API** section and note down the Access URL. This URL will be used in the curl command as **\<control_center_apis_access_url>**.
+For more information, see the [API Key and Authentication Reference Document][3].
 
-Reference: [API Key and Authentication Reference Document][3]
-
-##### Steps to Configure Webhook via Datadog:
-- Navigate to **Integrations** tab on your Datadog cloud account and search for Bitdefender integration.
-- Over Configure tab of Bitdefender integration, select an existing API key or create a new one by selecting any of the buttons.
-- After selecting API key, Click on **Add API key** button and copy the URL by clicking on **Click Here to Copy URL**.
-- Execute curl command as mentioned below after updating/replacing following fields: 
-    - **\<control_center_apis_access_url>**: \<collected from the above section>
-    - **\<bitdefender-encoded-api-key>**: \<encoded api key>
-    - **\<dd-api-key>**: \<datadog api key>
-    - **\<webhook_url>**:  \<URL copied from the above step>
-```bash
-curl -X POST -k "<control_center_apis_access_url>/v1.0/jsonrpc/push" --header "Authorization: Basic <bitdefender-encoded-api-key>" --header "Content-Type: application/json" --data "{\"params\": {\"status\": 1,\"serviceType\": \"jsonRPC\",\"serviceSettings\": {\"url\": \"<webhook_url>\",\"requireValidSslCertificate\": false,\"authorization\": \"<dd-api-key>\"},\"subscribeToEventTypes\": {\"av\": true,\"aph\": true,\"fw\": true,\"avc\": true,\"uc\": true,\"dp\": true,\"hd\": true,\"exchange-malware\": true,\"network-sandboxing\": true,\"new-incident\": true,\"antiexploit\": true,\"network-monitor\": true,\"ransomware-mitigation\": true,\"storage-antimalware\": true}},\"jsonrpc\": \"2.0\",\"method\": \"setPushEventSettings\",\"id\": \"bitdefender_push\"}"
-```
-
-- After replacing/updating above fields curl command looks like below:
-```bash
-curl -X POST -k "https://cloudap.gravityzone.bitdefender.com/api/v1.0/jsonrpc/push" --header "Authorization: Basic <bitdefender-encoded-api-key>" --header "Content-Type: application/json" --data "{\"params\": {\"status\": 1,\"serviceType\": \"jsonRPC\",\"serviceSettings\": {\"url\": \"https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=bitdefender\",\"requireValidSslCertificate\": false,\"authorization\": \"<dd-api-key>\"},\"subscribeToEventTypes\": {\"av\": true,\"aph\": true,\"fw\": true,\"avc\": true,\"uc\": true,\"dp\": true,\"hd\": true,\"exchange-malware\": true,\"network-sandboxing\": true\"new-incident\": true,\"antiexploit\": true,\"network-monitor\": true,\"ransomware-mitigation\": true,\"storage-antimalware\": true,}},\"jsonrpc\": \"2.0\",\"method\": \"setPushEventSettings\",\"id\": \"bitdefender_push\"}"
-
-```
-**Note:** For windows machine add `^` before `&ddsource` in **webhook_url** parameter.
-
+### Configure a webhook in Datadog
+1. In Datadog, navigate to the **Integrations** tab, and search for the Bitdefender integration.
+2. Click the **Bitdefender** integration. The integration window opens. On the **Configure** tab, select an existing API key, or create a new one.
+3. After selecting an API key, click **Add API key**, then click **Click Here to Copy URL**.
+4. Make a curl request. Use the template below, putting values into the following fields: 
+    - **\<control_center_apis_access_url>**: The URL from the previous section
+    - **\<bitdefender-encoded-api-key>**: Your encoded API key
+    - **\<dd-api-key>**: Your Datadog API key
+    - **\<webhook_url>**:  The URL you copied in step 3
+    ```bash
+    curl -X POST -k "<control_center_apis_access_url>/v1.0/jsonrpc/push" --header "Authorization: Basic <bitdefender-encoded-api-key>" --header "Content-Type: application/json" --data "{\"params\": {\"status\": 1,\"serviceType\": \"jsonRPC\",\"serviceSettings\": {\"url\": \"<webhook_url>\",\"requireValidSslCertificate\": false,\"authorization\": \"<dd-api-key>\"},\"subscribeToEventTypes\": {\"av\": true,\"aph\": true,\"fw\": true,\"avc\": true,\"uc\": true,\"dp\": true,\"hd\": true,\"exchange-malware\": true,\"network-sandboxing\": true,\"new-incident\": true,\"antiexploit\": true,\"network-monitor\": true,\"ransomware-mitigation\": true,\"storage-antimalware\": true}},\"jsonrpc\": \"2.0\",\"method\": \"setPushEventSettings\",\"id\": \"bitdefender_push\"}"
+    ```
+    **Note**: If you're using Windows, add `^` before `&ddsource` in the **webhook_url** parameter.
+    Here's an example of a completed curl request:
+    ```bash
+    curl -X POST -k "https://cloudap.gravityzone.bitdefender.com/api/v1.0/jsonrpc/push" --header "Authorization: Basic <bitdefender-encoded-api-key>" --header "Content-Type: application/json" --data "{\"params\": {\"status\": 1,\"serviceType\": \"jsonRPC\",\"serviceSettings\": {\"url\": \"https://http-intake.logs.datadoghq.com/api/v2/logs?dd-api-key=<dd-api-key>&ddsource=bitdefender\",\"requireValidSslCertificate\": false,\"authorization\": \"<dd-api-key>\"},\"subscribeToEventTypes\": {\"av\": true,\"aph\": true,\"fw\": true,\"avc\": true,\"uc\": true,\"dp\": true,\"hd\": true,\"exchange-malware\": true,\"network-sandboxing\": true\"new-incident\": true,\"antiexploit\": true,\"network-monitor\": true,\"ransomware-mitigation\": true,\"storage-antimalware\": true,}},\"jsonrpc\": \"2.0\",\"method\": \"setPushEventSettings\",\"id\": \"bitdefender_push\"}"
+    ```
 	
-- Once you execute the curl command, json response with the result key having true value would return that means your connection is established successfully.
-- Ensure the data is being received in datadog by filtering logs using below query in Log explorer.
-  - source: bitdefender
+    After you make the curl request, you should receive a response indicating your connection has been established successfully.
+5. In Datadog, filter your logs in Log Explorer to ensure data is populating properly in your dashboard.
 
-## Data Collected
-
-### Logs
-
-The Bitdefender integration collects and forwards Bitdefender logs to Datadog.
-
-### Metrics
-
-The Bitdefender integration does not include any metrics.
-
-### Events
-
-The Bitdefender integration does not include any events.
+## Data collected
+The Bitdefender integration collects and forwards Bitdefender logs to Datadog. It does not include any metrics or events.
 
 ## Support
 
