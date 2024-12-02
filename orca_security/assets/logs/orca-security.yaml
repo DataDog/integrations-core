@@ -1,6 +1,7 @@
 id: orca-security
 metric_id: orca-security
-installation_sources: orca_security
+installation_sources: 
+  - orca_security
 backend_only: false
 facets: null
 pipeline:
