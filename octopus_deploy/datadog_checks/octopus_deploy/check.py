@@ -15,6 +15,18 @@ from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, 
 
 from .config_models import ConfigMixin
 
+EVENT_TO_ALERT_TYPE = {
+    'MachineHealthy': 'success',
+    'MachineUnhealthy': 'warning',
+    'MachineUnavailable': 'warning',
+    'CertificateExpired': 'error',
+    'DeploymentFailed': 'error',
+    'DeploymentSucceeded': 'success',
+    'LoginFailed': 'warning',
+    'MachineAdded': 'info',
+    'MachineDeleted': 'info',
+}
+
 
 class OctopusDeployCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'octopus_deploy'
@@ -30,6 +42,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._default_projects_discovery = {}
         self._projects_discovery = {}
         self._base_tags = self.instance.get("tags", [])
+        self.collect_events = self.instance.get("collect_events", False)
 
     def check(self, _):
         self._update_times()
@@ -151,6 +164,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._process_project_groups(
                 space_id, space_name, space_config.get("project_groups") if space_config else None
             )
+            if self.collect_events:
+                self._collect_new_events(space_id, space_name)
 
     def _process_project_groups(self, space_id, space_name, project_groups_config):
         if project_groups_config:
@@ -290,6 +305,34 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("server_node.count", 1, tags=self._base_tags + server_tags)
             self.gauge("server_node.in_maintenance_mode", maintenance_mode, tags=self._base_tags + server_tags)
             self.gauge("server_node.max_concurrent_tasks", max_tasks, tags=self._base_tags + server_tags)
+
+    def _collect_new_events(self, space_id, space_name):
+        self.log.debug("Collecting events for space id %s: name %s", space_id, space_name)
+        url = f"api/{space_id}/events"
+        params = {
+            'from': self._from_completed_time,
+            'to': self._to_completed_time,
+            'eventCategories': list(EVENT_TO_ALERT_TYPE.keys()),
+        }
+        events = self._process_endpoint(url, params=params).get('Items', [])
+        tags = self._base_tags + [f"space_name:{space_name}"]
+
+        for event in events:
+            timestamp = datetime.datetime.fromisoformat(event.get("Occurred")).timestamp()
+            category = event.get("Category")
+            title = f"Octopus Deploy: {category}"
+            event_message = event.get("Message")
+            event = {
+                'timestamp': timestamp,
+                'event_type': self.__NAMESPACE__,
+                'host': self.hostname,
+                'msg_text': event_message,
+                'msg_title': title,
+                'alert_type': EVENT_TO_ALERT_TYPE[category],
+                'source_type_name': self.__NAMESPACE__,
+                'tags': tags,
+            }
+            self.event(event)
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config

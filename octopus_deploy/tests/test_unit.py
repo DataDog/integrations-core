@@ -13,7 +13,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .constants import ALL_METRICS
+from .constants import ALL_EVENTS, ALL_METRICS
 
 MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
 MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=15)
@@ -869,3 +869,21 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
     )
+
+
+@pytest.mark.parametrize(
+    ('expected_events', 'events_enabled'),
+    [pytest.param([], False, id='events disabled'), pytest.param(ALL_EVENTS, True, id='events enabled')],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_events(get_current_datetime, dd_run_check, aggregator, expected_events, events_enabled):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['collect_events'] = events_enabled
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    get_current_datetime.return_value = MOCKED_TIME2
+    dd_run_check(check)
+    for event in expected_events:
+        aggregator.assert_event(event['message'], tags=event['tags'], count=1)

@@ -37,3 +37,18 @@ ALL_METRICS = [
     "octopus_deploy.server_node.in_maintenance_mode",
     "octopus_deploy.server_node.max_concurrent_tasks",
 ]
+
+ALL_EVENTS = [
+    {
+        'message': 'Machine test is unhealthy',
+        'tags': ['space_name:Default'],
+    },
+    {
+        'message': 'Deploy to dev failed for new-project-from-group release 0.0.2 to dev',
+        'tags': ['space_name:Default'],
+    },
+    {
+        'message': 'Deploy to dev failed for project-new-2 release 0.0.2 to dev',
+        'tags': ['space_name:Default'],
+    },
+]
