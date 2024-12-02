@@ -12,7 +12,6 @@ MAX_SIMILAR_TO_DISPLAY = 15
 def dict_diff(expected, closest):
     """
     Returns an array of key/value pairs that are different between the two dicts.
-    The number of keys is fairly small so we can prioritize clarity over performance.
     """
     diff = []
     for key in closest.keys() | expected.keys():
