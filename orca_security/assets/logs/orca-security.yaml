@@ -1,5 +1,5 @@
-id: orca_security
-metric_id: orca_security
+id: orca-security
+metric_id: orca-security
 backend_only: false
 facets: null
 pipeline:
