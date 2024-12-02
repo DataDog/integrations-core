@@ -151,6 +151,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._process_project_groups(
                 space_id, space_name, space_config.get("project_groups") if space_config else None
             )
+            self._collect_environment_metrics(space_id, space_name)
 
     def _process_project_groups(self, space_id, space_name, project_groups_config):
         if project_groups_config:
@@ -290,6 +291,29 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("server_node.count", 1, tags=self._base_tags + server_tags)
             self.gauge("server_node.in_maintenance_mode", maintenance_mode, tags=self._base_tags + server_tags)
             self.gauge("server_node.max_concurrent_tasks", max_tasks, tags=self._base_tags + server_tags)
+
+    def _collect_environment_metrics(self, space_id, space_name):
+        self.log.debug("Collecting environments.")
+        url = f"api/{space_id}/environments"
+        response_json = self._process_endpoint(url)
+        environments = response_json.get('Items', [])
+
+        for environment in environments:
+            environment_name = environment.get("Name")
+            environment_slug = environment.get("Slug")
+            environment_id = environment.get("Id")
+            use_guided_failure = int(environment.get("UseGuidedFailure", False))
+            allow_dynamic_infrastructure = int(environment.get("AllowDynamicInfrastructure", False))
+
+            tags = self._base_tags + [
+                f"space_name:{space_name}",
+                f"environment_name:{environment_name}",
+                f"environment_id:{environment_id}",
+                f"environment_slug:{environment_slug}",
+            ]
+            self.gauge("environment.count", 1, tags=tags)
+            self.gauge("environment.use_guided_failure", use_guided_failure, tags=tags)
+            self.gauge("environment.allow_dynamic_infrastructure", allow_dynamic_infrastructure, tags=tags)
 
 
 # Discovery class requires 'include' to be a dict, so this function is needed to normalize the config

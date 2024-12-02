@@ -869,3 +869,60 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
     )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_environment_metrics(get_current_datetime, dd_run_check, instance, aggregator):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'octopus_deploy.environment.count',
+        value=1,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.count',
+        value=1,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'octopus_deploy.environment.use_guided_failure',
+        value=0,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.use_guided_failure',
+        value=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'octopus_deploy.environment.allow_dynamic_infrastructure',
+        value=1,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.allow_dynamic_infrastructure',
+        value=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )
