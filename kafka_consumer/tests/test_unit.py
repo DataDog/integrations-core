@@ -162,7 +162,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
     mock_client.get_consumer_offsets.return_value = consumer_offset
     mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition1']
-    mock_client.get_consumer_group_state.return_value = "STABLE"
+    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
     mock_generic_client.return_value = mock_client
 
     # When
@@ -229,6 +229,7 @@ def test_when_partition_is_none_then_emit_warning_log(
     mock_client.get_consumer_offsets.return_value = consumer_offset
     mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = None
+    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
@@ -274,6 +275,7 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     mock_client.get_consumer_offsets.return_value = consumer_offset
     mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition2']
+    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
@@ -319,6 +321,7 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     mock_client.get_consumer_offsets.return_value = consumer_offset
     mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition1']
+    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
@@ -349,6 +352,7 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     mock_client.get_consumer_offsets.return_value = consumer_offset
     mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition1']
+    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.DEBUG)
 

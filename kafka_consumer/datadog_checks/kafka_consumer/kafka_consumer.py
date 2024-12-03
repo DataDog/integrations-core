@@ -139,7 +139,7 @@ class KafkaCheck(AgentCheck):
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
-            consumer_group_state = self.client.get_consumer_group_state(consumer_group)
+            consumer_group_state = self.get_consumer_group_state(consumer_group)
             if reported_contexts >= contexts_limit:
                 self.log.debug(
                     "Reported contexts number %s greater than or equal to contexts limit of %s, returning",
@@ -220,6 +220,17 @@ class KafkaCheck(AgentCheck):
                 self.log.warning(msg, consumer_group, topic, partition)
                 self.client.request_metadata_update()  # force metadata update on next poll()
         self.log.debug('%s consumer offsets reported', reported_contexts)
+
+    def get_consumer_group_state(self, consumer_group):
+        consumer_group_state = ""
+        # Get the consumer group state if present
+        group_id, consumer_group_state = self.client.describe_consumer_groups(consumer_group)
+        self.log.debug(
+            "Consumer group: %s in state %s",
+            group_id,
+            consumer_group_state,
+        )
+        return consumer_group_state
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""
