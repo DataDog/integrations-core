@@ -340,6 +340,14 @@ instances:
     #
     # collect_property_metrics: false
 
+    ## @param collect_vsan_data - boolean - optional - default: false
+    ## If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+    ## Ensure that you have the vSAN Performance Service enabled:
+    ## https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan-monitoring.doc/
+    ## GUID-02F67DC3-3D5A-48A4-A445-D2BD6AF2862C.html
+    #
+    # collect_vsan_data: false
+
     ## @param attributes_prefix - string - optional
     ## Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
     ## Example use cases:

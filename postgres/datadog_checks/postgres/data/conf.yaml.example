@@ -83,6 +83,8 @@ instances:
     #   - rdsadmin
     #   - azure_maintenance
     #   - cloudsqladmin
+    #   - alloydbadmin
+    #   - alloydbmetadata
 
     ## @param ssl - string - optional - default: allow
     ## This option determines whether or not and with what priority a secure SSL TCP/IP connection

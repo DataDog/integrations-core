@@ -878,6 +878,27 @@ def load_json_fixture(name):
             True,
             id='explain find',
         ),
+        pytest.param(
+            None,
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            False,
+            id='missing ns',
+        ),
+        pytest.param(
+            "",
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            False,
+            id='blank ns',
+        ),
+        pytest.param(
+            "db",
+            "query",
+            {"find": "test", "filter": {}, "$db": "test", "$readPreference": {"mode": "?"}},
+            True,
+            id='ns with no collection',
+        ),
     ],
 )
 def test_should_explain_operation(namespace, op, command, should_explain):

@@ -1,0 +1,147 @@
+name: Slurm
+files:
+- name: slurm.yaml
+  options:
+  - template: init_config
+    options:
+      - name: slurm_binaries_dir
+        description: |
+          The directory in which all the Slurm binaries are located. These are mainly:
+          sinfo, sacct, sdiag, sshare and sdiag.
+        value:
+          type: string
+          example: /usr/bin/
+      - template: init_config/default
+  - template: instances
+    options:
+    - name: collect_sinfo_stats
+      description: Whether or not to collect statistics from the sinfo command.
+      value:
+        type: boolean
+        example: True
+    - name: collect_sdiag_stats
+      description: Whether or not to collect statistics from the sdiag command.
+      value:
+        type: boolean
+        example: True
+    - name: collect_squeue_stats
+      description: Whether or not to collect statistics from the squeue command.
+      value:
+        type: boolean
+        example: True
+    - name: collect_sacct_stats
+      description: Whether or not to collect statistics from the sacct command.
+      value:
+        type: boolean
+        example: True
+    - name: collect_sshare_stats
+      description: Whether or not to collect statistics from the sshare command.
+      value:
+        type: boolean
+        example: True
+    - name: collect_gpu_stats
+      description: Whether or not to collect GPU statistics when Slurm is configured to use GPUs.
+      value:
+        type: boolean
+        example: False
+    - name: sinfo_collection_level
+      description: |
+        The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
+        3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3 
+        collects data from from individual nodes as well but is more verbose and includes data such as CPU and 
+        memory usage as reported from the OS, as well as additional tags.
+      value:
+        type: integer
+        example: 1
+    - name: sinfo_path
+      description: Full path to the sinfo binary.
+      value:
+        type: string
+        example: /usr/bin/sinfo
+    - name: sacct_path
+      description: Full path to the sacct binary.
+      value:
+        type: string
+        example: /usr/bin/sacct
+    - name: sdiag_path
+      description: Full path to the sdiag binary.
+      value:
+        type: string
+        example: /usr/bin/sdiag
+    - name: sshare_path
+      description: Full path to the sshare binary.
+      value:
+        type: string
+        example: /usr/bin/sshare
+    - name: squeue_path
+      description: Full path to the squeue binary.
+      value:
+        type: string
+        example: /usr/bin/squeue
+    - name: debug_sinfo_stats
+      description: |
+        Whether or not to enable debug logging for the sinfo command. This logs the output of the sinfo command
+        to the Agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_sdiag_stats
+      description: |
+        Whether or not to enable debug logging for the sdiag command. This logs the output of the sdiag command
+        to the Agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_squeue_stats
+      description: |
+        Whether or not to enable debug logging for the squeue command. This logs the output of the squeue command
+        to the Agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_sshare_stats
+      description: |
+        Whether or not to enable debug logging for the sshare command. This logs the output of the sshare command
+        to the Agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - name: debug_sacct_stats
+      description: |
+        Whether or not to enable debug logging for the sacct command. This logs the output of the sacct command
+        to the Agent log.
+      value:
+        type: boolean
+        example: False
+      hidden: True
+    - template: instances/default
+      overrides:
+        min_collection_interval.description: |
+          This changes the collection interval of the check. For more information, see:
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+
+          Most Slurm metrics are collected from calling the different binaries. Depending on the size of the Slurm cluster,
+          this can be a very expensive operation. It is recommended to set this to a higher value than the default 15 
+          seconds, but this can be adjusted based on the size of the cluster and the desired granularity of the metrics.
+        min_collection_interval.value.display_default: 60
+        min_collection_interval.value.default: 60
+        min_collection_interval.value.example: 60
+        min_collection_interval.enabled: true
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/slurm/slurmd.log 
+      source: slurm
+      service: slurm
+    - type: file
+      path: /var/log/slurm/slurmdbd.log
+      source: slurm
+      service: slurm
+    - type: file
+      path: /var/log/slurm/slurmctld.log
+      source: slurm
+      service: slurm

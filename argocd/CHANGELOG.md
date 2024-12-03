@@ -2,11 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.1.0 / 2024-10-04
+## 3.2.0 / 2024-11-28
 
 ***Added***:
 
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* Add new Application Set metrics ([#18961](https://github.com/DataDog/integrations-core/pull/18961))
+
+## 3.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:
 
@@ -17,6 +19,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 2.4.3 / 2024-08-09 / Agent 7.57.0
 
