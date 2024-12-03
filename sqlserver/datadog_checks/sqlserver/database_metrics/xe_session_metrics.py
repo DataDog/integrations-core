@@ -6,6 +6,8 @@ from datadog_checks.base.config import is_affirmative
 
 from .base import SqlserverDatabaseMetricsBase
 
+XE_RING_BUFFER = "ring_buffer"
+
 XE_SESSION_STATUS_QUERY = {
     "name": "sys.dm_xe_sessions",
     "query": """SELECT

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_RING_BUFFER
 
 DB_QUERY = """
 SELECT
@@ -150,7 +151,7 @@ DEADLOCK_TIMESTAMP_ALIAS = "timestamp"
 DEADLOCK_XML_ALIAS = "event_xml"
 
 
-def get_deadlocks_query(convert_xml_to_str=False, xe_session_name="datadog"):
+def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DATADOG, xe_target_name=XE_RING_BUFFER):
     """
     Construct the query to fetch deadlocks from the system_health extended event session
     :param convert_xml_to_str: Whether to convert the XML to a string. This option is for MSOLEDB drivers
@@ -168,7 +169,7 @@ def get_deadlocks_query(convert_xml_to_str=False, xe_session_name="datadog"):
                 FROM sys.dm_xe_session_targets AS xt
                 INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
                 WHERE xs.name = N'{xe_session_name}'
-                AND xt.target_name = N'ring_buffer'
+                AND xt.target_name = N'{xe_target_name}'
         ) AS XML_Data
     CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
     WHERE xdr.value('@timestamp', 'datetime')

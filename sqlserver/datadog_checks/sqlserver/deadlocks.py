@@ -53,6 +53,7 @@ class Deadlocks(DBMAsyncJob):
         self.collection_interval = config.deadlocks_config.get("collection_interval", DEFAULT_COLLECTION_INTERVAL)
         self._force_convert_xml_to_str = False
         self._xe_session_name = None
+        self._xe_session_target = None
         super(Deadlocks, self).__init__(
             check,
             run_sync=True,
