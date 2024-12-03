@@ -1,6 +1,6 @@
 {
     "title": "Adyen Payouts",
-    "description": "This Dashboard provides a comprehensive overview of key logs related to third party payout events. The dashboard visualizes\ntotal, successful, failed, expired, declined, and reversed payouts. Additionally, it highlights payout trends over time, top reasons for failed payouts, and a breakdown of payouts by merchant account. ",
+    "description": "This Dashboard provides a comprehensive overview of key logs related to third party payout events. The dashboard visualizes total, successful, failed, expired, declined, and reversed payouts. Additionally, it highlights payout trends over time, top reasons for failed payouts, and a breakdown of payouts by merchant account. ",
     "widgets": [
         {
             "id": 6720697615291836,
@@ -68,7 +68,7 @@
             "id": 6437951956107458,
             "definition": {
                 "type": "note",
-                "content": "**Overview**\n\nThis Dashboard provides a comprehensive overview of key logs related to third party payout events. The dashboard visualizes\ntotal, successful, failed, expired, declined, and reversed payouts. Additionally, it highlights payout trends over time, top reasons for failed payouts, and a breakdown of payouts by merchant account. \n\nFor more information, see the [Adyen Integration Documentation](https://docs.datadoghq.com/integrations/adyen/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Overview**\n\nThis Dashboard provides a comprehensive overview of key logs related to third party payout events. The dashboard visualizes total, successful, failed, expired, declined, and reversed payouts. Additionally, it highlights payout trends over time, top reasons for failed payouts, and a breakdown of payouts by merchant account. \n\nFor more information, see the [Adyen Integration Documentation](https://docs.datadoghq.com/integrations/adyen/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -98,7 +98,7 @@
                         "id": 3208550364818198,
                         "definition": {
                             "type": "note",
-                            "content": "To know more about the payout status, Refer [Adyen Payout Documentation](https://docs.adyen.com/online-payments/online-payouts/payout-webhook/#payouts-to-bank-accounts-or-wallets)",
+                            "content": "To learn more about the payout status, see the [Adyen Payout Documentation](https://docs.adyen.com/online-payments/online-payouts/payout-webhook/#payouts-to-bank-accounts-or-wallets)",
                             "background_color": "yellow",
                             "font_size": "16",
                             "text_align": "left",

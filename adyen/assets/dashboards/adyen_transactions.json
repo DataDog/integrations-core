@@ -1,6 +1,6 @@
 {
     "title": "Adyen Transactions",
-    "description": "This Dashboard provides a comprehensive overview of key logs related to transaction events. The dashboard visualizes transaction overview, refund insights, and other transaction analytics. Additionally, it provides insights related to transactions by currency, merchant account, and payment method.",
+    "description": "This Dashboard provides a comprehensive overview of key logs related to transaction events. The dashboard visualizes transaction overviews, refund insights, and other transaction analytics. Additionally, it provide insights related to transactions by currency, merchant account, and payment method.",
     "widgets": [
         {
             "id": 6509483665561548,
@@ -68,7 +68,7 @@
             "id": 8436695922142380,
             "definition": {
                 "type": "note",
-                "content": "**Overview**\n\nThis Dashboard provides a comprehensive overview of key logs related to transaction events. The dashboard visualizes transaction overview, refund insights, and other transaction analytics. Additionally, it provides insights related to transactions by currency, merchant account, and payment method.\n\nFor more information, see the [Adyen Integration Documentation](https://docs.datadoghq.com/integrations/adyen/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Overview**\n\nThis Dashboard provides a comprehensive overview of key logs related to transaction events. The dashboard visualizes transaction overviews, refund insights, and other transaction analytics. Additionally, it provide insights related to transactions by currency, merchant account, and payment method.\n\nFor more information, see the [Adyen Integration Documentation](https://docs.datadoghq.com/integrations/adyen/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

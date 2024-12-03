@@ -3,7 +3,7 @@
 	"created_at": "2024-09-26",
 	"last_updated_at": "2024-09-26",
 	"title": "High number of declined payouts detected",
-	"description": "This monitor tracks and alerts when a high number of payouts gets declined.",
+	"description": "Declined payouts occur when disbursement requests are rejected due to issues such as invalid bank details, insufficient funds, or compliance failures. This monitor tracks declined payouts exceeding the threshold to ensure timely action and prevent operational delays.",
 	"definition": {
 		"id": 154507580,
 		"name": "High number of declined payouts detected",

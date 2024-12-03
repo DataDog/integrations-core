@@ -3,7 +3,7 @@
 	"created_at": "2024-09-26",
 	"last_updated_at": "2024-09-26",
 	"title": "Second Chargeback detected",
-	"description": "This monitor tracks and alerts when a second chargeback is detected.",
+	"description": "Second chargebacks occur when the issuer rejects the defense or Adyen accepts the pre-arbitration case, marking the final stage of the chargeback process. This monitor tracks the occurrence of second chargebacks to ensure timely awareness and prompt action to address these cases effectively.",
 	"definition": {
 		"id": 154586409,
 		"name": "Second Chargeback detected",

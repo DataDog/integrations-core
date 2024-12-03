@@ -3,7 +3,7 @@
 	"created_at": "2024-09-26",
 	"last_updated_at": "2024-09-26",
 	"title": "Failed capture detected due to a rejection by the card scheme",
-	"description": "This monitor tracks and alerts when a failed capture gets detected due to a rejection by the card scheme.",
+	"description": "This monitor tracks and alerts for failed captures caused by a rejection from the card scheme. These failures occur when payments cannot be secured, typically due to issues with the card issuer or network, and require prompt investigation to prevent payment processing disruptions.",
 	"definition": {
 		"id": 154282075,
 		"name": "Failed capture detected due to a rejection by the card scheme",
