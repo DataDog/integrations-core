@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.discovery.discovery import Discovery
-from datadog_checks.base.utils.time import get_current_datetime
+from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, Projects
 
 from .config_models import ConfigMixin
@@ -231,7 +231,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.debug("Collecting running and queued tasks for project %s", project_name)
         params = {'project': project_id, 'states': ["Queued", "Executing"]}
         response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_name, project_name, response_json.get('Items', []))
+        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
 
     def _process_completed_tasks(self, space_id, space_name, project_id, project_name):
         self.log.debug("Collecting completed tasks for project %s", project_name)
@@ -241,7 +241,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             'toCompletedDate': self._to_completed_time,
         }
         response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
-        self._process_tasks(space_name, project_name, response_json.get('Items', []))
+        self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
 
     def _calculate_task_times(self, task):
         task_queue_time = task.get("QueueTime")
@@ -270,16 +270,20 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             completed_time = -1
         return queued_time, executing_time, completed_time
 
-    def _process_tasks(self, space_name, project_name, tasks_json):
+    def _process_tasks(self, space_id, space_name, project_name, tasks_json):
         self.log.debug("Discovered %s tasks for project %s", len(tasks_json), project_name)
         for task in tasks_json:
             task_id = task.get("Id")
+            task_name = task.get("Name")
+            server_node = task.get("ServerNode")
+            task_state = task.get("State")
             tags = self._base_tags + [
                 f'space_name:{space_name}',
                 f'project_name:{project_name}',
                 f'task_id:{task_id}',
-                f'task_name:{task.get("Name")}',
-                f'task_state:{task.get("State")}',
+                f'task_name:{task_name}',
+                f'task_state:{task_state}',
+                f'server_node:{server_node}',
             ]
             self.log.debug("Processing task id %s for project %s", task_id, project_name)
             queued_time, executing_time, completed_time = self._calculate_task_times(task)
@@ -287,8 +291,13 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("deployment.queued_time", queued_time, tags=tags)
             if executing_time != -1:
                 self.gauge("deployment.executing_time", executing_time, tags=tags)
-            if executing_time != -1:
+
+            if completed_time != -1:
                 self.gauge("deployment.completed_time", completed_time, tags=tags)
+
+                if self.logs_enabled:
+                    self.log.debug("Collecting logs for task %s, id: %s", task_name, task_id)
+                    self._collect_deployment_logs(space_id, task_id, tags)
 
     def _collect_server_nodes_metrics(self):
         self.log.debug("Collecting server node metrics.")
@@ -305,6 +314,28 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("server_node.count", 1, tags=self._base_tags + server_tags)
             self.gauge("server_node.in_maintenance_mode", maintenance_mode, tags=self._base_tags + server_tags)
             self.gauge("server_node.max_concurrent_tasks", max_tasks, tags=self._base_tags + server_tags)
+
+    def _collect_deployment_logs(self, space_id, task_id, tags):
+        url = f"api/{space_id}/tasks/{task_id}/details"
+        activity_logs = self._process_endpoint(url).get('ActivityLogs', [])
+        self._submit_activity_logs(activity_logs, tags)
+
+    def _submit_activity_logs(self, activity_logs, tags):
+        for log in activity_logs:
+            name = log.get("Name")
+            log_elements = log.get("LogElements", [])
+            children = log.get("Children", [])
+
+            for log_element in log_elements:
+                payload = {}
+                payload['ddtags'] = ",".join(tags)
+                payload['message'] = log_element.get("MessageText")
+                payload['timestamp'] = get_timestamp(datetime.datetime.fromisoformat(log_element.get("OccurredAt")))
+                payload['status'] = log_element.get("Category")
+                payload['stage_name'] = name
+                self.send_log(payload)
+
+            self._submit_activity_logs(children, tags)
 
     def _collect_new_events(self, space_id, space_name):
         self.log.debug("Collecting events for space id %s: name %s", space_id, space_name)

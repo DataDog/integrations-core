@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import datetime
 import logging
 from contextlib import nullcontext as does_not_raise
 
@@ -13,10 +12,7 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
-from .constants import ALL_EVENTS, ALL_METRICS
-
-MOCKED_TIME1 = datetime.datetime.fromisoformat("2024-09-23T14:45:00.123+00:00")
-MOCKED_TIME2 = MOCKED_TIME1 + datetime.timedelta(seconds=15)
+from .constants import ALL_DEPLOYMENT_LOGS, ALL_EVENTS, ALL_METRICS, MOCKED_TIME1, MOCKED_TIME2, ONLY_TEST_LOGS
 
 
 @pytest.mark.parametrize(
@@ -68,7 +64,8 @@ def test_all_metrics_covered(
     instance = {'octopus_endpoint': 'http://localhost:80'}
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     get_current_datetime.return_value = MOCKED_TIME1
-
+    dd_run_check(check)
+    get_current_datetime.return_value = MOCKED_TIME2
     dd_run_check(check)
 
     aggregator.assert_metric('octopus_deploy.api.can_connect', 1)
@@ -208,6 +205,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -219,6 +217,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -230,6 +229,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -242,6 +242,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -253,6 +254,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
         ],
     )
     aggregator.assert_metric(
@@ -264,6 +266,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
         ],
     )
     aggregator.assert_metric(
@@ -276,6 +279,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
         ],
     )
     aggregator.assert_metric(
@@ -288,6 +292,7 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
         ],
     )
 
@@ -305,6 +310,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         tags=[
             'project_name:test',
             'space_name:Default',
+            'server_node:None',
             'task_id:ServerTasks-118055',
             'task_name:Deploy',
             'task_state:Queued',
@@ -316,6 +322,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         tags=[
             'space_name:Default',
             'project_name:my-project',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
             'task_id:ServerTasks-118048',
             'task_name:Deploy',
             'task_state:Executing',
@@ -337,6 +344,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -348,6 +356,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -359,6 +368,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -370,6 +380,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -381,6 +392,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -392,6 +404,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -403,6 +416,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -414,6 +428,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -424,6 +439,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -435,6 +451,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -446,6 +463,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
     aggregator.assert_metric(
@@ -457,6 +475,7 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
+            'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
 
@@ -889,6 +908,43 @@ def test_server_node_endpoint_failed(get_current_datetime, dd_run_check, aggrega
             'server_node_name:octopus-i8932-79236734bc234-09h234n',
         ],
     )
+
+
+@pytest.mark.parametrize(
+    ('logs_enabled, project_groups, expected_logs'),
+    [
+        pytest.param(True, None, ALL_DEPLOYMENT_LOGS, id='logs enabled'),
+        pytest.param(False, None, [], id='logs disabled'),
+        pytest.param(
+            True,
+            {'include': [{'.*': {'projects': {'include': [r'^test$']}}}]},
+            ONLY_TEST_LOGS,
+            id='logs enabled only test logs',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_deployment_logs(
+    get_current_datetime,
+    datadog_agent,
+    dd_run_check,
+    instance,
+    logs_enabled,
+    project_groups,
+    expected_logs,
+):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+    instance['project_groups'] = project_groups
+    datadog_agent._config['logs_enabled'] = logs_enabled
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    datadog_agent.assert_logs(check.check_id, [])
+    get_current_datetime.return_value = MOCKED_TIME2
+    dd_run_check(check)
+    datadog_agent.assert_logs(check.check_id, expected_logs)
 
 
 @pytest.mark.parametrize(

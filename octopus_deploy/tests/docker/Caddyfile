@@ -124,6 +124,38 @@
         rewrite * /GET/api/octopusservernodes/response.json
         file_server
     }
+        @get_tasks_1844 {
+        method GET
+        path /api/Spaces-1/tasks/ServerTasks-1844/details
+    }
+    route @get_tasks_1844 {
+        rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1844/details/response.json
+        file_server
+    }
+    @get_tasks_1845 {
+        method GET
+        path /api/Spaces-1/tasks/ServerTasks-1845/details
+    }
+    route @get_tasks_1845 {
+        rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1845/details/response.json
+        file_server
+    }
+    @get_tasks_1846 {
+        method GET
+        path /api/Spaces-1/tasks/ServerTasks-1846/details
+    }
+    route @get_tasks_1846 {
+        rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1846/details/response.json
+        file_server
+    }
+    @get_tasks_1847 {
+        method GET
+        path /api/Spaces-1/tasks/ServerTasks-1847/details
+    }
+    route @get_tasks_1847 {
+        rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1847/details/response.json
+        file_server
+    }
 
     file_server browse
 }
