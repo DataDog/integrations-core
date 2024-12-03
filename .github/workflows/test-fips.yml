@@ -61,28 +61,67 @@ jobs:
         && make \
         && sudo make install
 
-    # Configure environment for Visual Studio
-    - name: Setup Visual Studio Environment
+    - name: Download and Extract OpenSSL and FIPS Module
       if: runner.os == 'Windows'
       shell: powershell
       run: |
-        $vswherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe";
-        $vsInstallPath = & $vswherePath -latest -products * -requires Microsoft.Component.MSBuild -property installationPath;
-        $vsDevCmd = "$vsInstallPath\Common7\Tools\VsDevCmd.bat";
-        echo "VS_DEV_CMD=$vsDevCmd" >> $env:GITHUB_ENV;
+        # Define URLs for OpenSSL and FIPS module
+        $OpenSSLUrl = "https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/openssl-windows-openssl-3.0.15-amd64-5BD585.zip"
+        $FIPSModuleUrl = "https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/fips-windows-openssl-3.0.9-amd64-118D97.zip"
+        
+        # Download OpenSSL
+        Invoke-WebRequest -Uri $OpenSSLUrl -OutFile openssl.zip
+        Expand-Archive -Path openssl.zip -DestinationPath "C:\Program Files\OpenSSL" -Force
+        Remove-Item -Path openssl.zip
 
-    # Install OpenSSL and FIPS
-    - name: Download and Install OpenSSL with FIPS
+        # Download FIPS Module
+        Invoke-WebRequest -Uri $FIPSModuleUrl -OutFile fipsmodule.zip
+        if (-Not (Test-Path "C:\Program Files\OpenSSL\lib\ossl-modules")) {
+          New-Item -ItemType Directory -Path "C:\Program Files\OpenSSL\lib\ossl-modules"
+        }
+        Expand-Archive -Path fipsmodule.zip -DestinationPath "C:\Program Files\OpenSSL\lib\ossl-modules" -Force
+        Remove-Item -Path fipsmodule.zip
+
+        if (-Not (Test-Path "C:\Program Files\OpenSSL\ssl")) {
+          New-Item -ItemType Directory -Path "C:\Program Files\OpenSSL\ssl"
+        }
+        Move-Item -Path "C:\Program Files\OpenSSL\lib\ossl-modules\fipsmodule.cnf" -Destination "C:\Program Files\OpenSSL\ssl\fipsmodule.cnf" -Force
+
+    - name: Configure OpenSSL FIPS
       if: runner.os == 'Windows'
       shell: powershell
       run: |
-        $OPENSSL_VERSION = "3.0.9";
-        Invoke-WebRequest -Uri "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -OutFile "openssl-${OPENSSL_VERSION}.tar.gz";
-        tar -xzf "openssl-${OPENSSL_VERSION}.tar.gz";
-        cd "openssl-${OPENSSL_VERSION}";
-        perl Configure VC-WIN64A enable-fips;
-        nmake;
-        nmake install;
+        # Create openssl.cnf file
+        $OpenSSLConf = @"
+        config_diagnostics = 1
+        openssl_conf = openssl_init
+
+        .include C:\Program Files\OpenSSL\ssl\fipsmodule.cnf
+
+        [openssl_init]
+        providers = provider_sect
+        alg_section = algorithm_sect
+
+        [provider_sect]
+        fips = fips_sect
+        base = base_sect
+
+        [base_sect]
+        activate = 1
+
+        [algorithm_sect]
+        default_properties = fips=yes
+        "@
+        $OpenSSLConf | Set-Content -Path "C:\Program Files\OpenSSL\ssl\openssl.cnf"
+
+    - name: Verify OpenSSL and FIPS
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        [Environment]::SetEnvironmentVariable("OPENSSL_CONF", "C:\Program Files\OpenSSL\ssl\openssl.cnf", "Process")
+
+        & "C:\Program Files\OpenSSL\openssl.exe" version -a
+        & "C:\Program Files\OpenSSL\openssl.exe" list -providers
 
     - name: Install Cryptography
       run: pip install cryptography
