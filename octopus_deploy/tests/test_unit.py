@@ -1019,3 +1019,188 @@ def test_environment_metrics(get_current_datetime, dd_run_check, aggregator):
             'environment_id:Environments-21',
         ],
     )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_environments_discovery_one_include(get_current_datetime, dd_run_check, aggregator):
+    instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'include': ['dev']}}
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'octopus_deploy.environment.count',
+        value=1,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.count',
+        value=1,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+        count=0,
+    )
+
+    aggregator.assert_metric(
+        'octopus_deploy.environment.use_guided_failure',
+        value=0,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.use_guided_failure',
+        value=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+        count=0,
+    )
+
+    aggregator.assert_metric(
+        'octopus_deploy.environment.allow_dynamic_infrastructure',
+        value=1,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.allow_dynamic_infrastructure',
+        value=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+        count=0,
+    )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_environments_discovery_exclude_dev(get_current_datetime, dd_run_check, aggregator, caplog):
+    instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'exclude': ['dev'], 'include': ['.*']}}
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    caplog.set_level(logging.DEBUG)
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'octopus_deploy.environment.count',
+        value=1,
+        count=0,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.count',
+        value=1,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'octopus_deploy.environment.use_guided_failure',
+        value=0,
+        count=0,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.use_guided_failure',
+        value=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'octopus_deploy.environment.allow_dynamic_infrastructure',
+        value=1,
+        count=0,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.allow_dynamic_infrastructure',
+        value=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_environments_discovery_include_invalid(get_current_datetime, dd_run_check, aggregator, caplog):
+    instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'include': ['test']}}
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    caplog.set_level(logging.DEBUG)
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'octopus_deploy.environment.count',
+        value=1,
+        count=0,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.count',
+        value=1,
+        count=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'octopus_deploy.environment.use_guided_failure',
+        value=0,
+        count=0,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.use_guided_failure',
+        value=0,
+        count=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'octopus_deploy.environment.allow_dynamic_infrastructure',
+        value=1,
+        count=0,
+        tags=['space_name:Default', 'environment_name:dev', 'environment_slug:dev', 'environment_id:Environments-1'],
+    )
+    aggregator.assert_metric(
+        'octopus_deploy.environment.allow_dynamic_infrastructure',
+        value=0,
+        count=0,
+        tags=[
+            'space_name:Default',
+            'environment_name:staging',
+            'environment_slug:staging',
+            'environment_id:Environments-21',
+        ],
+    )

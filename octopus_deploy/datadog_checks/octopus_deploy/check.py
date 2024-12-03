@@ -41,6 +41,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._project_groups_discovery = {}
         self._default_projects_discovery = {}
         self._projects_discovery = {}
+        self._environments_discovery = {}
         self._base_tags = self.instance.get("tags", [])
         self.collect_events = self.instance.get("collect_events", False)
 
@@ -164,7 +165,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._process_project_groups(
                 space_id, space_name, space_config.get("project_groups") if space_config else None
             )
-            self._collect_environment_metrics(space_id, space_name)
+            self._process_environments(space_id, space_name)
             if self.collect_events:
                 self._collect_new_events(space_id, space_name)
 
@@ -214,7 +215,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                         f"api/{space_id}/projectgroups/{project_group_id}/projects"
                     ).get('Items', [])
                 ]
-        self.log.debug("Monitoring %s Projects", len(projects))
+        self.log.debug("Monitoring %s Projects for %s in %s", len(projects), project_group_name, space_name)
         for _, _, project, _ in projects:
             project_id = project.get("Id")
             project_name = project.get("Name")
@@ -227,6 +228,47 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("project.count", 1, tags=tags)
             self._process_queued_and_running_tasks(space_id, space_name, project_id, project_name)
             self._process_completed_tasks(space_id, space_name, project_id, project_name)
+
+    def _process_environments(self, space_id, space_name):
+        if self.config.environments:
+            self._init_environments_discovery(space_id)
+            environments = list(self._environments_discovery[space_id].get_items())
+        else:
+            environments = [
+                (None, environment.get("Name"), environment, None)
+                for environment in self._process_endpoint(f"api/{space_id}/environments").get('Items', [])
+            ]
+
+        self.log.debug("Collecting %s environments for %s", len(environments), space_name)
+
+        for _, _, environment, _ in environments:
+            environment_name = environment.get("Name")
+            environment_slug = environment.get("Slug")
+            environment_id = environment.get("Id")
+            use_guided_failure = int(environment.get("UseGuidedFailure", False))
+            allow_dynamic_infrastructure = int(environment.get("AllowDynamicInfrastructure", False))
+
+            tags = self._base_tags + [
+                f"space_name:{space_name}",
+                f"environment_name:{environment_name}",
+                f"environment_id:{environment_id}",
+                f"environment_slug:{environment_slug}",
+            ]
+            self.gauge("environment.count", 1, tags=tags)
+            self.gauge("environment.use_guided_failure", use_guided_failure, tags=tags)
+            self.gauge("environment.allow_dynamic_infrastructure", allow_dynamic_infrastructure, tags=tags)
+
+    def _init_environments_discovery(self, space_id):
+        self.log.info("Default Environments discovery: %s", self.config.environments)
+        if space_id not in self._environments_discovery:
+            self._environments_discovery[space_id] = Discovery(
+                lambda: self._process_endpoint(f"api/{space_id}/environments").get('Items', []),
+                limit=self.config.environments.limit,
+                include=normalize_discover_config_include(self.config.environments),
+                exclude=self.config.environments.exclude,
+                interval=self.config.environments.interval,
+                key=lambda environment: environment.get("Name"),
+            )
 
     def _process_queued_and_running_tasks(self, space_id, space_name, project_id, project_name):
         self.log.debug("Collecting running and queued tasks for project %s", project_name)
