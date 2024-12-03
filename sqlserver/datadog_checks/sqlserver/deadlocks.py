@@ -172,7 +172,7 @@ class Deadlocks(DBMAsyncJob):
                 if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
                     convert_xml_to_str = True
                 query = get_deadlocks_query(
-                    convert_xml_to_str=convert_xml_to_str, xe_session_name=self._xe_session_name
+                    convert_xml_to_str=convert_xml_to_str, xe_session_name=self._xe_session_name, xe_target_name=self._xe_session_target
                 )
                 lookback = self._get_lookback_seconds()
                 self._log.debug(
