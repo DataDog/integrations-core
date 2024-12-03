@@ -85,8 +85,15 @@ class KafkaClient:
 
         return config
 
-    def consumer_list_topics(self):
-        return self._consumer.list_topics(timeout=self.config._request_timeout)
+    def consumer_get_cluster_id_and_list_topics(self, consumer_group):
+        cluster_metadata = self._consumer.list_topics(timeout=self.config._request_timeout)
+        try:
+            # TODO: remove this try-except, the attribute is always present.
+            cluster_id = cluster_metadata.cluster_id
+        except AttributeError:
+            self.log.error("Failed to get cluster metadata for consumer group %s", consumer_group)
+            return "", []
+        return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
     def consumer_offsets_for_times(self, partitions):
         return self._consumer.offsets_for_times(partitions=partitions, timeout=self.config._request_timeout)
@@ -115,14 +122,9 @@ class KafkaClient:
             topic_partitions_for_highwater_offsets = set()
 
             self.open_consumer(consumer_group)
-            cluster_metadata = self.consumer_list_topics()
-            try:
-                cluster_id = cluster_metadata.cluster_id
-            except AttributeError:
-                self.log.error("Failed to get cluster metadata for consumer group %s", consumer_group)
-            topics = cluster_metadata.topics
+            cluster_id, topics = self.consumer_get_cluster_id_and_list_topics(consumer_group)
 
-            for topic in topics:
+            for topic, partitions in topics:
                 if topic in KAFKA_INTERNAL_TOPICS:
                     self.log.debug("Skipping internal topic %s", topic)
                     continue
@@ -130,7 +132,7 @@ class KafkaClient:
                     self.log.debug("Skipping non-relevant topic %s", topic)
                     continue
 
-                for partition in topics[topic].partitions:
+                for partition in partitions:
                     if (
                         self.config._monitor_all_broker_highwatermarks
                         or (topic, partition) in topic_partition_with_consumer_offset

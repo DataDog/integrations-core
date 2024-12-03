@@ -27,6 +27,17 @@ def seed_mock_client():
     client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     client.get_partitions_for_topic.return_value = ['partition1']
     client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
+    client.consumer_get_cluster_id_and_list_topics.return_value = (
+        # cluster_id
+        "test-cluster",
+        # topics
+        [
+            ('dc', [0, 1]),
+            ('unconsumed_topic', [0, 1]),
+            ('marvel', [0, 1]),
+            ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+        ],
+    )
     return client
 
 
