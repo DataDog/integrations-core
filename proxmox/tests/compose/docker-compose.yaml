@@ -1,0 +1,13 @@
+services:
+  proxmox:
+    image: makedie/proxmox_ve:8.3.0
+    platform: linux/amd64
+    container_name: pve
+    hostname: pve
+    privileged: true
+    ports:
+      - "8006:8006"
+    extra_hosts:
+      - "pve:10.46.18.40"
+    tty: true
+    stdin_open: true

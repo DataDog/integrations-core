@@ -1,0 +1,27 @@
+name: Proxmox
+files:
+- name: proxmox.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+      - template: instances/default
+      - name: url
+        description: The URL of the Proxmox API.
+        value:
+          type: string
+          example: https://localhost:8006
+      - name: token_id
+        description: The token ID for the Proxmox API.
+        required: true
+        value:
+          type: string
+          example: <USER@REALM!TOKENID>
+      - name: token_secret
+        description: The token secret for the Proxmox API.
+        required: true
+        value:
+          type: string
+          example: <UUID>
