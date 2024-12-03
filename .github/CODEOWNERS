@@ -243,6 +243,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /wmi_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 
 # SaaS Integrations
+/blazemeter/                                                        @DataDog/saas-integrations
+/blazemeter/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
+/blazemeter/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
+/blazemeter/metadata.csv                                            @DataDog/saas-integrations @DataDog/documentation
+
 /cisco_umbrella_dns/                                                 @DataDog/saas-integrations
 /cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation
 /cisco_umbrella_dns/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
