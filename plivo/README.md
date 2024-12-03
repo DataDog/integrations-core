@@ -7,33 +7,27 @@ The Plivo integration seamlessly collects message (SMS, MMS, and WhatsApp) and v
 
 ## Setup
 
-### Get config parameters of Plivo
+### Get Plivo config parameters
 
 #### Plivo Auth ID and Auth Token
 
-1. Sign in to [Plivo][2] using a user account with Owner, Admin or Developer role.
+1. Sign in to [Plivo][2] using an Owner, Admin or Developer account.
 2. Navigate to the **Overview** section.
-3. You can find the **Auth ID** and **Auth Token** under the *Account* section.
-4. You can also generate the new **Auth Token**, refer [here](#generate-new-auth-token).
-5. Copy these credentials for the following configuration steps. 
+3. In the **Account** section, copy the **Auth ID** and **Auth Token** values.
 
-**Note**: If you are using the credentials of a Plivo subaccount, the data retrieved will be specific to that subaccount and not the entire account. To fetch the credentials of a particular subaccount, refer [here](#plivo-sub-account-auth-id-and-auth-token).
+      If you need to generate a new Auth Token, go to **Settings** > **Credentials**, then click **Generate Auth Token**.
 
-#### Generate new Auth Token 
-- Navigate to **Account** > **Settings** > **Credentials**.
-- Click on **Generate Auth Token**
+#### Plivo subaccount Auth ID and Auth Token
 
-#### Plivo Sub-Account Auth ID and Auth Token
+You can use the credentials of a Plivo subaccount to retrieve data specific to that subaccount, rather than the entire account.
 
-- Sign in to [Plivo][2] using a user account with Owner, Admin or Developer role.
-- Go to **Account** > **Settings** > **Subaccounts**.
-- You can find the **Auth ID** and **Auth Token** of the subaccount for which you want the data to be ingested.
+1. Sign in to [Plivo][2] using an Owner, Admin or Developer account.
+2. Navigate to **Account** > **Settings** > **Subaccounts**.
+3. Copy the **Auth ID** and **Auth Token** of the subaccount for you want to use.
 
 #### Message Expiry Time (Optional)
 
-- Set the message expiry time in seconds to match the message expiry time configured in Plivo. Ensure that the expiry time remains synchronized with what is configured in Plivo. The default value is set to 3 hours (10800 seconds). Messages ingestion to Datadog will be delayed by this duration to ensure settled messages are fetched. Refer [here][4] to know more about Plivo message expiry.
-
-**Note**: It is important to keep the Message Expiry Time in sync with the configured in Plivo; otherwise, unsettled message logs may be ingested.
+- Set the "message expiry time" parameter in seconds in Datadog to match the message expiry time configured in Plivo. Ensure the expiry time remains synchronized with the configuration in Plivo to avoid fetching unsettled messages. The default value is 3 hours (10,800 seconds). Message ingestion into Datadog will be delayed by this duration to ensure only settled messages are fetched. Settled messages are fully processed and finalized, while unsettled messages are still in the queue. See [Message Expiry][4] to learn more.
 
 ### Add your Plivo Configurations
 
