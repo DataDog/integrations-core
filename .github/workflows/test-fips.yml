@@ -1,0 +1,63 @@
+name: Test FIPS
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      runner:
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run:
+    name: FIPS test on "${{ inputs.platform }}"
+    runs-on: ${{ fromJson(inputs.runner) }}
+
+    env:
+      FORCE_COLOR: "1"
+      DEBIAN_FRONTEND: "noninteractive"
+      LD_LIBRARY_PATH: /usr/local/lib
+      OPENSSL_CONF: /usr/local/ssl/openssl.cnf
+      OPENSSL_FIPS: 1
+      PYTHON_VERSION: "3.12"
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+        cache: 'pip'
+
+    - name: Install System Dependencies
+      run: |
+        sudo apt update && \
+        sudo apt install -y --no-install-recommends \
+          wget \
+          build-essential \
+          gcc \
+          make \
+          perl \
+          libc6-dev && \
+        sudo apt-get clean && \
+        sudo rm -rf /var/lib/apt/lists/*
+
+    - name: Install OpenSSL
+      run: |
+        wget https://www.openssl.org/source/openssl-3.0.0.tar.gz \
+        && tar -xvzf openssl-3.0.0.tar.gz \
+        && cd openssl-3.0.0 \
+        && ./Configure enable-fips \
+        && make \
+        && make install
+
+    - name: Install Cryptography
+      run: pip install cryptography

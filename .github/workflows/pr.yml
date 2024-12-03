@@ -18,7 +18,8 @@ concurrency:
 
 jobs:
   test:
-    uses: ./.github/workflows/pr-test.yml
+    uses: ./.github/workflows/test-fips.yml
     with:
-      repo: core
+      platform: linux
+      runner: '["ubuntu-22.04"]'
     secrets: inherit
