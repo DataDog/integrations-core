@@ -96,7 +96,18 @@ class KafkaClient:
         return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
     def consumer_offsets_for_times(self, partitions):
-        return self._consumer.offsets_for_times(partitions=partitions, timeout=self.config._request_timeout)
+        topicpartitions_for_querying = [
+            # Setting offset to -1 will return the latest highwater offset while calling offsets_for_times
+            #   Reference: https://github.com/fede1024/rust-rdkafka/issues/460
+            TopicPartition(topic=topic, partition=partition, offset=-1)
+            for topic, partition in partitions
+        ]
+        return [
+            (tp.topic, tp.partition, tp.offset)
+            for tp in self._consumer.offsets_for_times(
+                partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
+            )
+        ]
 
     def get_highwater_offsets(self, consumer_offsets):
         self.log.debug('Getting highwater offsets')
@@ -137,11 +148,7 @@ class KafkaClient:
                         self.config._monitor_all_broker_highwatermarks
                         or (topic, partition) in topic_partition_with_consumer_offset
                     ):
-                        # Setting offset to -1 will return the latest highwater offset while calling offsets_for_times
-                        #   Reference: https://github.com/fede1024/rust-rdkafka/issues/460
-                        topic_partitions_for_highwater_offsets.add(
-                            TopicPartition(topic=topic, partition=partition, offset=-1)
-                        )
+                        topic_partitions_for_highwater_offsets.add((topic, partition))
                         self.log.debug('TOPIC: %s', topic)
                         self.log.debug('PARTITION: %s', partition)
                     else:
@@ -153,13 +160,9 @@ class KafkaClient:
                     len(topic_partitions_for_highwater_offsets),
                     consumer_group,
                 )
-                for topic_partition_with_highwater_offset in self.consumer_offsets_for_times(
-                    partitions=list(topic_partitions_for_highwater_offsets),
+                for topic, partition, offset in self.consumer_offsets_for_times(
+                    partitions=topic_partitions_for_highwater_offsets
                 ):
-                    self.log.debug('Topic partition with highwater offset: %s', topic_partition_with_highwater_offset)
-                    topic = topic_partition_with_highwater_offset.topic
-                    partition = topic_partition_with_highwater_offset.partition
-                    offset = topic_partition_with_highwater_offset.offset
                     highwater_offsets[(topic, partition)] = offset
                     self.log.debug("Adding %s %s to checked set to facilitate early exit", topic, partition)
                     topic_partition_checked.add((topic, partition))

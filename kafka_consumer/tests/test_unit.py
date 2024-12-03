@@ -16,6 +16,12 @@ from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_times
 pytestmark = [pytest.mark.unit]
 
 
+def fake_consumer_offsets_for_times(partitions):
+    """In our testing environment the offset is 80 for all partitions and topics."""
+
+    return [(t, p, 80) for t, p in partitions]
+
+
 def seed_mock_client():
     """Set some common defaults for the mock client to kafka."""
     client = mock.create_autospec(KafkaClient)
@@ -38,6 +44,7 @@ def seed_mock_client():
             ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
         ],
     )
+    client.consumer_offsets_for_times = fake_consumer_offsets_for_times
     return client
 
 
