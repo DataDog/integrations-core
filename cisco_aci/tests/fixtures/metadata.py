@@ -274,7 +274,7 @@ INTERFACE_METADATA = [
 
 TOPOLOGY_LINK_METADATA = [
     {
-        'id': 'default:10.0.200.0:49.1',
+        'id': 'default:10.0.200.0:cisco-aci-eth1/49.cisco-aci-eth5/1',
         'local': {
             'device': {
                 'dd_id': 'default:10.0.200.0',
@@ -287,6 +287,7 @@ TOPOLOGY_LINK_METADATA = [
         },
         'remote': {
             'device': {
+                'dd_id': 'default:10.0.200.5',
                 'description': 'topology/pod-1/node-201',
                 'id': '6a:00:21:1f:55:2a',
                 'id_type': 'mac',
@@ -294,15 +295,16 @@ TOPOLOGY_LINK_METADATA = [
                 'name': 'SP201',
             },
             'interface': {
+                'dd_id': 'default:10.0.200.5:cisco-aci-eth5/1',
                 'description': 'topology/pod-1/paths-201/pathep-[eth5/1]',
-                'id': 'eth5/1',
-                'id_type': 'interface_name',
+                'id': '6a:00:21:1f:55:2a',
+                'id_type': 'mac_address',
             },
         },
         'source_type': 'lldp',
     },
     {
-        'id': 'default:10.0.200.1:49.2',
+        'id': 'default:10.0.200.1:cisco-aci-eth1/49.cisco-aci-eth5/2',
         'local': {
             'device': {
                 'dd_id': 'default:10.0.200.1',
@@ -315,6 +317,7 @@ TOPOLOGY_LINK_METADATA = [
         },
         'remote': {
             'device': {
+                'dd_id': 'default:10.0.200.5',
                 'description': 'topology/pod-1/node-201',
                 'id': '6a:00:21:1f:55:2b',
                 'id_type': 'mac',
@@ -322,9 +325,10 @@ TOPOLOGY_LINK_METADATA = [
                 'name': 'SP201',
             },
             'interface': {
+                'dd_id': 'default:10.0.200.5:cisco-aci-eth5/2',
                 'description': 'topology/pod-1/paths-201/pathep-[eth5/2]',
-                'id': 'eth5/2',
-                'id_type': 'interface_name',
+                'id': '6a:00:21:1f:55:2b',
+                'id_type': 'mac_address',
             },
         },
         'source_type': 'lldp',

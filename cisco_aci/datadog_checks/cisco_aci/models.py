@@ -93,6 +93,23 @@ class LldpAdjAttributes(BaseModel):
 
     @computed_field
     @property
+    def ndm_remote_interface_type(self) -> str:
+        # map the Cisco ACI port subtype to match what NDM (writer) expects
+        port_subtype_mapping = {
+            "if-alias": "interface_alias",
+            "port-name": "interface_name",
+            "mac": "mac_address",
+            "nw-addr": "network_address",
+            "if-name": "interface_name",
+            "agent-ckt-id": "agent_circuit_id",
+            "local": "local",
+        }
+        if self.port_id_t:
+            return port_subtype_mapping.get(self.port_id_t, "unknown")
+        return "unknown"
+
+    @computed_field
+    @property
     def local_device_dn(self) -> str:
         # example: topology/pod-1/node-101/sys/lldp/inst/if-[eth1/49]/adj-1
         return helpers.get_hostname_from_dn(self.dn)
@@ -108,6 +125,13 @@ class LldpAdjAttributes(BaseModel):
     @property
     def local_port_index(self) -> int:
         return helpers.get_index_from_eth_id(self.local_port_id)
+
+    @computed_field
+    @property
+    def remote_device_dn(self) -> str:
+        # example: topology/pod-1/paths-201/path-ep-[eth1/1]
+        # use regex to extract the pod/node - ex: pod-1-node-201
+        return helpers.get_hostname_from_dn(self.sys_desc)
 
     @computed_field
     @property
