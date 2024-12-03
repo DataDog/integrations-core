@@ -195,19 +195,19 @@ jobs:
         path: output
 
   build-macos:
-    name: Target ${{ matrix.job.image }}
+    name: Target macOS ${{ matrix.job.arch }}
     runs-on: ${{ matrix.job.os }}
     strategy:
       fail-fast: false
       matrix:
         job:
         - os: macos-13
-          image: "Intel macOS"
+          arch: x86_64
         - os: macos-14
-          image: "M1 macOS"
+          arch: arm64
     env:
-      TARGET_NAME: macos-x86_64
-      OUT_DIR: output/macos-x86_64
+      TARGET_NAME: macos-${{ matrix.job.arch }}
+      OUT_DIR: output/macos-${{ matrix.job.arch }}
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
 
     permissions:
