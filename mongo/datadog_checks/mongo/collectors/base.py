@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import re
+import time
+from functools import wraps
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.mongo.metrics import CASE_SENSITIVE_METRIC_NAME_SUFFIXES
@@ -23,6 +25,8 @@ class MongoCollector(object):
         self.gauge = self.check.gauge
         self.base_tags = tags
         self.metrics_to_collect = self.check.metrics_to_collect
+        self._collection_interval = None
+        self._collector_key = (self.__class__.__name__,)
 
     def collect(self, api):
         """The main method exposed by the collector classes, needs to be implemented by every subclass.
@@ -126,3 +130,32 @@ class MongoCollector(object):
                 # Keep old incorrect metric name
                 # 'top' and 'index', 'collectionscans' metrics are affected
                 self.gauge(metric_name_alias[:-2], value, tags=tags)
+
+    def get_last_collection_timestamp(self):
+        return self.check.metrics_last_collection_timestamp.get(self._collector_key)
+
+    def set_last_collection_timestamp(self, timestamp):
+        self.check.metrics_last_collection_timestamp[self._collector_key] = timestamp
+
+
+def collection_interval_checker(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        current_time = time.time()
+        # If _collection_interval not set or set to the check default, call the function to collect the metrics
+        if (
+            self._collection_interval is None
+            or self._collection_interval <= self.check._config.min_collection_interval  # Ensure the interval is valid
+        ):
+            self.set_last_collection_timestamp(current_time)
+            return func(self, *args, **kwargs)
+
+        # Check if enough time has passed since the last collection
+        last_collection_timestamp = self.get_last_collection_timestamp()
+        if not last_collection_timestamp or current_time - last_collection_timestamp >= self._collection_interval:
+            self.set_last_collection_timestamp(current_time)
+            return func(self, *args, **kwargs)
+        else:
+            self.log.debug("%s skipped: collection interval not reached yet.", self.__class__.__name__)
+
+    return wrapper
