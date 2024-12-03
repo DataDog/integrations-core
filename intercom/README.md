@@ -3,7 +3,7 @@
 ## Overview
 [Intercom][1] is a customer communication platform that enables businesses to engage with their users through in-app messaging, email, and chat. It offers features like live chat, automated messaging, and customer support tools, making it easier for companies to provide personalized customer experiences.
 
-The Intercom integration seamlessly collects admin activities, data events, conversations, news items, and ticket data, and ingests them into Datadog for comprehensive analysis using webhooks.
+The Intercom integration seamlessly collects admin activities, data events, conversations, news items, and ticket data, and ingests them into Datadog for comprehensive analysis using [webhooks][6].
 
 ## Setup
 
@@ -21,11 +21,11 @@ Configure the Datadog endpoint to forward Intercom events as logs to Datadog. Se
     2. Go to **Settings**.
     3. In the Integrations section, select **Developer Hub**.
     4. Click **New app**.
-    5. Fill in the required details for your application, such as the name and associated workspace.
+    5. Fill in the required details for your application, including the name and associated workspace.
     6. Click **Create app**.
 - #### Configure webhook topics
     1. Select Required permissions
-        1. After creating the app, navigate to the *Authentication* section using the left-side menu and click **Edit** button in the upper-right corner.
+        1. After creating the app, go to the *Authentication* section in the left-side menu, and click the **Edit** button in the top-right corner.
         2. By default, all permissions are enabled. However, ensure that the following specific permissions are enabled:
             - Read admins
             - Read content data
@@ -34,6 +34,7 @@ Configure the Datadog endpoint to forward Intercom events as logs to Datadog. Se
             - Read tickets
         3. Click **Save**.
     2. Select Webhook topics
+    ```
         1. Next, navigate to the **Webhooks** section using the left-side menu.
         2. Enter the endpoint URL that was generated [here](#webhook-url-generation).
         3. On the **Select a topic** dropdown menu, select the following webhook topics:
@@ -82,3 +83,4 @@ For further assistance, contact [Datadog Support][5].
 [3]: https://developers.intercom.com/docs/webhooks
 [4]: https://app.datadoghq.com/integrations/intercom
 [5]: https://docs.datadoghq.com/help/
+[6]: https://developers.intercom.com/docs/references/2.10/webhooks/webhook-models
