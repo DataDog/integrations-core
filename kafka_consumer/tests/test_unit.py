@@ -10,9 +10,24 @@ import pytest
 from confluent_kafka.admin._group import ConsumerGroupListing, ListConsumerGroupsResult
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp
 
 pytestmark = [pytest.mark.unit]
+
+
+def seed_mock_client():
+    """Set some common defaults for the mock client to kafka."""
+    client = mock.create_autospec(KafkaClient)
+    # consumer_offset = {(consumer_group, topic, partition): offset}
+    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
+    # highwater_offset = {(topic, partition): offset}
+    highwater_offset = {("topic1", "partition1"): 1}
+    client.get_consumer_offsets.return_value = consumer_offset
+    client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
+    client.get_partitions_for_topic.return_value = ['partition1']
+    client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
+    return client
 
 
 @pytest.mark.parametrize(
@@ -149,24 +164,13 @@ def test_oauth_config(
 
 # TODO: After these tests are finished and the revamp is complete,
 # the tests should be refactored to be parameters instead of separate tests
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
-def test_when_consumer_lag_less_than_zero_then_emit_event(
-    mock_generic_client, check, kafka_instance, dd_run_check, aggregator
-):
+def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance, dd_run_check, aggregator):
     # Given
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 1}
-    mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = ['partition1']
-    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
-    mock_generic_client.return_value = mock_client
+    mock_client = seed_mock_client()
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
 
     # When
-    kafka_consumer_check = check(kafka_instance)
     dd_run_check(kafka_consumer_check)
 
     # Then
@@ -216,25 +220,16 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
     )
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
-def test_when_partition_is_none_then_emit_warning_log(
-    mock_generic_client, check, kafka_instance, dd_run_check, aggregator, caplog
-):
+def test_when_partition_is_none_then_emit_warning_log(check, kafka_instance, dd_run_check, aggregator, caplog):
     # Given
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 1}
-    mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = None
-    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
-    mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
-    # When
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = None
     kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    # When
     dd_run_check(kafka_consumer_check)
 
     # Then
@@ -262,25 +257,18 @@ def test_when_partition_is_none_then_emit_warning_log(
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_partition_not_in_partitions_then_emit_warning_log(
-    mock_generic_client, check, kafka_instance, dd_run_check, aggregator, caplog
+    check, kafka_instance, dd_run_check, aggregator, caplog
 ):
     # Given
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 1}
-    mock_client = mock.MagicMock()
-    mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = ['partition2']
-    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
-    mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
 
-    # When
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = ['partition2']
     kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    # When
     dd_run_check(kafka_consumer_check)
 
     # Then
@@ -308,25 +296,23 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_metrics(
-    mock_generic_client, kafka_instance, dd_run_check, aggregator, caplog
+    check, kafka_instance, dd_run_check, aggregator, caplog
 ):
     # Given
+    caplog.set_level(logging.WARNING)
+
+    mock_client = seed_mock_client()
     # consumer_offset = {(consumer_group, topic, partition): offset}
     consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
     # highwater_offset = {(topic, partition): offset}
     highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
-    mock_client = mock.MagicMock()
     mock_client.get_consumer_offsets.return_value = consumer_offset
     mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = ['partition1']
-    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
-    mock_generic_client.return_value = mock_client
-    caplog.set_level(logging.WARNING)
+    kafka_consumer_check = check(kafka_instance, init_config={'max_partition_contexts': 2})
+    kafka_consumer_check.client = mock_client
 
     # When
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 2}, [kafka_instance])
     dd_run_check(kafka_consumer_check)
 
     # Then
@@ -339,25 +325,23 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     assert expected_warning in caplog.text
 
 
-@mock.patch("datadog_checks.kafka_consumer.kafka_consumer.KafkaClient")
 def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metrics(
-    mock_generic_client, kafka_instance, dd_run_check, aggregator, caplog
+    check, kafka_instance, dd_run_check, aggregator, caplog
 ):
     # Given
+    caplog.set_level(logging.DEBUG)
+
+    mock_client = seed_mock_client()
     # consumer_offset = {(consumer_group, topic, partition): offset}
     consumer_offset = {("consumer_group1", "topic1", "partition1"): 2, ("consumer_group1", "topic2", "partition2"): 2}
     # highwater_offset = {(topic, partition): offset}
     highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
-    mock_client = mock.MagicMock()
     mock_client.get_consumer_offsets.return_value = consumer_offset
     mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
-    mock_client.get_partitions_for_topic.return_value = ['partition1']
-    mock_client.describe_consumer_groups.return_value = ('consumger_group', 'STABLE')
-    mock_generic_client.return_value = mock_client
-    caplog.set_level(logging.DEBUG)
+    kafka_consumer_check = check(kafka_instance, init_config={'max_partition_contexts': 3})
+    kafka_consumer_check.client = mock_client
 
     # When
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {'max_partition_contexts': 3}, [kafka_instance])
     dd_run_check(kafka_consumer_check)
 
     # Then
