@@ -136,15 +136,14 @@ XE_SESSION_DATADOG = "datadog"
 XE_SESSION_SYSTEM = "system_health"
 XE_SESSIONS_QUERY = f"""
 SELECT
-    s.name AS session_name
+    s.name AS session_name, t.target_name AS target_name
 FROM
     sys.dm_xe_sessions s
 JOIN
     sys.dm_xe_session_targets t
     ON s.address = t.event_session_address
 WHERE
-    t.target_name = 'ring_buffer'
-    AND s.name IN ('{XE_SESSION_DATADOG}', '{XE_SESSION_SYSTEM}');
+    s.name IN ('{XE_SESSION_DATADOG}', '{XE_SESSION_SYSTEM}');
 """
 
 DEADLOCK_TIMESTAMP_ALIAS = "timestamp"

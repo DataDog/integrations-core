@@ -11,6 +11,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_EVENT_FILE, XE_RING_BUFFER
 from datadog_checks.sqlserver.queries import (
     DEADLOCK_TIMESTAMP_ALIAS,
     DEADLOCK_XML_ALIAS,
@@ -135,14 +136,24 @@ class Deadlocks(DBMAsyncJob):
                     if not rows:
                         raise NoXESessionError(NO_XE_SESSION_ERROR)
                     xe_system_found = False
+                    xe_system_xe_file_found = False
                     for row in rows:
-                        if (session := row[0]) in (XE_SESSION_DATADOG):
+                        (session, target) = row
+                        if session in (XE_SESSION_DATADOG):
                             self._xe_session_name = session
+                            self._xe_session_target = target
                             return
                         if session == XE_SESSION_SYSTEM:
                             xe_system_found = True
+                            if target == XE_EVENT_FILE:
+                                xe_system_xe_file_found = True
+                            
                     if xe_system_found:
                         self._xe_session_name = XE_SESSION_SYSTEM
+                        if xe_system_xe_file_found:
+                            self._xe_session_target = XE_EVENT_FILE
+                        else:
+                            self._xe_session_target = XE_RING_BUFFER
                         return
         raise NoXESessionError(NO_XE_SESSION_ERROR)
 
@@ -153,7 +164,7 @@ class Deadlocks(DBMAsyncJob):
             except NoXESessionError as e:
                 self._log.error(str(e))
                 return
-            self._log.info(f'Using XE session {self._xe_session_name} to collect deadlocks')
+            self._log.info(f'Using XE session [{self._xe_session_name}], target [{self._xe_session_target}] to collect deadlocks')
 
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
