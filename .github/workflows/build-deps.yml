@@ -262,7 +262,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: target-macos
+        name: target-macos-${{ matrix.job.arch }}
         path: output
 
   publish:
