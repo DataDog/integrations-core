@@ -102,4 +102,8 @@ files:
         headers.value.example:
           X-Octopus-ApiKey: "<OCTOPUS_API_KEY>"
         auth_token.display_priority: 4
-
+  - template: logs
+    example:
+    - type: integration
+      source: octopus-deploy
+      service: <SERVICE_NAME>
