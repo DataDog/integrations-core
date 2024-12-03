@@ -48,8 +48,7 @@ jobs:
     # If we guess the PR number wrong, the validation will catch it and suggest a simple fix.
     - name: Update changelogs
       env:
-        GH_TOKEN:
-          ${{ github.token }}
+        DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: |-
         ddev release changelog new added -m "Update dependencies"
     - name: Create Pull Request

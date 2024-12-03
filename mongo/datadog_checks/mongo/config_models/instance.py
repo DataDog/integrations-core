@@ -73,6 +73,16 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class MetricsCollectionInterval(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection: Optional[int] = None
+    collections_indexes_stats: Optional[int] = None
+    sharded_data_distribution: Optional[int] = None
+
+
 class OperationSamples(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -128,6 +138,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     hosts: Optional[Union[str, tuple[str, ...]]] = None
     metric_patterns: Optional[MetricPatterns] = None
+    metrics_collection_interval: Optional[MetricsCollectionInterval] = None
     min_collection_interval: Optional[float] = None
     operation_samples: Optional[OperationSamples] = None
     options: Optional[MappingProxyType[str, Any]] = None

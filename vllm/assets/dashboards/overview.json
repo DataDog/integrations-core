@@ -448,7 +448,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vllm.avg.generation_throughput.toks_per_s{$model_name}"
+                                            "query": "sum:vllm.avg.generation_throughput.toks_per_s{$model_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
