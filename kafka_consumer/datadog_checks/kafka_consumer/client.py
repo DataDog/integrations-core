@@ -14,6 +14,7 @@ class KafkaClient:
         self.config = config
         self.log = log
         self._kafka_client = None
+        self._consumer = None
         self.topic_partition_cache = {}
 
     @property
@@ -31,7 +32,7 @@ class KafkaClient:
 
         return self._kafka_client
 
-    def __create_consumer(self, consumer_group):
+    def open_consumer(self, consumer_group):
         config = {
             "bootstrap.servers": self.config._kafka_connect_str,
             "group.id": consumer_group,
@@ -41,7 +42,12 @@ class KafkaClient:
         }
         config.update(self.__get_authentication_config())
 
-        return Consumer(config, logger=self.log)
+        self._consumer = Consumer(config, logger=self.log)
+        self.log.debug("Consumer instance %s created for group %s", self._consumer, consumer_group)
+
+    def close_consumer(self):
+        self.log.debug("Closing consumer instance %s", self._consumer)
+        self._consumer.close()
 
     def __get_authentication_config(self):
         config = {
@@ -79,6 +85,12 @@ class KafkaClient:
 
         return config
 
+    def consumer_list_topics(self):
+        return self._consumer.list_topics(timeout=self.config._request_timeout)
+
+    def consumer_offsets_for_times(self, partitions):
+        return self._consumer.offsets_for_times(partitions=partitions, timeout=self.config._request_timeout)
+
     def get_highwater_offsets(self, consumer_offsets):
         self.log.debug('Getting highwater offsets')
 
@@ -102,9 +114,8 @@ class KafkaClient:
 
             topic_partitions_for_highwater_offsets = set()
 
-            consumer = self.__create_consumer(consumer_group)
-            self.log.debug("Consumer instance %s created for group %s", consumer, consumer_group)
-            cluster_metadata = consumer.list_topics(timeout=self.config._request_timeout)
+            self.open_consumer(consumer_group)
+            cluster_metadata = self.consumer_list_topics()
             try:
                 cluster_id = cluster_metadata.cluster_id
             except AttributeError:
@@ -140,9 +151,8 @@ class KafkaClient:
                     len(topic_partitions_for_highwater_offsets),
                     consumer_group,
                 )
-                for topic_partition_with_highwater_offset in consumer.offsets_for_times(
+                for topic_partition_with_highwater_offset in self.consumer_offsets_for_times(
                     partitions=list(topic_partitions_for_highwater_offsets),
-                    timeout=self.config._request_timeout,
                 ):
                     self.log.debug('Topic partition with highwater offset: %s', topic_partition_with_highwater_offset)
                     topic = topic_partition_with_highwater_offset.topic
@@ -154,8 +164,7 @@ class KafkaClient:
             else:
                 self.log.debug('No new highwater offsets to query for consumer group %s', consumer_group)
 
-            self.log.debug("Closing consumer instance %s", consumer)
-            consumer.close()
+            self.close_consumer()
 
         self.log.debug('Got %s highwater offsets', len(highwater_offsets))
         return highwater_offsets, cluster_id
