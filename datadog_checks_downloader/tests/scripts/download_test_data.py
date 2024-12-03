@@ -18,7 +18,7 @@ from zipfile import ZipFile
 
 REPOSITORY_BASE_URL = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com/'
 INTEGRATION = 'active-directory'
-INTEGRATION_VERSION = '1.10.0'
+INTEGRATION_VERSION = '4.0.0'
 ZIP_FILENAME = f'datadog-{INTEGRATION}-{INTEGRATION_VERSION}.zip'
 TARGET_DIR = Path(__file__).parent.parent / 'data'
 

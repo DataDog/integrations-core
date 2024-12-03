@@ -7,11 +7,13 @@ import time
 from typing import List, Optional
 
 from bson import json_util
+from pymongo.errors import NotPrimaryError
 
 from datadog_checks.mongo.dbm.utils import (
     format_key_name,
     get_command_collection,
     get_command_truncation_state,
+    get_db_from_namespace,
     get_explain_plan,
     obfuscate_command,
     should_explain_operation,
@@ -106,6 +108,9 @@ class MongoOperationSamples(DBMAsyncJob):
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping operation samples collection on arbiter node")
             return False
+        elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
+            self._check.log.debug("Skipping operation samples collection on node in recovering state")
+            return False
         return True
 
     def _get_operation_samples(self, now, databases_monitored: List[str]):
@@ -148,10 +153,16 @@ class MongoOperationSamples(DBMAsyncJob):
                 continue
 
     def _get_current_op(self):
-        operations = self._check.api_client.current_op()
-        for operation in operations:
-            self._check.log.debug("Found operation: %s", operation)
-            yield operation
+        try:
+            operations = self._check.api_client.current_op()
+            for operation in operations:
+                self._check.log.debug("Found operation: %s", operation)
+                yield operation
+        except NotPrimaryError as e:
+            # If the node is not primary or secondary, for example node is in recovering state
+            # we could not run the $currentOp command to collect operation samples.
+            self._check.log.warning("Could not collect operation samples, node is not primary or secondary")
+            self._check.log.debug("Error details: %s", e)
 
     def _should_include_operation(self, operation: dict, databases_monitored: List[str]) -> bool:
         # Skip operations from db that are not configured to be monitored
@@ -160,7 +171,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping operation without namespace: %s", operation)
             return False
 
-        db, _ = namespace.split(".", 1)
+        db = get_db_from_namespace(namespace)
         if db not in databases_monitored:
             self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
             return False
@@ -203,7 +214,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
     def _get_operation_metadata(self, operation: dict) -> OperationSampleOperationMetadata:
         namespace = operation.get("ns")
-        db, _ = namespace.split(".", 1)
+        db = get_db_from_namespace(namespace)
         command = operation.get("command", {})
         return {
             "type": operation.get("type"),
@@ -305,9 +316,11 @@ class MongoOperationSamples(DBMAsyncJob):
             "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags()),
             "timestamp": now * 1000,
+            "service": self._check._config.service,
             "network": {
                 "client": operation_metadata["client"],
             },
+            "cloud_metadata": self._check._config.cloud_metadata,
             "db": {
                 "instance": operation_metadata["dbname"],
                 "plan": explain_plan,
@@ -359,6 +372,8 @@ class MongoOperationSamples(DBMAsyncJob):
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(),
+            "cloud_metadata": self._check._config.cloud_metadata,
             "timestamp": now * 1000,
+            "service": self._check._config.service,
             "mongodb_activity": activities,
         }

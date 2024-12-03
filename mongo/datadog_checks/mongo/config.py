@@ -11,7 +11,7 @@ from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
 
 
 class MongoConfig(object):
-    def __init__(self, instance, log):
+    def __init__(self, instance, log, init_config):
         self.log = log
         self.min_collection_interval = int(instance.get('min_collection_interval', 15))
 
@@ -95,6 +95,7 @@ class MongoConfig(object):
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])
+        self._metrics_collection_interval = instance.get("metrics_collection_interval", {})
 
         self._base_tags = list(set(instance.get('tags', [])))
 
@@ -102,6 +103,7 @@ class MongoConfig(object):
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
         self.cluster_name = instance.get('cluster_name', None)
+        self.cloud_metadata = self._compute_cloud_metadata(instance)
         self._operation_samples_config = instance.get('operation_samples', {})
         self._slow_operations_config = instance.get('slow_operations', {})
         self._schemas_config = instance.get('schemas', {})
@@ -119,6 +121,7 @@ class MongoConfig(object):
         # TODO: service check and metric tags should be updated to be dynamic with auto-discovered databases
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
+        self.service = instance.get('service') or init_config.get('service') or ''
 
     def _get_clean_server_name(self):
         try:
@@ -157,6 +160,15 @@ class MongoConfig(object):
         if self.cluster_name:
             tags.append('clustername:%s' % self.cluster_name)
         return tags
+
+    def _compute_cloud_metadata(self, instance):
+        cloud_metadata = {}
+        if aws := instance.get('aws'):
+            cloud_metadata['aws'] = {
+                'instance_endpoint': aws.get('instance_endpoint'),
+                'cluster_identifier': aws.get('cluster_identifier') or self.cluster_name,
+            }
+        return cloud_metadata
 
     @property
     def operation_samples(self):
@@ -245,3 +257,19 @@ class MongoConfig(object):
             database_autodiscovery_config.get("max_collections_per_database", 100)
         )
         return database_autodiscovery_config
+
+    @property
+    def metrics_collection_interval(self):
+        '''
+        metrics collection interval is used to customize how often to collect different types of metrics
+        by default, metrics are collected on every check run with default interval of 15 seconds
+        '''
+        return {
+            # $collStats and $indexStats are collected on every check run but they can get expensive on large databases
+            'collection': int(self._metrics_collection_interval.get('collection', self.min_collection_interval)),
+            'collections_indexes_stats': int(
+                self._metrics_collection_interval.get('collections_indexes_stats', self.min_collection_interval)
+            ),
+            # $shardDataDistribution stats are collected every 5 minutes by default due to the high resource usage
+            'sharded_data_distribution': int(self._metrics_collection_interval.get('sharded_data_distribution', 300)),
+        }

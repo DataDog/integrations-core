@@ -57,6 +57,17 @@ UNEXPLAINABLE_COMMANDS = frozenset(
     ]
 )
 
+UNEXPLAINABLE_PIPELINE_STAGES = frozenset(
+    [
+        "$collStats",
+        "$currentOp",
+        "$indexStats",
+        "$listSearchIndexes",
+        "$sample",
+        "$shardedDataDistribution",
+    ]
+)
+
 COMMAND_KEYS_TO_REMOVE = frozenset(["comment", "lsid", "$clusterTime"])
 
 EXPLAIN_PLAN_KEYS_TO_REMOVE = frozenset(
@@ -108,12 +119,25 @@ def should_explain_operation(
     if any(command.get(key) for key in UNEXPLAINABLE_COMMANDS):
         return False
 
-    db, _ = namespace.split(".", 1)
-    if db in MONGODB_SYSTEM_DATABASES:
-        return False
+    # if UNEXPLAINABLE_PIPELINE_STAGES in command pipeline stages, skip
+    if pipeline := command.get("pipeline"):
+        stages = [list(stage.keys())[0] for stage in pipeline if isinstance(stage, dict)]
+        if any(stage in UNEXPLAINABLE_PIPELINE_STAGES for stage in stages):
+            return False
 
-    if not explain_plan_rate_limiter.acquire(explain_plan_cache_key):
-        # Skip operations that have been explained recently
+    if namespace:
+        # namespace is in the form of db.collection
+        # however, some database level commands in earlier versions of MongoDB <= 5.0
+        # do not have a collection name in the namespace
+        # e.g. "admin.$cmd" vs. "admin"
+        db = get_db_from_namespace(namespace)
+        if db in MONGODB_SYSTEM_DATABASES:
+            return False
+
+        if not explain_plan_rate_limiter.acquire(explain_plan_cache_key):
+            # Skip operations that have been explained recently
+            return False
+    else:
         return False
 
     return True
@@ -159,7 +183,7 @@ def get_command_truncation_state(command: dict) -> Optional[str]:
 
 def get_command_collection(command: dict, ns: str) -> Optional[str]:
     if ns:
-        _, collection = ns.split(".", 1)
+        collection = get_collection_from_namespace(ns)
         if collection != '$cmd':
             return collection
 
@@ -210,3 +234,16 @@ def obfuscate_literals(value):
         return regex.Regex("?", value.flags)
     else:
         return value
+
+
+def get_db_from_namespace(namespace: str) -> Optional[str]:
+    if not namespace:
+        return None
+    return namespace.split(".", 1)[0]
+
+
+def get_collection_from_namespace(namespace: str) -> Optional[str]:
+    if not namespace:
+        return None
+    splitted_ns = namespace.split(".", 1)
+    return splitted_ns[1] if len(splitted_ns) > 1 else None
