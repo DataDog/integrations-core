@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import socket
+
 import pytest
 
 from .common import _get_expected_tags, check_bgw_metrics, check_common_metrics
@@ -23,6 +25,7 @@ def test_e2e(check, dd_agent_check, pg_instance):
         cur.execute("SHOW cluster_name;")
         check.cluster_name = cur.fetchone()[0]
 
+    check._database_hostname = socket.gethostname().lower()
     expected_tags = _get_expected_tags(check, pg_instance, with_host=False)
     check_bgw_metrics(aggregator, expected_tags)
     check_common_metrics(aggregator, expected_tags=expected_tags, count=None)
