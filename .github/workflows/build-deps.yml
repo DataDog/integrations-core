@@ -195,9 +195,16 @@ jobs:
         path: output
 
   build-macos:
-    name: Target macOS
-    runs-on: macos-13
-
+    name: Target ${{ matrix.job.image }}
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+        - os: macos-13
+          image: "Intel macOS"
+        - os: macos-14
+          image: "M1 macOS"
     env:
       TARGET_NAME: macos-x86_64
       OUT_DIR: output/macos-x86_64
@@ -320,6 +327,7 @@ jobs:
     - name: Create pull request
       uses: peter-evans/create-pull-request@v5
       with:
+        base: pythyu/macos_arm_build
         token: ${{ steps.token-generator.outputs.token }}
         title: Update dependency resolution
         commit-message: Update dependency resolution
