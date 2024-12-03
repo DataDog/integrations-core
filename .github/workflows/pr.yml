@@ -17,9 +17,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
+  test-linux:
     uses: ./.github/workflows/test-fips.yml
     with:
       platform: linux
       runner: '["ubuntu-22.04"]'
+    secrets: inherit
+
+  test-windows:
+    uses: ./.github/workflows/test-fips.yml
+    with:
+      platform: windows
+      runner: '["windows-2022"]'
     secrets: inherit

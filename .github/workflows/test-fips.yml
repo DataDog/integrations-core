@@ -38,6 +38,7 @@ jobs:
         cache: 'pip'
 
     - name: Install System Dependencies
+      if: runner.os == 'Linux'
       run: |
         sudo apt update && \
         sudo apt install -y --no-install-recommends \
@@ -51,13 +52,45 @@ jobs:
         sudo rm -rf /var/lib/apt/lists/*
 
     - name: Install OpenSSL
+      if: runner.os == 'Linux'
       run: |
-        wget https://www.openssl.org/source/openssl-3.0.0.tar.gz \
-        && tar -xvzf openssl-3.0.0.tar.gz \
-        && cd openssl-3.0.0 \
+        wget https://www.openssl.org/source/openssl-3.0.9.tar.gz \
+        && tar -xvzf openssl-3.0.9.tar.gz \
+        && cd openssl-3.0.9 \
         && ./Configure enable-fips \
         && make \
-        && make install
+        && sudo make install
+
+    # Configure environment for Visual Studio
+    - name: Setup Visual Studio Environment
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        $vswherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe";
+        $vsInstallPath = & $vswherePath -latest -products * -requires Microsoft.Component.MSBuild -property installationPath;
+        $vsDevCmd = "$vsInstallPath\Common7\Tools\VsDevCmd.bat";
+        echo "VS_DEV_CMD=$vsDevCmd" >> $env:GITHUB_ENV;
+
+    # Install OpenSSL and FIPS
+    - name: Download and Install OpenSSL with FIPS
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        $OPENSSL_VERSION = "3.0.9";
+        Invoke-WebRequest -Uri "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -OutFile "openssl-${OPENSSL_VERSION}.tar.gz";
+        tar -xzf "openssl-${OPENSSL_VERSION}.tar.gz";
+        cd "openssl-${OPENSSL_VERSION}";
+        perl Configure VC-WIN64A enable-fips;
+        nmake;
+        nmake install;
 
     - name: Install Cryptography
       run: pip install cryptography
+
+    # Verify OpenSSL Installation
+    - name: Verify OpenSSL and FIPS Provider
+      run: |
+        # Check installed OpenSSL version
+        openssl version -a
+        # Confirm FIPS provider is installed
+        openssl list -providers
