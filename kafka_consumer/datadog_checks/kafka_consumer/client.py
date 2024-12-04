@@ -147,48 +147,27 @@ class KafkaClient:
         consumer_groups = self._get_consumer_groups()
         self.log.debug('Identified %s consumer groups', len(consumer_groups))
 
-        futures = self._get_consumer_offset_futures(consumer_groups)
-        self.log.debug('%s futures to be waited on', len(futures))
+        offsets = self._get_offsets_for_groups(consumer_groups)
+        self.log.debug('%s futures to be waited on', len(offsets))
 
-        for future in as_completed(futures):
-            try:
-                response_offset_info = future.result()
-            except KafkaException as e:
-                self.log.debug("Failed to read consumer offsets for future %s: %s", future, e)
-            else:
-                consumer_group = response_offset_info.group_id
-                topic_partitions = response_offset_info.topic_partitions
+        for consumer_group, topic_partitions in offsets:
 
-                self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
-                self.log.debug('RESULT TOPIC PARTITIONS: %s', topic_partitions)
+            self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
 
-                for topic_partition in topic_partitions:
-                    topic = topic_partition.topic
-                    partition = topic_partition.partition
-                    offset = topic_partition.offset
+            for topic, partition, offset in topic_partitions:
+                self.log.debug('RESULTS TOPIC: %s', topic)
+                self.log.debug('RESULTS PARTITION: %s', partition)
+                self.log.debug('RESULTS OFFSET: %s', offset)
 
-                    self.log.debug('RESULTS TOPIC: %s', topic)
-                    self.log.debug('RESULTS PARTITION: %s', partition)
-                    self.log.debug('RESULTS OFFSET: %s', offset)
+                if offset == OFFSET_INVALID:
+                    continue
 
-                    if topic_partition.error:
-                        self.log.debug(
-                            "Encountered error: %s. Occurred with topic: %s; partition: [%s]",
-                            topic_partition.error.str(),
-                            topic_partition.topic,
-                            str(topic_partition.partition),
-                        )
-                        continue
-
-                    if offset == OFFSET_INVALID:
-                        continue
-
-                    if self.config._monitor_unlisted_consumer_groups or not self.config._consumer_groups_compiled_regex:
+                if self.config._monitor_unlisted_consumer_groups or not self.config._consumer_groups_compiled_regex:
+                    consumer_offsets[(consumer_group, topic, partition)] = offset
+                else:
+                    to_match = f"{consumer_group},{topic},{partition}"
+                    if self.config._consumer_groups_compiled_regex.match(to_match):
                         consumer_offsets[(consumer_group, topic, partition)] = offset
-                    else:
-                        to_match = f"{consumer_group},{topic},{partition}"
-                        if self.config._consumer_groups_compiled_regex.match(to_match):
-                            consumer_offsets[(consumer_group, topic, partition)] = offset
 
         self.log.debug('Got %s consumer offsets', len(consumer_offsets))
         return consumer_offsets
@@ -200,14 +179,47 @@ class KafkaClient:
         else:
             return self.config._consumer_groups
 
-    def _list_consumer_group_offsets(self, cg_tp):
+    def list_consumer_group_offsets(self, groups):
         """
-        :returns: A dict of futures for each group, keyed by the group id.
-                  The future result() method returns :class:`ConsumerGroupTopicPartitions`.
+        For every group and (optionally) its topics and partitions retrieve consumer offsets.
 
-        :rtype: dict[str, future]
+        As input expects a list of tuples: (consumer_group_id, topic_partitions).
+        topic_partitions are either None to indicate we want all topics and partitions OR a list of (topic, partition).
+
+        Returns a list of tuples with members:
+        1. group id
+        2. list of tuples: (topic, partition, offset)
         """
-        return self.kafka_client.list_consumer_group_offsets([cg_tp])
+        futures = []
+        for consumer_group, topic_partitions in groups:
+            topic_partitions = (
+                topic_partitions if topic_partitions is None else [TopicPartition(t, p) for t, p in topic_partitions]
+            )
+            futures.append(
+                self.kafka_client.list_consumer_group_offsets(
+                    [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)]
+                )[consumer_group]
+            )
+        offsets = []
+        for completed in as_completed(futures):
+            try:
+                response_offset_info = completed.result()
+            except KafkaException as e:
+                self.log.debug("Failed to read consumer offsets for future %s: %s", completed, e)
+                continue
+            tpo = []
+            for tp in response_offset_info.topic_partitions:
+                if tp.error:
+                    self.log.debug(
+                        "Encountered error: %s. Occurred with topic: %s; partition: [%s]",
+                        tp.error.str(),
+                        tp.topic,
+                        str(tp.partition),
+                    )
+                    continue
+                tpo.append((tp.topic, tp.partition, tp.offset))
+            offsets.append((response_offset_info.group_id, tpo))
+        return offsets
 
     def describe_consumer_groups(self, consumer_group):
         """
@@ -222,41 +234,27 @@ class KafkaClient:
     def close_admin_client(self):
         self._kafka_client = None
 
-    def _get_consumer_offset_futures(self, consumer_groups):
-        futures = []
+    def _get_offsets_for_groups(self, consumer_groups):
+        groups = []
 
         # If either monitoring all consumer groups or regex, return all consumer group offsets (can filter later)
         if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
             for consumer_group in consumer_groups:
-                futures.append(
-                    self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
-                )
-            return futures
+                groups.append((consumer_group, None))
+            return self.list_consumer_group_offsets(groups)
 
         for consumer_group in consumer_groups:
             # If topics are specified
             topics = consumer_groups.get(consumer_group)
             if not topics:
-                futures.append(
-                    self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group))[consumer_group]
-                )
+                groups.append((consumer_group, None))
                 continue
 
-            for topic in topics:
-                # If partitions are defined
-                if partitions := topics[topic]:
-                    topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
-                # If partitions are not defined
-                else:
-                    # get all the partitions for this topic
+            for topic, partitions in topics.items():
+                if not partitions:
                     partitions = self.get_partitions_for_topic(topic)
+                topic_partitions = [(topic, p) for p in partitions]
 
-                    topic_partitions = [TopicPartition(topic, partition) for partition in partitions]
+                groups.append((consumer_group, topic_partitions))
 
-                futures.append(
-                    self._list_consumer_group_offsets(ConsumerGroupTopicPartitions(consumer_group, topic_partitions))[
-                        consumer_group
-                    ]
-                )
-
-        return futures
+        return self.list_consumer_group_offsets(groups)
