@@ -544,6 +544,7 @@ instances:
         ## @param collect_comments - boolean - optional - default: true
         ## Set to `false` to disable the collection of comments in your SQL statements.
         ## Requires `collect_metadata: true`.
+        ## Note: This option must be `true` in order to propagate APM traces.
         #
         # collect_comments: true
 

@@ -665,6 +665,7 @@ files:
                 description: |
                   Set to `false` to disable the collection of comments in your SQL statements.
                   Requires `collect_metadata: true`.
+                  Note: This option must be `true` in order to propagate APM traces.
                 value:
                   type: boolean
                   example: true
