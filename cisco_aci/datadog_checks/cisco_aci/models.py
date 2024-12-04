@@ -306,6 +306,7 @@ class TopologyLinkMetadata(BaseModel):
     source_type: Optional[SourceType] = Field(default=None)
     local: Optional[TopologyLinkSide] = Field(default=None)
     remote: Optional[TopologyLinkSide] = Field(default=None)
+    integration: Optional[str] = Field(default='cisco-aci')
 
 
 class NetworkDevicesMetadata(BaseModel):
