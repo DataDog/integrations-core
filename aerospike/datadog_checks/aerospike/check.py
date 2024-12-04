@@ -18,9 +18,5 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
-            # enabling histogram to be treated as distribution
-            'collect_histogram_buckets': 'true',
-            'histogram_buckets_as_distributions': 'true',
-            'collect_counters_with_distributions': 'true',
             'rename_labels': {'cluster_name': 'aerospike_cluster', 'service': 'aerospike_service'},
         }
