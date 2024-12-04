@@ -110,19 +110,13 @@ class KafkaClient:
         ]
 
     def get_partitions_for_topic(self, topic):
-        if partitions := self.topic_partition_cache.get(topic):
-            return partitions
-
         try:
             cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
         except KafkaException as e:
             self.log.error("Received exception when getting partitions for topic %s: %s", topic, e)
-            return None
-        else:
-            topic_metadata = cluster_metadata.topics[topic]
-            partitions = list(topic_metadata.partitions.keys())
-            self.topic_partition_cache[topic] = partitions
-            return partitions
+            return []
+        topic_metadata = cluster_metadata.topics[topic]
+        return list(topic_metadata.partitions)
 
     def request_metadata_update(self):
         # https://github.com/confluentinc/confluent-kafka-python/issues/594
@@ -252,7 +246,10 @@ class KafkaClient:
 
             for topic, partitions in topics.items():
                 if not partitions:
-                    partitions = self.get_partitions_for_topic(topic)
+                    if topic in self.topic_partition_cache:
+                        partitions = self.topic_partition_cache[topic]
+                    else:
+                        partitions = self.topic_partition_cache[topic] = self.get_partitions_for_topic(topic)
                 topic_partitions = [(topic, p) for p in partitions]
 
                 groups.append((consumer_group, topic_partitions))
