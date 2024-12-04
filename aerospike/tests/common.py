@@ -27,6 +27,8 @@ EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.aerospike_namespace_client_read_success',
     'aerospike.aerospike_namespace_client_read_not_found',
     'aerospike.aerospike_namespace_client_read_timeout',
+    'aerospike.aerospike_namespace_client_write_timeout',
+    'aerospike.aerospike_namespace_sindex_num_partitions',
     'aerospike.aerospike_namespace_client_read_filtered_out',
     'aerospike.aerospike_namespace_client_udf_error',
     'aerospike.aerospike_namespace_client_write_error',
