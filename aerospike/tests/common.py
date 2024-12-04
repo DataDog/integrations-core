@@ -123,7 +123,7 @@ EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.aerospike_sindex_nbtr_memory_used',
     'aerospike.aerospike_sindex_stat_gc_recs',
     'aerospike.aerospike_sindex_write_error',
-    'aerospike.aerospike_sindex_write_success',            
+    'aerospike.aerospike_sindex_write_success',
 ]
 
 EXPECTED_PROMETHEUS_METRICS_5_6 = [
