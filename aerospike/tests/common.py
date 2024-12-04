@@ -154,7 +154,7 @@ NAMESPACE_METRICS = [
     'retransmit_all_batch_sub_dup_res',
     'truncate_lut',
     'ops_sub_write_success',
-] 
+]
 
 TPS_METRICS = [
     'tps.write',
