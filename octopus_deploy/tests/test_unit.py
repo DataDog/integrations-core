@@ -1272,7 +1272,6 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
     )
 
 
-
 @pytest.mark.parametrize(
     ('mock_http_get', 'expected_log'),
     [
@@ -1614,7 +1613,9 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_deployment_metrics_deployments_http_failure(get_current_datetime, dd_run_check, aggregator, expected_log, caplog):
+def test_deployment_metrics_deployments_http_failure(
+    get_current_datetime, dd_run_check, aggregator, expected_log, caplog
+):
     instance = {'octopus_endpoint': 'http://localhost:80'}
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -1856,7 +1857,9 @@ def test_deployment_metrics_deployments_http_failure(get_current_datetime, dd_ru
 )
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
-def test_deployment_metrics_environments_http_failure(get_current_datetime, dd_run_check, aggregator, expected_log, caplog):
+def test_deployment_metrics_environments_http_failure(
+    get_current_datetime, dd_run_check, aggregator, expected_log, caplog
+):
     instance = {'octopus_endpoint': 'http://localhost:80', 'environments': {'include': ['test']}}
 
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
@@ -2080,3 +2083,33 @@ def test_deployment_metrics_environments_http_failure(get_current_datetime, dd_r
             'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
     )
+
+
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get):
+    instance = {'octopus_endpoint': 'http://localhost:80'}
+
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+    get_current_datetime.return_value = MOCKED_TIME2
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, _ = call
+        args_list += list(args)
+
+    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-1') == 1
+    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-2') == 1
+    assert args_list.count('http://localhost:80/api/Spaces-1/releases/Releases-3') == 1
+
+    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-17') == 1
+    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-18') == 1
+    assert args_list.count('http://localhost:80/api/Spaces-1/deployments/Deployments-19') == 1
+
+    assert args_list.count('http://localhost:80/api/Spaces-1/environments') == 5

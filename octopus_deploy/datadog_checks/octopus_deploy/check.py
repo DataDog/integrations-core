@@ -5,6 +5,7 @@
 import datetime
 from collections.abc import Iterable
 
+from cachetools import TTLCache
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
@@ -14,6 +15,9 @@ from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, Projects
 
 from .config_models import ConfigMixin
+
+TTL_CACHE_MAXSIZE = 50
+TTL_CACHE_TTL = 3600
 
 EVENT_TO_ALERT_TYPE = {
     'MachineHealthy': 'success',
@@ -26,6 +30,12 @@ EVENT_TO_ALERT_TYPE = {
     'MachineAdded': 'info',
     'MachineDeleted': 'info',
 }
+
+
+class Deployment:
+    def __init__(self, environment_name, release_version):
+        self.environment_name = environment_name
+        self.release_version = release_version
 
 
 class OctopusDeployCheck(AgentCheck, ConfigMixin):
@@ -42,6 +52,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._default_projects_discovery = {}
         self._projects_discovery = {}
         self._environments_discovery = {}
+        self._environments_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
+        self._deployments_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
+        self._releases_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         self._base_tags = self.instance.get("tags", [])
         self.collect_events = self.instance.get("collect_events", False)
 
@@ -245,6 +258,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             environment_name = environment.get("Name")
             environment_slug = environment.get("Slug")
             environment_id = environment.get("Id")
+            self._environments_cache[environment_id] = environment_name
             use_guided_failure = int(environment.get("UseGuidedFailure", False))
             allow_dynamic_infrastructure = int(environment.get("AllowDynamicInfrastructure", False))
 
@@ -349,12 +363,36 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def _get_deployment_tags(self, space_id, task):
         deployment_id = task.get("Arguments", {}).get("DeploymentId")
-        deployment = self._process_endpoint(f"api/{space_id}/deployments/{deployment_id}")
-        release_id = deployment.get("ReleaseId")
-        environment_id = deployment.get("EnvironmentId")
-        release = self._process_endpoint(f"api/{space_id}/releases/{release_id}")
-        release_version = release.get("Version")
-        environment_name = self._get_environmnet_name(environment_id, space_id)
+        self.log.debug("Getting deployment tags for deployment id: %s", deployment_id)
+        cached_deployment = self._deployments_cache.get(deployment_id)
+
+        if cached_deployment is not None:
+            release_version = cached_deployment.release_version
+            environment_name = cached_deployment.environment_name
+        else:
+            self.log.debug("Cached deployment not found for deployment id: %s", deployment_id)
+            deployment = self._process_endpoint(f"api/{space_id}/deployments/{deployment_id}")
+            release_id = deployment.get("ReleaseId")
+            environment_id = deployment.get("EnvironmentId")
+            environment_name = self._environments_cache.get(environment_id)
+
+            if environment_name is None:
+                self.log.debug(
+                    "Cached environment name not found for deployment id: %s, env id: %s", deployment_id, environment_id
+                )
+                environment_name = self._get_environmnet_name(environment_id, space_id)
+
+            release_version = self._releases_cache.get(release_id)
+            if release_version is None:
+                self.log.debug(
+                    "Cached release not found for deployment id: %s, release id: %s", deployment_id, release_id
+                )
+                release = self._process_endpoint(f"api/{space_id}/releases/{release_id}")
+                release_version = release.get("Version")
+                self._releases_cache[release_id] = release_version
+
+            self._deployments_cache[deployment_id] = Deployment(environment_name, release_version)
+
         tags = [
             f'deployment_id:{deployment_id}',
             f'release_version:{release_version}',
@@ -363,6 +401,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         return tags
 
     def _get_environmnet_name(self, environment_id, space_id):
+        self.log.debug("Getting environment name for environment %s", environment_id)
         if self.config.environments:
             environments = list(self._environments_discovery[space_id].get_items())
         else:
