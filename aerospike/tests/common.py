@@ -145,17 +145,11 @@ PROMETHEUS_XDR_METRICS = [
     'aerospike.aerospike_xdr_success',
 ]
 
-# all the namespace metrics are covered in EXPECTED_METRICS
-NAMESPACE_METRICS = [
-]
+NAMESPACE_METRICS = []
 
-# All TPS metrics are covered in EXPECTED_METRICS 
-TPS_METRICS = [
-]
+TPS_METRICS = []
 
-# we cover all metrics reported by exporter, as exporter is server agnostic
-LEGACY_SET_METRICS = [
-]
+LEGACY_SET_METRICS = []
 
 SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
 # we support dashboards only latest set metrics
@@ -163,9 +157,7 @@ SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
 
 ALL_METRICS = NAMESPACE_METRICS + LEGACY_SET_METRICS
 
-# required sindex metrics are added to the EXPECTED_LIST
-INDEXES_METRICS = [
-]
+INDEXES_METRICS = []
 
 STATS_METRICS = [
     'cluster_size',
@@ -269,9 +261,7 @@ lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered
 """
 
 # all datacenter metrics are referred as xdr metrics covered in PROMETHEUS_XDR_METRICS
-DATACENTER_METRICS = [
-]
+DATACENTER_METRICS = []
 
 # XDR metrics are covered in PROMETHEUS_XDR_METRICS
-XDR_DC_METRICS = [
-]
+XDR_DC_METRICS = [].extend(PROMETHEUS_XDR_METRICS)
