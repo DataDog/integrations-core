@@ -6,8 +6,6 @@ from concurrent.futures import as_completed
 from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
 from confluent_kafka.admin import AdminClient
 
-from datadog_checks.kafka_consumer.constants import OFFSET_INVALID
-
 
 class KafkaClient:
     def __init__(self, config, log) -> None:
@@ -15,7 +13,6 @@ class KafkaClient:
         self.log = log
         self._kafka_client = None
         self._consumer = None
-        self.topic_partition_cache = {}
 
     @property
     def kafka_client(self):
@@ -133,46 +130,6 @@ class KafkaClient:
             self.log.error("Failed to collect consumer groups: %s", e)
         return groups
 
-    def get_consumer_offsets(self):
-        # {(consumer_group, topic, partition): offset}
-        self.log.debug('Getting consumer offsets')
-        consumer_offsets = {}
-
-        consumer_groups = self._get_consumer_groups()
-        self.log.debug('Identified %s consumer groups', len(consumer_groups))
-
-        offsets = self._get_offsets_for_groups(consumer_groups)
-        self.log.debug('%s futures to be waited on', len(offsets))
-
-        for consumer_group, topic_partitions in offsets:
-
-            self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
-
-            for topic, partition, offset in topic_partitions:
-                self.log.debug('RESULTS TOPIC: %s', topic)
-                self.log.debug('RESULTS PARTITION: %s', partition)
-                self.log.debug('RESULTS OFFSET: %s', offset)
-
-                if offset == OFFSET_INVALID:
-                    continue
-
-                if self.config._monitor_unlisted_consumer_groups or not self.config._consumer_groups_compiled_regex:
-                    consumer_offsets[(consumer_group, topic, partition)] = offset
-                else:
-                    to_match = f"{consumer_group},{topic},{partition}"
-                    if self.config._consumer_groups_compiled_regex.match(to_match):
-                        consumer_offsets[(consumer_group, topic, partition)] = offset
-
-        self.log.debug('Got %s consumer offsets', len(consumer_offsets))
-        return consumer_offsets
-
-    def _get_consumer_groups(self):
-        # Get all consumer groups to monitor
-        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
-            return [grp for grp in self.list_consumer_groups() if grp]
-        else:
-            return self.config._consumer_groups
-
     def list_consumer_group_offsets(self, groups):
         """
         For every group and (optionally) its topics and partitions retrieve consumer offsets.
@@ -227,31 +184,3 @@ class KafkaClient:
 
     def close_admin_client(self):
         self._kafka_client = None
-
-    def _get_offsets_for_groups(self, consumer_groups):
-        groups = []
-
-        # If either monitoring all consumer groups or regex, return all consumer group offsets (can filter later)
-        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
-            for consumer_group in consumer_groups:
-                groups.append((consumer_group, None))
-            return self.list_consumer_group_offsets(groups)
-
-        for consumer_group in consumer_groups:
-            # If topics are specified
-            topics = consumer_groups.get(consumer_group)
-            if not topics:
-                groups.append((consumer_group, None))
-                continue
-
-            for topic, partitions in topics.items():
-                if not partitions:
-                    if topic in self.topic_partition_cache:
-                        partitions = self.topic_partition_cache[topic]
-                    else:
-                        partitions = self.topic_partition_cache[topic] = self.get_partitions_for_topic(topic)
-                topic_partitions = [(topic, p) for p in partitions]
-
-                groups.append((consumer_group, topic_partitions))
-
-        return self.list_consumer_group_offsets(groups)

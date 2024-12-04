@@ -23,10 +23,9 @@ def fake_consumer_offsets_for_times(partitions):
 def seed_mock_client():
     """Set some common defaults for the mock client to kafka."""
     client = mock.create_autospec(KafkaClient)
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    client.get_consumer_offsets.return_value = consumer_offset
+    client.list_consumer_groups.return_value = ["consumer_group1"]
     client.get_partitions_for_topic.return_value = ['partition1']
+    client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
     client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
     client.consumer_get_cluster_id_and_list_topics.return_value = (
         "cluster_id",
@@ -184,7 +183,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
     # Given
     mock_client = seed_mock_client()
     # We need the consumer offset to be higher than the highwater offset.
-    mock_client.get_consumer_offsets.return_value = {("consumer_group1", "topic1", "partition1"): 81}
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 81)])]
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
 
@@ -238,12 +237,12 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance,
     )
 
 
-def test_when_partition_is_none_then_emit_warning_log(check, kafka_instance, dd_run_check, aggregator, caplog):
+def test_when_no_partitions_then_emit_warning_log(check, kafka_instance, dd_run_check, aggregator, caplog):
     # Given
     caplog.set_level(logging.WARNING)
 
     mock_client = seed_mock_client()
-    mock_client.get_partitions_for_topic.return_value = None
+    mock_client.get_partitions_for_topic.return_value = []
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
 
@@ -321,9 +320,6 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     caplog.set_level(logging.WARNING)
 
     mock_client = seed_mock_client()
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    mock_client.get_consumer_offsets.return_value = consumer_offset
     kafka_consumer_check = check(kafka_instance, init_config={'max_partition_contexts': 2})
     kafka_consumer_check.client = mock_client
 
@@ -347,9 +343,10 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     caplog.set_level(logging.DEBUG)
 
     mock_client = seed_mock_client()
-    # consumer_offset = {(consumer_group, topic, partition): offset}
-    consumer_offset = {("consumer_group1", "topic1", "partition1"): 2, ("consumer_group1", "topic2", "partition2"): 2}
-    mock_client.get_consumer_offsets.return_value = consumer_offset
+    mock_client.list_consumer_group_offsets.return_value = [
+        ("consumer_group1", [("topic1", "partition1", 2)]),
+        ("consumer_group1", [("topic2", "partition2", 2)]),
+    ]
     kafka_consumer_check = check(kafka_instance, init_config={'max_partition_contexts': 3})
     kafka_consumer_check.client = mock_client
 
@@ -375,7 +372,7 @@ def test_when_empty_string_consumer_group_then_skip(kafka_instance):
         return_value=["", "my_consumer"],
     ):
         kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
-        assert kafka_consumer_check.client._get_consumer_groups() == ["my_consumer"]
+        assert kafka_consumer_check._get_consumer_groups() == ["my_consumer"]
 
 
 def test_get_interpolated_timestamp():

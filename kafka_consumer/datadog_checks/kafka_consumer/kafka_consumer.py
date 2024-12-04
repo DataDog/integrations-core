@@ -8,7 +8,7 @@ from time import time
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
-from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
+from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
 
 MAX_TIMESTAMPS = 1000
 
@@ -23,6 +23,7 @@ class KafkaCheck(AgentCheck):
         self._data_streams_enabled = is_affirmative(self.instance.get('data_streams_enabled', False))
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
+        self.topic_partition_cache = {}
         self.check_initializations.insert(0, self.config.validate_config)
 
     def check(self, _):
@@ -41,7 +42,7 @@ class KafkaCheck(AgentCheck):
         try:
             # Fetch consumer offsets
             # Expected format: {(consumer_group, topic, partition): offset}
-            consumer_offsets = self.client.get_consumer_offsets()
+            consumer_offsets = self.get_consumer_offsets()
         except Exception:
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
@@ -95,6 +96,74 @@ class KafkaCheck(AgentCheck):
         )
         if self.config._close_admin_client:
             self.client.close_admin_client()
+
+    def get_consumer_offsets(self):
+        # {(consumer_group, topic, partition): offset}
+        self.log.debug('Getting consumer offsets')
+        consumer_offsets = {}
+
+        consumer_groups = self._get_consumer_groups()
+        self.log.debug('Identified %s consumer groups', len(consumer_groups))
+
+        offsets = self._get_offsets_for_groups(consumer_groups)
+        self.log.debug('%s futures to be waited on', len(offsets))
+
+        for consumer_group, topic_partitions in offsets:
+
+            self.log.debug('RESULT CONSUMER GROUP: %s', consumer_group)
+
+            for topic, partition, offset in topic_partitions:
+                self.log.debug('RESULTS TOPIC: %s', topic)
+                self.log.debug('RESULTS PARTITION: %s', partition)
+                self.log.debug('RESULTS OFFSET: %s', offset)
+
+                if offset == OFFSET_INVALID:
+                    continue
+
+                if self.config._monitor_unlisted_consumer_groups or not self.config._consumer_groups_compiled_regex:
+                    consumer_offsets[(consumer_group, topic, partition)] = offset
+                else:
+                    to_match = f"{consumer_group},{topic},{partition}"
+                    if self.config._consumer_groups_compiled_regex.match(to_match):
+                        consumer_offsets[(consumer_group, topic, partition)] = offset
+
+        self.log.debug('Got %s consumer offsets', len(consumer_offsets))
+        return consumer_offsets
+
+    def _get_consumer_groups(self):
+        # Get all consumer groups to monitor
+        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
+            return [grp for grp in self.client.list_consumer_groups() if grp]
+        else:
+            return self.config._consumer_groups
+
+    def _get_offsets_for_groups(self, consumer_groups):
+        groups = []
+
+        # If either monitoring all consumer groups or regex, return all consumer group offsets (can filter later)
+        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
+            for consumer_group in consumer_groups:
+                groups.append((consumer_group, None))
+            return self.client.list_consumer_group_offsets(groups)
+
+        for consumer_group in consumer_groups:
+            # If topics are specified
+            topics = consumer_groups.get(consumer_group)
+            if not topics:
+                groups.append((consumer_group, None))
+                continue
+
+            for topic, partitions in topics.items():
+                if not partitions:
+                    if topic in self.topic_partition_cache:
+                        partitions = self.topic_partition_cache[topic]
+                    else:
+                        partitions = self.topic_partition_cache[topic] = self.client.get_partitions_for_topic(topic)
+                topic_partitions = [(topic, p) for p in partitions]
+
+                groups.append((consumer_group, topic_partitions))
+
+        return self.client.list_consumer_group_offsets(groups)
 
     def _load_broker_timestamps(self, persistent_cache_key):
         """Loads broker timestamps from persistent cache."""
@@ -208,7 +277,7 @@ class KafkaCheck(AgentCheck):
                 self.gauge('estimated_consumer_lag', lag, tags=consumer_group_tags)
                 reported_contexts += 1
             else:
-                if partitions is None:
+                if not partitions:
                     msg = (
                         "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic has no partitions "
                         "in the cluster, so skipping reporting these offsets."
