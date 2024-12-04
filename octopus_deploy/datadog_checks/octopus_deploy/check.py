@@ -375,13 +375,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             release_id = deployment.get("ReleaseId")
             environment_id = deployment.get("EnvironmentId")
             environment_name = self._environments_cache.get(environment_id)
-
-            if environment_name is None:
-                self.log.debug(
-                    "Cached environment name not found for deployment id: %s, env id: %s", deployment_id, environment_id
-                )
-                environment_name = self._get_environmnet_name(environment_id, space_id)
-
             release_version = self._releases_cache.get(release_id)
             if release_version is None:
                 self.log.debug(
@@ -399,19 +392,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             f'environment_name:{environment_name}',
         ]
         return tags
-
-    def _get_environmnet_name(self, environment_id, space_id):
-        self.log.debug("Getting environment name for environment %s", environment_id)
-        if self.config.environments:
-            environments = list(self._environments_discovery[space_id].get_items())
-        else:
-            environments = [
-                (None, environment.get("Name"), environment, None)
-                for environment in self._process_endpoint(f"api/{space_id}/environments").get('Items', [])
-            ]
-        for _, environment_name, environment, _ in environments:
-            if environment.get("Id") == environment_id:
-                return environment_name
 
     def _collect_server_nodes_metrics(self):
         self.log.debug("Collecting server node metrics.")
