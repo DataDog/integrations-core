@@ -81,12 +81,13 @@ def create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, namespa
         lldp_attrs = lldp_adj_ep.attributes
 
         local_device_id = device_map.get(lldp_attrs.local_device_dn)
-        local_interface_id = "{}:{}".format(local_device_id, lldp_attrs.local_port_id)
 
         local = TopologyLinkSide(
             device=TopologyLinkDevice(dd_id=local_device_id),
             interface=TopologyLinkInterface(
-                dd_id=local_interface_id, id=lldp_attrs.local_port_id, id_type='interface_name'
+                dd_id=get_interface_dd_id(local_device_id, lldp_attrs.local_port_id),
+                id=lldp_attrs.local_port_id,
+                id_type='interface_name',
             ),
         )
 

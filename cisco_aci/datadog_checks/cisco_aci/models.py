@@ -212,7 +212,7 @@ class InterfaceMetadata(BaseModel):
     device_id: Optional[str] = Field(default=None)
     id_tags: list = Field(default_factory=list)
     raw_id: Optional[str] = Field(default=None)
-    raw_id_type: Optional[str] = Field(default='cisco_aci')
+    raw_id_type: Optional[str] = Field(default='cisco-aci')
     index: Optional[int] = Field(default=None)
     name: Optional[str] = Field(default=None)
     alias: Optional[str] = Field(default=None)
