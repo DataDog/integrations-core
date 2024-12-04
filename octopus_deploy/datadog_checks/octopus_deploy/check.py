@@ -162,10 +162,10 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             tags = self._base_tags + [f'space_id:{space_id}', f'space_name:{space_name}']
             self.gauge("space.count", 1, tags=tags)
             self.log.debug("Processing space %s", space_name)
+            self._process_environments(space_id, space_name)
             self._process_project_groups(
                 space_id, space_name, space_config.get("project_groups") if space_config else None
             )
-            self._process_environments(space_id, space_name)
             if self.collect_events:
                 self._collect_new_events(space_id, space_name)
 
@@ -320,14 +320,19 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             task_name = task.get("Name")
             server_node = task.get("ServerNode")
             task_state = task.get("State")
-            tags = self._base_tags + [
-                f'space_name:{space_name}',
-                f'project_name:{project_name}',
-                f'task_id:{task_id}',
-                f'task_name:{task_name}',
-                f'task_state:{task_state}',
-                f'server_node:{server_node}',
-            ]
+            deployment_tags = self._get_deployment_tags(space_id, task)
+            tags = (
+                self._base_tags
+                + deployment_tags
+                + [
+                    f'space_name:{space_name}',
+                    f'project_name:{project_name}',
+                    f'task_id:{task_id}',
+                    f'task_name:{task_name}',
+                    f'task_state:{task_state}',
+                    f'server_node:{server_node}',
+                ]
+            )
             self.log.debug("Processing task id %s for project %s", task_id, project_name)
             queued_time, executing_time, completed_time = self._calculate_task_times(task)
             self.gauge("deployment.count", 1, tags=tags)
@@ -341,6 +346,33 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 if self.logs_enabled:
                     self.log.debug("Collecting logs for task %s, id: %s", task_name, task_id)
                     self._collect_deployment_logs(space_id, task_id, tags)
+
+    def _get_deployment_tags(self, space_id, task):
+        deployment_id = task.get("Arguments", {}).get("DeploymentId")
+        deployment = self._process_endpoint(f"api/{space_id}/deployments/{deployment_id}")
+        release_id = deployment.get("ReleaseId")
+        environment_id = deployment.get("EnvironmentId")
+        release = self._process_endpoint(f"api/{space_id}/releases/{release_id}")
+        release_version = release.get("Version")
+        environment_name = self._get_environmnet_name(environment_id, space_id)
+        tags = [
+            f'deployment_id:{deployment_id}',
+            f'release_version:{release_version}',
+            f'environment_name:{environment_name}',
+        ]
+        return tags
+
+    def _get_environmnet_name(self, environment_id, space_id):
+        if self.config.environments:
+            environments = list(self._environments_discovery[space_id].get_items())
+        else:
+            environments = [
+                (None, environment.get("Name"), environment, None)
+                for environment in self._process_endpoint(f"api/{space_id}/environments").get('Items', [])
+            ]
+        for _, environment_name, environment, _ in environments:
+            if environment.get("Id") == environment_id:
+                return environment_name
 
     def _collect_server_nodes_metrics(self):
         self.log.debug("Collecting server node metrics.")
@@ -357,29 +389,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("server_node.count", 1, tags=self._base_tags + server_tags)
             self.gauge("server_node.in_maintenance_mode", maintenance_mode, tags=self._base_tags + server_tags)
             self.gauge("server_node.max_concurrent_tasks", max_tasks, tags=self._base_tags + server_tags)
-
-    def _collect_environment_metrics(self, space_id, space_name):
-        self.log.debug("Collecting environments.")
-        url = f"api/{space_id}/environments"
-        response_json = self._process_endpoint(url)
-        environments = response_json.get('Items', [])
-
-        for environment in environments:
-            environment_name = environment.get("Name")
-            environment_slug = environment.get("Slug")
-            environment_id = environment.get("Id")
-            use_guided_failure = int(environment.get("UseGuidedFailure", False))
-            allow_dynamic_infrastructure = int(environment.get("AllowDynamicInfrastructure", False))
-
-            tags = self._base_tags + [
-                f"space_name:{space_name}",
-                f"environment_name:{environment_name}",
-                f"environment_id:{environment_id}",
-                f"environment_slug:{environment_slug}",
-            ]
-            self.gauge("environment.count", 1, tags=tags)
-            self.gauge("environment.use_guided_failure", use_guided_failure, tags=tags)
-            self.gauge("environment.allow_dynamic_infrastructure", allow_dynamic_infrastructure, tags=tags)
 
     def _collect_deployment_logs(self, space_id, task_id, tags):
         url = f"api/{space_id}/tasks/{task_id}/details"
