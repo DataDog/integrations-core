@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 5.0.0 / 2024-12-04 / Agent 7.59.0
+
+***Added***:
+
+* New dashboards to show various important Aerospike metrics in multiple dashboards
+
+***Changed***:
+
+* Allows all metrics from aerospike-prometheus-exporter to be available in datadog
+* Enabled histogram metrics as distributions by default
+* removed renaming of "cluster_name" as "aerospike_cluster" as cluster_name label is not causing any impact on dashboards.
+
 ## 4.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
