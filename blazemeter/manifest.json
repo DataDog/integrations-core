@@ -12,7 +12,9 @@
     "title": "BlazeMeter",
     "media": [],
     "classifier_tags": [
-      "Category::Metrics"
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
