@@ -128,6 +128,17 @@ class KafkaClient:
         # https://github.com/confluentinc/confluent-kafka-python/issues/594
         self.kafka_client.list_topics(None, timeout=self.config._request_timeout)
 
+    def list_consumer_groups(self):
+        groups = []
+        try:
+            groups_res = self.kafka_client.list_consumer_groups().result()
+            for valid_group in groups_res.valid:
+                self.log.debug("Discovered consumer group: %s", valid_group.group_id)
+                groups.append(valid_group.group_id)
+        except Exception as e:
+            self.log.error("Failed to collect consumer groups: %s", e)
+        return groups
+
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
         self.log.debug('Getting consumer offsets')
@@ -184,22 +195,8 @@ class KafkaClient:
 
     def _get_consumer_groups(self):
         # Get all consumer groups to monitor
-        consumer_groups = []
         if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
-            consumer_groups_future = self.kafka_client.list_consumer_groups()
-            try:
-                list_consumer_groups_result = consumer_groups_future.result()
-                for valid_consumer_group in list_consumer_groups_result.valid:
-                    self.log.debug("Discovered consumer group: %s", valid_consumer_group.group_id)
-
-                consumer_groups.extend(
-                    valid_consumer_group.group_id
-                    for valid_consumer_group in list_consumer_groups_result.valid
-                    if valid_consumer_group.group_id != ""
-                )
-            except Exception as e:
-                self.log.error("Failed to collect consumer groups: %s", e)
-            return consumer_groups
+            return [grp for grp in self.list_consumer_groups() if grp]
         else:
             return self.config._consumer_groups
 
