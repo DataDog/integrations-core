@@ -15,4 +15,3 @@ METRIC_MAP = {
     # all latency metrics will be treated as Distribution in datadog cloud
     "aerospike_latencies(.*)": {"name": "$1", "type": "histogram"},
 }
-
