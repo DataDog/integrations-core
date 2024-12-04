@@ -192,7 +192,7 @@ class Deadlocks(DBMAsyncJob):
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     def _create_deadlock_rows(self):
-        db_rows = self._query_deadlocks()
+        db_rows = self._query_deadlocks()        
         deadlock_events = []
         total_number_of_characters = 0
         for i, row in enumerate(db_rows):
