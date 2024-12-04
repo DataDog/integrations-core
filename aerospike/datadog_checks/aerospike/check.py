@@ -7,9 +7,7 @@ from .metrics import METRIC_MAP
 
 
 class AerospikeCheckV2(OpenMetricsBaseCheckV2):
-
-    __NAMESPACE__ = 'aerospike'
-
+    __NAMESPACE__ = "aerospike"
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -17,6 +15,9 @@ class AerospikeCheckV2(OpenMetricsBaseCheckV2):
 
     def get_default_config(self):
         return {
-            'metrics': [METRIC_MAP],
-            'rename_labels': {'cluster_name': 'aerospike_cluster', 'service': 'aerospike_service'},
+            "metrics": [METRIC_MAP],
+            "rename_labels": {
+                "cluster_name": "aerospike_cluster",
+                "service": "aerospike_service",
+            },
         }
