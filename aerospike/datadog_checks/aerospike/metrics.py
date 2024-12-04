@@ -4,7 +4,7 @@
 
 # https://docs.aerospike.com/server/operations/monitor/key_metrics
 METRIC_MAP = {
-    # all metrics ( except latencies), will be treated as gauge, as we need latest values, without having up-down changes
+    # all metrics ( except latencies), will be treated as gauge, as we need latest values not up-down changes
     "aerospike_users(.*)": {"name": "$1", "type": "gauge"},
     "aerospike_namespace(.*)": {"name": "$1", "type": "gauge"},
     "aerospike_node(.*)": {"name": "$1", "type": "gauge"},
