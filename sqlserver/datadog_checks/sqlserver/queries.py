@@ -171,5 +171,6 @@ def get_deadlocks_query(convert_xml_to_str=False, xe_session_name="datadog"):
                 AND xt.target_name = N'ring_buffer'
         ) AS XML_Data
     CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
-    WHERE xdr.value('@timestamp', 'datetime') >= DATEADD(SECOND, ?, GETDATE())
+    WHERE xdr.value('@timestamp', 'datetime')
+        >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC')
     ;"""
