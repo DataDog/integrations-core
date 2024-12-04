@@ -1,0 +1,11 @@
+services:
+  duckdb:
+    image: datacatering/duckdb:${DUCKDB_VERSION}
+    container_name: duckdb-ce
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/data
+    environment:
+      - DUCKDB_PORT=5000
+    command: ["duckdb", "--port", "5000", "--db", "/data/duckdb.db"]
