@@ -16,13 +16,18 @@ import pytest
 from mock import patch
 
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.database_metrics.xe_session_metrics import XE_EVENT_FILE, XE_RING_BUFFER
 from datadog_checks.sqlserver.deadlocks import (
     PAYLOAD_QUERY_SIGNATURE,
     PAYLOAD_TIMESTAMP,
-    XE_SESSION_DATADOG,
     Deadlocks,
 )
-from datadog_checks.sqlserver.queries import DEADLOCK_TIMESTAMP_ALIAS, DEADLOCK_XML_ALIAS
+from datadog_checks.sqlserver.queries import (
+    DEADLOCK_TIMESTAMP_ALIAS,
+    DEADLOCK_XML_ALIAS,
+    XE_SESSION_DATADOG,
+    XE_SESSION_SYSTEM,
+)
 
 from .common import CHECK_NAME
 
@@ -137,9 +142,18 @@ def _create_deadlock(dd_environment, dbm_instance):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.usefixtures('_create_deadlock')
 @pytest.mark.parametrize("convert_xml_to_str", [False, True])
-def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str):
+@pytest.mark.parametrize(
+    "xe_session_name, xe_session_target",
+    [
+        [XE_SESSION_DATADOG, XE_RING_BUFFER],
+        [XE_SESSION_SYSTEM, XE_EVENT_FILE],
+    ],
+)
+def test_deadlocks(aggregator, dd_run_check, dbm_instance, convert_xml_to_str, xe_session_name, xe_session_target):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     check.deadlocks._force_convert_xml_to_str = convert_xml_to_str
+    check.deadlocks._xe_session_name = xe_session_name
+    check.deadlocks._xe_session_target = xe_session_target
 
     dbm_instance['dbm_enabled'] = True
     deadlock_payloads = _run_check_and_get_deadlock_payloads(dd_run_check, check, aggregator)
