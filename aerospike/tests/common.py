@@ -145,11 +145,30 @@ PROMETHEUS_XDR_METRICS = [
     'aerospike.aerospike_xdr_success',
 ]
 
-NAMESPACE_METRICS = []
+NAMESPACE_METRICS = [
+    'objects',
+    'hwm_breached',
+    'client_write_error',
+    'client_write_success',
+    'tombstones',
+    'retransmit_all_batch_sub_dup_res',
+    'truncate_lut',
+    'ops_sub_write_success',
+] 
 
-TPS_METRICS = []
+TPS_METRICS = [
+    'tps.write',
+    'tps.read',
+]
 
-LEGACY_SET_METRICS = []
+LEGACY_SET_METRICS = [
+    'tombstones',
+    'memory_data_bytes',
+    'truncate_lut',
+    'objects',
+    'stop_writes_count',
+    'disable_eviction',
+]
 
 SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
 # we support dashboards only latest set metrics
@@ -157,7 +176,31 @@ SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
 
 ALL_METRICS = NAMESPACE_METRICS + LEGACY_SET_METRICS
 
-INDEXES_METRICS = []
+INDEXES_METRICS = [
+    "aerospike.sindex.delete_error",
+    "aerospike.sindex.delete_success",
+    "aerospike.sindex.entries",
+    "aerospike.sindex.histogram",
+    "aerospike.sindex.ibtr_memory_used",
+    "aerospike.sindex.keys",
+    "aerospike.sindex.load_pct",
+    "aerospike.sindex.loadtime",
+    "aerospike.sindex.nbtr_memory_used",
+    "aerospike.sindex.query_agg",
+    "aerospike.sindex.query_agg_avg_rec_count",
+    "aerospike.sindex.query_agg_avg_record_size",
+    "aerospike.sindex.query_avg_rec_count",
+    "aerospike.sindex.query_avg_record_size",
+    "aerospike.sindex.query_lookup_avg_rec_count",
+    "aerospike.sindex.query_lookup_avg_record_size",
+    "aerospike.sindex.query_lookups",
+    "aerospike.sindex.query_reqs",
+    "aerospike.sindex.si_accounted_memory",
+    "aerospike.sindex.stat_gc_recs",
+    "aerospike.sindex.stat_gc_time",
+    "aerospike.sindex.write_error",
+    "aerospike.sindex.write_success",
+]
 
 STATS_METRICS = [
     'cluster_size',
@@ -261,7 +304,42 @@ lag=0;in_queue=0;in_progress=0;success=98344698;abandoned=0;not_found=0;filtered
 """
 
 # all datacenter metrics are referred as xdr metrics covered in PROMETHEUS_XDR_METRICS
-DATACENTER_METRICS = []
+DATACENTER_METRICS = [
+    'aerospike.datacenter.dc_timelag',
+    'aerospike.datacenter.dc_rec_ship_attempts',
+    'aerospike.datacenter.dc_delete_ship_attempts',
+    'aerospike.datacenter.dc_remote_ship_ok',
+    'aerospike.datacenter.dc_err_ship_client',
+    'aerospike.datacenter.dc_err_ship_server',
+    'aerospike.datacenter.dc_esmt_bytes_shipped',
+    'aerospike.datacenter.dc_esmt_ship_avg_comp_pct',
+    'aerospike.datacenter.dc_latency_avg_ship',
+    'aerospike.datacenter.dc_remote_ship_avg_sleep',
+    'aerospike.datacenter.dc_open_conn',
+    'aerospike.datacenter.dc_recs_inflight',
+    'aerospike.datacenter.dc_size',
+    'aerospike.datacenter.dc_as_open_conn',
+    'aerospike.datacenter.dc_as_size',
+]
 
 # XDR metrics are covered in PROMETHEUS_XDR_METRICS
-XDR_DC_METRICS = [].extend(PROMETHEUS_XDR_METRICS)
+XDR_DC_METRICS = [
+    'aerospike.xdr_dc.lag',
+    'aerospike.xdr_dc.in_queue',
+    'aerospike.xdr_dc.in_progress',
+    'aerospike.xdr_dc.success',
+    'aerospike.xdr_dc.abandoned',
+    'aerospike.xdr_dc.not_found',
+    'aerospike.xdr_dc.filtered_out',
+    'aerospike.xdr_dc.retry_no_node',
+    'aerospike.xdr_dc.retry_conn_reset',
+    'aerospike.xdr_dc.retry_dest',
+    'aerospike.xdr_dc.recoveries',
+    'aerospike.xdr_dc.recoveries_pending',
+    'aerospike.xdr_dc.hot_keys',
+    'aerospike.xdr_dc.uncompressed_pct',
+    'aerospike.xdr_dc.compression_ratio',
+    'aerospike.xdr_dc.throughput',
+    'aerospike.xdr_dc.latency_ms',
+    'aerospike.xdr_dc.lap_us',
+]
