@@ -8,6 +8,7 @@ from time import time
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
+from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 MAX_TIMESTAMPS = 1000
 
@@ -54,7 +55,7 @@ class KafkaCheck(AgentCheck):
             if len(consumer_offsets) < self._context_limit:
                 # Fetch highwater offsets
                 # Expected format: ({(topic, partition): offset}, cluster_id)
-                highwater_offsets, cluster_id = self.client.get_highwater_offsets(consumer_offsets)
+                highwater_offsets, cluster_id = self.get_highwater_offsets(consumer_offsets)
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets)
@@ -231,6 +232,71 @@ class KafkaCheck(AgentCheck):
             consumer_group_state,
         )
         return consumer_group_state
+
+    def get_highwater_offsets(self, consumer_offsets):
+        self.log.debug('Getting highwater offsets')
+
+        cluster_id = ""
+        highwater_offsets = {}
+        topics_with_consumer_offset = set()
+        topic_partition_with_consumer_offset = set()
+
+        if not self.config._monitor_all_broker_highwatermarks:
+            for _, topic, partition in consumer_offsets:
+                topics_with_consumer_offset.add(topic)
+                topic_partition_with_consumer_offset.add((topic, partition))
+
+        topic_partition_checked = set()
+
+        for consumer_group, _topic, _partition in consumer_offsets:
+            self.log.debug('CONSUMER GROUP: %s', consumer_group)
+            if (_topic, _partition) in topic_partition_checked:
+                self.log.debug('Highwater offset already collected for topic %s with partition %s', _topic, _partition)
+                continue
+
+            topic_partitions_for_highwater_offsets = set()
+
+            self.client.open_consumer(consumer_group)
+            cluster_id, topics = self.client.consumer_get_cluster_id_and_list_topics(consumer_group)
+
+            for topic, partitions in topics:
+                if topic in KAFKA_INTERNAL_TOPICS:
+                    self.log.debug("Skipping internal topic %s", topic)
+                    continue
+                if not self.config._monitor_all_broker_highwatermarks and topic not in topics_with_consumer_offset:
+                    self.log.debug("Skipping non-relevant topic %s", topic)
+                    continue
+
+                for partition in partitions:
+                    if (
+                        self.config._monitor_all_broker_highwatermarks
+                        or (topic, partition) in topic_partition_with_consumer_offset
+                    ):
+                        topic_partitions_for_highwater_offsets.add((topic, partition))
+                        self.log.debug('TOPIC: %s', topic)
+                        self.log.debug('PARTITION: %s', partition)
+                    else:
+                        self.log.debug("Skipping non-relevant partition %s of topic %s", partition, topic)
+
+            if len(topic_partitions_for_highwater_offsets) > 0:
+                self.log.debug(
+                    'Querying %s highwater offsets for consumer group %s',
+                    len(topic_partitions_for_highwater_offsets),
+                    consumer_group,
+                )
+                for topic, partition, offset in self.client.consumer_offsets_for_times(
+                    partitions=topic_partitions_for_highwater_offsets
+                ):
+                    highwater_offsets[(topic, partition)] = offset
+                    self.log.debug("Adding %s %s to checked set to facilitate early exit", topic, partition)
+                    topic_partition_checked.add((topic, partition))
+            else:
+                self.log.debug('No new highwater offsets to query for consumer group %s', consumer_group)
+
+            self.client.close_consumer()
+
+        self.log.debug('Got %s highwater offsets', len(highwater_offsets))
+        return highwater_offsets, cluster_id
 
     def send_event(self, title, text, tags, event_type, aggregation_key, severity='info'):
         """Emit an event to the Datadog Event Stream."""

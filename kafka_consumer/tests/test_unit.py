@@ -27,17 +27,17 @@ def seed_mock_client():
     client = mock.create_autospec(KafkaClient)
     # consumer_offset = {(consumer_group, topic, partition): offset}
     consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 1}
     client.get_consumer_offsets.return_value = consumer_offset
-    client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     client.get_partitions_for_topic.return_value = ['partition1']
     client.describe_consumer_groups.return_value = ('consumer_group', 'STABLE')
     client.consumer_get_cluster_id_and_list_topics.return_value = (
-        # cluster_id
-        "test-cluster",
+        "cluster_id",
         # topics
         [
+            # Used in unit tets
+            ('topic1', ["partition1"]),
+            ('topic2', ["partition2"]),
+            # Copied from integration tests
             ('dc', [0, 1]),
             ('unconsumed_topic', [0, 1]),
             ('marvel', [0, 1]),
@@ -185,6 +185,8 @@ def test_oauth_config(
 def test_when_consumer_lag_less_than_zero_then_emit_event(check, kafka_instance, dd_run_check, aggregator):
     # Given
     mock_client = seed_mock_client()
+    # We need the consumer offset to be higher than the highwater offset.
+    mock_client.get_consumer_offsets.return_value = {("consumer_group1", "topic1", "partition1"): 81}
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = mock_client
 
@@ -323,10 +325,7 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     mock_client = seed_mock_client()
     # consumer_offset = {(consumer_group, topic, partition): offset}
     consumer_offset = {("consumer_group1", "topic1", "partition1"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
     mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     kafka_consumer_check = check(kafka_instance, init_config={'max_partition_contexts': 2})
     kafka_consumer_check.client = mock_client
 
@@ -334,11 +333,11 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     dd_run_check(kafka_consumer_check)
 
     # Then
-    aggregator.assert_metric("kafka.broker_offset", count=2)
-    aggregator.assert_metric("kafka.consumer_offset", count=0)
+    aggregator.assert_metric("kafka.broker_offset", count=1)
+    aggregator.assert_metric("kafka.consumer_offset", count=1)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
 
-    expected_warning = "Discovered 3 metric contexts"
+    expected_warning = "Discovered 2 metric contexts"
 
     assert expected_warning in caplog.text
 
@@ -352,10 +351,7 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     mock_client = seed_mock_client()
     # consumer_offset = {(consumer_group, topic, partition): offset}
     consumer_offset = {("consumer_group1", "topic1", "partition1"): 2, ("consumer_group1", "topic2", "partition2"): 2}
-    # highwater_offset = {(topic, partition): offset}
-    highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
     mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     kafka_consumer_check = check(kafka_instance, init_config={'max_partition_contexts': 3})
     kafka_consumer_check.client = mock_client
 
