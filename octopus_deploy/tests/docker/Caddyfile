@@ -156,6 +156,70 @@
         rewrite * /GET/api/Spaces-1/tasks/ServerTasks-1847/details/response.json
         file_server
     }
+    @get_environments {
+        method GET
+        path /api/Spaces-1/environments
+    }
+    route @get_environments {
+        rewrite * /GET/api/Spaces-1/environments/response.json
+        file_server
+    }
+    @get_releases_1 {
+        method GET
+        path /api/Spaces-1/releases/Releases-1
+    }
+    route @get_releases_1 {
+        rewrite * /GET/api/Spaces-1/releases/Releases-1/response.json
+        file_server
+    }
+    @get_releases_2 {
+        method GET
+        path /api/Spaces-1/releases/Releases-2
+    }
+    route @get_releases_2 {
+        rewrite * /GET/api/Spaces-1/releases/Releases-2/response.json
+        file_server
+    }
+    @get_releases_3 {
+        method GET
+        path /api/Spaces-1/releases/Releases-3
+    }
+    route @get_releases_3 {
+        rewrite * /GET/api/Spaces-1/releases/Releases-3/response.json
+        file_server
+    }
+    @get_deployments_16 {
+        method GET
+        path /api/Spaces-1/deployments/Deployments-16
+    }
+    route @get_deployments_16 {
+        rewrite * /GET/api/Spaces-1/deployments/Deployments-16/response.json
+        file_server
+    }
+    @get_deployments_17 {
+        method GET
+        path /api/Spaces-1/deployments/Deployments-17
+    }
+    route @get_deployments_17 {
+        rewrite * /GET/api/Spaces-1/deployments/Deployments-17/response.json
+        file_server
+    }
+    @get_deployments_18 {
+        method GET
+        path /api/Spaces-1/deployments/Deployments-18
+    }
+    route @get_deployments_18 {
+        rewrite * /GET/api/Spaces-1/deployments/Deployments-18/response.json
+        file_server
+    }
+    @get_deployments_19 {
+        method GET
+        path /api/Spaces-1/deployments/Deployments-19
+    }
+    route @get_deployments_19 {
+        rewrite * /GET/api/Spaces-1/deployments/Deployments-19/response.json
+        file_server
+    }
 
     file_server browse
 }
