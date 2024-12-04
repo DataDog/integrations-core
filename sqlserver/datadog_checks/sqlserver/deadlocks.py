@@ -147,7 +147,7 @@ class Deadlocks(DBMAsyncJob):
                             xe_system_found = True
                             if target == XE_EVENT_FILE:
                                 xe_system_xe_file_found = True
-                            
+
                     if xe_system_found:
                         self._xe_session_name = XE_SESSION_SYSTEM
                         if xe_system_xe_file_found:
@@ -164,7 +164,9 @@ class Deadlocks(DBMAsyncJob):
             except NoXESessionError as e:
                 self._log.error(str(e))
                 return
-            self._log.info(f'Using XE session [{self._xe_session_name}], target [{self._xe_session_target}] to collect deadlocks')
+            self._log.info(
+                f'Using XE session [{self._xe_session_name}], target [{self._xe_session_target}] to collect deadlocks'
+            )
 
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
@@ -172,7 +174,9 @@ class Deadlocks(DBMAsyncJob):
                 if self._force_convert_xml_to_str or self._get_connector() == "adodbapi":
                     convert_xml_to_str = True
                 query = get_deadlocks_query(
-                    convert_xml_to_str=convert_xml_to_str, xe_session_name=self._xe_session_name, xe_target_name=self._xe_session_target
+                    convert_xml_to_str=convert_xml_to_str,
+                    xe_session_name=self._xe_session_name,
+                    xe_target_name=self._xe_session_target,
                 )
                 lookback = self._get_lookback_seconds()
                 self._log.debug(
@@ -192,7 +196,7 @@ class Deadlocks(DBMAsyncJob):
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     def _create_deadlock_rows(self):
-        db_rows = self._query_deadlocks()        
+        db_rows = self._query_deadlocks()
         deadlock_events = []
         total_number_of_characters = 0
         for i, row in enumerate(db_rows):

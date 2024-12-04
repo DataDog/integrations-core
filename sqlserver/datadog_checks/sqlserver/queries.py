@@ -172,14 +172,16 @@ def get_deadlocks_query(convert_xml_to_str=False, xe_session_name=XE_SESSION_DAT
         ) AS XML_Data
     CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
     WHERE xdr.value('@timestamp', 'datetime')
-        >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC');"""
-        
+        >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC')
+    ;"""
+
     return f"""SELECT TOP(?)
 event_data AS [{DEADLOCK_XML_ALIAS}],
-CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[1]','datetime') AS [{DEADLOCK_TIMESTAMP_ALIAS}]
-FROM 
+CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[1]','datetime')
+    AS [{DEADLOCK_TIMESTAMP_ALIAS}]
+FROM
 sys.fn_xe_file_target_read_file
 ('system_health*.xel', null, null, null)
-WHERE object_name like 'xml_deadlock_report' 
-  and CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[1]','datetime') 
+WHERE object_name like 'xml_deadlock_report'
+  and CONVERT(xml, event_data).value('(event[@name="xml_deadlock_report"]/@timestamp)[1]','datetime')
     >= DATEADD(SECOND, ?, TODATETIMEOFFSET(GETDATE(), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())) AT TIME ZONE 'UTC');"""
