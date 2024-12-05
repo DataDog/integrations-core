@@ -71,7 +71,7 @@
 
 * Adding databases (schemas) data collection to MySQL
   These data include information about the tables, their columns, indexes, foreign keys, and partitions. ([#17916](https://github.com/DataDog/integrations-core/pull/17916))
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18185))
 
 ***Fixed***:
 
