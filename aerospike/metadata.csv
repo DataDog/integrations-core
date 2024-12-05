@@ -206,6 +206,7 @@ aerospike.aerospike_namespace_re_repl_success,gauge,,,,[OpenMetricsV2 and Aerosp
 aerospike.aerospike_namespace_re_repl_timeout,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+]  ,0,aerospike,,,
 aerospike.aerospike_namespace_record_proto_compression_ratio,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+]  ,0,aerospike,,,
 aerospike.aerospike_namespace_record_proto_uncompressed_pct,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+]  ,0,aerospike,,,
+aerospike.aerospike_namespace_reject_non_xdr_writes,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] if non-xdr writes are allowed,0,aerospike,,,
 aerospike.aerospike_namespace_replication_factor,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+]  ,0,aerospike,,,
 aerospike.aerospike_namespace_retransmit_all_batch_sub_dup_res,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+]  ,0,aerospike,,,
 aerospike.aerospike_namespace_retransmit_all_delete_dup_res,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+]  ,0,aerospike,,,
