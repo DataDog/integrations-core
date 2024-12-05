@@ -34,7 +34,7 @@ db = [
     "mmh3==4.1.0",
 ]
 deps = [
-    "binary==1.0.1; python_version >= '3.12'",
+    "binary==1.0.1",
     "cachetools==5.5.0",
     "cryptography==43.0.1",
     "ddtrace==2.10.6",
