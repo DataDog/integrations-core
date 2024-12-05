@@ -170,7 +170,7 @@ LEGACY_SET_METRICS = [
     'set.disable_eviction',
 ]
 
-SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
+SET_METRICS = ['set.enable_index', 'set.index_populating', 'set.sindexes']
 # we support dashboards only latest set metrics
 # SET_METRICS.extend(LEGACY_SET_METRICS)
 
