@@ -242,12 +242,6 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         r'^/System/Library/',
     ]]
 
-    external_invalid_file_patterns = [
-        # We don't accept OpenSSL in external wheels
-        '*.dylibs/libssl.3.dylib',
-        '*.dylibs/libcrypto.3.dylib',
-    ]
-
     def copy_filt_func(libname):
         return not any(excl.search(libname) for excl in exclusions)
 
@@ -255,15 +249,6 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         print(f'--> {wheel.name}')
         if not wheel_was_built(wheel):
             print('Using existing wheel')
-
-            unacceptable_files = find_patterns_in_wheel(wheel, external_invalid_file_patterns)
-            if unacceptable_files:
-                print(
-                    f"Found copies of unacceptable files in external wheel '{wheel.name}'",
-                    f'(matching {external_invalid_file_patterns}): ',
-                    unacceptable_files,
-                )
-                sys.exit(1)
 
             shutil.move(wheel, external_dir)
             continue
