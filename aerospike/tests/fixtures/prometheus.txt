@@ -155,3 +155,63 @@ aerospike_namespace_allow_nonxdr_writes{cluster_name="null",ns="user-data",servi
 # HELP aerospike_namespace_allow_ttl_without_nsup allow ttl without nsup
 # TYPE aerospike_namespace_allow_ttl_without_nsup gauge
 aerospike_namespace_allow_ttl_without_nsup{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+===============
+# HELP aerospike_namespace_allow_xdr_writes allows xdr write
+# TYPE aerospike_namespace_allow_xdr_writes gauge
+aerospike_namespace_allow_xdr_writes{cluster_name="null",ns="user-data",service="192.168.32.3:3000"} 0
+
+# HELP aerospike_namespace_appeals_records_exonerated appeals records exonerated
+# TYPE aerospike_namespace_appeals_records_exonerated counter
+aerospike_namespace_appeals_records_exonerated{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_appeals_rx_active appeals rx active
+# TYPE aerospike_namespace_appeals_rx_active gauge
+aerospike_namespace_appeals_rx_active{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_appeals_tx_active appeals tx active
+# TYPE aerospike_namespace_appeals_tx_active gauge
+aerospike_namespace_appeals_tx_active{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_available_bin_names appeals tx remaining
+# TYPE aerospike_namespace_available_bin_names gauge
+aerospike_namespace_available_bin_names{cluster_name="null",ns="user-data",service="192.168.32.3:3000"} 0
+
+# HELP aerospike_namespace_background_scan_max_rps appeals tx remaining
+# TYPE aerospike_namespace_background_scan_max_rps gauge
+aerospike_namespace_background_scan_max_rps{cluster_name="null",ns="user-data",service="192.168.32.3:3000"} 0
+
+# HELP aerospike_namespace_batch_sub_proxy_complete batch sub proxy complete
+# TYPE aerospike_namespace_batch_sub_proxy_complete counter
+aerospike_namespace_batch_sub_proxy_complete{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+# HELP aerospike_namespace_batch_sub_proxy_error batch sub proxy error
+# TYPE aerospike_namespace_batch_sub_proxy_error counter
+aerospike_namespace_batch_sub_proxy_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_batch_sub_proxy_timeout batch sub proxy timeout
+# TYPE aerospike_namespace_batch_sub_proxy_timeout counter
+aerospike_namespace_batch_sub_proxy_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+# HELP aerospike_namespace_batch_sub_read_error batch sub read error
+# TYPE aerospike_namespace_batch_sub_read_error counter
+aerospike_namespace_batch_sub_read_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_batch_sub_read_filtered_out batch sub read filtered out
+# TYPE aerospike_namespace_batch_sub_read_filtered_out counter
+aerospike_namespace_batch_sub_read_filtered_out{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_batch_sub_read_not_found batch sub read not found
+# TYPE aerospike_namespace_batch_sub_read_not_found counter
+aerospike_namespace_batch_sub_read_not_found{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 1.71643e+06
+
+# HELP aerospike_namespace_batch_sub_read_success batch sub read success
+# TYPE aerospike_namespace_batch_sub_read_success counter
+aerospike_namespace_batch_sub_read_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 68270
+# HELP aerospike_namespace_batch_sub_read_timeout batch sub read timeout
+# TYPE aerospike_namespace_batch_sub_read_timeout counter
+aerospike_namespace_batch_sub_read_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_batch_sub_tsvc_error batch sub tsvc error
+# TYPE aerospike_namespace_batch_sub_tsvc_error counter
+aerospike_namespace_batch_sub_tsvc_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+# HELP aerospike_namespace_batch_sub_tsvc_timeout batch sub tsvc timeout
+# TYPE aerospike_namespace_batch_sub_tsvc_timeout counter
+aerospike_namespace_batch_sub_tsvc_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
