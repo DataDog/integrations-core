@@ -124,7 +124,7 @@ def _test_check(aggregator):
 
     if version_parts >= [5, 6]:
         for metric in SET_METRICS:
-            aggregator.assert_metric("aerospike.set.{}".format(metric))
+            aggregator.assert_metric("aerospike.{}".format(metric))
     else:
         for metric in LEGACY_SET_METRICS:
             aggregator.assert_metric("aerospike.{}".format(metric))
