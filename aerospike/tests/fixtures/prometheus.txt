@@ -415,3 +415,7 @@ aerospike_sindex_write_error{cluster_name="null",ns="test",set="test1",service="
 # HELP aerospike_sindex_write_success sindex success during writes
 # TYPE aerospike_sindex_write_success gauge
 aerospike_sindex_write_success{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_namespace_data_in_index data avail pct
+# TYPE aerospike_namespace_data_in_index gauge
+aerospike_namespace_data_in_index{cluster_name="test",ns="test",service="192.168.32.3:3000"} 26
