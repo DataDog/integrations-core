@@ -48,12 +48,22 @@ jobs:
           perl \
           libc6-dev
 
-    - name: Install OpenSSL
+    - name: Build FIPS Module
       if: runner.os == 'Linux'
       run: |
-        wget https://www.openssl.org/source/openssl-3.0.9.tar.gz \
-        && tar -xvzf openssl-3.0.9.tar.gz \
-        && cd openssl-3.0.9 \
+        wget https://www.openssl.org/source/openssl-${{ env.FIPS_MODULE_VERSION }}.tar.gz \
+        && tar -xvzf openssl-${{ env.FIPS_MODULE_VERSION }}.tar.gz \
+        && cd openssl-${{ env.FIPS_MODULE_VERSION }} \
+        && ./Configure enable-fips \
+        && make \
+        && sudo make install
+
+    - name: Build OpenSSL
+      if: runner.os == 'Linux'
+      run: |
+        wget https://www.openssl.org/source/openssl-${{ env.OPENSSL_VERSION }}.tar.gz \
+        && tar -xvzf openssl-${{ env.OPENSSL_VERSION }}.tar.gz \
+        && cd openssl-${{ env.OPENSSL_VERSION }} \
         && ./Configure enable-fips \
         && make \
         && sudo make install
@@ -111,6 +121,15 @@ jobs:
       shell: powershell
       run: |
         .\openssl.exe version -a
+        .\openssl.exe list -providers
+
+    - name: Verify OpenSSL with FIPS ENV vars
+      if: runner.os == 'Windows'
+      working-directory: .\python_dir
+      shell: powershell
+      run: |
+        $env:OPENSSL_MODULES = ".\ossl-modules"
+        $env:OPENSSL_CONF = ".\openssl.cnf"
         .\openssl.exe list -providers
 
     - name: Verify OpenSSL with FIPS ENV vars
