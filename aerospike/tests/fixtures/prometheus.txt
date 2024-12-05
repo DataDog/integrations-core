@@ -1187,3 +1187,404 @@ aerospike_namespace_xdr_from_proxy_write_success{cluster_name="null",ns="test",s
 # HELP aerospike_namespace_xdr_from_proxy_write_timeout
 # TYPE aerospike_namespace_xdr_from_proxy_write_timeout gauge
 aerospike_namespace_xdr_from_proxy_write_timeout{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_prole_objects
+# TYPE aerospike_namespace_prole_objects gauge
+aerospike_namespace_prole_objects{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_prole_tombstones
+# TYPE aerospike_namespace_prole_tombstones gauge
+aerospike_namespace_prole_tombstones{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_agg
+# TYPE aerospike_namespace_query_agg gauge
+aerospike_namespace_query_agg{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_agg_abort
+# TYPE aerospike_namespace_query_agg_abort gauge
+aerospike_namespace_query_agg_abort{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_agg_avg_rec_count
+# TYPE aerospike_namespace_query_agg_avg_rec_count gauge
+aerospike_namespace_query_agg_avg_rec_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_agg_error
+# TYPE aerospike_namespace_query_agg_error gauge
+aerospike_namespace_query_agg_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_agg_success
+# TYPE aerospike_namespace_query_agg_success gauge
+aerospike_namespace_query_agg_success{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_fail
+# TYPE aerospike_namespace_query_fail gauge
+aerospike_namespace_query_fail{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_long_queue_full
+# TYPE aerospike_namespace_query_long_queue_full gauge
+aerospike_namespace_query_long_queue_full{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_long_reqs
+# TYPE aerospike_namespace_query_long_reqs gauge
+aerospike_namespace_query_long_reqs{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_lookup_abort
+# TYPE aerospike_namespace_query_lookup_abort gauge
+aerospike_namespace_query_lookup_abort{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_lookup_avg_rec_count
+# TYPE aerospike_namespace_query_lookup_avg_rec_count gauge
+aerospike_namespace_query_lookup_avg_rec_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_lookup_error
+# TYPE aerospike_namespace_query_lookup_error gauge
+aerospike_namespace_query_lookup_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_lookup_success
+# TYPE aerospike_namespace_query_lookup_success gauge
+aerospike_namespace_query_lookup_success{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_lookups
+# TYPE aerospike_namespace_query_lookups gauge
+aerospike_namespace_query_lookups{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_ops_bg_failure
+# TYPE aerospike_namespace_query_ops_bg_failure gauge
+aerospike_namespace_query_ops_bg_failure{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_ops_bg_success
+# TYPE aerospike_namespace_query_ops_bg_success gauge
+aerospike_namespace_query_ops_bg_success{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_proto_compression_ratio
+# TYPE aerospike_namespace_query_proto_compression_ratio gauge
+aerospike_namespace_query_proto_compression_ratio{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_proto_uncompressed_pct
+# TYPE aerospike_namespace_query_proto_uncompressed_pct gauge
+aerospike_namespace_query_proto_uncompressed_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_reqs
+# TYPE aerospike_namespace_query_reqs gauge
+aerospike_namespace_query_reqs{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_short_queue_full
+# TYPE aerospike_namespace_query_short_queue_full gauge
+aerospike_namespace_query_short_queue_full{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_short_reqs
+# TYPE aerospike_namespace_query_short_reqs gauge
+aerospike_namespace_query_short_reqs{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_udf_bg_failure
+# TYPE aerospike_namespace_query_udf_bg_failure gauge
+aerospike_namespace_query_udf_bg_failure{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_query_udf_bg_success
+# TYPE aerospike_namespace_query_udf_bg_success gauge
+aerospike_namespace_query_udf_bg_success{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_rack_id
+# TYPE aerospike_namespace_rack_id gauge
+aerospike_namespace_rack_id{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_re_repl_error
+# TYPE aerospike_namespace_re_repl_error gauge
+aerospike_namespace_re_repl_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_re_repl_success
+# TYPE aerospike_namespace_re_repl_success gauge
+aerospike_namespace_re_repl_success{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_re_repl_timeout
+# TYPE aerospike_namespace_re_repl_timeout gauge
+aerospike_namespace_re_repl_timeout{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_record_proto_compression_ratio
+# TYPE aerospike_namespace_record_proto_compression_ratio gauge
+aerospike_namespace_record_proto_compression_ratio{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_record_proto_uncompressed_pct
+# TYPE aerospike_namespace_record_proto_uncompressed_pct gauge
+aerospike_namespace_record_proto_uncompressed_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_replication_factor
+# TYPE aerospike_namespace_replication_factor gauge
+aerospike_namespace_replication_factor{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_all_batch_sub_dup_res
+# TYPE aerospike_namespace_retransmit_all_batch_sub_dup_res gauge
+aerospike_namespace_retransmit_all_batch_sub_dup_res{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_all_delete_dup_res
+# TYPE aerospike_namespace_retransmit_all_delete_dup_res gauge
+aerospike_namespace_retransmit_all_delete_dup_res{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_all_delete_repl_write
+# TYPE aerospike_namespace_retransmit_all_delete_repl_write gauge
+aerospike_namespace_retransmit_all_delete_repl_write{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_all_read_dup_res
+# TYPE aerospike_namespace_retransmit_all_read_dup_res gauge
+aerospike_namespace_retransmit_all_read_dup_res{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_all_udf_dup_res
+# TYPE aerospike_namespace_retransmit_all_udf_dup_res gauge
+aerospike_namespace_retransmit_all_udf_dup_res{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_all_udf_repl_write
+# TYPE aerospike_namespace_retransmit_all_udf_repl_write gauge
+aerospike_namespace_retransmit_all_udf_repl_write{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_all_write_dup_res
+# TYPE aerospike_namespace_retransmit_all_write_dup_res gauge
+aerospike_namespace_retransmit_all_write_dup_res{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_all_write_repl_write
+# TYPE aerospike_namespace_retransmit_all_write_repl_write gauge
+aerospike_namespace_retransmit_all_write_repl_write{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_ops_sub_dup_res
+# TYPE aerospike_namespace_retransmit_ops_sub_dup_res gauge
+aerospike_namespace_retransmit_ops_sub_dup_res{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_ops_sub_repl_write
+# TYPE aerospike_namespace_retransmit_ops_sub_repl_write gauge
+aerospike_namespace_retransmit_ops_sub_repl_write{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_udf_sub_dup_res
+# TYPE aerospike_namespace_retransmit_udf_sub_dup_res gauge
+aerospike_namespace_retransmit_udf_sub_dup_res{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_retransmit_udf_sub_repl_write
+# TYPE aerospike_namespace_retransmit_udf_sub_repl_write gauge
+aerospike_namespace_retransmit_udf_sub_repl_write{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_aggr_abort
+# TYPE aerospike_namespace_scan_aggr_abort gauge
+aerospike_namespace_scan_aggr_abort{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_aggr_complete
+# TYPE aerospike_namespace_scan_aggr_complete gauge
+aerospike_namespace_scan_aggr_complete{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_basic_abort
+# TYPE aerospike_namespace_scan_basic_abort gauge
+aerospike_namespace_scan_basic_abort{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_basic_complete
+# TYPE aerospike_namespace_scan_basic_complete gauge
+aerospike_namespace_scan_basic_complete{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_ops_bg_abort
+# TYPE aerospike_namespace_scan_ops_bg_abort gauge
+aerospike_namespace_scan_ops_bg_abort{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_ops_bg_complete
+# TYPE aerospike_namespace_scan_ops_bg_complete gauge
+aerospike_namespace_scan_ops_bg_complete{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_proto_compression_ratio
+# TYPE aerospike_namespace_scan_proto_compression_ratio gauge
+aerospike_namespace_scan_proto_compression_ratio{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_proto_uncompressed_pct
+# TYPE aerospike_namespace_scan_proto_uncompressed_pct gauge
+aerospike_namespace_scan_proto_uncompressed_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_udf_bg_abort
+# TYPE aerospike_namespace_scan_udf_bg_abort gauge
+aerospike_namespace_scan_udf_bg_abort{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_scan_udf_bg_complete
+# TYPE aerospike_namespace_scan_udf_bg_complete gauge
+aerospike_namespace_scan_udf_bg_complete{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_sets_enable_xdr
+# TYPE aerospike_namespace_sets_enable_xdr gauge
+aerospike_namespace_sets_enable_xdr{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_single_bin
+# TYPE aerospike_namespace_single_bin gauge
+aerospike_namespace_single_bin{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_single_scan_threads
+# TYPE aerospike_namespace_single_scan_threads gauge
+aerospike_namespace_single_scan_threads{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_smd_evict_void_time
+# TYPE aerospike_namespace_smd_evict_void_time gauge
+aerospike_namespace_smd_evict_void_time{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_stop_writes_pct
+# TYPE aerospike_namespace_stop_writes_pct gauge
+aerospike_namespace_stop_writes_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_cache_replica_writes
+# TYPE aerospike_namespace_storage_engine_cache_replica_writes gauge
+aerospike_namespace_storage_engine_cache_replica_writes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_cold_start_empty
+# TYPE aerospike_namespace_storage_engine_cold_start_empty gauge
+aerospike_namespace_storage_engine_cold_start_empty{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_commit_min_size
+# TYPE aerospike_namespace_storage_engine_commit_min_size gauge
+aerospike_namespace_storage_engine_commit_min_size{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_commit_to_device
+# TYPE aerospike_namespace_storage_engine_commit_to_device gauge
+aerospike_namespace_storage_engine_commit_to_device{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_compression_level
+# TYPE aerospike_namespace_storage_engine_compression_level gauge
+aerospike_namespace_storage_engine_compression_level{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_data_in_memory
+# TYPE aerospike_namespace_storage_engine_data_in_memory gauge
+aerospike_namespace_storage_engine_data_in_memory{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_defrag_lwm_pct
+# TYPE aerospike_namespace_storage_engine_defrag_lwm_pct gauge
+aerospike_namespace_storage_engine_defrag_lwm_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_defrag_queue_min
+# TYPE aerospike_namespace_storage_engine_defrag_queue_min gauge
+aerospike_namespace_storage_engine_defrag_queue_min{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_defrag_sleep
+# TYPE aerospike_namespace_storage_engine_defrag_sleep gauge
+aerospike_namespace_storage_engine_defrag_sleep{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_defrag_startup_minimum
+# TYPE aerospike_namespace_storage_engine_defrag_startup_minimum gauge
+aerospike_namespace_storage_engine_defrag_startup_minimum{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_direct_files
+# TYPE aerospike_namespace_storage_engine_direct_files gauge
+aerospike_namespace_storage_engine_direct_files{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_disable_odsync
+# TYPE aerospike_namespace_storage_engine_disable_odsync gauge
+aerospike_namespace_storage_engine_disable_odsync{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_enable_benchmarks_storage
+# TYPE aerospike_namespace_storage_engine_enable_benchmarks_storage gauge
+aerospike_namespace_storage_engine_enable_benchmarks_storage{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_file_age
+# TYPE aerospike_namespace_storage_engine_file_age gauge
+aerospike_namespace_storage_engine_file_age{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_file_defrag_reads
+# TYPE aerospike_namespace_storage_engine_file_defrag_reads gauge
+aerospike_namespace_storage_engine_file_defrag_reads{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_file_defrag_writes
+# TYPE aerospike_namespace_storage_engine_file_defrag_writes gauge
+aerospike_namespace_storage_engine_file_defrag_writes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_file_free_wblocks
+# TYPE aerospike_namespace_storage_engine_file_free_wblocks gauge
+aerospike_namespace_storage_engine_file_free_wblocks{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_file_shadow_write_q
+# TYPE aerospike_namespace_storage_engine_file_shadow_write_q gauge
+aerospike_namespace_storage_engine_file_shadow_write_q{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_file_used_bytes
+# TYPE aerospike_namespace_storage_engine_file_used_bytes gauge
+aerospike_namespace_storage_engine_file_used_bytes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_file_writes
+# TYPE aerospike_namespace_storage_engine_file_writes gauge
+aerospike_namespace_storage_engine_file_writes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_filesize
+# TYPE aerospike_namespace_storage_engine_filesize gauge
+aerospike_namespace_storage_engine_filesize{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_flush_max_ms
+# TYPE aerospike_namespace_storage_engine_flush_max_ms gauge
+aerospike_namespace_storage_engine_flush_max_ms{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_max_write_cache
+# TYPE aerospike_namespace_storage_engine_max_write_cache gauge
+aerospike_namespace_storage_engine_max_write_cache{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_min_avail_pct
+# TYPE aerospike_namespace_storage_engine_min_avail_pct gauge
+aerospike_namespace_storage_engine_min_avail_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_post_write_queue
+# TYPE aerospike_namespace_storage_engine_post_write_queue gauge
+aerospike_namespace_storage_engine_post_write_queue{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_read_page_cache
+# TYPE aerospike_namespace_storage_engine_read_page_cache gauge
+aerospike_namespace_storage_engine_read_page_cache{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_serialize_tomb_raider
+# TYPE aerospike_namespace_storage_engine_serialize_tomb_raider gauge
+aerospike_namespace_storage_engine_serialize_tomb_raider{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_tomb_raider_sleep
+# TYPE aerospike_namespace_storage_engine_tomb_raider_sleep gauge
+aerospike_namespace_storage_engine_tomb_raider_sleep{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_storage_engine_write_block_size
+# TYPE aerospike_namespace_storage_engine_write_block_size gauge
+aerospike_namespace_storage_engine_write_block_size{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_strong_consistency
+# TYPE aerospike_namespace_strong_consistency gauge
+aerospike_namespace_strong_consistency{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_strong_consistency_allow_expunge
+# TYPE aerospike_namespace_strong_consistency_allow_expunge gauge
+aerospike_namespace_strong_consistency_allow_expunge{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_tomb_raider_eligible_age
+# TYPE aerospike_namespace_tomb_raider_eligible_age gauge
+aerospike_namespace_tomb_raider_eligible_age{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_tomb_raider_period
+# TYPE aerospike_namespace_tomb_raider_period gauge
+aerospike_namespace_tomb_raider_period{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_tombstones
+# TYPE aerospike_namespace_tombstones gauge
+aerospike_namespace_tombstones{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_transaction_pending_limit
+# TYPE aerospike_namespace_transaction_pending_limit gauge
+aerospike_namespace_transaction_pending_limit{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_truncate_lut
+# TYPE aerospike_namespace_truncate_lut gauge
+aerospike_namespace_truncate_lut{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_truncate_threads
+# TYPE aerospike_namespace_truncate_threads gauge
+aerospike_namespace_truncate_threads{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_truncated_records
+# TYPE aerospike_namespace_truncated_records gauge
+aerospike_namespace_truncated_records{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_udf_sub_lang_delete_success
+# TYPE aerospike_namespace_udf_sub_lang_delete_success gauge
+aerospike_namespace_udf_sub_lang_delete_success{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_udf_sub_lang_error
+# TYPE aerospike_namespace_udf_sub_lang_error gauge
+aerospike_namespace_udf_sub_lang_error{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_udf_sub_lang_read_success
+# TYPE aerospike_namespace_udf_sub_lang_read_success gauge
+aerospike_namespace_udf_sub_lang_read_success{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_udf_sub_lang_write_success
+# TYPE aerospike_namespace_udf_sub_lang_write_success gauge
+aerospike_namespace_udf_sub_lang_write_success{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
