@@ -150,7 +150,7 @@ aerospike_latencies_write_ms_count{cluster_name="null",ns="user-data",service="1
 
 # HELP aerospike_namespace_reject_non_xdr_writes allows non-xdr write
 # TYPE aerospike_namespace_reject_non_xdr_writes gauge
-aerospike_namespace_reject_non_xdr_writes{cluster_name="null",ns="user-data",service="192.168.32.3:3000"} 0
+aerospike_namespace_reject_non_xdr_writes{cluster_name="null",ns="user-data",service="192.168.32.3:3000", storage_engine="memory"} 0
 
 # HELP aerospike_namespace_allow_ttl_without_nsup allow ttl without nsup
 # TYPE aerospike_namespace_allow_ttl_without_nsup gauge
