@@ -195,12 +195,19 @@ jobs:
         path: output
 
   build-macos:
-    name: Target macOS
-    runs-on: macos-13
-
+    name: Target macOS ${{ matrix.job.arch }}
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+        - os: macos-13
+          arch: x86_64
+        - os: macos-14
+          arch: arm64
     env:
-      TARGET_NAME: macos-x86_64
-      OUT_DIR: output/macos-x86_64
+      TARGET_NAME: macos-${{ matrix.job.arch }}
+      OUT_DIR: output/macos-${{ matrix.job.arch }}
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python"
 
     permissions:
@@ -236,7 +243,7 @@ jobs:
       with:
         path: |
           ~/builder_root
-        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/build-deps.yml') }}
+        key: macos-${{ matrix.job.arch }}-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py', './.github/workflows/build-deps.yml') }}
 
     - name: Run the build
       env:
@@ -255,7 +262,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: target-macos
+        name: target-macos-${{ matrix.job.arch }}
         path: output
 
   publish:
@@ -320,6 +327,7 @@ jobs:
     - name: Create pull request
       uses: peter-evans/create-pull-request@v5
       with:
+        base: pythyu/macos_arm_build
         token: ${{ steps.token-generator.outputs.token }}
         title: Update dependency resolution
         commit-message: Update dependency resolution
