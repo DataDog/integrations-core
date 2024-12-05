@@ -52,7 +52,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._default_projects_discovery = {}
         self._projects_discovery = {}
         self._environments_discovery = {}
-        self._environments_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
+        self._environments_cache = {}
         self._deployments_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         self._releases_cache = TTLCache(maxsize=TTL_CACHE_MAXSIZE, ttl=TTL_CACHE_TTL)
         self._base_tags = self.instance.get("tags", [])
