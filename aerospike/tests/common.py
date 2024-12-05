@@ -163,10 +163,10 @@ TPS_METRICS = [
 
 LEGACY_SET_METRICS = [
     'set.tombstones',
-    'aerospike_sets_memory_data_bytes',
-    'aerospike_sets_truncate_lut',
-    'aerospike_sets_objects',
-    'aerospike_sets_stop_writes_count',
+    'set.memory_data_bytes',
+    'set.truncate_lut',
+    'set._objects',
+    'set.stop_writes_count',
     'set.disable_eviction',
 ]
 
