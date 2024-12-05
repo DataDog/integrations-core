@@ -49,4 +49,4 @@ aerospike.aerospike_xdr_retry_dest,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] 
 aerospike.aerospike_xdr_retry_no_node,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records retried because XDR cannot determine which destination node is the master.,0,aerospike,,,
 aerospike.aerospike_xdr_success,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records successfully shipped to remote datacenters.,0,aerospike,,,
 
-aerospike_latencies_read_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of queries in a bucket taking N milliseconds.,0,aerospike,,,
+aerospike.aerospike_latencies_read_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of queries in a bucket taking N milliseconds.,0,aerospike,,,
