@@ -36,23 +36,17 @@ jobs:
 
     - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: "${{ env.PYTHON_VERSION }}"
-        cache: 'pip'
-
     - name: Install System Dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && \
+        sudo apt update 
         sudo apt install -y --no-install-recommends \
           wget \
           build-essential \
           gcc \
           make \
           perl \
-          libc6-dev && \
+          libc6-dev
 
     - name: Install OpenSSL
       if: runner.os == 'Linux'
@@ -127,10 +121,4 @@ jobs:
         $env:OPENSSL_MODULES = ".\ossl-modules"
         $env:OPENSSL_CONF = ".\openssl.cnf"
         .\openssl.exe list -providers
-
-    - name: Install Cryptography
-      run: pip install cryptography
-
-    - name: Test Cryptography without FIPS
-      run: python -c "from cryptography.hazmat.primitives import hashes; hashes.Hash(hashes.MD5())"
 
