@@ -22,6 +22,7 @@ jobs:
     with:
       platform: linux
       runner: '["ubuntu-22.04"]'
+      zip_url: 'https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/python-windows-combined-v3.12.6-openssl-3.0.15-openssl-3.0.9-amd64.zip'
     secrets: inherit
 
   test-windows:
@@ -29,4 +30,5 @@ jobs:
     with:
       platform: windows
       runner: '["windows-2022"]'
+      zip_url: 'https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/python-windows-combined-v3.12.6-openssl-3.0.15-openssl-3.0.9-amd64.zip'
     secrets: inherit
