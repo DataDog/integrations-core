@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+aerospike.aerospike_latencies_read_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of queries in a bucket taking N milliseconds.,0,aerospike,,,
 aerospike.aerospike_namespace_client_delete_error,gauge,,,,[Legacy] The number of client delete transactions that failed with an error.,0,aerospike,,,
 aerospike.aerospike_namespace_client_read_error,gauge,,,,[Legacy] The number of client read transaction errors.,0,aerospike,,,
 aerospike.aerospike_namespace_client_read_filtered_out,gauge,,,,[Legacy] The number of client read transaction that timed out.,0,aerospike,,,
@@ -48,5 +49,3 @@ aerospike.aerospike_xdr_retry_conn_reset,gauge,,,,[OpenMetricsV2 and Aerospike v
 aerospike.aerospike_xdr_retry_dest,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records retried due to a temporary error returned by destination node.,0,aerospike,,,
 aerospike.aerospike_xdr_retry_no_node,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records retried because XDR cannot determine which destination node is the master.,0,aerospike,,,
 aerospike.aerospike_xdr_success,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records successfully shipped to remote datacenters.,0,aerospike,,,
-
-aerospike.aerospike_latencies_read_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of queries in a bucket taking N milliseconds.,0,aerospike,,,
