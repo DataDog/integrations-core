@@ -330,6 +330,7 @@ aerospike.namespace.latency.write_ops_sec,gauge,,transaction,,[Legacy] The write
 aerospike.namespace.latency.write_over_1ms,gauge,,transaction,,[Legacy] The write latency over 1ms.,-1,aerospike,write latency 1ms,,
 aerospike.namespace.latency.write_over_64ms,gauge,,transaction,,[Legacy] The write latency over 64ms.,-1,aerospike,write latency 64ms,,
 aerospike.namespace.latency.write_over_8ms,gauge,,transaction,,[Legacy] The write latency over 8ms.,-1,aerospike,write latency 8ms,,
+aerospike.namespace.memory_free_pct,gauge,,percent,,[Legacy and OpenMetricsV2 and Aerospike v3.9+]The percentage of memory capacity free for this namespace.,0,aerospike,,,
 aerospike.namespace.objects,gauge,,record,,[Legacy] The number of records in this namespace for this node. Does not include tombstones.,0,aerospike,Namespace Objects,,
 aerospike.namespace.ops_sub_write_success,gauge,,transaction,,[Legacy] The number of successful ops scan/query write sub-transactions.,0,aerospike,,,
 aerospike.namespace.retransmit_all_batch_sub_dup_res,gauge,,,,[Legacy] The number of retransmits that occurred during batch sub transactions that were being duplicate resolved.,0,aerospike,,,
