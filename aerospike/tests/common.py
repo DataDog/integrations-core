@@ -171,8 +171,7 @@ LEGACY_SET_METRICS = [
 ]
 
 SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
-# we support dashboards only latest set metrics
-# SET_METRICS.extend(LEGACY_SET_METRICS)
+SET_METRICS.extend(LEGACY_SET_METRICS)
 
 ALL_METRICS = NAMESPACE_METRICS + LEGACY_SET_METRICS
 
