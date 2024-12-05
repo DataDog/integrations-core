@@ -133,3 +133,6 @@ aerospike_namespace_client_read_success{cluster_name="null",ns="user-data",servi
 # HELP aerospike_namespace_client_read_timeout client read timeout
 # TYPE aerospike_namespace_client_read_timeout counter
 aerospike_namespace_client_read_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="device"} 0
+# HELP aerospike_latencies_read_ms_bucket read ms bucket
+# TYPE aerospike_latencies_read_ms_bucket gauge
+aerospike_latencies_read_ms_bucket{cluster_name="null",le="+Inf",l,ns="test",service="192.168.32.3:3000} 0
