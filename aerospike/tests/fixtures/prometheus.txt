@@ -216,50 +216,202 @@ aerospike_namespace_batch_sub_tsvc_error{cluster_name="null",ns="user-data",serv
 # TYPE aerospike_namespace_batch_sub_tsvc_timeout counter
 aerospike_namespace_batch_sub_tsvc_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_delete_error batch sub tsvc timeout
+# HELP aerospike_namespace_client_delete_error client deleted errors
 # TYPE aerospike_namespace_client_delete_error counter
 aerospike_namespace_client_delete_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_delete_filtered_out batch sub tsvc timeout
+# HELP aerospike_namespace_client_delete_filtered_out client delete filtered out
 # TYPE aerospike_namespace_client_delete_filtered_out counter
 aerospike_namespace_client_delete_filtered_out{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_delete_not_found batch sub tsvc timeout
+# HELP aerospike_namespace_client_delete_not_found client deleted not found
 # TYPE aerospike_namespace_client_delete_not_found counter
 aerospike_namespace_client_delete_not_found{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_delete_success batch sub tsvc timeout
+# HELP aerospike_namespace_client_delete_success client delete successful
 # TYPE aerospike_namespace_client_delete_success counter
 aerospike_namespace_client_delete_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_delete_timeout batch sub tsvc timeout
+# HELP aerospike_namespace_client_delete_timeout client deletes timedout
 # TYPE aerospike_namespace_client_delete_timeout counter
 aerospike_namespace_client_delete_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_lang_delete_success batch sub tsvc timeout
+# HELP aerospike_namespace_client_lang_delete_success client lang delete successful
 # TYPE aerospike_namespace_client_lang_delete_success counter
 aerospike_namespace_client_lang_delete_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_lang_error batch sub tsvc timeout
+# HELP aerospike_namespace_client_lang_error client lang errored out
 # TYPE aerospike_namespace_client_lang_error counter
 aerospike_namespace_client_lang_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_lang_read_success batch sub tsvc timeout
+# HELP aerospike_namespace_client_lang_read_success client lang read successful
 # TYPE aerospike_namespace_client_lang_read_success counter
 aerospike_namespace_client_lang_read_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_lang_write_success batch sub tsvc timeout
+# HELP aerospike_namespace_client_lang_write_success client lang write success
 # TYPE aerospike_namespace_client_lang_write_success counter
 aerospike_namespace_client_lang_write_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_proxy_complete batch sub tsvc timeout
+# HELP aerospike_namespace_client_proxy_complete client proxy completed
 # TYPE aerospike_namespace_client_proxy_complete counter
 aerospike_namespace_client_proxy_complete{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_proxy_error batch sub tsvc timeout
+# HELP aerospike_namespace_client_proxy_error client proxy errored out
 # TYPE aerospike_namespace_client_proxy_error counter
 aerospike_namespace_client_proxy_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
 
-# HELP aerospike_namespace_client_proxy_timeout batch sub tsvc timeout
+# HELP aerospike_namespace_client_proxy_timeout client proxy timedout
 # TYPE aerospike_namespace_client_proxy_timeout counter
-aerospike_namespace_client_proxy_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+aerospike_namespace_client_proxy_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_appeals_tx_remaining appeals rx active
+# TYPE aerospike_namespace_appeals_tx_remaining gauge
+aerospike_namespace_appeals_tx_remaining{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_tsvc_error client tsvc errors
+# TYPE aerospike_namespace_client_tsvc_error counter
+aerospike_namespace_client_tsvc_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_tsvc_timeout client tsvc timeouts
+# TYPE aerospike_namespace_client_tsvc_timeout counter
+aerospike_namespace_client_tsvc_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_udf_complete client udf completes
+# TYPE aerospike_namespace_client_udf_complete counter
+aerospike_namespace_client_udf_complete{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_udf_filtered_out client udf filtered out
+# TYPE aerospike_namespace_client_udf_filtered_out counter
+aerospike_namespace_client_udf_filtered_out{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_udf_timeout client udf timed out
+# TYPE aerospike_namespace_client_udf_timeout counter
+aerospike_namespace_client_udf_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_current_time client delete error
+# TYPE aerospike_namespace_current_time counter
+aerospike_namespace_current_time{cluster_name="null",ns="test",service="192.168.32.3:3000"} 0
+
+# HELP aerospike_node_stats_sindex_gc_objects_validated sindex gc objects validated
+# TYPE aerospike_node_stats_sindex_gc_objects_validated gauge
+aerospike_node_stats_sindex_gc_objects_validated{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_sindex_gc_retries sindex gc retried
+# TYPE aerospike_node_stats_sindex_gc_retries gauge
+aerospike_node_stats_sindex_gc_retries{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_sindex_ucgarbage_found sindex gc garbage found
+# TYPE aerospike_node_stats_sindex_ucgarbage_found gauge
+aerospike_node_stats_sindex_ucgarbage_found{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_system_free_mem_pct system free memory
+# TYPE aerospike_node_stats_system_free_mem_pct gauge
+aerospike_node_stats_system_free_mem_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_system_kernel_cpu_pct system kernel cpu pct
+# TYPE aerospike_node_stats_system_kernel_cpu_pct gauge
+aerospike_node_stats_system_kernel_cpu_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_system_total_cpu_pct system total cpu pct
+# TYPE aerospike_node_stats_system_total_cpu_pct gauge
+aerospike_node_stats_system_total_cpu_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_system_user_cpu_pct system user cpu pct
+# TYPE aerospike_node_stats_system_user_cpu_pct gauge
+aerospike_node_stats_system_user_cpu_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_time_since_rebalance time since node rebalanced
+# TYPE aerospike_node_stats_time_since_rebalance gauge
+aerospike_node_stats_time_since_rebalance{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_tombstones system tombstone count
+# TYPE aerospike_node_stats_tombstones gauge
+aerospike_node_stats_tombstones{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_tree_gc_queue tree garbage collect queue
+# TYPE aerospike_node_stats_tree_gc_queue gauge
+aerospike_node_stats_tree_gc_queue{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_stats_uptime node uptime
+# TYPE aerospike_node_stats_uptime gauge
+aerospike_node_stats_uptime{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_ticks number of times refresh happened
+# TYPE aerospike_node_ticks gauge
+aerospike_node_ticks{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_node_up represents if the exporter is up
+# TYPE aerospike_node_up gauge
+aerospike_node_up{cluster_name="null",ns="test",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sets_disable_eviction set disable eviction value
+# TYPE aerospike_sets_disable_eviction gauge
+aerospike_sets_disable_eviction{cluster_name="null",ns="test",set="test1"service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sets_memory_data_bytes memory used for data in specific set
+# TYPE aerospike_sets_memory_data_bytes gauge
+aerospike_sets_memory_data_bytes{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sets_objects number of objects in selected set
+# TYPE aerospike_sets_objects gauge
+aerospike_sets_objects{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sets_stop_writes_count number of objects in selected set
+# TYPE aerospike_sets_stop_writes_count gauge
+aerospike_sets_stop_writes_count{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sets_tombstones number of tombstone objects in selected set
+# TYPE aerospike_sets_tombstones gauge
+aerospike_sets_tombstones{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sets_truncate_lut set truncation last updated time
+# TYPE aerospike_sets_truncate_lut gauge
+aerospike_sets_truncate_lut{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_delete_error deleted in sindex error count
+# TYPE aerospike_sindex_delete_error gauge
+aerospike_sindex_delete_error{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_delete_success deleted in sindex error count
+# TYPE aerospike_sindex_delete_success gauge
+aerospike_sindex_delete_success{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_entries sindex entries current count
+# TYPE aerospike_sindex_entries gauge
+aerospike_sindex_entries{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_histogram sindex histograms
+# TYPE aerospike_sindex_histogram gauge
+aerospike_sindex_histogram{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_ibtr_memory_used memory used by ibtr process
+# TYPE aerospike_sindex_ibtr_memory_used gauge
+aerospike_sindex_ibtr_memory_used{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_keys sindex keys
+# TYPE aerospike_sindex_keys gauge
+aerospike_sindex_keys{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_load_pct sindex load pct
+# TYPE aerospike_sindex_load_pct gauge
+aerospike_sindex_load_pct{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_loadtime when sindex load time
+# TYPE aerospike_sindex_loadtime gauge
+aerospike_sindex_loadtime{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_nbtr_memory_used memory used by nbtr process
+# TYPE aerospike_sindex_nbtr_memory_used gauge
+aerospike_sindex_nbtr_memory_used{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_stat_gc_recs sindex garbage records
+# TYPE aerospike_sindex_stat_gc_recs gauge
+aerospike_sindex_stat_gc_recs{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_write_error sindex error during writes
+# TYPE aerospike_sindex_write_error gauge
+aerospike_sindex_write_error{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
+
+# HELP aerospike_sindex_write_success sindex success during writes
+# TYPE aerospike_sindex_write_success gauge
+aerospike_sindex_write_success{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
