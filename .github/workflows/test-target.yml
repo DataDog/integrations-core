@@ -225,6 +225,13 @@ jobs:
       run: |
           ddev test --cov --junit ${{ inputs.target }} -- -m "unit or not (integration or e2e)"
 
+    - name: Run Integration and E2E tests with latest base package
+      if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
+      env:
+        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+      run: |
+        ddev env test --base --new-env --junit ${{ inputs.target }} -- all -m "integration or e2e"
+
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.standard && inputs.minimum-base-package
       run: |
