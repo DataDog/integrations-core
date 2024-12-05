@@ -1285,7 +1285,12 @@ class AgentCheck(object):
 
                     enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
                 elif self.should_profile_memory():
-                    self.profile_memory(self.check, self.init_config, args=(instance,))
+                    # self.init_config['profile_memory'] should be `/tmp/datadog-agent-memory-profiler*` by default.
+                    # If we use `--m-dir`, hidden flag, it should be same as a given value.
+                    namespaces = [self.init_config['profile_memory']]
+                    for id in self.check_id.split(":"):
+                        namespaces.append(id)
+                    self.profile_memory(func=self.check, namespaces=namespaces, args=(instance,))
                 else:
                     self.check(instance)
 
