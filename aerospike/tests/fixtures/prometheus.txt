@@ -422,7 +422,7 @@ aerospike_namespace_data_in_index{cluster_name="null",ns="test",service="192.168
 
 # HELP aerospike_namespace_default_ttl default record ttl
 # TYPE aerospike_namespace_default_ttl gauge
-aerospike_namespace_default_ttl{cluster_name=\"null\",ns=\"test\",service=\"192.168.32.3:3000\"} 26
+aerospike_namespace_default_ttl{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
 
 # HELP aerospike_namespace_deleted_last_bin
 # TYPE aerospike_namespace_deleted_last_bin gauge
@@ -443,3 +443,23 @@ aerospike_namespace_device_used_bytes{cluster_name="null",ns="test",service="192
 # HELP aerospike_namespace_disable_cold_start_eviction
 # TYPE aerospike_namespace_disable_cold_start_eviction gauge
 aerospike_namespace_disable_cold_start_eviction{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_disable_write_dup_res
+# TYPE aerospike_namespace_disable_write_dup_res gauge
+aerospike_namespace_disable_write_dup_res{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_disallow_null_setname
+# TYPE aerospike_namespace_disallow_null_setname gauge
+aerospike_namespace_disallow_null_setname{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_effective_is_quiesced
+# TYPE aerospike_namespace_effective_is_quiesced gauge
+aerospike_namespace_effective_is_quiesced{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_effective_prefer_uniform_balance
+# TYPE aerospike_namespace_effective_prefer_uniform_balance gauge
+aerospike_namespace_effective_prefer_uniform_balance{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_effective_replication_factor
+# TYPE aerospike_namespace_effective_replication_factor gauge
+aerospike_namespace_effective_replication_factor{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
