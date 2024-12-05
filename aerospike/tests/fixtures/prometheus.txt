@@ -422,5 +422,24 @@ aerospike_namespace_data_in_index{cluster_name="null",ns="test",service="192.168
 
 # HELP aerospike_namespace_default_ttl default record ttl
 # TYPE aerospike_namespace_default_ttl gauge
-aerospike_namespace_default_ttl{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+aerospike_namespace_default_ttl{cluster_name=\"null\",ns=\"test\",service=\"192.168.32.3:3000\"} 26
 
+# HELP aerospike_namespace_deleted_last_bin
+# TYPE aerospike_namespace_deleted_last_bin gauge
+aerospike_namespace_deleted_last_bin{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_device_free_pct
+# TYPE aerospike_namespace_device_free_pct gauge
+aerospike_namespace_device_free_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_device_total_bytes
+# TYPE aerospike_namespace_device_total_bytes gauge
+aerospike_namespace_device_total_bytes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_device_used_bytes
+# TYPE aerospike_namespace_device_used_bytes gauge
+aerospike_namespace_device_used_bytes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_disable_cold_start_eviction
+# TYPE aerospike_namespace_disable_cold_start_eviction gauge
+aerospike_namespace_disable_cold_start_eviction{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26

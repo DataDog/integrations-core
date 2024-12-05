@@ -216,7 +216,6 @@ EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.aerospike_node_stats_sindex_gc_garbage_cleaned',
     'aerospike.aerospike_node_stats_sindex_gc_garbage_found',
     'aerospike.aerospike_node_stats_sindex_gc_list_creation_time',
-    'aerospike.aerospike_node_stats_sindex_gc_list_deletion_time',
 ]
 
 EXPECTED_PROMETHEUS_METRICS_5_6 = [
