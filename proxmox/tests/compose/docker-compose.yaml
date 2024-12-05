@@ -7,7 +7,5 @@ services:
     privileged: true
     ports:
       - "8006:8006"
-    extra_hosts:
-      - "pve:10.46.18.40"
     tty: true
     stdin_open: true
