@@ -15,6 +15,7 @@ Cisco ACI Response Models
 
 class NodeAttributes(BaseModel):
     address: Optional[str] = None
+    ad_st: Optional[str] = Field(default=None, alias="adSt")
     fabric_st: Optional[str] = Field(default=None, alias="fabricSt")
     role: Optional[str] = None
     dn: Optional[str] = None
@@ -31,6 +32,22 @@ class NodeAttributes(BaseModel):
         if self.role in ['leaf', 'spine']:
             return 'switch'
         return 'other'
+
+    @computed_field
+    @property
+    def status(self) -> int:
+        if self.role == 'controller':
+            return 1 if self.ad_st == 'on' else 2
+        mapping = {
+            'active': 1,
+            'inactive': 2,
+            'disabled': 2,
+            'discovering': 2,
+            'undiscovered': 2,
+            'unsupported': 2,
+            'unknown': 2,
+        }
+        return mapping.get(self.fabric_st, 2)
 
 
 class Node(BaseModel):
@@ -88,27 +105,13 @@ class DeviceMetadata(BaseModel):
     tags: list = Field(default_factory=list)
     name: Optional[str] = Field(default=None)
     ip_address: Optional[str] = Field(default=None)
+    status: Optional[int] = Field(default=None)
     model: Optional[str] = Field(default=None)
-    fabric_st: Optional[str] = Field(default=None, exclude=True)
     vendor: Optional[str] = Field(default=None)
     version: Optional[str] = Field(default=None)
     serial_number: Optional[str] = Field(default=None)
     device_type: Optional[str] = Field(default=None)
     integration: Optional[str] = Field(default='cisco-aci')
-
-    @computed_field
-    @property
-    def status(self) -> int:
-        mapping = {
-            'active': 1,
-            'inactive': 2,
-            'disabled': 2,
-            'discovering': 2,
-            'undiscovered': 2,
-            'unsupported': 2,
-            'unknown': 2,
-        }
-        return mapping.get(self.fabric_st, 2)
 
 
 class DeviceMetadataList(BaseModel):
