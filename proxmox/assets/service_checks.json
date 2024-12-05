@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "agent_version": "7.59.1",
+    "integration": "Proxmox",
+    "check": "proxmox.uptime",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "Proxmox endpoint up",
+    "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint of Proxmox."
+  }
+]
