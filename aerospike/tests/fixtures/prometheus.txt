@@ -155,7 +155,7 @@ aerospike_namespace_allow_nonxdr_writes{cluster_name="null",ns="user-data",servi
 # HELP aerospike_namespace_allow_ttl_without_nsup allow ttl without nsup
 # TYPE aerospike_namespace_allow_ttl_without_nsup gauge
 aerospike_namespace_allow_ttl_without_nsup{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
-===============
+
 # HELP aerospike_namespace_allow_xdr_writes allows xdr write
 # TYPE aerospike_namespace_allow_xdr_writes gauge
 aerospike_namespace_allow_xdr_writes{cluster_name="null",ns="user-data",service="192.168.32.3:3000"} 0
@@ -215,3 +215,51 @@ aerospike_namespace_batch_sub_tsvc_error{cluster_name="null",ns="user-data",serv
 # HELP aerospike_namespace_batch_sub_tsvc_timeout batch sub tsvc timeout
 # TYPE aerospike_namespace_batch_sub_tsvc_timeout counter
 aerospike_namespace_batch_sub_tsvc_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_delete_error batch sub tsvc timeout
+# TYPE aerospike_namespace_client_delete_error counter
+aerospike_namespace_client_delete_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_delete_filtered_out batch sub tsvc timeout
+# TYPE aerospike_namespace_client_delete_filtered_out counter
+aerospike_namespace_client_delete_filtered_out{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_delete_not_found batch sub tsvc timeout
+# TYPE aerospike_namespace_client_delete_not_found counter
+aerospike_namespace_client_delete_not_found{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_delete_success batch sub tsvc timeout
+# TYPE aerospike_namespace_client_delete_success counter
+aerospike_namespace_client_delete_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_delete_timeout batch sub tsvc timeout
+# TYPE aerospike_namespace_client_delete_timeout counter
+aerospike_namespace_client_delete_timeout{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_lang_delete_success batch sub tsvc timeout
+# TYPE aerospike_namespace_client_lang_delete_success counter
+aerospike_namespace_client_lang_delete_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_lang_error batch sub tsvc timeout
+# TYPE aerospike_namespace_client_lang_error counter
+aerospike_namespace_client_lang_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_lang_read_success batch sub tsvc timeout
+# TYPE aerospike_namespace_client_lang_read_success counter
+aerospike_namespace_client_lang_read_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_lang_write_success batch sub tsvc timeout
+# TYPE aerospike_namespace_client_lang_write_success counter
+aerospike_namespace_client_lang_write_success{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_proxy_complete batch sub tsvc timeout
+# TYPE aerospike_namespace_client_proxy_complete counter
+aerospike_namespace_client_proxy_complete{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_proxy_error batch sub tsvc timeout
+# TYPE aerospike_namespace_client_proxy_error counter
+aerospike_namespace_client_proxy_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
+
+# HELP aerospike_namespace_client_proxy_timeout batch sub tsvc timeout
+# TYPE aerospike_namespace_client_proxy_timeout counter
+aerospike_namespace_client_proxy_error{cluster_name="null",ns="user-data",service="192.168.32.3:3000",storage_engine="memory"} 0
