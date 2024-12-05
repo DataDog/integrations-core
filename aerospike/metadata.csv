@@ -20,7 +20,6 @@ aerospike.aerospike_namespace_batch_sub_read_success,gauge,,,,[OpenMetricsV2 and
 aerospike.aerospike_namespace_batch_sub_read_timeout,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] batch activity read timeouts,0,aerospike,,,
 aerospike.aerospike_namespace_batch_sub_tsvc_error,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] batch activity tsvc errors,0,aerospike,,,
 aerospike.aerospike_namespace_batch_sub_tsvc_timeout,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] batch activity tsvc timeouts,0,aerospike,,,
-aerospike.aerospike_namespace_client_delete_error,gauge,,,,[Legacy] The number of client delete transactions that failed with an error.,0,aerospike,,,
 aerospike.aerospike_namespace_client_delete_error,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of client delete errors,0,aerospike,,,
 aerospike.aerospike_namespace_client_delete_filtered_out,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of client delete filtered out,0,aerospike,,,
 aerospike.aerospike_namespace_client_delete_not_found,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of client delete which are not found,0,aerospike,,,
