@@ -161,16 +161,16 @@ TPS_METRICS = [
     'tps.read',
 ]
 
-LEGACY_SET_METRICS = []
-#     'set.tombstones',
-#     'set.memory_data_bytes',
-#     'set.truncate_lut',
-#     'set.objects',
-#     'set.stop_writes_count',
-#     'set.disable_eviction',
-# ]
+LEGACY_SET_METRICS = [
+    'tombstones',
+    'memory_data_bytes',
+    'truncate_lut',
+    'objects',
+    'stop_writes_count',
+    'disable_eviction',
+]
 
-SET_METRICS = ['set.enable_index', 'set.index_populating', 'set.sindexes']
+SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
 # we support dashboards only latest set metrics
 # SET_METRICS.extend(LEGACY_SET_METRICS)
 
