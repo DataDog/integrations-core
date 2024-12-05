@@ -32,12 +32,6 @@ EVENT_TO_ALERT_TYPE = {
 }
 
 
-class Deployment:
-    def __init__(self, environment_name, release_version):
-        self.environment_name = environment_name
-        self.release_version = release_version
-
-
 class OctopusDeployCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'octopus_deploy'
 
@@ -367,8 +361,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         cached_deployment = self._deployments_cache.get(deployment_id)
 
         if cached_deployment is not None:
-            release_version = cached_deployment.release_version
-            environment_name = cached_deployment.environment_name
+            release_version = cached_deployment[0]
+            environment_name = cached_deployment[1]
         else:
             self.log.debug("Cached deployment not found for deployment id: %s", deployment_id)
             deployment = self._process_endpoint(f"api/{space_id}/deployments/{deployment_id}")
@@ -384,7 +378,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 release_version = release.get("Version")
                 self._releases_cache[release_id] = release_version
 
-            self._deployments_cache[deployment_id] = Deployment(environment_name, release_version)
+            self._deployments_cache[deployment_id] = (release_version, environment_name)
 
         tags = [
             f'deployment_id:{deployment_id}',
