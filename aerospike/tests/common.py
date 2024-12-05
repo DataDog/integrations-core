@@ -165,7 +165,7 @@ LEGACY_SET_METRICS = [
     'set.tombstones',
     'set.memory_data_bytes',
     'set.truncate_lut',
-    'set._objects',
+    'set.objects',
     'set.stop_writes_count',
     'set.disable_eviction',
 ]
