@@ -30,9 +30,9 @@
         "SpaceId": "Spaces-1",
         "EstimatedRemainingQueueDurationSeconds": 0,
         "Name": "Deploy",
-        "Description": "Deploy test release 0.0.41 to dev",
+        "Description": "Deploy test release 0.0.1 to dev",
         "Arguments": {
-          "DeploymentId": "Deployments-118"
+          "DeploymentId": "Deployments-19"
         },
         "State": "Queued",
         "Completed": "Queued...",

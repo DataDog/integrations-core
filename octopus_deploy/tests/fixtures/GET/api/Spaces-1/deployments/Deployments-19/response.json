@@ -1,0 +1,71 @@
+{
+    "Id": "Deployments-19",
+    "SpaceId": "Spaces-1",
+    "ReleaseId": "Releases-3",
+    "ChannelId": "Channels-1",
+    "DeploymentProcessId": "deploymentprocess-Projects-1-s-1-MNSER",
+    "Changes": [
+      {
+        "Version": "0.0.2",
+        "ReleaseNotes": null,
+        "BuildInformation": [],
+        "WorkItems": [],
+        "Commits": []
+      },
+      {
+        "Version": "0.0.2",
+        "ReleaseNotes": null,
+        "BuildInformation": [],
+        "WorkItems": [],
+        "Commits": []
+      }
+    ],
+    "ChangesMarkdown": "\n**Release 0.0.2**\n\n\n\n\n**Release 0.0.2**\n\n\n\n",
+    "EnvironmentId": "Environments-1",
+    "TenantId": null,
+    "ForcePackageDownload": false,
+    "ForcePackageRedeployment": false,
+    "Priority": "LifecycleDefault",
+    "SkipActions": [],
+    "SpecificMachineIds": [],
+    "ExcludedMachineIds": [],
+    "ManifestVariableSetId": null,
+    "TaskId": "ServerTasks-1847",
+    "ProjectId": "Projects-1",
+    "UseGuidedFailure": false,
+    "Comments": null,
+    "FormValues": {},
+    "QueueTime": null,
+    "QueueTimeExpiry": null,
+    "Name": "Deploy to staging",
+    "Created": "2024-09-2T14:42:40.224+00:00",
+    "TentacleRetentionPeriod": {
+      "Unit": "Days",
+      "QuantityToKeep": 0,
+      "ShouldKeepForever": true
+    },
+    "ChangeRequestSettings": null,
+    "DeployedBy": "test",
+    "DeployedById": "Users-1",
+    "FailureEncountered": false,
+    "DeployedToMachineIds": [],
+    "ExecutionPlanLogContext": {
+      "Steps": [
+        {
+          "Slug": "run-a-script",
+          "CorrelationId": "ServerTasks-1847"
+        }
+      ]
+    },
+    "Links": {
+      "Self": "/api/Spaces-1/deployments/Deployments-1",
+      "Release": "/api/Spaces-1/releases/Releases-2",
+      "Environment": "/api/Spaces-1/environments/Environments-1",
+      "Project": "/api/Spaces-1/projects/Projects-1",
+      "Task": "/api/tasks/ServerTasks-1847",
+      "Web": "/app#/Spaces-1/deployments/Deployments-1",
+      "Artifacts": "/api/Spaces-1/artifacts?regarding=Deployments-1",
+      "Interruptions": "/api/Spaces-1/interruptions?regarding=Deployments-1",
+      "DeploymentProcess": "/api/Spaces-1/deploymentprocesses/deploymentprocess-Projects-1-s-1-KSJDF"
+    }
+  }

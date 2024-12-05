@@ -89,6 +89,30 @@ files:
           - name: interval
             type: integer
         example: {}
+    - name: environments
+      display_priority: 6
+      description: |
+        Filter your integration by environment.
+      value:
+        type: object
+        properties:
+          - name: limit
+            description: |
+              Maximum number of projects to be processed.
+            type: integer
+          - name: include
+            type: array
+            items:
+              anyOf:
+                - type: string
+                - type: object
+          - name: exclude
+            type: array
+            items:
+              type: string
+          - name: interval
+            type: integer
+        example: {}
     - template: instances/default
     - template: instances/http
       overrides:
