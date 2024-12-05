@@ -3,7 +3,6 @@ aerospike.aerospike_latencies_read_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospi
 aerospike.aerospike_latencies_read_ms_count,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of queries in a bucket taking N milliseconds.,0,aerospike,,,
 aerospike.aerospike_latencies_write_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of queries in a bucket taking N milliseconds.,0,aerospike,,,
 aerospike.aerospike_latencies_write_ms_count,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of queries in a bucket taking N milliseconds.,0,aerospike,,,
-aerospike.aerospike_namespace_allow_nonxdr_writes,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] if non-xdr writes are allowed,0,aerospike,,,
 aerospike.aerospike_namespace_allow_ttl_without_nsup,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] should nsup work without configuring ttl,0,aerospike,,,
 aerospike.aerospike_namespace_allow_xdr_writes,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] if xdr writes are allowed point in time,0,aerospike,,,
 aerospike.aerospike_namespace_appeals_records_exonerated,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records successfully exenerated,0,aerospike,,,

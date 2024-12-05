@@ -26,7 +26,6 @@ EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.aerospike_latencies_read_ms_count',
     'aerospike.aerospike_latencies_write_ms_bucket',
     'aerospike.aerospike_latencies_write_ms_count',
-    'aerospike.aerospike_namespace_allow_nonxdr_writes',
     'aerospike.aerospike_namespace_reject_non_xdr_writes',
     'aerospike.aerospike_namespace_allow_ttl_without_nsup',
     'aerospike.aerospike_namespace_allow_xdr_writes',
