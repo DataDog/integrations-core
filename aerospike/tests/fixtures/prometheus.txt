@@ -416,6 +416,11 @@ aerospike_sindex_write_error{cluster_name="null",ns="test",set="test1",service="
 # TYPE aerospike_sindex_write_success gauge
 aerospike_sindex_write_success{cluster_name="null",ns="test",set="test1",service="192.168.32.3:3000"} 32
 
-# HELP aerospike_namespace_data_in_index data avail pct
+# HELP aerospike_namespace_data_in_index data size in index
 # TYPE aerospike_namespace_data_in_index gauge
 aerospike_namespace_data_in_index{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_namespace_default_ttl default record ttl
+# TYPE aerospike_namespace_default_ttl gauge
+aerospike_namespace_default_ttl{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+

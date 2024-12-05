@@ -53,6 +53,7 @@ aerospike.aerospike_namespace_clock_skew_stop_writes,gauge,,,,[Legacy and OpenMe
 aerospike.aerospike_namespace_current_time,gauge,,,,[OpenMetricsV2 and Aerospike v3.9+] current time,0,aerospike,,,
 aerospike.aerospike_namespace_data_in_index,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] size of data available in index.,0,aerospike,,,
 aerospike.aerospike_namespace_dead_partitions,gauge,,,,[Legacy and OpenMetricsV2 and Aerospike v4.0+] The number of dead partitions for this namespace (when using strong-consistency). This is the number of partitions that are unavailable when all roster nodes are present.,0,aerospike,,,
+aerospike.aerospike_namespace_default_ttl,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] ttl of a record inserted,0,aerospike,,,
 aerospike.aerospike_namespace_device_available_pct,gauge,,,,[Legacy and OpenMetricsV2 and Aerospike v3.9+] The minimum contiguous disk space for all disks in a namespace.,0,aerospike,,,
 aerospike.aerospike_namespace_hwm_breached,gauge,,,,[Legacy and OpenMetricsV2 and Aerospike v3.9+] If true Aerospike has breached 'high-water-[disk/memory]-pct' for this namespace. Deprecated since 3.9,0,aerospike,,,
 aerospike.aerospike_namespace_index_flash_alloc_pct,gauge,,,,[OpenMetricsV2 and Aerospike v5.6+] Applies only to Enterprise Edition configured with index-type flash. Percentage of the mount(s) allocated for the primary index used by this namespace on this node.,0,aerospike,,,
