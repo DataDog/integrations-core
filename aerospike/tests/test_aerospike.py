@@ -127,7 +127,7 @@ def _test_check(aggregator):
             aggregator.assert_metric("aerospike.set.{}".format(metric))
     else:
         for metric in LEGACY_SET_METRICS:
-            print(" ---> ","aerospike.set.{}".format(metric))
+            print(" ---> ", "aerospike.set.{}".format(metric))
             aggregator.assert_metric("aerospike.set.{}".format(metric))
 
     for metric in INDEXES_METRICS:
