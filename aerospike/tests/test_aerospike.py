@@ -21,7 +21,7 @@ from .common import (
     # SET_METRICS,
     # STATS_METRICS,
     # TPS_METRICS,
-    VERSION,
+    # VERSION,
 )
 
 
