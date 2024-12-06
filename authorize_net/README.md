@@ -7,23 +7,27 @@ The Authorize.Net integration collects settled transaction logs and unsettled tr
 
 ## Setup
 
-### Get API Credentials from Authorize.Net
+### Get Login ID and Transaction Key from Authorize.Net
 
-#### Authorize.Net API Login ID and Transaction Key
-
-1. Visit to [Authorize.Net][2]
+1. Visit the appropriate URL:
+   - For a production environment, visit [login.authorize.net][2].
+   - For a sandbox environment, visit [sandbox.authorize.net][5].
 2. Sign in to your Authorize.Net account with a user which has access to the **Account Administrator** role.
 3. Go to the Accounts > Security Settings > General Security Settings.
 4. Click **API Credentials & Keys**, and get API Login ID.
-5. To get Transaction Key, click **New Transaction Key** and click **Submit**.
+5. To get Transaction Key, on the same page click **New Transaction Key** and click **Submit**.
 6. A pop-up will be displayed to verify your identity, click **Request PIN**.
 7. Enter the PIN you received via email, and click **verify PIN**.
 8. Get the Transaction Key.
 9. Click Continue to complete the process.
 
-### Add your Authorize.Net Credentials
-- Login ID
-- Transaction Key
+### Connect your Authorize.Net Account to Datadog
+|Parameters| Description                                                                                    |
+|--------------------|------------------------------------------------------------------------------------------------|
+|Login ID| Login ID of your Authorize.Net account.                                                        |
+|Transaction Key| Transaction Key of your Authorize.Net account.                                                 |
+|Environment Type| Dropdown to select the environment type of your Authorize.Net account. (Production or Sandbox) |
+
 
 ## Data Collected
 
@@ -47,3 +51,4 @@ For further assistance, contact [Datadog Support][4].
 [2]: https://login.authorize.net/
 [3]: https://github.com/DataDog/integrations-core/blob/master/Authorize.Net/metadata.csv
 [4]: https://docs.datadoghq.com/help/
+[5]: https://sandbox.authorize.net/

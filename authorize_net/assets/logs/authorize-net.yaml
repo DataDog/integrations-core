@@ -9,14 +9,14 @@ facets:
     source: log
   - facetType: range
     groups:
-      - authorize-net
+      - Authorize-net
     name: Settle Amount
     path: authorize-net.settleAmount
     source: log
     type: double
 pipeline:
   type: pipeline
-  name: authorize-net
+  name: authorize.net
   enabled: true
   filter:
     query: "source:authorize-net"
