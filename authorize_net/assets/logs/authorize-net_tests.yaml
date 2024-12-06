@@ -1,6 +1,31 @@
-id: authorize-net
+id: "authorize-net"
 tests:
-  - sample: |-
+ -
+  sample: |-
+    {
+      "enrichment_details": {
+          "merchantId": "2zHHE7jW",
+          "batchId": "157463",
+          "settlementTimeUTC": "2024-12-03T09:23:05Z"
+      },
+      "log": {
+          "submitTimeUTC": "2024-10-21T08:28:47Z",
+          "product": "Card Not Present",
+          "transactionStatus": "settledSuccessfully",
+          "transId": "800205266",
+          "submitTimeLocal": "2024-10-21T01:28:47",
+          "accountType": "AmericanExpress",
+          "settleAmount": 115,
+          "accountNumber": "XXXX0002",
+          "firstName": "John",
+          "lastName": "Doe"
+          "marketType": "eCommerce"
+      }
+    }
+  service: "transaction"
+  result:
+    custom: {}
+    message: |-
       {
         "enrichment_details": {
             "merchantId": "2zHHE7jW",
@@ -22,30 +47,6 @@ tests:
         }
       }
     service: "transaction"
-    result:
-        custom: {}
-        message: |-
-            {
-                "enrichment_details": {
-                    "merchantId": "2zHHE7jW",
-                    "batchId": "157463",
-                    "settlementTimeUTC": "2024-12-03T09:23:05Z"
-                },
-                "log": {
-                    "submitTimeUTC": "2024-10-21T08:28:47Z",
-                    "product": "Card Not Present",
-                    "transactionStatus": "settledSuccessfully",
-                    "transId": "800205266",
-                    "submitTimeLocal": "2024-10-21T01:28:47",
-                    "accountType": "AmericanExpress",
-                    "settleAmount": 115,
-                    "accountNumber": "XXXX0002",
-                    "firstName": "John",
-                    "lastName": "Doe"
-                    "marketType": "eCommerce"
-                }
-            }
-        service: "transaction"
-        tags:
-        - "source:LOGS_SOURCE"
-        timestamp: 1
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
