@@ -20,8 +20,8 @@ tests:
                       "lastName": "Doe"
                       "marketType": "eCommerce"
                   },
-                  "service": "transaction"
-              }
+       }
+    service: transaction
     result:
         custom: {}
         message: |-
