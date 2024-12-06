@@ -1,6 +1,6 @@
 {
     "title": "Authorize.Net Unsettled Transactions",
-    "description": "This dashboard provides a comprehensive view of unsettled transactions in Authorize.Net, highlighting average unsettled transactions and the average amount per transaction. It categorizes transactions by account type, market type, product, status, and customer profile ID, while also tracking held transactions and trends over time. Financial metrics show the impact of unsettled transactions, aiding in issue detection and timely resolution.",
+    "description": "This dashboard provides a comprehensive view of unsettled transactions in Authorize.Net, highlighting average unsettled transactions and the average amount per transaction. It categorizes transactions by account type, market type, product, and status, while also tracking held transactions and trends over time. Financial metrics show the impact of unsettled transactions, aiding in issue detection and timely resolution.",
     "widgets": [
         {
             "id": 7072091412398420,
