@@ -16,7 +16,7 @@ facets:
     type: double
 pipeline:
   type: pipeline
-  name: authorize-net
+  name: authorize.net
   enabled: true
   filter:
     query: "source:authorize-net"
