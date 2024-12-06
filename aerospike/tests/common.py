@@ -14,7 +14,7 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 HOST = "127.0.0.1"
 PORT = 3000
 EXPORTER_PORT = 9145
-VERSION = os.environ.get('AEROSPIKE_VERSION')
+VERSION = os.environ.get('7.2')
 
 OPENMETRICS_V2_INSTANCE = {
     'openmetrics_endpoint': 'http://{}:{}/metrics'.format(HOST, EXPORTER_PORT),
