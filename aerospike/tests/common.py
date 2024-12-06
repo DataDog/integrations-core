@@ -440,10 +440,7 @@ PROMETHEUS_XDR_METRICS = [
 
 NAMESPACE_METRICS = []
 
-TPS_METRICS = [
-    'tps.write',
-    'tps.read',
-]
+TPS_METRICS = []
 
 LEGACY_SET_METRICS = [
     'tombstones',
