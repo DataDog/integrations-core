@@ -1,12 +1,12 @@
 services:
   aerospike:
     container_name: aerospike
-    image: aerospike/aerospike-server:${AEROSPIKE_VERSION}
+    image: aerospike/aerospike-server:latest
     ports:
       - "3000:3000"
   aerospike-prometheus-exporter:
     container_name: aerospike-prometheus-exporter
-    image: aerospike/aerospike-prometheus-exporter:${AEROSPIKE_EXPORTER_VERSION}
+    image: aerospike/aerospike-prometheus-exporter:latest
     ports:
       - "9145:9145"
     environment:
