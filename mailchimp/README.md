@@ -13,7 +13,7 @@ The Mailchimp integration collects metrics from campaigns and lists, directing t
 
 ## Setup
 
-### Get API credentials for Mailchimp
+### Generate API credentials in Mailchimp
 
 1. Log in to your [Mailchimp account][2]. 
 2. Check the url for the Server prefix. It is the `xxxx`part of the url(eg: `https://xxxx.admin.mailchimp.com/`).
@@ -23,10 +23,15 @@ The Mailchimp integration collects metrics from campaigns and lists, directing t
 6. Enter your preferred name for the API key and click on **Generate Key**. Your API key is now generated.
 
 
-### Add your Mailchimp Credentials
+### Connect your Mailchimp Account to Datadog
 
-- Mailchimp Marketing API Key
-- Mailchimp Server Prefix
+1. Add your Marketing API Key and Server Prefix    
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Marketing API key|API key for your Mailchimp marketing account.|
+    |Server prefix|Server prefix (for example: us13) of the Mailchimp account.|
+
+2. Click the Save button to save your settings.
 
 
 ## Data Collected
