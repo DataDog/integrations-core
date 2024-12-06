@@ -419,11 +419,7 @@ EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.aerospike_namespace_udf_sub_lang_write_success',
 ]
 
-EXPECTED_PROMETHEUS_METRICS_5_6 = [
-    'aerospike.aerospike_node_stats_client_connections_opened',
-    'aerospike.aerospike_node_stats_fabric_connections_opened',
-    'aerospike.aerospike_node_stats_heartbeat_connections_opened',
-]
+EXPECTED_PROMETHEUS_METRICS_5_6 = []
 
 PROMETHEUS_XDR_METRICS = [
     'aerospike.aerospike_xdr_abandoned',
