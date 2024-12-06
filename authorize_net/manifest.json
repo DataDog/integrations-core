@@ -20,7 +20,7 @@
             "media_type": "image",
             "caption": "Authorize.net Settled Transactions",
             "image_url": "images/authorize_net_settled_transactions_2.png"
-          },
+        },
         {
           "media_type": "image",
           "caption": "Authorize.net Unsettled Transactions",
