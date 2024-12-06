@@ -3,7 +3,7 @@
 	"created_at": "2024-12-05",
 	"last_updated_at": "2024-12-05",
 	"title": "High number of expired transactions detected",
-	"description": "Expired transactions in Authorize.Net are those that were authorized but not captured within the 30-day timeframe. This monitor tracks expired transactions to ensure timely resolution, helping to avoid potential revenue loss and maintain customer satisfaction.",
+	"description": "The expired transactions in Authorize.Net are those that were authorized but not captured within the 30-day timeframe. This monitor tracks expired transactions to ensure timely resolution, helping to avoid potential revenue loss and maintain customer satisfaction.",
 	"definition": {
 		"id": 156179306,
 		"name": "High number of expired transactions detected",

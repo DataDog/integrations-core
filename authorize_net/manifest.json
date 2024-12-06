@@ -14,12 +14,17 @@
         {
           "media_type": "image",
           "caption": "Authorize.net Settled Transactions",
-          "image_url": "images/authorize_net_settled_transaction.png"
+          "image_url": "images/authorize_net_settled_transactions_1.png"
         },
+        {
+            "media_type": "image",
+            "caption": "Authorize.net Settled Transactions",
+            "image_url": "images/authorize_net_settled_transactions_2.png"
+          },
         {
           "media_type": "image",
           "caption": "Authorize.net Unsettled Transactions",
-          "image_url": "images/authorize_net_unsettled_transaction.png"
+          "image_url": "images/authorize_net_unsettled_transactions.png"
         }
       ],
       "classifier_tags": [
@@ -39,7 +44,7 @@
           },
           "metrics": {
               "prefix": "authorize_net.",
-              "check": [],
+              "check": ["authorize_net.unsettled_transaction.amount_by_account_type", "authorize_net.unsettled_transaction.total_unsettled_transactions"],
               "metadata_path": "metadata.csv"
           },
           "service_checks": {

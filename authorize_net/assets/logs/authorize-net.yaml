@@ -27,8 +27,7 @@ pipeline:
       sources:
         - service
     - type: date-remapper
-      name: Define `enrichment_details.settlementTimeUTC` as the official timestamp of
-        the log
+      name: Define `enrichment_details.settlementTimeUTC` as the official date of the log
       enabled: true
       sources:
         - enrichment_details.settlementTimeUTC
