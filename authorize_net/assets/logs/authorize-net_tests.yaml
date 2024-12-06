@@ -17,7 +17,7 @@ tests:
             "settleAmount": 115,
             "accountNumber": "XXXX0002",
             "firstName": "John",
-            "lastName": "Doe"
+            "lastName": "Doe",
             "marketType": "eCommerce"
         }
       }
