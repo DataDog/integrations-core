@@ -5,7 +5,7 @@ tests:
         "enrichment_details": {
             "merchantId": "2zHHE7jW",
             "batchId": "157463",
-            settlementTimeUTC": "2024-12-03T09:23:05Z"
+            "settlementTimeUTC": "2024-12-03T09:23:05Z"
         },
         "log": {
             "submitTimeUTC": "2024-10-21T08:28:47Z",
