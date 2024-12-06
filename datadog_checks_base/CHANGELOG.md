@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.2.0 / 2024-12-05
+
+***Added***:
+
+* Bump binary package version for py3.12 ([#19190](https://github.com/DataDog/integrations-core/pull/19190))
+
 ## 37.1.1 / 2024-11-28
 
 ***Fixed***:
