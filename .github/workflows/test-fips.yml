@@ -145,7 +145,7 @@ jobs:
         "@
         $OpenSSLConf | Set-Content -Path ".\openssl.cnf"
 
-    - name: Verify OpenSSL and FIPS Provider
+    - name: Verify OpenSSL
       if: runner.os == 'Windows'
       working-directory: .\python_dir
       shell: powershell
@@ -162,22 +162,13 @@ jobs:
         $env:OPENSSL_CONF = ".\openssl.cnf"
         .\openssl.exe list -providers
 
-    - name: Verify OpenSSL with FIPS ENV vars
-      if: runner.os == 'Windows'
-      working-directory: .\python_dir
-      shell: powershell
-      run: |
-        $env:OPENSSL_MODULES = ".\ossl-modules"
-        $env:OPENSSL_CONF = ".\openssl.cnf"
-        .\openssl.exe list -providers
-
-    - name: Add Python to path Windows
+    - name: Add Python to PATH Windows
       if: runner.os == 'Windows'
       shell: powershell
       run: |
         Add-Content -Path $env:GITHUB_ENV -Value "PATH=.\python_dir;$env:PATH"
 
-    - name: Add Python to path Linux
+    - name: Add Python to PATH Linux
       if: runner.os == 'Linux'
       run: |
         echo "PATH=./python_dir:$PATH" >> $GITHUB_ENV
