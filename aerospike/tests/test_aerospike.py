@@ -72,7 +72,7 @@ def test_e2e(dd_agent_check, instance):
 
 @pytest.mark.e2e
 def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
-    version_parts = [int(p) for p in VERSION.split('.')]
+    # version_parts = [int(p) for p in VERSION.split('.')]
 
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
 
