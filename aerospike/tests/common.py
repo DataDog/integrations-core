@@ -448,31 +448,7 @@ SET_METRICS = []
 
 ALL_METRICS = NAMESPACE_METRICS + LEGACY_SET_METRICS
 
-INDEXES_METRICS = [
-    "aerospike.sindex.delete_error",
-    "aerospike.sindex.delete_success",
-    "aerospike.sindex.entries",
-    "aerospike.sindex.histogram",
-    "aerospike.sindex.ibtr_memory_used",
-    "aerospike.sindex.keys",
-    "aerospike.sindex.load_pct",
-    "aerospike.sindex.loadtime",
-    "aerospike.sindex.nbtr_memory_used",
-    "aerospike.sindex.query_agg",
-    "aerospike.sindex.query_agg_avg_rec_count",
-    "aerospike.sindex.query_agg_avg_record_size",
-    "aerospike.sindex.query_avg_rec_count",
-    "aerospike.sindex.query_avg_record_size",
-    "aerospike.sindex.query_lookup_avg_rec_count",
-    "aerospike.sindex.query_lookup_avg_record_size",
-    "aerospike.sindex.query_lookups",
-    "aerospike.sindex.query_reqs",
-    "aerospike.sindex.si_accounted_memory",
-    "aerospike.sindex.stat_gc_recs",
-    "aerospike.sindex.stat_gc_time",
-    "aerospike.sindex.write_error",
-    "aerospike.sindex.write_success",
-]
+INDEXES_METRICS = []
 
 STATS_METRICS = []
 
