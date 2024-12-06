@@ -22,14 +22,6 @@ def clean_environment():
     yield
 
 
-def test_ssl_md5_before_fips(clean_environment):
-    import ssl
-
-    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-    ctx.set_ciphers("MD5")
-    assert True
-
-
 def test_ssl_md5_after_fips(clean_environment):
     import ssl
 
@@ -39,13 +31,6 @@ def test_ssl_md5_after_fips(clean_environment):
         ctx.set_ciphers("MD5")
 
 
-def test_cryptography_md5_before_fips(clean_environment):
-    from cryptography.hazmat.primitives import hashes
-
-    hashes.Hash(hashes.MD5())
-    assert True
-
-
 def test_cryptography_md5_after_fips(clean_environment):
     from cryptography.exceptions import InternalError
     from cryptography.hazmat.primitives import hashes
@@ -53,4 +38,3 @@ def test_cryptography_md5_after_fips(clean_environment):
     enable_fips(path_to_openssl_conf=PATH_TO_OPENSSL_CONF,path_to_openssl_modules=PATH_TO_OPENSSL_MODULES)
     with pytest.raises(InternalError, match='Unknown OpenSSL error.'):
         hashes.Hash(hashes.MD5())
-
