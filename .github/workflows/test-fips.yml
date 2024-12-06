@@ -68,6 +68,36 @@ jobs:
         && make \
         && sudo make install
 
+    - name: Build Python from Source with Custom OpenSSL
+      if: runner.os == 'Linux'
+      run: |
+
+        # Install dependencies for building Python
+        sudo apt-get update && sudo apt-get install -y \
+          build-essential \
+          zlib1g-dev \
+          libffi-dev \
+          libssl-dev \
+          libncurses5-dev \
+          libsqlite3-dev \
+          libreadline-dev \
+          libbz2-dev \
+          liblzma-dev \
+          tk-dev \
+          uuid-dev \
+          libgdbm-dev \
+          wget
+
+        # Download and extract Python source
+        wget https://www.python.org/ftp/python/${{ env.PYTHON_VERSION }}/Python-${{ env.PYTHON_VERSION }}.tgz
+        tar -xvzf Python-${{ env.PYTHON_VERSION }}.tgz -C python_dir
+        cd python_dir
+
+        # Configure and build Python with custom OpenSSL
+        ./configure --enable-optimizations --with-openssl=$(pwd)/../openssl-${{ env.OPENSSL_VERSION }}
+        make -j$(nproc)
+        sudo make altinstall
+
     - name: Download python-windows-combined
       if: runner.os == 'Windows'
       shell: powershell
@@ -141,3 +171,16 @@ jobs:
         $env:OPENSSL_CONF = ".\openssl.cnf"
         .\openssl.exe list -providers
 
+    - name: Add Python to path Windows
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        Add-Content -Path $env:GITHUB_ENV -Value "PATH=.\python_dir;$env:PATH"
+
+    - name: Add Python to path Linux
+      if: runner.os == 'Linux'
+      run: |
+        echo "PATH=./python_dir:$PATH" >> $GITHUB_ENV
+
+    - name: Test Python
+      run: python --version
