@@ -260,6 +260,9 @@ class CouchDB2:
                     dist_tags = list(tags)
                     dist_tags.append("node:{0}".format(node))
                     self._build_system_metrics(metrics, dist_tags, "{0}.{1}".format(prefix, key))
+            elif key == "distribution_events":
+                self.agent_check.log.debug("Skipping distribution events")
+                continue
             elif isinstance(value, dict):
                 self._build_system_metrics(value, tags, "{0}.{1}".format(prefix, key))
             else:

@@ -7,7 +7,7 @@
 
 Amazon EKS on AWS Fargate is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. Kubernetes nodes are managed by AWS Fargate and abstracted away from the user.
 
-**Note**: Network Performance Monitoring (NPM) is not supported for EKS Fargate.
+**Note**: Cloud Network Monitoring (CNM) is not supported for EKS Fargate.
 
 ## Setup
 
@@ -305,20 +305,30 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 ###### Setup
 
-1. Install the Datadog Agent with the Cluster Agent and Admission Controller enabled:
+1. Create a file, `datadog-values.yaml`, that contains:
 
    ```sh
-   helm install datadog datadog/datadog -n datadog-agent \
-       --set datadog.clusterName=cluster-name \
-       --set agents.enabled=false \
-       --set datadog.apiKeyExistingSecret=datadog-secret \
-       --set clusterAgent.tokenExistingSecret=datadog-secret \
-       --set clusterAgent.admissionController.agentSidecarInjection.enabled=true \
-       --set clusterAgent.admissionController.agentSidecarInjection.provider=fargate
+   datadog:
+     clusterName: <CLUSTER_NAME>
+     apiKeyExistingSecret: datadog-secret
+   agents:
+     enabled: false
+   clusterAgent:
+     tokenExistingSecret: datadog-secret
+     admissionController:
+       agentSidecarInjection:
+         enabled: true
+         provider: fargate
    ```
    **Note**: Use `agents.enabled=false` for a Fargate-only cluster. On a mixed cluster, set `agents.enabled=true` to create a DaemonSet for monitoring workloads on EC2 instances.
 
-2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
+2. Deploy the chart:
+
+   ```bash
+   helm install datadog-agent -f datadog-values.yaml datadog/datadog
+   ```
+
+3. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
    **The Admission Controller does not mutate pods that are already created**.
 
 **Example result**
