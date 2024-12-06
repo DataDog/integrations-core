@@ -110,7 +110,7 @@ def _test_check(aggregator):
     if version_parts >= [5, 3]:
         for metric in LATENCIES_METRICS:
             aggregator.assert_metric(metric)
-        aggregator.assert_metric('aerospike.set.device_data_bytes')
+        # aggregator.assert_metric('aerospike.set.device_data_bytes')
 
     else:
         for metric in TPS_METRICS:

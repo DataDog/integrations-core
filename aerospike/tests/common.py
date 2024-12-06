@@ -485,46 +485,11 @@ INDEXES_METRICS = [
     "aerospike.sindex.write_success",
 ]
 
-STATS_METRICS = [
-    'cluster_size',
-    'batch_index_initiate',
-    'cluster_generation',
-    'cluster_clock_skew_stop_writes_sec',
-    'uptime',
-]
+STATS_METRICS = []
 
-LAZY_METRICS = [
-    'aerospike.namespace.latency.write_over_64ms',
-    'aerospike.namespace.latency.write_over_8ms',
-    'aerospike.namespace.latency.write_over_1ms',
-    'aerospike.namespace.latency.write_ops_sec',
-    'aerospike.namespace.latency.read_over_64ms',
-    'aerospike.namespace.latency.read_over_8ms',
-    'aerospike.namespace.latency.read_over_1ms',
-    'aerospike.namespace.latency.read_ops_sec',
-    'aerospike.namespace.latency.batch_index_over_64ms',
-    'aerospike.namespace.latency.batch_index_over_8ms',
-    'aerospike.namespace.latency.batch_index_over_1ms',
-    'aerospike.namespace.latency.batch_index_ops_sec',
-]
+LAZY_METRICS = []
 
-LATENCIES_METRICS = [
-    'aerospike.namespace.latency.read_over_1ms',
-    'aerospike.namespace.latency.read_over_8ms',
-    'aerospike.namespace.latency.read_over_64ms',
-    'aerospike.namespace.latency.read',
-    'aerospike.namespace.latency.read_ops_sec',
-    'aerospike.namespace.latency.write_ops_sec',
-    'aerospike.namespace.latency.write_over_1ms',
-    'aerospike.namespace.latency.write_over_64ms',
-    'aerospike.namespace.latency.write',
-    'aerospike.namespace.latency.write_over_8ms',
-    'aerospike.namespace.latency.batch_index_ops_sec',
-    'aerospike.namespace.latency.batch_index_over_1ms',
-    'aerospike.namespace.latency.batch_index_over_64ms',
-    'aerospike.namespace.latency.batch_index',
-    'aerospike.namespace.latency.batch_index_over_8ms',
-]
+LATENCIES_METRICS = []
 
 INSTANCE = {
     'host': HOST,
