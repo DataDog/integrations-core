@@ -442,17 +442,10 @@ NAMESPACE_METRICS = []
 
 TPS_METRICS = []
 
-LEGACY_SET_METRICS = [
-    'tombstones',
-    'memory_data_bytes',
-    'truncate_lut',
-    'objects',
-    'stop_writes_count',
-    'disable_eviction',
-]
+LEGACY_SET_METRICS = []
 
-SET_METRICS = ['enable_index', 'index_populating', 'sindexes']
-SET_METRICS.extend(LEGACY_SET_METRICS)
+SET_METRICS = []
+#SET_METRICS.extend(LEGACY_SET_METRICS)
 
 ALL_METRICS = NAMESPACE_METRICS + LEGACY_SET_METRICS
 
