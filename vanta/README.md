@@ -31,9 +31,10 @@ Vanta integration requires a Vanta account and its Client Id, and Client Secret.
 4. Specify the following details for the new application and click on **Create**.
     * **Name**: Enter a descriptive name for your application.
     * **Description**: Provide a brief overview of your application.
-    * **App Type**: Select `Manage Vanta` type.
-5. From the **Application Info**, Click on **Generate client secret** button to obtain the client secret.
-6. Copy **Client ID** and **Client secret** for configuration.
+    * **App Type**: Select **Manage Vanta** 
+5. Navigate to the **Application Info** section for the Client ID.
+6. Click on **Generate client secret** for the Client secret.
+
 
 #### Add Vanta Credentials
 
@@ -44,11 +45,11 @@ Vanta integration requires a Vanta account and its Client Id, and Client Secret.
 
 ### Logs 
 
-The Vanta integration collects and forward Vulnerabilities logs to Datadog.
+The Vanta integration collects and forwards Vulnerabilities logs to Datadog.
 
 ### Metrics
 
-The Vanta integration collects and forward Frameworks metrics to Datadog.
+The Vanta integration collects and forwards Frameworks metrics to Datadog.
 
 {{< get-metrics-from-git "vanta" >}}
 
