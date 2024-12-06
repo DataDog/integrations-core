@@ -438,16 +438,7 @@ PROMETHEUS_XDR_METRICS = [
     'aerospike.aerospike_xdr_success',
 ]
 
-NAMESPACE_METRICS = [
-    'objects',
-    'hwm_breached',
-    'client_write_error',
-    'client_write_success',
-    'tombstones',
-    'retransmit_all_batch_sub_dup_res',
-    'truncate_lut',
-    'ops_sub_write_success',
-]
+NAMESPACE_METRICS = []
 
 TPS_METRICS = [
     'tps.write',
