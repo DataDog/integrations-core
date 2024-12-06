@@ -1,6 +1,6 @@
 module envoy-e2e
 
-go 1.13
+go 1.16
 
 require (
 	github.com/envoyproxy/go-control-plane v0.9.9
