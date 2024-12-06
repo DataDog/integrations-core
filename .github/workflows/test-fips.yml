@@ -25,12 +25,12 @@ jobs:
     env:
       FORCE_COLOR: "1"
       DEBIAN_FRONTEND: "noninteractive"
-      LD_LIBRARY_PATH: /usr/local/lib
       OPENSSL_FIPS: 1
       PYTHON_VERSION: "3.12"
       OPENSSL_VERSION: "3.0.15"
       FIPS_MODULE_VERSION:  "3.0.9"
-
+      OSSL_MODULES_DIR: "
+      OSSL_CONFIG_DIR: "
 
     steps:
 
@@ -166,12 +166,27 @@ jobs:
       if: runner.os == 'Windows'
       shell: powershell
       run: |
-        Add-Content -Path $env:GITHUB_ENV -Value "PATH=.\python_dir;$env:PATH"
+        Add-Content -Path $env:GITHUB_ENV -Value "PATH=.\python_dir;.\python_dir\Scripts;$env:PATH"
 
     - name: Add Python to PATH Linux
       if: runner.os == 'Linux'
       run: |
         echo "PATH=./python_dir:$PATH" >> $GITHUB_ENV
 
-    - name: Test Python
-      run: python --version
+    - name: Install pip
+      run: |
+        python -m ensurepip
+
+    - name: Install ddev from local folder
+      run: |
+        python -m pip install -e ./datadog_checks_dev[cli]
+        python -m pip install -e ./ddev
+
+    - name: Configure ddev
+      run: |
+        ddev config set repos.core .
+        ddev config set repo core
+
+    - name: Test
+      run: |
+        ddev test datadog_checks_base -- -k fips
