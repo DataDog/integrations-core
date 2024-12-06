@@ -188,5 +188,8 @@ jobs:
         ddev config set repo core
 
     - name: Test
+      shell: powershell
       run: |
+        $env:PATH_TO_OPENSSL_CONF = "$(pwd)\python_dir\openssl.cnf"
+        $env:PATH_TO_OPENSSL_MODULES = "$(pwd)\python_dir\ossl-modules"
         ddev test datadog_checks_base -- -k fips
