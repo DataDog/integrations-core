@@ -29,8 +29,6 @@ jobs:
       PYTHON_VERSION: "3.12"
       OPENSSL_VERSION: "3.0.15"
       FIPS_MODULE_VERSION:  "3.0.9"
-      OSSL_MODULES_DIR: "
-      OSSL_CONFIG_DIR: "
 
     steps:
 
@@ -177,6 +175,21 @@ jobs:
       run: |
         python -m ensurepip
 
+    - name: Restore cache
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || '~/.cache/pip' }}
+        key: >-
+          ${{ format(
+            'v01-python-{0}-{1}-{2}-{3}',
+            env.pythonLocation,
+            hashFiles('datadog_checks_base/pyproject.toml'),
+            hashFiles('datadog_checks_dev/pyproject.toml'),
+            hashFiles('ddev/pyproject.toml')
+          )}}
+        restore-keys: |-
+          v01-python-${{ env.pythonLocation }}
+
     - name: Install ddev from local folder
       run: |
         python -m pip install -e ./datadog_checks_dev[cli]
@@ -188,8 +201,13 @@ jobs:
         ddev config set repo core
 
     - name: Test
+      if: runner.os == 'Windows'
+      working-directory: .\python_dir
       shell: powershell
       run: |
-        $env:PATH_TO_OPENSSL_CONF = "$(pwd)\python_dir\openssl.cnf"
-        $env:PATH_TO_OPENSSL_MODULES = "$(pwd)\python_dir\ossl-modules"
+        $env:PATH_TO_OPENSSL_CONF = "$(pwd)\openssl.cnf"
+        $env:PATH_TO_OPENSSL_MODULES = "$(pwd)\ossl-modules"
+        $env:OPENSSL_CONF = "$(pwd)\openssl.cnf"
+        $env:OPENSSL_MODULES = "$(pwd)\ossl-modules"
+        .\openssl.exe list -providers
         ddev test datadog_checks_base -- -k fips
