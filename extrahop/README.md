@@ -26,16 +26,11 @@ This integration seamlessly collects all the above listed logs, channeling them 
 4. Click **Save**.
 5. Copy and store **ID** and **Secret** in a secure location.
 
-#### Configure the Datadog endpoint to forward ExtraHop logs to Datadog
+#### Add your ExtraHop credentials
 
-1. Navigate to `ExtraHop`.
-2. Add your ExtraHop credentials.
-
-| ExtraHop Parameters                   | Description                                                  |
-| ------------------------------------- | ------------------------------------------------------------ |
-| Domain                                | The Domain of your ExtraHop Console                          |
-| Client ID                             | The Client ID of your ExtraHop Console                       |
-| Client Secret                         | The Client Secret of your ExtraHop Console                   |
+- Domain
+- Client ID
+- Client Secret
 
 ## Data Collected
 
