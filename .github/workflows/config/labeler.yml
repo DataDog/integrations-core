@@ -187,6 +187,8 @@ integration/exchange_server:
 - exchange_server/**/*
 integration/external_dns:
 - external_dns/**/*
+integration/falco:
+- falco/**/*
 integration/flink:
 - flink/**/*
 integration/fluentd:
