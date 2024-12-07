@@ -62,15 +62,6 @@ def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance)
-
-    # _test_check(aggregator)
-
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-@pytest.mark.e2e
 def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
     # version_parts = [int(p) for p in VERSION.split('.')]
 
@@ -78,15 +69,11 @@ def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
 
     tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
     tags = instance_openmetrics_v2.get('tags').append(tags)
-
+    
     aggregator.assert_service_check('aerospike.openmetrics.health', AgentCheck.OK, tags=tags)
 
     for metric in EXPECTED_PROMETHEUS_METRICS:
         aggregator.assert_metric(metric, tags=tags)
-
-    # if version_parts >= [5, 6]:
-    #     for metric in EXPECTED_PROMETHEUS_METRICS_5_6:
-    #         aggregator.assert_metric(metric, tags=tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

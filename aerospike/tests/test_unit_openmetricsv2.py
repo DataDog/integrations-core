@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import EXPECTED_PROMETHEUS_METRICS, EXPECTED_PROMETHEUS_METRICS_5_6, HERE, PROMETHEUS_XDR_METRICS
+from .common import EXPECTED_PROMETHEUS_METRICS, HERE, PROMETHEUS_XDR_METRICS
 
 pytestmark = [pytest.mark.unit]
 
@@ -23,7 +23,7 @@ def test_openmetricsv2_check(aggregator, dd_run_check, instance_openmetrics_v2, 
     check = AerospikeCheck('aerospike', {}, [instance_openmetrics_v2])
     dd_run_check(check)
 
-    for metric_name in EXPECTED_PROMETHEUS_METRICS + EXPECTED_PROMETHEUS_METRICS_5_6 + PROMETHEUS_XDR_METRICS:
+    for metric_name in EXPECTED_PROMETHEUS_METRICS + PROMETHEUS_XDR_METRICS:
         aggregator.assert_metric(metric_name)
 
         aggregator.assert_metric_has_tag(
