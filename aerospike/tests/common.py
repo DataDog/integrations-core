@@ -21,9 +21,6 @@ OPENMETRICS_V2_INSTANCE = {
     'tags': ['openmetrics_instance'],
 }
 
-EXPECTED_PROMETHEUS_METRICS2 = [
-]
-
 EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.aerospike_namespace_appeals_records_exonerated',
     'aerospike.aerospike_namespace_appeals_rx_active',

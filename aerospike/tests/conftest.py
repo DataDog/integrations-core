@@ -61,7 +61,7 @@ def dd_environment():
     ):
         yield OPENMETRICS_V2_INSTANCE
 
+
 @pytest.fixture
 def instance_openmetrics_v2():
-    # print()
     return deepcopy(OPENMETRICS_V2_INSTANCE)
