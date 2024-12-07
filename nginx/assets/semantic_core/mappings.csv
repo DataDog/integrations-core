@@ -1,0 +1,6 @@
+otel,dd,description,filter
+nginx.connections_accepted,nginx.connections.accepted_count,The total number of accepted client connections,
+nginx.connections_current,nginx.connections.idle,The current number of nginx connections by state,`state`: `waiting`
+nginx.connections_current,nginx.net.connections,The current number of nginx connections by state,`state`: `active`
+nginx.connections_current,nginx.net.waiting,The current number of nginx connections by state,`state`: `waiting`
+nginx.requests,nginx.requests.total_count,Total number of requests made to the server since it started,
