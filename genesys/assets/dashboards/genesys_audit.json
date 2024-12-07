@@ -1,0 +1,838 @@
+{
+  "title": "Genesys Audit",
+  "description": "The Genesys Audit Dashboard provides a centralized view of audit logs, tracking critical activities across the platform for enhanced security and compliance. Key widgets, such as total audit logs, user-specific activity, and event types by action and status, allow teams to monitor usage patterns, identify anomalies, and analyze system interactions in real time. With insights on frequently accessed services and activity trends over time, the dashboard is essential for auditing, ensuring data integrity, and supporting compliance initiatives within the Genesys environment.\n",
+  "widgets": [
+    {
+      "id": 9001282409665398,
+      "definition": {
+        "type": "image",
+        "url": "https://www.logo.wine/a/logo/Genesys_(company)/Genesys_(company)-Logo.wine.svg",
+        "sizing": "cover",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 4
+      }
+    },
+    {
+      "id": 7190176070006682,
+      "definition": {
+        "type": "note",
+        "content": "**Overview**\n\nThe Genesys Audit Dashboard provides a centralized view of audit logs, tracking critical activities across the platform for enhanced security and compliance. Key widgets, such as total audit logs, user-specific activity, and event types by action and status, allow teams to monitor usage patterns, identify anomalies, and analyze system interactions in real time. With insights on frequently accessed services and activity trends over time, the dashboard is essential for auditing, ensuring data integrity, and supporting compliance initiatives within the Genesys environment. \n\nFor more information, see the [Genesys Integration Documentation](https://docs.datadoghq.com/integrations/genesys/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 8,
+        "height": 4
+      }
+    },
+    {
+      "id": 934095259067582,
+      "definition": {
+        "title": "Audit Logs Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3510442448112420,
+            "definition": {
+              "title": "Total Audit Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 5160520173431890,
+            "definition": {
+              "title": "Logs over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Audit Logs",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 4209693445532392,
+      "definition": {
+        "title": "Activity Distribution",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8452967305282134,
+            "definition": {
+              "title": "Frequent Activity by Service Name",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@serviceName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 6044914967180450,
+            "definition": {
+              "title": "Infrequent Activity by Service Name",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@serviceName",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "asc",
+                            "metric": "@id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1437011448422136,
+            "definition": {
+              "title": "Activity by User",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 81898895474580,
+            "definition": {
+              "title": "Top Activity by Entity Name",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@entity.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 344202775524140,
+            "definition": {
+              "title": "Top Activity by Entity Type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@entityType",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7417685183716274,
+            "definition": {
+              "title": "Activity by Level",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@level",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 8,
+              "height": 4
+            }
+          },
+          {
+            "id": 4430954780685730,
+            "definition": {
+              "title": "Activity by Status",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "inline"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 12,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 4575091239524662,
+            "definition": {
+              "title": "Activity by Action",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@action",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "cardinality",
+                            "order": "desc",
+                            "metric": "@id"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@id"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 16,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 9,
+        "width": 12,
+        "height": 21
+      }
+    },
+    {
+      "id": 5090632135355677,
+      "definition": {
+        "title": "Audit Logs",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "response_format": "event_list",
+            "query": {
+              "data_source": "logs_stream",
+              "query_string": "source:genesys service:audit $User_Home_OrgId $Service_Name $User $Level $Action $Status",
+              "indexes": [],
+              "storage": "hot",
+              "sort": {
+                "order": "desc",
+                "column": "timestamp"
+              }
+            },
+            "columns": [
+              {
+                "field": "status_line",
+                "width": "auto"
+              },
+              {
+                "field": "timestamp",
+                "width": "auto"
+              },
+              {
+                "field": "content",
+                "width": "auto"
+              }
+            ]
+          }
+        ],
+        "type": "list_stream"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 4
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "User_Home_OrgId",
+      "prefix": "@userHomeOrgId",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Service_Name",
+      "prefix": "@serviceName",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "User",
+      "prefix": "@usr.id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Level",
+      "prefix": "@level",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Action",
+      "prefix": "@action",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Status",
+      "prefix": "@status",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
