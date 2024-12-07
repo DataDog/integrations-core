@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-12-05",
+	"last_updated_at": "2024-12-05",
+	"title": "High number of expired transactions detected",
+	"description": "The expired transactions in Authorize.Net are those that were authorized but not captured within the 30-day timeframe. This monitor tracks expired transactions to ensure timely resolution, helping to avoid potential revenue loss and maintain customer satisfaction.",
+	"definition": {
+		"id": 156179306,
+		"name": "High number of expired transactions detected",
+		"type": "log alert",
+		"query": "logs(\"source:authorize-net service:transaction @log.transactionStatus:expired\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 20",
+		"message": "{{#is_alert}}\nAn expired transaction in Authorize.Net is one that was authorized but not captured within 30 days.\n\nA high number of expired transactions has been detected. This issue requires immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
+		"tags": [
+			"integration:authorize-net"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 20
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:authorize-net"
+	]
+}
