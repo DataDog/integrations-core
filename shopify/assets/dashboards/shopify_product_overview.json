@@ -1,0 +1,621 @@
+{
+    "title": "Shopify - Product Overview",
+    "description": "",
+    "widgets": [
+        {
+            "id": 8506652285430826,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-primary-logo-456baa801ee66a0a435671082365958316831c9960c480451dd0330bcdae304f.svg",
+                "url_dark_theme": "https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-inverted-primary-logo-bdc6ddd67862d9bb1f8c559e1bb50dd233112ac57b29cac2edcf17ed2e1fe6fa.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 7,
+                "height": 2
+            }
+        },
+        {
+            "id": 8770406996449935,
+            "definition": {
+                "title": "Shopify Monitor Summary",
+                "type": "manage_status",
+                "display_format": "countsAndList",
+                "color_preference": "background",
+                "hide_zero_counts": true,
+                "show_status": true,
+                "last_triggered_format": "relative",
+                "query": "tag:shopify",
+                "sort": "status,asc",
+                "count": 50,
+                "start": 0,
+                "summary_type": "monitors",
+                "show_priority": false,
+                "show_last_triggered": false
+            },
+            "layout": {
+                "x": 7,
+                "y": 0,
+                "width": 5,
+                "height": 4
+            }
+        },
+        {
+            "id": 1767411351951850,
+            "definition": {
+                "type": "note",
+                "content": "**[Shopify](https://www.shopify.com/)** is a comprehensive commerce platform that helps individuals to start, manage, and grow a business. It offers a set of tools to build an online store, manage sales, market to customers, and accept payments in digital and physical locations.\n\nThe **Shopify Product Overview** Dashboard provides an overview of products within your store. It provides  insights into product types, status distribution, inventory, and variant details.\n\nFor more information, see the [Shopify Integration Documentation](https://docs.datadoghq.com/integrations/shopify/).\n\n### Tip:-\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n",
+                "background_color": "green",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 7,
+                "height": 2
+            }
+        },
+        {
+            "id": 2446181804882916,
+            "definition": {
+                "title": "Total Products",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:product $product_name $product_type $product_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 6613518820826564,
+            "definition": {
+                "title": "Top Product Count by Type",
+                "type": "treemap",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@productType",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:product -@productType:\"\" $product_name $product_type $product_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 4,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 4043889896241554,
+            "definition": {
+                "title": "Products with Out of Stock Variants",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:product @hasOutOfStockVariants:true $product_name $product_type $product_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 1141858048342154,
+            "definition": {
+                "title": "Products with Out of Stock Inventory",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:product @tracksInventory:true @totalInventory:<=0 $product_type $product_name $product_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 4,
+                "y": 7,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 5213489288870882,
+            "definition": {
+                "title": "Products with Inventory Tracking",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:shopify service:product @tracksInventory:true $product_type $product_name $product_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 8,
+                "y": 7,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8353371234267758,
+            "definition": {
+                "title": "Products by Status",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@product_status",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:product $product_type $product_name $product_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "inline"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 3849686844214096,
+            "definition": {
+                "title": "Product Variant Price (Avg)",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@priceRangeV2.maxVariantPrice.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@legacyResourceId",
+                                        "limit": 15,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@priceRangeV2.maxVariantPrice.amount"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@title",
+                                        "limit": 15,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@priceRangeV2.maxVariantPrice.amount"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@priceRangeV2.maxVariantPrice.currencyCode",
+                                        "limit": 15,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@priceRangeV2.maxVariantPrice.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:product $product_type $product_name $product_id $currency"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@priceRangeV2.minVariantPrice.amount"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@legacyResourceId",
+                                        "limit": 15,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@priceRangeV2.maxVariantPrice.amount"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@title",
+                                        "limit": 15,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@priceRangeV2.maxVariantPrice.amount"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@priceRangeV2.maxVariantPrice.currencyCode",
+                                        "limit": 15,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@priceRangeV2.maxVariantPrice.amount"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:product $product_type $product_name $product_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 6750,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 2,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "number",
+                                "alias": "Max Variant Price",
+                                "formula": "query1"
+                            },
+                            {
+                                "cell_display_mode": "number",
+                                "alias": "Min Variant Price",
+                                "formula": "query2"
+                            },
+                            {
+                                "alias": "Average Variant Price",
+                                "cell_display_mode": "bar",
+                                "formula": "(query1 + query2) / 2"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 4,
+                "y": 9,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 6140658451404220,
+            "definition": {
+                "title": "Product Summary",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:shopify service:product $product_name $product_type $product_id $currency",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "legacyResourceId",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "title",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "productType",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "product_status",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "tracksInventory",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "totalInventory",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "priceRangeV2.maxVariantPrice.amount",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "priceRangeV2.minVariantPrice.amount",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "priceRangeV2.maxVariantPrice.currencyCode",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "vendor",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "isGiftCard",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "product_id",
+            "prefix": "@id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "product_name",
+            "prefix": "@title",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "product_type",
+            "prefix": "@productType",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "currency",
+            "prefix": "@priceRangeV2.maxVariantPrice.currencyCode",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
