@@ -21,7 +21,6 @@ except ImportError as e:
     aerospike = None
     aerospike_exception = e
 
-
 SOURCE_TYPE_NAME = 'aerospike'
 SERVICE_CHECK_UP = '%s.cluster_up' % SOURCE_TYPE_NAME
 SERVICE_CHECK_CONNECT = '%s.can_connect' % SOURCE_TYPE_NAME
