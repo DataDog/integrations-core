@@ -145,6 +145,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /openstack_controller/                  @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack_controller/manifest.json     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/*.md              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/octopus_deploy/                        @DataDog/platform-integrations @DataDog/agent-integrations
+/octopus_deploy/manifest.json           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/octopus_deploy/*.md                    @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /teleport/                              @DataDog/platform-integrations @DataDog/agent-integrations
 /teleport/manifest.json                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /teleport/*.md                          @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
