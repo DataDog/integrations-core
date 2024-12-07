@@ -13,5 +13,6 @@ METRIC_MAP = {
     "aerospike_xdr(.*)": {"name": "$1", "type": "gauge"},
     "aerospike_sysinfo(.*)": {"name": "$1", "type": "gauge"},
     # all latency metrics will be treated as Distribution in datadog cloud
-    "aerospike_latencies(.*)": {"name": "$1", "type": "histogram"},
+    # "aerospike_latencies(.*)": {"name": "$1", "type": "histogram"},
+    "aerospike_latencies(.*)": {"name": "$1", "type": "gauge"},
 }
