@@ -223,7 +223,7 @@ def build_image():
 
             # Assumption: if a digest was provided we're not changing the build image and therefore
             # we're fine with reusing wheels we've built previously
-            if args.digest or True:
+            if args.digest:
                 script_args.append('--use-built-index')
 
             check_process([
