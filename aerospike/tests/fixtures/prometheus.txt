@@ -1988,3 +1988,114 @@ aerospike_sysinfo_network_receive_bytes{cluster_name="null",ns="test",service="1
 # TYPE aerospike_sysinfo_network_transfer_bytes gauge
 aerospike_sysinfo_network_transfer_bytes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
 
+# HELP aerospike_latencies_batch_index_ms_bucket
+# TYPE aerospike_latencies_batch_index_ms_bucket gauge
+aerospike_latencies_batch_index_ms_bucket{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_latencies_batch_index_ms_count
+# TYPE aerospike_latencies_batch_index_ms_count gauge
+aerospike_latencies_batch_index_ms_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_latencies_batch_sub_read_ms_bucket
+# TYPE aerospike_latencies_batch_sub_read_ms_bucket gauge
+aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_latencies_batch_sub_read_ms_count
+# TYPE aerospike_latencies_batch_sub_read_ms_count gauge
+aerospike_latencies_batch_sub_read_ms_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_latencies_read_ms_bucket
+# TYPE aerospike_latencies_read_ms_bucket gauge
+aerospike_latencies_read_ms_bucket{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_latencies_read_ms_count
+# TYPE aerospike_latencies_read_ms_count gauge
+aerospike_latencies_read_ms_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_latencies_write_ms_bucket
+# TYPE aerospike_latencies_write_ms_bucket gauge
+aerospike_latencies_write_ms_bucket{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_latencies_write_ms_count
+# TYPE aerospike_latencies_write_ms_count gauge
+aerospike_latencies_write_ms_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_data_used_bytes
+# TYPE aerospike_sets_data_used_bytes gauge
+aerospike_sets_data_used_bytes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_default_read_touch_ttl_pct
+# TYPE aerospike_sets_default_read_touch_ttl_pct gauge
+aerospike_sets_default_read_touch_ttl_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_default_ttl
+# TYPE aerospike_sets_default_ttl gauge
+aerospike_sets_default_ttl{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_disable_eviction
+# TYPE aerospike_sets_disable_eviction gauge
+aerospike_sets_disable_eviction{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_enable_index
+# TYPE aerospike_sets_enable_index gauge
+aerospike_sets_enable_index{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_index_populating
+# TYPE aerospike_sets_index_populating gauge
+aerospike_sets_index_populating{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_objects
+# TYPE aerospike_sets_objects gauge
+aerospike_sets_objects{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_sindexes
+# TYPE aerospike_sets_sindexes gauge
+aerospike_sets_sindexes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_stop_writes_count
+# TYPE aerospike_sets_stop_writes_count gauge
+aerospike_sets_stop_writes_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_stop_writes_size
+# TYPE aerospike_sets_stop_writes_size gauge
+aerospike_sets_stop_writes_size{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_tombstones
+# TYPE aerospike_sets_tombstones gauge
+aerospike_sets_tombstones{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_truncate_lut
+# TYPE aerospike_sets_truncate_lut gauge
+aerospike_sets_truncate_lut{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sets_truncating
+# TYPE aerospike_sets_truncating gauge
+aerospike_sets_truncating{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sindex_entries
+# TYPE aerospike_sindex_entries gauge
+aerospike_sindex_entries{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sindex_entries_per_bval
+# TYPE aerospike_sindex_entries_per_bval gauge
+aerospike_sindex_entries_per_bval{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sindex_entries_per_rec
+# TYPE aerospike_sindex_entries_per_rec gauge
+aerospike_sindex_entries_per_rec{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sindex_load_pct
+# TYPE aerospike_sindex_load_pct gauge
+aerospike_sindex_load_pct{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sindex_load_time
+# TYPE aerospike_sindex_load_time gauge
+aerospike_sindex_load_time{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sindex_stat_gc_recs
+# TYPE aerospike_sindex_stat_gc_recs gauge
+aerospike_sindex_stat_gc_recs{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_sindex_used_bytes
+# TYPE aerospike_sindex_used_bytes gauge
+aerospike_sindex_used_bytes{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
