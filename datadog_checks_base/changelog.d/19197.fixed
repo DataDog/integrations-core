@@ -1,0 +1,1 @@
+Fix "no snapshot data found" error when `agent check <check> --profile-memory`
