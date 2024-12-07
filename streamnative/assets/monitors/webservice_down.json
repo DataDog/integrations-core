@@ -1,0 +1,34 @@
+{
+	"version": 2,
+	"created_at": "2024-11-07",
+	"last_updated_at": "2024-11-07",
+	"title": "Webservice is down",
+	"description": "Webservice is down for the specified organization, instance, and cluster.",
+	"definition": {
+		"id": 155033525,
+		"name": "Webservice is down",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:streamnative.health.pulsar_detector_pulsar_sla_webservice_up{*} by {cloud_streamnative_io_organization_name,cloud_streamnative_io_pulsar_instance,cloud_streamnative_io_pulsar_cluster} < 1",
+		"message": "{{#is_alert}}\nWebservice is down for Organization: {{cloud_streamnative_io_organization_name.name}}, Instance: {{cloud_streamnative_io_pulsar_instance.name}}, Cluster: {{cloud_streamnative_io_pulsar_cluster.name}}\n{{/is_alert}}\n@email@example.com",
+		"tags": [
+			"streamnative"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"on_missing_data": "show_no_data",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:streamnative"
+	]
+}
