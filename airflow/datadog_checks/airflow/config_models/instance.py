@@ -76,6 +76,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     ntlm_domain: Optional[str] = None
+    omit_authenticated_metrics: Optional[bool] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     proxy: Optional[Proxy] = None
