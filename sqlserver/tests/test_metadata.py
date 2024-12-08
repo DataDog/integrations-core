@@ -13,7 +13,7 @@ import pytest
 from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, SQLSERVER_MAJOR_VERSION
 from .utils import deep_compare, normalize_ids, normalize_indexes_columns
 
 try:
@@ -82,6 +82,8 @@ def test_get_settings_query_cached(dbm_instance, caplog):
     assert times_columns_loaded == 1, "columns should have been loaded only once"
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     # dd_run_check(check)
@@ -95,6 +97,12 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     assert len(event["metadata"]) > 0
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skipif(
+    SQLSERVER_MAJOR_VERSION < 2016,
+    reason='Partitioning is only supported on Enterprise Edition with SQL Server 2012 and 2014',
+)
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
     exp_datadog_test = {
