@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package redapl;
+
+// RedaplEvent message
+message RedaplEvent {
+    // The source is required and cannot be empty
+    string source = 1;
+    // The message contains either a RawResourceV3 or a client-specific payload
+    bytes message = 2;  // Serialized protobuf message
+}
