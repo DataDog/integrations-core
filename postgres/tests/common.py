@@ -15,6 +15,7 @@ from datadog_checks.postgres.util import (
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
+    QUERY_PG_STAT_DATABASE_CONFLICTS,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
     REPLICATION_STATS_METRICS,
@@ -79,14 +80,6 @@ DBM_MIGRATED_METRICS = [
     'postgresql.connections',
 ]
 
-CONFLICT_METRICS = [
-    'postgresql.conflicts.tablespace',
-    'postgresql.conflicts.lock',
-    'postgresql.conflicts.snapshot',
-    'postgresql.conflicts.bufferpin',
-    'postgresql.conflicts.deadlock',
-]
-
 COMMON_BGW_METRICS = [
     'postgresql.bgwriter.checkpoints_timed',
     'postgresql.bgwriter.checkpoints_requested',
@@ -108,12 +101,12 @@ COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 CHECK_PERFORMANCE_METRICS = [
     'archiver_metrics',
     'bgw_metrics',
-    'connections_metrics',
+    'pg_stat_database_connections',
     'count_metrics',
     'instance_metrics',
     'replication_metrics',
     'replication_stats_metrics',
-    'slru_metrics',
+    'pg_stat_slru',
 ]
 
 requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
@@ -353,8 +346,8 @@ def check_conflict_metrics(aggregator, expected_tags, count=1):
         return
     for db in COMMON_DBS:
         db_tags = expected_tags + ['db:{}'.format(db)]
-        for name in CONFLICT_METRICS:
-            aggregator.assert_metric(name, count=count, tags=db_tags)
+        for metric_name in _iterate_metric_name(QUERY_PG_STAT_DATABASE_CONFLICTS):
+            aggregator.assert_metric(metric_name, count=count, tags=db_tags)
 
 
 def check_bgw_metrics(aggregator, expected_tags, count=1):
@@ -406,7 +399,7 @@ def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=Fals
     if is_aurora:
         expected_metrics = expected_metrics - {'replication_metrics'}
     if float(POSTGRES_VERSION) < 13.0:
-        expected_metrics = expected_metrics - {'slru_metrics'}
+        expected_metrics = expected_metrics - {'pg_stat_slru'}
     if float(POSTGRES_VERSION) < 10.0:
         expected_metrics = expected_metrics - {'replication_stats_metrics'}
     for name in expected_metrics:
