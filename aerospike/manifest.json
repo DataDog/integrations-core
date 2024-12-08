@@ -48,7 +48,15 @@
       "auto_install": true
     },
     "dashboards": {
-      "Aerospike Overview": "assets/dashboards/overview.json"
+      "Aerospike Overview": "assets/dashboards/overview.json",
+      "Aerospike Alerts View": "assets/dashboards/alerts_view.json",
+      "Aerospike Cluster View ": "assets/dashboards/cluster_overview.json",
+      "Aerospike Namespace View": "assets/dashboards/namespace_view.json",
+      "Aerospike Node View": "assets/dashboards/node_overview.json",
+      "Aerospike Secondary Index View": "assets/dashboards/secondary_index_view.json",
+      "Aerospike Set View": "assets/dashboards/set_dashboard.json",
+      "Aerospike Users View": "assets/dashboards/users_view.json",
+      "Aerospike XDR View": "assets/dashboards/xdr_view.json"
     }
   }
 }
