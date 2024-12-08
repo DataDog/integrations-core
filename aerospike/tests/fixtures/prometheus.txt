@@ -2004,6 +2004,14 @@ aerospike_latencies_batch_sub_read_ms_bucket{cluster_name="null",ns="test",servi
 # TYPE aerospike_latencies_batch_sub_read_ms_count gauge
 aerospike_latencies_batch_sub_read_ms_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
 
+# HELP aerospike_latencies_batch_sub_write_ms_bucket
+# TYPE aerospike_latencies_batch_sub_write_ms_bucket gauge
+aerospike_latencies_batch_sub_write_ms_bucket{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
+# HELP aerospike_latencies_batch_sub_write_ms_count
+# TYPE aerospike_latencies_batch_sub_write_ms_count gauge
+aerospike_latencies_batch_sub_write_ms_count{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26
+
 # HELP aerospike_latencies_read_ms_bucket
 # TYPE aerospike_latencies_read_ms_bucket gauge
 aerospike_latencies_read_ms_bucket{cluster_name="null",ns="test",service="192.168.32.3:3000"} 26

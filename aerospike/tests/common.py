@@ -26,6 +26,8 @@ EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.aerospike_latencies_batch_index_ms_count',
     'aerospike.aerospike_latencies_batch_sub_read_ms_bucket',
     'aerospike.aerospike_latencies_batch_sub_read_ms_count',
+    'aerospike.aerospike_latencies_batch_sub_write_ms_bucket',
+    'aerospike.aerospike_latencies_batch_sub_write_ms_count',
     'aerospike.aerospike_latencies_read_ms_bucket',
     'aerospike.aerospike_latencies_read_ms_count',
     'aerospike.aerospike_latencies_write_ms_bucket',

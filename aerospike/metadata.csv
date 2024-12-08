@@ -3,6 +3,8 @@ aerospike.aerospike_latencies_batch_index_ms_bucket,gauge,,,,[OpenMetricsV2 and 
 aerospike.aerospike_latencies_batch_index_ms_count,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] comments,0,aerospike,,,
 aerospike.aerospike_latencies_batch_sub_read_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] comments,0,aerospike,,,
 aerospike.aerospike_latencies_batch_sub_read_ms_count,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] comments,0,aerospike,,,
+aerospike.aerospike_latencies_batch_sub_write_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] comments,0,aerospike,,,
+aerospike.aerospike_latencies_batch_sub_write_ms_count,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] comments,0,aerospike,,,
 aerospike.aerospike_latencies_read_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] comments,0,aerospike,,,
 aerospike.aerospike_latencies_read_ms_count,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] comments,0,aerospike,,,
 aerospike.aerospike_latencies_write_ms_bucket,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] comments,0,aerospike,,,
