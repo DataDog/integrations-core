@@ -56,6 +56,7 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-agent-metrics",  # excluding this since `agent-metrics` check is Agent v5 only
     "datadog-amazon-kafka",  # excluding this since `amazon-kafka` wasn't an official release
     "datadog-tokumx",  # excluding this since `tokumx` was dropped in py3
+    "datadog-ntp",  # excluding this since `ntp` was Agent 5 only
 ]
 
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.
