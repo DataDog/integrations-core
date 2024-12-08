@@ -54,6 +54,7 @@ EXCLUDED_INTEGRATIONS = [
     "datadog-kubernetes",  # excluding this since `kubernetes` check is Agent v5 only
     "datadog-go-metro",  # excluding this since `go-metro` check is Agent v5 only
     "datadog-agent-metrics",  # excluding this since `agent-metrics` check is Agent v5 only
+    "datadog-amazon-kafka", # excluding this since `amazon-kafka` wasn't an official release
 ]
 
 # Specific integration versions released for the last time by a revoked developer but not shipped anymore.
