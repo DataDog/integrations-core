@@ -15,16 +15,11 @@ import os
 import re
 import subprocess
 import sys
+import tomllib
 from collections import defaultdict, namedtuple
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
-
-if sys.version_info[:2] >= (3, 11):
-    import tomllib
-# TODO: remove this once ddev drops versions less than 3.11
-else:
-    import tomli as tomllib
 
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idoutputs
 OUTPUT_LIMIT = 1024 * 1024
