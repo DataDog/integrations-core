@@ -78,7 +78,7 @@ aerospike.aerospike_namespace_conflict_resolve_writes,gauge,,,,[OpenMetricsV2 an
 aerospike.aerospike_namespace_current_time,gauge,,,,[OpenMetricsV2 and Aerospike v3.9+] current time,0,aerospike,,,
 aerospike.aerospike_namespace_data_avail_pct,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Measures the minimum contiguous storage-engine device/pmem ,0,aerospike,,,
 aerospike.aerospike_namespace_data_compression_ratio,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Measures the average compressed size to uncompressed size ratio ,0,aerospike,,,
-aerospike.aerospike_namespace_data_total_bytes,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Regardless of storage-engine, the total allocated storag engine,0,aerospike,,,
+aerospike.aerospike_namespace_data_total_bytes,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Regardless of storage-engine the total allocated storag engine,0,aerospike,,,
 aerospike.aerospike_namespace_data_used_bytes,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Regardless of storage-engine nd the amount of data used in that storage used ,0,aerospike,,,
 aerospike.aerospike_namespace_data_used_pct,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Percentage of used storage capacity for this namespace,0,aerospike,,,
 aerospike.aerospike_namespace_dead_partitions,gauge,,,,[Legacy and OpenMetricsV2 and Aerospike v4.0+] The number of dead partitions for this namespace (when using strong-consistency). This is the number of partitions that are unavailable when all roster nodes are present.,0,aerospike,,,
