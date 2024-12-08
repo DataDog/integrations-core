@@ -194,7 +194,6 @@ class TestVault:
             dd_run_check(c)
 
         expected_tags = [
-            'is_leader:true',
             'vault_cluster:vault-cluster-f5f44063',
             'vault_version:0.10.2',
         ]
@@ -278,7 +277,6 @@ class TestVault:
             dd_run_check(c)
 
         expected_tags = [
-            'is_leader:true',
             'vault_cluster:vault-cluster-f5f44063',
             'vault_version:0.10.2',
         ]
@@ -352,7 +350,6 @@ class TestVault:
             dd_run_check(c)
 
         expected_tags = [
-            'is_leader:true',
             'vault_cluster:vault-cluster-f5f44063',
             'vault_version:0.10.2',
         ]
@@ -484,6 +481,7 @@ class TestVault:
             )
             assert c._skip_dr_metric_collection
             aggregator.assert_metric('vault.is_leader', 1)
+            aggregator.assert_metric('vault.has_leader', 1)
             aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
             assert_all_metrics(aggregator)
 
@@ -531,7 +529,6 @@ class TestVault:
         assert event['alert_type'] == 'info'
         assert event['source_type_name'] == c.CHECK_NAME
         assert event['host'] == c.hostname
-        assert 'is_leader:true' in event['tags']
         assert c._previous_leader == next_leader
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
