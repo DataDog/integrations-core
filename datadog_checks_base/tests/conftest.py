@@ -8,6 +8,7 @@ from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 
 HERE = get_here()
+EMBEDDED = os.path.join(HERE, 'fixtures', 'fips', 'embedded')
 
 
 @pytest.fixture(scope="session")
