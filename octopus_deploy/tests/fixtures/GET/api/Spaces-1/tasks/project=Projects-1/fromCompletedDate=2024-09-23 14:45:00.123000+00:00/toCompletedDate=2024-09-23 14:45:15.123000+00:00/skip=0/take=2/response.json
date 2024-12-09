@@ -1,0 +1,78 @@
+{
+    "ItemType": "Task",
+    "TotalResults": 1,
+    "ItemsPerPage": 2,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "TotalCounts": {
+        "Canceled": 0,
+        "Cancelling": 0,
+        "Executing": 0,
+        "Failed": 12,
+        "Queued": 0,
+        "Success": 1779,
+        "TimedOut": 0,
+        "Interrupted": 0
+    },
+    "TotalCountsInOtherSpaces": {
+        "Canceled": 0,
+        "Cancelling": 0,
+        "Executing": 0,
+        "Failed": 0,
+        "Queued": 0,
+        "Success": 0,
+        "TimedOut": 0,
+        "Interrupted": 0
+    },
+    "Items": [
+        {
+            "Id": "ServerTasks-1844",
+            "SpaceId": "Spaces-1",
+            "Name": "Deploy",
+            "Description": "Deploy test-api release 0.1.5 to Development",
+            "Arguments": {
+                "DeploymentId": "Deployments-16"
+            },
+            "State": "Success",
+            "Completed": "Monday, 23 September 2024 2:57:22 PM +00:00",
+            "QueueTime": "2024-09-23T14:57:18.798+00:00",
+            "QueueTimeExpiry": null,
+            "StartTime": "2024-09-23T14:57:19.411+00:00",
+            "LastUpdatedTime": "2024-09-23T14:57:22.603+00:00",
+            "CompletedTime": "2024-09-23T14:57:22.603+00:00",
+            "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+            "Duration": "3 seconds",
+            "ErrorMessage": "",
+            "HasBeenPickedUpByProcessor": true,
+            "IsCompleted": true,
+            "FinishedSuccessfully": true,
+            "HasPendingInterruptions": false,
+            "CanRerun": false,
+            "HasWarningsOrErrors": false,
+            "UnmetPreconditions": null,
+            "ProjectId": "Projects-1",
+            "Links": {
+                "Self": "/api/tasks/ServerTasks-1844",
+                "Web": "/app#/Spaces-1/tasks/ServerTasks-1844",
+                "Raw": "/api/tasks/ServerTasks-1844/raw",
+                "Rerun": "/api/tasks/rerun/ServerTasks-1844",
+                "Cancel": "/api/tasks/ServerTasks-1844/cancel",
+                "State": "/api/tasks/ServerTasks-1844/state",
+                "BlockedBy": "/api/tasks/ServerTasks-1844/blockedby",
+                "QueuedBehind": "/api/tasks/ServerTasks-1844/queued-behind{?skip,take}",
+                "Details": "/api/tasks/ServerTasks-1844/details{?verbose,tail,ranges}",
+                "StatusMessages": "/api/tasks/ServerTasks-1844/status/messages",
+                "Prioritize": "/api/tasks/ServerTasks-1844/prioritize",
+                "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-1844",
+                "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-1844"
+            }
+        }
+    ],
+    "Links": {
+        "Self": "/api/tasks?skip=0&take=30",
+        "Template": "/api/tasks{?skip,active,environment,tenant,runbook,project,name,node,running,states,hasPendingInterruptions,hasWarningsOrErrors,take,ids,partialName,spaces,includeSystem,description,fromCompletedDate,toCompletedDate,fromQueueDate,toQueueDate,fromStartDate,toStartDate}",
+        "Page.All": "/api/tasks?skip=0&take=2147483647",
+        "Page.Current": "/api/tasks?skip=0&take=30",
+        "Page.Last": "/api/tasks?skip=0&take=30"
+    }
+}
