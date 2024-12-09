@@ -1021,11 +1021,10 @@ def test_paginated_limit_octopusservernodes(
 
 
 @pytest.mark.parametrize(
-    ('paginated_limit, api_calls, expected_skip_take_args'),
+    ('paginated_limit, expected_skip_take_args'),
     [
         pytest.param(
             30,
-            1,
             [
                 (['http://localhost:80/api/Spaces-1/events'], 0, 30),
                 (['http://localhost:80/api/Spaces-1/events'], 0, 30),
@@ -1033,7 +1032,6 @@ def test_paginated_limit_octopusservernodes(
             id='high limit',
         ),
         pytest.param(
-            2,
             2,
             [
                 (['http://localhost:80/api/Spaces-1/events'], 0, 2),
@@ -1052,7 +1050,6 @@ def test_paginated_limit_events(
     aggregator,
     paginated_limit,
     mock_http_get,
-    api_calls,
     expected_skip_take_args,
     caplog,
 ):
