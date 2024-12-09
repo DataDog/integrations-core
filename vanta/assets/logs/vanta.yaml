@@ -1,0 +1,38 @@
+id: vanta
+metric_id: vanta
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Vanta
+  enabled: true
+  filter:
+    query: source:vanta
+  processors:
+    - type: pipeline
+      name: Vulnerabiity
+      enabled: true
+      filter:
+        query: service:vulnerability
+      processors:
+        - type: date-remapper
+          name: Define `vulnerability_info.remediateByDate` as the official date of the
+            log
+          enabled: true
+          sources:
+            - vulnerability_info.remediateByDate
+        - name: Lookup for `vulnerability_info.severity` to `vulnerability_status`
+          enabled: true
+          source: vulnerability_info.severity
+          target: vulnerability_status
+          lookupTable: |-
+            LOW, Notice
+            MEDIUM, Warn
+            HIGH, Critical
+            CRITICAL, Emergency
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `vulnerability_status` as the official status of the log
+          enabled: true
+          sources:
+            - vulnerability_status
