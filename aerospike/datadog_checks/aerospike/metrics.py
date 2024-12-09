@@ -4,7 +4,7 @@
 
 # https://docs.aerospike.com/server/operations/monitor/key_metrics
 METRIC_MAP = {
-    # all metrics ( except latencies), will be treated as gauge, as we need latest values not up-down changes
+    # all metrics will be treated as gauge, as we need latest values not up-down or deltas
     "aerospike_users(.*)": {"name": "$1", "type": "gauge"},
     "aerospike_namespace(.*)": {"name": "$1", "type": "gauge"},
     "aerospike_node(.*)": {"name": "$1", "type": "gauge"},
@@ -12,7 +12,5 @@ METRIC_MAP = {
     "aerospike_sindex(.*)": {"name": "$1", "type": "gauge"},
     "aerospike_xdr(.*)": {"name": "$1", "type": "gauge"},
     "aerospike_sysinfo(.*)": {"name": "$1", "type": "gauge"},
-    # all latency metrics will be treated as Distribution in datadog cloud
-    # "aerospike_latencies(.*)": {"name": "$1", "type": "histogram"},
     "aerospike_latencies(.*)": {"name": "$1", "type": "gauge"},
 }
