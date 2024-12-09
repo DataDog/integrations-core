@@ -1,0 +1,33 @@
+{
+	"version": 2,
+	"created_at": "2024-11-18",
+	"last_updated_at": "2024-11-18",
+	"title": "High Number of Errored Conversations Detected",
+	"description": "Errored conversations refer to the number of active sessions aborted due to an edge or adapter error event. This monitor tracks and alerts when there is a high occurrence of conversations ending in errors, helping to prevent potential bottlenecks.",
+	"definition": {
+		"id": 157628372,
+		"name": "High Number of Errored Conversations Detected",
+		"type": "query alert",
+		"query": "sum(last_1d):sum:genesys.conversations.errored_conversations_count{*}.as_count() > 100",
+		"message": "{{#is_alert}}\nErrored conversations refer to the number of active sessions aborted due to an edge or adapter error event.\n\nHigh number of errored conversations has been detected. Please review and take necessary action.\n{{/is_alert}}",
+		"tags": [
+			"source:genesys"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 100
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:genesys"
+	]
+}
