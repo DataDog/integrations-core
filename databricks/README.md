@@ -28,6 +28,7 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 
 ### Configuration
 
+#### Cluster Utilization Monitoring
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
 
 Each script described below can be modified to suits your needs. For instance, you can:
@@ -449,11 +450,17 @@ chmod a+x /tmp/start_datadog.sh
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+### Model Serving Monitoring
+
+model serving instructions
+
 ## Data Collected
 
 ### Metrics
-
-See the [Spark integration documentation][8] for a list of metrics collected.
+#### Model Serving Metrics
+See [metadata.csv][29] for a list of metrics provided by this integration.
+#### Spark Metrics
+See the [Spark integration documentation][8] for a list of Spark metrics collected.
 
 ### Service Checks
 
@@ -501,3 +508,4 @@ Additional helpful documentation, links, and articles:
 [26]: https://www.datadoghq.com/product/cloud-cost-management/
 [27]: https://www.datadoghq.com/product/log-management/
 [28]: https://docs.datadoghq.com/integrations/databricks/?tab=driveronly
+[29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
