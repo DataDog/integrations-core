@@ -269,7 +269,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         else:
             environments = [
                 (None, environment.get("Name"), environment, None)
-                for environment in self._process_endpoint(f"api/{space_id}/environments").get('Items', [])
+                for environment in self._process_paginated_endpoint(f"api/{space_id}/environments").get('Items', [])
             ]
 
         self.log.debug("Collecting %s environments for %s", len(environments), space_name)
@@ -296,7 +296,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.info("Default Environments discovery: %s", self.config.environments)
         if space_id not in self._environments_discovery:
             self._environments_discovery[space_id] = Discovery(
-                lambda: self._process_endpoint(f"api/{space_id}/environments").get('Items', []),
+                lambda: self._process_paginated_endpoint(f"api/{space_id}/environments").get('Items', []),
                 limit=self.config.environments.limit,
                 include=normalize_discover_config_include(self.config.environments),
                 exclude=self.config.environments.exclude,
