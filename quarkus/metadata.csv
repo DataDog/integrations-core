@@ -1,1 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+quarkus.http_server.requests.seconds.count,count,,,,The number of requests observed so far.,0,quarkus,,,
+quarkus.http_server.requests.seconds.max,gauge,,second,,The current longest request duration in seconds.,0,quarkus,,,
+quarkus.http_server.requests.seconds.sum,count,,second,,Total number of seconds that requests took so far.,0,quarkus,,,
