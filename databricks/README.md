@@ -152,7 +152,7 @@ chmod a+x /tmp/start_datadog.sh
 /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
 ```
 
-<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 <!-- xxx tab "All nodes" xxx -->
 ##### Install the Datadog Agent on driver and worker nodes
 
