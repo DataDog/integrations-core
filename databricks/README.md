@@ -447,7 +447,12 @@ EOF
 chmod a+x /tmp/start_datadog.sh
 /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
 ```
-<!-- xxx tabs xxx -->
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
+
+<!-- xxz tab xxx -->
 <!-- xxx tab "Model Serving Metrics" xxx -->
 
 1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
@@ -455,9 +460,9 @@ chmod a+x /tmp/start_datadog.sh
 
    **Important:**
    * Make sure you delete the default value in **Lifetime (days)** so that the token doesn't expire and the integration doesn't break.
-   * Ensure the account generating the token has [CAN VIEW access][9] for the Databricks jobs and clusters you want to monitor.
+   * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.
 
-   As an alternative, follow the [official Databricks documentation][10] to generate access token for a [service principal][11].
+   As an alternative, follow the [official Databricks documentation][31] to generate access token for a [service principal][31].
 
 3. In Datadog, open the Databricks integration tile.
 4. On the **Configure** tab, click **Add Databricks Workspace**.
@@ -511,7 +516,7 @@ Additional helpful documentation, links, and articles:
 [18]: https://docs.databricks.com/en/clusters/web-terminal.html
 [19]: https://docs.databricks.com/en/notebooks/index.html
 [20]: https://docs.datadoghq.com/agent/troubleshooting/
-[21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
+[21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.pngƒ
 [22]: https://www.datadoghq.com/blog/databricks-monitoring-datadog/
 [23]: https://app.datadoghq.com/integrations/spark
 [24]: https://docs.databricks.com/en/ingestion/add-data/upload-to-volume.html#upload-files-to-a-unity-catalog-volume
@@ -520,3 +525,5 @@ Additional helpful documentation, links, and articles:
 [27]: https://www.datadoghq.com/product/log-management/
 [28]: https://docs.datadoghq.com/integrations/databricks/?tab=driveronly
 [29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
+[30]: https://docs.databricks.com/en/security/auth-authz/access-control/index.html#job-acls
+[31]: https://docs.databricks.com/en/admin/users-groups/service-principals.html#what-is-a-service-principal
