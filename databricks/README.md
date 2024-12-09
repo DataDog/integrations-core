@@ -458,9 +458,7 @@ model serving instructions
 
 ### Metrics
 
-See [metadata.csv][29] for a list of metrics collected for model serving.
-
-[//]: # (See the [Spark integration documentation][8] for a list of metrics collected.)
+See [metadata.csv][29] for a list of metrics provided by this integration.
 
 ### Service Checks
 
