@@ -1,0 +1,4 @@
+:8080 {
+  root * /site
+  file_server
+}
