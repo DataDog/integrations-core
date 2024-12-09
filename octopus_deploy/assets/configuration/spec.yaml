@@ -113,6 +113,13 @@ files:
           - name: interval
             type: integer
         example: {}
+    - name: paginated_limit
+      description: |
+          Sets the number of items API calls should return at a time. Default is 30.
+      value:
+        example: 30
+        type: integer
+      required: false
     - template: instances/default
     - template: instances/http
       overrides:

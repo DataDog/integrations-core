@@ -118,6 +118,11 @@ instances:
     #     <OPTION_1>: <VALUE_1>
     #     <OPTION_2>: <VALUE_2>
 
+    ## @param paginated_limit - integer - optional - default: 30
+    ## Sets the number of items API calls should return at a time. Default is 30.
+    #
+    # paginated_limit: 30
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

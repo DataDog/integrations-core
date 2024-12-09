@@ -52,6 +52,10 @@ def instance_min_collection_interval():
     return 15
 
 
+def instance_paginated_limit():
+    return 30
+
+
 def instance_persist_connections():
     return False
 
