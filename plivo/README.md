@@ -7,7 +7,7 @@ The Plivo integration seamlessly collects message (SMS, MMS, and WhatsApp) and v
 
 ## Setup
 
-### Get Plivo config parameters
+### Generate API credentials in Plivo
 
 #### Plivo Auth ID and Auth Token
 
@@ -29,11 +29,17 @@ You can use the credentials of a Plivo subaccount to retrieve data specific to t
 
 - Set the "message expiry time" parameter in seconds in Datadog to match the message expiry time configured in Plivo. Ensure the expiry time remains synchronized with the configuration in Plivo to avoid fetching unsettled messages. The default value is 3 hours (10,800 seconds). Message ingestion into Datadog will be delayed by this duration to ensure only settled messages are fetched. Settled messages are fully processed and finalized, while unsettled messages are still in the queue. See [Message Expiry][4] to learn more.
 
-### Add your Plivo Configurations
+### Connect your Plivo Account to Datadog
 
-- Plivo Auth ID 
-- Plivo Auth Token
-- Plivo Message Expiry Time (Optional)
+1. Add your Auth ID, Auth Token and Message Expiry Time
+
+| Plivo Parameters                       | Description                                                  |
+| -------------------------------------- | ------------------------------------------------------------ |
+| Plivo Auth ID                          | The Auth ID of your plivo account.                           |
+| Plivo Auth Token                       | The Auth Token of your plivo account.                        |
+| Plivo Message Expiry Time (Optional)   | The Message Expiry Time (in seconds) for your Plivo account. Refer [here](#message-expiry-time-optional) for details.|
+
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
