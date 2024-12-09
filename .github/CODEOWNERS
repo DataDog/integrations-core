@@ -266,6 +266,12 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /freshservice/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /freshservice/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
+/genesys/                                                           @DataDog/saas-integrations
+/genesys/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
+/genesys/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
+/genesys/metadata.csv                                               @DataDog/saas-integrations @DataDog/documentation
+/genesys/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /godaddy/                                                           @DataDog/saas-integrations
 /godaddy/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
 /godaddy/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation

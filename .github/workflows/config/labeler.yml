@@ -201,6 +201,8 @@ integration/freshservice:
 - freshservice/**/*
 integration/gearmand:
 - gearmand/**/*
+integration/genesys:
+- genesys/**/*
 integration/gitlab:
 - gitlab/**/*
 integration/gitlab_runner:
