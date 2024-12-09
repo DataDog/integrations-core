@@ -8,6 +8,7 @@ from typing import Any  # noqa: F401
 
 import pytest
 
+
 @pytest.fixture(scope="function")
 def clean_environment():
     os.environ["GOFIPS"] = "0"

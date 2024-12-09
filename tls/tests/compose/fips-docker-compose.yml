@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  fips-server:  # This server should only accept FIPS certificates
+    image: ghcr.io/datadog/apps-fips-server:main
+    ports:
+      - "8443:443"  # Maps container's port 443 to host port 8443
+    network_mode: "host"
+    command: ["rsa", "-c", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:443"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  non-fips-server:  # This server should only accept non FIPS certificates
+    image: ghcr.io/datadog/apps-fips-server:main
+    ports:
+      - "9443:443"  # Maps container's port 443 to host port 9443
+    network_mode: "host"
+    command: ["rsa", "-c", "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:443"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
