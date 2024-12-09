@@ -18,6 +18,7 @@ IGNORES = {
     "php_fpm": ["datadog_checks/php_fpm/vendor"],
     "snmp": ["tests/mibs"],
     "tokumx": ["datadog_checks/tokumx/vendor"],
+    "vsphere": ["datadog_checks/vsphere/send_to_redapl"],
 }
 
 

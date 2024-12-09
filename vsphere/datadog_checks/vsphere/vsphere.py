@@ -489,7 +489,7 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Starting vsan metrics collection (query start time: %s).", collect_start_time)
         try:
             t0 = Timer()
-            new_health_metrics, new_performance_metrics = self.query_vsan_metrics(
+            new_health_metrics, new_performance_metrics, to_redapl_metrics = self.query_vsan_metrics(
                 collect_start_time - dt.timedelta(hours=2)
             )
             self.gauge(
@@ -580,6 +580,8 @@ class VSphereCheck(AgentCheck):
                             str(hostname),
                             tags,
                         )
+
+            self.send_resource_to_redapl(to_redapl_metrics)
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass
@@ -613,8 +615,19 @@ class VSphereCheck(AgentCheck):
                 self.log.debug("Skipping vsan metrics for cluster %s because it is not a vsan cluster", cluster.name)
         if not cluster_nested_elts:
             self.log.debug("There are no vsan clusters to collect metrics from, skipping vsan collection")
-            return [], []
+            return [], [], []
         return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
+
+    def send_resource_to_redapl(self, clusters_data):
+        input_data = {}
+        for cluster in clusters_data:
+            for i, v in cluster.items():
+                if i not in input_data:
+                    input_data[i] = ''
+                input_data[i] += str(v) + ','
+        for i, v in input_data.items():
+            self.log.debug("Sending resource to redapl: %s, %s", i, v)
+            self.set_metadata(i, v)
 
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]
