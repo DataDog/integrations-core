@@ -26,6 +26,9 @@ Model serving metrics provide insights into how your  Databricks model serving i
 
 Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [configuration](#configuration) instructions for your appropriate cluster. After that, install the [Spark integration][23] on Datadog to autoinstall the Databricks Overview dashboard.
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Cluster Utilization" xxx -->
+
 ### Configuration
 
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
