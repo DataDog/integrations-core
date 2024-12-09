@@ -2,7 +2,7 @@
 
 <div class="alert alert-warning">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Databricks cluster utilization metrics and logs.
+This page is limited to documentation for ingesting Databricks cluster utilization metrics and log and model serving metrics.
 </div>
 
 ![Databricks default dashboard][21]
@@ -21,6 +21,8 @@ Datadog offers several Databricks monitoring capabilities.
 
 Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Cluster Utilization Metrics and Logs" xxx -->
 
 ### Installation
 
@@ -445,7 +447,22 @@ EOF
 chmod a+x /tmp/start_datadog.sh
 /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
 ```
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Model Serving Metrics" xxx -->
 
+1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
+2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime (days)**, and click **Generate**. Take note of your token.
+
+   **Important:**
+   * Make sure you delete the default value in **Lifetime (days)** so that the token doesn't expire and the integration doesn't break.
+   * Ensure the account generating the token has [CAN VIEW access][9] for the Databricks jobs and clusters you want to monitor.
+
+   As an alternative, follow the [official Databricks documentation][10] to generate access token for a [service principal][11].
+
+3. In Datadog, open the Databricks integration tile.
+4. On the **Configure** tab, click **Add Databricks Workspace**.
+5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
+6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -453,7 +470,8 @@ chmod a+x /tmp/start_datadog.sh
 
 ### Metrics
 
-See the [Spark integration documentation][8] for a list of metrics collected.
+See the [Spark integration documentation][8] for a list of metrics collected for cluster utilization.
+See [metadata.csv][29] for a list of metrics collected for model serving.
 
 ### Service Checks
 
@@ -501,3 +519,4 @@ Additional helpful documentation, links, and articles:
 [26]: https://www.datadoghq.com/product/cloud-cost-management/
 [27]: https://www.datadoghq.com/product/log-management/
 [28]: https://docs.datadoghq.com/integrations/databricks/?tab=driveronly
+[29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
