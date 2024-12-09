@@ -1,0 +1,844 @@
+{
+    "title": "Intercom Ticket",
+    "description": "This dashboard provides a detailed overview of insights related to tickets, tracking total tickets and categorizing them by type and status. Additionally, it includes insights on Tickets by Teammate Assignee ID and Tickets by Team Assignee ID, detailed news item logs for thorough tracking and analysis.",
+    "widgets": [
+        {
+            "id": 884200066134640,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn.bfldr.com/OLAMIFTW/at/8j935ttmptgxs72twq8zk36f/Intercom_Logo_Lockup_Black.png?auto=webp&format=png",
+                "url_dark_theme": "https://cdn.bfldr.com/OLAMIFTW/at/tc9zfv2f3gc6bc8n9qh47gf/Intercom_Logo_Lockup_White.png?auto=webp&format=png",
+                "sizing": "contain",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 3
+            }
+        },
+        {
+            "id": 1695785703283444,
+            "definition": {
+                "type": "note",
+                "content": "**Overview**\n\nThis dashboard provides a detailed overview of insights related to tickets, tracking total tickets, shared tickets, and archived tickets, and categorizing them by type and state. Additionally, it includes insights on Tickets by Teammate Assignee ID and Tickets by Team Assignee ID.\n\nFor more information, see the [Intercom Integration Documentation](https://docs.datadoghq.com/integrations/intercom/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 3
+            }
+        },
+        {
+            "id": 3732668766316452,
+            "definition": {
+                "title": "Total Tickets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:intercom service:ticket $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "custom_bg",
+                                "custom_bg_color": "#f1f0ff"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 5144174302820554,
+            "definition": {
+                "title": "Shared Tickets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:intercom service:ticket @data.item.is_shared:true $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_yellow",
+                                "custom_bg_color": "#f1f0ff"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 3,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 5252111996283722,
+            "definition": {
+                "title": "Ticket by Type",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@data.item.ticket_type.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:intercom service:ticket $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 3,
+                "width": 6,
+                "height": 5
+            }
+        },
+        {
+            "id": 3464763428775536,
+            "definition": {
+                "title": "External Tickets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:intercom service:ticket @data.item.ticket_type.is_internal:false $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 5347522276972314,
+            "definition": {
+                "title": "Internal Tickets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:intercom service:ticket @data.item.ticket_type.is_internal:true $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 6,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 5686552018887696,
+            "definition": {
+                "title": "Ticket by Category",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@data.item.category",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:intercom service:ticket $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4793770661763816,
+            "definition": {
+                "title": "Ticket by State",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@data.item.ticket_state",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:intercom service:ticket $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 8,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 3960146065435968,
+            "definition": {
+                "title": "Ticket by Teammate Assignee Id",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.id",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:intercom service:ticket $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "text_formats": [
+                            [
+                                {
+                                    "match": {
+                                        "type": "is",
+                                        "value": "0"
+                                    },
+                                    "palette": "black_on_light_red",
+                                    "replace": {
+                                        "type": "all",
+                                        "with": "Unassigned"
+                                    }
+                                }
+                            ]
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "count",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 1088341693647172,
+            "definition": {
+                "title": "Ticket by Team Assignee Id",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@data.item.team_assignee_id",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:intercom service:ticket $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "text_formats": [
+                            [
+                                {
+                                    "match": {
+                                        "type": "is",
+                                        "value": "0"
+                                    },
+                                    "replace": {
+                                        "type": "all",
+                                        "with": "Unassigned"
+                                    },
+                                    "palette": "black_on_light_red"
+                                }
+                            ]
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "count",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 6,
+                "y": 12,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 772377947467084,
+            "definition": {
+                "title": "Ticket Summary",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@data.item.ticket_id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@data.item.ticket_id",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@data.item.ticket_attributes._default_title_",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@data.item.ticket_attributes._default_description_",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@data.item.ticket_type.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@data.item.ticket_id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:intercom service:ticket $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 10000,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "count",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 7425989071032864,
+            "definition": {
+                "title": "Ticket Logs over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Tickets",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:intercom service:ticket $AppId"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 20,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 1126880796734506,
+            "definition": {
+                "title": "Ticket Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:intercom service:ticket $AppId ",
+                            "indexes": [],
+                            "storage": "hot",
+                            "sort": {
+                                "order": "desc",
+                                "column": "timestamp"
+                            }
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 24,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "AppId",
+            "prefix": "@app_id",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
