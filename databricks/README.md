@@ -457,9 +457,10 @@ model serving instructions
 ## Data Collected
 
 ### Metrics
-
+#### Model Serving Metrics
 See [metadata.csv][29] for a list of metrics provided by this integration.
-See the [Spark integration documentation][8] for a list of metrics collected.å
+#### Spark Metrics
+See the [Spark integration documentation][8] for a list of Spark metrics collected.
 
 ### Service Checks
 
