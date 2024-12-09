@@ -201,6 +201,8 @@ integration/freshservice:
 - freshservice/**/*
 integration/gearmand:
 - gearmand/**/*
+integration/genesys:
+- genesys/**/*
 integration/gitlab:
 - gitlab/**/*
 integration/gitlab_runner:
@@ -349,6 +351,8 @@ integration/mimecast:
 - mimecast/**/*
 integration/mongo:
 - mongo/**/*
+integration/mux:
+- mux/**/*
 integration/mysql:
 - mysql/**/*
 integration/nagios:
@@ -529,6 +533,8 @@ integration/teleport:
 - teleport/**/*
 integration/temporal:
 - temporal/**/*
+integration/temporal_cloud:
+- temporal_cloud/**/*
 integration/tenable:
 - tenable/**/*
 integration/teradata:

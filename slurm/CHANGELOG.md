@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.0.3 / 2024-12-06
+
+***Fixed***:
+
+* Add all user query param to the different queries ([#19182](https://github.com/DataDog/integrations-core/pull/19182))
+
 ## 1.0.2 / 2024-11-28
 
 ***Fixed***:

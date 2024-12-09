@@ -1,1 +1,0 @@
-Ddev now uses the macos-13 runner instead of macos-13 for the generated test matrix, because the macos-12 runner is being discontinued by microsoft.

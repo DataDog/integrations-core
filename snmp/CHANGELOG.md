@@ -43,7 +43,7 @@
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 7.3.1 / 2024-06-05 / Agent 7.55.0
 
