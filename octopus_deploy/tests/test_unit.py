@@ -1075,8 +1075,6 @@ def test_paginated_limit_events(
             print(kwargs)
             skip_take_args += [(list(args), skip, take)]
 
-    # assert args_list.count([]'http://localhost:80/api/Spaces-1/events') == api_calls
-    # for item in expected_skip_take_args:
     assert skip_take_args == expected_skip_take_args
 
     for event in ALL_EVENTS:

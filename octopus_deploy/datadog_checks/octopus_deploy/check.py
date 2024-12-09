@@ -92,7 +92,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             num_pages_seen += 1
             num_pages = response_json.get("NumberOfPages", num_pages)
             skip += self.config.paginated_limit
-            all_items = items + all_items
+            all_items = all_items + items
         return {"Items": all_items}
 
     def _init_spaces_discovery(self):
