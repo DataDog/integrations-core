@@ -6,6 +6,7 @@
 from typing import Optional, Tuple
 
 from bson import json_util, regex
+from pymongo.errors import ExecutionTimeout, NetworkTimeout
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
@@ -143,13 +144,23 @@ def should_explain_operation(
     return True
 
 
-def get_explain_plan(api_client, op: Optional[str], command: dict, dbname: str):
+def get_explain_plan(api_client, command: dict, dbname: str, op_duration: int, cursor_timeout: int) -> dict:
     dbname = command.pop("$db", dbname)
+    verbosity = get_explain_command_verbosity(op_duration, cursor_timeout)
     try:
         for key in EXPLAIN_COMMAND_EXCLUDE_KEYS:
             command.pop(key, None)
-        explain_plan = api_client[dbname].command("explain", command, verbosity="executionStats")
-        return format_explain_plan(explain_plan)
+        try:
+            explain_plan = api_client.explain_command(dbname, command, verbosity)
+            return format_explain_plan(explain_plan)
+        except (ExecutionTimeout, NetworkTimeout) as e:
+            # If the operation times out, we try one more time with a different verbosity
+            if verbosity != "queryPlanner":
+                verbosity = "queryPlanner"
+                explain_plan = api_client.explain_command(dbname, command, verbosity)
+                return format_explain_plan(explain_plan)
+
+            raise e
     except Exception as e:
         return {
             "collection_errors": [
@@ -159,6 +170,14 @@ def get_explain_plan(api_client, op: Optional[str], command: dict, dbname: str):
                 }
             ],
         }
+
+
+def get_explain_command_verbosity(op_duration: int, cursor_timeout: int) -> str:
+    if op_duration > cursor_timeout:
+        # If the operation duration is greater than the cursor timeout,
+        # we use "queryPlanner" to avoid the cursor timeout
+        return "queryPlanner"
+    return "executionStats"
 
 
 def format_explain_plan(explain_plan: dict) -> dict:
