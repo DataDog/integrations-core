@@ -49,6 +49,9 @@
     },
     "monitors": {
       "Average Request Latency is High": "assets/monitors/latency.json"
+    },
+    "saved_views": {
+      "NVIDIA NIM Errors": "assets/saved_views/nim_errors.json"
     }
   },
   "author": {
