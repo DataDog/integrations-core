@@ -21,8 +21,10 @@ Datadog offers several Databricks monitoring capabilities.
 
 Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Cluster Utilization Metrics and Logs" xxx -->
+
+[//]: # (<!-- xxx tabs xxx -->)
+
+[//]: # (<!-- xxx tab "Cluster Utilization Metrics and Logs" xxx -->)
 
 ### Installation
 
@@ -152,7 +154,7 @@ chmod a+x /tmp/start_datadog.sh
 /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
 ```
 
-<!-- xxz tabs xxx -->
+<!-- xxz tab xxx -->
 <!-- xxx tab "All nodes" xxx -->
 ##### Install the Datadog Agent on driver and worker nodes
 
@@ -246,6 +248,9 @@ chmod a+x /tmp/start_datadog.sh
 /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
 
 ```
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 #### With a cluster-scoped init script 
 
@@ -449,24 +454,37 @@ chmod a+x /tmp/start_datadog.sh
 <!-- xxz tabs xxx -->
 
 
-<!-- xxz tab xxx -->
-<!-- xxx tab "Model Serving Metrics" xxx -->
+[//]: # (<!-- xxz tab xxx -->)
 
-1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
-2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime (days)**, and click **Generate**. Take note of your token.
+[//]: # (<!-- xxx tab "Model Serving Metrics" xxx -->)
 
-   **Important:**
-   * Make sure you delete the default value in **Lifetime (days)** so that the token doesn't expire and the integration doesn't break.
-   * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.
+[//]: # ()
+[//]: # (1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.)
 
-   As an alternative, follow the [official Databricks documentation][31] to generate access token for a [service principal][31].
+[//]: # (2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime &#40;days&#41;**, and click **Generate**. Take note of your token.)
 
-3. In Datadog, open the Databricks integration tile.
-4. On the **Configure** tab, click **Add Databricks Workspace**.
-5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
-6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
+[//]: # ()
+[//]: # (   **Important:**)
+
+[//]: # (   * Make sure you delete the default value in **Lifetime &#40;days&#41;** so that the token doesn't expire and the integration doesn't break.)
+
+[//]: # (   * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.)
+
+[//]: # ()
+[//]: # (   As an alternative, follow the [official Databricks documentation][31] to generate access token for a [service principal][31].)
+
+[//]: # ()
+[//]: # (3. In Datadog, open the Databricks integration tile.)
+
+[//]: # (4. On the **Configure** tab, click **Add Databricks Workspace**.)
+
+[//]: # (5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.)
+
+[//]: # (6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.)
+
+[//]: # (<!-- xxz tab xxx -->)
+
+[//]: # (<!-- xxz tabs xxx -->)
 
 ## Data Collected
 
