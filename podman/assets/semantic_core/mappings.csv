@@ -1,0 +1,9 @@
+otel,dd,description
+container.blockio.io_service_bytes_recursive.read,container.io.read,Number of bytes transferred from the disk by the container
+container.blockio.io_service_bytes_recursive.write,container.io.write,Number of bytes transferred to the disk by the container
+container.cpu.usage.system,container.cpu.system,System CPU usage.
+container.cpu.usage.total,container.cpu.usage,Total CPU time consumed.
+container.memory.usage.limit,container.memory.soft_limit,Memory limit of the container.
+container.memory.usage.total,container.memory.usage,Memory usage of the container.
+container.network.io.usage.rx_bytes,container.net.rcvd,Bytes received by the container.
+container.network.io.usage.tx_bytes,container.net.sent,Bytes sent by the container.
