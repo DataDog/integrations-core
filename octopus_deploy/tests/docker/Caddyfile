@@ -161,7 +161,7 @@
         path /api/Spaces-1/environments
     }
     route @get_environments {
-        rewrite * /GET/api/Spaces-1/environments/response.json
+        rewrite * /GET/api/Spaces-1/environments/skip=0/take=30/response.json
         file_server
     }
     @get_releases_1 {
