@@ -98,9 +98,14 @@ pipeline:
         supportRules: >-
           extract_data_till_pipe_delimited %{regex("[^|]*")}
 
-          extract_syslog_header_with_hostname <%{integer:}>%{integer:syslog.version} %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):timestamp} %{notSpace:syslog.hostname} %{notSpace:syslog.appname} %{notSpace:syslog.process_id:nullIf("-")} %{notSpace:syslog.msgid} %{data:}
 
-          extract_syslog_header <%{integer:}>%{integer:} %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):timestamp}%{data:}
+          extract_syslog_header_with_hostname <%{integer:}>%{integer:syslog.version} %{parse_date_rule:} %{notSpace:syslog.hostname} %{notSpace:syslog.appname} %{notSpace:syslog.process_id:nullIf("-")} %{notSpace:syslog.msgid} - 
+
+
+          extract_syslog_header <%{integer:}>%{integer:} %{parse_date_rule:}%{data:}
+
+
+          parse_date_rule %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
         matchRules: >-
           parsing_rule_for_change_history_event
           (%{extract_syslog_header_with_hostname:}|%{extract_syslog_header:})?CEF\:%{integer:}\|%{extract_data_till_pipe_delimited:device_vendor}\|%{extract_data_till_pipe_delimited:device_product}\|%{extract_data_till_pipe_delimited:device_version}\|%{extract_data_till_pipe_delimited:change_history_type}\|%{regex("(ChangeHistory)"):event_name}\|%{extract_data_till_pipe_delimited:severity}\|%{data:log_message}
@@ -311,8 +316,8 @@ pipeline:
               EventReceivedByServer=%{date("M/d/yyyy h:mm:ss
               a"):EventReceivedByServer} %{keyvalue_parsing_rule:}
     - type: date-remapper
-      name: Define `EventReceivedByServer`,`FileFirstSeenByServer`,`timestamp` as the
-        official date of the log
+      name: Define `EventReceivedByServer`, `FileFirstSeenByServer`, `timestamp` as
+        the official date of the log
       enabled: true
       sources:
         - EventReceivedByServer
@@ -392,7 +397,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `RemoteIpAddress` as `network.client.ip`
+      name: Map `RemoteIpAddress` to `network.client.ip`
       enabled: true
       sources:
         - RemoteIpAddress
