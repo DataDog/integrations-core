@@ -313,6 +313,14 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
                     entityRefId="cluster-domclient:nested-id-1",
                     value=[MagicMock(metricId=MagicMock(dynamicProperty=[], label='iopsRead'), values='None')],
                 ),
+                MagicMock(
+                    entityRefId="cluster-domclient:nested-id-1",
+                    value=[MagicMock(metricId=MagicMock(dynamicProperty=[], label='used'), values='6,5')],
+                ),
+                MagicMock(
+                    entityRefId="cluster-domclient:nested-id-1",
+                    value=[MagicMock(metricId=MagicMock(dynamicProperty=[], label='total'), values='5,6')],
+                ),
             ]
 
             health_metrics, performance_metrics, redapl_metrics = api.get_vsan_metrics(
@@ -324,9 +332,11 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             assert 'vsphere.vsan.cluster.health.1.count' in health_metrics[0]
             assert 'vsphere.vsan.cluster.health.2.count' in health_metrics[0]
             assert len(performance_metrics) == 1
-            assert len(performance_metrics[0]) == 3
+            assert len(performance_metrics[0]) == 5
             assert len(redapl_metrics) == 1
             assert redapl_metrics[0]['cost'] == 4
+            assert redapl_metrics[0]['size_used'] == 5
+            assert redapl_metrics[0]['size_total'] == 6
 
             vsan_config = MagicMock()
             vsan_config.enabled = True
