@@ -199,6 +199,35 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_relations_xmin(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = ['persons']
+
+    conn = _get_superconn(pg_instance)
+    cursor = conn.cursor()
+    cursor.execute("SELECT xmin FROM pg_class WHERE relname='persons'")
+    start_xmin = float(cursor.fetchone()[0])
+
+    # Check that initial xmin metric match
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance, db=pg_instance['dbname'], table='persons', schema='public')
+    aggregator.assert_metric('postgresql.relation.xmin', count=1, value=start_xmin, tags=expected_tags)
+    aggregator.reset()
+
+    # Run multiple DDL modifying the persons relation which will increase persons' xmin in pg_class
+    cursor.execute("ALTER TABLE persons REPLICA IDENTITY FULL;")
+    cursor.execute("ALTER TABLE persons REPLICA IDENTITY DEFAULT;")
+    cursor.close()
+    conn.close()
+
+    check.check(pg_instance)
+
+    # xmin metric should be greater than initial xmin
+    assert_metric_at_least(aggregator, 'postgresql.relation.xmin', lower_bound=start_xmin + 1, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_max_relations(aggregator, integration_check, pg_instance):
     pg_instance.update({'relations': [{'relation_regex': '.*'}], 'max_relations': 1})
     check = integration_check(pg_instance)
