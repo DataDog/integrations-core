@@ -1,1 +1,0 @@
-Fix `azure_sql_server_database` resource tag to use Azure SQL Database `{fully_qualified_doman_name}/{database_name}`.

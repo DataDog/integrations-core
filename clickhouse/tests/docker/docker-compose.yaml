@@ -1,5 +1,3 @@
-version: '3.9'
-
 # https://clickhouse.yandex/docs/en/operations/table_engines/distributed/
 # https://clickhouse.yandex/docs/en/operations/table_engines/replication/#creating-replicated-tables
 services:
