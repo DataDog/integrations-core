@@ -32,3 +32,27 @@ jobs:
       runner: '["windows-2022"]'
       zip_url: 'https://agent-ints-python-build-sandbox.s3.eu-north-1.amazonaws.com/python-windows-combined-v3.12.6-openssl-3.0.15-openssl-3.0.9-amd64.zip'
     secrets: inherit
+
+  test-tls-linux:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: TLS
+      target: tls
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "core"
+      standard: true
+      agent-image: "datadog/agent-dev:nicolas-guerguadj-add-fips-mode-py3"
+    secrets: inherit
+
+  test-tls-windows:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: TLS
+      target: tls
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "core"
+      standard: true
+      agent-image-windows: "datadog/agent-dev:main-py3-fips-win-servercore-ltsc2022"
+    secrets: inherit
