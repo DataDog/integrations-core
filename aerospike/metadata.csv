@@ -509,3 +509,4 @@ aerospike.aerospike_xdr_retry_conn_reset,gauge,,,,[OpenMetricsV2 and Aerospike v
 aerospike.aerospike_xdr_retry_dest,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records retried due to a temporary error returned by destination node.,0,aerospike,,,
 aerospike.aerospike_xdr_retry_no_node,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records retried because XDR cannot determine which destination node is the master.,0,aerospike,,,
 aerospike.aerospike_xdr_success,gauge,,,,[OpenMetricsV2 and Aerospike v5.0+] Number of records successfully shipped to remote datacenters.,0,aerospike,,,
+aerospike.uptime,gauge,,second,,[Legacy] The time since last server restart.,1,aerospike,,,
