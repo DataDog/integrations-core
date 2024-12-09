@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,14 @@ from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.http import MockResponse
 
 from .constants import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_OCTOPUS_LAB
+
+
+# https://docs.python.org/3/library/unittest.mock-examples.html#coping-with-mutable-arguments
+class CopyingMock(mock.MagicMock):
+    def __call__(self, /, *args, **kwargs):
+        args = copy.deepcopy(args)
+        kwargs = copy.deepcopy(kwargs)
+        return super().__call__(*args, **kwargs)
 
 
 @pytest.fixture(scope='session')
@@ -117,6 +126,8 @@ def mock_http_get(request, monkeypatch, mock_http_call):
     elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
 
     def get(url, *args, **kwargs):
+        args = copy.deepcopy(args)
+        kwargs = copy.deepcopy(kwargs)
         method = 'GET'
         url = get_url_path(url)
         if http_error and url in http_error:
@@ -128,8 +139,8 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         mock_elapsed = mock.MagicMock(total_seconds=mock.MagicMock(return_value=elapsed_total_seconds.get(url, 0.0)))
         mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
         mock_status_code = mock.MagicMock(return_value=200)
-        return mock.MagicMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
+        return CopyingMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
 
-    mock_get = mock.MagicMock(side_effect=get)
+    mock_get = CopyingMock(side_effect=get)
     monkeypatch.setattr('requests.get', mock_get)
     return mock_get

@@ -58,6 +58,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def _process_endpoint(self, endpoint, params=None, report_service_check=False):
         try:
+            params = {} if params is None else params
             response = self.http.get(f"{self.config.octopus_endpoint}/{endpoint}", params=params)
             response.raise_for_status()
             if report_service_check:
@@ -73,10 +74,31 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 self.warning("Failed to access endpoint: %s: %s", endpoint, e)
                 return {}
 
+    def _process_paginated_endpoint(self, endpoint, params=None, report_service_check=False):
+        skip = 0
+        take = self.config.paginated_limit
+        num_pages = 1
+        num_pages_seen = 0
+        all_items = []
+        params = {} if params is None else params
+        while num_pages_seen < num_pages:
+            params['skip'] = skip
+            params['take'] = take
+
+            response_json = self._process_endpoint(endpoint, params=params, report_service_check=report_service_check)
+            if response_json == {}:
+                return response_json
+            items = response_json.get("Items")
+            num_pages_seen += 1
+            num_pages = response_json.get("NumberOfPages", num_pages)
+            skip += self.config.paginated_limit
+            all_items = all_items + items
+        return {"Items": all_items}
+
     def _init_spaces_discovery(self):
         self.log.info("Spaces discovery: %s", self.config.spaces)
         self._spaces_discovery = Discovery(
-            lambda: self._process_endpoint("api/spaces", report_service_check=True).get('Items', []),
+            lambda: self._process_paginated_endpoint("api/spaces", report_service_check=True).get('Items', []),
             limit=self.config.spaces.limit,
             include=normalize_discover_config_include(self.config.spaces),
             exclude=self.config.spaces.exclude,
@@ -88,9 +110,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.info("Default Project Groups discovery: %s", self.config.project_groups)
         if space_id not in self._default_project_groups_discovery:
             self._default_project_groups_discovery[space_id] = Discovery(
-                lambda: self._process_endpoint(f"api/{space_id}/projectgroups", report_service_check=True).get(
-                    'Items', []
-                ),
+                lambda: self._process_paginated_endpoint(
+                    f"api/{space_id}/projectgroups", report_service_check=True
+                ).get('Items', []),
                 limit=self.config.project_groups.limit,
                 include=normalize_discover_config_include(self.config.project_groups),
                 exclude=self.config.project_groups.exclude,
@@ -102,9 +124,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self.log.info("Project Groups discovery: %s", project_groups_config)
         if space_id not in self._project_groups_discovery:
             self._project_groups_discovery[space_id] = Discovery(
-                lambda: self._process_endpoint(f"api/{space_id}/projectgroups", report_service_check=True).get(
-                    'Items', []
-                ),
+                lambda: self._process_paginated_endpoint(
+                    f"api/{space_id}/projectgroups", report_service_check=True
+                ).get('Items', []),
                 limit=project_groups_config.limit,
                 include=normalize_discover_config_include(project_groups_config),
                 exclude=project_groups_config.exclude,
@@ -118,8 +140,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._default_projects_discovery[space_id] = {}
         if project_group_id not in self._default_projects_discovery[space_id]:
             self._default_projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._process_endpoint(
-                    f"api/{space_id}/projectgroups/{project_group_id}/projects", report_service_check=True
+                lambda: self._process_paginated_endpoint(
+                    f"api/{space_id}/projectgroups/{project_group_id}/projects",
+                    report_service_check=True,
                 ).get('Items', []),
                 limit=self.config.projects.limit,
                 include=normalize_discover_config_include(self.config.projects),
@@ -134,8 +157,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._projects_discovery[space_id] = {}
         if project_group_id not in self._projects_discovery[space_id]:
             self._projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._process_endpoint(
-                    f"api/{space_id}/projectgroups/{project_group_id}/projects", report_service_check=True
+                lambda: self._process_paginated_endpoint(
+                    f"api/{space_id}/projectgroups/{project_group_id}/projects",
+                    report_service_check=True,
                 ).get('Items', []),
                 limit=projects_config.limit,
                 include=normalize_discover_config_include(projects_config),
@@ -152,7 +176,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         else:
             spaces = [
                 (None, space.get("Name"), space, None)
-                for space in self._process_endpoint("api/spaces", report_service_check=True).get('Items', [])
+                for space in self._process_paginated_endpoint("api/spaces", report_service_check=True).get('Items', [])
             ]
         self.log.debug("Monitoring %s spaces", len(spaces))
         for _, _, space, space_config in spaces:
@@ -178,7 +202,9 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             else:
                 project_groups = [
                     (None, project_group.get("Name"), project_group, None)
-                    for project_group in self._process_endpoint(f"api/{space_id}/projectgroups").get('Items', [])
+                    for project_group in self._process_paginated_endpoint(f"api/{space_id}/projectgroups").get(
+                        'Items', []
+                    )
                 ]
         self.log.debug("Monitoring %s Project Groups", len(project_groups))
         for _, _, project_group, project_group_config in project_groups:
@@ -209,7 +235,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             else:
                 projects = [
                     (None, project.get("Name"), project, None)
-                    for project in self._process_endpoint(
+                    for project in self._process_paginated_endpoint(
                         f"api/{space_id}/projectgroups/{project_group_id}/projects"
                     ).get('Items', [])
                 ]
@@ -230,7 +256,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
     def _process_queued_and_running_tasks(self, space_id, space_name, project_id, project_name):
         self.log.debug("Collecting running and queued tasks for project %s", project_name)
         params = {'project': project_id, 'states': ["Queued", "Executing"]}
-        response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
+        response_json = self._process_paginated_endpoint(f"api/{space_id}/tasks", params)
         self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
 
     def _process_completed_tasks(self, space_id, space_name, project_id, project_name):
@@ -240,7 +266,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             'fromCompletedDate': self._from_completed_time,
             'toCompletedDate': self._to_completed_time,
         }
-        response_json = self._process_endpoint(f"api/{space_id}/tasks", params)
+        response_json = self._process_paginated_endpoint(f"api/{space_id}/tasks", params)
         self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
 
     def _calculate_task_times(self, task):
@@ -302,7 +328,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
     def _collect_server_nodes_metrics(self):
         self.log.debug("Collecting server node metrics.")
         url = "api/octopusservernodes"
-        response_json = self._process_endpoint(url)
+        response_json = self._process_paginated_endpoint(url)
         server_nodes = response_json.get('Items', [])
 
         for server_node in server_nodes:
@@ -345,7 +371,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             'to': self._to_completed_time,
             'eventCategories': list(EVENT_TO_ALERT_TYPE.keys()),
         }
-        events = self._process_endpoint(url, params=params).get('Items', [])
+        events = self._process_paginated_endpoint(url, params=params).get('Items', [])
         tags = self._base_tags + [f"space_name:{space_name}"]
 
         for event in events:
