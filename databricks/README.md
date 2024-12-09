@@ -2,7 +2,7 @@
 
 <div class="alert alert-warning">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Databricks cluster utilization metrics and log and model serving metrics.
+This page is limited to documentation for ingesting Databricks cluster utilization metrics and logs.
 </div>
 
 ![Databricks default dashboard][21]
@@ -21,10 +21,6 @@ Datadog offers several Databricks monitoring capabilities.
 
 Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
-
-[//]: # (<!-- xxx tabs xxx -->)
-
-[//]: # (<!-- xxx tab "Cluster Utilization Metrics and Logs" xxx -->)
 
 ### Installation
 
@@ -453,45 +449,11 @@ chmod a+x /tmp/start_datadog.sh
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-
-[//]: # (<!-- xxz tab xxx -->)
-
-[//]: # (<!-- xxx tab "Model Serving Metrics" xxx -->)
-
-[//]: # ()
-[//]: # (1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.)
-
-[//]: # (2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime &#40;days&#41;**, and click **Generate**. Take note of your token.)
-
-[//]: # ()
-[//]: # (   **Important:**)
-
-[//]: # (   * Make sure you delete the default value in **Lifetime &#40;days&#41;** so that the token doesn't expire and the integration doesn't break.)
-
-[//]: # (   * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.)
-
-[//]: # ()
-[//]: # (   As an alternative, follow the [official Databricks documentation][31] to generate access token for a [service principal][31].)
-
-[//]: # ()
-[//]: # (3. In Datadog, open the Databricks integration tile.)
-
-[//]: # (4. On the **Configure** tab, click **Add Databricks Workspace**.)
-
-[//]: # (5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.)
-
-[//]: # (6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.)
-
-[//]: # (<!-- xxz tab xxx -->)
-
-[//]: # (<!-- xxz tabs xxx -->)
-
 ## Data Collected
 
 ### Metrics
 
-See the [Spark integration documentation][8] for a list of metrics collected for cluster utilization.
-See [metadata.csv][29] for a list of metrics collected for model serving.
+See the [Spark integration documentation][8] for a list of metrics collected.
 
 ### Service Checks
 
@@ -531,7 +493,7 @@ Additional helpful documentation, links, and articles:
 [18]: https://docs.databricks.com/en/clusters/web-terminal.html
 [19]: https://docs.databricks.com/en/notebooks/index.html
 [20]: https://docs.datadoghq.com/agent/troubleshooting/
-[21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.pngƒ
+[21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
 [22]: https://www.datadoghq.com/blog/databricks-monitoring-datadog/
 [23]: https://app.datadoghq.com/integrations/spark
 [24]: https://docs.databricks.com/en/ingestion/add-data/upload-to-volume.html#upload-files-to-a-unity-catalog-volume
@@ -539,6 +501,3 @@ Additional helpful documentation, links, and articles:
 [26]: https://www.datadoghq.com/product/cloud-cost-management/
 [27]: https://www.datadoghq.com/product/log-management/
 [28]: https://docs.datadoghq.com/integrations/databricks/?tab=driveronly
-[29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
-[30]: https://docs.databricks.com/en/security/auth-authz/access-control/index.html#job-acls
-[31]: https://docs.databricks.com/en/admin/users-groups/service-principals.html#what-is-a-service-principal
