@@ -459,6 +459,7 @@ model serving instructions
 ### Metrics
 
 See [metadata.csv][29] for a list of metrics provided by this integration.
+See the [Spark integration documentation][8] for a list of metrics collected.å
 
 ### Service Checks
 
