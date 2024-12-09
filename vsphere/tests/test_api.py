@@ -326,7 +326,7 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             assert len(performance_metrics) == 1
             assert len(performance_metrics[0]) == 3
             assert len(redapl_metrics) == 1
-            assert redapl_metrics[0]['info']['cost'] == 4
+            assert redapl_metrics[0]['cost'] == 4
 
             vsan_config = MagicMock()
             vsan_config.enabled = True

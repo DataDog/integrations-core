@@ -6,7 +6,6 @@ from __future__ import division
 import copy
 import datetime as dt
 import logging
-import time
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -39,10 +38,6 @@ from datadog_checks.vsphere.metrics import (
     VSAN_PERCENT_METRICS,
 )
 from datadog_checks.vsphere.resource_filters import TagFilter
-from datadog_checks.vsphere.send_to_redapl.redapl_pb2 import RedaplEvent
-from datadog_checks.vsphere.send_to_redapl.resource_pb2 import RawResourceV3
-from datadog_checks.vsphere.send_to_redapl.struct_pb2 import Value
-from datadog_checks.vsphere.send_to_redapl.timestamp_pb2 import Timestamp
 from datadog_checks.vsphere.types import (
     CounterId,  # noqa: F401
     InfrastructureData,  # noqa: F401
@@ -586,8 +581,7 @@ class VSphereCheck(AgentCheck):
                             tags,
                         )
 
-            for cluster_data in to_redapl_metrics:
-                self.send_resource_to_redapl(cluster_data)
+            self.send_resource_to_redapl(to_redapl_metrics)
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass
@@ -624,57 +618,16 @@ class VSphereCheck(AgentCheck):
             return [], [], []
         return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
 
-    def send_resource_to_redapl(self, input_data):
-        # cluster: {'ref': cluster-reference, 'info': {all data attributes except for 'tags'}}
-        cluster_reference = input_data['ref']
-        raw_resource = RawResourceV3()
-        # REDAPL requests that an org_id of -1 be used for all resources--they will change it
-        raw_resource.org_id = -1
-        raw_resource.type = "vsphere_vsan_cluster"
-        raw_resource.name = cluster_reference.name
-
-        data = input_data['info']
-
-        for i, v in data.items():
-            field_value = Value()
-            if isinstance(v, str):
-                field_value.string_value = v
-            elif isinstance(v, (int, float)):
-                field_value.number_value = v
-            raw_resource.fields_by_name[i].CopyFrom(field_value)
-
-        now = int(time.time())
-        seen_at = Timestamp()
-        seen_at.seconds = now
-        raw_resource.seen_at.CopyFrom(seen_at)
-
-        expire_at = Timestamp()
-        expire_at.seconds = now + 86400  # Expire after 24 hours
-        raw_resource.expire_at.CopyFrom(expire_at)
-
-        raw_resource.version = 1
-        raw_resource.tiebreaker = 123
-        raw_resource.scope = "integrations_core_scope"
-
-        redapl_event = RedaplEvent()
-        # any resource from integrations_core should have this source
-        redapl_event.source = "integrations-core"
-        redapl_event.message = raw_resource.SerializeToString()
-        serialized_redapl_event = redapl_event.SerializeToString()
-
-        headers = {
-            'dd-api-key': datadog_agent.get_config('api_key'),
-            'Content-Type': 'application/x-protobuf',
-        }
-
-        response = self.http.post(
-            'https://intake.profile.{}/api/v2/genresources'.format(datadog_agent.get_config('site')),
-            headers=headers,
-            data=serialized_redapl_event,
-        )
-
-        self.log.debug("Response Code for cluster %s, %s", cluster_reference, response.status_code)
-        self.log.debug("Response Body: %s", response.text)
+    def send_resource_to_redapl(self, clusters_data):
+        input_data = {}
+        for cluster in clusters_data:
+            for i, v in cluster.items():
+                if i not in input_data:
+                    input_data[i] = ''
+                input_data[i] += str(v) + ','
+        for i, v in input_data.items():
+            self.log.debug("Sending resource to redapl: %s, %s", i, v)
+            self.set_metadata(i, v)
 
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]
