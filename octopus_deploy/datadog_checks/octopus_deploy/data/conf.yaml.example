@@ -51,6 +51,11 @@ instances:
     #
   - octopus_endpoint: http://localhost:80/api
 
+    ## @param environments - mapping - optional
+    ## Filter your integration by environment.
+    #
+    # environments: {}
+
     ## @param headers - mapping - optional
     ## Headers to use for every request. An Authorization header including the Octopus Deploy API key token is required
     ## for authentication for the REST API.
