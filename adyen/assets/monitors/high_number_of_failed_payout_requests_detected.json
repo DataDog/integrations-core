@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-26",
+	"last_updated_at": "2024-09-26",
+	"title": "High number of failed payout requests detected",
+	"description": "Failed payout requests occur when disbursement attempts are unsuccessful, potentially causing delays and operational disruptions. This monitor tracks failed payout requests to ensure timely action and maintain efficient operations.",
+	"definition": {
+		"id": 154607493,
+		"name": "High number of failed payout requests detected",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:payout @evt.name:PAYOUT_THIRDPARTY @notificationItems.NotificationRequestItem.success:false\").index(\"*\").rollup(\"cardinality\", \"@pspReference\").last(\"1d\") > 10",
+		"message": "{{#is_alert}}\n'Failed payout requests' refer to third party payout requests that lead to a failure in completing the transaction. Please review and take action to ensure successful payout processing.\n\nThe failed payout requests have exceeded the threshold, which could impact timely disbursements and may cause delays in fund transfers. This requires immediate attention to ensure smooth operations.\n{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:payout"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}

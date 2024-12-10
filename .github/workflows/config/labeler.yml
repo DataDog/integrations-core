@@ -39,6 +39,8 @@ integration/activemq:
 - activemq/**/*
 integration/activemq_xml:
 - activemq_xml/**/*
+integration/adyen:
+- adyen/**/*
 integration/aerospike:
 - aerospike/**/*
 integration/agent_metrics:
