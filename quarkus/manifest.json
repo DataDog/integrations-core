@@ -46,8 +46,7 @@
     },
     "monitors": {
       "Long Requests": "assets/monitors/long_requests.json"
-    },
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
