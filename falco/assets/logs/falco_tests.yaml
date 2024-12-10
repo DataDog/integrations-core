@@ -63,7 +63,7 @@ tests:
           name: "nginx"
         evt:
           time: 1730281682285310500
-          type: "openat"
+          name: "openat"
         fd:
           name: "/etc/shadow"
         k8s:
