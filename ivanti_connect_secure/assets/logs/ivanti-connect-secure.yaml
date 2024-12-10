@@ -384,7 +384,7 @@ pipeline:
 
               successful_login_rule3 Login succeeded for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from %{ipv4:network.client.ip}.
 
-              successful_login_rule4 %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from IP %{ipv4:network.client.ip}( via %{port:network.client.port} port)? authenticated successfully using %{regex(".*(?= authentication)"):} authentication.
+              successful_login_rule4 %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from IP %{ipv4:network.client.ip}( via (%{port:network.client.port}|%{word:}) port)? authenticated successfully using %{regex(".*(?= authentication)"):} authentication.
 
               successful_login_rule5 %{regex(".*(?= login)"):} login succeeded for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from %{ipv4:network.client.ip}.
 
@@ -495,6 +495,6 @@ pipeline:
 
               failed_login_rule3 Login failed from %{ipv4:network.client.ip} for %{regex("[^/]*"):usr.name}/%{regex("[^.]*"):realm_name}.
 
-              successful_login_rule1 Admin %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from IP %{ipv4:network.client.ip}( via %{port:network.client.port} port)? authenticated successfully using %{regex(".*(?= authentication)"):} authentication.
+              successful_login_rule1 Admin %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from IP %{ipv4:network.client.ip}( via (%{port:network.client.port}|%{word:}) port)? authenticated successfully using %{regex(".*(?= authentication)"):} authentication.
 
-              successful_login_rule2 Login succeeded for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from IP %{ipv4:network.client.ip}( via %{port:network.client.port} port)?.
+              successful_login_rule2 Login succeeded for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from IP %{ipv4:network.client.ip}( via (%{port:network.client.port}|%{word:}) port)?.
