@@ -391,10 +391,15 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /shopify/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
 /shopify/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-vonage/                                                @DataDog/saas-integrations
-vonage/*.md                                            @DataDog/saas-integrations @DataDog/documentation
-vonage/manifest.json                                   @DataDog/saas-integrations @DataDog/documentation
-vonage/assets/logs/                                    @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+/hubspot_content_hub/                                               @DataDog/saas-integrations
+/hubspot_content_hub/*.md                                           @DataDog/saas-integrations @DataDog/documentation
+/hubspot_content_hub/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
+/hubspot_content_hub/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
+vonage/                                                            @DataDog/saas-integrations
+vonage/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
+vonage/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
+vonage/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
 
 /asana/                                                             @DataDog/saas-integrations
 /asana/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
