@@ -187,7 +187,8 @@ SELECT
   pg_stat_get_vacuum_count(C.reltoastrelid),
   pg_stat_get_autovacuum_count(C.reltoastrelid),
   EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_vacuum_time(C.reltoastrelid))),
-  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autovacuum_time(C.reltoastrelid)))
+  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autovacuum_time(C.reltoastrelid))),
+  C.xmin
 FROM pg_class C
 LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 LEFT JOIN pg_locks L ON C.oid = L.relation AND L.locktype = 'relation'
@@ -234,6 +235,7 @@ WHERE C.relkind = 'r'
         {'name': 'toast.autovacuumed', 'type': 'monotonic_count'},
         {'name': 'toast.last_vacuum_age', 'type': 'gauge'},
         {'name': 'toast.last_autovacuum_age', 'type': 'gauge'},
+        {'name': 'relation.xmin', 'type': 'gauge'},
     ],
 }
 
