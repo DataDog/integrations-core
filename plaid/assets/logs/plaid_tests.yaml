@@ -1,0 +1,45 @@
+id: "plaid"
+tests:
+  - sample: |-
+      {
+        "account_id": "6KywNXRyqaHydVXXE9d7FeeLaGbNK3f8DGlA5",
+        "ach_class": "ppd",
+        "amount": "12.34",
+        "authorization_id": "dd847b81-e7f0-1a32-accc-2cd0f8b8ad2f",
+        "cancellable": false,
+        "created": "2024-12-04T08:22:13.817289Z",
+        "credit_funds_source": null,
+        "description": "posted",
+        "expected_settlement_date": null,
+        "failure_reason": null,
+        "funding_account_id": null,
+        "guarantee_decision": null,
+        "guarantee_decision_rationale": null,
+        "id": "8e8fe843-b5a4-92be-01b9-5cb51ed378e0",
+        "iso_currency_code": "USD",
+        "ledger_id": "4b15ee7e-a39f-4c94-a84e-bfa3982a7737",
+        "metadata": null,
+        "network": "ach",
+        "network_trace_id": null,
+        "origination_account_id": "",
+        "originator_client_id": "66d5881a2972360019c5e068",
+        "recurring_transfer_id": null,
+        "refunds": [],
+        "standard_return_window": "2024-12-09",
+        "status": "posted",
+        "sweep_status": "unswept",
+        "type": "debit",
+        "unauthorized_return_window": "2025-03-05",
+        "user": {
+          "address": null,
+          "email_address": null,
+          "legal_name": "Anne Charleston",
+          "phone_number": null
+        }
+      }
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
