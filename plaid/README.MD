@@ -2,7 +2,7 @@
 
 [Plaid](https://plaid.com/) specializes in financial technology by offering APIs that allow developers to integrate banking services into their applications. By connecting users' bank accounts to apps, Plaid enables features like account verification, transaction history retrieval, and balance checks. This functionality is crucial for various applications, including budgeting tools, personal finance management, and payment processing.
 
-## Overview
+## Overview 
 
 Here are some insights that can be drawn from your Plaid dashboard:
 
