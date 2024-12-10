@@ -116,6 +116,7 @@ class SQLServer(AgentCheck):
 
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self.connection = None
         self.failed_connections = {}
         self.instance_metrics = []
@@ -154,7 +155,7 @@ class SQLServer(AgentCheck):
         # go through the agent internal metrics submission processing those tags
         self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
-        self.check_initializations.append(self.set_resolved_hostname)
+        self.check_initializations.append(self.load_static_information)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self.config_checks)
         self.check_initializations.append(self.make_metric_list_to_collect)
@@ -202,6 +203,8 @@ class SQLServer(AgentCheck):
         self.set_metadata("resolved_hostname", self.resolved_hostname)
 
     def set_resource_tags(self):
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+
         if self._config.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -224,10 +227,10 @@ class SQLServer(AgentCheck):
             name = self._config.cloud_metadata.get("azure")["name"]
             db_instance = None
             if "sql_database" in deployment_type and self._config.dbm_enabled:
-                # azure sql databases have a special format, which is set for DBM
-                # customers in the resolved_hostname.
-                # If user is not DBM customer, the resource_name should just be set to the `name`
-                db_instance = self._resolved_hostname
+                # azure_sql_server_database resource should be set to {fully_qualified_server_name}/{database_name}
+                # for correct resource aliasing
+                dbname = self.instance.get("database", "master")
+                db_instance = f"{name}/{dbname}"
             # some `deployment_type`s map to multiple `resource_type`s
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
@@ -244,7 +247,6 @@ class SQLServer(AgentCheck):
 
     def set_resolved_hostname(self):
         # load static information cache
-        self.load_static_information()
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
                 self._resolved_hostname = self._config.reported_hostname
@@ -271,7 +273,13 @@ class SQLServer(AgentCheck):
                     # for Azure SQL Database, each database on a given "server" has isolated compute resources,
                     # meaning that the agent is only able to see query activity for the specific database it's
                     # connected to. For this reason, each Azure SQL database is modeled as an independent host.
-                    self._resolved_hostname = "{}/{}".format(host, configured_database)
+                    azure = self._config.cloud_metadata.get("azure")
+                    if azure and azure.get("aggregate_sql_databases"):
+                        # If the aggregate_sql_databases option is enabled, the agent will group all Azure SQL
+                        # databases and report them as a single database instance.
+                        self._resolved_hostname = host
+                    else:
+                        self._resolved_hostname = "{}/{}".format(host, configured_database)
         # set resource tags to properly tag with updated hostname
         self.set_resource_tags()
 
@@ -279,7 +287,16 @@ class SQLServer(AgentCheck):
     def resolved_hostname(self):
         return self._resolved_hostname
 
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            host, _ = split_sqlserver_host_port(self.instance.get("host"))
+            self._database_hostname = resolve_db_host(host)
+        return self._database_hostname
+
     def load_static_information(self):
+        engine_edition_reloaded = False
         expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
@@ -309,6 +326,7 @@ class SQLServer(AgentCheck):
                         result = cursor.fetchone()
                         if result:
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
+                            engine_edition_reloaded = True
                         else:
                             self.log.warning("failed to load version static information due to empty results")
                     if STATIC_INFO_RDS not in self.static_info_cache:
@@ -318,9 +336,11 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_RDS] = True
                         else:
                             self.static_info_cache[STATIC_INFO_RDS] = False
-            # re-initialize resolved_hostname to ensure we take into consideration the static information
+            # re-initialize resolved_hostname to ensure we take into consideration the egine edition
             # after it's loaded
-            self._resolved_hostname = None
+            if engine_edition_reloaded:
+                self._resolved_hostname = None
+            self.set_resolved_hostname()
 
     def debug_tags(self):
         return self.tags + ["agent_hostname:{}".format(self.agent_hostname)]
@@ -342,7 +362,6 @@ class SQLServer(AgentCheck):
 
     def initialize_connection(self):
         self.connection = Connection(
-            host=self.resolved_hostname,
             init_config=self.init_config,
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
@@ -709,6 +728,7 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
+            self.load_static_information()
             # configure custom queries for the check
             if self._query_manager is None:
                 # use QueryManager to process custom queries
@@ -736,7 +756,7 @@ class SQLServer(AgentCheck):
 
     def _new_database_metric_executor(self, database_metric_class, db_names=None):
         return database_metric_class(
-            instance_config=self.instance,
+            config=self._config,
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
@@ -949,6 +969,7 @@ class SQLServer(AgentCheck):
         if self.resolved_hostname not in self._database_instance_emitted:
             event = {
                 "host": self.resolved_hostname,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver",
                 "kind": "database_instance",

@@ -2,15 +2,11 @@
 
 <!-- towncrier release notes start -->
 
-## 5.0.0 / 2024-10-04
+## 5.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
 ***Fixed***:
 
@@ -24,6 +20,7 @@
 
 ***Added***:
 
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 * Bump RethinkDB version for py3.12 E2E tests ([#18636](https://github.com/DataDog/integrations-core/pull/18636))
 
 ## 3.1.0 / 2024-01-05 / Agent 7.51.0

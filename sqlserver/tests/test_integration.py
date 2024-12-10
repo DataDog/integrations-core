@@ -601,12 +601,12 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             {
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
-                "dd.internal.resource:azure_sql_server_database:forced_hostname",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
@@ -618,12 +618,47 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
             {
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
-                "dd.internal.resource:azure_sql_server_database:localhost/datadog_test-1",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
+            ],
+        ),
+        (
+            True,
+            'datadog_test-1',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost/datadog_test-1',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'fully_qualified_domain_name': 'my-instance.database.windows.net',
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
+            ],
+        ),
+        (
+            True,
+            'datadog_test-1',
+            None,
+            ENGINE_EDITION_SQL_DATABASE,
+            'localhost',
+            {
+                'azure': {
+                    'deployment_type': 'sql_database',
+                    'fully_qualified_domain_name': 'my-instance.database.windows.net',
+                    'aggregate_sql_databases': True,
+                },
+            },
+            [
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net/datadog_test-1",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
@@ -656,13 +691,13 @@ def test_file_space_usage_metrics(aggregator, dd_run_check, instance_docker, dat
                 },
                 'azure': {
                     'deployment_type': 'sql_database',
-                    'name': 'my-instance',
+                    'name': 'my-instance.database.windows.net',
                 },
             },
             [
                 "dd.internal.resource:aws_rds_instance:foo.aws.com",
-                "dd.internal.resource:azure_sql_server_database:my-instance",
-                "dd.internal.resource:azure_sql_server:my-instance",
+                "dd.internal.resource:azure_sql_server_database:my-instance.database.windows.net",
+                "dd.internal.resource:azure_sql_server:my-instance.database.windows.net",
             ],
         ),
         (
@@ -873,3 +908,27 @@ def test_propagate_agent_tags(
                 status=SQLServer.OK,
                 tags=expected_tags,
             )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_static_information_expire(aggregator, dd_run_check, init_config, instance_docker):
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    dd_run_check(sqlserver_check)
+    assert sqlserver_check.static_info_cache is not None
+    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
+
+    # manually clear static information cache
+    sqlserver_check.static_info_cache.clear()
+    dd_run_check(sqlserver_check)
+    assert sqlserver_check.static_info_cache is not None
+    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert sqlserver_check.resolved_hostname == 'stubbed.hostname'
+
+    # manually pop STATIC_INFO_ENGINE_EDITION to make sure it is reloaded
+    sqlserver_check.static_info_cache.pop(STATIC_INFO_ENGINE_EDITION)
+    dd_run_check(sqlserver_check)
+    assert sqlserver_check.static_info_cache is not None
+    assert len(sqlserver_check.static_info_cache.keys()) == 4
+    assert sqlserver_check.resolved_hostname == 'stubbed.hostname'

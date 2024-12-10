@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "95ee2e88-d2ee-45f8-a4d6-2cb9eced79ee",
+  "app_id": "incident-io",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into incident activities from incident.io.",
+    "title": "incident.io",
+    "media": [
+      {
+        "caption": "incident.io - Incidents Overview 1",
+        "image_url": "images/incident-io_incidents_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "incident.io - Incidents Overview 2",
+        "image_url": "images/incident-io_incidents_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "incident.io - Incidents Overview 3",
+        "image_url": "images/incident-io_incidents_overview_3.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Incidents",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 25431122,
+      "source_type_name": "incident.io",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "incident.io - Incidents Overview": "assets/dashboards/incident-io_incidents_overview.json"
+    },
+    "logs": {
+      "source": "incident-io"
+    },
+    "monitors": {
+      "Critical public incident": "assets/monitors/critical_public_incident.json",
+      "High number of public incidents": "assets/monitors/high_number_of_public_incidents.json",
+      "Public incident reopened": "assets/monitors/public_incident_reopened.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

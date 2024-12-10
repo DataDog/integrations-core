@@ -2,11 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 2.1.0 / 2024-10-04
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+## 2.1.0 / 2024-10-04 / Agent 7.59.0
 
 ***Fixed***:
 
@@ -17,6 +13,10 @@
 ***Changed***:
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 
 ## 1.0.2 / 2024-07-05 / Agent 7.55.0
 

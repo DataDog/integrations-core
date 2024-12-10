@@ -10,7 +10,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import closing
 from copy import copy
 from datetime import datetime
-from os import environ
 from threading import Event
 
 import mock
@@ -23,7 +22,7 @@ from datadog_checks.mysql import MySql
 from datadog_checks.mysql.activity import MySQLActivity
 from datadog_checks.mysql.util import StatementTruncationState
 
-from .common import CHECK_NAME, HOST, MYSQL_VERSION_PARSED, PORT
+from .common import CHECK_NAME, HOST, MYSQL_FLAVOR, MYSQL_VERSION_PARSED, PORT
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -59,7 +58,7 @@ def dbm_instance(instance_complex):
             'SELECT id, name FROM testdb.users FOR UPDATE',
             (
                 '4d09873d44c33af7'
-                if MYSQL_VERSION_PARSED > parse_version('5.7') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+                if MYSQL_VERSION_PARSED > parse_version('5.7') and MYSQL_FLAVOR != 'mariadb'
                 else 'aca1be410fbadb61'
             ),
             StatementTruncationState.not_truncated.value,
@@ -70,7 +69,7 @@ def dbm_instance(instance_complex):
             ),
             (
                 '4a12d7afe06cf40'
-                if environ.get('MYSQL_FLAVOR') == 'mariadb'
+                if MYSQL_FLAVOR == 'mariadb'
                 else ('da7d6b1e9deb88e' if MYSQL_VERSION_PARSED > parse_version('5.7') else '63bd1fd025c7f7fb')
             ),
             StatementTruncationState.truncated.value,
@@ -113,7 +112,13 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     assert activity['dbm_type'] == 'activity'
     assert activity['ddsource'] == 'mysql'
     assert activity['ddagentversion'], "missing agent version"
-    assert set(activity['ddtags']) == {'tag1:value1', 'tag2:value2', 'port:13306'}
+    assert set(activity['ddtags']) == {
+        'database_hostname:stubbed.hostname',
+        'tag1:value1',
+        'tag2:value2',
+        'port:13306',
+        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
+    }
     assert type(activity['collection_interval']) in (float, int), "invalid collection_interval"
 
     assert activity['mysql_activity'], "should have at least one activity row"
@@ -132,8 +137,7 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
     # sql text length limits
     expected_sql_text = (
         query[:1021] + '...'
-        if len(query) > 1024
-        and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
+        if len(query) > 1024 and (MYSQL_VERSION_PARSED == parse_version('5.6') or MYSQL_FLAVOR == 'mariadb')
         else query[:4093] + '...' if len(query) > 4096 else query
     )
     assert blocked_row['sql_text'] == expected_sql_text
@@ -193,7 +197,7 @@ def test_activity_metadata(aggregator, dd_run_check, dbm_instance, datadog_agent
     """
     query_signature = (
         '4d09873d44c33af7'
-        if MYSQL_VERSION_PARSED > parse_version('5.7') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+        if MYSQL_VERSION_PARSED > parse_version('5.7') and MYSQL_FLAVOR != 'mariadb'
         else 'e7f7cb251194df29'
     )
 
@@ -522,9 +526,11 @@ def test_events_wait_current_disabled_no_warning_azure_flexible_server(
 # directly to metrics-intake, so they should also be properly tagged with a resource
 def _expected_dbm_job_err_tags(dbm_instance):
     return dbm_instance['tags'] + [
+        'database_hostname:stubbed.hostname',
         'job:query-activity',
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',
+        'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     ]
 
 
@@ -539,7 +545,7 @@ def test_if_deadlock_metric_is_collected(aggregator, dd_run_check, dbm_instance)
 
 
 @pytest.mark.skipif(
-    environ.get('MYSQL_FLAVOR') == 'mariadb' or MYSQL_VERSION_PARSED < parse_version('8.0'),
+    MYSQL_FLAVOR == 'mariadb' or MYSQL_VERSION_PARSED < parse_version('8.0'),
     reason='Deadock count is not updated in MariaDB or older MySQL versions',
 )
 @pytest.mark.integration

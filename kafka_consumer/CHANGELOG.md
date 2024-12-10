@@ -2,15 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 6.0.0 / 2024-10-04
+## 6.1.0 / 2024-11-25
+
+***Security***:
+
+* Bump confluent-kafka to 2.6.1 ([#19099](https://github.com/DataDog/integrations-core/pull/19099))
+
+## 6.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
 ***Fixed***:
 
@@ -22,6 +24,10 @@
 
 * Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
 
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
 ## 4.6.1 / 2024-09-05
 
 ***Fixed***:
@@ -32,7 +38,7 @@
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 4.5.0 / 2024-07-05 / Agent 7.56.0
 
