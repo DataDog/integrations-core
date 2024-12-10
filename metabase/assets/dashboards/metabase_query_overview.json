@@ -1,0 +1,1406 @@
+{
+  "title": "Metabase - Query Overview",
+  "description": "This dashboard provides a comprehensive analysis of the Metabase query logs.",
+  "widgets": [
+    {
+      "id": 7693179238065116,
+      "definition": {
+        "type": "image",
+        "url": "https://yt3.googleusercontent.com/D1DEZe15kTf_FFSScua0rJp4ubPAjEtJDt1LZ8hNY_p_cazG55XluQdz7DCNxn31m8dWl4VFlcE=s160-c-k-c0x00ffffff-no-rj",
+        "url_dark_theme": "https://yt3.googleusercontent.com/D1DEZe15kTf_FFSScua0rJp4ubPAjEtJDt1LZ8hNY_p_cazG55XluQdz7DCNxn31m8dWl4VFlcE=s160-c-k-c0x00ffffff-no-rj",
+        "sizing": "contain",
+        "margin": "md",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 1819252917483758,
+      "definition": {
+        "title": "Monitors Summary",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4567865750208782,
+            "definition": {
+              "title": "Monitors Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:metabase) service:query-logs",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 66128774006588,
+      "definition": {
+        "type": "note",
+        "content": "**[Metabase](https://www.metabase.com/cloud/)** is an open-source business intelligence tool that you can connect to many popular databases. Metabase lets you ask questions about your data, and displays answers in formats that make sense, whether that’s a bar chart or a detailed table.\n\nThis dashboard provides a comprehensive analysis of Metabase query logs, offering insights into executed queries.\n\nFor more information, see the [Metabase Integration Documentation](https://docs.datadoghq.com/integrations/metabase/).\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "background_color": "blue",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "top",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 4586672715992262,
+      "definition": {
+        "title": "Overview",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5681092784955122,
+            "definition": {
+              "title": "Total Query Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#c9e5ff"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 2373837759190436,
+            "definition": {
+              "title": "Queries over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@query_source",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 2791420634259186,
+            "definition": {
+              "title": "Total Running Time",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "sum",
+                        "metric": "@running_time_seconds"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#c9e5ff"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 1769213227294192,
+            "definition": {
+              "title": "Top Users/API Keys by Total Query Running Time",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "sum",
+                        "metric": "@running_time_seconds"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "sum",
+                            "metric": "@running_time_seconds"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs @query_source:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 3831086524416612,
+            "definition": {
+              "title": "Native Query Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@is_native",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 7,
+              "y": 3,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 6310904994231554,
+            "definition": {
+              "title": "Queries by Source",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@query_source",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 4509409153221262,
+            "definition": {
+              "title": "Cache Hit Percentage",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:metabase service:query-logs @cache_hit:true $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "data_source": "logs",
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:metabase service:query-logs @cache_hit:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "(throughput(query1) / throughput(query2)) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5040430115299624,
+            "definition": {
+              "title": "Cache Hit Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@cache_hit",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs @cache_hit:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 10,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 8733268029723804,
+            "definition": {
+              "title": "Query Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name ",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@query_source",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@result_rows",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@running_time_seconds",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@is_native",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@usr.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@dashboard_name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@card_name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@database_name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 18
+      }
+    },
+    {
+      "id": 3677775460836924,
+      "definition": {
+        "title": "Dashboard",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1682092307019548,
+            "definition": {
+              "title": "Slowest Dashboards",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "max",
+                        "metric": "@running_time_seconds"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@dashboard_name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "max",
+                            "metric": "@running_time_seconds"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs @query_source:dashboard $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4961758982707352,
+            "definition": {
+              "title": "Top Dashboards by Total Running Time",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "sum",
+                        "metric": "@running_time_seconds"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@dashboard_name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "sum",
+                            "metric": "@running_time_seconds"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs @query_source:dashboard $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 23,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 3467310125871346,
+      "definition": {
+        "title": "Card",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1702343538856682,
+            "definition": {
+              "title": "Slowest Cards",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "max",
+                        "metric": "@running_time_seconds"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@card_name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "max",
+                            "metric": "@running_time_seconds"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs @query_source:question $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2287284381540338,
+            "definition": {
+              "title": "Top Cards by Total Running Time",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "sum",
+                        "metric": "@running_time_seconds"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@card_name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "sum",
+                            "metric": "@running_time_seconds"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs @query_source:question $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 28,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 58817873008986,
+      "definition": {
+        "title": "Query Errors",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4910050676128990,
+            "definition": {
+              "title": "Error Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "throughput(query1) * 3600",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "per_unit_name": "hour"
+                        }
+                      }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 8495209297844404,
+            "definition": {
+              "title": "Queries Count with Error",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5867957533674390,
+            "definition": {
+              "title": "Native Error Query Distribution",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@is_native",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1472721839533902,
+            "definition": {
+              "title": "Error by Query Source",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@query_source",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 5747522789761224,
+            "definition": {
+              "title": "Queries with Error",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name ",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@query_source",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@error",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@is_native",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 5,
+              "y": 3,
+              "width": 7,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 33,
+        "width": 12,
+        "height": 8
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Query_Source",
+      "prefix": "@query_source",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Dashboard_Name",
+      "prefix": "@dashboard_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Card_Name",
+      "prefix": "@card_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "User_Name",
+      "prefix": "@usr.name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
