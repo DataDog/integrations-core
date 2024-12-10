@@ -795,14 +795,14 @@
                 "x": 0,
                 "y": 4,
                 "width": 12,
-                "height": 39
+                "height": 1
             }
         },
         {
             "id": 7405800016622172,
             "definition": {
                 "title": "Application Justification Events",
-                "background_color": "vivid_pink",
+                "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1569,7 +1569,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 43,
+                "y": 5,
                 "width": 12,
                 "height": 1
             }
@@ -2067,10 +2067,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -2114,6 +2111,16 @@
                                     "response_format": "scalar",
                                     "style": {
                                         "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
                                     }
                                 }
                             ],
@@ -2197,7 +2204,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 44,
+                "y": 6,
                 "width": 12,
                 "height": 1,
                 "is_column_break": true

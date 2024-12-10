@@ -239,10 +239,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -263,7 +260,8 @@
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -275,6 +273,16 @@
                                     "response_format": "scalar",
                                     "style": {
                                         "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
                                     }
                                 }
                             ],
@@ -365,14 +373,14 @@
                 "x": 0,
                 "y": 4,
                 "width": 12,
-                "height": 19
+                "height": 1
             }
         },
         {
             "id": 8495484121935254,
             "definition": {
                 "title": "Application Control Events Overview",
-                "background_color": "vivid_pink",
+                "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -382,7 +390,7 @@
                         "definition": {
                             "type": "note",
                             "content": "Application Control Events group includes following event types:\n- Application Action Events\n- Application Justification Events\n- Bad Rated Application Action Events",
-                            "background_color": "pink",
+                            "background_color": "green",
                             "font_size": "14",
                             "text_align": "left",
                             "vertical_align": "top",
@@ -519,78 +527,9 @@
                         }
                     },
                     {
-                        "id": 3895058034948400,
-                        "definition": {
-                            "title": "Application Control Events by Event Type",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:delinea-privilege-manager service:(application-action-events OR application-justification-events OR bad-rated-application-action-events) $ComputerName $HostName $EventType $UserName"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@event_name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 12,
-                            "height": 5
-                        }
-                    },
-                    {
                         "id": 7979720750745414,
                         "definition": {
-                            "title": "Total 10 Computers with Application Control Events",
+                            "title": "Top 10 Computers with Application Control Events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -658,18 +597,79 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 11,
+                            "y": 6,
                             "width": 12,
                             "height": 4
+                        }
+                    },
+                    {
+                        "id": 7027991143461776,
+                        "definition": {
+                            "title": "Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:delinea-privilege-manager service:(application-action-events OR application-justification-events OR bad-rated-application-action-events) $ComputerName $HostName $EventType $UserName",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@event_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@ComputerName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@usr.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@FileName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@PolicyName",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@log_message",
+                                            "width": "compact"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 12,
+                            "height": 5
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 23,
+                "y": 5,
                 "width": 12,
-                "height": 16
+                "height": 1,
+                "is_column_break": true
             }
         },
         {
@@ -824,66 +824,41 @@
                         }
                     },
                     {
-                        "id": 785457999377644,
+                        "id": 6357137654868758,
                         "definition": {
-                            "title": "Local Security Events by Event Type",
+                            "title": "Log Details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:delinea-privilege-manager service:(password-disclosure-events OR newly-discovered-file-events OR change-history-events) $ComputerName $HostName $EventType $UserName"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@event_name",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:delinea-privilege-manager service:(password-disclosure-events OR newly-discovered-file-events OR change-history-events) $ComputerName $HostName $EventType $UserName",
+                                        "indexes": [],
+                                        "storage": "hot"
                                     },
-                                    "style": {
-                                        "palette": "datadog16"
-                                    }
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@event_name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@log_message",
+                                            "width": "compact"
+                                        }
+                                    ]
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
+                            "type": "list_stream"
                         },
                         "layout": {
                             "x": 0,
@@ -891,14 +866,14 @@
                             "width": 12,
                             "height": 5
                         }
-                    }
+                    }  
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 39,
+                "y": 6,
                 "width": 12,
-                "height": 12
+                "height": 1
             }
         },
         {
@@ -906,7 +881,7 @@
             "definition": {
                 "title": "Datadog Cloud SIEM",
                 "title_align": "center",
-                "background_color": "vivid_pink",
+                "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -916,7 +891,7 @@
                         "definition": {
                             "type": "note",
                             "content": "Datadog Cloud SIEM analyzes and correlates Delinea Privilege Manager logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security).",
-                            "background_color": "pink",
+                            "background_color": "green",
                             "font_size": "14",
                             "text_align": "left",
                             "vertical_align": "center",
@@ -1416,7 +1391,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 51,
+                "y": 7,
                 "width": 12,
                 "height": 1
             }

@@ -1092,7 +1092,8 @@
                 "x": 0,
                 "y": 5,
                 "width": 12,
-                "height": 1
+                "height": 1,
+                "is_column_break": true
             }
         },
         {

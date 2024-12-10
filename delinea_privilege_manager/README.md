@@ -4,7 +4,7 @@
 
 [Delinea Privilege Manager][3] is an endpoint least privilege and application control solution for Windows and macOS, capable of supporting enterprises and fast-growing organizations at scale. Local Security and Application Control are the two major components of Delinea Privilege Manager.
 
-This integration parses the following types of logs:
+This integration supports the following types of logs:
 - **Application Action Events** : Application Action Events contain generic information about the application that ran, the policy that was triggered, the date and time stamp, the computer, and the user.
 - **Application Justification Events** : Application Justification Events are generated when an application requiring a justification workflow is run by a user.
 - **Bad Rated Application Action Events** : Bad Rated Application Action Events are generated when an application is being installed or executed, that is identified with a bad security rating.
@@ -12,7 +12,7 @@ This integration parses the following types of logs:
 - **Newly Discovered File Events** : Newly Discovered File Events contain information about newly discovered files on the system.
 - **Change History Events** : Change History Events contain information about any changes made in Delinea Privilege Manager.
 
-Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, out-of-the-box detection rules are available to help you monitor and respond to potential security threats effectively.
+Visualize detailed insights into these logs through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 
 ## Setup
@@ -66,19 +66,23 @@ Linux command
         - For TCP, configuration would look like this: tcp://[host]:port
         - For UDP, configuration would look like this: udp://[host]:port
         
-        **host**: ip address where your datadog-agent is running.
+        **host**: IP address where your datadog-agent is running.
         
-        **port**: port number to send syslog messages.
+        **port**: Port number to send syslog messages.
     4. Click on the **Create** button. Confirm the details added and get back to the Admin Menu.
   - Setting Up Syslog Server Tasks:
     1. After adding a new Syslog connection, to send logs to your Syslog Server, go to **Admin** > **Tasks**.
     2. Expand the **Server Tasks** folder, then **Foreign Systems**, select **SysLog** and click **Create**.
     3. From the **Template** drop-down, select the **Send Application Action Events to Syslog** template.
-    4. Add a **Name** for this task (set to **Application Action Events**) and **Event Name** (set to **Application Action Events**), and specify the **Event Severity**(0-Lowest, 10-Highest) or keep it as is. 
+    4. Add a **Name** for this task (set to **Application Action Events**) and **Event Name** (set to **Application Action Events**), and specify the **Event Severity**(0-Lowest, 10-Highest) or keep it as is.
+
     5. From the **SysLog System** drop-down select your SysLog server foreign system (configured above).
     6. Provide value for **Security Ratings Provider** if required or keep it as is.
     7. Click **Create**.
-    8. Once created, Scroll down to the Schedule section, click on **New Schedule** button. Provide Below Details:
+
+        **Note**: Do not alter the **Data source**, and ensure the **Replace spaces** toggle is disabled, as any changes to these parameters will directly impact the functionality of the Delinea Privilege Manager integration.
+
+    8. Once created, scroll down to the Schedule section, click on the **New Schedule** button. Provide below details:
         1. Schedule Details: 
             -  Provide **Schedule Name**.
         2. Schedule:
@@ -88,7 +92,7 @@ Linux command
 
 This process configures the Syslog forwarding task for **Application Action Events**. For other types of events mentioned in the table below, create new tasks for each event with respective template and event name, and follow all the above steps.
 
-**Note**: In step 4, ensure to set the **Name** for the task and the **Event Name** according to the selected **Template**, as specified in the table below:
+  **Note**: In step 4, ensure to set the **Name** for the task and the **Event Name** according to the selected Template, as specified in the table below. The **Event Name** is essential to the functionality of the Delinea Privilege Manager Pipeline and must be provided exactly as specified.
 
 | Template     | Event Name    | Name |
 | ---------  | -------------- |--------------
@@ -109,7 +113,7 @@ This process configures the Syslog forwarding task for **Application Action Even
 
 | Format     | Event Types    |
 | ---------  | -------------- |
-| JSON | Application Action Events, Bad Rated Application Action Events, Application Justification Events, Password Disclosure Events, Newly Discovered File Events, Change History Events |
+| CEF | Application Action Events, Bad Rated Application Action Events, Application Justification Events, Password Disclosure Events, Newly Discovered File Events, Change History Events |
 
 ### Metrics
 
@@ -122,8 +126,6 @@ The Delinea Privilege Manager integration does not include any events.
 ### Service Checks
 
 The Delinea Privilege Manager integration does not include any service checks.
-
-See [service_checks.json][5] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 

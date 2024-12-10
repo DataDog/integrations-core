@@ -60,7 +60,7 @@ pipeline:
     query: source:delinea-privilege-manager
   processors:
     - type: grok-parser
-      name: Parsing Delinea Events
+      name: Parsing Delinea Privilege Manager events
       enabled: true
       source: message
       samples:
@@ -96,7 +96,7 @@ pipeline:
           item was created from a template,
       grok:
         supportRules: >-
-          extract_data_till_pipe_delimited %{regex("[^|]*")}
+          extract_data_till_pipe_delimiter %{regex("[^|]*")}
 
 
           extract_syslog_header_with_hostname <%{integer:}>%{integer:syslog.version} %{parse_date_rule:} %{notSpace:syslog.hostname} %{notSpace:syslog.appname} %{notSpace:syslog.process_id:nullIf("-")} %{notSpace:syslog.msgid} - 
@@ -108,10 +108,10 @@ pipeline:
           parse_date_rule %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
         matchRules: >-
           parsing_rule_for_change_history_event
-          (%{extract_syslog_header_with_hostname:}|%{extract_syslog_header:})?CEF\:%{integer:}\|%{extract_data_till_pipe_delimited:device_vendor}\|%{extract_data_till_pipe_delimited:device_product}\|%{extract_data_till_pipe_delimited:device_version}\|%{extract_data_till_pipe_delimited:change_history_type}\|%{regex("(ChangeHistory)"):event_name}\|%{extract_data_till_pipe_delimited:severity}\|%{data:log_message}
+          (%{extract_syslog_header_with_hostname:}|%{extract_syslog_header:})?CEF\:%{integer:}\|%{extract_data_till_pipe_delimiter:device_vendor}\|%{extract_data_till_pipe_delimiter:device_product}\|%{extract_data_till_pipe_delimiter:device_version}\|%{extract_data_till_pipe_delimiter:change_history_type}\|%{regex("(ChangeHistory)"):event_name}\|%{extract_data_till_pipe_delimiter:severity}\|%{data:log_message}
 
 
-          parsing_rule (%{extract_syslog_header_with_hostname:}|%{extract_syslog_header:})?CEF\:%{integer:}\|%{extract_data_till_pipe_delimited:device_vendor}\|%{extract_data_till_pipe_delimited:device_product}\|%{extract_data_till_pipe_delimited:device_version}\|%{extract_data_till_pipe_delimited:}\|%{extract_data_till_pipe_delimited:event_name}\|%{extract_data_till_pipe_delimited:severity}\|%{data:log_message}
+          parsing_rule (%{extract_syslog_header_with_hostname:}|%{extract_syslog_header:})?CEF\:%{integer:}\|%{extract_data_till_pipe_delimiter:device_vendor}\|%{extract_data_till_pipe_delimiter:device_product}\|%{extract_data_till_pipe_delimiter:device_version}\|%{extract_data_till_pipe_delimiter:}\|%{extract_data_till_pipe_delimiter:event_name}\|%{extract_data_till_pipe_delimiter:severity}\|%{data:log_message}
     - type: pipeline
       name: Processing of application action events
       enabled: true
@@ -156,11 +156,11 @@ pipeline:
               parsing_rule_1 %{keyvalue_parsing_rule:}
               PolicyName=%{data:PolicyName} UserName=%{data:UserName}
               FileName=%{data:FileName} FilePath=%{data:FilePath}
-              EventReceivedByServer=%{date("M/d/yyyy h:mm:ss
+              EventReceivedByServer=%{date("M/d/yyyy h:m:s
               a"):EventReceivedByServer} %{keyvalue_parsing_rule:}
 
 
-              parsing_rule_2 %{keyvalue_parsing_rule:} FileName=%{data:FileName} FileHashSha1=%{data:FileHashSha1} FileHashSha256=%{data:FileHashSha256} FileHash=%{data:FileHash} FileFirstSeenByServer=%{date("M/d/yyyy h:mm:ss a"):FileFirstSeenByServer}( %{keyvalue_parsing_rule:})?
+              parsing_rule_2 %{keyvalue_parsing_rule:} FileName=%{data:FileName} FileHashSha1=%{data:FileHashSha1} FileHashSha256=%{data:FileHashSha256} FileHash=%{data:FileHash} FileFirstSeenByServer=%{date("M/d/yyyy h:m:s a"):FileFirstSeenByServer}( %{keyvalue_parsing_rule:})?
     - type: pipeline
       name: Processing of application justification events
       enabled: true
@@ -187,7 +187,7 @@ pipeline:
               PolicyName=%{data:PolicyName} UserName=%{data:UserName}
               UserReason=%{data:UserReason}( FileName=%{data:FileName}
               FilePath=%{data:FilePath} EventReceivedByServer=%{date("M/d/yyyy
-              h:mm:ss a"):EventReceivedByServer} %{keyvalue_parsing_rule:})?
+              h:m:s a"):EventReceivedByServer} %{keyvalue_parsing_rule:})?
     - type: pipeline
       name: Processing of change history events
       enabled: true
@@ -250,7 +250,7 @@ pipeline:
             matchRules: parsing_rule_1 %{keyvalue_parsing_rule:} FileName=%{data:FileName}
               FileHashSha1=%{data:FileHashSha1}
               FileHashSha256=%{data:FileHashSha256} FileHash=%{data:FileHash}
-              FileFirstSeenByServer=%{date("M/d/yyyy h:mm:ss
+              FileFirstSeenByServer=%{date("M/d/yyyy h:m:s
               a"):FileFirstSeenByServer}( %{keyvalue_parsing_rule:})?
     - type: pipeline
       name: Processing of password disclosure events
@@ -284,7 +284,7 @@ pipeline:
             supportRules: keyvalue_parsing_rule
               %{data::keyvalue("=","`~!#$%^&*()+{}\\\\\\[\\]|;'?<>:/\" ")}
             matchRules: parsing_rule_1 %{keyvalue_parsing_rule:}
-              EventOccuredOnServer=%{date("M/d/yyyy h:mm:ss
+              EventOccuredOnServer=%{date("M/d/yyyy h:m:s
               a"):EventOccuredOnServer} %{keyvalue_parsing_rule:} Requesting
               User=%{data:RequestingUser}
               RemoteIpAddress=%{notSpace:RemoteIpAddress}
@@ -313,7 +313,7 @@ pipeline:
             matchRules: parsing_rule_1 %{keyvalue_parsing_rule:}
               PolicyName=%{data:PolicyName} UserName=%{data:UserName}
               FileName=%{data:FileName} FilePath=%{data:FilePath}
-              EventReceivedByServer=%{date("M/d/yyyy h:mm:ss
+              EventReceivedByServer=%{date("M/d/yyyy h:m:s
               a"):EventReceivedByServer} %{keyvalue_parsing_rule:}
     - type: date-remapper
       name: Define `EventReceivedByServer`, `FileFirstSeenByServer`, `timestamp` as
