@@ -11,5 +11,5 @@ pipeline:
   name: plaid_logs
   enabled: true
   filter:
-    query: "source:plaid "
+    query: "source:plaid"
   processors: []
