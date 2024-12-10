@@ -44,7 +44,9 @@
     "dashboards": {
       "Quarkus Overview": "assets/dashboards/overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "Long Requests": "assets/monitors/long_requests.json"
+    },
     "saved_views": {}
   },
   "author": {
