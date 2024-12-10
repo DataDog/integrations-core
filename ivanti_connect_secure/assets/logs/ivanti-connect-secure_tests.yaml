@@ -58,17 +58,17 @@ tests:
       authentication failed for authentication successful for demouser/System
       Local from 10.10.10.10"}'
     result: null
-  - sample: '577 <134>1 2024-12-04T01:18:24-05:00 test.com PulseSecure: - - -
-      {"message_id":"AUT24604","date":"2024-12-04","timestamp":"1733\
-      293104","us_timestamp":"1733293104.48858","opaque_id":"2304","g\
-      ateway_id":"","gateway_name":"","unique_id":"uid_1234","sev_n\
-      um":"9","sev_string":"major","source_ip":"10.10.10.10",
-      "macaddr":"",
-      "user":"user@test.com","realm_name":"","roles":"","session_id\
-      ":"","useragent":"","device_id":"","browser_id":"","tenan\
-      t_id":"","cert_hash":"","additional_details":[],"raw_message":\
-      "SSL negotiation failed while client at source IP \'10.10.10.10\' was
-      trying to connect to \'10.0.0.0\'. Reason: \'http request\'"}'
+  - sample: "577 <134>1 2024-12-04T01:18:24-05:00 test.com PulseSecure: - - -
+      {\"message_id\":\"AUT24604\",\"date\":\"2024-12-04\",\"timestamp\":\"1733\
+      293104\",\"us_timestamp\":\"1733293104.48858\",\"opaque_id\":\"2304\",\"g\
+      ateway_id\":\"\",\"gateway_name\":\"\",\"unique_id\":\"uid_1234\",\"sev_n\
+      um\":\"9\",\"sev_string\":\"major\",\"source_ip\":\"10.10.10.10\",
+      \"macaddr\":\"\",
+      \"user\":\"user@test.com\",\"realm_name\":\"\",\"roles\":\"\",\"session_id\
+      \":\"\",\"useragent\":\"\",\"device_id\":\"\",\"browser_id\":\"\",\"tenan\
+      t_id\":\"\",\"cert_hash\":\"\",\"additional_details\":[],\"raw_message\":\
+      \"SSL negotiation failed while client at source IP '10.10.10.10' was
+      trying to connect to '10.0.0.0'. Reason: 'http request'\"}"
     result: null
   - sample: '577 <134>1 2024-12-04T01:18:24-05:00 test.com PulseSecure: - - -
       {"message_id":"AUT20919","date":"2024-12-04","timestamp":"1733293104","us_timestamp":"1733293104.48858","opaque_id":"2304","gateway_id":"","gateway_name":"","unique_id":"uid_1234","sev_num":"9","sev_string":"major","source_ip":"10.10.10.10",
