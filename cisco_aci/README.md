@@ -45,7 +45,7 @@ To configure this check for an Agent running on a host:
         ## Authentication can use either a user auth or a certificate.
         ## If using the user auth, enter the `username` and `pwd` configuration.
         #
-        pwd: <PWD>
+        pwd: <PWD> #password may need to be enclosed in double quotes to evaluate special characters as a string
     
         ## @param tenant - list of strings - optional
         ## List of tenants to collect metrics data from.
