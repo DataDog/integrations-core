@@ -42,7 +42,7 @@
       }
     },
     "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/quarkus_overview.json"
+      "Quarkus Overview": "assets/dashboards/overview.json"
     },
     "monitors": {},
     "saved_views": {}
