@@ -118,8 +118,7 @@ pipeline:
           seconds"}'
       grok:
         supportRules: ""
-        matchRules:
-          "common_rule (%{number} )?(<%{integer}>)?(%{integer} )?%{notSpace}
+        matchRules: "common_rule (%{number} )?(<%{integer}>)?(%{integer} )?%{notSpace}
           %{notSpace} %{notSpace}: %{notSpace} %{notSpace} %{notSpace}
           %{data::json}"
     - type: grok-parser
@@ -407,8 +406,7 @@ pipeline:
               18773, Newly Detected Files 10, Mismatched Files 10"
           grok:
             supportRules: ""
-            matchRules:
-              "integrity_scan_rule Integrity Scan Completed: Integrity Scan
+            matchRules: "integrity_scan_rule Integrity Scan Completed: Integrity Scan
               Results : Matched Files
               %{integer:ivanti_connect_secure.matched_files}, Newly Detected
               Files %{integer:ivanti_connect_secure.detected_files}, Mismatched
@@ -431,8 +429,7 @@ pipeline:
               (session:sid12345)
           grok:
             supportRules: ""
-            matchRules:
-              connection_requests_rule Closed connection to %{notSpace:hostname}
+            matchRules: connection_requests_rule Closed connection to %{notSpace:hostname}
               port %{port:network.destination.port} after
               %{integer:ivanti_connect_secure.duration} seconds, with
               %{integer:network.bytes_read} bytes read \(in
