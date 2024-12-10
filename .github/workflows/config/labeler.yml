@@ -423,6 +423,8 @@ integration/postfix:
 - postfix/**/*
 integration/postgres:
 - postgres/**/*
+integration/postmark:
+- postmark/**/*
 integration/powerdns_recursor:
 - powerdns_recursor/**/*
 integration/presto:
