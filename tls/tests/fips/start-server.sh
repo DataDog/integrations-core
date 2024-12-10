@@ -17,4 +17,5 @@ openssl s_server \
     -cert /etc/ssl/certs/server.crt \
     -key /etc/ssl/private/server.key \
     -cipher $CIPHER \
+    -no_tls1_3 \
     -WWW

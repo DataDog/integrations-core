@@ -29,6 +29,14 @@ HOSTNAME_TO_PORT_MAPPING = {
 }
 
 
+@pytest.fixture(scope="function")
+def clean_fips_environment():
+    os.environ["GOFIPS"] = "0"
+    os.environ["OPENSSL_CONF"] = ""
+    os.environ["OPENSSL_MODULES"] = ""
+    yield
+
+
 @pytest.fixture(scope='session')
 def dd_environment(instance_e2e, mock_local_tls_dns):
     with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=20):

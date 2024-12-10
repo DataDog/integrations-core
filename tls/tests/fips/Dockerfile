@@ -9,7 +9,3 @@ RUN chmod +x /usr/local/bin/start-server.sh
 
 # Expose port 443
 EXPOSE 443
-
-# Run the server script
-CMD ["/usr/local/bin/start-server.sh"]
-
