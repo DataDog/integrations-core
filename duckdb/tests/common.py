@@ -8,10 +8,7 @@ from datadog_checks.dev import get_docker_hostname, get_here
 HERE = get_here()
 HOST = get_docker_hostname()
 PORT = 5000
+DB = 'data/duckdb.db'
 
-CONFIG = {
-    'host': HOST,
-    'port': PORT,
-    'database': 'data/duckdb.db',
-    'read_only': False,
-}
+DEFAULT_INSTANCE = {'host': HOST, 'port': PORT, 'database': DB, 'read_only': False}
+

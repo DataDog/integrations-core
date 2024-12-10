@@ -1,11 +1,20 @@
 services:
   duckdb:
-    image: datacatering/duckdb:v${DUCKDB_VERSION}
-    container_name: duckdb-ce
+    build: .
+    container_name: duckdb-container
+    volumes:
+      - ./data:/data  # Mounts the local `data` directory to `/data` inside the container
+    working_dir: /data  # Set working directory to /data
+    environment:
+      - DUCKDB_QUERY="CREATE TABLE IF NOT EXISTS users(id INTEGER, name VARCHAR); INSERT INTO users VALUES (1, 'Alice');"
+      - DUCKDB_DATABASE=/data/sample.duckdb  # Path to the DuckDB database file
+    command: ["sh", "-c", "/usr/local/bin/duckdb /data/sample.duckdb && tail -f /dev/null"]
+    entrypoint: ["/bin/sh", "-c", "echo 'Running initial query...'; duckdb /data/sample.duckdb \"${DUCKDB_QUERY}\" && tail -f /dev/null"]
     ports:
       - "5001:5000"
-    volumes:
-      - ./data:/data
-    environment:
-      - DUCKDB_PORT=5000
-    command: ["duckdb", "--port", "5000", "--db", "/data/duckdb.db"]
+    #command: ["duckdb", "/data/sample.duckdb"]
+    #restart: unless-stopped
+
+volumes:
+  data:
+    driver: local

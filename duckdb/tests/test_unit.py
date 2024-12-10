@@ -9,7 +9,6 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.duckdb import DuckdbCheck
 
-
 def test_check(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
     check = DuckdbCheck('duckdb', {}, [instance])
