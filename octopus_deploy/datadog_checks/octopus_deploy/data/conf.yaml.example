@@ -52,7 +52,33 @@ instances:
   - octopus_endpoint: http://localhost:80/api
 
     ## @param environments - mapping - optional
-    ## Filter your integration by environment.
+    ## Optional configuration to indicate the environments that we want to be processed. If not configured,
+    ## all environments will be processed.
+    ##
+    ## The 'include' key will indicate the regular expressions of the environments for which metrics are
+    ## to be reported.
+    ##
+    ## The environments will be processed in the order indicated in the 'include'.
+    ## If an environment is matched on an 'include' key, it will only be processed there and not in a later 'include'
+    ## that it might match on.
+    ##
+    ## The 'exclude' key will indicate the regular expressions of those environments for which metrics
+    ## are not to be reported.
+    ## The excludes will have priority over the includes, that is, if an environment matches an exclude, it will not be
+    ## processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
+    ##
+    ## The 'limit' key will allow limiting the number of environments processed to avoid a combinatorial explosion of
+    ## tags associated with a metric.
+    ##
+    ## The 'interval' key will indicate the validity time of the last list of environments obtained through the
+    ## endpoint. If 'interval' is not indicated, the list of environments will be obtained each time the check
+    ## is executed and will not be cached.
+    ##
+    ## In the following example, only the environment named 'prod' will be collected.
+    ##
+    ##   environments:
+    ##     include:
+    ##       - 'prod'
     #
     # environments: {}
 
