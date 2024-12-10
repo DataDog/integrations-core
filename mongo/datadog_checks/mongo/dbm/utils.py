@@ -10,6 +10,7 @@ from bson import json_util, regex
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache
+from datadog_checks.mongo.api import MongoApi
 
 try:
     import datadog_agent
@@ -85,7 +86,7 @@ EXPLAIN_PLAN_KEYS_TO_REMOVE = frozenset(
 )
 
 
-def format_key_name(formatter, metric_dict: dict) -> dict:
+def format_key_name(formatter: callable, metric_dict: dict) -> dict:
     # convert camelCase to snake_case
     formatted = {}
     for key, value in metric_dict.items():
@@ -143,7 +144,7 @@ def should_explain_operation(
     return True
 
 
-def get_explain_plan(api_client, op: Optional[str], command: dict, dbname: str):
+def get_explain_plan(api_client: MongoApi, op: Optional[str], command: dict, dbname: str) -> dict:
     dbname = command.pop("$db", dbname)
     try:
         for key in EXPLAIN_COMMAND_EXCLUDE_KEYS:
@@ -196,7 +197,7 @@ def get_command_collection(command: dict, ns: str) -> Optional[str]:
     return None
 
 
-def obfuscate_command(command: dict):
+def obfuscate_command(command: dict) -> str:
     # Obfuscate the command to remove sensitive information
     # Remove the following keys from the command before obfuscating
     # - comment: The comment field should not contribute to the query signature
@@ -208,7 +209,7 @@ def obfuscate_command(command: dict):
     return datadog_agent.obfuscate_mongodb_string(json_util.dumps(obfuscated_command))
 
 
-def obfuscate_explain_plan(plan):
+def obfuscate_explain_plan(plan: dict) -> dict:
     if isinstance(plan, dict):
         obfuscated_plan = {}
         for key, value in plan.items():

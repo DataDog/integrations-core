@@ -44,7 +44,7 @@ class HostingType:
     UNKNOWN = "unknown"
 
 
-def get_state_name(state):
+def get_state_name(state: int):
     """Maps a mongod node state id to a human readable string."""
     if state in REPLSET_MEMBER_STATES:
         return REPLSET_MEMBER_STATES[state][0]
@@ -52,7 +52,7 @@ def get_state_name(state):
         return 'UNKNOWN'
 
 
-def get_long_state_name(state):
+def get_long_state_name(state: int):
     """Maps a mongod node state id to a human readable string."""
     if state in REPLSET_MEMBER_STATES:
         return REPLSET_MEMBER_STATES[state][1]
@@ -76,7 +76,7 @@ class Deployment(object):
         raise NotImplementedError
 
     @property
-    def deployment_tags(self):
+    def deployment_tags(self) -> list[str]:
         """
         Returns a list of tags related to the deployment type.
         The tags are subject to change in the event of a deployment type update,
@@ -101,11 +101,11 @@ class MongosDeployment(Deployment):
         self.shard_map = shard_map
 
     @property
-    def shards(self):
+    def shards(self) -> list[str]:
         return list(self.shard_map.get('map', {}).values())
 
     @property
-    def hosts(self):
+    def hosts(self) -> list[str]:
         return list(self.shard_map.get('hosts', {}).keys())
 
     @property
@@ -117,7 +117,7 @@ class MongosDeployment(Deployment):
         return "mongos"
 
     @property
-    def deployment_tags(self):
+    def deployment_tags(self) -> list[str]:
         return super(MongosDeployment, self).deployment_tags + ["sharding_cluster_role:mongos"]
 
     @property
@@ -165,7 +165,7 @@ class ReplicaSetDeployment(Deployment):
         self.hosts = hosts
         self._replset_tags = replset_tags
 
-    def is_principal(self):
+    def is_principal(self) -> bool:
         # There is only ever one primary node in a replica set.
         # In case sharding is disabled, the primary can be considered the master.
         return not self.use_shards and self.is_primary
@@ -188,7 +188,7 @@ class ReplicaSetDeployment(Deployment):
         return tags
 
     @property
-    def replset_tags(self):
+    def replset_tags(self) -> list[str]:
         if not self._replset_tags:
             return []
         return ["replset_{}:{}".format(k.lower(), v) for k, v in self._replset_tags.items()]

@@ -2,13 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from typing import Optional
 from urllib.parse import quote_plus, unquote_plus, urlencode, urlunparse
 
 import pymongo
 
 
-def build_connection_string(hosts, scheme, username=None, password=None, database=None, options=None):
-    # type: (list, str, str, str, str, dict) -> str
+def build_connection_string(
+    hosts: list[str],
+    scheme: str,
+    username: Optional[str] = None,
+    password: Optional[str] = None,
+    database: Optional[str] = None,
+    options: Optional[dict] = None,
+):
     """
     Build a server connection string from individual parts. Make sure that parts are properly URL-encoded.
 
@@ -39,7 +46,7 @@ def build_connection_string(hosts, scheme, username=None, password=None, databas
     return urlunparse([scheme, netloc, path, path_params, query, fragment])
 
 
-def parse_mongo_uri(server, sanitize_username=False):
+def parse_mongo_uri(server: str, sanitize_username: bool = False):
     """
     Parses a MongoDB-formatted URI (e.g. mongodb://user:pass@server/db) and returns parsed elements
     and a sanitized URI.

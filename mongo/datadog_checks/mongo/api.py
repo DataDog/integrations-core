@@ -3,7 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from typing import Optional, Set
+
 from pymongo import MongoClient, ReadPreference
+from pymongo.client_session import ClientSession
+from pymongo.database import Database
 from pymongo.errors import (
     ConfigurationError,
     ConnectionFailure,
@@ -11,6 +15,9 @@ from pymongo.errors import (
     ProtocolError,
     ServerSelectionTimeoutError,
 )
+
+from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.mongo.config import MongoConfig
 
 # The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in
 # the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.
@@ -38,7 +45,7 @@ class MongoApi(object):
         Valid for ReplicaSetDeployment deployments
     """
 
-    def __init__(self, config, log, replicaset: str = None):
+    def __init__(self, config: MongoConfig, log: CheckLoggingAdapter, replicaset: str = None):
         self._config = config
         self._log = log
         options = {
@@ -70,7 +77,7 @@ class MongoApi(object):
         # Check if the server supports the $collStats aggregation pipeline stage.
         self.coll_stats_pipeline_supported = True
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Database:
         return self._cli[item]
 
     def connect(self):
@@ -84,13 +91,13 @@ class MongoApi(object):
     def ping(self):
         return self['admin'].command('ping')
 
-    def server_info(self, session=None):
+    def server_info(self, session: Optional[ClientSession] = None):
         return self._cli.server_info(session)
 
-    def list_database_names(self, session=None):
+    def list_database_names(self, session: Optional[ClientSession] = None):
         return self._cli.list_database_names(session)
 
-    def current_op(self, session=None):
+    def current_op(self, session: Optional[ClientSession] = None):
         # Use $currentOp stage to get all users and idle sessions.
         # Note: Why not use the `currentOp` command?
         # Because the currentOp command and db.currentOp() helper method return the results in a single document,
@@ -98,7 +105,13 @@ class MongoApi(object):
         # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
         return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session)
 
-    def get_collection_stats(self, db_name, coll_name, stats=None, session=None):
+    def get_collection_stats(
+        self,
+        db_name: str,
+        coll_name: str,
+        stats: Optional[Set[str]] = None,
+        session: Optional[ClientSession] = None,
+    ):
         if not self.coll_stats_pipeline_supported:
             return [self.coll_stats_compatible(db_name, coll_name, session)]
         try:
@@ -116,7 +129,13 @@ class MongoApi(object):
             self.coll_stats_pipeline_supported = False
             return [self.coll_stats_compatible(db_name, coll_name, session)]
 
-    def coll_stats(self, db_name, coll_name, stats=None, session=None):
+    def coll_stats(
+        self,
+        db_name: str,
+        coll_name: str,
+        stats: Optional[Set[str]] = None,
+        session: Optional[ClientSession] = None,
+    ):
         if not stats:
             stats = {"latencyStats", "storageStats", "queryExecStats"}
         stats = {stat: {} for stat in stats}
@@ -130,23 +149,23 @@ class MongoApi(object):
             session=session,
         )
 
-    def coll_stats_compatible(self, db_name, coll_name, session=None):
+    def coll_stats_compatible(self, db_name: str, coll_name: str, session: Optional[ClientSession] = None):
         # collStats is deprecated in MongoDB 6.2. Use the $collStats aggregation stage instead.
         return self[db_name].command({'collStats': coll_name}, session=session)
 
-    def index_stats(self, db_name, coll_name, session=None):
+    def index_stats(self, db_name: str, coll_name: str, session: Optional[ClientSession] = None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
-    def index_information(self, db_name, coll_name, session=None):
+    def index_information(self, db_name: str, coll_name: str, session: Optional[ClientSession] = None):
         return self[db_name][coll_name].index_information(session=session)
 
-    def list_search_indexes(self, db_name, coll_name, session=None):
+    def list_search_indexes(self, db_name: str, coll_name: str, session: Optional[ClientSession] = None):
         return self[db_name][coll_name].list_search_indexes(session=session)
 
-    def sharded_data_distribution_stats(self, session=None):
+    def sharded_data_distribution_stats(self, session: Optional[ClientSession] = None):
         return self["admin"].aggregate([{"$shardedDataDistribution": {}}], session=session)
 
-    def _is_auth_required(self, options):
+    def _is_auth_required(self, options: dict) -> bool:
         # Check if the node is an arbiter. If it is, usually it does not require authentication.
         # However this is a best-effort check as the replica set might focce authentication.
         try:
@@ -160,17 +179,17 @@ class MongoApi(object):
         except:
             return True
 
-    def get_profiling_level(self, db_name, session=None):
+    def get_profiling_level(self, db_name: str, session: Optional[ClientSession] = None):
         return self[db_name].command('profile', -1, session=session)
 
-    def get_profiling_data(self, db_name, ts, session=None):
+    def get_profiling_data(self, db_name: str, ts: int, session: Optional[ClientSession] = None):
         filter = {'ts': {'$gt': ts}}
         return self[db_name]['system.profile'].find(filter, session=session).sort('ts', 1)
 
-    def get_log_data(self, session=None):
+    def get_log_data(self, session: Optional[ClientSession] = None):
         return self['admin'].command("getLog", "global", session=session)
 
-    def sample(self, db_name, coll_name, sample_size, session=None):
+    def sample(self, db_name: str, coll_name: str, sample_size: int, session: Optional[ClientSession] = None):
         return self[db_name][coll_name].aggregate([{"$sample": {"size": sample_size}}], session=session)
 
     def get_cmdline_opts(self):
@@ -193,8 +212,8 @@ class MongoApi(object):
 
     def list_authorized_collections(
         self,
-        db_name,
-        limit=None,
+        db_name: str,
+        limit: int = None,
     ):
         coll_names = []
         try:
@@ -219,7 +238,7 @@ class MongoApi(object):
             return coll_names[:limit]
         return coll_names
 
-    def is_collection_sharded(self, db_name, coll_name):
+    def is_collection_sharded(self, db_name: str, coll_name: str):
         try:
             # Check if the collection is sharded by looking for the collection config
             # in the config.collections collection.
