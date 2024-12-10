@@ -44,3 +44,13 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `output_fields.evt.type` to `output_fields.evt.name`
+      enabled: true
+      sources:
+        - output_fields.evt.type
+      sourceType: attribute
+      target: output_fields.evt.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
