@@ -214,7 +214,7 @@ class MongoOperationSamples(DBMAsyncJob):
             return None
         return effective_users[0].get("user")
 
-    def _get_operation_duration_microsecs(self, operation: dict):
+    def _get_operation_duration_microsecs(self, operation: dict) -> int:
         # The in-flight duration of the operation in microseconds
         return operation.get("microsecs_running", 0)
 

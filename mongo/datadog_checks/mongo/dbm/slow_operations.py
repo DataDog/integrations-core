@@ -363,7 +363,7 @@ class MongoSlowOperations(DBMAsyncJob):
         }
         return self._sanitize_event(event)
 
-    def _get_operation_duration_microsecs(self, slow_operation):
+    def _get_operation_duration_microsecs(self, slow_operation: dict) -> int:
         # The total duration of the slow operation in microseconds
         return slow_operation.get("millis", slow_operation.get("durationMillis", 0)) * 1000
 
