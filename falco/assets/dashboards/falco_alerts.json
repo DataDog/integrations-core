@@ -2391,9 +2391,10 @@
                     {
                         "id": 4652245226647702,
                         "definition": {
-                            "title": "Top Event Types",
+                            "title": "Top Event Names",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2409,18 +2410,18 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@output_fields.evt.type",
+                                                    "facet": "@evt.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
-                                                "aggregation": "count",
-                                                "metric": "count"
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
@@ -2671,6 +2672,7 @@
                             "title": "Event System Call Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -2694,7 +2696,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "output_fields.evt.type",
+                                            "field": "evt.name",
                                             "width": "auto"
                                         },
                                         {
@@ -2883,6 +2885,7 @@
                 "title": "Alert Log Details",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "requests": [
                     {
                         "response_format": "event_list",
@@ -2958,7 +2961,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "output_fields.evt.type",
+                                "field": "evt.name",
                                 "width": "auto"
                             },
                             {

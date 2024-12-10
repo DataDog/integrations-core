@@ -52,6 +52,8 @@ tests:
     }
   result:
     custom:
+      evt:
+        name: "openat"
       hostname: "k8s-node1"
       output: "09:48:02.285310579: Warning Sensitive file opened for reading by non-trusted program (file=/etc/shadow gparent=containerd-shim ggparent=systemd gggparent=<NA> evt_type=openat user=root user_uid=0 user_loginuid=-1 process=cat proc_exepath=/usr/bin/cat parent=runc command=cat /etc/shadow terminal=0 container_id=c1f3a8646e7f container_image=docker.io/library/nginx container_image_tag=latest container_name=nginx k8s_ns=default k8s_pod_name=nginx-7854ff8877-vrlrs)"
       output_fields:
@@ -63,7 +65,6 @@ tests:
           name: "nginx"
         evt:
           time: 1730281682285310500
-          name: "openat"
         fd:
           name: "/etc/shadow"
         k8s:
