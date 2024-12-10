@@ -1,14 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-
-from six import PY3, iteritems
+import time
 
 from datadog_checks.base.utils.serialization import json
-
-if PY3:
-    import time
 
 from . import aci_metrics, exceptions, helpers, ndm
 
@@ -45,7 +40,7 @@ class Fabric:
         self.event_platform_event = check.event_platform_event
 
     def ndm_enabled(self):
-        return PY3 and self.send_ndm_metadata
+        return self.send_ndm_metadata
 
     def collect(self):
         fabric_pods = self.api.get_fabric_pods()
@@ -54,13 +49,22 @@ class Fabric:
         pods = self.submit_pod_health(fabric_pods)
         devices, interfaces = self.submit_nodes_health_and_metadata(fabric_nodes, pods)
         if self.ndm_enabled():
+            # get topology link metadata
+            lldp_adj_eps = self.api.get_lldp_adj_eps()
+            cdp_adj_eps = self.api.get_cdp_adj_eps()
+            device_map = ndm.get_device_ip_mapping(devices)
+            links = ndm.create_topology_link_metadata(lldp_adj_eps, cdp_adj_eps, device_map, self.namespace)
+
+            # get exporter IP metadata for netflow
             exporter_ip_addresses = []
             if self.enable_netflow:
                 oob_mgmt_ips = self.api.get_oob_mgmt_ips()
                 exporter_ip_addresses = ndm.create_exporter_ip_address_metadata(self.namespace, oob_mgmt_ips)
 
             collect_timestamp = int(time.time())
-            batches = ndm.batch_payloads(self.namespace, devices, interfaces, exporter_ip_addresses, collect_timestamp)
+            batches = ndm.batch_payloads(
+                self.namespace, devices, interfaces, links, exporter_ip_addresses, collect_timestamp
+            )
             for batch in batches:
                 self.event_platform_event(json.dumps(batch.model_dump(exclude_none=True)), "network-devices-metadata")
 
@@ -134,15 +138,14 @@ class Fabric:
         pod_id = helpers.get_pod_from_dn(node['dn'])
         common_tags = ndm.common_tags(node.get('address', ''), device_hostname, self.namespace)
         try:
-            eth_list = self.api.get_eth_list(pod_id, node['id'])
+            eth_list_and_stats = self.api.get_eth_list_and_stats(pod_id, node['id'])
         except (exceptions.APIConnectionException, exceptions.APIParsingException):
             pass
         interfaces = []
-        for e in eth_list:
-            eth_attrs = helpers.get_attributes(e)
-            eth_id = eth_attrs['id']
+        for e in eth_list_and_stats:
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
             tags.extend(common_tags)
+
             if self.ndm_enabled():
                 interface_metadata = ndm.create_interface_metadata(e, node.get('address', ''), self.namespace)
                 interfaces.append(interface_metadata)
@@ -158,11 +161,8 @@ class Fabric:
                     tags,
                     device_hostname,
                 )
-            try:
-                stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
-                self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
-            except (exceptions.APIConnectionException, exceptions.APIParsingException):
-                pass
+            stats = e.get('l1PhysIf', {}).get('children', [])
+            self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
         self.log.info("finished processing ethernet ports for %s", node['id'])
         return interfaces
 
@@ -177,10 +177,10 @@ class Fabric:
                 continue
 
             metrics = {}
-            for n, ms in iteritems(aci_metrics.FABRIC_METRICS):
+            for n, ms in aci_metrics.FABRIC_METRICS.items():
                 if n not in name:
                     continue
-                for cisco_metric, dd_metric in iteritems(ms):
+                for cisco_metric, dd_metric in ms.items():
                     mname = dd_metric.format(self.get_fabric_type(obj_type))
                     mval = s.get(name, {}).get("attributes", {}).get(cisco_metric)
                     json_attrs = s.get(name, {}).get("attributes", {})

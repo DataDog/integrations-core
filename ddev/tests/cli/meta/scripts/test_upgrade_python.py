@@ -27,8 +27,8 @@ def test_upgrade_python(fake_repo, ddev):
 
     hatch_file = fake_repo.path / 'dummy' / 'hatch.toml'
     contents = hatch_file.read_text()
-    assert f'python = ["2.7", "{OLD_PYTHON_VERSION}"]' not in contents
-    assert f'python = ["2.7", "{NEW_PYTHON_VERSION}"]' in contents
+    assert f'python = ["{OLD_PYTHON_VERSION}"]' not in contents
+    assert f'python = ["{NEW_PYTHON_VERSION}"]' in contents
 
     for integration in ('dummy', 'datadog_checks_dependency_provider', 'logs_only'):
         pyproject_file = fake_repo.path / integration / 'pyproject.toml'

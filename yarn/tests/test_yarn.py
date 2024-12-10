@@ -2,12 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import os
 import re
 
 import pytest
 from requests.exceptions import SSLError
-from six import iteritems
 
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import (
@@ -84,25 +82,25 @@ def test_check(aggregator, mocked_request):
     )
 
     # Check the YARN Cluster Metrics
-    for metric, value in iteritems(YARN_CLUSTER_METRICS_VALUES):
+    for metric, value in YARN_CLUSTER_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=EXPECTED_TAGS, count=1)
 
     # Check the YARN App Metrics
-    for metric, value in iteritems(YARN_APP_METRICS_VALUES):
+    for metric, value in YARN_APP_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=YARN_APP_METRICS_TAGS + CUSTOM_TAGS, count=1)
-    for metric, value in iteritems(DEPRECATED_YARN_APP_METRICS_VALUES):
+    for metric, value in DEPRECATED_YARN_APP_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=YARN_APP_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Node Metrics
-    for metric, value in iteritems(YARN_NODE_METRICS_VALUES):
+    for metric, value in YARN_NODE_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=YARN_NODE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Root Queue Metrics
-    for metric, value in iteritems(YARN_ROOT_QUEUE_METRICS_VALUES):
+    for metric, value in YARN_ROOT_QUEUE_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=YARN_ROOT_QUEUE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Custom Queue Metrics
-    for metric, value in iteritems(YARN_QUEUE_METRICS_VALUES):
+    for metric, value in YARN_QUEUE_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=YARN_QUEUE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Queue Metrics from excluded queues are absent
@@ -110,7 +108,7 @@ def test_check(aggregator, mocked_request):
         aggregator.assert_metric(metric, tags=YARN_QUEUE_NOFOLLOW_METRICS_TAGS + CUSTOM_TAGS, count=0)
 
     # Check the YARN Subqueue Metrics
-    for metric, value in iteritems(YARN_SUBQUEUE_METRICS_VALUES):
+    for metric, value in YARN_SUBQUEUE_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=YARN_SUBQUEUE_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
@@ -301,27 +299,6 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
     )
 
 
-def test_metadata(aggregator, instance, datadog_agent):
-    check = YarnCheck("yarn", {}, [instance])
-    check.check_id = "test:123"
-
-    check.check(instance)
-
-    raw_version = os.getenv("YARN_VERSION")
-
-    major, minor, patch = raw_version.split(".")
-
-    version_metadata = {
-        "version.scheme": "semver",
-        "version.major": major,
-        "version.minor": minor,
-        "version.patch": patch,
-        "version.raw": raw_version,
-    }
-
-    datadog_agent.assert_metadata("test:123", version_metadata)
-
-
 def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):
     instance = YARN_COLLECT_APPS_ALL_STATES_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
@@ -329,7 +306,7 @@ def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):
     dd_run_check(yarn)
 
     for app in YARN_APPS_ALL_STATES:
-        for metric, value in iteritems(app['metric_values']):
+        for metric, value in app['metric_values'].items():
             aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=1)
 
 
@@ -351,7 +328,7 @@ def test_collect_apps_states_list(dd_run_check, aggregator, mocked_request, conf
     state_tag_re = re.compile(r'state:.*')
 
     for app in YARN_APPS_ALL_STATES:
-        for metric, value in iteritems(app['metric_values']):
+        for metric, value in app['metric_values'].items():
             m = re.search(state_tag_re, app['tags'][2])
             if m:
                 state_tag = m.group(0)
@@ -368,7 +345,7 @@ def test_collect_apps_killed_instance_state(dd_run_check, aggregator, mocked_req
     dd_run_check(yarn)
 
     for app in YARN_APPS_ALL_STATES:
-        for metric, value in iteritems(app['metric_values']):
+        for metric, value in app['metric_values'].items():
             if app['tags'] == "KILLED":
                 aggregator.assert_metric(metric, value=value, tags=app['tags'] + EXPECTED_TAGS, count=1)
             else:

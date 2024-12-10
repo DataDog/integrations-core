@@ -37,7 +37,7 @@
       "auto_install": true
     },
     "monitors": {
-      "windows_crash": "assets/monitors/windows_crash.json"
+      "Windows Crash Detection": "assets/monitors/windows_crash.json"
     }
   }
 }

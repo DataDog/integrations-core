@@ -4,7 +4,6 @@ backports-functools-lru-cache @ https://agent-int-packages.datadoghq.com/externa
 bcrypt @ https://agent-int-packages.datadoghq.com/built/bcrypt/bcrypt-3.1.7-20240903133956-cp27-cp27mu-manylinux2014_aarch64.manylinux_2_17_aarch64.whl#sha256=881be3e74146a7ed945e5ca51f0a3bc1faac11171f7b50d416436822226cfa58
 beautifulsoup4 @ https://agent-int-packages.datadoghq.com/external/beautifulsoup4/beautifulsoup4-4.9.3-py2-none-any.whl#sha256=4c98143716ef1cb40bf7f39a8e3eec8f8b009509e74904ba3a7b315431577e35
 binary @ https://agent-int-packages.datadoghq.com/external/binary/binary-1.0.0-py2.py3-none-any.whl#sha256=e1b61f3a5c002717d1a28e4d9d2dc8acbc9d6b12baf7b1e4ab25d743da97e323
-boto @ https://agent-int-packages.datadoghq.com/external/boto/boto-2.49.0-py2.py3-none-any.whl#sha256=147758d41ae7240dc989f0039f27da8ca0d53734be0eb869ef16e3adcfa462e8
 boto3 @ https://agent-int-packages.datadoghq.com/external/boto3/boto3-1.17.112-py2.py3-none-any.whl#sha256=8716465313c50ad9e5c2ac1767642ca0ddf7d1729c3d5c884d82880c1a15a310
 botocore @ https://agent-int-packages.datadoghq.com/external/botocore/botocore-1.20.112-py2.py3-none-any.whl#sha256=6d51de0981a3ef19da9e6a3c73b5ab427e3c0c8b92200ebd38d087299683dd2b
 cachetools @ https://agent-int-packages.datadoghq.com/external/cachetools/cachetools-3.1.1-py2.py3-none-any.whl#sha256=428266a1c0d36dc5aca63a2d7c5942e88c2c898d72139fca0e97fdd2380517ae

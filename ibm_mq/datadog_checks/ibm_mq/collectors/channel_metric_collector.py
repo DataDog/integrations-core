@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Callable, Dict, List  # noqa: F401
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 
@@ -168,7 +166,7 @@ class ChannelMetricCollector(object):
 
     def _submit_metrics_from_properties(self, channel_info, channel_name, metrics_map, tags):
         # type: (Dict, str, Dict[str, int], List[str] ) -> None
-        for metric_name, pymqi_type in iteritems(metrics_map):
+        for metric_name, pymqi_type in metrics_map.items():
             metric_full_name = '{}.channel.{}'.format(metrics.METRIC_PREFIX, metric_name)
             if pymqi_type not in channel_info:
                 self.log.debug("metric '%s' not found in channel: %s", metric_name, channel_name)
@@ -181,7 +179,7 @@ class ChannelMetricCollector(object):
             self.log.warning("Status `%s` not found for channel `%s`", channel_status, channel_name)
             channel_status = STATUS_MQCHS_UNKNOWN
 
-        for status, status_label in iteritems(CHANNEL_STATUS_NAME_MAPPING):
+        for status, status_label in CHANNEL_STATUS_NAME_MAPPING.items():
             status_active = int(status == channel_status)
             self.gauge(
                 self.CHANNEL_COUNT_CHECK,

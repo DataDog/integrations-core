@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
-from os import environ
 
 import mock
 import pytest
@@ -102,7 +101,7 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
 
     _assert_complex_config(
         aggregator,
-        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname='stubbed.hostname')],
+        tags.SC_TAGS + tags.database_instance_resource_tags('stubbed.hostname'),
         tags.METRIC_TAGS_WITH_RESOURCE,
     )
     aggregator.assert_metrics_using_metadata(
@@ -117,8 +116,8 @@ def test_e2e(dd_agent_check, dd_default_hostname, instance_complex):
     aggregator = dd_agent_check(instance_complex)
     _assert_complex_config(
         aggregator,
-        tags.SC_TAGS + [tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=dd_default_hostname)],
-        tags.METRIC_TAGS,
+        tags.SC_TAGS + tags.database_instance_resource_tags(dd_default_hostname),
+        tags.METRIC_TAGS + [f'database_hostname:{dd_default_hostname}', 'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower())],
         hostname=dd_default_hostname,
         e2e=True,
     )
@@ -313,7 +312,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         + variables.REPLICATION_OPERATION_TIME_METRICS
     )
 
-    if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
+    if MYSQL_VERSION_PARSED >= parse_version('5.6') and MYSQL_FLAVOR != 'mariadb':
         testable_metrics.extend(variables.PERFORMANCE_VARS + variables.COMMON_PERFORMANCE_VARS)
         operation_time_metrics.extend(
             variables.COMMON_PERFORMANCE_OPERATION_TIME_METRICS + variables.PERFORMANCE_OPERATION_TIME_METRICS
@@ -391,6 +390,7 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
         assert mysql_check._is_group_replication_active(db) is False
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     'dbm_enabled, reported_hostname, expected_hostname',
     [
@@ -414,12 +414,10 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname') as resolve_db_host:
         mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
         dd_run_check(mysql_check)
-        if reported_hostname:
-            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
-        else:
-            assert resolve_db_host.called is True
+        assert resolve_db_host.called is True
 
     expected_tags = [
+        'database_hostname:{}'.format(mysql_check.database_hostname),
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:{}'.format(expected_hostname),
@@ -710,7 +708,8 @@ def test_set_resources(aggregator, dd_run_check, instance_basic, cloud_metadata,
     for m in metric_names:
         aggregator.assert_metric_has_tag("mysql.net.connections", m)
     aggregator.assert_metric_has_tag(
-        "mysql.net.connections", tags.DATABASE_INSTANCE_RESOURCE_TAG.format(hostname=mysql_check.resolved_hostname)
+        "mysql.net.connections",
+        f'dd.internal.resource:database_instance:{mysql_check.resolved_hostname}',
     )
 
 
@@ -759,3 +758,60 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     event = next((e for e in dbm_metadata if e['kind'] == 'database_instance'), None)
     assert event is None
+
+
+@pytest.mark.parametrize(
+    'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
+    [
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+    ],
+)
+@pytest.mark.integration
+def test_propagate_agent_tags(
+    aggregator,
+    dd_run_check,
+    instance_basic,
+    instance_propagate_agent_tags,
+    init_config_propagate_agent_tags,
+    should_propagate_agent_tags,
+):
+    instance_basic['propagate_agent_tags'] = instance_propagate_agent_tags
+    init_config = {}
+    if init_config_propagate_agent_tags is not None:
+        init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
+
+    agent_tags = ['my-env:test-env', 'random:tag', 'bar:foo']
+    expected_tags = (
+        instance_basic.get('tags', [])
+        + [
+            'database_hostname:stubbed.hostname',
+            'server:{}'.format(HOST),
+            'port:{}'.format(PORT),
+            'dd.internal.resource:database_instance:forced_hostname',
+            "dd.internal.resource:aws_rds_instance:foo.aws.com",
+            "dd.internal.resource:azure_mysql_server:my-instance",
+            'dd.internal.resource:gcp_sql_database_instance:foo-project:bar',
+        ]
+        + agent_tags
+    )
+
+    with mock.patch('datadog_checks.mysql.config.get_agent_host_tags', return_value=agent_tags):
+        check = MySql(common.CHECK_NAME, init_config, [instance_basic])
+        assert check._config._should_propagate_agent_tags(instance_basic, init_config) == should_propagate_agent_tags
+        if should_propagate_agent_tags:
+            assert all(tag in check.tags for tag in agent_tags)
+            dd_run_check(check)
+            aggregator.assert_service_check(
+                'mysql.can_connect',
+                count=1,
+                status=MySql.OK,
+                tags=expected_tags,
+            )

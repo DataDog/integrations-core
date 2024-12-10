@@ -57,19 +57,23 @@ runners = { linux = ["ubuntu-20.04"] }
 
 [overrides.ci.sqlserver]
 platforms = ["windows", "linux"]
-runners = { windows = ["windows-2019"] }
+runners = { windows = ["windows-2019"], linux = ["ubuntu-20.04"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
 
 [overrides.ci.tokumx]
-only-py2 = true
+exclude = true
 
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
 aerospike = ['Apache-2.0']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
+# https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
+# TODO: Remove once confluent-kafka license metadata is fixed:
+# https://github.com/confluentinc/confluent-kafka-python/issues/1857
+confluent-kafka = ['Apache-2.0']
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
 dnspython = ['ISC']
 # https://github.com/cannatag/ldap3/blob/dev/COPYING.txt
@@ -105,12 +109,9 @@ simplejson = ['MIT']
 supervisor = ['BSD-3-Clause-Modification']
 # https://github.com/Cairnarvon/uptime/blob/master/COPYING.txt
 uptime = ['BSD-2-Clause']
-# https://github.com/hickeroar/win_inet_pton/blob/master/LICENSE
-win-inet-pton = ['Unlicense']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
-contextlib2 = 'https://github.com/jazzband/contextlib2'
 dnspython = 'https://github.com/rthalley/dnspython'
 foundationdb = 'https://github.com/apple/foundationdb'
 in-toto = 'https://github.com/in-toto/in-toto'
@@ -127,7 +128,6 @@ service-identity = 'https://github.com/pyca/service-identity'
 snowflake-connector-python = 'https://github.com/snowflakedb/snowflake-connector-python'
 supervisor = 'https://github.com/Supervisor/supervisor'
 tuf = 'https://github.com/theupdateframework/python-tuf'
-typing = 'https://github.com/python/typing'
 
 [overrides.validate.openmetrics]
 exclude = [

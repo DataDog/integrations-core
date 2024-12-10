@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      PYTHON_VERSION: "3.11"
+      PYTHON_VERSION: "3.12"
       TARGET: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
 
     steps:
@@ -154,10 +154,6 @@ jobs:
     - name: Validate CI configuration
       if: inputs.ci
       run: ddev validate ci
-
-    - name: Validate the CODEOWNERS file
-      if: inputs.codeowners
-      run: ddev validate codeowners
 
     - name: Validate default configuration files
       if: inputs.config
@@ -246,6 +242,10 @@ jobs:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       run: ddev validate licenses
+      
+    - name: Validate the CODEOWNERS file
+      if: inputs.codeowners
+      run: ddev validate codeowners
 
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}

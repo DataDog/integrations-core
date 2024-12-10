@@ -4,9 +4,7 @@
 import os
 from contextlib import contextmanager
 from typing import Iterator  # noqa: F401
-
-from six import string_types
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
@@ -123,6 +121,7 @@ def docker_run(
     wrappers=None,
     attempts=None,
     attempts_wait=1,
+    capture=None,
 ):
     """
     A convenient context manager for safely setting up and tearing down Docker environments.
@@ -168,10 +167,13 @@ def docker_run(
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')
 
     if compose_file is not None:
-        if not isinstance(compose_file, string_types):
+        if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
 
-        set_up = ComposeFileUp(compose_file, build=build, service_name=service_name)
+        composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
+        if capture is not None:
+            composeFileArgs['capture'] = capture
+        set_up = ComposeFileUp(**composeFileArgs)
         if down is not None:
             tear_down = down
         else:
@@ -231,10 +233,11 @@ def docker_run(
 
 
 class ComposeFileUp(LazyFunction):
-    def __init__(self, compose_file, build=False, service_name=None):
+    def __init__(self, compose_file, build=False, service_name=None, capture=None):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
+        self.capture = capture
         self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d', '--force-recreate']
 
         if self.build:
@@ -244,7 +247,10 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
-        return run_command(self.command, check=True)
+        args = {'check': True}
+        if self.capture is not None:
+            args['capture'] = self.capture
+        return run_command(self.command, **args)
 
 
 class ComposeFileLogs(LazyFunction):

@@ -7,7 +7,6 @@ import os
 import re
 
 import pytest
-from six.moves import range
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor

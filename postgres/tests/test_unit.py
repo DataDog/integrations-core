@@ -8,7 +8,6 @@ import psycopg2
 import pytest
 from pytest import fail
 from semver import VersionInfo
-from six import iteritems
 
 from datadog_checks.postgres import PostgreSql, util
 
@@ -100,7 +99,7 @@ def test_version_metadata(check, test_case, params):
     check.check_id = 'test:123'
     with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
         check.set_metadata('version', test_case)
-        for name, value in iteritems(params):
+        for name, value in params.items():
             m.assert_any_call('test:123', name, value)
         m.assert_any_call('test:123', 'version.scheme', 'semver')
         m.assert_any_call('test:123', 'version.raw', test_case)
@@ -143,6 +142,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'port:5432',
                 'foo:bar',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'database_hostname:stubbed.hostname',
             },
         ),
         (
@@ -153,6 +153,7 @@ def test_query_timeout_connection_string(aggregator, integration_check, pg_insta
                 'port:5432',
                 'server:localhost',
                 'dd.internal.resource:database_instance:stubbed.hostname',
+                'database_hostname:stubbed.hostname',
             },
         ),
     ],

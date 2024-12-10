@@ -19,6 +19,12 @@
       "Category::AI/ML",
       "Submitted Data Type::Metrics",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/vllm-integration/"
+      }
     ]
   },
   "assets": {
@@ -45,8 +51,8 @@
       ]
     },
     "monitors": {
-      "token_throughput": "assets/monitors/token_throughput.json",
-      "latency": "assets/monitors/latency.json"
+      "vLLM application token usage is high": "assets/monitors/token_throughput.json",
+      "Average Request Latency is High": "assets/monitors/latency.json"
     },
     "dashboards": {
       "vLLM Overview": "assets/dashboards/overview.json"

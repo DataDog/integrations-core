@@ -1,4 +1,4 @@
-# Agent Check: AWS Neuron
+# Agent Check: AWS Inferentia and AWS Trainium Monitoring
 
 ## Overview
 
@@ -54,6 +54,9 @@ The AWS Neuron integration can collect logs from the Neuron containers and forwa
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
 Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
