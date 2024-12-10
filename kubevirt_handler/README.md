@@ -1,5 +1,9 @@
 # Agent Check: KubeVirt Handler
 
+<div class="alert alert-warning">
+This integration is in public beta and should be enabled on production workloads with caution.
+</div>
+
 ## Overview
 
 This check monitors [KubeVirt Handler][1] through the Datadog Agent.
