@@ -1,5 +1,3 @@
-version: "3.2"
-
 services:
   coredns:
     image: coredns/coredns:${COREDNS_VERSION}
