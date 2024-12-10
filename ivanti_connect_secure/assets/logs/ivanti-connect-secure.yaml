@@ -430,9 +430,9 @@ pipeline:
 
               successful_login_rule1 (Primary|Secondary) authentication successful for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from %{ipv4:network.client.ip}( forwarded for %{ipv4:forwarded_ip})?
 
-              successful_login_rule2 Login succeeded for %{regex("[^/]*"):usr.name}/%{regex("[^(]*"):realm_name}( \(session: %{regex("[^)]*"):session_id}\))? from %{ipv4:network.client.ip}.
+              successful_login_rule2 Login succeeded for %{regex("[^/]*"):usr.name}/%{regex("[^\\(]*"):realm_name} \(session:%{regex("[^)]*"):session_id}\) from %{ipv4:network.client.ip}( )?.*
 
-              successful_login_rule3 Login succeeded for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from %{ipv4:network.client.ip}.
+              successful_login_rule3 Login succeeded for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from %{ipv4:network.client.ip}( )?.*
 
               successful_login_rule4 %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from IP %{ipv4:network.client.ip}( via (%{port:network.client.port}|%{word:}) port)? authenticated successfully using %{regex(".*(?= authentication)"):} authentication.
 
