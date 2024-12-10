@@ -316,11 +316,12 @@ pipeline:
               EventReceivedByServer=%{date("M/d/yyyy h:m:s
               a"):EventReceivedByServer} %{keyvalue_parsing_rule:}
     - type: date-remapper
-      name: Define `EventReceivedByServer`, `FileFirstSeenByServer`, `timestamp` as
-        the official date of the log
+      name: Define `EventReceivedByServer`, `EventOccuredOnServer`,
+        `FileFirstSeenByServer`, `timestamp` as the official date of the log
       enabled: true
       sources:
         - EventReceivedByServer
+        - EventOccuredOnServer
         - FileFirstSeenByServer
         - timestamp
     - type: category-processor
