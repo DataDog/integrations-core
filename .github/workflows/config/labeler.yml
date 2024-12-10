@@ -261,6 +261,8 @@ integration/impala:
 - impala/**/*
 integration/istio:
 - istio/**/*
+integration/ivanti_connect_secure:
+- ivanti_connect_secure/**/*
 integration/jboss_wildfly:
 - jboss_wildfly/**/*
 integration/jmeter:
