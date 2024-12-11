@@ -1,0 +1,52 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "2287c449-1fb3-4897-8771-8ae5ead3c7ef",
+  "app_id": "asana",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Explore and analyze Asana audit logs",
+    "title": "Asana",
+    "media": [
+      {
+        "caption": "Asana - Audit Logs",
+        "image_url": "images/asana_audit_logs.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 30091439,
+      "source_type_name": "Asana",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Asana - Audit Logs": "assets/dashboards/asana_audit_logs.json"
+    },
+    "logs": {
+      "source": "asana"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
