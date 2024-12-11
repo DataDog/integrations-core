@@ -12,7 +12,7 @@ Follow the instructions below to configure this integration for your Adyen accou
 ### Configuration
 
 #### Webhook Configuration
-Configure the Datadog endpoint to forward Adyen events as logs to Datadog. See [Adyen webhook overview][2] for more details.
+Configure the Datadog endpoint to forward Adyen events as logs to Datadog. For more details, see [Adyen webhook overview][2].
 
     1. Copy the generated URL inside the **Configuration** tab on the Datadog [Adyen integration tile][4].
     2. Sign in to your [Adyen][1] account with a user which has a **Merchant technical integrator** role along with default roles, and has access to **Company account and all associated merchant accounts**.
