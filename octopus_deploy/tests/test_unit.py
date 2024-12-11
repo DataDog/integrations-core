@@ -1146,6 +1146,9 @@ def test_environments_discovery_one_include(get_current_datetime, dd_run_check, 
         count=0,
     )
 
+    aggregator.assert_metric_has_tag("octopus_deploy.deployment.count", 'environment_name:dev')
+    aggregator.assert_metric_has_tag("octopus_deploy.deployment.count", 'environment_name:staging', count=0)
+
 
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
@@ -1205,6 +1208,8 @@ def test_environments_discovery_exclude_dev(get_current_datetime, dd_run_check, 
             'environment_id:Environments-2',
         ],
     )
+    aggregator.assert_metric_has_tag("octopus_deploy.deployment.count", 'environment_name:dev', count=0)
+    aggregator.assert_metric_has_tag("octopus_deploy.deployment.count", 'environment_name:staging')
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -1270,6 +1275,8 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
             'environment_id:Environments-2',
         ],
     )
+    aggregator.assert_metric_has_tag("octopus_deploy.deployment.count", 'environment_name:dev', count=0)
+    aggregator.assert_metric_has_tag("octopus_deploy.deployment.count", 'environment_name:staging', count=0)
 
 
 @pytest.mark.parametrize(
@@ -1651,10 +1658,10 @@ def test_deployment_metrics_deployments_http_failure(
             'release_version:None',
             'task_state:Executing',
         ],
-        count=1,
+        count=0,
     )
     deployment_metrics = aggregator.metrics('octopus_deploy.deployment.count')
-    assert len(deployment_metrics) == 2
+    assert len(deployment_metrics) == 1
     assert expected_log in caplog.text
     get_current_datetime.return_value = MOCKED_TIME2
     dd_run_check(check)
@@ -1733,6 +1740,7 @@ def test_deployment_metrics_deployments_http_failure(
             'release_version:None',
             'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
+        count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.deployment.queued_time',
@@ -1748,6 +1756,7 @@ def test_deployment_metrics_deployments_http_failure(
             'release_version:None',
             'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
+        count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.deployment.executing_time',
@@ -1763,6 +1772,7 @@ def test_deployment_metrics_deployments_http_failure(
             'environment_name:None',
             'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
+        count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.deployment.completed_time',
@@ -1778,6 +1788,7 @@ def test_deployment_metrics_deployments_http_failure(
             'release_version:None',
             'server_node:OctopusServerNodes-50c3dfbarc82',
         ],
+        count=0,
     )
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
@@ -1867,221 +1878,12 @@ def test_deployment_metrics_environments_http_failure(
     caplog.set_level(logging.WARNING)
     dd_run_check(check)
     assert expected_log in caplog.text
-
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        tags=[
-            'project_name:test',
-            'space_name:Default',
-            'server_node:None',
-            'task_id:ServerTasks-118055',
-            'task_name:Deploy',
-            'release_version:0.0.2',
-            'environment_name:None',
-            'deployment_id:Deployments-19',
-            'task_state:Queued',
-        ],
-        count=1,
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        tags=[
-            'space_name:Default',
-            'project_name:my-project',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-            'task_id:ServerTasks-118048',
-            'task_name:Deploy',
-            'deployment_id:Deployments-18',
-            'environment_name:None',
-            'release_version:0.0.1',
-            'task_state:Executing',
-        ],
-        count=1,
-    )
-    deployment_metrics = aggregator.metrics('octopus_deploy.deployment.count')
-    assert len(deployment_metrics) == 2
-    assert expected_log in caplog.text
     get_current_datetime.return_value = MOCKED_TIME2
     dd_run_check(check)
 
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
-        1,
-        tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:0.0.2',
-            'deployment_id:Deployments-19',
-            'environment_name:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        110,
-        tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:0.0.2',
-            'deployment_id:Deployments-19',
-            'environment_name:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        50,
-        tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'release_version:0.0.2',
-            'deployment_id:Deployments-19',
-            'environment_name:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        5,
-        tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
-            'task_state:Failed',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-19',
-            'environment_name:None',
-            'release_version:0.0.2',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        1,
-        tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:None',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        90,
-        tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:None',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        54,
-        tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'release_version:0.0.1',
-            'environment_name:None',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        1,
-        tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-18',
-            'environment_name:None',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.count',
-        tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:None',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.queued_time',
-        18,
-        tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:None',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.executing_time',
-        41,
-        tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:None',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
-    )
-    aggregator.assert_metric(
-        'octopus_deploy.deployment.completed_time',
-        14,
-        tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
-            'task_state:Success',
-            'project_name:test',
-            'space_name:Default',
-            'deployment_id:Deployments-17',
-            'environment_name:None',
-            'release_version:0.0.1',
-            'server_node:OctopusServerNodes-50c3dfbarc82',
-        ],
+        count=0,
     )
 
 

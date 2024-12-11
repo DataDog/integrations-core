@@ -354,35 +354,43 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             task_name = task.get("Name")
             server_node = task.get("ServerNode")
             task_state = task.get("State")
-            deployment_tags = self._get_deployment_tags(space_id, task)
-            tags = (
-                self._base_tags
-                + deployment_tags
-                + [
-                    f'space_name:{space_name}',
-                    f'project_name:{project_name}',
-                    f'task_id:{task_id}',
-                    f'task_name:{task_name}',
-                    f'task_state:{task_state}',
-                    f'server_node:{server_node}',
-                ]
-            )
-            self.log.debug("Processing task id %s for project %s", task_id, project_name)
-            queued_time, executing_time, completed_time = self._calculate_task_times(task)
-            self.gauge("deployment.count", 1, tags=tags)
-            self.gauge("deployment.queued_time", queued_time, tags=tags)
-            if executing_time != -1:
-                self.gauge("deployment.executing_time", executing_time, tags=tags)
+            deployment_id = task.get("Arguments", {}).get("DeploymentId")
+            environment_name, deployment_tags = self._get_deployment_tags(space_id, deployment_id)
+            if environment_name in self._environments_cache.values():
+                tags = (
+                    self._base_tags
+                    + deployment_tags
+                    + [
+                        f'space_name:{space_name}',
+                        f'project_name:{project_name}',
+                        f'task_id:{task_id}',
+                        f'task_name:{task_name}',
+                        f'task_state:{task_state}',
+                        f'server_node:{server_node}',
+                    ]
+                )
+                self.log.debug("Processing task id %s for project %s", task_id, project_name)
+                queued_time, executing_time, completed_time = self._calculate_task_times(task)
+                self.gauge("deployment.count", 1, tags=tags)
+                self.gauge("deployment.queued_time", queued_time, tags=tags)
+                if executing_time != -1:
+                    self.gauge("deployment.executing_time", executing_time, tags=tags)
 
-            if completed_time != -1:
-                self.gauge("deployment.completed_time", completed_time, tags=tags)
+                if completed_time != -1:
+                    self.gauge("deployment.completed_time", completed_time, tags=tags)
 
-                if self.logs_enabled:
-                    self.log.debug("Collecting logs for task %s, id: %s", task_name, task_id)
-                    self._collect_deployment_logs(space_id, task_id, tags)
+                    if self.logs_enabled:
+                        self.log.debug("Collecting logs for task %s, id: %s", task_name, task_id)
+                        self._collect_deployment_logs(space_id, task_id, tags)
+            else:
+                self.log.debug(
+                    "Skipping task id: %s for project %s in skipped environment: %s",
+                    task_id,
+                    project_name,
+                    environment_name,
+                )
 
-    def _get_deployment_tags(self, space_id, task):
-        deployment_id = task.get("Arguments", {}).get("DeploymentId")
+    def _get_deployment_tags(self, space_id, deployment_id):
         self.log.debug("Getting deployment tags for deployment id: %s", deployment_id)
         cached_deployment = self._deployments_cache.get(deployment_id)
 
@@ -411,7 +419,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             f'release_version:{release_version}',
             f'environment_name:{environment_name}',
         ]
-        return tags
+        return environment_name, tags
 
     def _collect_server_nodes_metrics(self):
         self.log.debug("Collecting server node metrics.")
