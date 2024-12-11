@@ -30,4 +30,5 @@ container.net.sent.packets,gauge,,,,The number of network packets sent (per inte
 container.pid.open_files,gauge,,,,The number of open file descriptors (Linux only),0,container,open_files,
 container.pid.thread_count,gauge,,,,The number of threads running inside this container,0,container,thread_count,
 container.pid.thread_limit,gauge,,,,The maximum number of threads for this container,0,container,thread_limit,
+container.restarts,gauge,,,,The number of container restarted,0,container,restarts,
 container.uptime,gauge,,second,,The container uptime,0,container,uptime,
