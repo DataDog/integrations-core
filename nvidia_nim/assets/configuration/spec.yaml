@@ -14,3 +14,8 @@ files:
         openmetrics_endpoint.description: |
           Endpoint exposing the NVIDIA NIM's Prometheus metrics. For more information refer to:
           https://docs.nvidia.com/nim/large-language-models/latest/observability.html
+  - template: logs
+    example:
+    - type: docker
+      source: nvidia_nim
+      service: <SERVICE>
