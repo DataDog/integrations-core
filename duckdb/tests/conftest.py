@@ -23,7 +23,7 @@ def dd_environment():
     compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
 
     with docker_run(compose_file, conditions=[
-        WaitFor(container_up, args=("DuckDB", common.PORT)),
+        WaitFor(container_up, args=("DuckDB", common.HOST, common.PORT, common.DB)),
         ]):
         yield common.DEFAULT_INSTANCE
 

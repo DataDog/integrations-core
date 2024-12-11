@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     && apt-get clean
 
+# Try to install duckdb through python
+#RUN pip3 install --no-warn-script-location duckdb
+
 # Install DuckDB CLI using precompiled binary as the pip one is not working
 RUN curl -L https://github.com/duckdb/duckdb/releases/download/v1.1.3/duckdb_cli-linux-aarch64.zip -o duckdb.zip && \
     unzip duckdb.zip && \
