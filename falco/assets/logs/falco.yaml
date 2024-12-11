@@ -30,7 +30,7 @@ pipeline:
       target: status
       lookupTable: |-
         Warning, warning
-        Notice, warning
+        Notice, notice
         Critical, critical
         Informational, info
       type: lookup-processor
