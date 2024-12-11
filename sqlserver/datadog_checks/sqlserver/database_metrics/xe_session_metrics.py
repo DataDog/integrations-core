@@ -6,6 +6,9 @@ from datadog_checks.base.config import is_affirmative
 
 from .base import SqlserverDatabaseMetricsBase
 
+XE_RING_BUFFER = "ring_buffer"
+XE_EVENT_FILE = "event_file"
+
 XE_SESSION_STATUS_QUERY = {
     "name": "sys.dm_xe_sessions",
     "query": """SELECT
@@ -44,8 +47,8 @@ XE_EVENTS_NOT_IN_XML = {
 class SQLServerXESessionMetrics(SqlserverDatabaseMetricsBase):
     @property
     def enabled(self):
-        self.deadlocks_config: dict = self.instance_config.get('deadlocks_collection', {}) or {}
-        return is_affirmative(self.instance_config.get("include_xe_metrics", False)) or is_affirmative(
+        self.deadlocks_config: dict = self.config.deadlocks_config
+        return self.config.database_metrics_config["xe_metrics"]["enabled"] or is_affirmative(
             self.deadlocks_config.get('enabled', False)
         )
 

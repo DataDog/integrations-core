@@ -48,6 +48,10 @@ In either case, make sure that the `source` value for your logs is `vllm`. This 
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+Additional helpful documentation, links, and articles:
+- [Optimize LLM application performance with Datadog's vLLM integration][13]
+
 
 [1]: https://docs.vllm.ai/en/stable/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -60,3 +64,4 @@ Need help? Contact [Datadog support][9].
 [10]: https://docs.datadoghq.com/containers/docker/log/?tab=containerinstallation#installation
 [11]: https://docs.datadoghq.com/containers/docker/log/?tab=hostagent#installation
 [12]: https://docs.datadoghq.com/containers/docker/log/?tab=dockerfile#log-integrations
+[13]: https://www.datadoghq.com/blog/vllm-integration/

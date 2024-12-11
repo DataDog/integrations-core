@@ -2,9 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
-from datadog_checks.base.config import is_affirmative
-
 from .base import SqlserverDatabaseMetricsBase
 
 QUERY_LOG_SHIPPING_SECONDARY = {
@@ -37,8 +34,8 @@ QUERY_LOG_SHIPPING_SECONDARY = {
 
 class SqlserverSecondaryLogShippingMetrics(SqlserverDatabaseMetricsBase):
     @property
-    def include_secondary_log_shipping_metrics(self):
-        return is_affirmative(self.instance_config.get('include_secondary_log_shipping_metrics', False))
+    def include_secondary_log_shipping_metrics(self) -> bool:
+        return self.config.database_metrics_config['secondary_log_shipping_metrics']['enabled']
 
     @property
     def enabled(self):
