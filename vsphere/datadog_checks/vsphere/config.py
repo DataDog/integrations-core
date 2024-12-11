@@ -134,10 +134,7 @@ class VSphereConfig(object):
             self.exclude_filters = {}
             for item in self.include_events:
                 event_name = item["event"]
-                if "excluded_messages" in item:
-                    excluded_messages = [r'{}'.format(msg) for msg in item["excluded_messages"]]
-                else:
-                    excluded_messages = []
+                excluded_messages = [r'{}'.format(msg) for msg in item.get("excluded_messages", [])]
                 self.exclude_filters[event_name] = excluded_messages
 
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
