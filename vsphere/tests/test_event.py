@@ -370,9 +370,7 @@ def test_include_events_ok(aggregator, realtime_instance, dd_run_check, mock_api
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
 def test_include_events_no_excluded_message(aggregator, realtime_instance, dd_run_check, mock_api):
-    realtime_instance['include_events'] = [
-        {"event": "AlarmStatusChangedEvent"}
-    ]
+    realtime_instance['include_events'] = [{"event": "AlarmStatusChangedEvent"}]
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     event1 = vim.event.AlarmStatusChangedEvent()
     event1.createdTime = dt.datetime.now()
