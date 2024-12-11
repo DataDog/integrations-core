@@ -1,6 +1,6 @@
 {
     "title": "Adyen Disputes",
-    "description": "This dashboard provides a comprehensive overview of key logs related to dispute events. The dashboard visualizes chargeback overview, fraud and dispute analytics. Additionally, it provide insights related to chargebacks by merchant account.",
+    "description": "This dashboard provides a comprehensive overview of key logs related to dispute events. The dashboard visualizes chargeback overview, fraud, and dispute analytics. Additionally, it provide insights related to chargebacks by merchant account.",
     "widgets": [
         {
             "id": 7687241876619038,
@@ -68,7 +68,7 @@
             "id": 8664679548486656,
             "definition": {
                 "type": "note",
-                "content": "**Overview**\n\nThis dashboard provides a comprehensive overview of key logs related to dispute events. The dashboard visualizes chargeback overview, fraud and dispute analytics. Additionally, it provide insights related to chargebacks by merchant account.\n\nFor more information, see the [Adyen Integration Documentation](https://docs.datadoghq.com/integrations/adyen/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**Overview**\n\nThis dashboard provides a comprehensive overview of key logs related to dispute events. The dashboard visualizes chargeback overviews, fraud, and dispute analytics, along with insights on chargebacks by merchant account.\n\nFor more information, see the [Adyen Integration Documentation](https://docs.datadoghq.com/integrations/adyen/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -98,7 +98,7 @@
                         "id": 4437822100258310,
                         "definition": {
                             "type": "note",
-                            "content": "To know more about the dispute flow and process, Refer [Adyen Dispute Documentation](https://docs.adyen.com/risk-management/understanding-disputes/dispute-process-and-flow/)",
+                            "content": "To learn more about the dispute flow and process, see the [Adyen Dispute Documentation](https://docs.adyen.com/risk-management/understanding-disputes/dispute-process-and-flow/)",
                             "background_color": "yellow",
                             "font_size": "16",
                             "text_align": "left",

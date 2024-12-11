@@ -4,20 +4,14 @@
 from __future__ import absolute_import
 
 import os
+import signal
+import subprocess
 from contextlib import contextmanager
-
-import psutil
-from six import PY3
 
 from .conditions import WaitForPortListening
 from .env import environment_run
 from .structures import LazyFunction, TempDir
 from .utils import ON_WINDOWS, find_free_port, get_ip
-
-if PY3:
-    import subprocess
-else:
-    import subprocess32 as subprocess
 
 PID_FILE = 'ssh.pid'
 
@@ -146,7 +140,5 @@ class KillProcess(LazyFunction):
         with TempDir(self.temp_name) as temp_dir:
             with open(os.path.join(temp_dir, self.pid_file)) as pid_file:
                 pid = int(pid_file.read())
-                # TODO: Remove psutil as a dependency when we drop Python 2, on Python 3 os.kill supports Windows
-                process = psutil.Process(pid)
-                process.kill()
+                os.kill(pid, signal.SIGKILL if os.name == 'posix' else signal.SIGTERM)
                 return 0

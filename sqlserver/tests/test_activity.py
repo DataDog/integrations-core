@@ -57,6 +57,7 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
@@ -203,8 +204,7 @@ def test_collect_load_activity(
     # internal debug metrics
     aggregator.assert_metric(
         OPERATION_TIME_METRIC_NAME,
-        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity']
-        + _expected_dbm_instance_tags(dbm_instance),
+        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity'] + _expected_dbm_instance_tags(check),
     )
 
 
@@ -725,6 +725,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
 
 
+@pytest.mark.integration
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.1
@@ -755,10 +756,11 @@ def _get_conn_for_user(instance_docker, user, _autocommit=False):
     return conn
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags']
+def _expected_dbm_instance_tags(check):
+    return check._config.tags
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("activity_enabled", [True, False])
 def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
     dbm_instance['query_activity'] = {'enabled': activity_enabled, 'run_sync': False}
@@ -794,7 +796,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check.activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
-        tags=['job:query-activity'] + _expected_dbm_instance_tags(dbm_instance),
+        tags=['job:query-activity'] + _expected_dbm_instance_tags(check),
         hostname='',
     )
 
@@ -813,7 +815,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
-        tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-activity'],
+        tags=_expected_dbm_instance_tags(check) + ['job:query-activity'],
     )
 
 

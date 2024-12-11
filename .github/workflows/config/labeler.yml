@@ -57,8 +57,12 @@ integration/amazon_msk:
 - amazon_msk/**/*
 integration/ambari:
 - ambari/**/*
+integration/anyscale:
+- anyscale/**/*
 integration/apache:
 - apache/**/*
+integration/appgate_sdp:
+- appgate_sdp/**/*
 integration/arangodb:
 - arangodb/**/*
 integration/argo_rollouts:
@@ -213,6 +217,8 @@ integration/go_expvar:
 - go_expvar/**/*
 integration/godaddy:
 - godaddy/**/*
+integration/greenhouse:
+- greenhouse/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:
@@ -233,6 +239,8 @@ integration/hivemq:
 - hivemq/**/*
 integration/http_check:
 - http_check/**/*
+integration/hubspot_content_hub:
+- hubspot_content_hub/**/*
 integration/hudi:
 - hudi/**/*
 integration/hyperv:
@@ -255,6 +263,8 @@ integration/iis:
 - iis/**/*
 integration/impala:
 - impala/**/*
+integration/incident_io:
+- incident_io/**/*
 integration/istio:
 - istio/**/*
 integration/jboss_wildfly:
@@ -289,22 +299,28 @@ integration/kubelet:
 - kubelet/**/*
 integration/kubernetes:
 - kubernetes/**/*
+integration/kubernetes_admission:
+- kubernetes_admission/**/*
 integration/kubernetes_cluster_autoscaler:
 - kubernetes_cluster_autoscaler/**/*
 integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
-integration/kubevirt_controller:
-- kubevirt_controller/**/*
 integration/kubevirt_api:
 - kubevirt_api/**/*
+integration/kubevirt_controller:
+- kubevirt_controller/**/*
+integration/kubevirt_handler:
+- kubevirt_handler/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
 integration/kyverno:
 - kyverno/**/*
 integration/langchain:
 - langchain/**/*
+integration/anthropic:
+- anthropic/**/*
 integration/lastpass:
 - lastpass/**/*
 integration/lighttpd:
@@ -329,6 +345,8 @@ integration/mesos_master:
 - mesos_master/**/*
 integration/mesos_slave:
 - mesos_slave/**/*
+integration/metabase:
+- metabase/**/*
 integration/mimecast:
 - mimecast/**/*
 integration/mongo:
@@ -351,6 +369,8 @@ integration/ntp:
 - ntp/**/*
 integration/nvidia_jetson:
 - nvidia_jetson/**/*
+integration/nvidia_nim:
+- nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
 integration/oke:
@@ -429,12 +449,16 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/shopify:
+- shopify/**/*
 integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
 - silk/**/*
 integration/singlestore:
 - singlestore/**/*
+integration/slurm:
+- slurm/**/*
 integration/snmp:
 - snmp/**/*
 integration/snmp_american_power_conversion:
@@ -467,6 +491,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sonicwall_firewall:
+- sonicwall_firewall/**/*
 integration/sophos_central_cloud:
 - sophos_central_cloud/**/*
 integration/spark:
@@ -485,6 +511,8 @@ integration/supervisord:
 - supervisord/**/*
 integration/suricata:
 - suricata/**/*
+integration/symantec_endpoint_protection:
+- symantec_endpoint_protection/**/*
 integration/system_core:
 - system_core/**/*
 integration/system_swap:
@@ -523,6 +551,8 @@ integration/traefik_mesh:
 - traefik_mesh/**/*
 integration/traffic_server:
 - traffic_server/**/*
+integration/trellix_endpoint_security:
+- trellix_endpoint_security/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
 integration/trend_micro_vision_one_endpoint_security:
@@ -543,8 +573,12 @@ integration/vllm:
 - vllm/**/*
 integration/voltdb:
 - voltdb/**/*
+integration/vonage:
+- vonage/**/*
 integration/vsphere:
 - vsphere/**/*
+integration/wazuh:
+- wazuh/**/*
 integration/weaviate:
 - weaviate/**/*
 integration/weblogic:

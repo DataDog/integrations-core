@@ -3,7 +3,7 @@
 	"created_at": "2024-09-26",
 	"last_updated_at": "2024-09-26",
 	"title": "High number of failed captures detected",
-	"description": "This monitor tracks and alerts the expired payouts when a high number of captures gets failed.",
+	"description": "Failed captures occur when authorized funds cannot be collected, often due to issues with the payment method or card issuer. This monitor tracks capture failures to ensure prompt action and prevent disruptions in transaction processing.",
 	"definition": {
 		"id": 154605619,
 		"name": "High number of failed captures detected",

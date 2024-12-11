@@ -329,7 +329,8 @@ instances:
     ##
     ## Note: This is only used when `legacy_mode` is set to `true`.
     #
-    # event_id: []
+    # event_id:
+    #   - '1101'
 
     ## @param message_filters - list of strings - optional
     ## The `message_filters` filter instructs the check to only capture

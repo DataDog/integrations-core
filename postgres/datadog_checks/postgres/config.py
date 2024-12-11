@@ -12,10 +12,13 @@ SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'
 TABLE_COUNT_LIMIT = 200
 
 DEFAULT_IGNORE_DATABASES = [
-    'template%',
+    'template0',
+    'template1',
     'rdsadmin',
     'azure_maintenance',
     'cloudsqladmin',
+    'alloydbadmin',
+    'alloydbmetadata',
     'postgres',
 ]
 
@@ -157,6 +160,7 @@ class PostgresConfig:
             'keep_identifier_quotation': is_affirmative(
                 obfuscator_options_config.get('keep_identifier_quotation', False)
             ),
+            'keep_json_path': is_affirmative(obfuscator_options_config.get('keep_json_path', False)),
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
@@ -165,6 +169,7 @@ class PostgresConfig:
             self.statement_metrics_config.get('incremental_query_metrics', False)
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
+        self.service = instance.get('service') or init_config.get('service') or ''
 
     def _build_tags(self, custom_tags, propagate_agent_tags):
         # Clean up tags in case there was a None entry in the instance

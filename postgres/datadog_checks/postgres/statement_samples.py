@@ -10,7 +10,6 @@ from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg2
 from cachetools import TTLCache
-from six import PY2
 
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
@@ -81,6 +80,12 @@ PG_STAT_ACTIVITY_COLS = [
     "query",
     "backend_type",
 ]
+
+# PG_STAT_ACTIVITY_COLS_MAPPING applies additional data type casting to the columns
+PG_STAT_ACTIVITY_COLS_MAPPING = {
+    # use the bytea type to avoid unicode decode errors on Azure PostgreSQL
+    'backend_type': 'backend_type::bytea as backend_type',
+}
 
 PG_BLOCKING_PIDS_FUNC = ",pg_blocking_pids(pid) as blocking_pids"
 CURRENT_TIME_FUNC = "clock_timestamp() as now,"
@@ -241,7 +246,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         return [dict(row) for row in rows]
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_new_pg_stat_activity(self, available_activity_columns):
+    def _get_new_pg_stat_activity(self, available_activity_columns, activity_columns_mapping):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
         report_activity = self._report_activity_event()
@@ -256,10 +261,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             blocking_func = PG_BLOCKING_PIDS_FUNC
         if report_activity:
             cur_time_func = CURRENT_TIME_FUNC
+        activity_columns = [activity_columns_mapping.get(col, col) for col in available_activity_columns]
         query = PG_STAT_ACTIVITY_QUERY.format(
             backend_type_predicate=backend_type_predicate,
             current_time_func=cur_time_func,
-            pg_stat_activity_cols=', '.join(available_activity_columns),
+            pg_stat_activity_cols=', '.join(activity_columns),
             pg_blocking_func=blocking_func,
             pg_stat_activity_view=self._config.pg_stat_activity_view,
             extra_filters=extra_filters,
@@ -333,6 +339,11 @@ class PostgresStatementSamples(DBMAsyncJob):
         normalized_rows = []
         for row in rows:
             total_count += 1
+            if row.get('backend_type') is not None:
+                try:
+                    row['backend_type'] = row['backend_type'].tobytes().decode('utf-8')
+                except UnicodeDecodeError:
+                    row['backend_type'] = 'unknown'
             if (not row['datname'] or not row['query']) and row.get(
                 'backend_type', 'client backend'
             ) == 'client backend':
@@ -425,6 +436,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             hostname=self._check.resolved_hostname,
             raw=True,
         )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_ms",
+            (time.time() - start_time) * 1000,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            f"{method_name}_count",
+            row_len,
+            "histogram",
+        )
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -448,7 +471,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 raw=True,
             )
             return
-        rows = self._get_new_pg_stat_activity(pg_activity_cols)
+        rows = self._get_new_pg_stat_activity(pg_activity_cols, PG_STAT_ACTIVITY_COLS_MAPPING)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
         if self._explain_plan_coll_enabled:
@@ -469,6 +492,13 @@ class PostgresStatementSamples(DBMAsyncJob):
                 tags=self.tags,
                 raw=True,
             )
+            datadog_agent.emit_agent_telemetry(
+                "postgres",
+                "collect_activity_snapshot_ms",
+                (time.time() - start_time) * 1000,
+                "histogram",
+            )
+
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
             "dd.postgres.collect_statement_samples.time",
@@ -504,6 +534,18 @@ class PostgresStatementSamples(DBMAsyncJob):
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
             raw=True,
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            "collect_statement_samples_ms",
+            elapsed_ms,
+            "histogram",
+        )
+        datadog_agent.emit_agent_telemetry(
+            "postgres",
+            "collect_statement_samples_count",
+            submitted_count,
+            "gauge",
         )
 
     @staticmethod
@@ -758,6 +800,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "ddtags": ",".join(self._dbtags(row['datname'])),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
+                'service': self._config.service,
                 "network": {
                     "client": {
                         "ip": str(row.get('client_addr', None)),
@@ -842,6 +885,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "ddtags": self._tags_no_db,
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,
+            'service': self._config.service,
             "postgres_activity": active_sessions,
             "postgres_connections": active_connections,
         }
@@ -884,6 +928,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         # multi-byte characters that fall on the limit are left out. One caveat is that if a statement's length
         # happens to be greater or equal to the threshold below but isn't actually truncated, this
         # would falsely report it as a truncated statement
-        statement_bytes = bytes(statement) if PY2 else bytes(statement, "utf-8")
+        statement_bytes = bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
         return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated

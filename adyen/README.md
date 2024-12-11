@@ -1,9 +1,9 @@
 # Adyen
 
 ## Overview
-[Adyen][1] is a global payment platform that provides a comprehensive suite of payment solutions for businesses. It enables companies to accept payments across online, mobile, and in-store channels. Adyen supports a wide range of payment methods, including credit cards, mobile wallets, and local payment options, and offers services such as fraud prevention and risk management.
+[Adyen][1] is a global payment platform that provides a comprehensive suite of payment solutions for businesses. It enables companies to accept payments online, on mobile, and in-store. Adyen supports a wide range of payment methods, including credit cards, mobile wallets, and local payment options, and offers services such as fraud prevention and risk management.
 
-The Adyen integration seamlessly collect the data of transactions, disputes, and payouts using the Adyen webhook capability and ingests them into Datadog for comprehensive analysis.
+The Adyen integration collects transaction, dispute, and payout data using Adyen's webhook capability and ingests it into Datadog for comprehensive analysis.
 
 ## Setup
 
@@ -21,17 +21,17 @@ Configure the Datadog endpoint to forward Adyen events as logs to Datadog. See [
     5. In the Recommended Webhooks section, select the **Add** option located next to the **Standard Webhook**.
     6. Under **General**, configure the following:
 
-        | Setting                                                 | Description                                                                             |
+        | Setting                                                 | Configuration                                                                             |
         |------------------------------                                          |-----------------------------------------------------------------------------------------|
         | Version                                  | Select webhook version 1                                                          |
-        | Description      | Add appropriate description to a webhook                                           |
-        | Merchant accounts  | Keep all merchant accounts or select the merchant account for which data needs to be ingested into Datadog                                       |
+        | Description      | Add a description to the webhook                                           |
+        | Merchant accounts  | Choose whether to keep all merchant accounts or select specific accounts for which data needs to be ingested into Datadog                                       |
     
     7. Under **Server configuration**, configure the following:
 
-        | Setting                                                 | Description                                                                             |
+        | Setting                                                 | Configuration                                                                             |
         |------------------------------                                          |-----------------------------------------------------------------------------------------|
-        | URL                                  | Enter the endpoint URL that you generated [here](#webhook-url-generation).                                                          |
+        | URL                                  | Enter the endpoint URL that you generated in step 1 of [Webhook configuration](#webhook-configuration).                                                          |
         | Method      | JSON                                           |
         | Encryption protocol  | TLSv1.3                                       |
     8. Under **Events**, keep the default selected events as per **Standard Webhook**.

@@ -45,6 +45,7 @@ def test_get_tcp_stats_failure():
 
 def test_get_tcp_stats(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
+    instance["collect_count_metrics"] = True
     check_instance = WindowsNetwork('network', {}, [instance])
 
     mock_stats = TCPSTATS(
@@ -99,12 +100,24 @@ def test_get_tcp_stats(aggregator):
         'system.net.tcp.out_resets': 28,
         'system.net.tcp.connections': 30,
     }
+    gauge_mets = [
+        'system.net.tcp4.connections',
+        'system.net.tcp4.current_established',
+        'system.net.tcp6.connections',
+        'system.net.tcp6.current_established',
+        'system.net.tcp.connections',
+        'system.net.tcp.current_established',
+    ]
 
     with mock.patch('datadog_checks.network.check_windows.WindowsNetwork._get_tcp_stats') as mock_get_tcp_stats:
         mock_get_tcp_stats.return_value = mock_stats  # Make _get_tcp_stats return my mock object
         check_instance.check({})
         for name, value in expected_mets.items():
-            aggregator.assert_metric(name, value=value)
+            if name in gauge_mets:
+                aggregator.assert_metric(name, value=value, metric_type=aggregator.GAUGE)
+            else:
+                aggregator.assert_metric(name, value=value, metric_type=aggregator.RATE)
+                aggregator.assert_metric(name + '.count', value=value, metric_type=aggregator.MONOTONIC_COUNT)
 
 
 def test_check_psutil_no_collect_connection_state(aggregator):

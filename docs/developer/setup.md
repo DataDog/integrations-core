@@ -282,7 +282,7 @@ pipx upgrade ddev
     Also be aware that this method does not get any changes from `datadog_checks_dev`, so if you have unreleased changes from `datadog_checks_dev` that may affect `ddev`, you will need to run the following to get the most recent changes from `datadog_checks_dev` to your `ddev`:
 
     ```
-    pipx inject ddev -e "/path/to/datadog_checks_dev"
+    pipx inject -e ddev "/path/to/datadog_checks_dev"
     ```
 
 ### Configuration

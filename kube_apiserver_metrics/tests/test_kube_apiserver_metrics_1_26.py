@@ -29,6 +29,7 @@ class TestKubeAPIServerMetrics:
         'go_goroutines',
         'rest_client_requests_total',
         'authenticated_user_requests',
+        'apiserver_admission_webhook_request_total',
         'apiserver_request_total',
         'apiserver_request_terminations_total',
         'grpc_client_handled_total',
@@ -76,6 +77,7 @@ class TestKubeAPIServerMetrics:
         'authenticated_user_requests.count',
         'apiserver_request_total.count',
         'apiserver_request_terminations_total.count',
+        'apiserver_admission_webhook_request_total.count',
     ]
 
     def test_check(self, dd_run_check, aggregator, mock_http_response):

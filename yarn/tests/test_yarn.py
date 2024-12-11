@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import os
 import re
 
 import pytest
@@ -298,27 +297,6 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
         tags=EXPECTED_TAGS + ['url:{}'.format(RM_ADDRESS)],
         count=4,
     )
-
-
-def test_metadata(aggregator, instance, datadog_agent):
-    check = YarnCheck("yarn", {}, [instance])
-    check.check_id = "test:123"
-
-    check.check(instance)
-
-    raw_version = os.getenv("YARN_VERSION")
-
-    major, minor, patch = raw_version.split(".")
-
-    version_metadata = {
-        "version.scheme": "semver",
-        "version.major": major,
-        "version.minor": minor,
-        "version.patch": patch,
-        "version.raw": raw_version,
-    }
-
-    datadog_agent.assert_metadata("test:123", version_metadata)
 
 
 def test_collect_apps_all_states(dd_run_check, aggregator, mocked_request):

@@ -5,6 +5,8 @@
 # <WEB_ENDPOINT>/api/metrics/types
 NUMERIC_TYPES = {'BOOL', 'FLOAT', 'INT', 'PERCENT', 'RATING'}
 
+MAX_PAGES = 100
+
 # All `domain` attributes found in: <WEB_ENDPOINT>/api/metrics/search
 CATEGORIES = {
     'Complexity': 'complexity',
