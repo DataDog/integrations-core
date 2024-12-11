@@ -6,7 +6,7 @@
 
 ***Fixed***:
 
-* Regression fix: handle missing index fields in payload. ([#19249](https://github.com/DataDog/integrations-core/pull/19249))
+* Regression fix: Handle missing index fields in payload. ([#19249](https://github.com/DataDog/integrations-core/pull/19249))
 
 ## 8.0.0 / 2024-10-04 / Agent 7.59.0
 
