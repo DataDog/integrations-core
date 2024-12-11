@@ -306,13 +306,14 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
 
     def _process_queued_and_running_tasks(self, space_id, space_name, project_id, project_name):
         self.log.debug("Collecting running and queued tasks for project %s", project_name)
-        params = {'project': project_id, 'states': ["Queued", "Executing"]}
+        params = {'name': 'Deploy', 'project': project_id, 'states': ["Queued", "Executing"]}
         response_json = self._process_paginated_endpoint(f"api/{space_id}/tasks", params)
         self._process_tasks(space_id, space_name, project_name, response_json.get('Items', []))
 
     def _process_completed_tasks(self, space_id, space_name, project_id, project_name):
         self.log.debug("Collecting completed tasks for project %s", project_name)
         params = {
+            'name': 'Deploy',
             'project': project_id,
             'fromCompletedDate': self._from_completed_time,
             'toCompletedDate': self._to_completed_time,
@@ -363,8 +364,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                     + [
                         f'space_name:{space_name}',
                         f'project_name:{project_name}',
-                        f'task_id:{task_id}',
-                        f'task_name:{task_name}',
                         f'task_state:{task_state}',
                         f'server_node:{server_node}',
                     ]

@@ -200,8 +200,6 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.count',
         1,
         tags=[
-            'task_id:ServerTasks-118048',
-            'task_name:Deploy',
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
@@ -215,8 +213,6 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.queued_time',
         30,
         tags=[
-            'task_id:ServerTasks-118048',
-            'task_name:Deploy',
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
@@ -230,8 +226,6 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.executing_time',
         150,
         tags=[
-            'task_id:ServerTasks-118048',
-            'task_name:Deploy',
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
@@ -246,8 +240,6 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=0,
         tags=[
-            'task_id:ServerTasks-118048',
-            'task_name:Deploy',
             'task_state:Executing',
             'project_name:my-project',
             'space_name:Default',
@@ -261,8 +253,6 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.count',
         1,
         tags=[
-            'task_id:ServerTasks-118055',
-            'task_name:Deploy',
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
@@ -276,8 +266,6 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         'octopus_deploy.deployment.queued_time',
         60,
         tags=[
-            'task_id:ServerTasks-118055',
-            'task_name:Deploy',
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
@@ -292,8 +280,6 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=0,
         tags=[
-            'task_id:ServerTasks-118055',
-            'task_name:Deploy',
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
@@ -308,8 +294,6 @@ def test_queued_or_running_tasks(get_current_datetime, dd_run_check, aggregator)
         0,
         count=0,
         tags=[
-            'task_id:ServerTasks-118055',
-            'task_name:Deploy',
             'task_state:Queued',
             'project_name:test',
             'space_name:Default',
@@ -335,8 +319,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'project_name:test',
             'space_name:Default',
             'server_node:None',
-            'task_id:ServerTasks-118055',
-            'task_name:Deploy',
             'release_version:0.0.2',
             'environment_name:dev',
             'deployment_id:Deployments-19',
@@ -350,8 +332,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
             'space_name:Default',
             'project_name:my-project',
             'server_node:OctopusServerNodes-50c3dfbarc82',
-            'task_id:ServerTasks-118048',
-            'task_name:Deploy',
             'deployment_id:Deployments-18',
             'environment_name:staging',
             'release_version:0.0.1',
@@ -369,8 +349,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.count',
         1,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -384,8 +362,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.queued_time',
         110,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -399,8 +375,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.executing_time',
         50,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -414,8 +388,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.completed_time',
         5,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -429,8 +401,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.count',
         1,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -444,8 +414,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.queued_time',
         90,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -459,8 +427,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.executing_time',
         54,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -474,8 +440,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.completed_time',
         1,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -488,8 +452,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -503,8 +465,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.queued_time',
         18,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -518,8 +478,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.executing_time',
         41,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -533,8 +491,6 @@ def test_completed_tasks(get_current_datetime, dd_run_check, aggregator):
         'octopus_deploy.deployment.completed_time',
         14,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1392,8 +1348,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
             'project_name:test',
             'space_name:Default',
             'server_node:None',
-            'task_id:ServerTasks-118055',
-            'task_name:Deploy',
             'release_version:None',
             'environment_name:dev',
             'deployment_id:Deployments-19',
@@ -1407,8 +1361,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
             'space_name:Default',
             'project_name:my-project',
             'server_node:OctopusServerNodes-50c3dfbarc82',
-            'task_id:ServerTasks-118048',
-            'task_name:Deploy',
             'deployment_id:Deployments-18',
             'environment_name:staging',
             'release_version:0.0.1',
@@ -1426,8 +1378,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.count',
         1,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1441,8 +1391,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.queued_time',
         110,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1456,8 +1404,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.executing_time',
         50,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1471,8 +1417,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.completed_time',
         5,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1486,8 +1430,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.count',
         1,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1501,8 +1443,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.queued_time',
         90,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1516,8 +1456,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.executing_time',
         54,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1531,8 +1469,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.completed_time',
         1,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1545,8 +1481,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1560,8 +1494,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.queued_time',
         18,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1575,8 +1507,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.executing_time',
         41,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1590,8 +1520,6 @@ def test_deployment_metrics_releases_http_failure(get_current_datetime, dd_run_c
         'octopus_deploy.deployment.completed_time',
         14,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1636,8 +1564,6 @@ def test_deployment_metrics_deployments_http_failure(
             'project_name:test',
             'space_name:Default',
             'server_node:None',
-            'task_id:ServerTasks-118055',
-            'task_name:Deploy',
             'release_version:0.0.2',
             'environment_name:dev',
             'deployment_id:Deployments-19',
@@ -1651,8 +1577,6 @@ def test_deployment_metrics_deployments_http_failure(
             'space_name:Default',
             'project_name:my-project',
             'server_node:OctopusServerNodes-50c3dfbarc82',
-            'task_id:ServerTasks-118048',
-            'task_name:Deploy',
             'deployment_id:Deployments-18',
             'environment_name:None',
             'release_version:None',
@@ -1670,8 +1594,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.count',
         1,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1685,8 +1607,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.queued_time',
         110,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1700,8 +1620,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.executing_time',
         50,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1715,8 +1633,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.completed_time',
         5,
         tags=[
-            'task_id:ServerTasks-1847',
-            'task_name:Deploy',
             'task_state:Failed',
             'project_name:test',
             'space_name:Default',
@@ -1730,8 +1646,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.count',
         1,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1746,8 +1660,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.queued_time',
         90,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1762,8 +1674,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.executing_time',
         54,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1778,8 +1688,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.completed_time',
         1,
         tags=[
-            'task_id:ServerTasks-1846',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1793,8 +1701,6 @@ def test_deployment_metrics_deployments_http_failure(
     aggregator.assert_metric(
         'octopus_deploy.deployment.count',
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1808,8 +1714,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.queued_time',
         18,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1823,8 +1727,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.executing_time',
         41,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
@@ -1838,8 +1740,6 @@ def test_deployment_metrics_deployments_http_failure(
         'octopus_deploy.deployment.completed_time',
         14,
         tags=[
-            'task_id:ServerTasks-1845',
-            'task_name:Deploy',
             'task_state:Success',
             'project_name:test',
             'space_name:Default',
