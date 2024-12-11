@@ -1,3 +1,5 @@
+# ExtraHop
+
 ## Overview
 
 [ExtraHop][1] applies machine learning techniques and rule-based monitoring to your wire data to identify unusual behaviors and potential risks to the security and performance of your network.
@@ -11,9 +13,7 @@ This integration seamlessly collects all the above listed logs, channeling them 
 
 ## Setup
 
-### Configuration
-
-#### Create CLIENT ID and CLIENT SECRET from ExtraHop Platform
+### Create CLIENT ID and CLIENT SECRET from ExtraHop Platform
 
 1. On the ExtraHop console, go to **System Settings** > **API Access**.
 2. Generate new Client ID and Client Secret. Click **Create Credentials** which is present at the bottom of the page under **Rest API Credentials** section.
@@ -26,11 +26,16 @@ This integration seamlessly collects all the above listed logs, channeling them 
 4. Click **Save**.
 5. Copy and store **ID** and **Secret** in a secure location.
 
-#### Add your ExtraHop credentials
+### Configure the Datadog endpoint to forward ExtraHop logs to Datadog
 
-- Domain
-- Client ID
-- Client Secret
+1. Navigate to `ExtraHop`.
+2. Add your ExtraHop credentials.
+
+| ExtraHop Parameters                   | Description                                                  |
+| ------------------------------------- | ------------------------------------------------------------ |
+| Domain                                | The Domain of your ExtraHop Console                          |
+| Client ID                             | The Client ID of your ExtraHop Console                       |
+| Client Secret                         | The Client Secret of your ExtraHop Console                   |
 
 ## Data Collected
 
