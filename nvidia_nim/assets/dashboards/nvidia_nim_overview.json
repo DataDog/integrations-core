@@ -205,7 +205,7 @@
                             "hide_zero_counts": true,
                             "show_status": true,
                             "last_triggered_format": "relative",
-                            "query": "tag:(integration:vllm)",
+                            "query": "tag:(integration:nvidia_nim)",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -265,12 +265,26 @@
                             "title": "Requests Waiting",
                             "title_size": "16",
                             "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ],
@@ -278,7 +292,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:nvidia_nim.num_requests.waiting{$model_name} by {model_name}"
+                                            "query": "avg:nvidia_nim.num_requests.waiting{$model_name, $host} by {model_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -305,7 +319,6 @@
                             "title": "Requests Waiting",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -370,12 +383,26 @@
                             "title": "Requests Failed",
                             "title_size": "16",
                             "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
                                             "formula": "query1"
                                         }
                                     ],
@@ -383,7 +410,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:nvidia_nim.request.failure.count{$model_name} by {model_name}.as_count()"
+                                            "query": "sum:nvidia_nim.request.failure.count{$model_name, $host} by {model_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -488,7 +515,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:nvidia_nim.request.success.count{$model_name} by {model_name}.as_rate()"
+                                            "query": "sum:nvidia_nim.request.success.count{$model_name, $host} by {model_name}.as_rate()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -514,7 +541,6 @@
                             "title": "Requests Running",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -550,9 +576,18 @@
                     {
                         "id": 2448557456884510,
                         "definition": {
-                            "title": "K/V Cache Utilization",
+                            "title": "GPU Cache Utilization",
                             "title_size": "16",
                             "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "time": {},
                             "type": "timeseries",
                             "requests": [
@@ -566,7 +601,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:nvidia_nim.gpu_cache_usage_percent{$model_name}"
+                                            "query": "avg:nvidia_nim.gpu_cache_usage_percent{$model_name, $host} by {model_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -705,12 +740,16 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -718,12 +757,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:nvidia_nim.time_to_first_token.seconds.sum{$model_name} by {model_name}.as_count()"
+                                            "query": "sum:nvidia_nim.time_to_first_token.seconds.sum{$model_name, $host} by {model_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:nvidia_nim.time_to_first_token.seconds.count{$model_name} by {model_name}.as_count()"
+                                            "query": "sum:nvidia_nim.time_to_first_token.seconds.count{$model_name, $host} by {model_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -759,7 +798,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -775,12 +813,12 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:nvidia_nim.request.prompt_tokens.sum{$model_name} by {model_name}.as_count()",
+                                            "query": "avg:nvidia_nim.request.prompt_tokens.sum{$model_name, $host} by {model_name}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         },
                                         {
-                                            "query": "avg:nvidia_nim.request.generation_tokens.sum{$model_name} by {model_name}.as_count()",
+                                            "query": "avg:nvidia_nim.request.generation_tokens.sum{$model_name, $host} by {model_name}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -818,12 +856,16 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit"
+                                                }
+                                            },
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -831,12 +873,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:nvidia_nim.time_per_output_token.seconds.sum{$model_name} by {model_name}.as_count()"
+                                            "query": "sum:nvidia_nim.time_per_output_token.seconds.sum{$model_name, $host} by {model_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:nvidia_nim.time_per_output_token.seconds.count{$model_name} by {model_name}.as_count()"
+                                            "query": "sum:nvidia_nim.time_per_output_token.seconds.count{$model_name, $host} by {model_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -861,7 +903,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 0,
                 "width": 12,
                 "height": 10,
                 "is_column_break": true
@@ -924,7 +966,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:nvidia_nim.process.resident_memory_bytes{$model_name}"
+                                            "query": "avg:nvidia_nim.process.resident_memory_bytes{$host} by {endpoint}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -971,7 +1013,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:nvidia_nim.python.gc.collections.count{$model_name} by {generation}.as_count()"
+                                            "query": "sum:nvidia_nim.python.gc.collections.count{$host} by {generation,endpoint}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -998,7 +1040,15 @@
                             "title": "Uncollectable Objects",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1011,7 +1061,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:nvidia_nim.python.gc.objects.uncollectable.count{$host}.as_count()"
+                                            "query": "sum:nvidia_nim.python.gc.objects.uncollectable.count{$host} by {endpoint,generation}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1047,7 +1097,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1060,7 +1109,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:nvidia_nim.process.virtual_memory_bytes{$host} by {host}"
+                                            "query": "avg:nvidia_nim.process.virtual_memory_bytes{$host} by {endpoint}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1107,7 +1156,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:nvidia_nim.python.gc.objects.collected.count{$model_name} by {generation}.as_count()"
+                                            "query": "sum:nvidia_nim.python.gc.objects.collected.count{$model_name, $host} by {generation}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1131,7 +1180,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 30,
+                "y": 10,
                 "width": 12,
                 "height": 8
             }

@@ -201,6 +201,8 @@ integration/freshservice:
 - freshservice/**/*
 integration/gearmand:
 - gearmand/**/*
+integration/genesys:
+- genesys/**/*
 integration/gitlab:
 - gitlab/**/*
 integration/gitlab_runner:
@@ -349,6 +351,8 @@ integration/mimecast:
 - mimecast/**/*
 integration/mongo:
 - mongo/**/*
+integration/mux:
+- mux/**/*
 integration/mysql:
 - mysql/**/*
 integration/nagios:
@@ -411,6 +415,8 @@ integration/ping_one:
 - ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
+integration/plaid:
+- plaid/**/*
 integration/podman:
 - podman/**/*
 integration/postfix:
@@ -447,6 +453,8 @@ integration/sap_hana:
 - sap_hana/**/*
 integration/scylla:
 - scylla/**/*
+integration/shopify:
+- shopify/**/*
 integration/sidekiq:
 - sidekiq/**/*
 integration/silk:
@@ -501,6 +509,8 @@ integration/ssh_check:
 - ssh_check/**/*
 integration/statsd:
 - statsd/**/*
+integration/streamnative:
+- streamnative/**/*
 integration/strimzi:
 - strimzi/**/*
 integration/supervisord:
@@ -527,6 +537,8 @@ integration/teleport:
 - teleport/**/*
 integration/temporal:
 - temporal/**/*
+integration/temporal_cloud:
+- temporal_cloud/**/*
 integration/tenable:
 - tenable/**/*
 integration/teradata:

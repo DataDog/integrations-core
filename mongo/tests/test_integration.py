@@ -61,7 +61,13 @@ def _assert_mongodb_instance_event(
     }
 
 
-@pytest.mark.parametrize("dbm", [True, False])
+@pytest.mark.parametrize(
+    "dbm",
+    [
+        pytest.param(True, id="DBM enabled"),
+        pytest.param(False, id="DBM disabled"),
+    ],
+)
 def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_run_check, dbm):
     instance_integration_cluster['dbm'] = dbm
     instance_integration_cluster['operation_samples'] = {'enabled': False}

@@ -101,7 +101,7 @@ files:
         example: default
     - name: send_ndm_metadata
       description: |
-        Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
+        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
       value:
         type: boolean
         example: False

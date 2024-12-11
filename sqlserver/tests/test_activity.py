@@ -57,6 +57,7 @@ def dbm_instance(instance_docker):
     return copy(instance_docker)
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
