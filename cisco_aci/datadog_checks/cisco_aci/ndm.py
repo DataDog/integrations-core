@@ -140,7 +140,7 @@ def create_exporter_ip_address_metadata(namespace, top_systems):
     for top_system in top_systems_list.top_systems:
         yield ExporterIPAddressMetadata(
             device_id=namespace + ":" + top_system.attributes.address,
-            exporter_ip_address=top_system.attributes.oob_mgmt_addr,
+            ip_address=top_system.attributes.oob_mgmt_addr,
             prefixlen=top_system.attributes.oob_mgmt_addr_mask,
         )
 

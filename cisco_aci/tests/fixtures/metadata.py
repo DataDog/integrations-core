@@ -339,25 +339,25 @@ EXPORTER_IP_ADDRESS_METADATA = [
     {
         'device_id': 'default:10.0.200.0',
         'integration': 'cisco-aci',
-        'exporter_ip_address': '1.1.0.101',
+        'ip_address': '1.1.0.101',
         'prefixlen': '24',
     },
     {
         'device_id': 'default:10.0.200.1',
         'integration': 'cisco-aci',
-        'exporter_ip_address': '1.1.0.102',
+        'ip_address': '1.1.0.102',
         'prefixlen': '24',
     },
     {
         'device_id': 'default:10.0.200.4',
         'integration': 'cisco-aci',
-        'exporter_ip_address': '1.1.0.1',
+        'ip_address': '1.1.0.1',
         'prefixlen': '24',
     },
     {
         'device_id': 'default:10.0.200.5',
         'integration': 'cisco-aci',
-        'exporter_ip_address': '1.1.0.201',
+        'ip_address': '1.1.0.201',
         'prefixlen': '24',
     },
 ]

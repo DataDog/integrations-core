@@ -361,7 +361,7 @@ class TopologyLinkMetadata(BaseModel):
 
 class ExporterIPAddressMetadata(BaseModel):
     device_id: Optional[str] = Field(default=None)
-    exporter_ip_address: Optional[str] = Field(default=None)
+    ip_address: Optional[str] = Field(default=None)
     integration: Optional[str] = Field(default='cisco-aci')
     prefixlen: Optional[int] = Field(default=None)
 
