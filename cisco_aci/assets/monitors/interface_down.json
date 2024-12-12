@@ -1,0 +1,26 @@
+{
+	"version": 2,
+	"created_at": "2024-12-04",
+	"last_updated_at": "2024-12-04",
+	"title": "Interface is down on a Cisco ACI device",
+	"description": "This monitor checks the status of interfaces on Cisco ACI devices. It alerts if one reports as 'down'.",
+	"definition": {
+		"name": "[Cisco ACI] Interface {{port.name}} down alert on device {{device_ip.name}} in namespace {{device_namespace.name}}",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:cisco_aci.fabric.port.status{status:down} by {device_ip,device_namespace,port} == 1",
+		"message": "{{#is_alert}}\nInterface {{port.name}} of network device with IP {{device_ip.name}} in namespace {{device_namespace.name}} is reporting DOWN.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nInterface {{port.name}} of network device with IP {{device_ip.name}} in namespace {{device_namespace.name}} is back online.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}&detailsTab=interfaces).",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+            "on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60
+		}
+	},
+	"tags": [
+		"integration:cisco-aci"
+	]
+}
