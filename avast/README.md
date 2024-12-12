@@ -18,24 +18,24 @@ This integration collects logs from the sources listed above and sends them to D
 
 ## Setup
 
-### Configuration
+### Generate API credentials in Avast
 
-Avast integration requires an Avast Business Hub account and its Client ID, and Client Secret. Below are the steps to fetch these details from Avast Business Hub console:
-
-#### Get Avast Credentials
-
-1. Login to the [Avast Business Hub][4] Account.
+1. Log in to [Avast Business Hub][4] Account.
 2. Navigate and click the gear(settings) icon.
 3. In the **Settings** section, click **Integrations**.
 4. Click **Add a new integration**.
 5. Provide an integration name.
 6. Select Integration scope as **API Gateway**, then click **Generate a secret**.
-7. Obtain the **Client ID** and the **Client Secret** for configuration.
+7. The **Client ID** and **Client Secret** will be generated.
 
-#### Add Avast Credentials
+### Connect your Avast Account to Datadog
 
-1. Avast `Client ID`
-2. Avast `Client Secret`
+1. Add your Client ID and Client Secret
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Client ID|The Client ID of Avast Business Hub Integration.|
+    |Client Secret|The Client Secret of Avast Business Hub Integration.|
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
