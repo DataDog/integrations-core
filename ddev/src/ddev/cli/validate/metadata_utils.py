@@ -392,6 +392,10 @@ VALID_UNIT_NAMES = {
     "yemeni rial",
     "zambian kwacha",
     "zimbabwe gold",
+    "bit_in_decimal_bytes_family",
+    "byte_in_decimal_bytes_family",
+    "bit_in_binary_bytes_family",
+    "byte_in_binary_bytes_family",
 }
 
 ALLOWED_PREFIXES = ('system.', 'jvm.', 'http.', 'datadog.', 'sftp.', 'process.', 'runtime.', 'otelcol_')
