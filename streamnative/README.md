@@ -14,18 +14,16 @@ The StreamNative integration collects the following types of [metrics][2]:
 
 ## Setup
 
-### Configuration
+### Generate API credentials in StreamNative
 
-#### Get StreamNative credentials
-
-Log into the [StreamNative Cloud Console Account][3].
-##### Get the `Organization ID` and `Instance Name`:
+Log in to [StreamNative Cloud Console Account][3].
+#### Generate `Organization ID` and `Instance Name`:
 
 1. Click the profile icon and select **Organizations**.
 2. Choose the **Organization** for which data needs to be collected.
-3. From the **Select an Instance** dropdown, note the **Instance Name**.
+3. From the **Select an Instance** dropdown, get the **Instance Name**.
 
-##### Get the `Client ID` and `Client Secret`:
+#### Generate `Client ID` and `Client Secret`:
 
 1. Click the profile icon and navigate to the **Accounts & Accesses** tab.
 2. Find the Service Account with **Admin** permissions set to **Enabled**.
@@ -34,12 +32,16 @@ Log into the [StreamNative Cloud Console Account][3].
 4. Select **Download OAuth2 Key** to obtain the **Client ID** and **Client Secret**.
 
 
-#### Add StreamNative credentials
+### Connect your StreamNative Account to Datadog
 
-- Organization ID 
-- Instance Name
-- Client ID  
-- Client Secret  
+1. Add your Organization ID, Instance Name, Client ID, and Client Secret
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Organization ID|Organization ID of your StreamNative account.|
+    |Instance Name|Instance name of the corresponding organization.|
+    |Client ID |Client ID of your service account.|
+    |Client Secret|Client Secret of your service account.|
+2. Click the Save button to save your settings.
 
 
 ## Data Collected
