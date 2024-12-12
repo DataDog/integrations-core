@@ -17,7 +17,7 @@ files:
         type: string
     - name: username
       description: The Datadog username created to connect to DuckDB.
-      required: true
+      required: false
       value:
         type: string
         example: datadog

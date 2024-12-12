@@ -19,10 +19,10 @@ instances:
     #
   - db_name: my_database.db
 
-    ## @param username - string - required
+    ## @param username - string - optional - default: datadog
     ## The Datadog username created to connect to DuckDB.
     #
-    username: datadog
+    # username: datadog
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.

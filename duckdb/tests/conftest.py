@@ -6,27 +6,19 @@ import os
 from copy import deepcopy
 
 import duckdb
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import WaitFor
 
 from . import common
 
-def container_up(service_name, port):
-    """
-    Try to connect to duckdb
-    """
-    duckdb.connect(
-        host=common.HOST, port=common.port, database=common.DB, read_only=False
-    )
+@pytest.fixture(scope='session')
+def connection_db():
+    db_file_path = os.path.join(common.HERE, common.DB_NAME) 
+    connection=duckdb.connect(db_file_path) 
+    return connection
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
-
-    with docker_run(compose_file, conditions=[
-        WaitFor(container_up, args=("DuckDB", common.HOST, common.PORT, common.DB)),
-        ]):
-        yield common.DEFAULT_INSTANCE
-
+    yield common.DEFAULT_INSTANCE
 
 @pytest.fixture
 def instance():

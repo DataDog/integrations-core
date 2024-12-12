@@ -28,8 +28,6 @@ class DuckdbCheck(AgentCheck):
         super(DuckdbCheck, self).__init__(name, init_config, instances)
 
         self.db_name = self.instance.get('db_name')
-        self.username = self.instance.get('username')
-        self.password = self.instance.get('password')
         self.collect_profiling_data = self.instance.get('collect_profiling_data', False)
         self.tags = self.instance.get('tags', [])
         self._connection = None
@@ -93,7 +91,7 @@ class DuckdbCheck(AgentCheck):
         for _ in range(retries):
             try:
                 # Try to establish the connection
-                conn = duckdb.connect(self._connect_params, read_only=True)
+                conn = duckdb.connect(self.db_name)
                 self.log.info('Connected to DuckDB database.')
                 yield conn
             except Exception as e:
@@ -108,13 +106,7 @@ class DuckdbCheck(AgentCheck):
                     conn.close()
 
     def initialize_config(self):
-        self._connect_params = json.dumps(
-            {
-                'database': self.db_name,
-                'username': self.username if self.username is not None else '',
-                'password': self.password if self.password is not None else '',
-            }
-        )
+        self._connect_params = self.db_name
 
     def submit_health_checks(self):
         # Check for connectivity

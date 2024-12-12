@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.dev import get_here
 
 HERE = get_here()
-HOST = get_docker_hostname()
-PORT = 5000
-DB = 'data/duckdb.db'
+DB_NAME = 'data/sample.db'
 
-DEFAULT_INSTANCE = {'host': HOST, 'port': PORT, 'database': DB, 'read_only': False}
+DB = os.path.join(HERE, DB_NAME)
+
+DEFAULT_INSTANCE = {'db_name': DB}
 
