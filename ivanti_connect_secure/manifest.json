@@ -1,0 +1,89 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6fbaf2b3-bcc9-49b1-bcb6-67239f17a1e0",
+  "app_id": "ivanti-connect-secure",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Ivanti Connect Secure logs.",
+    "title": "Ivanti Connect Secure",
+    "media": [
+      {
+        "caption": "Ivanti Connect Secure - Overview",
+        "image_url": "images/ivanti_connect_secure_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti Connect Secure - Web Requests",
+        "image_url": "images/ivanti_connect_secure_web_requests.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti Connect Secure - Authentication",
+        "image_url": "images/ivanti_connect_secure_authentication.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti Connect Secure - Connection and VPN Tunneling",
+        "image_url": "images/ivanti_connect_secure_connection_and_vpn_tunneling.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti Connect Secure - Administrator Activities",
+        "image_url": "images/ivanti_connect_secure_administrator_activities.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Ivanti Connect Secure - Statistics and System Status",
+        "image_url": "images/ivanti_connect_secure_statistics_and_system_status.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 33282127,
+      "source_type_name": "Ivanti Connect Secure",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Ivanti Connect Secure - Overview": "assets/dashboards/ivanti_connect_secure_overview.json",
+      "Ivanti Connect Secure - Web Requests": "assets/dashboards/ivanti_connect_secure_web_requests.json",
+      "Ivanti Connect Secure - Authentication": "assets/dashboards/ivanti_connect_secure_authentication.json",
+      "Ivanti Connect Secure - Connection and VPN Tunneling": "assets/dashboards/ivanti_connect_secure_connection_and_vpn_tunneling.json",
+      "Ivanti Connect Secure - Administrator Activities": "assets/dashboards/ivanti_connect_secure_administrator_activities.json",
+      "Ivanti Connect Secure - Statistics and System Status": "assets/dashboards/ivanti_connect_secure_statistics_and_system_status.json"
+    },
+    "logs": {
+      "source": "ivanti-connect-secure"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
