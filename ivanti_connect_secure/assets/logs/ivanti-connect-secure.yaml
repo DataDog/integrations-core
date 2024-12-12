@@ -424,9 +424,11 @@ pipeline:
 
               failed_login_rule6 Login failed from %{ipv4:network.client.ip} for %{notSpace:usr.name} because %{regex("[^.]*"):reason}.
 
-              rejected_login_rule1 Login rejected( login)? from IP %{ipv4:network.client.ip} for %{regex("[^/]*"):usr.name}/%{regex("[^.]*"):realm_name}. %{regex("[^.]*"):reason}.
+              rejected_login_rule1 Login rejected from IP %{ipv4:network.client.ip} for %{regex("[^/]*"):usr.name}/%{regex("[^.]*"):realm_name} %{regex("due to internal error"):reason}.
 
-              rejected_login_rule2 Login rejected( login)? from IP %{ipv4:network.client.ip}( for %{regex("[^.]*"):usr.name})?. %{regex("[^.]*"):reason}.
+              rejected_login_rule2 Login rejected( login)? from IP %{ipv4:network.client.ip} for %{regex("[^/]*"):usr.name}/%{regex("[^.]*"):realm_name}. %{regex("[^.]*"):reason}.
+
+              rejected_login_rule3 Login rejected( login)? from IP %{ipv4:network.client.ip}( for %{regex("[^.]*"):usr.name})?. %{regex("[^.]*"):reason}.
 
               successful_login_rule1 (Primary|Secondary) authentication successful for %{regex("[^/]*"):usr.name}/%{regex(".*(?= from)"):realm_name} from %{ipv4:network.client.ip}( forwarded for %{ipv4:forwarded_ip})?
 
