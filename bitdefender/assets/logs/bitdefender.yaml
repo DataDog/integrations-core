@@ -1,0 +1,16 @@
+id: bitdefender
+metric_id: bitdefender
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Bitdefender
+  enabled: true
+  filter:
+    query: source:bitdefender
+  processors:
+    - type: date-remapper
+      name: Define `id` as the official date of the log
+      enabled: true
+      sources:
+        - id
