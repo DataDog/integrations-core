@@ -2,7 +2,7 @@
 
 <div class="alert alert-info">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Databricks Model Serving metrics and cluster utilization data.
+This page is limited to documentation for ingesting Databricks model serving metrics and cluster utilization data.
 </div>
 
 ![Databricks default dashboard][21]
@@ -25,10 +25,10 @@ Model serving metrics provide insights into how your  Databricks model serving i
 ### Installation
 Gain insight into the health of your model serving infrastructure by following the [Model Serving Configuration](#model-serving-configuration) instructions.
 
-Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [configuration](#configuration) instructions for your appropriate cluster. Refer to [Spark Configuration](#spark-configuration) instructions.
+Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [configuration](#spark-configuration) instructions for your appropriate cluster. Refer to [Spark Configuration](#spark-configuration) instructions.
 
-[//]: # (### Configuration)
-### Model Serving Configuration
+### Configuration
+#### Model Serving Configuration
 1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
 2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime (days)**, and click **Generate**. Take note of your token.
 
@@ -43,7 +43,7 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
 5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
 6. In the **Select resources to set up collection** section, make sure **Metrics - Model Serving** is **Enabled**.
 
-### Spark Configuration
+#### Spark Configuration
 Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
 
 Each script described below can be modified to suits your needs. For instance, you can:
@@ -464,10 +464,6 @@ chmod a+x /tmp/start_datadog.sh
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
-
-### Model Serving Monitoring
-
-model serving instructions
 
 ## Data Collected
 
