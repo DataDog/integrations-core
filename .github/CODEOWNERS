@@ -421,6 +421,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /streamnative/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /streamnative/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/tenable_io/                                                        @DataDog/saas-integrations
+/tenable_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
+/tenable_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
+/tenable_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
 # As well as the secure downloader.
