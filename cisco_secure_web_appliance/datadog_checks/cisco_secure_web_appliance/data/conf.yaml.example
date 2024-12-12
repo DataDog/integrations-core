@@ -1,0 +1,30 @@
+## Log Section
+## type - required - Type of log input source (tcp / udp / file / windows_event).
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                          Set path if type is file.
+##                                          Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which integration sent the logs.
+## encoding - optional - For file specifies the file encoding. Default is utf-8. Other
+##                        possible values are utf-16-le and utf-16-be.
+## service - required - The name of the service that generates the log.
+##                       Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+## 1. File Monitoring
+##   - If you want to monitor CSWA logs (access_logs and l4tm_logs) using file monitoring then use type:file stanza.
+## 2. Syslog
+##   - If you want to monitor CSWA logs using syslog (access_logs) then use type:udp stanza.
+#
+# logs:
+#   - type: file
+#     path: <Path to Directory Where L4TM would Get Stored>
+#     service: l4tm_logs
+#     source: cisco-secure-web-appliance
+#   - type: udp
+#     port: <PORT>
+#     service: access_logs
+#     source: cisco-secure-web-appliance
+#   - type: file
+#     port: <Path to Directory Where access log would Get Stored>
+#     service: access_logs
+#     source: cisco-secure-web-appliance
