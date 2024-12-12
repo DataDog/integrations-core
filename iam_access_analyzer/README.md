@@ -48,6 +48,6 @@ This integration does not include any events.
 
 Need help? Contact [Datadog support][3].
 
-[1]: /logs/guide/forwarder/
+[1]: https://docs.datadoghq.com/logs/guide/forwarder/
 [2]: https://app.datadoghq.com/logs?query=source%3Aaccess-analyzer
 [3]: https://docs.datadoghq.com/help
