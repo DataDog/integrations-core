@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import assert_service_checks
 
 
 @pytest.mark.e2e
+@pytest.mark.usefixtures("dd_environment")
 def test_e2e(instance, aggregator, dd_agent_check):
     aggregator = dd_agent_check(instance, rate=True)
     aggregator.assert_service_check('duckdb.can_connect', ServiceCheck.OK)
