@@ -6,6 +6,7 @@ import functools
 import importlib
 import inspect
 import logging
+import os
 import re
 import traceback
 import unicodedata
@@ -30,6 +31,7 @@ import yaml
 from pydantic import BaseModel, ValidationError
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
+from datadog_checks.base.fips import FIPSSwitch
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -86,6 +88,7 @@ if is_affirmative(datadog_agent.get_config('integration_profiling')):
 
 if TYPE_CHECKING:
     import ssl  # noqa: F401
+
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
@@ -306,6 +309,11 @@ class AgentCheck(object):
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+
+        self.fips = FIPSSwitch()
+
+        if os.environ.get("GOFIPS", None) == "1":
+            self.fips.enable()
 
     def _create_metrics_pattern(self, metric_patterns, option_name):
         all_patterns = metric_patterns.get(option_name, [])
