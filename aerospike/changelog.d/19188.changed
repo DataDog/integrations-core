@@ -1,0 +1,6 @@
+Sy/slurm user
+
+* Allows all metrics from aerospike-prometheus-exporter to be available in datadog
+* Enabled histogram metrics as distributions by default
+* removed renaming of "cluster_name" as "aerospike_cluster" as cluster_name label is not causing any impact on dashboards.s
+
