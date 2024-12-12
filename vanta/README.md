@@ -19,27 +19,27 @@ This integration collects logs and metrics from the sources listed above and sen
 
 ## Setup
 
-### Configuration
+### Generate API credentials in Vanta
 
-Vanta integration requires a Vanta account and its Client Id, and Client Secret. Below are the steps to fetch these details from Vanta console:
-
-#### Get Vanta Credentials
-
-1. Login to [Vanta Account][5] 
+1. Log in to [Vanta Account][5]
 2. Go to the **Settings** and navigate to **Developer Console**.
-3. Click on the **+Create** button at the upper right corner.
-4. Specify the following details for the new application and click on **Create**.
+3. Click the **+Create** button at the upper right corner.
+4. Specify the following details for the new application and click **Create**.
     * **Name**: Enter a descriptive name for your application.
     * **Description**: Provide a brief overview of your application.
     * **App Type**: Select **Manage Vanta** 
 5. Navigate to the **Application Info** section for the Client ID.
-6. Click on **Generate client secret** for the Client secret.
+6. Click **Generate client secret** for the Client Secret.
 
 
-#### Add Vanta Credentials
+### Connect your Vanta Account to Datadog
 
-- Vanta App Client ID
-- Vanta App Client Secret
+1. Add your Client ID and Client Secret
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Client ID|The Client ID of application on Vanta.|
+    |Client Secret|The Client Secret of application on Vanta.|
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
