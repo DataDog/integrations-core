@@ -8,16 +8,16 @@ Docusign integration provides real-time insights into Docusign activities, such 
 
 ## Setup
 
-### Configuration
 
-#### Prerequisites
+### Prerequisites
 
 - Docusign Developer Account
-- A Docusign account with a plan that includes Docusign Monitor
+- Docusign account with a plan that includes Docusign Monitor
 
-#### Get Docusign Credentials
 
-1. Login to [Developer Admin Console][2].
+### Generate API credentials in Docusign
+
+1. Log in to [Developer Admin Console][2].
 2. Get your **Account Name** from the **Account Profile** page.
 3. Access the **Apps and Keys** page under the **Integrations** section.
 4. Obtain the **User ID** from the **My Account Information** section.
@@ -37,23 +37,26 @@ Docusign integration provides real-time insights into Docusign activities, such 
     - Note: _After selecting Accept, the browser will display a message saying that it can't load the page. You can safely ignore this page and close the tab._
 12. To test the integration with Developer account, select `Developer` option for the **Account Type** configuration parameter of the integration.
 13. Perform the [Go-Live][3] process for the App to access the [Production Account][4].
-14. Navigate to Admin console and perform steps 2 to 10 and update the respective configuration parameters for the integration.
+14. Navigate to the Admin console and perform steps 2 to 10 and update the respective configuration parameters for the integration.
 
 
+### Connect your Docusign Account to Datadog
 
-#### Add Docusign Credentials
-
-- Account Type
-- Docusign Account Name
-- User Id
-- Integration Key
-- RSA Private Key
+1. Add your Account Type, Docusign Account Name, User Id, Integration Key, and RSA Private Key
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Account Type|Dropdown to select the type of Docusign account (e.g., Developer or Production).|
+    |Docusign Account Name|The name associated with the Docusign account (case sensitive).|
+    |User ID |A GUID value that uniquely identifies a Docusign user.|
+    |Integration Key|A unique GUID that identifies a Docusign integration.|
+    |RSA Private Key|A cryptographic key for signing JWT tokens for secure API authentication.|
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
 ### Logs 
 
-The Docusign integration collects logs and forwards to Datadog.
+The Docusign integration collects logs and forwards them to Datadog.
 
 ### Metrics
 
