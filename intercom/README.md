@@ -14,15 +14,13 @@ Follow the instructions below to configure this integration for your Intercom ac
 #### Webhook Configuration
 Configure the Datadog endpoint to forward Intercom events as logs to Datadog. See [Intercom webhook overview][3] for more details.
 
-- #### Webhook URL generation
-    - Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
-- #### Register a new application
-    1. Sign in to your [Intercom][2] account using a user account with full access to Apps and Integrations.
-    2. Go to **Settings**.
-    3. In the Integrations section, select **Developer Hub**.
-    4. Click **New app**.
-    5. Fill in the required details for your application, including the name and associated workspace.
-    6. Click **Create app**.
+    1. Copy the generated URL inside the **Configuration** tab on the Datadog [Intercom integration tile][4].
+    2. Sign in to your [Intercom][2] account using a user account with full access to Apps and Integrations.
+    3. Go to **Settings**.
+    4. In the Integrations section, select **Developer Hub**.
+    5. Click **New app**.
+    6. Fill in the required details for your application, including the name and associated workspace.
+    7. Click **Create app**.
 - #### Configure webhook topics
     1. Select Required permissions
         1. After creating the app, go to the *Authentication* section in the left-side menu, and click the **Edit** button in the top-right corner.
@@ -36,7 +34,7 @@ Configure the Datadog endpoint to forward Intercom events as logs to Datadog. Se
     2. Select Webhook topics
     ```
         1. Next, navigate to the **Webhooks** section using the left-side menu.
-        2. Enter the endpoint URL that was generated [here](#webhook-url-generation).
+        2. Enter the endpoint URL that you generated in step 1 of [Webhook Configuration](#webhook-configuration).
         3. On the **Select a topic** dropdown menu, select the following webhook topics:
             - admin.activity_log_event.created
             - content_stat.news_item
