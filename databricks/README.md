@@ -36,7 +36,7 @@ Monitor Databricks Spark applications with the [Datadog Spark integration][3]. I
    * Make sure you delete the default value in **Lifetime (days)** so that the token doesn't expire and the integration doesn't break.
    * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.
 
-   As an alternative, follow the [official Databricks documentation][31] to generate access token for a [service principal][31].
+   As an alternative, follow the [official Databricks documentation][31] to generate an access token for a [service principal][31].
 
 3. In Datadog, open the Databricks integration tile.
 4. On the **Configure** tab, click **Add Databricks Workspace**.
