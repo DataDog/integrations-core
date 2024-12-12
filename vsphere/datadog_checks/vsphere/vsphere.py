@@ -626,8 +626,9 @@ class VSphereCheck(AgentCheck):
                     input_data[i] = ''
                 input_data[i] += str(v) + ','
         for i, v in input_data.items():
-            self.log.debug("Sending resource to redapl: %s, %s", i, v)
-            self.set_metadata(i, v)
+            # we want to remove the last comma to avoid adding an empty '' resource
+            self.log.debug("Sending resource to redapl: %s, %s", i, v.rstrip(','))
+            self.set_metadata(i, v.rstrip(','))
 
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]

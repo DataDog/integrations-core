@@ -3627,7 +3627,7 @@ def test_vsan_cluster_to_redapl(realtime_instance, dd_run_check, datadog_agent, 
 
         dd_run_check(check)
 
-        datadog_agent.assert_metadata('', {'attr0': '1.0,', 'attr1': 'value1,', 'attr2': '123,'})
+        datadog_agent.assert_metadata('', {'attr0': '1.0', 'attr1': 'value1', 'attr2': '123'})
         # 6 elts of version metadata + 3 elts of cluster metadata
         datadog_agent.assert_metadata_count(9)
 
