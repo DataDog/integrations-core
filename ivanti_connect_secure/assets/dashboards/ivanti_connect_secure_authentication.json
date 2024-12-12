@@ -1,5 +1,5 @@
 {
-    "title": "Ivanti Connect Secure - Authentication ",
+    "title": "Ivanti Connect Secure - Authentication",
     "description": "- This dashboard offers a detailed overview of authentication activities and potential security concerns.",
     "widgets": [
         {
@@ -783,7 +783,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:ivanti-connect-secure service:AUT @message_id:(AUT21051 OR AUT21052 OR AUT21053 OR AUT21054 OR AUT21055 OR AUT21056 OR AUT21057 OR AUT21058 OR AUT21059 OR AUT21060 OR AUT24082 OR AUT24083) $User-Name $Client-IP $Severity"
+                                                "query": "source:ivanti-connect-secure service:AUT @message_id:(AUT21051 OR AUT21052 OR AUT21053 OR AUT21054 OR AUT21055 OR AUT21056 OR AUT21057 OR AUT21058 OR AUT21059 OR AUT21060 OR AUT24083) $User-Name $Client-IP $Severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -921,7 +921,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:ivanti-connect-secure service:AUT @message_id:(AUT21051 OR AUT21052 OR AUT21053 OR AUT21054 OR AUT21055 OR AUT21056 OR AUT21057 OR AUT21058 OR AUT21059 OR AUT21060 OR AUT24082 OR AUT24083) $User-Name $Client-IP $Severity"
+                                                "query": "source:ivanti-connect-secure service:AUT @message_id:(AUT21051 OR AUT21052 OR AUT21053 OR AUT21054 OR AUT21055 OR AUT21056 OR AUT21057 OR AUT21058 OR AUT21059 OR AUT21060 OR AUT24083) $User-Name $Client-IP $Severity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1058,7 +1058,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:ivanti-connect-secure service:AUT @message_id:(AUT21051 OR AUT21052 OR AUT21053 OR AUT21054 OR AUT21055 OR AUT21056 OR AUT21057 OR AUT21058 OR AUT21059 OR AUT21060 OR AUT24082 OR AUT24083) $User-Name $Client-IP $Severity"
+                                                "query": "source:ivanti-connect-secure service:AUT @message_id:(AUT21051 OR AUT21052 OR AUT21053 OR AUT21054 OR AUT21055 OR AUT21056 OR AUT21057 OR AUT21058 OR AUT21059 OR AUT21060 OR AUT24083) $User-Name $Client-IP $Severity"
                                             },
                                             "indexes": [
                                                 "*"
