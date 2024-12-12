@@ -32,9 +32,9 @@ The Greenhouse integration collects these logs and sends them to Datadog. These 
 
 1. Add your Greenhouse API Key.
 
-    | Greenhouse Parameters | Description                                                     |
-    | ----------------------| ----------------------------------------------------------------|
-    | API Key               | The Personal API key of Greenhouse  to authenticate the request |
+    | Parameters | Description                                                     |
+    | -----------| ----------------------------------------------------------------|
+    | API Key    | The Personal API key of Greenhouse  to authenticate the request |
 
 2. Click the Save button to save your settings.
 
