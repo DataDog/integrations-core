@@ -10,24 +10,27 @@ This integration gathers audit logs and forwards them to Datadog for seamless an
 
 ## Setup
 
-### Configuration
-
-#### Get Credentials of Asana
+### Generate API Credentials in Asana
 
 1. Log in to your [Asana Admin Console][3] as a **Super Admin** of an Enterprise+ organization.
 2. Navigate to the **Apps** tab in your Admin Console.
 3. Click on **Service Accounts**.
 4. Select the **Add Service Account** button and complete the following steps:
-    1. Enter a descriptive and identifiable name under **Name**.
-    2. Under **Permission Scopes**, select **Scoped permissions** and check the **Audit Logs** box.
+   1. Enter a descriptive and identifiable name under **Name**.
+   2. Under **Permission Scopes**, select **Scoped permissions** and check the **Audit Logs** box.
 5. Click **Save Changes** and copy the **Service Account PAT** for later use.
 6. Go to the **Settings** tab in your Admin Console.
 7. Scroll to the bottom of the page to locate the **Domain ID (Workspace ID)**.
 
-#### Add your Asana Credentials
+### Connect your Asana Account to Datadog
 
-- Workspace ID
-- Service Account PAT
+1. Add your Workspace ID and Service Account PAT.
+   | Parameters          | Description                                                                           |
+   | ------------------- | ------------------------------------------------------------------------------------- |
+   | Workspace ID        | The Workspace ID of your organization in the Asana platform.                          |
+   | Service Account PAT | The Service Account Personal Access Token of your organization in the Asana platform. |
+
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
