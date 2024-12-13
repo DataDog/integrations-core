@@ -11,6 +11,7 @@ from datadog_checks.duckdb import DuckdbCheck
 
 def test_check(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+    instance = {'db_name': '/Users/hadhemi.samaali/go/src/github.com/DataDog/integrations-core/duckdb/tests/data/sample.db'}
     check = DuckdbCheck('duckdb', {}, [instance])
     dd_run_check(check)
 
