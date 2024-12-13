@@ -11,13 +11,13 @@ from .base import SqlserverDatabaseMetricsBase
 INDEX_USAGE_STATS_QUERY = {
     "name": "sys.dm_db_index_usage_stats",
     "query": """
-SELECT
+    SELECT
          DB_NAME(ixus.database_id) as db,
          CASE
             WHEN ind.name IS NULL THEN 'HeapIndex_' + OBJECT_NAME(ind.object_id)
             ELSE ind.name
          END AS index_name,
-         OBJECT_SCHEMA_NAME(ind.object_id, ixus.database_id) as schema_name,
+         OBJECT_SCHEMA_NAME(ind.object_id, ixus.database_id) as "schema",
          OBJECT_NAME(ind.object_id) as table_name,
         user_seeks,
         user_scans,
@@ -32,7 +32,7 @@ SELECT
     "columns": [
         {"name": "db", "type": "tag"},
         {"name": "index_name", "type": "tag"},
-        {"name": "schema_name", "type": "tag"},
+        {"name": "schema", "type": "tag"},
         {"name": "table", "type": "tag"},
         {"name": "index.user_seeks", "type": "monotonic_count"},
         {"name": "index.user_scans", "type": "monotonic_count"},
