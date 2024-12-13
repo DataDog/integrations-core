@@ -833,7 +833,7 @@ def test_sqlserver_index_usage_metrics(
             ('msdb', 'PK__backupse__21F79AAB9439648C', 'dbo', 'backupset', 0, 1, 0, 0),
         ],
         [
-            ('datadog_test-1', 'idx_something', None, 'some_table', 10, 60, 12, 18),
+            ('datadog_test-1', 'idx_something', 'dbo', 'some_table', 10, 60, 12, 18),
             ('datadog_test-1', 'idx_something_else', 'dbo', 'some_table', 20, 30, 40, 50),
         ],
     ]
@@ -870,12 +870,12 @@ def test_sqlserver_index_usage_metrics(
         tags = sqlserver_check._config.tags
         for result in mocked_results:
             for row in result:
-                db, index_name, schema_name, table, *metric_values = row
+                db, index_name, schema, table, *metric_values = row
                 metrics = zip(index_usage_metrics.metric_names()[0], metric_values)
                 expected_tags = [
                     f'db:{db}',
                     f'index_name:{index_name}',
-                    f'schema_name:{schema_name}',
+                    f'schema:{schema}',
                     f'table:{table}',
                 ] + tags
                 for metric_name, metric_value in metrics:
