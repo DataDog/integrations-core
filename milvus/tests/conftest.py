@@ -11,13 +11,15 @@ from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from . import common
 
+SCRIPT_COMPLETION_STR = "Setup complete"
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = common.COMPOSE_FILE
     conditions = [
-        CheckDockerLogs(identifier='caddy', patterns=['server running']),
         CheckEndpoints(common.MOCKED_INSTANCE["openmetrics_endpoint"]),
+        CheckDockerLogs("script-runner", SCRIPT_COMPLETION_STR)
     ]
     logging.info(conditions)
     with docker_run(compose_file, conditions=conditions):

@@ -19,7 +19,7 @@ MOCKED_INSTANCE = {
     'tags': ['test:tag'],
 }
 
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+COMPOSE_FILE = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
 STANDALONE_TEST_METRICS = {
     'milvus.go.gc_duration_seconds.quantile': 'gauge',
