@@ -24,9 +24,7 @@ Use out-of-the-box dashboards to gain detailed insights into system events, netw
 
 ## Setup
 
-### Configuration
-
-#### Get Credentials of Trend Micro Vision One Endpoint Security
+### Generate API Credentials in Trend Micro Vision One Endpoint Security
 
 1. Log in to the Trend Micro Vision One console.
 2. Go to **Endpoint Security** (Sidebar) > **Standard Endpoint Protection** > **Administration** > **Settings** > **Automation API Access Settings**.
@@ -40,18 +38,23 @@ Use out-of-the-box dashboards to gain detailed insights into system events, netw
    2. **Communication time-out**: Select 120 seconds for a request to reach Apex Central after the application generates the request.
 6. Click **Save**.
 
-#### Get Timezone of Trend Micro Vision One console
+### Get Timezone of Trend Micro Vision One console
 
 1. Log in to the Trend Micro Vision One console.
 2. Go to **Administration** (Sidebar) > **Console Settings** > **Time Zone**.
 3. Check the **Timezone** from **Current console time**.
 
-#### Add your Trend Micro Vision One Endpoint Security credentials
+### Connect your Trend Micro Vision One Endpoint Security Account to Datadog
 
-- API Host
-- Application ID
-- API Key
-- Time Zone (This timezone should be the same as the Trend Vision One console.)
+1. Add your API Host, Application ID, API Key and select the Time Zone from the dropdown.
+   | Parameters     | Description                                                             |
+   | -------------- | ----------------------------------------------------------------------- |
+   | API Host       | The API Host of Trend Micro Vision One Endpoint Security console.       |
+   | Application ID | The Application ID of Trend Micro Vision One Endpoint Security console. |
+   | API Key        | The API Key of of Trend Micro Vision One Endpoint Security console.     |
+   | Time Zone      | The Time Zone of the Trend Micro Vision One console.                    |
+
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
