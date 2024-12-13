@@ -4,7 +4,6 @@
 import mock
 import pytest
 from clickhouse_driver.errors import Error, NetworkError
-from six import PY3
 
 from datadog_checks.clickhouse import ClickhouseCheck, queries
 
@@ -30,6 +29,8 @@ def test_config(instance):
             sync_request_timeout=10,
             compression=False,
             secure=False,
+            ca_certs=None,
+            verify=True,
             settings={},
             client_name='datadog-test-clickhouse',
         )
@@ -65,9 +66,7 @@ def test_error_query(instance, dd_run_check):
     ids=['SystemMetrics', 'SystemEvents'],
 )
 def test_latest_metrics_supported(metrics, ignored_columns, metric_source_url):
-    # While we're here, also check key order
-    if PY3:
-        assert list(metrics) == sorted(metrics)
+    assert list(metrics) == sorted(metrics)
 
     described_metrics = parse_described_metrics(metric_source_url)
 

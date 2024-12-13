@@ -21,6 +21,7 @@ from datadog_checks.mongo.collectors import (
     FsyncLockCollector,
     HostInfoCollector,
     IndexStatsCollector,
+    ProcessStatsCollector,
     ReplicaCollector,
     ReplicationOpLogCollector,
     ServerStatusCollector,
@@ -32,6 +33,7 @@ from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
 from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import (
     SERVICE_CHECK_NAME,
+    HostingType,
     MongosDeployment,
     ReplicaSetDeployment,
     StandaloneDeployment,
@@ -50,14 +52,6 @@ except ImportError:
     from ..stubs import datadog_agent
 
 long = int
-
-
-class HostingType:
-    ATLAS = "mongodb-atlas"
-    ALIBABA_APSARADB = "alibaba-apsaradb"
-    DOCUMENTDB = "amazon-documentdb"
-    SELF_HOSTED = "self-hosted"
-    UNKNOWN = "unknown"
 
 
 class MongoDb(AgentCheck):
@@ -90,7 +84,7 @@ class MongoDb(AgentCheck):
 
     def __init__(self, name, init_config, instances=None):
         super(MongoDb, self).__init__(name, init_config, instances)
-        self._config = MongoConfig(self.instance, self.log)
+        self._config = MongoConfig(self.instance, self.log, self.init_config)
 
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
@@ -99,9 +93,11 @@ class MongoDb(AgentCheck):
         self.metrics_to_collect = self._build_metric_list_to_collect()
         self.collectors = []
         self.last_states_by_server = {}
+        self.metrics_last_collection_timestamp = {}
 
         self.deployment_type = None
         self._mongo_version = None
+        self._mongo_modules = None
         self._resolved_hostname = None
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -140,6 +136,7 @@ class MongoDb(AgentCheck):
             FsyncLockCollector(self, tags),
             ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
             HostInfoCollector(self, tags),
+            ProcessStatsCollector(self, tags),
         ]
         if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
@@ -250,9 +247,16 @@ class MongoDb(AgentCheck):
         '''
         Return the internal resource tags for the database instance.
         '''
-        if not self._resolved_hostname:
-            return []
-        return [f"dd.internal.resource:database_instance:{self._resolved_hostname}"]
+        tags = []
+        if self._resolved_hostname:
+            tags.append(f"dd.internal.resource:database_instance:{self._resolved_hostname}")
+        if self._config.cloud_metadata:
+            aws = self._config.cloud_metadata.get('aws')
+            if instance_endpoint := aws.get('instance_endpoint'):
+                tags.append(f"dd.internal.resource:aws_docdb_instance:{instance_endpoint}")
+            if cluster_identifier := aws.get('cluster_identifier'):
+                tags.append(f"dd.internal.resource:aws_docdb_cluster:{cluster_identifier}")
+        return tags
 
     def _get_tags(self, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)
@@ -263,15 +267,21 @@ class MongoDb(AgentCheck):
             tags.extend(self.deployment_type.replset_tags)
         return tags
 
+    def _get_service_check_tags(self):
+        tags = deepcopy(self._config.service_check_tags)
+        if self._resolved_hostname:
+            tags.append(f"database_instance:{self._resolved_hostname}")
+        return tags
+
     def check(self, _):
         try:
             self._refresh_metadata()
             self._refresh_deployment()
             self._collect_metrics()
+            self._send_database_instance_metadata()
 
             # DBM
             if self._config.dbm_enabled:
-                self._send_database_instance_metadata()
                 self._operation_samples.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._slow_operations.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
@@ -283,16 +293,22 @@ class MongoDb(AgentCheck):
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._config.service_check_tags)
 
     def _refresh_metadata(self):
-        if self._mongo_version is None:
-            self.log.debug('No mongo_version metadata present, refreshing it.')
-            self._mongo_version = self.api_client.server_info().get('version', '0.0')
+        if self._mongo_version is None or self._mongo_modules is None:
+            self.log.debug('No mongo_version or mongo_module metadata present, refreshing it.')
+            server_info = self.api_client.server_info()
+            self._mongo_version = server_info.get('version', '0.0')
             self._mongo_version_parsed = Version(self._mongo_version.split("-")[0])
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
+            self._mongo_modules = server_info.get('modules', [])
+            self.set_metadata('modules', ','.join(self._mongo_modules))
+            self.log.debug('modules: %s', self._mongo_modules)
         if self._resolved_hostname is None:
             self._resolved_hostname = self._config.reported_database_hostname or self.api_client.hostname
             self.set_metadata('resolved_hostname', self._resolved_hostname)
             self.log.debug('resolved_hostname: %s', self._resolved_hostname)
+        if self._config.cluster_name:
+            self.set_metadata('cluster_name', self._config.cluster_name)
 
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
@@ -360,7 +376,10 @@ class MongoDb(AgentCheck):
         if self._resolved_hostname not in self._database_instance_emitted:
             # DO NOT emit with internal resource tags, as the metadata event is used to CREATE the databse instance
             tags = self._get_tags()
-            mongodb_instance_metadata = {"cluster_name": self._config.cluster_name} | deployment.instance_metadata
+            mongodb_instance_metadata = {
+                "cluster_name": self._config.cluster_name,
+                "modules": self._mongo_modules,
+            } | deployment.instance_metadata
             database_instance = {
                 "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),

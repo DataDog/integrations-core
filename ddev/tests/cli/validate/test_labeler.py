@@ -4,7 +4,6 @@
 import os
 
 import pytest
-import yaml
 
 
 @pytest.mark.parametrize('repo_fixture', ['fake_extras_repo', 'fake_marketplace_repo'])
@@ -113,7 +112,8 @@ def test_labeler_sync_add_integration_in_config(fake_repo, ddev):
 
 def test_labeler_fix_existing_integration_in_config(fake_repo, ddev):
     (fake_repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml').write_text(
-        """changelog/no-changelog:
+        """\
+changelog/no-changelog:
 - any:
   - requirements-agent-release.txt
   - '*/__about__.py'
@@ -129,7 +129,7 @@ integration/dummy2:
 - something
 release:
 - '*/__about__.py'
-    """,
+""",
     )
 
     result = ddev('validate', 'labeler', '--sync')
@@ -144,8 +144,7 @@ release:
 
 
 def labeler_test_config(integrations):
-    config = yaml.safe_load(
-        """
+    config = """\
 changelog/no-changelog:
 - any:
   - requirements-agent-release.txt
@@ -156,12 +155,16 @@ changelog/no-changelog:
   - '!ddev/src/**'
 integration/datadog_checks_tests_helper:
 - datadog_checks_tests_helper/**/*
+"""
+
+    for integration in integrations:
+        config += f"""\
+integration/{integration}:
+- {integration}/**/*
+"""
+    config += """\
 release:
 - '*/__about__.py'
 """
-    )
 
-    for integration in integrations:
-        config[f"integration/{integration}"] = [f"{integration}/**/*"]
-
-    return yaml.dump(config, default_flow_style=False, sort_keys=True)
+    return config

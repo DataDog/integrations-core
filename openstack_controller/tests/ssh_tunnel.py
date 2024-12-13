@@ -4,20 +4,14 @@
 from __future__ import absolute_import
 
 import os
+import subprocess
 from contextlib import contextmanager
-
-import psutil
-from six import PY3
 
 from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.dev.env import environment_run
+from datadog_checks.dev.ssh_tunnel import KillProcess
 from datadog_checks.dev.structures import LazyFunction, TempDir
 from datadog_checks.dev.utils import ON_WINDOWS, find_free_port, get_ip
-
-if PY3:
-    import subprocess
-else:
-    import subprocess32 as subprocess
 
 PID_FILE = 'ssh.pid'
 
@@ -134,19 +128,3 @@ class TCPTunnelUp(LazyFunction):
             WaitForPortListening(ip, local_port)()
 
             return ip, local_port
-
-
-class KillProcess(LazyFunction):
-    """Kill a process with the `pid_file` residing in the temporary directory `temp_name`."""
-
-    def __init__(self, temp_name, pid_file):
-        self.temp_name = temp_name
-        self.pid_file = pid_file
-
-    def __call__(self):
-        with TempDir(self.temp_name) as temp_dir:
-            with open(os.path.join(temp_dir, self.pid_file)) as pid_file:
-                pid = int(pid_file.read())
-                process = psutil.Process(pid)
-                process.kill()
-                return 0

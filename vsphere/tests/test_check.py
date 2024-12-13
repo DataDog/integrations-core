@@ -7,9 +7,8 @@ import logging
 import os
 import time
 
-import mock
 import pytest
-from mock import MagicMock
+from mock import MagicMock, mock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base import to_string
@@ -21,6 +20,13 @@ from tests.legacy.utils import mock_alarm_event
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
@@ -115,6 +121,7 @@ def test_external_host_tags(aggregator, realtime_instance):
     check.submit_external_host_tags()
     submitted_tags = check.set_external_tags.mock_calls[0].args[0]
     submitted_tags.sort(key=lambda x: x[0])
+    expected_tags.sort(key=lambda x: x[0])
     for ex, sub in zip(expected_tags, submitted_tags):
         ex_host, sub_host = ex[0], sub[0]
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']

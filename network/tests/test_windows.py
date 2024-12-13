@@ -16,14 +16,10 @@ import socket
 from collections import namedtuple
 
 import mock
-from six import PY3, iteritems
 
 from datadog_checks.network.check_windows import TCPSTATS, WindowsNetwork
 
 from . import common
-
-if PY3:
-    long = int
 
 
 @mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
@@ -49,6 +45,7 @@ def test_get_tcp_stats_failure():
 
 def test_get_tcp_stats(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
+    instance["collect_count_metrics"] = True
     check_instance = WindowsNetwork('network', {}, [instance])
 
     mock_stats = TCPSTATS(
@@ -103,12 +100,24 @@ def test_get_tcp_stats(aggregator):
         'system.net.tcp.out_resets': 28,
         'system.net.tcp.connections': 30,
     }
+    gauge_mets = [
+        'system.net.tcp4.connections',
+        'system.net.tcp4.current_established',
+        'system.net.tcp6.connections',
+        'system.net.tcp6.current_established',
+        'system.net.tcp.connections',
+        'system.net.tcp.current_established',
+    ]
 
     with mock.patch('datadog_checks.network.check_windows.WindowsNetwork._get_tcp_stats') as mock_get_tcp_stats:
         mock_get_tcp_stats.return_value = mock_stats  # Make _get_tcp_stats return my mock object
         check_instance.check({})
-        for name, value in iteritems(expected_mets):
-            aggregator.assert_metric(name, value=value)
+        for name, value in expected_mets.items():
+            if name in gauge_mets:
+                aggregator.assert_metric(name, value=value, metric_type=aggregator.GAUGE)
+            else:
+                aggregator.assert_metric(name, value=value, metric_type=aggregator.RATE)
+                aggregator.assert_metric(name + '.count', value=value, metric_type=aggregator.MONOTONIC_COUNT)
 
 
 def test_check_psutil_no_collect_connection_state(aggregator):
@@ -230,7 +239,7 @@ def test_cx_state_psutil(aggregator):
         mock_psutil.net_connections.return_value = conn
         check_instance._setup_metrics({})
         check_instance._cx_state_psutil()
-        for _, m in iteritems(aggregator._metrics):
+        for m in aggregator._metrics.values():
             assert results[m[0].name] == m[0].value
 
 
@@ -240,8 +249,8 @@ def test_cx_counters_psutil(aggregator):
     )
     counters = {
         'Ethernet': snetio(
-            bytes_sent=long(3096403230),
-            bytes_recv=long(3280598526),
+            bytes_sent=int(3096403230),
+            bytes_recv=int(3280598526),
             packets_sent=6777924,
             packets_recv=32888147,
             errin=0,
@@ -262,7 +271,7 @@ def test_cx_counters_psutil(aggregator):
     with mock.patch('datadog_checks.network.check_windows.psutil') as mock_psutil:
         mock_psutil.net_io_counters.return_value = counters
         check_instance._cx_counters_psutil()
-        for _, m in iteritems(aggregator._metrics):
+        for m in aggregator._metrics.values():
             assert 'device:Ethernet' in m[0].tags
             if 'bytes_rcvd' in m[0].name:
                 assert m[0].value == 3280598526

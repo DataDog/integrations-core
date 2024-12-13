@@ -47,3 +47,20 @@ METRIC_MAP = {
     'DCGM_FI_PROF_SM_ACTIVE': 'sm_active',
     'DCGM_FI_PROF_SM_OCCUPANCY': 'sm_occupancy',
 }
+
+RENAME_LABELS_MAP = {
+    # Assign the label values as these default tags to make it easier to graph and filter.
+    # Since these are exposed from the dcgm exporter, these tags by default point to the exporter
+    # instead of the pod that submitted these metrics to the exporter.
+    'namespace': 'kube_namespace',
+    'pod': 'pod_name',
+    'container': 'kube_container_name',
+}
+
+IGNORED_TAGS = [
+    # Since were using the map to add these tags, we need to disable these from the autodiscovery
+    # feature.
+    "kube_namespace:.*",
+    "pod_name:.*",
+    "kube_container_name:.*",
+]

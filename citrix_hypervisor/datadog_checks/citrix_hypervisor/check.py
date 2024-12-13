@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List  # noqa: F401
+from xmlrpc.client import ServerProxy
 
 import yaml
-from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.ddyaml import yaml_load_force_loader
@@ -94,7 +94,7 @@ class CitrixHypervisorCheck(AgentCheck):
         master_address = session['ErrorDescription'][1]
         if not master_address.startswith('http://'):
             master_address = 'http://' + master_address
-        master_xenserver = xmlrpclib.Server(master_address)
+        master_xenserver = ServerProxy(master_address)
 
         # Master credentials can be different, we could specify new `master_username` and
         # `master_password` options later if requested
@@ -109,7 +109,7 @@ class CitrixHypervisorCheck(AgentCheck):
     def open_session(self):
         # type: () -> Dict[str, str]
         try:
-            self.xenserver = xmlrpclib.Server(self._base_url)
+            self.xenserver = ServerProxy(self._base_url)
         except Exception as e:
             self.log.warning(str(e))
             return {}

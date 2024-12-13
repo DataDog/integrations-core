@@ -1,6 +1,6 @@
-# CHANGELOG - sophos_central_cloud
+# CHANGELOG - sophos-central-cloud
 
-## 1.0.0 / 2024-06-17
+## 1.0.0 / 2024-06-30
 
 ***Added***:
 

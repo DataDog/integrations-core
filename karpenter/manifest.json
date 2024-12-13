@@ -54,7 +54,7 @@
       "Karpenter Overview": "assets/dashboards/karpenter_overview.json"
     },
     "monitors": {
-      "pod states": "assets/monitors/pod_state.json"
+      "High percentage of pods reporting in a non Running or non Succeeded state": "assets/monitors/pod_state.json"
     },
     "saved_views": {
       "Karpenter Overview": "assets/saved_views/karpenter_overview.json",

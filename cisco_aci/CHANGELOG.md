@@ -2,6 +2,63 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2024-10-31
+
+***Added***:
+
+* [NDM] [Cisco ACI] Utilize raw ID for interface metadata ([#18842](https://github.com/DataDog/integrations-core/pull/18842))
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Improve integration performance ([#18747](https://github.com/DataDog/integrations-core/pull/18747))
+
+## 4.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+* [NDM] [Cisco ACI] Add check metrics ([#18748](https://github.com/DataDog/integrations-core/pull/18748))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Security***:
+
+* Bump version of cryptography to 43.0.1 to address vulnerability ([#18656](https://github.com/DataDog/integrations-core/pull/18656))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
+## 2.12.0 / 2024-09-06
+
+***Added***:
+
+* Add the ability to tag Cisco ACI device and interface metrics with user-defined tags. ([#18496](https://github.com/DataDog/integrations-core/pull/18496))
+
+## 2.11.0 / 2024-09-05
+
+***Added***:
+
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Use name instead of node ID as device hostname ([#18375](https://github.com/DataDog/integrations-core/pull/18375))
+
+## 2.10.2 / 2024-09-02 / Agent 7.57.0
+
+***Fixed***:
+
+* [NDM] [Cisco ACI] Use actual int for interface index ([#18414](https://github.com/DataDog/integrations-core/pull/18414))
+
 ## 2.10.1 / 2024-08-20
 
 ***Fixed***:
@@ -15,7 +72,7 @@
 * [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
 * [NDM] [Cisco ACI] Add common NDM tags to metrics ([#18017](https://github.com/DataDog/integrations-core/pull/18017))
 * [NDM] [Cisco ACI] Add config flag for enabling sending metadata to NDM ([#18099](https://github.com/DataDog/integrations-core/pull/18099))
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 2.9.0 / 2024-07-05 / Agent 7.56.0
 

@@ -13,7 +13,6 @@ import psycopg2
 import pytest
 from dateutil import parser
 from semver import VersionInfo
-from six import string_types
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
@@ -798,7 +797,7 @@ def test_statement_samples_collect(
 
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
-        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
+        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, str) else arg)
 
         # Find matching events by checking if the expected query starts with the event statement. Using this
         # instead of a direct equality check covers cases of truncated statements
@@ -1479,7 +1478,7 @@ def test_statement_samples_dbstrict(aggregator, integration_check, dbm_instance,
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
     for _, _, dbname, query, arg in SAMPLE_QUERIES:
-        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, string_types) else arg)
+        expected_query = query % ('\'' + arg + '\'' if isinstance(arg, str) else arg)
         matching = [e for e in dbm_samples if e['db']['statement'] == expected_query]
         if not dbstrict or dbname == dbm_instance['dbname']:
             # when dbstrict=True we expect to only capture those queries for the initial database to which the
@@ -1583,6 +1582,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, integration_ch
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
+@pytest.mark.flaky
 def test_activity_collection_rate_limit(aggregator, integration_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.2

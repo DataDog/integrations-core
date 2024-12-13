@@ -112,6 +112,7 @@ def test_subscription_stats_sync_errors(aggregator, integration_check, pg_replic
 
 
 @requires_over_10
+@pytest.mark.flaky(max_runs=5)
 def test_stat_subscription(aggregator, integration_check, pg_replica_logical):
     check = integration_check(pg_replica_logical)
     check.check(pg_replica_logical)

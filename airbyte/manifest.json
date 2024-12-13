@@ -50,7 +50,7 @@
       "airbyte_overview": "assets/dashboards/airbyte_overview.json"
     },
     "monitors": {
-      "long_running_jobs": "assets/monitors/long_running_jobs.json"
+      "Sync Jobs are taking a longer time than usual": "assets/monitors/long_running_jobs.json"
     }
   },
   "author": {

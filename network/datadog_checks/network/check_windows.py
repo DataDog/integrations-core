@@ -7,13 +7,10 @@ from ctypes import Structure, byref, windll
 from ctypes.wintypes import DWORD
 
 import psutil
-from six import PY3, iteritems
 
 from . import Network
 
 Iphlpapi = windll.Iphlpapi
-if PY3:
-    long = int
 
 
 class TCPSTATS(Structure):
@@ -82,7 +79,7 @@ class WindowsNetwork(Network):
             else:
                 metrics[metric] += 1
 
-        for metric, value in iteritems(metrics):
+        for metric, value in metrics.items():
             self.gauge(metric, value, tags=tags)
 
     def _cx_counters_psutil(self, tags=None):
@@ -90,7 +87,7 @@ class WindowsNetwork(Network):
         Collect metrics about interfaces counters using psutil
         """
         tags = [] if tags is None else tags
-        for iface, counters in iteritems(psutil.net_io_counters(pernic=True)):
+        for iface, counters in psutil.net_io_counters(pernic=True).items():
             metrics = {
                 'bytes_rcvd': counters.bytes_recv,
                 'bytes_sent': counters.bytes_sent,
@@ -131,6 +128,11 @@ class WindowsNetwork(Network):
             'dwOutRsts': '.out_resets',
             'dwNumConns': '.connections',
         }
+        # similar to the linux check
+        nstat_metrics_gauge_names = [
+            '.connections',
+            '.current_established',
+        ]
 
         proto_dict = {}
         tcp4stats = self._get_tcp_stats(socket.AF_INET)
@@ -152,7 +154,10 @@ class WindowsNetwork(Network):
             for fieldname in tcpstats_dict:
                 fieldvalue = getattr(stats, fieldname)
                 metric_name = "system.net." + str(proto) + tcpstats_dict[fieldname]
-                self.submit_netmetric(metric_name, fieldvalue, tags)
+                if tcpstats_dict[fieldname] in nstat_metrics_gauge_names:
+                    self._submit_netmetric_gauge(metric_name, fieldvalue, tags)
+                else:
+                    self.submit_netmetric(metric_name, fieldvalue, tags)
 
     def _parse_protocol_psutil(self, conn):
         """

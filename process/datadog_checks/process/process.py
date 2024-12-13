@@ -10,7 +10,6 @@ import time
 from collections import defaultdict
 
 import psutil
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.platform import Platform
@@ -464,7 +463,7 @@ class ProcessCheck(AgentCheck):
             self.last_pid_cache_ts[self.name] = 0
             self.process_list_cache.reset()
 
-        for attr, mname in iteritems(ATTR_TO_METRIC):
+        for attr, mname in ATTR_TO_METRIC.items():
             vals = [x for x in proc_state[attr] if x is not None]
             # skip []
             if vals:
@@ -480,7 +479,7 @@ class ProcessCheck(AgentCheck):
                     if mname in ['ioread_bytes', 'iowrite_bytes']:
                         self.monotonic_count('system.processes.{}_count'.format(mname), sum_vals, tags=tags)
 
-        for attr, mname in iteritems(ATTR_TO_METRIC_RATE):
+        for attr, mname in ATTR_TO_METRIC_RATE.items():
             vals = [x for x in proc_state[attr] if x is not None]
             if vals:
                 self.rate('system.processes.{}'.format(mname), sum(vals), tags=tags)

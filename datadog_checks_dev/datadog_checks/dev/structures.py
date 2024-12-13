@@ -6,14 +6,11 @@ import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
-import six
-
 from ._env import e2e_active, get_env_vars, remove_env_vars, set_env_vars, tear_down_env
 from .warn import warning
 
 
-@six.add_metaclass(abc.ABCMeta)
-class LazyFunction(object):
+class LazyFunction(abc.ABC):
     """Abstract base class for lazy function calls."""
 
     @abc.abstractmethod

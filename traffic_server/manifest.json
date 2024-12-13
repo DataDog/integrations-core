@@ -56,8 +56,8 @@
       "Traffic Server - Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Traffic Server] 4xx Errors higher than usual": "assets/monitors/4xx.json",
-      "[Traffic Server] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+      "4xx errors number is high": "assets/monitors/4xx.json",
+      "5xx errors number is high": "assets/monitors/5xx.json"
     },
     "saved_views": {
       "traffic_server_error_logs": "assets/saved_views/traffic_server_error_logs.json",
