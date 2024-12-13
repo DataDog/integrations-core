@@ -460,11 +460,14 @@ class SparkCheck(AgentCheck):
         """
         for app_id, (app_name, tracking_url) in running_apps.items():
 
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'executors'
-            )
-
+            try:
+                base_url = self._get_request_url(tracking_url)
+                response = self._rest_request_to_json(
+                    base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'executors'
+                )
+            except JSONDecodeError as e: # We don't want to skip other apps if there is an error in this one.
+                self.log.warning("Exception happened when getting metrics for %s: %s", app_id, e)
+                continue
             tags = ['app_name:%s' % str(app_name)]
             tags.extend(addl_tags)
 
@@ -490,11 +493,14 @@ class SparkCheck(AgentCheck):
         """
         for app_id, (app_name, tracking_url) in running_apps.items():
 
-            base_url = self._get_request_url(tracking_url)
-            response = self._rest_request_to_json(
-                base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'storage/rdd'
-            )
-
+            try:
+                base_url = self._get_request_url(tracking_url)
+                response = self._rest_request_to_json(
+                    base_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, addl_tags, app_id, 'storage/rdd'
+                )
+            except JSONDecodeError as e: # We don't want to skip other apps if there is an error in this one.
+                self.log.warning("Exception happened when getting metrics for %s: %s", app_id, e)
+                continue
             tags = ['app_name:%s' % str(app_name)]
             tags.extend(addl_tags)
 
@@ -524,7 +530,7 @@ class SparkCheck(AgentCheck):
                 # NOTE: If api call returns response 404
                 # then it means that the application is not a streaming application, we should skip metric submission
                 if e.response.status_code != 404:
-                    raise
+                    continue
 
     def _spark_structured_streams_metrics(self, running_apps, addl_tags):
         """
