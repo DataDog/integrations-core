@@ -16,7 +16,7 @@
 * Fix crash in DBM operation samples collection when a node is in recovering mode. ([#19080](https://github.com/DataDog/integrations-core/pull/19080))
 * Resolved deprecation warning for `collStats` by using `$collStats` aggregation pipeline to collect oplog size in MongoDB 6.2+. ([#19133](https://github.com/DataDog/integrations-core/pull/19133))
 
-## 8.2.1 / 2024-11-06
+## 8.2.1 / 2024-11-06 / Agent 7.60.0
 
 ***Fixed***:
 
