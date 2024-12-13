@@ -1241,7 +1241,6 @@
                 {
                   "formulas": [
                     {
-                      "alias": "Operation",
                       "formula": "query1"
                     }
                   ],
