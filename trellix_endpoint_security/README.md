@@ -10,12 +10,10 @@ This integration provides enrichment and visualization for above mentioned event
 
 ## Setup
 
-### Configuration
-
-#### Get Credentials of Trellix Endpoint Security
+### Generate API Credentials in Trellix Endpoint Security
 
 1. Log in to the Trellix ePO Saas.
-2. Navigate to the **Trellix Developer Portal[2]**.
+2. Navigate to the **[Trellix Developer Portal][2]**.
 3. Under **Self-Service**, select **API Access Management**.
 4. In the **Credential Configurations** section, provide the following details:
    - **Client Type**: Enter a descriptive and identifiable name.
@@ -25,11 +23,16 @@ This integration provides enrichment and visualization for above mentioned event
 6. When your credentials are available, generate your Client credentials by clicking **Generate** under **Create Client Credentials**.
 7. Copy the API key from **Access Management**, along with the Client ID and Client Secret, from **Create Client Credentials**.
 
-#### Add your Trellix Endpoint Security credentials
+### Connect your Trellix Endpoint Security Account to Datadog
 
-- Client ID
-- Client Secret
-- API Key
+1. Add your Client ID, Client Secret, and API Key.
+   | Parameters    | Description                            |
+   | ------------- | -------------------------------------- |
+   | Client ID     | The Client ID of Trellix ePO SaaS.     |
+   | Client Secret | The Client Secret of Trellix ePO SaaS. |
+   | API Key       | The API Key of Trellix ePO SaaS.       |
+
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
