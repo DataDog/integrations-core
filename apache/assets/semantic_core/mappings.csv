@@ -1,0 +1,18 @@
+otel,dd,description,filter
+apache.cpu.load,apache.performance.cpu_load,Current load of the CPU.,
+apache.current_connections,apache.conns_total,The number of active connections currently attached to the HTTP server.,
+apache.requests,apache.net.request_per_s,The number of requests serviced by the HTTP server per second.,
+apache.scoreboard,apache.scoreboard.sending_reply,The number of workers in each state.,`state`: `sending`
+apache.scoreboard,apache.scoreboard.reading_request,The number of workers in each state.,`state`: `reading`
+apache.scoreboard,apache.scoreboard.open_slot,The number of workers in each state.,`state`: `open`
+apache.scoreboard,apache.scoreboard.logging,The number of workers in each state.,`state`: `logging`
+apache.scoreboard,apache.scoreboard.keepalive,The number of workers in each state.,`state`: `keepalive`
+apache.scoreboard,apache.scoreboard.idle_cleanup,The number of workers in each state.,`state`: `idle_cleanup`
+apache.scoreboard,apache.scoreboard.gracefully_finishing,The number of workers in each state.,`state`: `finishing`
+apache.scoreboard,apache.scoreboard.dns_lookup,The number of workers in each state.,`state`: `dnslookup`
+apache.scoreboard,apache.scoreboard.closing_connection,The number of workers in each state.,`state`: `closing`
+apache.scoreboard,apache.scoreboard.starting_up,The number of workers in each state.,`state`: `starting`
+apache.scoreboard,apache.scoreboard.waiting_for_connection,The number of workers in each state.,`state`: `waiting`
+apache.uptime,apache.performance.uptime,The amount of time that the server has been running in seconds.,
+apache.workers,apache.performance.idle_workers,The number of workers currently attached to the HTTP server.,`state`: `idle`
+apache.workers,apache.performance.busy_workers,The number of workers currently attached to the HTTP server.,`state`: `busy`
