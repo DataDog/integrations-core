@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from io import open
 from ipaddress import ip_address, ip_network
-from urllib.parse import quote, urlparse, urlunparse
+from urllib.parse import quote, urlparse, urlunparse, urljoin
 
 import requests
 import requests_unixsocket
@@ -923,6 +923,45 @@ class DCOSAuthTokenReader(object):
 
             return self._token
 
+class AuthTokenOIDCReader(object):
+    def __init__(self, config):
+        _url = config.get('url')
+        if not isinstance(_url, str):
+            raise ConfigurationError('The `url` setting of `auth_token` reader must be a string')
+        elif not _url:
+            raise ConfigurationError('The `url` setting of `auth_token` reader is required')
+
+        _role = config.get('role')
+        if not isinstance(_role, str):
+            raise ConfigurationError('The `role` setting of `auth_token` reader must be a string')
+        elif not _role:
+            raise ConfigurationError('The `role` setting of `auth_token` reader is required')
+
+        self._headers = config.get('headers') or {}
+        if not isinstance(self._headers, dict):
+            raise ConfigurationError('The `headers` setting of `auth_token` reader must be a dict')
+
+        self._token_url = urljoin(_url+"/", _role)
+
+        self._token = None
+        self._expiration = None
+
+    def read(self, **request):
+        if self._token is None or get_timestamp() >= self._expiration or 'error' in request:
+            resp = requests.get(self._token_url, headers=self._headers)
+            resp.raise_for_status()
+            try:
+                data = resp.json()['data']
+            except requests.exceptions.JSONDecodeError:
+                raise Exception("OIDC reader failed to parse token endpoint response")
+            except KeyError:
+                raise Exception("OIDC reader an invalid response")
+            
+            self._token = data['token']
+            self._expiration = get_timestamp() + data['ttl']
+
+            return self._token
+    
 
 class AuthTokenHeaderWriter(object):
     DEFAULT_PLACEHOLDER = '<TOKEN>'
@@ -958,6 +997,7 @@ AUTH_TOKEN_READERS = {
     'file': AuthTokenFileReader,
     'oauth': AuthTokenOAuthReader,
     'dcos_auth': DCOSAuthTokenReader,
+    'oidc': AuthTokenOIDCReader, 
 }
 AUTH_TOKEN_WRITERS = {'header': AuthTokenHeaderWriter}
 
