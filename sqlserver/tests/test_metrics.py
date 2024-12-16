@@ -255,6 +255,7 @@ def test_check_index_usage_metrics(
             'db:{}'.format(instance_docker_metrics['database']),
             'index_name:thingsindex',
             'table:ϑings',
+            'schema:dbo',
         ]
         aggregator.assert_metric(metric_name, tags=expected_tags, hostname=sqlserver_check.resolved_hostname, count=1)
 
