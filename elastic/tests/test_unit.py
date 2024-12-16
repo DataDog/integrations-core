@@ -11,7 +11,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
-from datadog_checks.elastic.metrics import stats_for_version
+from datadog_checks.elastic.metrics import INDEX_STATS_METRICS, stats_for_version
 
 from .common import URL, get_fixture_path
 
@@ -242,3 +242,33 @@ def test_v8_process_stats_data(aggregator, instance):
     aggregator.assert_metric(
         "elasticsearch.breakers.inflight_requests.estimated_size_in_bytes", metric_type=aggregator.GAUGE
     )
+
+
+def test__get_index_metrics_empty_key(aggregator, instance, mock_http_response):
+    mock_http_response(
+        json_data=[
+            {
+                # 'docs.count' is missing
+                'docs.deleted': '0',
+                'health': 'yellow',
+                'index': 'testindex',
+                'pri': '1',
+                'pri.store.size': '225',
+                'rep': '1',
+                'status': 'open',
+                'store.size': '225',
+                'uuid': 'AHSf1ILbSHucwl2X6og55g',
+            },
+        ]
+    )
+    check = ESCheck('elastic', {}, instances=[instance])
+    # Focus only on index metrics, so mock out index search stats.
+    check._get_index_search_stats = mock.MagicMock()
+
+    check._get_index_metrics(admin_forwarder=False, version=[8, 8, 2], base_tags=[])
+
+    for m in INDEX_STATS_METRICS:
+        if m == 'elasticsearch.index.docs.count':
+            aggregator.assert_metric(m, count=0)
+        else:
+            aggregator.assert_metric(m)
