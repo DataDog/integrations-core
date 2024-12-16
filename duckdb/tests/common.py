@@ -12,3 +12,4 @@ DB = os.path.join(HERE, DB_NAME)
 
 DEFAULT_INSTANCE = {'db_name': DB}
 
+METRICS_MAP = ['duckdb.worker_threads']

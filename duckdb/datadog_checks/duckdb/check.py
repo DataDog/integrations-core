@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-import time
 from contextlib import closing, contextmanager
 from copy import deepcopy
 from typing import Any, AnyStr, Iterable, Iterator, Sequence  # noqa: F401
@@ -28,7 +26,6 @@ class DuckdbCheck(AgentCheck):
         super(DuckdbCheck, self).__init__(name, init_config, instances)
 
         self.db_name = self.instance.get('db_name')
-        self.collect_profiling_data = self.instance.get('collect_profiling_data', False)
         self.tags = self.instance.get('tags', [])
         self._connection = None
         self._connect_params = None
@@ -42,28 +39,28 @@ class DuckdbCheck(AgentCheck):
             self._execute_query_raw,
             queries=manager_queries,
             tags=self.tags,
-            error_handler=self._executor_error_handler,
+            error_handler=self._query_errors,
         )
         self.check_initializations.append(self.initialize_config)
         self.check_initializations.append(self._query_manager.compile_queries)
 
-    def check(self, instance):
+    def check(self, _):
         try:
             with self.connect() as conn:
                 if conn:
                     self._connection = conn
                     self._query_manager.execute()
-            self.submit_health_checks()
+                    self.submit_health_checks()
         except Exception as e:
             self.service_check(SERVICE_CHECK_CONNECT, ServiceCheck.CRITICAL, tags=self._tags)
-            raise e
+            self.log.debug('Unable to connect to the database:  "%s"', e)
+            # raise e
 
     def _execute_query_raw(self, query):
         # type: (AnyStr) -> Iterable[Sequence]
         with closing(self._connection.cursor()) as cursor:
             query = query.format(self.db_name)
-            cursor.execute(query)
-            if cursor.rowcount < 1:
+            if len(cursor.fetchall()) < 1:  # this is returning a -1
                 self._query_errors += 1
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
                 return None
@@ -86,24 +83,20 @@ class DuckdbCheck(AgentCheck):
     @contextmanager
     def connect(self):
         conn = None
-        retries = 3
-        delay = 5
-        for _ in range(retries):
-            try:
-                # Try to establish the connection
-                conn = duckdb.connect(self.db_name)
-                self.log.info('Connected to DuckDB database.')
-                yield conn
-            except Exception as e:
-                if 'Conflicting lock' in str(e):
-                    self.log.error('Lock conflict detected, retrying in %s seconds...', delay)
-                    time.sleep(delay)
-                else:
-                    self.log.error('Unable to connect to DuckDB database. %s.', e)
-                    raise e
-            finally:
-                if conn:
-                    conn.close()
+        try:
+            # Try to establish the connection
+            conn = duckdb.connect(self.db_name)
+            self.log.info('Connected to DuckDB database.')
+            yield conn
+        except Exception as e:
+            if 'Conflicting lock' in str(e):
+                self.log.error('Lock conflict detected')
+            else:
+                self.log.error('Unable to connect to DuckDB database. %s.', e)
+                raise e
+        finally:
+            if conn:
+                conn.close()
 
     def initialize_config(self):
         self._connect_params = self.db_name
@@ -147,5 +140,7 @@ class DuckdbCheck(AgentCheck):
 
     def _executor_error_handler(self, error):
         # type: (AnyStr) -> AnyStr
+        self.log.debug('Error from query "%s"', error)
+
         self._query_errors += 1
         return error

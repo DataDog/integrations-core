@@ -14,25 +14,10 @@ init_config:
 instances:
 
     ## @param db_name - string - required
-    ## The database to connect to.
+    ## The database to connect to (file path).
     ## NOTE: DuckDB databases are stored as files.
     #
-  - db_name: my_database.db
-
-    ## @param username - string - optional - default: datadog
-    ## The Datadog username created to connect to DuckDB.
-    #
-    # username: datadog
-
-    ## @param password - string - optional
-    ## The password associated with the Datadog user.
-    #
-    # password: <PASSWORD>
-
-    ## @param collect_profiling_data - boolean - optional - default: false
-    ## This option is used if the query profiling is enabled for you database.
-    #
-    # collect_profiling_data: false
+  - db_name: /path-to-file/my_database.db
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
