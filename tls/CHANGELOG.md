@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0-beta.1 / 2024-12-16
+
+***Added***:
+
+* Allow for different TLS Ciphers to be included or excluded. ([#19270](https://github.com/DataDog/integrations-core/pull/19270))
+
 ## 4.0.0 / 2024-10-04
 
 ***Removed***:
