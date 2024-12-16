@@ -24,6 +24,11 @@ facets:
     source: log
   - groups:
       - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
     name: User ID
     path: usr.id
     source: log
