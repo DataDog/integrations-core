@@ -24,7 +24,7 @@
 * Fix duplicate deadlock events ([#19139](https://github.com/DataDog/integrations-core/pull/19139))
 * Fix poor query signature correlation for deadlocks. ([#19142](https://github.com/DataDog/integrations-core/pull/19142))
 
-## 20.1.1 / 2024-11-25
+## 20.1.1 / 2024-11-25 / Agent 7.60.0
 
 ***Fixed***:
 
