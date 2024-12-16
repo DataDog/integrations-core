@@ -23,9 +23,9 @@ You can use the credentials of a Plivo subaccount to retrieve data specific to t
 
 1. Sign in to [Plivo][2] using an Owner, Admin or Developer account.
 2. Navigate to **Account** > **Settings** > **Subaccounts**.
-3. Copy the **Auth ID** and **Auth Token** of the subaccount for you want to use.
+3. Copy the **Auth ID** and **Auth Token** of the subaccount that you want to use.
 
-#### Message Expiry Time (Optional)
+### Message Expiry Time (Optional)
 
 - Set the "message expiry time" parameter in seconds in Datadog to match the message expiry time configured in Plivo. Ensure the expiry time remains synchronized with the configuration in Plivo to avoid fetching unsettled messages. The default value is 3 hours (10,800 seconds). Message ingestion into Datadog will be delayed by this duration to ensure only settled messages are fetched. Settled messages are fully processed and finalized, while unsettled messages are still in the queue. See [Message Expiry][4] to learn more.
 
