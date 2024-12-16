@@ -9,19 +9,16 @@ The GoDaddy integration collects metrics from SSL certificates and their domains
 
 ### Generate API credentials in GoDaddy
 
-#### Find your GoDaddy API key and API secret
-
 - Navigate to the [GoDaddy Developer Portal][1].
 - Sign in with your GoDaddy account.
-- Select "API Keys."
-- Choose "Create New API Key."
+- Select "API Keys".
+- Choose "Create New API Key".
 - Provide a name for your API.
 - Select "Production" under Environment.
-- Click "Next." Your API Key is now created.
-- Copy these credentials for the following configuration steps.
-- After storing your API Key and Secret, click on "Got It."
+- Click "Next". Your API Key is now created.
+- Click on "Got It".
 
-#### Find your GoDaddy customer number
+### Find your GoDaddy customer number
 
 - Go to your GoDaddy [Login & PIN page][2]. You might be prompted to sign in.
 - Under **Login Info**, find your **Customer number** (also known as your **shopper ID**).
