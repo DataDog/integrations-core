@@ -1,4 +1,4 @@
-# Freshservice Integration For Datadog
+# Freshservice
 
 ## Overview
 
@@ -6,32 +6,27 @@
 
 This integration ingests the following logs:
 
-- Tickets: Case sheet detailing an issue's history, from the time it was reported until it was closed
+- Ticket: Represents case sheet detailing an issue's history, from the time it was reported until it was closed.
 
 The Freshservice integration seamlessly collects ticket logs from Freshservice, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into ticket logs through the out-of-the-box dashboards.
 
 ## Setup
 
-### Configuration
+### Generate API credentials in Freshservice
 
-#### Freshservice Configuration
-
-Steps to get API key:
-
-1. Log in to the [Freshservice][2] platform with your credentials.
+1. Log in to your [Freshservice account][2].
 2. Click your profile picture on the upper-right corner of the portal and select the Profile settings page. Your API key is displayed on the right-side section of the page.
 
-#### Freshservice Integration Configuration
+### Connect your Freshservice Account to Datadog
 
-Configure the Datadog endpoint to forward Freshservice events as logs to Datadog.
+1. Add your Freshservice API key.
 
-1. Navigate to Freshservice.
-2. Add your Freshservice API key.
+    | Parameters | Description                                                                |
+    | ----------------------- | --------------------------------------------------------------|
+    | Domain Name             | The Domain Name from Freshservice portal URL.                 |
+    | API Key                 | The Personal API key of Freshservice.                         |
 
-| Freshservice Parameters | Description                                                                |
-| ----------------------- | -------------------------------------------------------------------------- |
-| Domain Name             | The Domain Name from Freshservice portal URL                               |
-| API Key                 | The Personal API key of Freshservice  to authenticate the request          |
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
