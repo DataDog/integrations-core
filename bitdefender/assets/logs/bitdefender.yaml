@@ -310,6 +310,32 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - type: string-builder-processor
+          name: "%{params.events.sender} - in attribute sender_extracted"
+          enabled: true
+          template: "%{params.events.sender}"
+          target: sender_extracted
+          replaceMissing: true
+        - type: grok-parser
+          name: Extract senders
+          enabled: true
+          source: sender_extracted
+          samples:
+            - u@gmail.com,a@test.com
+            - a-ph@gmail.com
+          grok:
+            supportRules: ""
+            matchRules: sender_rule %{data:senders:array(",")}
+        - type: attribute-remapper
+          name: Map `senders` to `usr.email`
+          enabled: true
+          sources:
+            - senders
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Processing of Firewall logs
       enabled: true
@@ -338,6 +364,32 @@ pipeline:
             - computer_ips
           sourceType: attribute
           target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: "%{params.events.local_port} - in attribute local_port_extracted"
+          enabled: true
+          template: "%{params.events.local_port}"
+          target: local_port_extracted
+          replaceMissing: true
+        - type: grok-parser
+          name: Extract local_ports
+          enabled: true
+          source: local_port_extracted
+          samples:
+            - 80,80,
+            - "80"
+          grok:
+            supportRules: ""
+            matchRules: local_port_rule %{data:local_ports:array(",")}
+        - type: attribute-remapper
+          name: Map `local_ports` to `network.client.port`
+          enabled: true
+          sources:
+            - local_ports
+          sourceType: attribute
+          target: network.client.port
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -715,42 +767,3 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
-        - type: string-builder-processor
-          name: "%{params.events.severity} - in attribute severity_extracted"
-          enabled: true
-          template: "%{params.events.severity}"
-          target: severity_extracted
-          replaceMissing: true
-        - type: grok-parser
-          name: Extract severities
-          enabled: true
-          source: severity_extracted
-          samples:
-            - critical,high
-          grok:
-            supportRules: ""
-            matchRules: severity_rule %{data:severities:array(",")}
-        - name: Lookup for severities to severity
-          enabled: true
-          source: severities
-          target: severity
-          lookupTable: |-
-            critical,critical
-            high,error
-            medium,warning
-            low,info
-          type: lookup-processor
-    - type: geo-ip-parser
-      name: Extracting Geo Location from Client IP Address
-      enabled: true
-      sources:
-        - network.client.ip
-      target: network.client.geoip
-      ip_processing_behavior: do-nothing
-    - type: geo-ip-parser
-      name: Extracting Geo Location from Destination IP Address
-      enabled: true
-      sources:
-        - network.destination.ip
-      target: network.destination.geoip
-      ip_processing_behavior: do-nothing
