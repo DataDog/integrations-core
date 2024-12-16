@@ -18,9 +18,8 @@ The Sophos Central Cloud integration seamlessly collects all the above listed lo
 1. Log in to your [**Sophos Central account**][2].
 2. From Sophos Central Admin, go to **My Products** > **General Settings** > **API Credentials Management**.
 3. Click **Add Credential**.
-4. Provide a credential name, select the appropriate role, add an optional description, and click the **Add** button. The **API credential Summary** for this credential is displayed.
+4. Provide a credential name, select the appropriate role, add an optional description, and click the **Add** button. The API credential summary page with the client ID is displayed.
 5. Click **Show Client Secret** to display the **Client Secret**.
-6. Copy the **Client ID** and **Client Secret** and store them in a secure location.
 
 ### Connect your Sophos Central Cloud Account to Datadog
 

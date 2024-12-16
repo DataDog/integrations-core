@@ -15,8 +15,6 @@ The Palo Alto Cortex XDR integration seamlessly collects the data of Palo Alto C
 
 ### Generate API credentials in Palo Alto Cortex XDR
 
-#### Steps to generate API key
-
 1. Log in to your **Palo Alto Cortex XDR account**.
 2. Navigate to **Settings** > **Configurations** > **Integrations** > **API Keys**.
 3. Click on **New Key**.
@@ -25,14 +23,13 @@ The Palo Alto Cortex XDR integration seamlessly collects the data of Palo Alto C
 6. Provide a comment that describes the purpose for the API key, if desired.
 7. Select the desired level of access for this key from existing **Roles**, or you can select **Custom** to set the permissions granularly.
 8. Click **Generate** to generate the API key.
-9. Copy the API key, and then click **Done**. This value represents your unique **Authorization:{key}**
 
-#### Steps to get API Key ID
+### Get API Key ID of Palo Alto Cortex XDR
 
 1. In the API Keys table, locate the ID field.
 2. Note your corresponding ID number. This value represents the **x-xdr-auth-id:{key_id}** token.
 
-#### Steps to get FQDN
+### Get FQDN of Palo Alto Cortex XDR
 
 1. Right-click your API key and select **View Examples**.
 2. Copy the **CURL Example** URL. The example contains your unique **FQDN**.
