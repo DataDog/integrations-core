@@ -259,8 +259,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         # only call pg_blocking_pids as often as we collect activity snapshots
         if self._check.version >= V9_6 and report_activity:
             blocking_func = PG_BLOCKING_PIDS_FUNC
-        if report_activity:
-            cur_time_func = CURRENT_TIME_FUNC
+        cur_time_func = CURRENT_TIME_FUNC
         activity_columns = [activity_columns_mapping.get(col, col) for col in available_activity_columns]
         query = PG_STAT_ACTIVITY_QUERY.format(
             backend_type_predicate=backend_type_predicate,
