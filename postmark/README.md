@@ -1,3 +1,5 @@
+# Postmark
+
 ## Overview
 
 [Postmark][1] is an email delivery service for sending and tracking application emails. It offers a scalable alternative to traditional SMTP and provides essential metrics like sent, opened, bounced, and spam complaint rates. This enables efficient email management and monitoring.
@@ -6,9 +8,11 @@ To gain insights into Postmark's broadcast and transactional message streams, in
 
 ## Setup
 
-To configure the integration for Postmark broadcast and transactional message streams activity logs through a webhook, follow these steps.
+Follow the instructions below to configure this integration for your Postmark account.
+
 
 ### Configuration
+
 #### Enable open and link tracking in server settings for the message streams
 Follow these steps to enable both features:
 
@@ -18,7 +22,7 @@ Follow these steps to enable both features:
 4. In the Tracking section, enable both **Open tracking** and **Link tracking**.
 
 #### Webhook configuration steps for broadcast message streams
-Configure the Datadog endpoint to forward Postmark broadcast message streams activity logs to Datadog.
+Configure the Datadog endpoint to forward Postmark broadcast message streams activity logs to Datadog. See [Postmark Webhook Overview][2] for more details.
 
 1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
 2. Log in to your [Postmark account][3]. This redirects you to the [servers page][4].
@@ -30,9 +34,8 @@ Configure the Datadog endpoint to forward Postmark broadcast message streams act
 8. Choose the types of events you want to push to Datadog.
 9. Click **Save webhook**.
 
-
 #### Webhook configuration steps for transactional message streams
-Configure the Datadog endpoint to forward Postmark transactional message streams activity logs to Datadog.
+Configure the Datadog endpoint to forward Postmark transactional message streams activity logs to Datadog. See [Postmark Webhook Overview][2] for more details.
 
 1. Select an existing API key or create a new one by clicking one of the buttons below:<!-- UI Component to be added by DataDog team -->
 2. Log in to your [Postmark account][3]. This redirects you to the [servers page][4].
