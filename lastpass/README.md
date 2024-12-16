@@ -12,21 +12,13 @@ reporting events, while out-of-the-box detection rules enhance detection and res
 
 ## Setup
 
-### Get config parameters of LastPass
-
-#### Account number
+### Generate API credentials in LastPass
 
 1. Log in to the [Admin Console](https://admin.lastpass.com/) with your email address and master password.
-2. On the **Dashboard** tab, click the profile email located in the top right corner to find the account number.
-3. Alternatively, you can find the account number by navigating to **Advanced** > **Enterprise API**.
-
-#### Provisioning hash
-
-1. Log in to the [Admin Console](https://admin.lastpass.com) with your email address and master password.
 2. Navigate to **Advanced** > **Enterprise API**.
-3. From there, you can create or reset a provisioning hash if you forgot it.
+3. You can find the Account number and can create a Provisioning hash.
 
-#### Time zone
+### Get Timezone of LastPass
 
 1. The options in the **Time Zone** dropdown menu are based on LastPass' time zone values.
 2. You must select the time zone that is configured in your LastPass account.
