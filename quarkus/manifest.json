@@ -37,6 +37,9 @@
         "check": "quarkus.http_server.requests.seconds.max",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "java quarkus-run.jar"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
