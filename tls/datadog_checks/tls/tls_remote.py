@@ -60,10 +60,6 @@ class TLSRemoteCheck(object):
         with sock:
             self.log.debug('Getting cert and TLS protocol version')
             try:
-<<<<<<< HEAD
-                with self.agent_check.get_tls_context().wrap_socket(
-                    sock, server_hostname=self.agent_check._server_hostname
-=======
                 context = self.agent_check.get_tls_context()
                 ciphers = self.agent_check.instance.get('tls_ciphers', None)
                 if ciphers:
@@ -79,15 +75,12 @@ class TLSRemoteCheck(object):
                     context.set_ciphers(updated_ciphers)
                     self.log.debug('Set ciphers to %s', context.get_ciphers())
                     self.log.debug('Context options %s', context.options)
-                    self.log.debug('Context verify mode %s', context.verify_mode)
+                    self.log.debug('Context verify mode %s', context.verify_mode.name)
                     self.log.debug('Context check hostname %s', context.check_hostname)
                     self.log.debug('Context minimum version %s', context.minimum_version.name)
                     self.log.debug('Context maximum version %s', context.maximum_version.name)
-                with closing(
-                    self.agent_check.get_tls_context().wrap_socket(
-                        sock, server_hostname=self.agent_check._server_hostname
-                    )
->>>>>>> 35c606885a (beta testing tls)
+                with self.agent_check.get_tls_context().wrap_socket(
+                    sock, server_hostname=self.agent_check._server_hostname
                 ) as secure_sock:
                     protocol_version = secure_sock.version()
                     der_cert = secure_sock.getpeercert(binary_form=True)
