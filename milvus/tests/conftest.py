@@ -19,7 +19,7 @@ def dd_environment():
     compose_file = common.COMPOSE_FILE
     conditions = [
         CheckEndpoints(common.MOCKED_INSTANCE["openmetrics_endpoint"]),
-        CheckDockerLogs("script-runner", SCRIPT_COMPLETION_STR)
+        CheckDockerLogs("script-runner", SCRIPT_COMPLETION_STR),
     ]
     logging.info(conditions)
     with docker_run(compose_file, conditions=conditions):

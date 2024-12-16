@@ -390,7 +390,7 @@ STANDALONE_TEST_METRICS = {
     'milvus.search.topk.sum': 'monotonic_count',
     'milvus.search.topk.count': 'monotonic_count',
     'milvus.search.topk.bucket': 'monotonic_count',
-    }
+}
 
 OTHER_TEST_METRICS = {
     'milvus.datacoord.channel_checkpoint_unix_seconds': 'gauge',

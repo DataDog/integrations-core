@@ -218,7 +218,7 @@ METRIC_MAP = {
     'raw_compute_cnt': 'raw_compute_cnt',
     're_search_cnt': 're_search_cnt',
     'search_latency': 'search.latency',
-    'search_topk': 'search.topk'
+    'search_topk': 'search.topk',
 }
 
 RENAME_LABELS_MAP = {
