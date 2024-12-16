@@ -181,7 +181,7 @@ pipeline:
         supportRules: ""
         matchRules: message_id_rule %{regex("[A-Za-z]{3}"):event_type}%{integer}
     - type: grok-parser
-      name: Convert “Roles” field into an array
+      name: Convert `roles` field into an array
       enabled: true
       source: roles
       samples:
