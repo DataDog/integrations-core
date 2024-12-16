@@ -7,7 +7,7 @@ The Authorize.Net integration collects settled transaction logs and unsettled tr
 
 ## Setup
 
-### Get Login ID and Transaction Key from Authorize.Net
+### Generate Login ID and Transaction Key in Authorize.Net
 
 1. Visit the appropriate URL:
    - For a production environment, visit [login.authorize.net][2].
@@ -22,12 +22,16 @@ The Authorize.Net integration collects settled transaction logs and unsettled tr
 9. Click Continue to complete the process.
 
 ### Connect your Authorize.Net Account to Datadog
+
+1. Add your Login ID, Transaction Key and Environment Type
+
 |Parameters| Description                                                                                    |
 |--------------------|------------------------------------------------------------------------------------------------|
 |Login ID| Login ID of your Authorize.Net account.                                                        |
 |Transaction Key| Transaction Key of your Authorize.Net account.                                                 |
-|Environment Type| Dropdown to select the environment type of your Authorize.Net account. (Production or Sandbox) |
+|Environment Type| Dropdown to select the environment type of your Authorize.Net account (Production or Sandbox). |
 
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
