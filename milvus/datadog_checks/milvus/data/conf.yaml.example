@@ -180,7 +180,7 @@ instances:
     ## @param collect_histogram_buckets - boolean - optional - default: true
     ## Whether or not to send histogram buckets.
     #
-    # collect_histogram_buckets: false
+    # collect_histogram_buckets: true
 
     ## @param non_cumulative_histogram_buckets - boolean - optional - default: false
     ## Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.

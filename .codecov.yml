@@ -410,6 +410,10 @@ coverage:
         target: 75
         flags:
         - mesos_master
+      Milvus:
+        target: 75
+        flags:
+        - milvus
       MongoDB:
         target: 75
         flags:
@@ -1254,6 +1258,11 @@ flags:
     paths:
     - mesos_slave/datadog_checks/mesos_slave
     - mesos_slave/tests
+  milvus:
+    carryforward: true
+    paths:
+    - milvus/datadog_checks/milvus
+    - milvus/tests
   mongo:
     carryforward: true
     paths:
