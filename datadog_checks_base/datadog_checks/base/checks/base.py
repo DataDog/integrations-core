@@ -310,8 +310,31 @@ class AgentCheck(object):
         self.__logs_enabled = None
 
         if os.environ.get("GOFIPS", "0") == "1":
+            with open("/opt/datadog-agent/embedded/ssl/openssl_fips.cnf", "w") as f:
+                config = """
+config_diagnostics = 1
+openssl_conf = openssl_init
+
+.include /opt/datadog-agent/embedded/ssl/fipsmodule.cnf
+
+[openssl_init]
+providers = provider_sect
+alg_section = algorithm_sect
+
+[provider_sect]
+fips = fips_sect
+base = base_sect
+
+[base_sect]
+activate = 1
+
+[algorithm_sect]
+default_properties = fips=yes
+"""
+                f.write(config)
+
             enable_fips(
-                path_to_openssl_conf="/opt/datadog-agent/embedded/ssl/openssl.cnf",
+                path_to_openssl_conf="/opt/datadog-agent/embedded/ssl/openssl_fips.cnf",
                 path_to_openssl_modules="/opt/datadog-agent/embedded/lib/ossl-modules",
             )
 
