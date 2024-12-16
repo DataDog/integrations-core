@@ -105,7 +105,7 @@ pipeline:
           extract_syslog_header <%{integer:}>%{integer:} %{parse_date_rule:}%{data:}
 
 
-          parse_date_rule %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
+          parse_date_rule %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ss.SZZ"):timestamp}|%{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
         matchRules: >-
           parsing_rule_for_change_history_event
           (%{extract_syslog_header_with_hostname:}|%{extract_syslog_header:})?CEF\:%{integer:}\|%{extract_data_till_pipe_delimiter:device_vendor}\|%{extract_data_till_pipe_delimiter:device_product}\|%{extract_data_till_pipe_delimiter:device_version}\|%{extract_data_till_pipe_delimiter:change_history_type}\|%{regex("(ChangeHistory)"):event_name}\|%{extract_data_till_pipe_delimiter:severity}\|%{data:log_message}
@@ -216,7 +216,7 @@ pipeline:
             supportRules: keyvalue_parsing_rule
               %{data::keyvalue("=","`~!#$%^&*()+{}\\\\\\[\\]|;'?<>:/\" ")}
             matchRules: parsing_rule_1 %{keyvalue_parsing_rule:} ItemName=%{data:ItemName}
-              UserId=%{data:UserId} %{keyvalue_parsing_rule:}
+              UserId=%{data:UserId} UserName=%{data:UserName}
               Changes=%{data:Changes}
     - type: pipeline
       name: Processing of newly discovered file events
