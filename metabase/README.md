@@ -1,3 +1,5 @@
+# Metabase
+
 ## Overview
 
 [Metabase][1] is a business intelligence analytics platform that can be used to ask questions about your data, or can be embedded in your apps to let your customers explore their data on their own.
@@ -20,7 +22,7 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 8. Go to the **Instances** tab.
 9. Click on **DNS alias** section to get the DNS alias value.
 
-#### Find your Metabase API Key
+#### Generate your Metabase API Key
 
 1. Log in to your Metabase cloud instance as an administrator.
 2. Click on the gear icon in the upper right corner.
@@ -33,10 +35,16 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 9. Select the **Administrators** Group.
 10. Click **Create** to get the generated API key.
 
-### Add your Metabase credentials
+### Connect your Metabase account to Datadog
 
-- Metabase DNS alias
-- Metabase API key
+1. Add your Metabase DNS alias and Metabase API key    
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Metabase DNS alias|The DNS alias of your Metabase cloud instance. Should be minimum 3 characters long (small case letters, dashes and numbers only)|
+    |Metabase API key|The API key used to authenticate the API requests.|
+
+2. Click the Save button to save your settings.
+
 
 ## Data Collected
 
@@ -58,4 +66,3 @@ For further assistance, contact [Datadog Support][2].
 
 [1]: https://www.metabase.com/cloud/
 [2]: https://docs.datadoghq.com/help/
-
