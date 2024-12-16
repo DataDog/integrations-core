@@ -128,7 +128,7 @@ def test_fabric_mocked(aggregator):
                 'device_namespace:{}'.format(device_namespace),
                 'device_hostname:{}'.format(device_hn),
                 'device_id:{}'.format(interface.device_id),
-                'port.status:{}'.format(interface.status),
+                'status:{}'.format(interface.status),
                 'dd.internal.resource:ndm_device_user_tags:{}'.format(interface.device_id),
                 'dd.internal.resource:ndm_interface_user_tags:{}:{}'.format(interface.device_id, interface.index),
             ]
