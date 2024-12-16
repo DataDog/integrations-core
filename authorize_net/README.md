@@ -25,11 +25,11 @@ The Authorize.Net integration collects settled transaction logs and unsettled tr
 
 1. Add your Login ID, Transaction Key and Environment Type
 
-|Parameters| Description                                                                                    |
-|--------------------|------------------------------------------------------------------------------------------------|
-|Login ID| Login ID of your Authorize.Net account.                                                        |
-|Transaction Key| Transaction Key of your Authorize.Net account.                                                 |
-|Environment Type| Dropdown to select the environment type of your Authorize.Net account (Production or Sandbox). |
+   |Parameters| Description                                                                                    |
+   |--------------------|------------------------------------------------------------------------------------------------|
+   |Login ID| Login ID for your Authorize.Net account.                                                        |
+   |Transaction Key| Transaction Key for your Authorize.Net account.                                                 |
+   |Environment Type| Dropdown to select the environment type for your Authorize.Net account (Production or Sandbox). |
 
 2. Click the Save button to save your settings.
 
