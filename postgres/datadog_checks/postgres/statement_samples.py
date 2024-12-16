@@ -556,9 +556,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
-            active_row['query_truncated'] = self._get_truncation_state(
-                track_activity_query_size, row['query']
-            ).value
+            active_row['query_truncated'] = self._get_truncation_state(track_activity_query_size, row['query']).value
             if row['statement'] is None:
                 active_row['statement'] = "ERROR: failed to obfuscate"
             return active_row
