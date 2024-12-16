@@ -1,4 +1,3 @@
-version: '3'
 services:
   fdb-coordinator:
     image: foundationdb/foundationdb:6.3.13

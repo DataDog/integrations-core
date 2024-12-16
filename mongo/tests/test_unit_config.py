@@ -200,3 +200,33 @@ def test_amazon_docdb_cloud_metadata(instance_integration_cluster, aws_cloud_met
         assert aws['cluster_identifier'] == aws_cloud_metadata['cluster_identifier']
     else:
         assert aws['cluster_identifier'] == instance_integration_cluster['cluster_name']
+
+
+@pytest.mark.parametrize(
+    'metrics_collection_interval, expected_metrics_collection_interval',
+    [
+        pytest.param(
+            {}, {'collection': 15, 'collections_indexes_stats': 15, 'sharded_data_distribution': 300}, id='default'
+        ),
+        pytest.param(
+            {
+                'collection': '60',
+                'collections_indexes_stats': '30',
+                'sharded_data_distribution': '600',
+            },
+            {'collection': 60, 'collections_indexes_stats': 30, 'sharded_data_distribution': 600},
+            id='custom',
+        ),
+        pytest.param(
+            {
+                'collection': 60,
+            },
+            {'collection': 60, 'collections_indexes_stats': 15, 'sharded_data_distribution': 300},
+            id='partial',
+        ),
+    ],
+)
+def test_metrics_collection_interval(instance, metrics_collection_interval, expected_metrics_collection_interval):
+    instance['metrics_collection_interval'] = metrics_collection_interval
+    config = MongoConfig(instance, mock.Mock(), {})
+    assert config.metrics_collection_interval == expected_metrics_collection_interval

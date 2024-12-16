@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 5.1.0 / 2024-10-31
+## 5.1.0 / 2024-10-31 / Agent 7.60.0
 
 ***Added***:
 
@@ -13,10 +13,6 @@
 ***Removed***:
 
 * Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
-
-***Added***:
-
-* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
 
 ***Fixed***:
 
@@ -36,6 +32,7 @@
 
 ***Added***:
 
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
 * Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
 
 ## 3.4.0 / 2024-09-05

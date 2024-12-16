@@ -34,7 +34,13 @@ DATABASE_STATS_METRICS_QUERY = {
 class SqlserverDatabaseStatsMetrics(SqlserverDatabaseMetricsBase):
     # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-ver15
     @property
+    def include_database_stats_metrics(self) -> bool:
+        return self.config.database_metrics_config["db_stats_metrics"]["enabled"]
+
+    @property
     def enabled(self):
+        if not self.include_database_stats_metrics:
+            return False
         return True
 
     @property
@@ -42,4 +48,8 @@ class SqlserverDatabaseStatsMetrics(SqlserverDatabaseMetricsBase):
         return [DATABASE_STATS_METRICS_QUERY]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(" f"enabled={self.enabled}"
+        return (
+            f"{self.__class__.__name__}("
+            f"enabled={self.enabled}, "
+            f"include_database_stats_metrics={self.include_database_stats_metrics})"
+        )
