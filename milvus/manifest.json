@@ -15,9 +15,7 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::AI",
-      "Category::Data Store",
-      "Category::Machine Learning & LLM",
+      "Category::AI/ML",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
