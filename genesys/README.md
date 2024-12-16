@@ -8,9 +8,7 @@ The Genesys integration collects conversations (Voice, Email, Message, Callback,
 
 ## Setup
 
-### Configuration
-
-#### Get Client ID and Client Secret config parameters from Genesys
+### Generate Client ID and Client Secret config parameters in Genesys
 1. Login to your [Genesys account][2] with **Admin** role.
 2. [Add a new role][3] with the following permissions:
     1. Analytics > Conversation Aggregate > View (Query for conversation aggregates)
@@ -25,9 +23,16 @@ The Genesys integration collects conversations (Voice, Email, Message, Callback,
 9. Click **Save**.
 10. Copy the Client ID and Client Secret from the **Client Details** Tab. 
 
-#### Add your Genesys credentials
-- Client ID 
-- Client Secret
+### Connect your Genesys Account to Datadog
+
+1. Add your Client ID and Client Secret
+
+    |Parameters| Description                                                                                    |
+    |--------------------|------------------------------------------------------------------------------------------------|
+    |Client ID| Client ID for your Genesys account.                                                        |
+    |Client Secret| Client Secret for your Genesys account.                                                 |
+
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
