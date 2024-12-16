@@ -1,3 +1,5 @@
+# LastPass
+
 ## Overview
 
 [LastPass][1] is a password management solution that securely stores and manages passwords and other sensitive
@@ -10,23 +12,21 @@ reporting events, while out-of-the-box detection rules enhance detection and res
 
 ## Setup
 
-### Configuration
+### Get config parameters of LastPass
 
-#### Get config parameters of LastPass
-
-##### Account number
+#### Account number
 
 1. Log in to the [Admin Console](https://admin.lastpass.com/) with your email address and master password.
 2. On the **Dashboard** tab, click the profile email located in the top right corner to find the account number.
 3. Alternatively, you can find the account number by navigating to **Advanced** > **Enterprise API**.
 
-##### Provisioning hash
+#### Provisioning hash
 
 1. Log in to the [Admin Console](https://admin.lastpass.com) with your email address and master password.
 2. Navigate to **Advanced** > **Enterprise API**.
 3. From there, you can create or reset a provisioning hash if you forgot it.
 
-##### Time zone
+#### Time zone
 
 1. The options in the **Time Zone** dropdown menu are based on LastPass' time zone values.
 2. You must select the time zone that is configured in your LastPass account.
@@ -36,18 +36,18 @@ reporting events, while out-of-the-box detection rules enhance detection and res
     - Navigate to **Account Settings**.
     - Find the selected time zone under the **Account Information** section.
 
-#### Configure the LastPass and Datadog integration
 
-Configure the Datadog endpoint to forward LastPass logs to Datadog.
+### Connect your LastPass account to Datadog
 
-1. Navigate to `LastPass` integration on Datadog platform.
-2. Add your LastPass credentials.
+1. Add your Account number, Provisioning hash and Time zone  
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Account number|The account number of your registered LastPass account.|
+    |Provisioning hash|The provisioning hash secret of your registered account on LastPass.|
+    |Time zone|The time zone of your registered account on LastPass.|
 
-| LastPass Parameters | Description                                                          |
-|---------------------|----------------------------------------------------------------------|
-| Account number      | The account number of your registered LastPass account.              |
-| Provisioning hash   | The provisioning hash secret of your registered account on LastPass. |
-| Time zone           | The time zone of your registered account on LastPass                 |
+2. Click the Save button to save your settings.
+
 
 ## Data Collected
 
