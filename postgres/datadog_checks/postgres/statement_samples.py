@@ -246,10 +246,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         return [dict(row) for row in rows]
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_new_pg_stat_activity(self, available_activity_columns, activity_columns_mapping):
+    def _get_new_pg_stat_activity(self, available_activity_columns, activity_columns_mapping, collect_activity):
         start_time = time.time()
         extra_filters, params = self._get_extra_filters_and_params(filter_stale_idle_conn=True)
-        report_activity = self._report_activity_event()
         cur_time_func = ""
         blocking_func = ""
         backend_type_predicate = ""
@@ -257,7 +256,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             backend_type_predicate = "backend_type != 'client backend' OR"
         # minimum version for pg_blocking_pids function is v9.6
         # only call pg_blocking_pids as often as we collect activity snapshots
-        if self._check.version >= V9_6 and report_activity:
+        if self._check.version >= V9_6 and collect_activity:
             blocking_func = PG_BLOCKING_PIDS_FUNC
         cur_time_func = CURRENT_TIME_FUNC
         activity_columns = [activity_columns_mapping.get(col, col) for col in available_activity_columns]
@@ -470,7 +469,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 raw=True,
             )
             return
-        rows = self._get_new_pg_stat_activity(pg_activity_cols, PG_STAT_ACTIVITY_COLS_MAPPING)
+        collect_activity = self._report_activity_event()
+        rows = self._get_new_pg_stat_activity(pg_activity_cols, PG_STAT_ACTIVITY_COLS_MAPPING, collect_activity)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
         if self._explain_plan_coll_enabled:
@@ -479,7 +479,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
                 submitted_count += 1
 
-        if self._report_activity_event():
+        if collect_activity:
             active_connections = self._get_active_connections()
             activity_event = self._create_activity_event(rows, active_connections)
             self._check.database_monitoring_query_activity(
