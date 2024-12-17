@@ -90,8 +90,8 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
-    ## Configure ICMP pings for all hosts in SNMP autodiscovery
-    ## Each device is pinged with these settings each time the SNMP
+    ## Configure ICMP pings.
+    ## The network device is pinged with these settings each time the SNMP
     ## check is run.
     ##
     ## By default, we try to use an unprivileged UDP socket to send ICMP
@@ -374,7 +374,7 @@ instances:
     ## Example:
     ## interface_configs:
     ##   - match_field: "name"  # (required) the field to match, can be `name` (interface name) or `index` (ifIndex)
-    ##     match_value: "eth0"  # (required) the value to match
+    ##     match_value: "eth0"  # (required, case sensitive) the value to match
     ##     in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
     ##     out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
     ##     tags:                # (optional) interface level tags

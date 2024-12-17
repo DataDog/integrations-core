@@ -64,6 +64,7 @@ def test_e2e_profile_chrysalis_luna_hsm(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.12383.3.1.1',
         'vendor': 'chrysalis',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "0db7b333-38a1-4e09-af1b-317da2f9f413",
+  "app_id": "kubeflow",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Integration for Kubeflow",
+    "title": "Kubeflow",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Category::Kubernetes",
+      "Submitted Data Type::Metrics",
+      "Category::AI/ML",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 22259533,
+      "source_type_name": "Kubeflow",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kubeflow.",
+        "check": "kubeflow.pipeline.run.status",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "katib-controller",
+        "katib-db-manager",
+        "katib-ui",
+        "kserve-controller-manager",
+        "ml-pipeline-api-server",
+        "ml-pipeline-scheduledworkflow",
+        "ml-pipeline-persistenceagent"
+      ]
+    },
+    "monitors": {
+      "Kubeflow Monitor": "assets/monitors/kubeflow.json"
+    },
+    "dashboards": {
+      "Kubeflow Overview": "assets/dashboards/overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

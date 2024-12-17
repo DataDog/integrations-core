@@ -7,20 +7,21 @@ from typing import Callable, List, Optional
 
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.core import QueryExecutor
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_MAJOR_VERSION
+from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_RDS
 
 
 class SqlserverDatabaseMetricsBase:
     def __init__(
         self,
-        instance_config,
+        config,
         new_query_executor,
         server_static_info,
         execute_query_handler,
         track_operation_time=False,
         databases=None,
     ):
-        self.instance_config: dict = instance_config
+        self.config: SQLServerConfig = config
         self.server_static_info: dict = server_static_info
         self.new_query_executor: Callable[
             [List[dict], Callable, Optional[List[str]], Optional[bool]], QueryExecutor
@@ -38,6 +39,10 @@ class SqlserverDatabaseMetricsBase:
     @property
     def engine_edition(self) -> Optional[int]:
         return self.server_static_info.get(STATIC_INFO_ENGINE_EDITION)
+
+    @property
+    def is_rds(self) -> Optional[int]:
+        return self.server_static_info.get(STATIC_INFO_RDS)
 
     @property
     def enabled(self) -> bool:
@@ -76,6 +81,7 @@ class SqlserverDatabaseMetricsBase:
             f"enabled={self.enabled}, "
             f"major_version={self.major_version}, "
             f"engine_edition={self.engine_edition})"
+            f"is_rds={self.is_rds})"
         )
 
     def metric_names(self) -> List[str]:

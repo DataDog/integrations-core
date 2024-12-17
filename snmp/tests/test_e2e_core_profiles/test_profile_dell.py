@@ -64,6 +64,7 @@ def test_e2e_profile_dell(dd_agent_check):
         ],
         "vendor": "dell",
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 

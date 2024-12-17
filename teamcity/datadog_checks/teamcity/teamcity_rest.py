@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-from six import PY2
+from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.time import get_precise_time
@@ -80,9 +80,6 @@ class TeamCityRest(AgentCheck):
         self.tags.update(instance_tags)
 
         self.bc_store = BuildConfigs()
-
-        if PY2:
-            self.check_initializations.append(self._validate_config)
 
     def _validate_config(self):
         if self.instance.get('projects'):
@@ -171,10 +168,6 @@ class TeamCityRest(AgentCheck):
             self._initialize_single_build_config()
 
         else:
-            if PY2:
-                raise self.CheckException(
-                    'Multi-build configuration monitoring is not currently supported in Python 2.'
-                )
             self.log.debug("Initializing multi-build configuration monitoring.")
             self._initialize_multi_build_config()
 
@@ -244,13 +237,20 @@ class TeamCityRest(AgentCheck):
             self.log.debug(
                 'No builds for project %d and build config %d, checking again', project_id, self.current_build_config
             )
-            ressource = "last_build"
+            resource = "last_build"
             options = {"project_id": project_id}
         else:
             self.log.debug('Checking for new builds...')
-            ressource = "new_builds"
+            resource = "new_builds"
             options = {"since_build": last_build_id}
-        return get_response(self, ressource, build_conf=self.current_build_config, **options)
+        try:
+            new_builds = get_response(self, resource, build_conf=self.current_build_config, **options)
+        except HTTPError:
+            # In the case where a build config has been deleted, no new builds should be returned and it will be removed
+            # from the list of all build configs in the next re-initialization
+            self.log.debug('Failed to retrieve new builds for build config %s', self.current_build_config)
+            new_builds = {}
+        return new_builds
 
     def _get_build_config_type(self, build_config):
         if self.is_deployment:

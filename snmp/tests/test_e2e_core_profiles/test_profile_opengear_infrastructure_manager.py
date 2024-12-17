@@ -102,6 +102,7 @@ def test_e2e_profile_opengear_infrastructure_manager(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.25049.1.61',
         'vendor': 'opengear',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

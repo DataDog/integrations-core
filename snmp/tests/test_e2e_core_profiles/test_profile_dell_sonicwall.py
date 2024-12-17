@@ -104,6 +104,7 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
         'vendor': 'dell',
         'version': '01972WA81B1D',
         'device_type': 'firewall',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

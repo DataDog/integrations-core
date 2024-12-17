@@ -19,7 +19,7 @@ def test_create_invalid_branch_name(ddev, name):
 
 
 def test_create_branch(ddev, mocker):
-    run_mock = mocker.patch('ddev.utils.git.GitManager.run')
+    run_mock = mocker.patch('ddev.utils.git.GitRepository.run')
     create_label_mock = mocker.patch('ddev.utils.github.GitHubManager.create_label')
 
     result = ddev('release', 'branch', 'create', '5.5.x')

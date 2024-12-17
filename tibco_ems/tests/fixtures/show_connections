@@ -1,0 +1,3 @@
+Command: show connections full
+L  Version   ID  FSXT  S  Host         IP address Port  User   ClientID Sess Prod Cons TmpT TmpQ Uncomm UncommSize     Uptime
+C  10.1.0 V4 2   ---A  +  d3ce69f9df4f 127.0.0.1  33696 admin              1    1    1    0    1      0     0.0 Kb    0:02:47

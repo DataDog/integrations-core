@@ -233,6 +233,7 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.3808.1.1.9999',
         'vendor': 'cyberpower',
         'device_type': 'pdu',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

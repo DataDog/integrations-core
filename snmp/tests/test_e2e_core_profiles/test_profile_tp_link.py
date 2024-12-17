@@ -67,6 +67,7 @@ def test_e2e_profile_tp_link(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.11863.5.1',
         'vendor': 'TP-Link',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

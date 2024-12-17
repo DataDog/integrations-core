@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from six import PY2
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.ibm_mq.config import IBMMQConfig
@@ -51,7 +50,6 @@ def test_cannot_override_hostname_if_no_host_provided(instance):
         IBMMQConfig(instance, {})
 
 
-@pytest.mark.skipif(PY2, reason="Config model validation only available in PY3.")
 @pytest.mark.parametrize(
     'param, values, should_error',
     [
@@ -82,7 +80,6 @@ def test_unique_items_queues_channels(instance, get_check, dd_run_check, param, 
             AssertionError("`{}` contains non-unique values. Error is: {}".format(param, e))
 
 
-@pytest.mark.skipif(PY2, reason="Config model validation only available in PY3.")
 @pytest.mark.parametrize(
     'param, values, should_error',
     [

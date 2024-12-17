@@ -52,6 +52,7 @@ def test_e2e_profile_generic_ups(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.2.1.33',
         'device_type': 'ups',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

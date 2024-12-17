@@ -117,6 +117,7 @@ def test_e2e_profile_aruba_switch(dd_agent_check):
         'vendor': 'aruba',
         'version': '8.6.0.4',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

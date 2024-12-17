@@ -86,6 +86,7 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.6486.800.1.1.2.2.2.1.1.4',
         'vendor': 'alcatel-lucent',
         'device_type': 'wlc',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

@@ -180,6 +180,7 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         'version': 'R80.10',
         'tags': common_tags,
         'device_type': 'firewall',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 

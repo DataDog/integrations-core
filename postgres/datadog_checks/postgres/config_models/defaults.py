@@ -89,7 +89,15 @@ def instance_idle_connection_timeout():
 
 
 def instance_ignore_databases():
-    return ['template%', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin']
+    return [
+        'template0',
+        'template1',
+        'rdsadmin',
+        'azure_maintenance',
+        'cloudsqladmin',
+        'alloydbadmin',
+        'alloydbmetadata',
+    ]
 
 
 def instance_log_unobfuscated_plans():
@@ -110,6 +118,10 @@ def instance_max_relations():
 
 def instance_min_collection_interval():
     return 15
+
+
+def instance_only_custom_queries():
+    return False
 
 
 def instance_pg_stat_statements_view():
@@ -141,4 +153,4 @@ def instance_tag_replication_role():
 
 
 def instance_use_global_custom_queries():
-    return 'extend'
+    return 'true'

@@ -10,6 +10,7 @@ from . import common
 
 
 @pytest.mark.e2e
+@pytest.mark.flaky
 def test_check_ok(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
     metrics = common.FORMATTED_EXTRA_METRICS

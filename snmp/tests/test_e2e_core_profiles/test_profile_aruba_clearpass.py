@@ -209,6 +209,7 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.14823.1.6.1',
         'vendor': 'aruba',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

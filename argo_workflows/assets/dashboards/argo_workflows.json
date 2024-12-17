@@ -411,7 +411,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:argo_rollouts.workqueue.adds.count{*}.as_count()"
+                                            "query": "sum:argo_workflows.queue_adds.count{*}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",

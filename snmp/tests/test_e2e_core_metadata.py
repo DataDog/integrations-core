@@ -96,6 +96,7 @@ def test_e2e_core_metadata_f5(dd_agent_check):
                     u'os_name': u'Linux',
                     u'os_version': u'3.10.0-862.14.4.el7.ve.x86_64',
                     u'device_type': u'load_balancer',
+                    u'integration': u'snmp',
                 },
             ],
             u'diagnoses': [
@@ -228,6 +229,7 @@ def test_e2e_core_metadata_cisco_3850(dd_agent_check):
         u'serial_number': u'FOCXXXXXXXX',
         u'model': u'CAT3K_CAA-UNIVERSALK9-M',
         u'device_type': u'switch',
+        u'integration': u'snmp',
     }
     assert device == actual_device
 
@@ -287,6 +289,7 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
         u'vendor': u'cisco',
         u'serial_number': u'SCA044001J9',
         u'device_type': u'switch',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -335,6 +338,7 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
         u'vendor': u'hp',
         u'serial_number': u'dXPEdPBE5yKtjW9xx3',
         u'device_type': u'server',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -383,6 +387,7 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
         u'vendor': u'hp',
         u'serial_number': u'dLPEdPBE5yKtjW9xx3',
         u'device_type': u'other',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -435,7 +440,8 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         ],
         'vendor': 'apc',
         'version': '2.0.3-test',
-        u'device_type': u'ups',
+        'device_type': 'ups',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -484,6 +490,7 @@ def test_e2e_core_metadata_juniper_ex(dd_agent_check):
         u'vendor': u'juniper-networks',
         u'version': u'version-1.0',
         u'device_type': u'switch',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, expected_device)
 
@@ -532,6 +539,7 @@ def test_e2e_core_metadata_juniper_mx(dd_agent_check):
         u'vendor': u'juniper-networks',
         u'version': u'version-1.1',
         u'device_type': u'router',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, expected_device)
 
@@ -580,6 +588,7 @@ def test_e2e_core_metadata_juniper_srx(dd_agent_check):
         u'vendor': u'juniper-networks',
         u'version': u'version-1.2',
         u'device_type': u'firewall',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, expected_device)
 
@@ -629,6 +638,7 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
         'vendor': 'aruba',
         'version': '8.6.0.4',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -676,6 +686,7 @@ def test_e2e_core_metadata_aruba_access_point(dd_agent_check):
         'vendor': 'aruba',
         'version': '6.5.4.3-6.5.4.3',
         'device_type': 'access_point',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -725,6 +736,7 @@ def test_e2e_core_metadata_arista(dd_agent_check):
         'vendor': 'arista',
         'version': '12.00',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -770,6 +782,7 @@ def test_e2e_core_metadata_palo_alto(dd_agent_check):
         'vendor': 'paloaltonetworks',
         'version': '9.0.5',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -819,6 +832,7 @@ def test_e2e_core_metadata_netapp(dd_agent_check):
         'vendor': 'netapp',
         'version': '9.3P7:',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -868,6 +882,7 @@ def test_e2e_core_metadata_checkpoint(dd_agent_check):
         'vendor': 'checkpoint',
         'version': 'R80.10',
         'device_type': 'firewall',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -918,6 +933,7 @@ def test_e2e_core_metadata_checkpoint_firewall(dd_agent_check):
         'vendor': 'checkpoint',
         'version': 'R80.10',
         'device_type': 'firewall',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -966,6 +982,7 @@ def test_e2e_core_metadata_fortinet_fortigate(dd_agent_check):
         'vendor': 'fortinet',
         'version': 'v5.6.4,build1575b1575,180425 (GA)',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1011,6 +1028,7 @@ def test_e2e_core_metadata_dell_idrac(dd_agent_check):
         u'vendor': u'dell',
         u'serial_number': u'acted quaintly driving',
         u'device_type': u'server',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1060,6 +1078,7 @@ def test_e2e_core_metadata_isilon(dd_agent_check):
         'vendor': 'dell',
         'version': '8.2.0.0',
         'device_type': 'storage',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1155,6 +1174,7 @@ def test_e2e_core_metadata_cisco_asr_1001x(dd_agent_check):
         u'vendor': u'cisco',
         u'version': u'17.6.4',
         u'device_type': u'router',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1198,6 +1218,7 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
         u'vendor': u'cisco',
         u'version': u'6.4.2',
         u'device_type': u'router',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1242,6 +1263,7 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
         u'vendor': u'cisco',
         u'version': u'7.1.3',
         u'device_type': u'router',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1387,5 +1409,6 @@ def test_e2e_core_metadata_cisco_wlc(dd_agent_check):
         ],
         u'vendor': u'cisco',
         u'device_type': u'wlc',
+        u'integration': u'snmp',
     }
     assert_device_metadata(aggregator, device)

@@ -73,6 +73,7 @@ def test_e2e_profile_hp_h3c_switch(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.25506.11.1.999',
         'vendor': 'hp',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

@@ -17,7 +17,19 @@
       "Supported OS::macOS",
       "Category::Cloud",
       "Category::Security",
-      "Offering::Integration"
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/teleport/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/teleport-integration/"
+      }
     ]
   },
   "assets": {
@@ -43,7 +55,8 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": ["teleport"]
     },
     "dashboards": {
       "Teleport Overview": "assets/dashboards/teleport_overview.json"

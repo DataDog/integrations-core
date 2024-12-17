@@ -12,7 +12,6 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from ipaddress import IPv4Address
-from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
 from cachetools import TTLCache
@@ -40,6 +39,7 @@ SUBMISSION_METHODS = {
     # These submission methods require more configuration than just a name
     # and a value and therefore must be defined as a custom transformer.
     'service_check': '__service_check',
+    'send_log': '__send_log',
 }
 
 
@@ -78,9 +78,7 @@ def create_submission_transformer(submit_method):
             # type: (Dict[str, Any], Tuple[str, Any], Dict[str, Any]) -> None
             kwargs.update(modifiers)
 
-            # TODO: When Python 2 goes away simply do:
-            # submit_method(*creation_args, *call_args, **kwargs)
-            submit_method(*chain(creation_args, call_args), **kwargs)
+            submit_method(*creation_args, *call_args, **kwargs)
 
         return transformer
 
@@ -152,6 +150,9 @@ class RateLimitingTTLCache(TTLCache):
 
 
 def resolve_db_host(db_host):
+    if db_host and db_host.endswith('.local'):
+        return db_host
+
     agent_hostname = datadog_agent.get_hostname()
     if not db_host or db_host in {'localhost', '127.0.0.1'} or db_host.startswith('/'):
         return agent_hostname
@@ -181,6 +182,28 @@ def resolve_db_host(db_host):
         )
 
     return db_host
+
+
+def get_agent_host_tags():
+    """
+    Get the tags from the agent host and return them as a list of strings.
+    """
+    result = []
+    host_tags = datadog_agent.get_host_tags()
+    if not host_tags:
+        return result
+    try:
+        tags_dict = json.loads(host_tags) or {}
+        for key, value in tags_dict.items():
+            if isinstance(value, list):
+                result.extend(value)
+            else:
+                raise ValueError(
+                    'Failed to parse {} tags from the agent host because {} is not a list'.format(key, value)
+                )
+    except Exception as e:
+        raise ValueError('Failed to parse tags from the agent host: {}. Error: {}'.format(host_tags, str(e)))
+    return result
 
 
 def default_json_event_encoding(o):

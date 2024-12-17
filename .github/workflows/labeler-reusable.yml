@@ -1,3 +1,5 @@
+# This workflow cannot create labels! It assumes the labels it attaches already exist.
+# Please reach out to @DataDog/agent-integrations if you need to create a new label.
 name: Reusable Labeler Workflow
 
 on:

@@ -69,6 +69,7 @@ def test_e2e_profile_cisco_firepower_asa(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.9.1.1902',
         'vendor': 'cisco',
         'device_type': 'firewall',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

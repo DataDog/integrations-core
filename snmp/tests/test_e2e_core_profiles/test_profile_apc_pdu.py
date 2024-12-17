@@ -170,6 +170,7 @@ def test_e2e_profile_apc_pdu(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.318.1.3.4.5',
         'vendor': 'apc',
         'device_type': 'pdu',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

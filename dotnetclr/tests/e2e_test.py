@@ -3,14 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.testing import requires_py3
-
 from .common import MINIMAL_INSTANCE
 
 pytestmark = pytest.mark.e2e
 
 
-@requires_py3
+@pytest.mark.flaky
 def test(dd_agent_check):
     from datadog_checks.dotnetclr.check import DotnetclrCheckV2
 

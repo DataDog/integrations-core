@@ -6,11 +6,11 @@ import re
 from os import environ
 
 import pytest
-from deepdiff import DeepDiff
 
 from datadog_checks.mysql import MySql
 
 from . import common
+from .utils import deep_compare
 
 
 @pytest.fixture
@@ -676,6 +676,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("dbms_version") is not None
         assert (schema_event.get("flavor") == "MariaDB") or (schema_event.get("flavor") == "MySQL")
         assert sorted(schema_event["tags"]) == [
+            'database_hostname:stubbed.hostname',
+            'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
             'dd.internal.resource:database_instance:stubbed.hostname',
             'port:13306',
             'tag1:value1',
@@ -695,17 +697,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
-
         normalize_values(actual_payload)
-
         assert db_name in databases_to_find
-
-        difference = DeepDiff(expected_data_for_db[db_name], actual_payload, ignore_order=True)
-
-        if difference:
-            raise AssertionError(Exception("found the following diffs: " + str(difference)))
+        assert deep_compare(expected_data_for_db[db_name], actual_payload)
 
 
+@pytest.mark.integration
 def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
 
     dbm_instance['dbm'] = True

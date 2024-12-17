@@ -1,0 +1,836 @@
+[
+    {
+        "host": "mongohost",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "dbm_type": "slow_query",
+        "collection_interval": 10,
+        "ddtags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "clustername:my_cluster",
+            "hosting_type:self-hosted",
+            "sharding_cluster_role:mongos"
+        ],
+        "cloud_metadata": {},
+        "timestamp": 1715911398111.2722,
+        "service": "my_service",
+        "mongodb_slow_queries": [
+            {
+                "timestamp": 32479987543991.0,
+                "dbname": "test",
+                "op": "update",
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "28f4ba1885941f76",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
+                "mills": 74,
+                "num_yields": 4,
+                "response_length": 0,
+                "nmatched": 608,
+                "nmodified": 441,
+                "keys_examined": 608,
+                "docs_examined": 608,
+                "keys_inserted": 441,
+                "cpu_nanos": 74500749,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 5
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 5
+                }
+            },
+            {
+                "timestamp": 32479987543991.0,
+                "dbname": "test",
+                "op": "command",
+                "ns": "test.$cmd",
+                "query_signature": "c1df6c33f6b6c258",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"test\"}",
+                "comment": "update customers subscription status by age",
+                "mills": 74,
+                "num_yields": 4,
+                "response_length": 60,
+                "cpu_nanos": 74715957,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 6
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 6
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 6
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 6
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 6
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 5
+                }
+            },
+            {
+                "timestamp": 32479987545007.0,
+                "dbname": "test",
+                "op": "update",
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "5390ab4d2f009230",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
+                "mills": 27,
+                "num_yields": 2,
+                "response_length": 0,
+                "nmatched": 495,
+                "nmodified": 495,
+                "keys_examined": 495,
+                "docs_examined": 495,
+                "keys_inserted": 495,
+                "cpu_nanos": 27416375,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 3
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 3
+                }
+            },
+            {
+                "timestamp": 32479987545008.0,
+                "dbname": "test",
+                "op": "command",
+                "ns": "test.$cmd",
+                "query_signature": "c1df6c33f6b6c258",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"test\"}",
+                "comment": "update customers subscription status by age",
+                "mills": 27,
+                "num_yields": 2,
+                "response_length": 60,
+                "cpu_nanos": 27721625,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 4
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 3
+                }
+            },
+            {
+                "timestamp": 32479987545040.0,
+                "dbname": "test",
+                "op": "update",
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "28f4ba1885941f76",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
+                "mills": 14,
+                "num_yields": 0,
+                "response_length": 0,
+                "nmatched": 495,
+                "nmodified": 495,
+                "keys_examined": 495,
+                "docs_examined": 495,
+                "keys_inserted": 495,
+                "cpu_nanos": 14032417,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 1
+                }
+            },
+            {
+                "timestamp": 32479987545041.0,
+                "dbname": "test",
+                "op": "command",
+                "ns": "test.$cmd",
+                "query_signature": "c1df6c33f6b6c258",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"test\"}",
+                "comment": "update customers subscription status by age",
+                "mills": 15,
+                "num_yields": 0,
+                "response_length": 60,
+                "cpu_nanos": 15198542,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 2
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 2
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 2
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 2
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 2
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 1
+                }
+            },
+            {
+                "timestamp": 32479987545338.0,
+                "dbname": "test",
+                "op": "command",
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { name: 1 }",
+                "query_signature": "2e0dfc1416f51975",
+                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"test\"}",
+                "query_hash": "A9774B9D",
+                "plan_cache_key": "0D12DCDF",
+                "query_framework": "classic",
+                "comment": "query customers by subscription status",
+                "mills": 12,
+                "num_yields": 0,
+                "response_length": 14089,
+                "nreturned": 101,
+                "keys_examined": 540,
+                "docs_examined": 540,
+                "cpu_nanos": 12071416,
+                "planning_time_micros": 11891,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "cursor": {
+                    "cursor_id": 5170666760900931828,
+                    "originating_command": null,
+                    "comment": null
+                },
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    }
+                }
+            },
+            {
+                "timestamp": 32479987545521.0,
+                "dbname": "test",
+                "op": "command",
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { name: 1 }",
+                "query_signature": "6f544fbdad56d0dc",
+                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"test\"}",
+                "query_hash": "A9774B9D",
+                "plan_cache_key": "0D12DCDF",
+                "query_framework": "classic",
+                "comment": "query customers by subscription status",
+                "mills": 14,
+                "num_yields": 0,
+                "response_length": 110,
+                "nreturned": 0,
+                "keys_examined": 612,
+                "docs_examined": 612,
+                "cpu_nanos": 14051708,
+                "planning_time_micros": 12443,
+                "cursor_exhausted": true,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    }
+                }
+            },
+            {
+                "timestamp": 32479987543991.0,
+                "dbname": "integration",
+                "op": "update",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "28f4ba1885941f76",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
+                "mills": 74,
+                "num_yields": 4,
+                "response_length": 0,
+                "nmatched": 608,
+                "nmodified": 441,
+                "keys_examined": 608,
+                "docs_examined": 608,
+                "keys_inserted": 441,
+                "cpu_nanos": 74500749,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 5
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 5
+                }
+            },
+            {
+                "timestamp": 32479987543991.0,
+                "dbname": "integration",
+                "op": "command",
+                "ns": "integration.$cmd",
+                "query_signature": "8429a2f4090d1911",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"integration\"}",
+                "comment": "update customers subscription status by age",
+                "mills": 74,
+                "num_yields": 4,
+                "response_length": 60,
+                "cpu_nanos": 74715957,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 6
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 6
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 6
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 6
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 6
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 5
+                }
+            },
+            {
+                "timestamp": 32479987545007.0,
+                "dbname": "integration",
+                "op": "update",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "5390ab4d2f009230",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
+                "mills": 27,
+                "num_yields": 2,
+                "response_length": 0,
+                "nmatched": 495,
+                "nmodified": 495,
+                "keys_examined": 495,
+                "docs_examined": 495,
+                "keys_inserted": 495,
+                "cpu_nanos": 27416375,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 3
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 3
+                }
+            },
+            {
+                "timestamp": 32479987545008.0,
+                "dbname": "integration",
+                "op": "command",
+                "ns": "integration.$cmd",
+                "query_signature": "8429a2f4090d1911",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"integration\"}",
+                "comment": "update customers subscription status by age",
+                "mills": 27,
+                "num_yields": 2,
+                "response_length": 60,
+                "cpu_nanos": 27721625,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 4
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 3
+                }
+            },
+            {
+                "timestamp": 32479987545040.0,
+                "dbname": "integration",
+                "op": "update",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "28f4ba1885941f76",
+                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false}",
+                "comment": "update customers subscription status by age",
+                "mills": 14,
+                "num_yields": 0,
+                "response_length": 0,
+                "nmatched": 495,
+                "nmodified": 495,
+                "keys_examined": 495,
+                "docs_examined": 495,
+                "keys_inserted": 495,
+                "cpu_nanos": 14032417,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 1
+                }
+            },
+            {
+                "timestamp": 32479987545041.0,
+                "dbname": "integration",
+                "op": "command",
+                "ns": "integration.$cmd",
+                "query_signature": "8429a2f4090d1911",
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"$db\": \"integration\"}",
+                "comment": "update customers subscription status by age",
+                "mills": 15,
+                "num_yields": 0,
+                "response_length": 60,
+                "cpu_nanos": 15198542,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 2
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 2
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 2
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 2
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 2
+                        }
+                    }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 1
+                }
+            },
+            {
+                "timestamp": 32479987545338.0,
+                "dbname": "integration",
+                "op": "command",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { name: 1 }",
+                "query_signature": "cde36dfcce436712",
+                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"integration\"}",
+                "query_hash": "A9774B9D",
+                "plan_cache_key": "0D12DCDF",
+                "query_framework": "classic",
+                "comment": "query customers by subscription status",
+                "mills": 12,
+                "num_yields": 0,
+                "response_length": 14089,
+                "nreturned": 101,
+                "keys_examined": 540,
+                "docs_examined": 540,
+                "cpu_nanos": 12071416,
+                "planning_time_micros": 11891,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "cursor": {
+                    "cursor_id": 5170666760900931828,
+                    "originating_command": null,
+                    "comment": null
+                },
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    }
+                }
+            },
+            {
+                "timestamp": 32479987545521.0,
+                "dbname": "integration",
+                "op": "command",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { name: 1 }",
+                "query_signature": "d6bf9ce5ca12a12c",
+                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"integration\"}",
+                "query_hash": "A9774B9D",
+                "plan_cache_key": "0D12DCDF",
+                "query_framework": "classic",
+                "comment": "query customers by subscription status",
+                "mills": 14,
+                "num_yields": 0,
+                "response_length": 110,
+                "nreturned": 0,
+                "keys_examined": 612,
+                "docs_examined": 612,
+                "cpu_nanos": 14051708,
+                "planning_time_micros": 12443,
+                "cursor_exhausted": true,
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                },
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    }
+                }
+            }
+        ]
+    }
+]

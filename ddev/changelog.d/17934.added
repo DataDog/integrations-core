@@ -1,1 +1,0 @@
-Support reading site and api key from org config setting in addition to cli flags.

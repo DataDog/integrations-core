@@ -101,6 +101,7 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.2.3.1008.123',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

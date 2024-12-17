@@ -267,6 +267,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.22610.1.3.28',
         'vendor': 'a10',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

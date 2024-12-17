@@ -57,7 +57,7 @@
       "Envoy Openmetrics Overview": "assets/dashboards/openmetrics_overview.json"
     },
     "monitors": {
-      "Envoy - connected state": "assets/monitors/connected_state.json"
+      "Envoy instance disconnected from control plane": "assets/monitors/connected_state.json"
     },
     "saved_views": {
       "envoy_overview": "assets/saved_views/envoy_overview.json",

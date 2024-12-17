@@ -1,0 +1,92 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "c5da80c1-8219-4aa0-bbd9-07c05b94edeb",
+  "app_id": "hubspot-content-hub",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into HubSpot Content Hub Activity Logs and Analytics metrics.",
+    "title": "HubSpot Content Hub",
+    "media": [
+      {
+        "caption": "HubSpot Content Hub - Audit Activity",
+        "image_url": "images/hubspot_content_hub_audit_activity.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "HubSpot Content Hub - Content Analytics",
+        "image_url": "images/hubspot_content_hub_content_analytics.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "HubSpot Content Hub - Geolocation Analytics",
+        "image_url": "images/hubspot_content_hub_geolocation_analytics.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "HubSpot Content Hub - Login Activity",
+        "image_url": "images/hubspot_content_hub_login_activity.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "HubSpot Content Hub - Security Activity",
+        "image_url": "images/hubspot_content_hub_security_activity.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "HubSpot Content Hub - Source Analytics",
+        "image_url": "images/hubspot_content_hub_source_analytics.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 25347309,
+      "source_type_name": "HubSpot Content Hub",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "hubspot.content_hub.",
+        "check": ["hubspot.content_hub.breakdown.count", "hubspot.content_hub.content.count"],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "HubSpot Content Hub - Audit Activity" : "assets/dashboards/hubspot_content_hub_audit_activity.json",
+      "HubSpot Content Hub - Content Analytics" : "assets/dashboards/hubspot_content_hub_content_analytics.json",
+      "HubSpot Content Hub - Geolocation Analytics" : "assets/dashboards/hubspot_content_hub_geolocation_analytics.json",
+      "HubSpot Content Hub - Login Activity" : "assets/dashboards/hubspot_content_hub_login_activity.json",
+      "HubSpot Content Hub - Security Activity" : "assets/dashboards/hubspot_content_hub_security_activity.json",
+      "HubSpot Content Hub - Source Analytics" : "assets/dashboards/hubspot_content_hub_source_analytics.json"
+    },
+    "monitors": {
+      "Blog Posts Bounce Rate is High" : "assets/monitors/blog_posts_bounce_rate.json",
+      "Page Bounce Rate is High" : "assets/monitors/page_bounce_rate.json"
+    },
+    "logs": {
+      "source": "hubspot-content-hub"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -379,6 +379,7 @@ def test_e2e_profile_citrix_netscaler(dd_agent_check):
         'vendor': 'citrix',
         'version': 'kept forward oxen but zombies forward Jaded',
         'device_type': 'load_balancer',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

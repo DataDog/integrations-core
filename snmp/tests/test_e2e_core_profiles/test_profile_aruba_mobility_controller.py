@@ -57,6 +57,7 @@ def test_e2e_profile_aruba_mobility_controller(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.14823.1.1.50',
         'vendor': 'aruba',
         'device_type': 'wlc',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

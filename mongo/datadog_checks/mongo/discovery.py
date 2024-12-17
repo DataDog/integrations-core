@@ -28,7 +28,7 @@ class MongoDBDatabaseAutodiscovery(Discovery):
         self.database_count = 0  # total number of databases on the server
 
     def _list_databases(self):
-        deployment = self._check.api_client.deployment_type
+        deployment = self._check.deployment_type
 
         databases = []
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:

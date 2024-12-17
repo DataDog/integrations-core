@@ -5,7 +5,6 @@ import copy
 import functools
 import importlib
 import inspect
-import json
 import logging
 import re
 import traceback
@@ -28,7 +27,7 @@ from typing import (  # noqa: F401
 )
 
 import yaml
-from six import PY2, binary_type, iteritems, raise_from, text_type
+from pydantic import BaseModel, ValidationError
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 
@@ -51,6 +50,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
+from ..utils.serialization import from_json, to_json
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
@@ -83,9 +83,6 @@ if is_affirmative(datadog_agent.get_config('integration_profiling')):
 
     prof = Profiler(service='datadog-agent-integrations')
     prof.start()
-
-if not PY2:
-    from pydantic import BaseModel, ValidationError
 
 if TYPE_CHECKING:
     import ssl  # noqa: F401
@@ -178,7 +175,6 @@ class AgentCheck(object):
         # type: (*Any, **Any) -> None
         """
         Parameters:
-
             name (str):
                 the name of the check
             init_config (dict):
@@ -306,8 +302,10 @@ class AgentCheck(object):
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
-        if not PY2:
-            self.check_initializations.append(self.load_configuration_models)
+        self.check_initializations.append(self.load_configuration_models)
+
+        self.__formatted_tags = None
+        self.__logs_enabled = None
 
     def _create_metrics_pattern(self, metric_patterns, option_name):
         all_patterns = metric_patterns.get(option_name, [])
@@ -399,6 +397,36 @@ class AgentCheck(object):
         return self._http
 
     @property
+    def logs_enabled(self):
+        # type: () -> bool
+        """
+        Returns True if logs are enabled, False otherwise.
+        """
+        if self.__logs_enabled is None:
+            self.__logs_enabled = bool(datadog_agent.get_config('logs_enabled'))
+
+        return self.__logs_enabled
+
+    @property
+    def formatted_tags(self):
+        # type: () -> str
+        if self.__formatted_tags is None:
+            normalized_tags = set()
+            for tag in self.instance.get('tags', []):
+                key, _, value = tag.partition(':')
+                if not value:
+                    continue
+
+                if self.disable_generic_tags and key in GENERIC_TAGS:
+                    key = '{}_{}'.format(self.name, key)
+
+                normalized_tags.add('{}:{}'.format(key, value))
+
+            self.__formatted_tags = ','.join(sorted(normalized_tags))
+
+        return self.__formatted_tags
+
+    @property
     def diagnosis(self):
         # type: () -> Diagnosis
         """
@@ -474,11 +502,9 @@ class AgentCheck(object):
 
         known_options = {k for k, _ in models_config}  # type: Set[str]
 
-        if not PY2:
-
-            if isinstance(models_config, BaseModel):
-                # Also add aliases, if any
-                known_options.update(set(models_config.model_dump(by_alias=True)))
+        if isinstance(models_config, BaseModel):
+            # Also add aliases, if any
+            known_options.update(set(models_config.model_dump(by_alias=True)))
 
         unknown_options = [option for option in user_configs.keys() if option not in known_options]  # type: List[str]
 
@@ -530,8 +556,7 @@ class AgentCheck(object):
     def load_configuration_model(import_path, model_name, config, context):
         try:
             package = importlib.import_module(import_path)
-        # TODO: remove the type ignore when we drop Python 2
-        except ModuleNotFoundError as e:  # type: ignore
+        except ModuleNotFoundError as e:
             # Don't fail if there are no models
             if str(e).startswith('No module named '):
                 return
@@ -542,8 +567,7 @@ class AgentCheck(object):
         if model is not None:
             try:
                 config_model = model.model_validate(config, context=context)
-            # TODO: remove the type ignore when we drop Python 2
-            except ValidationError as e:  # type: ignore
+            except ValidationError as e:
                 errors = e.errors()
                 num_errors = len(errors)
                 message_lines = [
@@ -562,7 +586,7 @@ class AgentCheck(object):
                     )
                     message_lines.append('  {}'.format(error['msg']))
 
-                raise_from(ConfigurationError('\n'.join(message_lines)), None)
+                raise ConfigurationError('\n'.join(message_lines)) from None
             else:
                 return config_model
 
@@ -667,7 +691,6 @@ class AgentCheck(object):
         """Send an event platform event.
 
         Parameters:
-
             raw_event (str):
                 JSON formatted string representing the event to send
             event_track_type (str):
@@ -737,7 +760,6 @@ class AgentCheck(object):
         """Sample a gauge metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -760,7 +782,6 @@ class AgentCheck(object):
         """Sample a raw count metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -785,7 +806,6 @@ class AgentCheck(object):
         """Sample an increasing counter metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -817,7 +837,6 @@ class AgentCheck(object):
         """Sample a point, with the rate calculated at the end of the check.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -840,7 +859,6 @@ class AgentCheck(object):
         """Sample a histogram metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -863,7 +881,6 @@ class AgentCheck(object):
         """Sample a histogram based on rate metrics.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -886,7 +903,6 @@ class AgentCheck(object):
         """Increment a counter metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -910,7 +926,6 @@ class AgentCheck(object):
         """Decrement a counter metric.
 
         Parameters:
-
             name (str):
                 the name of the metric
             value (float):
@@ -934,7 +949,6 @@ class AgentCheck(object):
         """Send the status of a service.
 
         Parameters:
-
             name (str):
                 the name of the service check
             status (int):
@@ -960,6 +974,42 @@ class AgentCheck(object):
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
+    def send_log(self, data, cursor=None, stream='default'):
+        # type: (dict[str, str], dict[str, Any] | None, str) -> None
+        """Send a log for submission.
+
+        Parameters:
+            data (dict[str, str]):
+                The log data to send. The following keys are treated specially, if present:
+
+                - timestamp: should be an integer or float representing the number of seconds since the Unix epoch
+                - ddtags: if not defined, it will automatically be set based on the instance's `tags` option
+            cursor (dict[str, Any] or None):
+                Metadata associated with the log which will be saved to disk. The most recent value may be
+                retrieved with the `get_log_cursor` method.
+            stream (str):
+                The stream associated with this log, used for accurate cursor persistence.
+                Has no effect if `cursor` argument is `None`.
+        """
+        attributes = data.copy()
+        if 'ddtags' not in attributes and self.formatted_tags:
+            attributes['ddtags'] = self.formatted_tags
+
+        timestamp = attributes.get('timestamp')
+        if timestamp is not None:
+            # convert seconds to milliseconds
+            attributes['timestamp'] = int(timestamp * 1000)
+
+        datadog_agent.send_log(to_json(attributes), self.check_id)
+        if cursor is not None:
+            self.write_persistent_cache('log_cursor_{}'.format(stream), to_json(cursor))
+
+    def get_log_cursor(self, stream='default'):
+        # type: (str) -> dict[str, Any] | None
+        """Returns the most recent log cursor from disk."""
+        data = self.read_persistent_cache('log_cursor_{}'.format(stream))
+        return from_json(data) if data else None
+
     def _log_deprecation(self, deprecation_key, *args):
         # type: (str, *str) -> None
         """
@@ -982,7 +1032,6 @@ class AgentCheck(object):
         """Updates the cached metadata `name` with `value`, which is then sent by the Agent at regular intervals.
 
         Parameters:
-
             name (str):
                 the name of the metadata
             value (Any):
@@ -1034,7 +1083,6 @@ class AgentCheck(object):
         """Returns the value previously stored with `write_persistent_cache` for the same `key`.
 
         Parameters:
-
             key (str):
                 the key to retrieve
         """
@@ -1049,7 +1097,6 @@ class AgentCheck(object):
         The cache is persistent between agent restarts but will be rebuilt if the check instance configuration changes.
 
         Parameters:
-
             key (str):
                 the key to retrieve
             value (str):
@@ -1068,7 +1115,7 @@ class AgentCheck(object):
             new_tags = []
             for hostname, source_map in external_tags:
                 new_tags.append((to_native_string(hostname), source_map))
-                for src_name, tags in iteritems(source_map):
+                for src_name, tags in source_map.items():
                     source_map[src_name] = self._normalize_tags_type(tags)
             datadog_agent.set_external_tags(new_tags)
         except IndexError:
@@ -1095,7 +1142,6 @@ class AgentCheck(object):
         and make it compliant with flake8 logging format linter.
 
         Parameters:
-
             warning_message (str):
                 the warning message
             args (Any):
@@ -1133,7 +1179,7 @@ class AgentCheck(object):
         The agent calls this method to retrieve diagnostics from integrations. This method
         runs explicit diagnostics if available.
         """
-        return json.dumps([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
+        return to_json([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
 
     def _get_requests_proxy(self):
         # type: () -> ProxySettings
@@ -1161,13 +1207,14 @@ class AgentCheck(object):
     def normalize(self, metric, prefix=None, fix_case=False):
         # type: (Union[str, bytes], Union[str, bytes], bool) -> str
         """
-        Turn a metric into a well-formed metric name
-        prefix.b.c
-        :param metric The metric name to normalize
-        :param prefix A prefix to to add to the normalized name, default None
-        :param fix_case A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
+        Turn a metric into a well-formed metric name prefix.b.c
+
+        Parameters:
+            metric: The metric name to normalize
+            prefix: A prefix to to add to the normalized name, default None
+            fix_case: A boolean, indicating whether to make sure that the metric name returned is in "snake_case"
         """
-        if isinstance(metric, text_type):
+        if isinstance(metric, str):
             metric = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
 
         if fix_case:
@@ -1192,7 +1239,7 @@ class AgentCheck(object):
         This happens for legacy reasons, when we cleaned up some characters (like '-')
         which are allowed in tags.
         """
-        if isinstance(tag, text_type):
+        if isinstance(tag, str):
             tag = tag.encode('utf-8', 'ignore')
         tag = self.TAG_REPLACEMENT.sub(br'_', tag)
         tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', tag)
@@ -1238,7 +1285,13 @@ class AgentCheck(object):
 
                     enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
                 elif self.should_profile_memory():
-                    self.profile_memory(self.check, self.init_config, args=(instance,))
+                    # self.init_config['profile_memory'] could be `/tmp/datadog-agent-memory-profiler*`
+                    # that is generated by Datadog Agent.
+                    # If we use `--m-dir` for `agent check` command, a hidden flag, it should be same as a given value.
+                    namespaces = [self.init_config['profile_memory']]
+                    for id in self.check_id.split(":"):
+                        namespaces.append(id)
+                    self.profile_memory(func=self.check, namespaces=namespaces, args=(instance,))
                 else:
                     self.check(instance)
 
@@ -1246,7 +1299,7 @@ class AgentCheck(object):
         except Exception as e:
             message = self.sanitize(str(e))
             tb = self.sanitize(traceback.format_exc())
-            error_report = json.dumps([{'message': message, 'traceback': tb}])
+            error_report = to_json([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
@@ -1286,13 +1339,12 @@ class AgentCheck(object):
         ```
 
         Parameters:
-
             event (dict[str, Any]):
                 the event to be sent
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in iteritems(event):
-            if not isinstance(value, (text_type, binary_type)):
+        for key, value in event.items():
+            if not isinstance(value, (str, bytes)):
                 continue
 
             try:

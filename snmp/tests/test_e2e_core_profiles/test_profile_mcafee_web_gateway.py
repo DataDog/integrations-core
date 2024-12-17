@@ -112,6 +112,7 @@ def test_e2e_profile_mcafee_web_gateway(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.1230.2.7.1.1',
         'vendor': 'mcafee',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

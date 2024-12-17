@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
 from cachetools import TTLCache
-from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
@@ -96,10 +95,6 @@ except ImportError:
     from ..stubs import datadog_agent
 
 
-if PY3:
-    long = int
-
-
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
@@ -114,8 +109,9 @@ class MySql(AgentCheck):
         self.is_mariadb = None
         self._resolved_hostname = None
         self._agent_hostname = None
+        self._database_hostname = None
         self._is_aurora = None
-        self._config = MySQLConfig(self.instance)
+        self._config = MySQLConfig(self.instance, init_config)
         self.tags = self._config.tags
         self.cloud_metadata = self._config.cloud_metadata
 
@@ -175,7 +171,16 @@ class MySql(AgentCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    @property
+    def database_hostname(self):
+        # type: () -> str
+        if self._database_hostname is None:
+            self._database_hostname = self.resolve_db_host()
+        return self._database_hostname
+
     def set_resource_tags(self):
+        self.tags.append("database_hostname:{}".format(self.database_hostname))
+
         if self.cloud_metadata.get("gcp") is not None:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
@@ -206,6 +211,12 @@ class MySql(AgentCheck):
                 self.resolved_hostname,
             )
         )
+
+    def set_version_tags(self):
+        if not self.version or not self.version.flavor:
+            return
+
+        self.tags.append('dbms_flavor:{}'.format(self.version.flavor.lower()))
 
     def _check_database_configuration(self, db):
         self._check_performance_schema_enabled(db)
@@ -279,7 +290,6 @@ class MySql(AgentCheck):
         if self.instance.get('pass'):
             self._log_deprecation('_config_renamed', 'pass', 'password')
 
-        tags = list(self.tags)
         self._set_qcache_stats()
         try:
             with self._connect() as db:
@@ -288,11 +298,12 @@ class MySql(AgentCheck):
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
                     aurora_tags = self._get_runtime_aurora_tags(db)
-                    self.tags = tags + aurora_tags
+                    self.tags = list(set(self.tags) | set(aurora_tags))
                     self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
 
                 # version collection
                 self.version = get_version(db)
+                self.set_version_tags()
                 self._send_metadata()
                 self._send_database_instance_metadata()
 
@@ -304,6 +315,7 @@ class MySql(AgentCheck):
                     self.check_userstat_enabled(db)
 
                 # Metric collection
+                tags = copy.deepcopy(self.tags)
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
@@ -681,7 +693,7 @@ class MySql(AgentCheck):
                 self.service_check(
                     self.GROUP_REPLICATION_SERVICE_CHECK_NAME,
                     status=status,
-                    tags=self._service_check_tags() + additional_tags,
+                    tags=self.service_check_tags + additional_tags,
                 )
 
                 metrics_to_fetch = SQL_GROUP_REPLICATION_METRICS_8_0_2 if above_802 else SQL_GROUP_REPLICATION_METRICS
@@ -726,9 +738,9 @@ class MySql(AgentCheck):
         if replica_sql_running is None:
             replica_sql_running = collect_type('Replica_SQL_Running', results, dict)
         if replica_io_running:
-            replica_io_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_io_running))
+            replica_io_running = any(v.lower().strip() == 'yes' for v in replica_io_running.values())
         if replica_sql_running:
-            replica_sql_running = any(v.lower().strip() == 'yes' for v in itervalues(replica_sql_running))
+            replica_sql_running = any(v.lower().strip() == 'yes' for v in replica_sql_running.values())
         binlog_running = results.get('Binlog_enabled', False)
 
         # replicas will only be collected if user has PROCESS privileges.
@@ -813,7 +825,7 @@ class MySql(AgentCheck):
         return False
 
     def _submit_metrics(self, variables, db_results, tags):
-        for variable, metric in iteritems(variables):
+        for variable, metric in variables.items():
             if isinstance(metric, list):
                 for m in metric:
                     metric_name, metric_type = m
@@ -856,7 +868,7 @@ class MySql(AgentCheck):
                 cursor.execute(query)
                 result = cursor.fetchone()
                 if result is not None:
-                    for field, metric in list(iteritems(field_metric_map)):
+                    for field, metric in field_metric_map.items():
                         # Find the column name in the cursor description to identify the column index
                         # http://www.python.org/dev/peps/pep-0249/
                         # cursor.description is a tuple of (column_name, ..., ...)
@@ -903,7 +915,7 @@ class MySql(AgentCheck):
     def _collect_system_metrics(self, host, db, tags):
         pid = None
         # The server needs to run locally, accessed by TCP or socket
-        if host in ["localhost", "127.0.0.1", "0.0.0.0"] or db.port == long(0):
+        if host in ["localhost", "127.0.0.1", "0.0.0.0"] or db.port == int(0):
             pid = self._get_server_pid(db)
 
         if pid:
@@ -1021,7 +1033,7 @@ class MySql(AgentCheck):
                 master_logs = {result[0]: result[1] for result in cursor_results}
 
                 binary_log_space = 0
-                for value in itervalues(master_logs):
+                for value in master_logs.values():
                     binary_log_space += value
 
                 return binary_log_space
@@ -1059,7 +1071,7 @@ class MySql(AgentCheck):
                     # MySQL <5.7 does not have Channel_Name.
                     # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
                     channel = replication_channel or replica_result.get('Channel_Name') or 'default'
-                    for key, value in iteritems(replica_result):
+                    for key, value in replica_result.items():
                         if value is not None:
                             replica_results[key]['channel:{0}'.format(channel)] = value
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
@@ -1075,12 +1087,19 @@ class MySql(AgentCheck):
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
-                cursor.execute("SHOW MASTER STATUS;")
+                if not self.is_mariadb and self.version.version_compatible((8, 4, 0)):
+                    cursor.execute("SHOW BINARY LOG STATUS;")
+                else:
+                    cursor.execute("SHOW MASTER STATUS;")
+
                 binlog_results = cursor.fetchone()
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
+            if "You are not using binary logging" in str(e):
+                replica_results.update({'Binlog_enabled': False})
+            else:
+                self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
 
         return replica_results
 
@@ -1157,7 +1176,7 @@ class MySql(AgentCheck):
                 schema_query_avg_run_time = {}
                 for row in cursor.fetchall():
                     schema_name = str(row[0])
-                    avg_us = long(row[1])
+                    avg_us = int(row[1])
 
                     # set the tag as the dictionary key
                     schema_query_avg_run_time["schema:{0}".format(schema_name)] = avg_us
@@ -1212,7 +1231,7 @@ class MySql(AgentCheck):
                 schema_size = {}
                 for row in cursor.fetchall():
                     schema_name = str(row[0])
-                    size = long(row[1])
+                    size = int(row[1])
 
                     # set the tag as the dictionary key
                     schema_size["schema:{0}".format(schema_name)] = size
@@ -1237,8 +1256,8 @@ class MySql(AgentCheck):
                 for row in cursor.fetchall():
                     table_schema = str(row[0])
                     table_name = str(row[1])
-                    rows_read_total = long(row[2])
-                    rows_changed_total = long(row[3])
+                    rows_read_total = int(row[2])
+                    rows_changed_total = int(row[3])
 
                     # set the tag as the dictionary key
                     table_rows_read_total["schema:{},table:{}".format(table_schema, table_name)] = rows_read_total
@@ -1293,6 +1312,8 @@ class MySql(AgentCheck):
         if self.resolved_hostname not in self._database_instance_emitted:
             event = {
                 "host": self.resolved_hostname,
+                "port": self._config.port,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "mysql",
                 "kind": "database_instance",

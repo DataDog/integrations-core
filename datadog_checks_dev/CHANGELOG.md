@@ -2,6 +2,57 @@
 
 <!-- towncrier release notes start -->
 
+## 34.1.0 / 2024-11-13
+
+***Added***:
+
+* Add MIT-0 license ([#18936](https://github.com/DataDog/integrations-core/pull/18936))
+
+***Fixed***:
+
+* fix author name not being normalized ([#18718](https://github.com/DataDog/integrations-core/pull/18718))
+
+## 34.0.0 / 2024-10-25
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* add check_only template for publishing platform integrations ([#18596](https://github.com/DataDog/integrations-core/pull/18596))
+* Add ``capture`` parameter to ``docker_run`` to capture ``docker compose`` output. ([#18878](https://github.com/DataDog/integrations-core/pull/18878))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+* Fix ddev create bug where README file gets overwritten ([#18879](https://github.com/DataDog/integrations-core/pull/18879))
+* Fix jmx based integrations test failing due to a missing jvm metric ([#18914](https://github.com/DataDog/integrations-core/pull/18914))
+
+## 33.1.0 / 2024-08-15
+
+***Added***:
+
+* Refactored integration name exclusion mapper and add new entries to exclusion mapper ([#18213](https://github.com/DataDog/integrations-core/pull/18213))
+
+## 33.0.0 / 2024-08-05
+
+***Removed***:
+
+* Remove `ddev release trello ...` commands. We no longer interact with Trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
+
+***Added***:
+
+* Show descriptions of templates in ddev create help. ([#18039](https://github.com/DataDog/integrations-core/pull/18039))
+* Add an exception for Zabbix (Community Edition) to pass validations ([#18197](https://github.com/DataDog/integrations-core/pull/18197))
+
+***Fixed***:
+
+* Improve messages around dependency spec management ([#17969](https://github.com/DataDog/integrations-core/pull/17969))
+* [NDM] Pin pysmi version for breaking generate traps DB tests ([#18066](https://github.com/DataDog/integrations-core/pull/18066))
+* Pin towncrier to 23.11, subsequent release broke us. ([#18168](https://github.com/DataDog/integrations-core/pull/18168))
+
 ## 32.2.1 / 2024-06-28
 
 ***Fixed***:

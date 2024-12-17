@@ -104,6 +104,7 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.11.2.51',
         'vendor': 'hp',
         'device_type': 'storage',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

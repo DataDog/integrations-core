@@ -69,10 +69,20 @@ instances:
     #
     # compression: <COMPRESSION>
 
+    ## @param tls_ca_cert - string - optional
+    ## The path to the CA certificate file.
+    #
+    # tls_ca_cert: <TLS_CA_CERT>
+
     ## @param tls_verify - boolean - optional - default: false
     ## Whether or not to connect securely using TLS. The server must also support this.
     #
     # tls_verify: false
+
+    ## @param verify - boolean - optional - default: true
+    ## Indicates if a certificate is required and if it will be validated after a connection is established.
+    #
+    # verify: true
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

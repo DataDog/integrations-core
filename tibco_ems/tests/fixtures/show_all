@@ -1,0 +1,75 @@
+TIBCO Enterprise Message Service Administration Tool.
+Copyright 2003-2021 by TIBCO Software Inc.
+All rights reserved.
+
+Version 10.1.0 V4 11/9/2021
+
+Connected to: tcp://localhost:7222
+Command: show server
+ Server:                   tibemsd (version: 10.1.0 V4)
+ Hostname:                 d3ce69f9df4f
+ Process Id:               1
+ State:                    active
+ Runtime Module Path:      /opt/tibco/ems/10.1/bin/lib:/opt/tibco/ems/10.1/lib
+ Topics:                   3 (0 dynamic, 0 temporary)
+ Queues:                   10 (0 dynamic, 1 temporary)
+ Client Connections:       0
+ Admin Connections:        1
+ Sessions:                 1
+ Producers:                1
+ Consumers:                1
+ Durables:                 1
+ Log File Size:            85.8 Kb out of 1MB
+ Pending Messages:         0
+ Pending Message Size:     0.0 Kb
+ Message Memory Usage:     16.6 Kb out of 512MB
+ Message Memory Pooled:    53.0 Kb
+ Synchronous Storage:      1.5 Kb
+ Asynchronous Storage:     3.5 Kb
+ Fsync for Sync Storage:   disabled
+ Inbound Message Rate:     0 msgs/sec,  0.0 Kb per second
+ Outbound Message Rate:    0 msgs/sec,  0.0 Kb per second
+ Storage Read Rate:        0 reads/sec,  0.0 Kb per second
+ Storage Write Rate:       0 writes/sec, 0.0 Kb per second
+ Uptime:                   18 days 11 hours 23 minutes
+Command: show queues
+                                                              All Msgs            Persistent Msgs
+  Queue Name                        SNFGXIBCT  Pre  Rcvrs     Msgs    Size        Msgs    Size
+  >                                 ---------    5*     0        0     0.0 Kb        0     0.0 Kb
+  !hash_queue#                      ---------    5*     0        0     0.0 Kb        0     0.0 Kb
+  #hash_queue#                      ---------    5*     0        0     0.0 Kb        0     0.0 Kb
+  $sys.admin                        +--------    5*     0        0     0.0 Kb        0     0.0 Kb
+  $sys.lookup                       ---------    5*     0        0     0.0 Kb        0     0.0 Kb
+  $sys.redelivery.delay             +--------    5*     0        0     0.0 Kb        0     0.0 Kb
+  $sys.undelivered                  +--------    5*     0        0     0.0 Kb        0     0.0 Kb
+* $TMP$.tibemsd.16675855A2984.1     ---------    5      1        0     0.0 Kb        0     0.0 Kb
+  queue.sample                      -------+-    5*     0        0     0.0 Kb        0     0.0 Kb
+  sample                            -------+-    5*     0        0     0.0 Kb        0     0.0 Kb
+Command: show topics
+                                                               All Msgs            Persistent Msgs
+  Topic Name                        SNFGEIBCTM  Subs  Durs     Msgs    Size        Msgs    Size
+  >                                 ----------     0     0        0     0.0 Kb        0     0.0 Kb
+  sample                            -------+--     1     1        0     0.0 Kb        0     0.0 Kb
+  topic.sample                      -------+--     0     0        0     0.0 Kb        0     0.0 Kb
+Command: show stat consumers
+                                                          Total Count      Rate/Second
+User         Conn  T  Destination                         Msgs   Size      Msgs   Size
+admin       10630  Q  $TMP$.tibemsd.16675855A2984.1          4   11.7 Kb      0    0.0 Kb
+Command: show stat producers
+                                        Total Count      Rate/Second
+User         Conn  T  Destination       Msgs   Size      Msgs   Size
+admin       10630  Q  $sys.admin           6    1.0 Kb      0    0.0 Kb
+Command: show connections full
+L  Version   ID    FSXT  S  Host         IP address Port  User   ClientID Sess Prod Cons TmpT TmpQ Uncomm UncommSize     Uptime
+C  10.1.0 V4 10630 ---A  +  d3ce69f9df4f 127.0.0.1  46418 admin              1    1    1    0    1      0     0.0 Kb      0.030
+Command: show durables
+  Topic Name        Durable          Shared  User         Msgs    Size
+  sample            sample.durable   N       <offline>       0     0.0 MB
+Command: show stat consumers
+                                                      Total Count      Rate/Second
+  User       Conn  T  Destination                      Msgs   Size      Msgs   Size
+  admin         2  Q  $TMP$.tibemsd.1669EC51B3.1          1    2.4 Kb      0    0.6 TB
+Command: show stat producers
+                                        Total Count      Rate/Second
+  User       Conn  T  Destination       Msgs   Size      Msgs   Size
+  admin         2  Q  $sys.admin           3    0.5 Kb      0    0.0 GB

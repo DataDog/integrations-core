@@ -1,0 +1,4 @@
+Command: show stat producers
+                                      Total Count      Rate/Second
+User       Conn  T  Destination       Msgs   Size      Msgs   Size
+admin         2  Q  $sys.admin           3    0.5 Kb      0    0.0 Kb

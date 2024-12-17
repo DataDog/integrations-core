@@ -15,29 +15,12 @@ ENV CXXFLAGS="${CFLAGS}"
 # --strip-debug reduces binary sizes and improves reproducibility
 ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 
-# For Python 2, we get openssl(1) via yum just to get the necessary headers,
-# and we remove the package after compilation to prevent it from interfering
-# with the use of openssl3 everywhere else
-ENV PYTHON2_VERSION=2.7.18
-RUN yum install -y openssl-devel && \
- DOWNLOAD_URL="https://python.org/ftp/python/${PYTHON2_VERSION}/Python-${PYTHON2_VERSION}.tgz" \
- VERSION="${PYTHON2_VERSION}" \
- SHA256="da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814" \
- RELATIVE_PATH=Python-{{version}} \
- INSTALL_COMMAND="make altinstall" \
- bash install-from-source.sh \
- --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-ipv6 --enable-unicode=ucs4 \
- && yum remove -y openssl-devel
-
-# Set up virtual environment for Python 2
-RUN /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script-location virtualenv \
- && /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m virtualenv /py2
-
 # openssl
-RUN yum install -y perl-IPC-Cmd && \
+RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
+ cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.0.13" \
- SHA256="88525753f79d3bec27d2fa7c66aa0b92b3aa9498dafd93d7cfa4b3780cdae313" \
+ VERSION="3.3.2" \
+ SHA256="2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -53,11 +36,11 @@ RUN yum install -y perl-IPC-Cmd && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.11.8
+ENV PYTHON3_VERSION=3.12.6
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889" \
+ SHA256="85a4c1be906d20e5c5a69f2466b00da769c221d6a684acfd3a514dbf5bf10a66" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON_VERSION} \
@@ -158,8 +141,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.7.1" \
- SHA256="f91249c87f68ea00cf27c44fdfa5a78423e41e71b7d408e5901a9896d905c495" \
+ VERSION="8.9.1" \
+ SHA256="291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

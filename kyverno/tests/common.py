@@ -68,6 +68,7 @@ REPORTS_METRICS = [
 
 BACKGROUND_METRICS = [
     'kyverno.policy.changes.count',
+    'kyverno.policy.rule.info',
 ]
 
 ADMISSION_METRICS = [
@@ -76,6 +77,7 @@ ADMISSION_METRICS = [
     'kyverno.http.requests.duration.seconds.count',
     'kyverno.http.requests.duration.seconds.sum',
     'kyverno.policy.changes.count',
+    'kyverno.policy.rule.info',
 ]
 
 CLEANUP_METRICS = []

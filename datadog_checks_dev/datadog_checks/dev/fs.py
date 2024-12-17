@@ -11,31 +11,19 @@ import shutil
 from contextlib import contextmanager
 from io import open
 from tempfile import mkdtemp
-
-from six import PY3, text_type
-from six.moves.urllib.request import urlopen
+from urllib.request import urlopen
 
 from .structures import EnvVars
 
-if PY3:
 
-    def write_file(file, contents, encoding='utf-8'):
-        with open(file, 'w', encoding=encoding) as f:
-            f.write(contents)
+def write_file(file, contents, encoding='utf-8'):
+    with open(file, 'w', encoding=encoding) as f:
+        f.write(contents)
 
-    def write_file_lines(file, lines, encoding='utf-8'):
-        with open(file, 'w', encoding=encoding) as f:
-            f.writelines(lines)
 
-else:
-
-    def write_file(file, contents, encoding='utf-8'):
-        with open(file, 'w', encoding=encoding) as f:
-            f.write(text_type(contents))
-
-    def write_file_lines(file, lines, encoding='utf-8'):
-        with open(file, 'w', encoding=encoding) as f:
-            f.writelines(text_type(line) for line in lines)
+def write_file_lines(file, lines, encoding='utf-8'):
+    with open(file, 'w', encoding=encoding) as f:
+        f.writelines(lines)
 
 
 def dir_exists(d):
@@ -140,14 +128,10 @@ def copy_dir_contents(path, d):
 def remove_path(path):
     try:
         shutil.rmtree(path, ignore_errors=False)
-    # TODO: Remove FileNotFoundError (and noqa: B014) when Python 2 is removed
-    # In Python 3, IOError have been merged into OSError
-    except (FileNotFoundError, OSError):  # noqa: B014
+    except OSError:
         try:
             os.remove(path)
-        # TODO: Remove FileNotFoundError (and noqa: B014) when Python 2 is removed
-        # In Python 3, IOError have been merged into OSError
-        except (FileNotFoundError, OSError, PermissionError):  # noqa: B014
+        except (OSError, PermissionError):
             pass
 
 

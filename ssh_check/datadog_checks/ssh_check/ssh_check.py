@@ -38,6 +38,11 @@ class CheckSSH(AgentCheck):
         self.add_missing_keys = is_affirmative(self.instance.get('add_missing_keys'))
         self.base_tags = self.instance.get('tags', [])
         self.base_tags.append("instance:{0}-{1}".format(self.host, self.port))
+        self._connection_settings_to_force_sha1 = (
+            {'disabled_algorithms': {'pubkeys': ['rsa-sha2-512', 'rsa-sha2-256']}}
+            if is_affirmative(self.instance.get('force_sha1'))
+            else {}
+        )
 
     def check(self, _):
         private_key = None
@@ -55,23 +60,24 @@ class CheckSSH(AgentCheck):
             except paramiko.ssh_exception.SSHException:
                 self.warning("Private key file is invalid")
 
-        client = paramiko.SSHClient()
+        client = self.initialize_client()
         if self.add_missing_keys:
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.load_system_host_keys()
 
         exception_message = "No errors occurred"
+        # If the private key is not valid and we pass password instead of passphrase it will attempt to connect
+        # using the password and the error will be misleading
+        connect_kwargs = (
+            {'password': self.password} if private_key is None else {'passphrase': self.password, 'pkey': private_key}
+        )
+        # Passing all kwargs together is needed to stay compatible with Python 2.
+        connect_kwargs.update(self._connection_settings_to_force_sha1)
+
         try:
             # Try to connect to check status of SSH
             try:
-                if not private_key:
-                    client.connect(self.host, port=self.port, username=self.username, password=self.password)
-                else:
-                    # If the private key is not valid and we pass password instead of passphrase it will attempt to
-                    # connect using the password and the error will be misleading
-                    client.connect(
-                        self.host, port=self.port, username=self.username, passphrase=self.password, pkey=private_key
-                    )
+                client.connect(self.host, port=self.port, username=self.username, **connect_kwargs)
                 self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags)
 
             except Exception as e:
@@ -109,6 +115,13 @@ class CheckSSH(AgentCheck):
         finally:
             # Always close the client, failure to do so leaks one thread per connection left open
             client.close()
+
+    def initialize_client(self):
+        """
+        This indirection is useful for swapping out the client for testing.
+        """
+
+        return paramiko.SSHClient()
 
     def _collect_metadata(self, client):
         try:

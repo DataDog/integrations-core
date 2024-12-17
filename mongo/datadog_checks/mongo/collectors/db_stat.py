@@ -43,5 +43,5 @@ class DbStatCollector(MongoCollector):
             ]
         else:
             additional_tags = None
-        stats = {'stats': db.command('dbstats')}
+        stats = {'stats': db.command({'dbStats': 1, 'freeStorage': 1})}
         return self._submit_payload(stats, additional_tags)

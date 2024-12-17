@@ -60,6 +60,7 @@ def test_e2e_profile_velocloud_edge(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.45346.1.1',
         'vendor': 'velocloud',
         'device_type': 'sd-wan',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

@@ -32,7 +32,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
         cache: 'pip'
 
     - name: Upgrade Python packaging tools
@@ -71,6 +71,9 @@ jobs:
     needs:
     - build
 
+    permissions:
+      contents: write
+      
     steps:
     - uses: actions/download-artifact@v4
       with:

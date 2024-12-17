@@ -1,0 +1,423 @@
+[
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted",
+        "cloud_metadata": {},
+        "timestamp": 1720550476223.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1"
+            }
+        },
+        "db": {
+            "instance": "integration",
+            "plan": {
+                "definition": {
+                    "executionStats": {
+                        "stage": "CACHED_PLAN",
+                        "nReturned": 0,
+                        "executionTimeMillisEstimate": 84,
+                        "works": 1,
+                        "advanced": 0,
+                        "needTime": 0,
+                        "needYield": 0,
+                        "saveState": 1,
+                        "restoreState": 1,
+                        "isEOF": 1,
+                        "inputStage": {
+                            "stage": "LIMIT",
+                            "nReturned": 0,
+                            "executionTimeMillisEstimate": 84,
+                            "works": 418,
+                            "advanced": 0,
+                            "needTime": 417,
+                            "needYield": 0,
+                            "saveState": 1,
+                            "restoreState": 1,
+                            "isEOF": 1,
+                            "limitAmount": 34,
+                            "inputStage": {
+                                "stage": "FETCH",
+                                "filter": {
+                                    "age": {
+                                        "$gt": "?"
+                                    }
+                                },
+                                "nReturned": 0,
+                                "executionTimeMillisEstimate": 84,
+                                "works": 418,
+                                "advanced": 0,
+                                "needTime": 417,
+                                "needYield": 0,
+                                "saveState": 1,
+                                "restoreState": 1,
+                                "isEOF": 1,
+                                "docsExamined": 417,
+                                "alreadyHasObj": 0,
+                                "inputStage": {
+                                    "stage": "IXSCAN",
+                                    "nReturned": 417,
+                                    "executionTimeMillisEstimate": 84,
+                                    "works": 418,
+                                    "advanced": 417,
+                                    "needTime": 0,
+                                    "needYield": 0,
+                                    "saveState": 1,
+                                    "restoreState": 1,
+                                    "isEOF": 1,
+                                    "keyPattern": {
+                                        "name": 1
+                                    },
+                                    "indexName": "name_1",
+                                    "isMultiKey": false,
+                                    "multiKeyPaths": {
+                                        "name": []
+                                    },
+                                    "isUnique": false,
+                                    "isSparse": false,
+                                    "isPartial": false,
+                                    "indexVersion": 2,
+                                    "direction": "forward",
+                                    "indexBounds": {
+                                        "name": [
+                                            "?"
+                                        ]
+                                    },
+                                    "keysExamined": 417,
+                                    "seeks": 1,
+                                    "dupsTested": 0,
+                                    "dupsDropped": 0
+                                }
+                            }
+                        }
+                    }
+                },
+                "signature": "a0e139ab93266440"
+            },
+            "query_signature": "7e73a3e6720168b8",
+            "application": null,
+            "user": "",
+            "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"limit\": 34, \"$db\": \"integration\"}",
+            "operation_metadata": {
+                "op": "query",
+                "ns": "integration.customers",
+                "collection": "customers",
+                "comment": "query customers by age"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "query",
+            "ns": "integration.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 85000,
+            "num_yields": 1,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 3
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 3
+                    }
+                }
+            }
+        }
+    },
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted",
+        "cloud_metadata": {},
+        "timestamp": 32479987545338.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "test",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "namespace": "integration.products",
+                        "indexFilterSet": false,
+                        "parsedQuery": {
+                            "$and": [
+                                {
+                                    "data": {
+                                        "$gt": "?"
+                                    }
+                                },
+                                {
+                                    "message": {
+                                        "$regularExpression": {
+                                            "pattern": "?",
+                                            "options": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "queryHash": "C30F916C",
+                        "planCacheKey": "C30F916C",
+                        "maxIndexedOrSolutionsReached": false,
+                        "maxIndexedAndSolutionsReached": false,
+                        "maxScansToExplodeReached": false,
+                        "winningPlan": {
+                            "stage": "COLLSCAN",
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "data": {
+                                            "$gt": "?"
+                                        }
+                                    },
+                                    {
+                                        "message": {
+                                            "$regularExpression": {
+                                                "pattern": "?",
+                                                "options": ""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "direction": "forward"
+                        },
+                        "rejectedPlans": []
+                    },
+                    "executionStats": {
+                        "executionSuccess": true,
+                        "nReturned": 0,
+                        "executionTimeMillis": 14,
+                        "totalKeysExamined": 0,
+                        "totalDocsExamined": 721,
+                        "executionStages": {
+                            "stage": "COLLSCAN",
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "data": {
+                                            "$gt": "?"
+                                        }
+                                    },
+                                    {
+                                        "message": {
+                                            "$regularExpression": {
+                                                "pattern": "?",
+                                                "options": ""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "nReturned": 0,
+                            "executionTimeMillisEstimate": 13,
+                            "works": 722,
+                            "advanced": 0,
+                            "needTime": 721,
+                            "needYield": 0,
+                            "saveState": 1,
+                            "restoreState": 1,
+                            "isEOF": 1,
+                            "direction": "forward",
+                            "docsExamined": 721
+                        },
+                        "allPlansExecution": []
+                    }
+                },
+                "signature": "6f93ef1b4ea189ab"
+            },
+            "query_signature": "2e0dfc1416f51975",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"test\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "test.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "test.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 12000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            },
+            "cursor": {
+                "cursor_id": 5170666760900931828,
+                "originating_command": null,
+                "comment": null
+            }
+        }
+    },
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted",
+        "cloud_metadata": {},
+        "timestamp": 32479987545521.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "test",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "namespace": "integration.products",
+                        "indexFilterSet": false,
+                        "parsedQuery": {
+                            "$and": [
+                                {
+                                    "data": {
+                                        "$gt": "?"
+                                    }
+                                },
+                                {
+                                    "message": {
+                                        "$regularExpression": {
+                                            "pattern": "?",
+                                            "options": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "queryHash": "C30F916C",
+                        "planCacheKey": "C30F916C",
+                        "maxIndexedOrSolutionsReached": false,
+                        "maxIndexedAndSolutionsReached": false,
+                        "maxScansToExplodeReached": false,
+                        "winningPlan": {
+                            "stage": "COLLSCAN",
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "data": {
+                                            "$gt": "?"
+                                        }
+                                    },
+                                    {
+                                        "message": {
+                                            "$regularExpression": {
+                                                "pattern": "?",
+                                                "options": ""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "direction": "forward"
+                        },
+                        "rejectedPlans": []
+                    },
+                    "executionStats": {
+                        "executionSuccess": true,
+                        "nReturned": 0,
+                        "executionTimeMillis": 14,
+                        "totalKeysExamined": 0,
+                        "totalDocsExamined": 721,
+                        "executionStages": {
+                            "stage": "COLLSCAN",
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "data": {
+                                            "$gt": "?"
+                                        }
+                                    },
+                                    {
+                                        "message": {
+                                            "$regularExpression": {
+                                                "pattern": "?",
+                                                "options": ""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "nReturned": 0,
+                            "executionTimeMillisEstimate": 13,
+                            "works": 722,
+                            "advanced": 0,
+                            "needTime": 721,
+                            "needYield": 0,
+                            "saveState": 1,
+                            "restoreState": 1,
+                            "isEOF": 1,
+                            "direction": "forward",
+                            "docsExamined": 721
+                        },
+                        "allPlansExecution": []
+                    }
+                },
+                "signature": "6f93ef1b4ea189ab"
+            },
+            "query_signature": "6f544fbdad56d0dc",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"test\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "test.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "test.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 14000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            }
+        }
+    }
+]

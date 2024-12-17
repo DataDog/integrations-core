@@ -5,9 +5,7 @@
 
 import re
 from collections import defaultdict
-
-from six import iteritems
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
 
@@ -269,7 +267,7 @@ class GoExpvar(AgentCheck):
             for new_key, new_content in enumerate(object):
                 yield str(new_key), new_content
         elif isinstance(object, dict):
-            for new_key, new_content in iteritems(object):
+            for new_key, new_content in object.items():
                 yield str(new_key), new_content
         else:
             self.log.warning("Could not parse this object, check the json served by the expvar")

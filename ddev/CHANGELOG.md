@@ -2,6 +2,79 @@
 
 <!-- towncrier release notes start -->
 
+## 11.0.0 / 2024-12-09
+
+***Removed***:
+
+* Remove manifest validation call that calls deprecated endpoint ([#19208](https://github.com/DataDog/integrations-core/pull/19208))
+
+***Changed***:
+
+* Ddev now uses the macos-13 runner instead of macos-13 for the generated test matrix, because the macos-12 runner is being discontinued by microsoft. ([#19163](https://github.com/DataDog/integrations-core/pull/19163))
+
+***Added***:
+
+* Add unit names for bolívar digital ([#19051](https://github.com/DataDog/integrations-core/pull/19051))
+* Bump dependencies for checking and fixing code style ([#19126](https://github.com/DataDog/integrations-core/pull/19126))
+
+## 10.4.0 / 2024-11-13
+
+***Added***:
+
+* Add MIT-0 license ([#18936](https://github.com/DataDog/integrations-core/pull/18936))
+* Add units for all circulating currencies ([#18947](https://github.com/DataDog/integrations-core/pull/18947))
+* Bump `datadog_checks_dev` to 34.1.0 ([#19049](https://github.com/DataDog/integrations-core/pull/19049))
+
+***Fixed***:
+
+* Don't hardcode location of payload file in script that serves static OpenMetrics payloads. ([#18993](https://github.com/DataDog/integrations-core/pull/18993))
+
+## 10.3.0 / 2024-10-28
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18207](https://github.com/DataDog/integrations-core/pull/18207))
+* add bit family as valid units ([#18845](https://github.com/DataDog/integrations-core/pull/18845))
+* Bumped datadog_checks_dev version to 34.0.0 ([#18918](https://github.com/DataDog/integrations-core/pull/18918))
+
+## 10.2.0 / 2024-09-05
+
+***Added***:
+
+* Add command to tag the Agent release branch. It supports both RC and final tags, see `ddev release branch tag --help` for more details. ([#18413](https://github.com/DataDog/integrations-core/pull/18413))
+
+## 10.1.0 / 2024-08-15
+
+***Added***:
+
+* Refactored integration name exclusion mapper and add new entries to exclusion mapper ([#18213](https://github.com/DataDog/integrations-core/pull/18213))
+* Add new ddtrace license to known licenses ([#18221](https://github.com/DataDog/integrations-core/pull/18221))
+* Bump `datadog_checks_dev` requirement ([#18346](https://github.com/DataDog/integrations-core/pull/18346))
+
+***Fixed***:
+
+* Enable local check only after installing it in agent docker container.
+  This avoids crashing the container with a version of the check that comes bundled with the agent before we load the local version of the check.
+  For now limited to docker since that addresses an immediate CI issue. We'll extend it to native agent once we observe it and iron out any kinks. ([#18271](https://github.com/DataDog/integrations-core/pull/18271))
+
+## 10.0.0 / 2024-08-06
+
+***Removed***:
+
+* Remove `ddev release trello ...` commands. We no longer interact with trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
+
+***Added***:
+
+* Add cli option to override org config value at runtime ([#17932](https://github.com/DataDog/integrations-core/pull/17932))
+* Support reading site and api key from org config setting in addition to cli flags. ([#17934](https://github.com/DataDog/integrations-core/pull/17934))
+* Add validation for versions in __about__.py and CHANGELOG: `ddev validate version`. ([#18063](https://github.com/DataDog/integrations-core/pull/18063))
+* Add joule as valid metric units ([#18147](https://github.com/DataDog/integrations-core/pull/18147))
+* Bump datadog_checks_dev dependency to 33.0+ to get new features and bugfixes. ([#18206](https://github.com/DataDog/integrations-core/pull/18206))
+
+***Fixed***:
+
+* Improve messages around dependency spec management ([#17969](https://github.com/DataDog/integrations-core/pull/17969))
+
 ## 9.1.0 / 2024-06-25
 
 ***Security***:

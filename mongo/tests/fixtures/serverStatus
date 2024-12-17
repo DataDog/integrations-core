@@ -921,6 +921,17 @@
             "fastmod": 12,
             "idhack": 13
         },
+        "query": {
+            "planCache": {
+              "classic": { "hits": 13041302, "misses": 1023350 },
+              "sbe": { "hits": 444, "misses": 878 }
+            },
+            "sort": {
+              "spillToDisk": 18,
+              "totalBytesSorted": 4808797953,
+              "totalKeysSorted": 14394599
+            }
+        },
         "queryExecutor": {
             "scanned": 46,
             "scannedObjects": 97

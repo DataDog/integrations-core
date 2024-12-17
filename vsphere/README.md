@@ -57,6 +57,18 @@ collect_per_instance_filters:
 
 `disk` metrics are specific for each disk on the host, therefore these metrics need to be enabled using `collect_per_instance_filters` to be collected.
 
+#### Collecting property metrics
+
+The vSphere integration can also collect property-based metrics. These are configuration properties, such as if a host is in maintenance mode or a cluster is configured with DRS.
+
+To enable property metrics, configure the following option:
+```
+collect_property_metrics: true
+```
+
+Property metrics are prefixed by the resource name. For example, host property metrics metrics are prefixed with `vsphere.host.*`, and VM property metrics are prefixed with `vsphere.vm.*`. View all the possible property metrics in the [metadata.csv][10].
+
+
 ### Events
 
 This check watches vCenter's Event Manager for events and emits them to Datadog. The check defaults to emit the following event types:
@@ -71,7 +83,7 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 - VmSuspendedEvent
 - VmPoweredOffEvent
 
-However, events can be added or removed using the `vsphere.d/conf.yaml` file. See the `include_events` parameter section in the [sample vsphere.d/conf.yaml][4].
+Use the `include_events` parameter section in the [sample vsphere.d/conf.yaml][4] to collect additional events from the `vim.event` class .
 
 ### Service Checks
 
@@ -85,7 +97,11 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 You can limit the number of VMs pulled in with the VMWare integration using the `vsphere.d/conf.yaml` file. See the `resource_filters` parameter section in the [sample vsphere.d/conf.yaml][4].
 
-### Monitoring vSphere Tanzu Kubernetes Grid (TKG)
+## Billing
+
+- [vSphere Integration Billing][17]
+
+## Monitoring vSphere Tanzu Kubernetes Grid (TKG)
 
 The Datadog vSphere integration collects metrics and events from your [TKG][13] VMs and control plane VMs automatically. To collect more granular information about your TKG cluster, including container-, pod-, and node-level metrics, you can install the [Datadog Agent][14] on your cluster. See the [distribution documentation][15] for example configuration files specific to TKG.
 
@@ -109,3 +125,4 @@ The Datadog vSphere integration collects metrics and events from your [TKG][13] 
 [14]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator
 [15]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=operator#TKG
 [16]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
+[17]: https://docs.datadoghq.com/account_management/billing/vsphere

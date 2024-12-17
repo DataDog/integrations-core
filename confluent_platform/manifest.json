@@ -16,7 +16,8 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Offering::Integration"
+      "Offering::Integration",
+      "Product::Data Streams Monitoring"
     ]
   },
   "author": {
@@ -49,8 +50,8 @@
       "Confluent Platform Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Confluent Platform] Unclean leader election": "assets/monitors/unclean_leader_election.json",
-      "[Confluent Platform] Unused topic partition": "assets/monitors/unused_partition.json"
+      "Unclean leader election detected": "assets/monitors/unclean_leader_election.json",
+      "Topic partition is not used": "assets/monitors/unused_partition.json"
     }
   }
 }

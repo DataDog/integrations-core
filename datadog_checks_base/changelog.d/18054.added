@@ -1,1 +1,0 @@
-Allow untyped metrics that we coerce to `counter` to be collected regardless if they have `_total` or not.

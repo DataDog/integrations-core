@@ -1,0 +1,15 @@
+name: PingFederate
+files:
+- name: ping_federate.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path:  <pf_install>/pingfederate/log/admin.log
+      source: ping-federate
+      service: admin
+
+    - type: file
+      path:  <pf_install>/pingfederate/log/audit.log
+      source: ping-federate
+      service: audit

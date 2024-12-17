@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 def status(app: Application):
     """Show information about the current environment."""
     app.display(f'Repo: {app.repo.name} @ {app.repo.path}')
-    app.display(f'Branch: {app.repo.git.current_branch}')
+    app.display(f'Branch: {app.repo.git.current_branch()}')
     app.display(f'Org: {app.config.org.name}')
 
     if changed_integrations := [i.name for i in app.repo.integrations.iter_changed()]:

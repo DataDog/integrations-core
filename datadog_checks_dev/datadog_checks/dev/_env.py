@@ -5,8 +5,6 @@ import json
 import os
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 
-from six import iteritems
-
 DDTRACE_OPTIONS_LIST = [
     'DD_TAGS',
     'DD_TRACE*',
@@ -56,7 +54,7 @@ def e2e_testing():
 
 
 def set_env_vars(env_vars):
-    for key, value in iteritems(env_vars):
+    for key, value in env_vars.items():
         key = '{}{}'.format(E2E_ENV_VAR_PREFIX, key)
         os.environ[key] = value
 
@@ -68,11 +66,11 @@ def remove_env_vars(env_vars):
 
 def get_env_vars(raw=False):
     if raw:
-        return {key: value for key, value in iteritems(os.environ) if key.startswith(E2E_ENV_VAR_PREFIX)}
+        return {key: value for key, value in os.environ.items() if key.startswith(E2E_ENV_VAR_PREFIX)}
     else:
         env_vars = {}
 
-        for key, value in iteritems(os.environ):
+        for key, value in os.environ.items():
             _, found, ev = key.partition(E2E_ENV_VAR_PREFIX)
             if found:
                 # Normalize casing for Windows
@@ -183,8 +181,7 @@ def serialize_data(data):
     # 1. Printing to stdout won't fail
     # 2. Easy parsing since there are no spaces
     #
-    # TODO: Remove str() when we drop Python 2
-    return str(urlsafe_b64encode(data.encode('utf-8')).decode('utf-8'))
+    return urlsafe_b64encode(data.encode('utf-8')).decode('utf-8')
 
 
 def deserialize_data(data):

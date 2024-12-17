@@ -84,6 +84,7 @@ def test_e2e_profile_dell_powerconnect(dd_agent_check):
         'vendor': 'dell',
         'version': '6.0',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

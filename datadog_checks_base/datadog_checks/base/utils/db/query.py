@@ -4,8 +4,6 @@
 from copy import deepcopy
 from typing import Any, Dict, List, Tuple  # noqa: F401
 
-from six import raise_from
-
 from datadog_checks.base.utils.db.types import Transformer, TransformerFactory  # noqa: F401
 from datadog_checks.base.utils.time import get_timestamp
 
@@ -165,7 +163,7 @@ class Query(object):
                 #
                 # When an exception is raised in the context of another one, both will be printed. To avoid
                 # this we set the context to None. https://www.python.org/dev/peps/pep-0409/
-                raise_from(type(e)(error), None)
+                raise type(e)(error) from None
             else:
                 if __column_type_is_tag:
                     column_data.append((column_name, (column_type, transformer)))
@@ -188,8 +186,12 @@ class Query(object):
             if not isinstance(extra, dict):
                 raise ValueError('extra #{} of {} is not a mapping'.format(i, query_name))
 
+            extra_type = extra.get('type')  # type: str
             extra_name = extra.get('name')  # type: str
-            if not extra_name:
+            if extra_type == 'log':
+                # The name is unused
+                extra_name = 'log'
+            elif not extra_name:
                 raise ValueError('field `name` for extra #{} of {} is required'.format(i, query_name))
             elif not isinstance(extra_name, str):
                 raise ValueError('field `name` for extra #{} of {} must be a string'.format(i, query_name))
@@ -202,7 +204,6 @@ class Query(object):
 
             sources[extra_name] = {'type': 'extra', 'index': i}
 
-            extra_type = extra.get('type')  # type: str  # Is the key in a transformers dict
             if not extra_type:
                 if 'expression' in extra:
                     extra_type = 'expression'
@@ -232,7 +233,7 @@ class Query(object):
             except Exception as e:
                 error = 'error compiling type `{}` for extra {} of {}: {}'.format(extra_type, extra_name, query_name, e)
 
-                raise_from(type(e)(error), None)
+                raise type(e)(error) from None
             else:
                 if extra_type in submission_transformers:
                     transformer = create_extra_transformer(transformer, extra_source)

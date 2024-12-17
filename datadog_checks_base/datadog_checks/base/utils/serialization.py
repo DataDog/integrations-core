@@ -8,13 +8,27 @@ try:
 
     impl = 'orjson'
     sort_keys_kwargs = {'option': json.OPT_SORT_KEYS}
+
+    def from_json(s, **kwargs):
+        return json.loads(s, **kwargs)
+
+    def to_json(d, **kwargs):
+        return json.dumps(d, **kwargs).decode()
+
 except ImportError:
     import json
 
     impl = 'stdlib'
     sort_keys_kwargs = {'sort_keys': True}
 
+    def from_json(s, **kwargs):
+        return json.loads(s, **kwargs)
+
+    def to_json(d, **kwargs):
+        return json.dumps(d, **kwargs)
+
+
 logger = logging.getLogger(__name__)
 logger.debug('Using JSON implementation from %s', impl)
 
-__all__ = ['json']
+__all__ = ['from_json', 'json', 'sort_keys_kwargs', 'to_json']

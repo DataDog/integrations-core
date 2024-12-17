@@ -8,12 +8,12 @@ import pytest
 
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
     EXPECTED_PROMETHEUS_METRICS,
     EXPECTED_PROMETHEUS_METRICS_5_6,
+    INDEXES_METRICS,
     LATENCIES_METRICS,
     LAZY_METRICS,
     LEGACY_SET_METRICS,
@@ -37,8 +37,8 @@ def test_check(aggregator, instance, dd_run_check):
     _test_check(aggregator)
 
 
+@pytest.mark.integration
 def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):
-
     check = AerospikeCheck('aerospike', {}, [instance])
     check.check_id = 'test:123'
 
@@ -70,7 +70,6 @@ def test_e2e(dd_agent_check, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@requires_py3
 @pytest.mark.e2e
 def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
     version_parts = [int(p) for p in VERSION.split('.')]
@@ -93,7 +92,6 @@ def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-@requires_py3
 @pytest.mark.integration
 def test_metrics_warning(dd_run_check, instance_openmetrics_v2):
     instance_openmetrics_v2['metrics'] = ['migrate_rx_objs', 'migrate_tx_objs']
@@ -130,6 +128,9 @@ def _test_check(aggregator):
     else:
         for metric in LEGACY_SET_METRICS:
             aggregator.assert_metric("aerospike.set.{}".format(metric))
+
+    for metric in INDEXES_METRICS:
+        aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
 

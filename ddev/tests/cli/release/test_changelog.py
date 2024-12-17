@@ -12,7 +12,9 @@ from ddev.repo.core import Repository
 class TestFix:
     def test_existing_pr(self, ddev, repository, helpers, network_replay, mocker):
         network_replay('release/changelog/fix_existing_pr.yaml')
-        mocker.patch('ddev.utils.git.GitManager.capture', return_value='cfd8020b628cc24eebadae2ab79a3a1be285885c\nfoo')
+        mocker.patch(
+            'ddev.utils.git.GitRepository.capture', return_value='cfd8020b628cc24eebadae2ab79a3a1be285885c\nfoo'
+        )
 
         changelog = repository.path / 'ddev' / 'CHANGELOG.md'
         changelog.write_text(
@@ -60,7 +62,9 @@ class TestFix:
 
     def test_pr_no_changelog_required(self, ddev, repository, helpers, network_replay, mocker):
         network_replay('release/changelog/fix_pr_no_changelog_required.yaml')
-        mocker.patch('ddev.utils.git.GitManager.capture', return_value='ed4909414c5aedeba347b523b3c40ecd651896ab\nfoo')
+        mocker.patch(
+            'ddev.utils.git.GitRepository.capture', return_value='ed4909414c5aedeba347b523b3c40ecd651896ab\nfoo'
+        )
 
         expected = helpers.dedent(
             """
@@ -90,7 +94,7 @@ class TestFix:
     def test_no_pr(self, ddev, repository, helpers, network_replay, mocker):
         network_replay('release/changelog/fix_no_pr.yaml')
         mocker.patch(
-            'ddev.utils.git.GitManager.capture',
+            'ddev.utils.git.GitRepository.capture',
             side_effect=[
                 '0000000000000000000000000000000000000000\nfoo',
                 helpers.dedent(
@@ -252,8 +256,11 @@ class TestNew:
         repo.git.capture('add', '.')
         repo.git.capture('commit', '-m', 'test')
         mocker.patch(
-            'ddev.utils.git.GitManager.capture',
+            'ddev.utils.git.GitRepository.capture',
             side_effect=[
+                'M ddev/pyproject.toml',
+                '',
+                '',
                 'M ddev/pyproject.toml',
                 '',
                 '',
@@ -310,7 +317,7 @@ class TestNew:
 
     def test_start_no_changelog(self, ddev, fragments_dir, helpers, mocker):
         mocker.patch(
-            'ddev.utils.git.GitManager.capture',
+            'ddev.utils.git.GitRepository.capture',
             side_effect=[
                 'M tests/conftest.py',
                 '',

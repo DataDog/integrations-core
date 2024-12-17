@@ -1,0 +1,20 @@
+{
+    "name": "vLLM Errors",
+    "options": {
+        "columns": [
+            "host",
+            "service"
+        ],
+        "message_display": "inline",
+        "show_date_column": true,
+        "show_message_column": true,
+        "show_timeline": true
+    },
+    "page": "stream",
+    "query": "source:vllm status:error",
+    "timerange": {
+        "interval_ms": 900000
+    },
+    "type": "logs",
+    "visible_facets": []
+}

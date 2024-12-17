@@ -2,15 +2,29 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from itertools import tee
+
 from prometheus_client.metrics_core import Metric
 from prometheus_client.parser import _parse_sample, _replace_help_escaping
+
+
+def text_fd_to_metric_families(fd):
+    raw_lines, input_lines = tee(fd, 2)
+    # It's important to start parsing outside of the for-loop.
+    # This way we treat crashes before we yield the first parsed line differently than crashes while yielding.
+    parsed_lines = _parse_payload(input_lines)
+    for raw_line, metric_family in zip(raw_lines, parsed_lines):
+        try:
+            yield metric_family
+        except Exception as e:
+            raise ValueError("Failed to parse the metric response '{}': {}".format(raw_line, e))
 
 
 # This copies most of the code from upstream at that version:
 # https://github.com/prometheus/client_python/blob/049744296d216e6be65dc8f3d44650310f39c384/prometheus_client/parser.py#L144
 # but reverting the behavior to a compatible version, which doesn't change counters to have a total suffix. See
 # https://github.com/prometheus/client_python/commit/a4dd93bcc6a0422e10cfa585048d1813909c6786#diff-0adf47ea7f99c66d4866ccb4e557a865L158
-def text_fd_to_metric_families(fd):
+def _parse_payload(fd):
     """Parse Prometheus text format from a file descriptor.
 
     This is a laxer parser than the main Go parser, so successful parsing does
