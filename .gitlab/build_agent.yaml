@@ -22,6 +22,8 @@ build-agent-auto:
   extends: .build-agent-tpl
   rules:
     - changes:
+        # We don't yet support variable expansion in `compare_to`. It was added in gitlab 17.2:
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/369916#note_1972773223
         compare_to: "master"
         paths:
           - .deps/*
