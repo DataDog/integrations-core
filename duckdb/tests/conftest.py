@@ -21,11 +21,9 @@ def connection_db():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    # yield {"db_name": ":memory:"}
     yield common.DEFAULT_INSTANCE
 
 
 @pytest.fixture
 def instance():
-    # return deepcopy({"db_name": ":memory:"})
     return deepcopy(common.DEFAULT_INSTANCE)

@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, contextmanager
 from copy import deepcopy
+import json
+import re
 from typing import Any, AnyStr, Iterable, Iterator, Sequence  # noqa: F401
 
 import duckdb
@@ -39,7 +41,7 @@ class DuckdbCheck(AgentCheck):
             self._execute_query_raw,
             queries=manager_queries,
             tags=self.tags,
-            error_handler=self._query_errors,
+            error_handler=self._executor_error_handler,
         )
         self.check_initializations.append(self.initialize_config)
         self.check_initializations.append(self._query_manager.compile_queries)
@@ -59,16 +61,21 @@ class DuckdbCheck(AgentCheck):
     def _execute_query_raw(self, query):
         # type: (AnyStr) -> Iterable[Sequence]
         with closing(self._connection.cursor()) as cursor:
+
             query = query.format(self.db_name)
-            if len(cursor.fetchall()) < 1:  # this is returning a -1
+            curs = cursor.execute(query)
+            if len(cursor.execute(query).fetchall()) < 1:  # this was returning a -1 with rowcount
                 self._query_errors += 1
                 self.log.warning('Failed to fetch records from query: `%s`.', query)
                 return None
-            for row in cursor.fetchall():
+            for row in cursor.execute(query).fetchall():
+                # To find the field name from the query
+                pattern = r"(?i)\bname\s*=\s*'([^']+)'"
+                query_name = re.search(pattern, query).group(1)
                 try:
-                    yield self._queries_processor(row, query)
+                    yield self._queries_processor(row, query_name)
                 except Exception as e:
-                    self.log.debug('Unable to process row returned from query "%s", skipping row %s. %s', query, row, e)
+                    self.log.debug('Unable to process row returned from query "%s", skipping row %s. %s', query_name, row, e)
                     yield row
 
     def _queries_processor(self, row, query_name):
@@ -79,13 +86,16 @@ class DuckdbCheck(AgentCheck):
         if query_name == 'version':
             self.submit_version(row)
             return unprocessed_row
+        
+        self.log.debug('Row processor returned: %s. \nFrom query: "%s"', unprocessed_row, query_name)
+        return unprocessed_row
 
     @contextmanager
     def connect(self):
         conn = None
         try:
             # Try to establish the connection
-            conn = duckdb.connect(self.db_name)
+            conn = duckdb.connect(self.db_name, read_only=True)
             self.log.info('Connected to DuckDB database.')
             yield conn
         except Exception as e:
@@ -99,7 +109,15 @@ class DuckdbCheck(AgentCheck):
                 conn.close()
 
     def initialize_config(self):
-        self._connect_params = self.db_name
+        self._connect_params = json.dumps(
+            {'db_name': self.db_name,})
+        global_tags = [
+            'db_name:{}'.format(self.instance.get('db_name')),
+        ]
+        if self.tags is not None:
+            global_tags.extend(self.tags)
+        self._tags = global_tags
+        self._query_manager.tags = self._tags
 
     def submit_health_checks(self):
         # Check for connectivity

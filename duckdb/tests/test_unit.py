@@ -14,9 +14,7 @@ from . import common
 
 def test_check(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    instance = {
-        'db_name': '/Users/hadhemi.samaali/go/src/github.com/DataDog/integrations-core/duckdb/tests/data/sample_1.db'
-    }
+    instance = common.DEFAULT_INSTANCE
     check = DuckdbCheck('duckdb', {}, [instance])
     dd_run_check(check)
 
@@ -26,11 +24,9 @@ def test_check(dd_run_check, aggregator, instance):
     # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
+def test_database_connection(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    instance = {
-        'db_name': '/Users/hadhemi.samaali/go/src/github.com/DataDog/integrations-core/duckdb/tests/data/sample.db'
-    }
+    instance = common.DEFAULT_INSTANCE
     check = DuckdbCheck('duckdb', {}, [instance])
     dd_run_check(check)
-    aggregator.assert_service_check('duckdb.can_connect', DuckdbCheck.CRITICAL)
+    aggregator.assert_service_check('duckdb.can_connect', DuckdbCheck.OK)

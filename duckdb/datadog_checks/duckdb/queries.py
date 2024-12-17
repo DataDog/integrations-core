@@ -19,7 +19,7 @@ DUCKDB_VERSION = {
 }
 
 DUCKDDB_WAL = {
-    'name': 'duckdb_wal',
+    'name': 'wal_autocheckpoint',
     'query': " SELECT CAST(SUBSTR(value, 1, LENGTH(value) - 3) AS INTEGER) * "
     "CASE "
     " WHEN RIGHT(value, 3) = 'KiB' THEN 1024 "
@@ -31,10 +31,11 @@ DUCKDDB_WAL = {
     'columns': [{'name': 'wal_autocheckpoint', 'type': 'gauge'}],
 }
 
-DUCKDDB_WAL_2 = {
-    'name': 'duckdb_worker_threads',
-    'query': " select value from duckdb_settings() where name = 'worker_threads';",
+
+DUCKDDB_THREADS = {
+    'name': 'worker_threads',
+    'query': "select value from duckdb_settings() where name = 'worker_threads';",
     'columns': [{'name': 'worker_threads', 'type': 'gauge'}],
 }
 
-DEFAULT_QUERIES = [DUCKDDB_WAL_2]
+DEFAULT_QUERIES = [DUCKDDB_THREADS, DUCKDDB_WAL, DUCKDB_VERSION]
