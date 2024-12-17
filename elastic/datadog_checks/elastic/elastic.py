@@ -261,7 +261,7 @@ class ESCheck(AgentCheck):
                 index_data['health_reverse'] = dd_health.reverse_status
 
             # Ensure that index_data does not contain None values
-            for key, value in index_data.items():
+            for key, value in list(index_data.items()):
                 if value is None:
                     del index_data[key]
                     self.log.debug("The index %s has no metric data for %s", idx['index'], key)
