@@ -79,8 +79,9 @@ class DNSCheck(AgentCheck):
             else:
                 t0 = get_precise_time()
                 answer = resolver.query(self.hostname, rdtype=self.record_type)  # dns.resolver.Answer
-                assert any(it.to_text() for it in answer.rrset.items)
                 response_time = get_precise_time() - t0
+                
+                assert any(it.to_text() for it in answer.rrset.items)
 
                 if self.resolves_as_ips:
                     self._check_answer(answer)
