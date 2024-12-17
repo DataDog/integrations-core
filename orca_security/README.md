@@ -39,7 +39,7 @@ The Orca Security integration seamlessly ingests the data of alert logs using th
 
 ### Logs
 
-The Orca integration collects and forwards Orca Alert logs to Datadog.
+The Orca integration collects and forwards Orca alert logs to Datadog.
 
 ### Metrics
 
