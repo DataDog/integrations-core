@@ -13,17 +13,17 @@ The Plivo integration seamlessly collects message (SMS, MMS, and WhatsApp) and v
 
 1. Sign in to [Plivo][2] using an Owner, Admin or Developer account.
 2. Navigate to the **Overview** section.
-3. In the **Account** section, copy the **Auth ID** and **Auth Token** values.
+3. In the **Account** section, get the **Auth ID** and **Auth Token** values.
 
       If you need to generate a new Auth Token, go to **Settings** > **Credentials**, then click **Generate Auth Token**.
 
-#### Plivo subaccount Auth ID and Auth Token
+#### Plivo subaccount Auth ID and Auth Token (optional)
 
 You can use the credentials of a Plivo subaccount to retrieve data specific to that subaccount, rather than the entire account.
 
 1. Sign in to [Plivo][2] using an Owner, Admin or Developer account.
 2. Navigate to **Account** > **Settings** > **Subaccounts**.
-3. Copy the **Auth ID** and **Auth Token** of the subaccount that you want to use.
+3. Get the **Auth ID** and **Auth Token** of the subaccount that you want to use.
 
 ### Message Expiry Time (Optional)
 
