@@ -43,10 +43,8 @@ jobs:
       repo: "core"
       standard: true
       pytest-args: "-s -k test_fips_inactive_e2e"
-      fips-mode: false
       traces-artifact-name: traces-tls-linux-no-fips
       test-results-name: test-tls-linux-no-fips
-      agent-image: "datadog/agent-dev:main-fips"
     secrets: inherit
 
   test-tls-linux-active:
@@ -59,10 +57,10 @@ jobs:
       repo: "core"
       standard: true
       pytest-args: "-s -k test_fips_active_e2e"
-      fips-mode: true
       traces-artifact-name: traces-tls-linux-fips
       test-results-name: test-tls-linux-fips
       agent-image: "datadog/agent-dev:main-fips"
+      e2e-env-vars: "{'GOFIPS':'1'}"
     secrets: inherit
 
   test-tls-windows:
