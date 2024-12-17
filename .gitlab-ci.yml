@@ -14,6 +14,7 @@ variables:
 
 stages:
   - build
+  - validate
   - release
   - notify
 
@@ -25,6 +26,7 @@ cache: &slack-cache
 
 validate-log-integrations:
   stage: validate
+  needs: []
   image: $VALIDATE_LOG_INTGS
   only:
   - schedules
@@ -46,6 +48,8 @@ validate-log-integrations:
   tags: [ "runner:main" ]
 
 notify-slack:
+  needs:
+    - validate-log-integrations
   stage: notify
   image: $NOTIFIER_IMAGE
   only:
