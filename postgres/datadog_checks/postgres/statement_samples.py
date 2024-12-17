@@ -936,8 +936,8 @@ class PostgresStatementSamples(DBMAsyncJob):
         if truncated:
             if track_activity_query_size < TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE:
                 self._log.warning(
-                    "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d ",
-                    "See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting%s ",
+                    "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d "
+                    "See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting%s "
                     "for more details on how to increase the track_activity_query_size setting.",
                     query_signature,
                     len(statement_bytes),
