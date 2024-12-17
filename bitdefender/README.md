@@ -37,7 +37,7 @@ The Bitdefender integration uses a webhook to ingest Bitdefender EDR logs. The i
 4. Click **Add**. The API Key Configuration window opens.
 5. Provide the following information:
     - **API Key Description**: A relevant name for your API key
-    - **Enabled APIs**: Select **Event Push Service**
+    - **Enabled APIs**: Select all services.
 6. Click **Generate** and copy the generated API key. 
 7. Perform Base64 encoding on the generated API key. You'll use the encoded API key for webhook configuration.
     1. Take your API key and append a colon (\:) to it, like this: `<api_key>:`
