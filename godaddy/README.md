@@ -1,7 +1,7 @@
 # GoDaddy
 
 ## Overview
-[GoDaddy][6] is a web hosting and domain registration company that helps individuals and businesses establish their online presence. One of their key offerings is SSL certificate services. GoDaddy provides several types of SSL certificates, including Standard SSL for securing one site, Wildcard SSL for securing multiple subdomains, and advanced solutions for ecommerce sites requiring enhanced security.
+[GoDaddy][5] is a web hosting and domain registration company that helps individuals and businesses establish their online presence. One of their key offerings is SSL certificate services. GoDaddy provides several types of SSL certificates, including Standard SSL for securing one site, Wildcard SSL for securing multiple subdomains, and advanced solutions for ecommerce sites requiring enhanced security.
 
 The GoDaddy integration collects metrics from SSL certificates and their domains, directing them into Datadog for analysis. This integration provides data points such as the total number of certificates, issued certificates, expired certificates, revoked certificates, and domains associated with each certificate. It also includes specific metrics for certificates nearing expiration. All these metrics are accessible through out-of-the-box dashboards and monitors.
 
@@ -27,7 +27,7 @@ The GoDaddy integration collects metrics from SSL certificates and their domains
 
 1. Add your API key, secret key and customer number
 
-| GoDaddy Parameters                       | Description                                                  |
+| Parameters                               | Description                                                  |
 | ---------------------------------------- | ------------------------------------------------------------ |
 | GoDaddy API key                          | The API Key of your GoDaddy Account                          |
 | GoDaddy secret key                       | The API Secret of your GoDaddy Account                       |
@@ -59,5 +59,4 @@ For further assistance, contact [Datadog Support][4].
 [2]: https://sso.godaddy.com/security
 [3]: https://developer.godaddy.com/doc/
 [4]: https://docs.datadoghq.com/help/
-[5]: https://github.com/DataDog/integrations-core/blob/master/godaddy/metadata.csv
-[6]: https://www.godaddy.com/en-in
+[5]: https://www.godaddy.com/en-in
