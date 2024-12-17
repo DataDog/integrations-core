@@ -930,7 +930,17 @@ def test_sqlserver_db_fragmentation_metrics(
         ],
         [
             ('msdb', 'syscachedcredentials', 'dbo', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
-            ('msdb', 'syscollector_blobs_internal', 'dbo', 1, 'PK_syscollector_blobs_internal_paremeter_name', 0, 0.0, 0, 0.0),
+            (
+                'msdb',
+                'syscollector_blobs_internal',
+                'dbo',
+                1,
+                'PK_syscollector_blobs_internal_paremeter_name',
+                0,
+                0.0,
+                0,
+                0.0,
+            ),
         ],
         [('datadog_test-1', 'ϑings', 'dbo', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
     ]
