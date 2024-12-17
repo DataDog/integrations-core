@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.1.0 / 2024-11-28
+
+***Added***:
+
+* [NDMII-3147] update Cisco IP SLA metric tags and description. ([#19079](https://github.com/DataDog/integrations-core/pull/19079))
+
 ## 9.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
@@ -37,7 +43,7 @@
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 7.3.1 / 2024-06-05 / Agent 7.55.0
 

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.1.0 / 2024-11-28
+
+***Added***:
+
+* Upgrade `snowflake-connector-python` to 3.12.3 ([#19010](https://github.com/DataDog/integrations-core/pull/19010))
+
 ## 7.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:
@@ -32,7 +38,7 @@
 
 ***Added***:
 
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 5.7.0 / 2024-07-05 / Agent 7.56.0
 

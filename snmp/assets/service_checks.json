@@ -13,6 +13,6 @@
             "snmp_device"
         ],
         "name": "Can check",
-        "description": "Returns `CRITICAL` if the Agent check is unable to collect metrics from SNMP, and `WARNING` if it partially works but metrics configuration is incorrect. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent check is unable to collect SNMP metrics from the SNMP Agent, and `WARNING` if it partially works but metrics configuration is incorrect. Returns `OK` otherwise."
     }
 ]
