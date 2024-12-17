@@ -32,7 +32,6 @@ gauges_counters = {
     'process_cpu_usage': 'process.cpu.usage',
     'process_files_max_files': 'process.files.max_files',
     'process_files_open_files': 'process.files.open_files',
-    'process_start_time_seconds': 'process.start_time.seconds',
     'process_uptime_seconds': 'process.uptime.seconds',
     'system_cpu_count': 'system.cpu.count',
     'system_cpu_usage': 'system.cpu.usage',

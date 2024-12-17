@@ -35,7 +35,6 @@ quarkus.netty.eventexecutor.tasks_pending,gauge,,task,,Number of pending tasks i
 quarkus.process.cpu.usage,gauge,,,,The recent cpu usage for the Java Virtual Machine process.,0,quarkus,,,
 quarkus.process.files.max_files,gauge,,file,,The maximum file descriptor count.,0,quarkus,,,
 quarkus.process.files.open_files,gauge,,file,,The open file descriptor count.,0,quarkus,,,
-quarkus.process.start_time.seconds,gauge,,second,,Start time of the process since unix epoch.,0,quarkus,,,
 quarkus.process.uptime.seconds,gauge,,second,,The uptime of the Java virtual machine.,0,quarkus,,,
 quarkus.system.cpu.count,gauge,,,,The number of processors available to the Java virtual machine.,0,quarkus,,,
 quarkus.system.cpu.usage,gauge,,,,The recent cpu usage of the system the application is running in.,0,quarkus,,,

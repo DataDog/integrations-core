@@ -40,7 +40,6 @@ EXPECTED_METRICS = [
     'process.cpu.usage',
     'process.files.max_files',
     'process.files.open_files',
-    'process.start_time.seconds',
     'process.uptime.seconds',
     'system.cpu.count',
     'system.cpu.usage',
