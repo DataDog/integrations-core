@@ -33,7 +33,7 @@ You can use the credentials of a Plivo subaccount to retrieve data specific to t
 
 1. Add your Auth ID, Auth Token and Message Expiry Time
 
-| Plivo Parameters                       | Description                                                  |
+| Parameters                             | Description                                                  |
 | -------------------------------------- | ------------------------------------------------------------ |
 | Plivo Auth ID                          | The Auth ID of your plivo account.                           |
 | Plivo Auth Token                       | The Auth Token of your plivo account.                        |
