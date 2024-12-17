@@ -34,7 +34,7 @@
       },
       "metrics": {
         "prefix": "quarkus.",
-        "check": "quarkus.http_server.requests.seconds.max",
+        "check": "quarkus.process.cpu.usage",
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
