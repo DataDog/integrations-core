@@ -9,19 +9,19 @@ The GoDaddy integration collects metrics from SSL certificates and their domains
 
 ### Generate API credentials in GoDaddy
 
-- Navigate to the [GoDaddy Developer Portal][1].
-- Sign in with your GoDaddy account.
-- Select "API Keys".
-- Choose "Create New API Key".
-- Provide a name for your API.
-- Select "Production" under Environment.
-- Click "Next". Your API Key is now created.
-- Click on "Got It".
+1. Navigate to the [GoDaddy Developer Portal][1].
+2. Sign in with your GoDaddy account.
+3. Select "API Keys".
+4. Choose "Create New API Key".
+5. Provide a name for your API.
+6. Select "Production" under Environment.
+7. Click "Next". Your API Key is now created.
+8. Click on "Got It".
 
 ### Find your GoDaddy customer number
 
-- Go to your GoDaddy [Login & PIN page][2]. You might be prompted to sign in.
-- Under **Login Info**, find your **Customer number** (also known as your **shopper ID**).
+1. Go to your GoDaddy [Login & PIN page][2]. You might be prompted to sign in.
+2. Under **Login Info**, find your **Customer number** (also known as your **shopper ID**).
 
 ### Connect your GoDaddy Account to Datadog
 
@@ -43,7 +43,9 @@ The GoDaddy integration does not include any logs.
 
 ### Metrics
 
-The GoDaddy integration collects and forwards Certificates and their Domains metrics to Datadog. See [metadata.csv][5] for a list of metrics provided by this integration.
+The GoDaddy integration collects and forwards Certificates and their Domains metrics to Datadog.
+
+{{< get-metrics-from-git "godaddy" >}}
 
 ### Events
 
