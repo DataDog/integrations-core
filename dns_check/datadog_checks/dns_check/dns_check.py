@@ -71,9 +71,8 @@ class DNSCheck(AgentCheck):
                 try:
                     t0 = get_precise_time()
                     resolver.query(self.hostname)
-                    response_time = get_precise_time() - t0
                 except dns.resolver.NXDOMAIN:
-                    pass
+                    response_time = get_precise_time() - t0
                 else:
                     raise AssertionError("Expected an NXDOMAIN, got a result.")
             else:
