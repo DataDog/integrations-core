@@ -40,8 +40,6 @@ The RingCentral integration seamlessly collects voice and audit logs, as well as
 
 
 ### Get RingCentral Account ID
-To access the Account ID, you need to first access details for a "Super Admin" user and then locate the Account ID through the URL:
-
 1. Visit [RingCentral][1] and log in as a Super Admin.
 2. Under the **Users** section, click **Users with Extensions**.
 3. From the list of users, click on the user who has a "Super Admin" suffix in their name to open the user's details panel.
