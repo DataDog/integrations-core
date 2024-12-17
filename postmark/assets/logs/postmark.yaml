@@ -19,6 +19,11 @@ facets:
     source: log
   - groups:
       - Web Access
+    name: URL Path
+    path: http.url_details.path
+    source: log
+  - groups:
+      - Web Access
     name: URL Port
     path: http.url_details.port
     source: log
