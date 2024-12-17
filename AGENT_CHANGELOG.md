@@ -1,3 +1,20 @@
+## Datadog Agent version [7.60.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7600)
+
+* Datadog Checks Base [37.2.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Datadog Checks Downloader [6.1.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
+* Cisco ACI [4.1.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* Cloudera [3.2.0](https://github.com/DataDog/integrations-core/blob/master/cloudera/CHANGELOG.md)
+* Datadog Cluster Agent [5.1.0](https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/CHANGELOG.md)
+* Kafka Consumer [6.1.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* MongoDB [8.2.1](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [14.2.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Network [5.1.0](https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md)
+* Postgres [22.2.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Slurm [1.0.1](https://github.com/DataDog/integrations-core/blob/master/slurm/CHANGELOG.md)
+* Spark [6.1.0](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
+* SQL Server [20.1.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* vSphere [8.0.1](https://github.com/DataDog/integrations-core/blob/master/vsphere/CHANGELOG.md)
+
 ## Datadog Agent version [7.59.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7590)
 
 * Active Directory [4.0.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md) **BREAKING CHANGE**

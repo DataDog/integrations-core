@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.2.0 / 2024-12-05 / Agent 7.60.0
+
+***Added***:
+
+* Bump binary package version for py3.12 ([#19190](https://github.com/DataDog/integrations-core/pull/19190))
+
 ## 37.1.1 / 2024-11-28
 
 ***Fixed***:
@@ -73,7 +79,7 @@
 * Log invalid line when failing to parse OpenMetrics response ([#17514](https://github.com/DataDog/integrations-core/pull/17514))
 * Support log submission from checks ([#18019](https://github.com/DataDog/integrations-core/pull/18019))
 * Allow untyped metrics that we coerce to `counter` to be collected regardless if they have `_total` or not. ([#18054](https://github.com/DataDog/integrations-core/pull/18054))
-* Update dependencies ([#18185](https://github.com/DataDog/integrations-core/pull/18185))
+* Update dependencies ([#18187](https://github.com/DataDog/integrations-core/pull/18187))
 
 ## 36.10.0 / 2024-07-11
 
