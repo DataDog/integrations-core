@@ -1,11 +1,6 @@
 services:
 
-# Caddy will create host a site with the metrics to exposes
-  caddy:
-    image: caddy:2.7
-    container_name: caddy
+  quarkus-app:
+    build: micrometer-quickstart
     ports:
       - "8080:8080"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./serve:/site

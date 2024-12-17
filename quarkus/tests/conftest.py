@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.conditions import CheckEndpoints
 
 INSTANCE = {'openmetrics_endpoint': 'http://localhost:8080/q/metrics'}
 
@@ -16,7 +16,6 @@ INSTANCE = {'openmetrics_endpoint': 'http://localhost:8080/q/metrics'}
 def dd_environment():
     compose_file = str(Path(__file__).parent.absolute() / 'docker' / 'docker-compose.yaml')
     conditions = [
-        CheckDockerLogs(identifier='caddy', patterns=['server running']),
         CheckEndpoints(INSTANCE["openmetrics_endpoint"]),
     ]
     with docker_run(compose_file, conditions=conditions):
