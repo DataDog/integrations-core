@@ -3,12 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 METRIC_MAP = {
-    'milvus_build_info': 'build_info',
+    'milvus_build_info': {'type': 'metadata', 'label': 'version', 'name': 'version'},
     'milvus_cgo_active_future_total': 'cgo.active_future_total',
     'milvus_cgo_cgo_duration_seconds': 'cgo.cgo_duration_seconds',
     'milvus_cgo_cgo_queue_duration_seconds': 'cgo.cgo_queue_duration_seconds',
     'milvus_cgo_running_cgo_call_total': 'cgo.running_cgo_call_total',
-    'milvus_datacoord_channel_checkpoint_unix_seconds': 'datacoord.channel_checkpoint_unix_seconds',
+    'milvus_datacoord_channel_checkpoint_unix_seconds': {
+        'name': 'datacoord.time_since_channel_checkpoint',
+        'type': 'time_elapsed',
+    },
     'milvus_datacoord_collection_num': 'datacoord.collection_num',
     'milvus_datacoord_consume_datanode_tt_lag_ms': 'datacoord.consume_datanode_tt_lag_ms',
     'milvus_datacoord_datanode_num': 'datacoord.datanode_num',
@@ -69,7 +72,10 @@ METRIC_MAP = {
     'milvus_proxy_sync_segment_request_length': 'proxy.sync_segment_request_length',
     'milvus_proxy_tt_lag_ms': 'proxy.tt_lag_ms',
     'milvus_querycoord_collection_num': 'querycoord.collection_num',
-    'milvus_querycoord_current_target_checkpoint_unix_seconds': 'querycoord.current_target_checkpoint_unix_seconds',
+    'milvus_querycoord_current_target_checkpoint_unix_seconds': {
+        'name': 'querycoord.current_target_checkpoint_unix_seconds',
+        'type': 'time_elapsed',
+    },
     'milvus_querycoord_load_latency': 'querycoord.load.latency',
     'milvus_querycoord_load_req_count': 'querycoord.load.req',
     'milvus_querycoord_partition_num': 'querycoord.partition_num',
@@ -168,8 +174,7 @@ METRIC_MAP = {
     'go_gc_duration_seconds': 'go.gc_duration_seconds',
     'go_goroutines': 'go.goroutines',
     'go_info': 'go.info',
-    'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
-    # 'go_memstats_alloc_bytes_total': 'go.memstats.alloc_bytes_total',
+    'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc_bytes', 'type': 'native_dynamic'},
     'go_memstats_buck_hash_sys_bytes': 'go.memstats.buck_hash_sys_bytes',
     'go_memstats_frees': 'go.memstats.frees',
     'go_memstats_gc_sys_bytes': 'go.memstats.gc_sys_bytes',
@@ -209,7 +214,7 @@ METRIC_MAP = {
     'process_max_fds': 'process.max_fds',
     'process_open_fds': 'process.open_fds',
     'process_resident_memory_bytes': 'process.resident_memory_bytes',
-    'process_start_time_seconds': 'process.start_time_seconds',
+    'process_start_time_seconds': {'name': 'process.start_time_seconds', 'type': 'time_elapsed'},
     'process_virtual_memory_bytes': 'process.virtual_memory.bytes',
     'process_virtual_memory_max_bytes': 'process.virtual_memory.max_bytes',
     'quant_compute_cnt': 'quant.compute_cnt',

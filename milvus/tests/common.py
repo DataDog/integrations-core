@@ -28,7 +28,7 @@ STANDALONE_TEST_METRICS = {
     'milvus.go.goroutines': 'gauge',
     'milvus.go.info': 'gauge',
     'milvus.go.memstats.alloc_bytes': 'gauge',
-    # 'milvus.go.memstats.alloc_bytes.count': 'monotonic_count',
+    'milvus.go.memstats.alloc_bytes.count': 'monotonic_count',
     'milvus.go.memstats.buck_hash_sys_bytes': 'gauge',
     'milvus.go.memstats.frees.count': 'monotonic_count',
     'milvus.go.memstats.gc_sys_bytes': 'gauge',
@@ -51,7 +51,6 @@ STANDALONE_TEST_METRICS = {
     'milvus.go.memstats.stack.sys_bytes': 'gauge',
     'milvus.go.memstats.sys_bytes': 'gauge',
     'milvus.go.threads': 'gauge',
-    'milvus.build_info': 'gauge',
     'milvus.cgo.active_future_total': 'gauge',
     'milvus.cgo.cgo_duration_seconds.sum': 'monotonic_count',
     'milvus.cgo.cgo_duration_seconds.count': 'monotonic_count',
@@ -414,9 +413,4 @@ OTHER_TEST_METRICS = {
     'milvus.storage.kv_size': 'gauge',
     'milvus.storage.op_count': 'count',
     'milvus.storage.request_latency': 'gauge',
-}
-
-
-RENAMED_LABELS = {
-    "milvus.build_info": 'milvus_version:v2.4.15',
 }
