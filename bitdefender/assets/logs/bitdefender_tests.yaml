@@ -1599,69 +1599,69 @@ tests:
         }
       }
     result:
-    custom:
-      computer_ip_extracted: "10.10.10.110"
-      detection_username_extracted: "user@domain.com"
-      id: 1731562021000
-      jsonrpc: "2.0"
-      method: "addEvents"
-      module_extracted: "antiexploit"
-      network:
-        client:
-          ip:
-           - "10.10.10.110"
-      params:
-        events:
-         -
-          computer_id: "sfdg544444444444"
-          detection_pid: "2000"
-          computer_name: "TEST_ENDPOINT"
-          detection_username: "user@domain.com"
-          detection_threatName: "EICAR-Test-File(notavirus)"
-          endpointId: "5cf51ba5e8ee8c5b1852a9d6"
-          module: "antiexploit"
-          detection_exploitTechnique: "Flash/Generic"
-          detection_time: "2019-06-03T13:58:30.000Z"
-          detection_action: "kill"
-          detection_parentPid: "4000"
-          detection_parentPath: "C:\\\\file25c8ba8b90ea1de127962f464.exe"
-          companyId: "5cf10c8af23f73097377c924"
-          computer_fqdn: "test-endpoint.dsd.ro"
-          computer_ip: "10.10.10.110"
-          detection_path: "C:\\\\file15c8ba8b90ea1de127962f464.exe"
-          product_installed: "BEST"
-      service: "antiexploit"
-      usr:
-        name:
-         - "user@domain.com"
-    message: |-
-      {
-        "method" : "addEvents",
-        "id" : 1731562021000,
-        "jsonrpc" : "2.0",
-        "params" : {
-          "events" : [ {
-            "computer_id" : "sfdg544444444444",
-            "detection_pid" : "2000",
-            "computer_name" : "TEST_ENDPOINT",
-            "detection_username" : "user@domain.com",
-            "detection_threatName" : "EICAR-Test-File(notavirus)",
-            "endpointId" : "5cf51ba5e8ee8c5b1852a9d6",
-            "module" : "antiexploit",
-            "detection_exploitTechnique" : "Flash/Generic",
-            "detection_time" : "2019-06-03T13:58:30.000Z",
-            "detection_action" : "kill",
-            "detection_parentPid" : "4000",
-            "detection_parentPath" : "C:\\\\file25c8ba8b90ea1de127962f464.exe",
-            "companyId" : "5cf10c8af23f73097377c924",
-            "computer_fqdn" : "test-endpoint.dsd.ro",
-            "computer_ip" : "10.10.10.110",
-            "detection_path" : "C:\\\\file15c8ba8b90ea1de127962f464.exe",
-            "product_installed" : "BEST"
-          } ]
+      custom:
+        computer_ip_extracted: "10.10.10.110"
+        detection_username_extracted: "user@domain.com"
+        id: 1731562021000
+        jsonrpc: "2.0"
+        method: "addEvents"
+        module_extracted: "antiexploit"
+        network:
+          client:
+            ip:
+            - "10.10.10.110"
+        params:
+          events:
+          -
+            computer_id: "sfdg544444444444"
+            detection_pid: "2000"
+            computer_name: "TEST_ENDPOINT"
+            detection_username: "user@domain.com"
+            detection_threatName: "EICAR-Test-File(notavirus)"
+            endpointId: "5cf51ba5e8ee8c5b1852a9d6"
+            module: "antiexploit"
+            detection_exploitTechnique: "Flash/Generic"
+            detection_time: "2019-06-03T13:58:30.000Z"
+            detection_action: "kill"
+            detection_parentPid: "4000"
+            detection_parentPath: "C:\\\\file25c8ba8b90ea1de127962f464.exe"
+            companyId: "5cf10c8af23f73097377c924"
+            computer_fqdn: "test-endpoint.dsd.ro"
+            computer_ip: "10.10.10.110"
+            detection_path: "C:\\\\file15c8ba8b90ea1de127962f464.exe"
+            product_installed: "BEST"
+        service: "antiexploit"
+        usr:
+          name:
+          - "user@domain.com"
+      message: |-
+        {
+          "method" : "addEvents",
+          "id" : 1731562021000,
+          "jsonrpc" : "2.0",
+          "params" : {
+            "events" : [ {
+              "computer_id" : "sfdg544444444444",
+              "detection_pid" : "2000",
+              "computer_name" : "TEST_ENDPOINT",
+              "detection_username" : "user@domain.com",
+              "detection_threatName" : "EICAR-Test-File(notavirus)",
+              "endpointId" : "5cf51ba5e8ee8c5b1852a9d6",
+              "module" : "antiexploit",
+              "detection_exploitTechnique" : "Flash/Generic",
+              "detection_time" : "2019-06-03T13:58:30.000Z",
+              "detection_action" : "kill",
+              "detection_parentPid" : "4000",
+              "detection_parentPath" : "C:\\\\file25c8ba8b90ea1de127962f464.exe",
+              "companyId" : "5cf10c8af23f73097377c924",
+              "computer_fqdn" : "test-endpoint.dsd.ro",
+              "computer_ip" : "10.10.10.110",
+              "detection_path" : "C:\\\\file15c8ba8b90ea1de127962f464.exe",
+              "product_installed" : "BEST"
+            } ]
+          }
         }
-      }
-    service: "antiexploit"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1731562021000
+      service: "antiexploit"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1731562021000
