@@ -21,7 +21,15 @@ def test_check(dd_run_check, aggregator, instance):
     aggregator.assert_service_check('duckdb.can_connect', DuckdbCheck.OK)
     for metric in common.METRICS_MAP:
         aggregator.assert_metric(metric)
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+def test_version(dd_run_check, aggregator, instance):
+    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
+    instance = common.DEFAULT_INSTANCE
+    check = DuckdbCheck('duckdb', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_service_check('duckdb.can_connect', DuckdbCheck.OK)
 
 
 def test_database_connection(dd_run_check, aggregator, instance):

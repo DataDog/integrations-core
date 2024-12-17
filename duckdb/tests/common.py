@@ -15,5 +15,4 @@ DEFAULT_INSTANCE = {'db_name': DB}
 METRICS_MAP = [
     'duckdb.worker_threads',
     'duckdb.wal_autocheckpoint',
-    'duckdb.wal_autocheckpoin',
     ]

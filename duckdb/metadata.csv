@@ -1,2 +1,3 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 duckdb.worker_threads,gauge,,,,The number of total threads used by the system,0,duckdb,,
+duckdb.wal_autocheckpoint,gauge,,,,The WAL size threshold at which to automatically trigger a checkpoint,0,duckdb,,
