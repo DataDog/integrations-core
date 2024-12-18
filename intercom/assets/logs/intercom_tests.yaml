@@ -292,7 +292,7 @@ tests:
       tags:
        - "source:LOGS_SOURCE"
       timestamp: 1726135185000
-  - sample: >-
+  - sample: |-
       {
         "data" : {
           "item" : {
@@ -373,6 +373,15 @@ tests:
         "app_id" : "abcdefgh",
         "delivered_at" : 0,
         "delivery_status" : "pending",
+        "network" : {
+          "ip" : {
+            "attributes" : [ {
+              "ip" : "218.57.154.108",
+              "source" : [ "@data.item.performed_by.ip" ]
+            } ],
+            "list" : [ "218.57.154.108" ]
+          }
+        }
       }
     service: "activity"
     result:
