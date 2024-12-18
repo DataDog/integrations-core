@@ -1,6 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 ceph.aggregate_pct_used,gauge,,percent,,Overall capacity usage metric,0,ceph,pct used,
 ceph.apply_latency_ms,gauge,,millisecond,,Time taken to flush an update to disks,-1,ceph,apply lat,
+ceph.class_pct_used,gauge,,percent,,Per-class percentage of raw storage used,0,ceph,class pct used,
 ceph.commit_latency_ms,gauge,,millisecond,,Time taken to commit an operation to the journal,-1,ceph,commit lat,
 ceph.misplaced_objects,gauge,,item,,Number of objects misplaced,-1,ceph,misplaced objects,
 ceph.misplaced_total,gauge,,item,,Total number of objects if there are misplaced objects,0,ceph,misplaced objects total,
