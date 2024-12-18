@@ -134,7 +134,7 @@ jobs:
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
         echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
 
-    - name:
+    - name: Dynamically construct environment variables
       run: |
         for key in $(echo '${{ toJSON(fromJSON(inputs.e2e-env-vars)) }}' | jq -r 'keys[]'); do
           value=$(echo '${{ toJSON(fromJSON(inputs.e2e-env-vars)) }}' | jq -r --arg k "$key" '.[$k]')
