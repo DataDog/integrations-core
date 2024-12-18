@@ -45,7 +45,7 @@ quarkus.worker_pool.queue.delay.seconds.count,count,,,,Number of items that spen
 quarkus.worker_pool.queue.delay.seconds.max,gauge,,second,,Current maximum time spent in the waiting queue before being processed.,0,quarkus,,,
 quarkus.worker_pool.queue.delay.seconds.sum,count,,,,Total time spent in the waiting queue before being processed.,0,quarkus,,,
 quarkus.worker_pool.queue.size,gauge,,,,Number of pending elements in the waiting queue.,0,quarkus,,,
-quarkus.worker_pool.ratio,gauge,,,,Ratio of workers being used at the moment.,0,quarkus,,,
+quarkus.worker_pool.ratio,gauge,,fraction,,Ratio of workers being used at the moment.,0,quarkus,,,
 quarkus.worker_pool.usage.seconds.count,count,,second,,Number of times resources from the pool were being used.,0,quarkus,,,
 quarkus.worker_pool.usage.seconds.max,gauge,,second,,Maximum time spent using resources from the pool.,0,quarkus,,,
 quarkus.worker_pool.usage.seconds.sum,count,,second,,Total time spent using resources from the pool.,0,quarkus,,,
