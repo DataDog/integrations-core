@@ -41,6 +41,8 @@ MAX_CHARACTER_SIZE_IN_BYTES = 6
 
 TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE = -1
 
+TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE = 4096
+
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
 # columns from pg_stat_activity which correspond to attributes common to all databases and are therefore stored in
@@ -548,8 +550,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "gauge",
         )
 
-    @staticmethod
-    def _to_active_session(row, track_activity_query_size):
+    def _to_active_session(self, row, track_activity_query_size):
         if (row.get('backend_type', 'client backend') != 'client backend') or (
             row['state'] is not None and row['state'] != 'idle'
         ):
@@ -557,8 +558,8 @@ class PostgresStatementSamples(DBMAsyncJob):
             # Create an active_row, for each session by
             # 1. Removing all null key/value pairs and the original query
             # 2. if row['statement'] is none, replace with ERROR: failed to obfuscate so we can still collect activity
-            active_row['query_truncated'] = PostgresStatementSamples._get_truncation_state(
-                track_activity_query_size, row['query']
+            active_row['query_truncated'] = self._get_truncation_state(
+                track_activity_query_size, row['query'], row['query_signature']
             ).value
             if row['statement'] is None:
                 active_row['statement'] = "ERROR: failed to obfuscate"
@@ -690,7 +691,10 @@ class PostgresStatementSamples(DBMAsyncJob):
 
         track_activity_query_size = self._get_track_activity_query_size()
 
-        if self._get_truncation_state(track_activity_query_size, statement) == StatementTruncationState.truncated:
+        if (
+            self._get_truncation_state(track_activity_query_size, statement, query_signature)
+            == StatementTruncationState.truncated
+        ):
             return (
                 None,
                 DBExplainError.query_truncated,
@@ -826,7 +830,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                         "comments": row['dd_comments'],
                     },
                     "query_truncated": self._get_truncation_state(
-                        self._get_track_activity_query_size(), row['query']
+                        self._get_track_activity_query_size(), row['query'], row['query_signature']
                     ).value,
                 },
                 'postgres': {k: v for k, v in row.items() if k not in pg_stat_activity_sample_exclude_keys},
@@ -915,8 +919,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _get_track_activity_query_size(self):
         return int(self._check.pg_settings.get("track_activity_query_size", TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE))
 
-    @staticmethod
-    def _get_truncation_state(track_activity_query_size, statement):
+    def _get_truncation_state(self, track_activity_query_size, statement, query_signature):
         # Only check is a statement is truncated if the value of track_activity_query_size was loaded correctly
         # to avoid confusingly reporting a wrong indicator by using a default that might be wrong for the database
         if track_activity_query_size == TRACK_ACTIVITY_QUERY_SIZE_UNKNOWN_VALUE:
@@ -930,4 +933,23 @@ class PostgresStatementSamples(DBMAsyncJob):
         # would falsely report it as a truncated statement
         statement_bytes = bytes(statement, "utf-8")
         truncated = len(statement_bytes) >= track_activity_query_size - (MAX_CHARACTER_SIZE_IN_BYTES + 1)
-        return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+        if truncated:
+            if track_activity_query_size < TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE:
+                self._log.warning(
+                    "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d "
+                    "See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting%s "
+                    "for more details on how to increase the track_activity_query_size setting.",
+                    query_signature,
+                    len(statement_bytes),
+                    track_activity_query_size,
+                    "#query-samples-are-truncated",
+                )
+            else:
+                self._log.debug(
+                    "Statement with query_signature=%s was truncated. Query size: %d, track_activity_query_size: %d",
+                    query_signature,
+                    len(statement_bytes),
+                    track_activity_query_size,
+                )
+            return StatementTruncationState.truncated
+        return StatementTruncationState.not_truncated
