@@ -73,6 +73,8 @@ integration/asana:
 - asana/**/*
 integration/aspdotnet:
 - aspdotnet/**/*
+integration/authorize_net:
+- authorize_net/**/*
 integration/avi_vantage:
 - avi_vantage/**/*
 integration/aws_neuron:
