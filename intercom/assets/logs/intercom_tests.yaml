@@ -405,7 +405,7 @@ tests:
             performed_by:
               email: "abc@xyz.com"
               id: "1234567"
-              ip: "218.57.154.108"
+              ip: "185.64.148.0"
               type: "admin"
             type: "admin_activity_log_event"
           type: "notification_event_data"
@@ -416,23 +416,39 @@ tests:
         id: "notif_3a7c4d12-56e7-4b8d-9f4c-d8e6f1234567"
         network:
           client:
-            geoip: {}
-            ip: "218.57.154.108"
+            geoip:
+              city:
+                name: "Paris"
+              continent:
+                code: "EU"
+                name: "Europe"
+              country:
+                iso_code: "FR"
+                name: "France"
+              ipAddress: "185.64.148.0"
+              location:
+                latitude: 48.90654
+                longitude: 2.33339
+              subdivision:
+                iso_code: "FR-IDF"
+                name: "Île-de-France"
+              timezone: "Europe/Paris"
+            ip: "185.64.148.0"
           ip:
             attributes:
             -
-              ip: "218.57.154.108"
+              ip: "185.64.148.0"
               source:
               - "@data.item.performed_by.ip"
             list:
-            - "218.57.154.108"
+            - "185.64.148.0"
         service: "activity"
         threat_intel:
           indicators_matched:
           - "IP"
           results:
           -
-            indicator: "0.0.0.0"
+            indicator: "185.64.148.0"
             additional_data:
               tunnels:
               -
@@ -489,7 +505,7 @@ tests:
                 "update_by" : 1234567
               },
               "performed_by" : {
-                "ip" : "218.57.154.108",
+                "ip" : "185.64.148.0",
                 "id" : "1234567",
                 "type" : "admin",
                 "email" : "abc@xyz.com"
@@ -509,7 +525,7 @@ tests:
           "threat_intel" : {
             "indicators_matched" : [ "IP" ],
             "results" : [ {
-              "indicator" : "0.0.0.0",
+              "indicator" : "185.64.148.0",
               "additional_data" : {
                 "tunnels" : [ {
                   "anonymous" : false,
@@ -560,10 +576,10 @@ tests:
           "network" : {
             "ip" : {
               "attributes" : [ {
-                "ip" : "218.57.154.108",
+                "ip" : "185.64.148.0",
                 "source" : [ "@data.item.performed_by.ip" ]
               } ],
-              "list" : [ "218.57.154.108" ]
+              "list" : [ "185.64.148.0" ]
             }
           }
         }
