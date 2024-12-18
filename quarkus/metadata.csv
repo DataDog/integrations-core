@@ -19,7 +19,7 @@ quarkus.jvm.gc.max_data_size.bytes,gauge,,byte,,Max size of long-lived heap memo
 quarkus.jvm.gc.overhead,gauge,,,,"An approximation of the percent of CPU time used by GC activities over the last lookback period or since monitoring began, whichever is shorter, in the range [0..1].",0,quarkus,,,
 quarkus.jvm.memory.committed.bytes,gauge,,byte,,The amount of memory in bytes that is committed for the Java virtual machine to use.,0,quarkus,,,
 quarkus.jvm.memory.max.bytes,gauge,,byte,,The maximum amount of memory in bytes that can be used for memory management.,0,quarkus,,,
-quarkus.jvm.memory.usage_after_gc,gauge,,percent,,"The percentage of long-lived heap pool used after the last GC event, in the range [0..1].",0,quarkus,,,
+quarkus.jvm.memory.usage_after_gc,gauge,,fraction,,"The percentage of long-lived heap pool used after the last GC event, in the range [0..1].",0,quarkus,,,
 quarkus.jvm.memory.used.bytes,gauge,,byte,,The amount of used memory.,0,quarkus,,,
 quarkus.jvm.threads.daemon_threads,gauge,,thread,,The current number of live daemon threads.,0,quarkus,,,
 quarkus.jvm.threads.live_threads,gauge,,thread,,The current number of live threads including both daemon and non-daemon threads.,0,quarkus,,,
