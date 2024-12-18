@@ -391,7 +391,7 @@ files:
       - name: collect_vsan_data
         description: |
           If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
-          Furthermore, vSAN clusters will be visualized as resources in the Resource Catalog product.
+          Furthermore, vSAN clusters are visualized as resources in the Resource Catalog product.
           
           Ensure that you have the vSAN Performance Service enabled:
           https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan-monitoring.doc/
