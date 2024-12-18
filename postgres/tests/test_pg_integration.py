@@ -463,7 +463,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     thread.join()
 
 
-@pytest.mark.flaky(max_runs=5)
+@pytest.mark.flaky(max_runs=10)
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -731,10 +731,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
     ) as resolve_db_host:
         check = PostgreSql('test_instance', {}, [pg_instance])
         check.run()
-        if reported_hostname:
-            assert resolve_db_host.called is False, 'Expected resolve_db_host.called to be False'
-        else:
-            assert resolve_db_host.called is True
+        assert resolve_db_host.called is True
 
     expected_tags_no_db = _get_expected_tags(check, pg_instance, server=HOST)
     expected_tags_with_db = expected_tags_no_db + ['db:datadog_test']

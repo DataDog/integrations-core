@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2024-09-24",
+    "last_updated_at": "2024-09-24",
+    "title": "Playback Failure Percentage is higher than usual",
+    "description": "Playback failures occur when a video cannot be played successfully. This monitor tracks the percentage of these failures to identify streaming quality issues. High rates can frustrate users and reduce engagement, so timely alerts are essential for maintaining a smooth viewing experience.",
+    "definition": {
+        "id": 154118176,
+        "name": "[Mux] Playback Failure Percentage is higher than usual",
+        "type": "query alert",
+        "query": "max(last_4h):max:mux.metric.playback_failure_percentage{*} by {video_id} > 20",
+        "message": "{{#is_warning}}  \nThe playback failure percentage for video id: {{video_id.name}} has exceeded the threshold.  \nCurrent Playback Failure Percentage: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe playback failure percentage for video id: {{video_id.name}} has exceeded the threshold.    \nCurrent Playback Failure Percentage: {{value}}%    \nThreshold: {{threshold}}%  \n{{/is_alert}}\n\n\n@example@example.com",
+        "tags": [
+            "integration:mux"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 20,
+                "warning": 10
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": 2,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:mux"
+    ]
+}
