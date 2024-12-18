@@ -15,7 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -46,9 +47,6 @@
     },
     "dashboards": {
       "Sidekiq Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "sidekiq"
     }
   }
 }

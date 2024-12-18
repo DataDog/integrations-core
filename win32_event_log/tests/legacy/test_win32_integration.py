@@ -4,7 +4,6 @@
 import platform
 
 import pytest
-from six import PY2
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.errors import SkipInstanceError
@@ -71,12 +70,6 @@ def test_legacy_mode_select(
     # Must only set a single mode
     if any(legacy_mode_opts) and any(legacy_mode_v2_opts):
         with pytest.raises(ConfigurationError, match="are both true"):
-            check = new_check(instance, init_config=init_config)
-        return
-
-    # legacy_mode_v2 is not supported on Python2
-    if PY2 and any(legacy_mode_v2_opts):
-        with pytest.raises(ConfigurationError, match="not supported on Python2"):
             check = new_check(instance, init_config=init_config)
         return
 

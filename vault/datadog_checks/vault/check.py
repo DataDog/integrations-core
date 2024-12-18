@@ -213,7 +213,8 @@ class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         self._api = Api(**methods)
 
         tags = [f'api_url:{self._api_url}']
-        tags.extend(self.config.tags)
+        if self.config.tags:
+            tags.extend(self.config.tags)
         self._tags = tuple(tags)
 
     def configure_scrapers(self):

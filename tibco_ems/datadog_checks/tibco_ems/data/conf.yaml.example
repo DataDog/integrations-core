@@ -1,0 +1,99 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param tibemsadmin - string - optional - default: /usr/bin/tibemsadmin
+    ## The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
+    ## , which can be overwritten on an instance.
+    #
+    # tibemsadmin: /usr/bin/tibemsadmin
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+  -
+    ## @param host - string - optional - default: localhost
+    ## Host that the Datadog Tibeco EMS check connects to.
+    #
+    # host: localhost
+
+    ## @param port - integer - optional - default: 7222
+    ## The port used to connect to the Tibco EMS server.
+    #
+    # port: 7222
+
+    ## @param username - string - optional
+    ## Username from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
+    ## For the check to work, this user must have access so that the Datadog Tibeco EMS
+    ## check can execute the `show` command.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## Password from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
+    ## For the check to work, this user must have access so that the Datadog Tibeco EMS
+    ## check can execute the `show` command.
+    #
+    # password: <PASSWORD>
+
+    ## @param script_path - string - optional
+    ## The path to the script that will be executed to collect metrics. Since the script is executed by a subprocess,
+    ## we need to know the path to the script. This must be the absolute path to the script.
+    #
+    # script_path: <SCRIPT_PATH>
+
+    ## @param tibemsadmin - string - optional
+    ## The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
+    ## , which can be overwritten on an instance.
+    ##
+    ## This overrides `tibemsadmin` defined in `init_config`.
+    #
+    # tibemsadmin: <TIBEMSADMIN>
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>

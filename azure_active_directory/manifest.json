@@ -8,8 +8,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Analyze your Azure Active Directory activity logs",
-    "title": "Azure Active Directory",
+    "description": "Analyze your Microsoft Entra ID activity logs",
+    "title": "Microsoft Entra ID",
     "media": [],
     "classifier_tags": [
       "Category::Azure",
@@ -18,7 +18,8 @@
       "Category::Security",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -39,9 +40,6 @@
       },
       "source_type_id": 10106,
       "auto_install": true
-    },
-    "logs": {
-      "source": "azure.active_directory"
     }
   }
 }

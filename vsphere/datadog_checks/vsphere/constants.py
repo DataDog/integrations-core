@@ -6,6 +6,7 @@ from pyVmomi import vim
 SOURCE_TYPE = 'vsphere'
 
 BOTH = 'both'
+NONE = 'None'
 HISTORICAL = 'historical'
 REALTIME = 'realtime'
 
@@ -29,6 +30,8 @@ MOR_TYPE_AS_STRING = {
     vim.Datacenter: 'datacenter',
     vim.Datastore: 'datastore',
     vim.ClusterComputeResource: 'cluster',
+    vim.StoragePod: 'storage_pod',
+    vim.vslm.vcenter.VStorageObjectManager: 'vstorage_object_manager',
 }
 
 ALL_RESOURCES = [
@@ -175,3 +178,52 @@ PROPERTY_METRICS_BY_RESOURCE_TYPE = {
     'cluster': CLUSTER_SIMPLE_PROPERTIES,
     'datastore': DATASTORE_SIMPLE_PROPERTIES,
 }
+
+EXCLUDE_FILTERS = {
+    'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
+    'TaskEvent': [
+        r'Initialize powering On',
+        r'Power Off virtual machine',
+        r'Power On virtual machine',
+        r'Reconfigure virtual machine',
+        r'Relocate virtual machine',
+        r'Suspend virtual machine',
+        r'Migrate virtual machine',
+    ],
+    'VmBeingHotMigratedEvent': [],
+    'VmMessageEvent': [],
+    'VmMigratedEvent': [],
+    'VmPoweredOnEvent': [],
+    'VmPoweredOffEvent': [],
+    'VmReconfiguredEvent': [],
+    'VmSuspendedEvent': [],
+}
+
+PER_RESOURCE_EVENTS = [
+    'AlarmAcknowledgedEvent',
+    'AlarmActionTriggeredEvent',
+    'AlarmClearedEvent',
+    'AlarmCreatedEvent',
+    'AlarmEmailCompletedEvent',
+    'AlarmEmailFailedEvent',
+    'AlarmReconfiguredEvent',
+    'AlarmRemovedEvent',
+    'AlarmScriptCompleteEvent',
+    'AlarmScriptFailedEvent',
+    'AlarmSnmpCompletedEvent',
+    'AlarmSnmpFailedEvent',
+    'AlarmStatusChangedEvent',
+    'CustomFieldValueChangedEvent',
+    'GeneralUserEvent',
+    'PermissionEvent',
+    'ScheduledTaskEvent',
+]
+
+VSAN_EVENT_IDS = [
+    'vsan.health.test.cluster.consistentconfig.event',
+    'vsan.health.test.network.hostdisconnected.event',
+]
+
+VSAN_EVENT_PREFIX = 'vsan'
+
+HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']

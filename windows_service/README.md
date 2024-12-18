@@ -8,7 +8,7 @@ This check monitors the state of any Windows Service and submits a service check
 
 ### Installation
 
-The Windows Service check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Windows hosts.
+The Windows Service check is installed by default with the [Datadog Agent][1], but is not configured. Please see the next section to configure the check.
 
 ### Configuration
 
@@ -81,6 +81,8 @@ The check automatically tags the Windows service name to each service check in t
 
 Beginning with Agent version 7.40, the check can add a `windows_service_startup_type:<STARTUP_TYPE>` tag to each service check to indicate the startup type of the service. Set the `windows_service_startup_type_tag` option to include this tag with each service check.
 
+Beginning with Agent version 7.55, the check can add a `display_name:<DISPLAY_NAME>` tag to each service check to indicate the display name of the service. Set the `collect_display_name_as_tag` option to `true` to include this tag with each service check.
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `windows_service` under the **Checks** section.
@@ -134,3 +136,4 @@ If the service is present in the output, permissions are the issue. To give the 
 [15]: https://docs.datadoghq.com/agent/guide/windows-agent-ddagent-user/
 [16]: https://learn.microsoft.com/en-US/troubleshoot/windows-server/group-policy/configure-group-policies-set-security
 [17]: https://learn.microsoft.com/en-us/windows/win32/services/service-trigger-events
+[18]: https://app.datadoghq.com/integrations/windows-service?search=windows%20service

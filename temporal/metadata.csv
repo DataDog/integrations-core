@@ -19,6 +19,7 @@ temporal.server.activity_info.size.count,count,,,,,0,temporal,activity info size
 temporal.server.activity_info.size.sum,count,,byte,,,0,temporal,activity info size sum,
 temporal.server.activity_info.sum,count,,,,,0,temporal,activity info sum,
 temporal.server.add_search_attributes.failures.count,count,,,,,0,temporal,add search attributes failures count,
+temporal.server.add_search_attributes.workflow_failure,gauge,,,,,0,temporal,add search attributes workflow failure count,
 temporal.server.add_search_attributes.workflow_failure.count,count,,,,,0,temporal,add search attributes workflow failure count,
 temporal.server.add_search_attributes.workflow_success.count,count,,,,,0,temporal,add search attributes workflow success count,
 temporal.server.archival.task_invalid_uri.count,count,,,,,0,temporal,archival task invalid uri count,

@@ -1,0 +1,161 @@
+[
+    {
+        "host": "d4c6071697ea:27017",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "dbm_type": "activity",
+        "collection_interval": 10,
+        "cloud_metadata": {},
+        "ddtags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
+        ],
+        "timestamp": 1715911398111.2722,
+        "service": "my_service",
+        "mongodb_activity": [
+            {
+                "now": 1715911398.1112723,
+                "query_signature": "a5c9a4483fa9bcdf",
+                "statement": "{\"find\": \"products\", \"filter\": {\"$and\": [{\"data\": {\"$gt\": 0.6283678507530881}}, {\"message\": {\"$regularExpression\": {\"pattern\": \"log\", \"options\": \"\"}}}]}, \"$db\": \"integration\", \"$readPreference\": {\"mode\": \"primaryPreferred\"}}",
+                "active": true,
+                "desc": "conn104",
+                "opid": 1538838,
+                "ns": "integration.products",
+                "plan_summary": "COLLSCAN",
+                "query_framework": null,
+                "current_op_time": "2024-05-16T18:06:38.419+00:00",
+                "microsecs_running": 167,
+                "transaction_time_open_micros": null,
+                "prepare_read_conflicts": 0,
+                "write_conflicts": 0,
+                "num_yields": 0,
+                "waiting_for_lock": false,
+                "locks": {
+                    "feature_compatibility_version": "r",
+                    "global": "r"
+                },
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "mutex": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    }
+                },
+                "waiting_for_flow_control": false,
+                "flow_control_stats": {},
+                "waiting_for_latch": {
+                    "timestamp": {
+                        "$date": "2024-05-16T18:06:38.419Z"
+                    },
+                    "capture_name": "FutureResolution"
+                },
+                "cursor": null,
+                "type": "op",
+                "op": "query",
+                "shard": null,
+                "dbname": "integration",
+                "application": null,
+                "collection": "products",
+                "comment": "find",
+                "truncated": "not_truncated",
+                "client": {
+                    "hostname": "192.168.65.1:39517",
+                    "driver": {
+                        "name": "PyMongo",
+                        "version": "4.7.2"
+                    },
+                    "os": {
+                        "type": "Darwin",
+                        "name": "Darwin",
+                        "architecture": "arm64",
+                        "version": "14.4.1"
+                    },
+                    "platform": "CPython 3.9.16.final.0"
+                },
+                "user": "test"
+            },
+            {
+                "now": 1715911398.1112723,
+                "query_signature": "2098271ac4fceefe",
+                "statement": "{\"getMore\": 7156629711810917986, \"collection\": \"oplog.rs\", \"batchSize\": 13981010, \"maxTimeMS\": 5000, \"term\": 2, \"lastKnownCommittedOpTime\": {\"ts\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 17}}, \"t\": 2}, \"$replData\": 1, \"$oplogQueryData\": 1, \"$readPreference\": {\"mode\": \"secondaryPreferred\"}, \"$db\": \"local\"}",
+                "active": true,
+                "desc": "conn1392",
+                "opid": 1399253104,
+                "ns": "local.oplog.rs",
+                "plan_summary": "COLLSCAN",
+                "query_framework": "classic",
+                "current_op_time": "2024-08-06T20:59:35.394+00:00",
+                "microsecs_running": 13134,
+                "transaction_time_open_micros": null,
+                "prepare_read_conflicts": 0,
+                "write_conflicts": 0,
+                "num_yields": 2,
+                "waiting_for_lock": false,
+                "locks": {},
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 2
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 2
+                        }
+                    }
+                },
+                "waiting_for_flow_control": false,
+                "flow_control_stats": {},
+                "waiting_for_latch": {},
+                "cursor": {
+                    "cursor_id": 7156629711810917986,
+                    "created_date": "2024-07-05T19:48:58.627000",
+                    "last_access_date": "2024-08-06T20:59:35.381000",
+                    "n_docs_returned": 88758072,
+                    "n_batches_returned": 101420266,
+                    "no_cursor_timeout": false,
+                    "tailable": true,
+                    "await_data": true,
+                    "originating_command": "{\"find\": \"oplog.rs\", \"filter\": {\"ts\": {\"$gte\": {\"$timestamp\": {\"t\": 1720208938, \"i\": 17}}}}, \"batchSize\": 13981010, \"tailable\": true, \"awaitData\": true, \"term\": 2, \"maxTimeMS\": 60000, \"readConcern\": {\"level\": \"local\", \"afterClusterTime\": {\"$timestamp\": {\"t\": 0, \"i\": 1}}}, \"$replData\": 1, \"$oplogQueryData\": 1, \"$readPreference\": {\"mode\": \"secondaryPreferred\"}, \"$db\": \"local\"}",
+                    "plan_summary": null,
+                    "operation_using_cursor_id": 1399253104,
+                    "comment": "oplogReplay"
+                },
+                "type": "op",
+                "op": "getmore",
+                "shard": null,
+                "dbname": "local",
+                "application": "OplogFetcher",
+                "collection": "oplog.rs",
+                "comment": null,
+                "truncated": "not_truncated",
+                "client": {
+                    "hostname": "10.131.62.131:45658",
+                    "driver": {
+                        "name": "MongoDB Internal Client",
+                        "version": "7.0.12"
+                    },
+                    "os": {
+                        "type": "Linux",
+                        "name": "Ubuntu",
+                        "architecture": "x86_64",
+                        "version": "22.04"
+                    },
+                    "platform": null
+                },
+                "user": null
+            }
+        ]
+    }
+]

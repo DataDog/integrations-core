@@ -6,7 +6,7 @@ The ActiveMQ check collects metrics for brokers, queues, producers, consumers, a
 
 **Note:** This check also supports ActiveMQ Artemis (future ActiveMQ version `6`) and reports metrics under the `activemq.artemis` namespace. See [metadata.csv][1] for a list of metrics provided by this integration.
 
-**Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][2].
+**Note**: If you are running an ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][2].
 
 ## Setup
 

@@ -400,6 +400,62 @@
         ]
     },
     {
+        "name": "mongodb.metrics.query.plancache.classic.hitsps",
+        "type": 1,
+        "value": 13041302.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.plancache.classic.missesps",
+        "type": 1,
+        "value": 1023350.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.plancache.sbe.hitsps",
+        "type": 1,
+        "value": 444.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.plancache.sbe.missesps",
+        "type": 1,
+        "value": 878.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.sort.spilltodiskps",
+        "type": 1,
+        "value": 18.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.sort.totalbytessortedps",
+        "type": 1,
+        "value": 4808797953.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.metrics.query.sort.totalkeyssortedps",
+        "type": 1,
+        "value": 14394599.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.metrics.queryexecutor.scannedps",
         "type": 1,
         "value": 46.0,
@@ -627,6 +683,30 @@
         "name": "mongodb.oplatencies.commands.latency",
         "type": 0,
         "value": 67574004.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.reads.latency.avg",
+        "type": 0,
+        "value": 2874788.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.writes.latency.avg",
+        "type": 0,
+        "value": 611.3,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.commands.latency.avg",
+        "type": 0,
+        "value": 8573.2,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test"
         ]
@@ -1216,6 +1296,22 @@
         ]
     },
     {
+        "name": "mongodb.wiredtiger.cache.bytes_read_into_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.bytes_written_from_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.wiredtiger.cache.failed_eviction_of_pages_exceeding_the_in_memory_maximumps",
         "type": 1,
         "value": 12.0,
@@ -1257,6 +1353,14 @@
     },
     {
         "name": "mongodb.wiredtiger.cache.pages_read_into_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.pages_requested_from_cache",
         "type": 0,
         "value": 12.0,
         "tags": [

@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   registry:
     image: goharbor/registry-photon:v2.0.5

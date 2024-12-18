@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   # 3-node RethinkDB cluster with 1 proxy node.
 

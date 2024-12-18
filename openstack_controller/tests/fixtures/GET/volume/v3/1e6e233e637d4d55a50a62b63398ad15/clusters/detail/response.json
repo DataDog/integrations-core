@@ -1,0 +1,19 @@
+{
+    "clusters": [
+        {
+            "name": "first_cluster",
+            "binary": "cinder-volume",
+            "state": "up",
+            "status": "enabled",
+            "disabled_reason": null,
+            "created_at": "2016-06-01T02:46:28",
+            "updated_at": "2016-06-01T02:46:28",
+            "num_down_hosts": 0,
+            "num_hosts": 0,
+            "last_heartbeat": "2016-06-01T02:46:28",
+            "replication_status": "enable",
+            "frozen": false,
+            "active_backend_id": "replication1"
+        }
+    ]
+}

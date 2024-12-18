@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name, is_azure_sql_database
 
 try:
     import datadog_agent
@@ -153,12 +153,7 @@ def _row_key(row):
     :param row: a normalized row from STATEMENT_METRICS_QUERY
     :return: a tuple uniquely identifying this row
     """
-    return (
-        row.get('database_name'),
-        row['query_signature'],
-        row['query_hash'],
-        row['query_plan_hash'],
-    )
+    return (row.get('database_name'), row['query_signature'], row['query_hash'], row.get('procedure_name'))
 
 
 XML_PLAN_OBFUSCATION_ATTRS = frozenset(
@@ -286,12 +281,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         )
         return self._statement_metrics_query
 
+    def lookback_window(self):
+        return self._config.statement_metrics_config.get('lookback_window', None)
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_raw_query_metrics_rows(self, cursor):
         self.log.debug("collecting sql server statement metrics")
         statement_metrics_query = self._get_statement_metrics_query_cached(cursor)
         now = time.time()
         query_interval = self.collection_interval * 2
+        if self.lookback_window():
+            query_interval = self.lookback_window()
         if self._last_stats_query_time:
             query_interval = max(query_interval, now - self._last_stats_query_time)
         self._last_stats_query_time = now
@@ -304,10 +304,29 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("loaded sql server statement metrics len(rows)=%s", len(rows))
         return rows
 
+    def _should_include_query_metrics_row(self, row):
+        if 'database_name' not in row:
+            # Unaggregated query metrics row without a database name
+            return True
+
+        engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
+        if is_azure_sql_database(engine_edition):
+            configured_database = self._check.instance.get('database')
+            if not configured_database or configured_database == 'master':
+                # If no database configured or the configured database is master, include all rows
+                return True
+            if not row['database_name'] or str(row['database_name']).lower() != configured_database.lower():
+                # If the row's database name does not match the configured database, exclude the row
+                return False
+
+        return True
+
     def _normalize_queries(self, rows):
         normalized_rows = []
 
         for row in rows:
+            if not self._should_include_query_metrics_row(row):
+                continue
             # Attempt to obfuscate SQL statement with metadata
             procedure_statement = None
             try:
@@ -425,6 +444,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
             'ddagenthostname': self._check.agent_hostname,
+            'service': self._config.service,
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -481,6 +501,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "ddsource": "sqlserver",
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
+                'service': self._config.service,
                 "db": {
                     "instance": row.get('database_name', None),
                     "query_signature": row['query_signature'],
@@ -574,6 +595,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "cloud_metadata": self._config.cloud_metadata,
                     'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                     'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+                    'service': self._config.service,
                     "db": {
                         "instance": row.get("database_name", None),
                         "plan": {

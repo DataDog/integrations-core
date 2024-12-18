@@ -1,0 +1,70 @@
+{
+    "portgroups": [
+        {
+            "address": "22:22:22:22:22:22",
+            "created_at": "2016-08-18T22:28:48.643434+11:11",
+            "extra": {},
+            "internal_info": {},
+            "links": [
+                {
+                    "href": "http://127.0.0.1/v1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+                    "rel": "bookmark"
+                }
+            ],
+            "mode": "active-backup",
+            "name": "test_portgroup",
+            "node_uuid": "9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+            "ports": [
+                {
+                    "href": "http://127.0.0.1/v1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
+                    "rel": "bookmark"
+                }
+            ],
+            "properties": {},
+            "standalone_ports_supported": true,
+            "updated_at": "2016-08-18T22:28:49.653974+00:00",
+            "uuid": "9d72cf53-19c8-4942-9314-005fa5d2a6a0"
+        },
+        {
+            "uuid": "032ce3fb-8181-4d6f-8b8e-f2adaa913f28",
+            "created_at": "2024-05-10T14:21:12+00:00",
+            "updated_at": null,
+            "address": "11:11:11:11:11:11",
+            "extra": {},
+            "internal_info": {},
+            "mode": "active-backup",
+            "name": "portgroup-1",
+            "properties": {},
+            "standalone_ports_supported": true,
+            "links": [
+                {
+                    "href": "http://127.0.0.1/baremetal/v1/portgroups/032ce3fb-8181-4d6f-8b8e-f2adaa913f28",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/baremetal/portgroups/032ce3fb-8181-4d6f-8b8e-f2adaa913f28",
+                    "rel": "bookmark"
+                }
+            ],
+            "node_uuid": "bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+            "ports": [
+                {
+                    "href": "http://127.0.0.1/baremetal/v1/portgroups/032ce3fb-8181-4d6f-8b8e-f2adaa913f28/ports",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/baremetal/portgroups/032ce3fb-8181-4d6f-8b8e-f2adaa913f28/ports",
+                    "rel": "bookmark"
+                }
+            ]
+        }
+    ]
+}

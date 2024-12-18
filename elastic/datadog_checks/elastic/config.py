@@ -2,8 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
-
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -59,7 +58,10 @@ def from_instance(instance):
     host = parsed.hostname
 
     custom_tags = instance.get('tags', [])
-    service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)]
+    if is_affirmative(instance.get('disable_legacy_service_check_tags', False)):
+        service_check_tags = ['url:{}'.format(url)]
+    else:
+        service_check_tags = ['host:{}'.format(host), 'port:{}'.format(port)]
     service_check_tags.extend(custom_tags)
 
     custom_queries = instance.get('custom_queries', [])

@@ -1,0 +1,30 @@
+{
+    "version": 2,
+    "created_at": "2024-05-17",
+    "last_updated_at": "2024-05-17",
+    "title": "Traefik Mesh entrypoint request count failures are high.",
+    "description": "Notify your team of high entrypoint request count failures in Traefik Mesh.",
+    "definition": {
+        "name": "Traefik Mesh entrypoint request count failures are high.",
+        "type": "query alert",
+        "query": "pct_change(sum(last_30m),last_5m):avg:traefik_mesh.entrypoint.requests.count{code:4* OR code:5*} by {host,code,entrypoint,endpoint}.as_count() > 10",
+        "message": "\n{{#is_alert}}\n\n  Seeing an unusually high amount of Traefik Mesh request failures coming from {host.name}\n  {endpoint.name} - {entrypoint.name}\n  \nStatus Code: {code.name}\n\n{{/is_alert}}",
+        "tags": [
+            "integration:traefik-mesh"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 10
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "notify_no_data": false,
+            "silenced": {},
+            "avalanche_window": 10
+        }
+    },
+    "tags": [
+        "integration:traefik-mesh"
+    ]
+}

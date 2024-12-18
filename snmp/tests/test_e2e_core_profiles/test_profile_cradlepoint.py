@@ -28,8 +28,11 @@ def test_e2e_profile_cradlepoint(dd_agent_check):
     common_tags = [
         'snmp_profile:cradlepoint',
         'snmp_host:cradlepoint.device.name',
+        'device_hostname:cradlepoint.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
@@ -82,6 +85,7 @@ def test_e2e_profile_cradlepoint(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.20992.2.46',
         'vendor': 'cradlepoint',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

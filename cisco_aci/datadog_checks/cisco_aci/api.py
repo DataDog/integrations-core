@@ -285,15 +285,26 @@ class Api:
         response = self.make_request(path)
         return self._parse_response(response)
 
-    def get_eth_list(self, pod, node):
-        query = 'query-target=subtree&target-subtree-class=l1PhysIf'
-        path = '/api/mo/topology/pod-{}/node-{}/sys.json?{}'.format(pod, node, query)
+    def get_eth_list_and_stats(self, pod, node):
+        subtree = 'children'
+        subtree_include = 'stats'
+        subtree_class = (
+            'ethpmPhysIf,eqptEgrTotal5min,eqptIngrTotal5min,eqptEgrDropPkts5min,eqptEgrBytes5min,eqptIngrBytes5min'
+        )
+        query = 'rsp-subtree={}&rsp-subtree-include={}&rsp-subtree-class={}'.format(
+            subtree, subtree_include, subtree_class
+        )
+        path = '/api/node/class/topology/pod-{}/node-{}/l1PhysIf.json?{}'.format(pod, node, query)
         response = self.make_request(path)
         return self._parse_response(response)
 
-    def get_eth_stats(self, pod, node, eth):
-        query = 'rsp-subtree-include=stats,no-scoped&page-size=50'
-        path = '/api/mo/topology/pod-{}/node-{}/sys/phys-[{}].json?{}'.format(pod, node, eth, query)
+    def get_lldp_adj_eps(self):
+        path = '/api/node/class/lldpAdjEp.json'
+        response = self.make_request(path)
+        return self._parse_response(response)
+
+    def get_cdp_adj_eps(self):
+        path = '/api/node/class/cdpAdjEp.json'
         response = self.make_request(path)
         return self._parse_response(response)
 

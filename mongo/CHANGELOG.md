@@ -2,7 +2,277 @@
 
 <!-- towncrier release notes start -->
 
-## 6.3.0 / 2024-03-22
+## 8.3.0 / 2024-11-28
+
+***Added***:
+
+* Add `metrics_collection_interval` config option to customize the collection interval for collection stats, index stats, and sharded data distribution metrics.
+  The default collection interval for collection stats and index stats remains unchanged at check min collection interval of 15 seconds.
+  The default collection interval for sharded data distribution metrics is 300 seconds. ([#19098](https://github.com/DataDog/integrations-core/pull/19098))
+
+***Fixed***:
+
+* Fixes timezone parsing bug in slow query log, preventing incorrect timestamp conversions on non-UTC servers. ([#19057](https://github.com/DataDog/integrations-core/pull/19057))
+* Fix crash in DBM operation samples collection when a node is in recovering mode. ([#19080](https://github.com/DataDog/integrations-core/pull/19080))
+* Resolved deprecation warning for `collStats` by using `$collStats` aggregation pipeline to collect oplog size in MongoDB 6.2+. ([#19133](https://github.com/DataDog/integrations-core/pull/19133))
+
+## 8.2.1 / 2024-11-06 / Agent 7.60.0
+
+***Fixed***:
+
+* Fix bug in parsing database name from namespace when no collection name is present, affecting database-level commands in MongoDB versions 5 and earlier. ([#18953](https://github.com/DataDog/integrations-core/pull/18953))
+
+## 8.2.0 / 2024-10-31
+
+***Added***:
+
+* Add `service` configured in integration init_config or instance config to the DBM events payload. The configured `service` will be converted to tag `service:<SERVICE>` and applied, query samples, slow queries and explain plans. ([#18846](https://github.com/DataDog/integrations-core/pull/18846))
+* Add `aws` to the instance configuration to allow cloud resource linking with Amazon DocumentDB. ([#18921](https://github.com/DataDog/integrations-core/pull/18921))
+
+***Fixed***:
+
+* Skip explain plan collection for mongo administrative aggregation pipeline, including `$collStats`, `$currentOp`, `$indexStats`, `$listSearchIndexes`, `$sample` and `$shardedDataDistribution`. ([#18844](https://github.com/DataDog/integrations-core/pull/18844))
+
+## 8.1.0 / 2024-10-16 / Agent 7.59.0
+
+***Added***:
+
+* Apply `timeoutMS` to integration connection to ensure client-side operation timeouts terminate the server processes. ([#18843](https://github.com/DataDog/integrations-core/pull/18843))
+
+## 8.0.0 / 2024-10-04
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+* Bump datadog-checks-base dependency ([#18583](https://github.com/DataDog/integrations-core/pull/18583))
+* Add `mongodb.system.cpu.percent` metric to track total CPU usage of the MongoDB process on self-hosted instances (only available on self-hosted MongoDB running on the same host as the Agent). ([#18618](https://github.com/DataDog/integrations-core/pull/18618))
+* Always emit `database_instance` metadata regardless of DBM status; previously emitted only when DBM was enabled. ([#18750](https://github.com/DataDog/integrations-core/pull/18750))
+* Include tag `clustername` & `database_instance` in mongo service check tags ([#18751](https://github.com/DataDog/integrations-core/pull/18751))
+* Add `resolved_views`, `working_millis`, and `queues` fields to the slow query (dbm only) event payload
+  - resolved_views: contains view details for slow queries on views (MongoDB 5.0+)
+  - working_millis: the amount of time that MongoDB spends working on the operation (MongoDB 8.0+)
+  - queues: contains information about the operation's queues (MongoDB 8.0+) ([#18761](https://github.com/DataDog/integrations-core/pull/18761))
+
+## 7.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+* Upgrade psutil to 6.0.0 to fix performance issues addressed ([#18688](https://github.com/DataDog/integrations-core/pull/18688))
+
+## 6.11.0 / 2024-09-10
+
+***Added***:
+
+* Add `index` tag to `mongodb.collection.indexes.accesses.opsps` metric for consistency with `mongodb.collection.indexsizes`. ([#18546](https://github.com/DataDog/integrations-core/pull/18546))
+
+## 6.10.0 / 2024-09-05
+
+***Deprecated***:
+
+* Deprecate metrics `mongodb.collection.collectionscans.nontailable` & `mongodb.collection.collectionscans.total`. ([#18511](https://github.com/DataDog/integrations-core/pull/18511))
+
+***Added***:
+
+* Collecting Explain Plans for Slow Operations:
+  - For slow operations captured by the database profiler, the `execStats` from the profiler documents are directly used and emitted.
+  - For slow operations identified in the logs, the integration now explicitly explains the operation and emits the resulting explain plan. ([#18309](https://github.com/DataDog/integrations-core/pull/18309))
+* Add metric `mongodb.stats.views` to report number of views in the database. ([#18334](https://github.com/DataDog/integrations-core/pull/18334))
+* Collect mongodb inferred document schema with documents sample (DBM only). By default, 10 documents per collection are sampled to generate inferred schema with fields and types. ([#18374](https://github.com/DataDog/integrations-core/pull/18374))
+* Add `query_framework` to operation samples. `query_framework` is a string that specifies the query framework used to process an operation. The field is available starting mongodb version 6.2. ([#18388](https://github.com/DataDog/integrations-core/pull/18388))
+* Add metric `mongodb.collection.indexes.accesses.opsps` to measure number of times the index was used per second. ([#18405](https://github.com/DataDog/integrations-core/pull/18405))
+* Add sharded data distribution metrics (only collected on mongos)
+  - `mongodb.sharded_data_distribution.num_orphaned_docs`, - Number of orphaned documents in the shard
+  - `mongodb.sharded_data_distribution.num_owned_documents` - Number of owned documents in the shard
+  - `mongodb.sharded_data_distribution.orphaned_size_bytes` - Size of orphaned documents in the shard
+  - `mongodb.sharded_data_distribution.owned_size_bytes` - Size of owned documents in the shard ([#18407](https://github.com/DataDog/integrations-core/pull/18407))
+* Improve MongoDB integration compatibility with AWS DocumentDB
+  - fallback to `collStats` command when `$collStats` aggregation pipeline is not available
+  - fix NoneType error with replication metrics collection
+  - fix `list_collection_names` error on unsupported filter `Type` ([#18430](https://github.com/DataDog/integrations-core/pull/18430))
+* Include replica set tags in metrics. ([#18463](https://github.com/DataDog/integrations-core/pull/18463))
+* Add modules to mongodb instance metadata. `modules` are a list of add-on modules that mongod was built with. Possible values currently include "enterprise" and "rocksdb". ([#18473](https://github.com/DataDog/integrations-core/pull/18473))
+* Collect MongoDB Atlas search indexes in schema collection (DBM only). ([#18476](https://github.com/DataDog/integrations-core/pull/18476))
+* Update dependencies ([#18478](https://github.com/DataDog/integrations-core/pull/18478))
+* Obfuscate literal values within the `parsedQuery`, `filter`, and `indexBounds` fields in MongoDB explain plans. ([#18499](https://github.com/DataDog/integrations-core/pull/18499))
+* Enables MongoDB inferred schema collection by default (DBM only). ([#18502](https://github.com/DataDog/integrations-core/pull/18502))
+* Add warning logs when agent user is not authorized to run $collStats and $indexStats on collections. ([#18506](https://github.com/DataDog/integrations-core/pull/18506))
+* Emit new metrics `mongodb.collection.collectionscans.totalps` & `mongodb.collection.collectionscans.nontailableps`. The new metrics measure the total number of queries that performed a collection scans or collection scans without tailable cursor per second. ([#18511](https://github.com/DataDog/integrations-core/pull/18511))
+* Add new metrics for MongoDB query plan cache (requires MongoDB 7.0+) and sort stages (requires MongoDB 6.2+):
+  - mongodb.metrics.query.plancache.classic.hitsps
+  - mongodb.metrics.query.plancache.classic.missesps
+  - mongodb.metrics.query.plancache.sbe.hitsps
+  - mongodb.metrics.query.plancache.sbe.missesps
+  - mongodb.metrics.query.sort.spilltodiskps
+  - mongodb.metrics.query.sort.totalbytessortedps
+  - mongodb.metrics.query.sort.totalkeyssortedps ([#18513](https://github.com/DataDog/integrations-core/pull/18513))
+
+***Fixed***:
+
+* Remove `comment` from obfuscate command and send it as a separate field in operation samples and slow operations payload. ([#18404](https://github.com/DataDog/integrations-core/pull/18404))
+* Cache database profiling level to avoid repeated queries in slow operations sampling. ([#18461](https://github.com/DataDog/integrations-core/pull/18461))
+
+## 6.9.0 / 2024-08-27 / Agent 7.57.0
+
+***Added***:
+
+* Add config option `database_autodiscovery.max_collections_per_database` to limit max number of collections to be monitored per autodiscoverd database. This option is applied to collection stats metrics and collection indexes stats metrics. ([#18416](https://github.com/DataDog/integrations-core/pull/18416))
+
+***Fixed***:
+
+* Skip collect explain plan for get profile level & listCollections command. ([#18408](https://github.com/DataDog/integrations-core/pull/18408))
+
+## 6.8.2 / 2024-08-16
+
+***Fixed***:
+
+* Fixed a bug where optional MongoDB collection stats metrics were always collected, regardless of configuration. ([#18342](https://github.com/DataDog/integrations-core/pull/18342))
+
+## 6.8.1 / 2024-08-13
+
+***Fixed***:
+
+* Fix missing metrics `num_yields` and `response_length` for slow operations collected from logs. ([#18305](https://github.com/DataDog/integrations-core/pull/18305))
+
+## 6.8.0 / 2024-08-09
+
+***Added***:
+
+* Collects 3 additional WiredTiger cache metrics from serverStatus
+  - wiredtiger.cache.bytes_read_into_cache
+  - wiredtiger.cache.bytes_written_from_cache
+  - wiredtiger.cache.pages_requested_from_cache ([#18052](https://github.com/DataDog/integrations-core/pull/18052))
+* Collect MongoDB slow operations for auto-discovered databases when DBM is enabled. The slow operations are collected from
+  - `system.profile` collection when database profiler is enabled
+  - MongoDB slow query logs when database profiler is not enabled ([#18140](https://github.com/DataDog/integrations-core/pull/18140))
+* Add `hosting_type` tag to the Mongo metrics. This tag indicates where the MongoDB instance is hosted. ([#18167](https://github.com/DataDog/integrations-core/pull/18167))
+* Add database and collection level average latency metrics by operation type
+  - mongodb.oplatencies.commands.latency.avg
+  - mongodb.oplatencies.reads.latency.avg
+  - mongodb.oplatencies.writes.latency.avg
+  - mongodb.collection.commands.latency.avg
+  - mongodb.collection.reads.latency.avg
+  - mongodb.collection.transactions.latency.avg
+  - mongodb.collection.writes.latency.avg ([#18177](https://github.com/DataDog/integrations-core/pull/18177))
+* Introduced a new `HostInfo` metrics collector to gather system-level metrics for the host running the `mongod` or `mongos` process. The following metrics are now collected by default across all deployment types:
+  - `mongodb.system.cpu.cores`
+  - `mongodb.system.mem.limit`
+  - `mongodb.system.mem.total` ([#18196](https://github.com/DataDog/integrations-core/pull/18196))
+* Add new database storage metrics collected from `dbStats`. The new metrics include
+  - mongodb.stats.freestoragesize
+  - mongodb.stats.fstotalsize
+  - mongodb.stats.fsusedsize
+  - mongodb.stats.indexfreestoragesize
+  - mongodb.stats.totalfreestoragesize
+  - mongodb.stats.totalsize ([#18200](https://github.com/DataDog/integrations-core/pull/18200))
+* Collect operation samples (DBM only) for operations that run on system databases (e.g. admin, local, config). ([#18224](https://github.com/DataDog/integrations-core/pull/18224))
+
+***Fixed***:
+
+* Fix the default null value for waiting_for_latch in operation sampling. When an operation is not waiting for latch, waiting_for_latch should be an empty dict instead of boolean False. ([#17997](https://github.com/DataDog/integrations-core/pull/17997))
+* Fix connection error `SCRAM-SHA-256 requires a username` when connection option authMechanism is provided ([#18156](https://github.com/DataDog/integrations-core/pull/18156))
+
+## 6.7.2 / 2024-07-19 / Agent 7.56.0
+
+***Fixed***:
+
+* Rename dbms from `mongodb` to `mongo` so that dbms is consistent with integration name. ([#18067](https://github.com/DataDog/integrations-core/pull/18067))
+
+## 6.7.1 / 2024-07-17
+
+***Fixed***:
+
+* Fix coll or index stats metrics failure when the agent user is not authorized to perform $collStats or $indexStats aggregation on a collection. This fix prevents check to fail when an OperationFailure is raised to run $collStats or $indexStats on system collections such as system.replset on local database. ([#18044](https://github.com/DataDog/integrations-core/pull/18044))
+
+## 6.7.0 / 2024-07-05
+
+***Deprecated***:
+
+* Configuration option `dbnames` is deprecated and will be removed in a future release.
+  To monitor multiple databases, set `database_autodiscovery.enabled` to true and configure `database_autodiscovery.include` and `database_autodiscovery.exclude` filters instead. ([#17959](https://github.com/DataDog/integrations-core/pull/17959))
+
+***Added***:
+
+* Add config option to use reported_database_hostname to override the mongodb instance hostname detected from admin command serverStatus.host ([#17800](https://github.com/DataDog/integrations-core/pull/17800))
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+* Add new `replset_me` tag to mongodb instances that belong to a replica set ([#17829](https://github.com/DataDog/integrations-core/pull/17829))
+* Add cursor object to sampled activities and explain plan payload. cursor contains the cursor information for idleCursor and getmore operations. ([#17840](https://github.com/DataDog/integrations-core/pull/17840))
+* Add tag `clustername` to mongo metrics. This tag is set only when `cluster_name` is provided in the integration configuration. ([#17876](https://github.com/DataDog/integrations-core/pull/17876))
+* Update mongo conf.yaml.example to include DBM for MongoDB config options. The new config options includes `dbm`, `cluster_name`, `operation_samples.enabled` & `operation_samples.collection_interval`. ([#17940](https://github.com/DataDog/integrations-core/pull/17940))
+* Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance. 
+  By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery. 
+  When enabled, the integration will automatically discover the databases available in the monitored mongodb instance and refresh the list of databases every 10 minutes.
+  Use `database_autodiscovery.include` and `database_autodiscovery.exclude` to filter the list of databases to monitor. ([#17959](https://github.com/DataDog/integrations-core/pull/17959))
+* Added new collection latency and query execution stats metrics.
+  - mongodb.collection.totalindexsize
+  - mongodb.collection.collectionscans.nontailable
+  - mongodb.collection.collectionscans.total
+  - mongodb.collection.commands.latency
+  - mongodb.collection.commands.opsps
+  - mongodb.collection.reads.latency
+  - mongodb.collection.reads.opsps
+  - mongodb.collection.transactions.latency
+  - mongodb.collection.transactions.opsps
+  - mongodb.collection.writes.latency
+  - mongodb.collection.writes.opsps ([#17961](https://github.com/DataDog/integrations-core/pull/17961))
+
+***Fixed***:
+
+* Excludes keys `'readConcern', 'writeConcern', 'needsMerge', 'fromMongos', 'let', 'mayBypassWriteBlocking'` from sampled commands that cause explain to fail ([#17836](https://github.com/DataDog/integrations-core/pull/17836))
+* Replace deprecated collStats command with $collStats aggregation stage to collect collection metrics ([#17961](https://github.com/DataDog/integrations-core/pull/17961))
+
+## 6.6.0 / 2024-06-13
+
+***Added***:
+
+* Include namespace in DBM samples operation_metadata ([#17730](https://github.com/DataDog/integrations-core/pull/17730))
+* Add support for AWS DocumentDB Instance-Based Clusters ([#17779](https://github.com/DataDog/integrations-core/pull/17779))
+* Always collect database stats from replicaset primaries ([#17798](https://github.com/DataDog/integrations-core/pull/17798))
+
+***Fixed***:
+
+* Skip emitting mongodb samples on unexplainable operations ([#17785](https://github.com/DataDog/integrations-core/pull/17785))
+
+## 6.5.0 / 2024-05-31 / Agent 7.55.0
+
+***Added***:
+
+* Emit mongodb_instance metadata event to for sharded cluster, replica-set and standalone deployment types. The metadata includes
+  - mongodb hostname
+  - mongodb version
+  - replica set name
+  - replica set state
+  - sharding cluster role
+  - cluster type
+  - hosts (list of mongodb instances this mongodb connects to)
+  - shards (list of shards this mongos instance connects to)
+  - cluster name ([#17518](https://github.com/DataDog/integrations-core/pull/17518))
+* Update dependencies ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+* Emit updated mongodb_instance event when mongo deployment type is refreshed with updates. The mongo deployment type is considered to be updated when
+  - replica set name is changed
+  - member role is updated in a replica set, i.e. primary step down/secondary step up or new member joins the replica set
+  - new shard joins a sharded cluster or new member joins a shard results in mongos shard map updated ([#17564](https://github.com/DataDog/integrations-core/pull/17564))
+* Samples MongoDB operations and collect explain plans for the sampled operations when DBM is enabled. ([#17596](https://github.com/DataDog/integrations-core/pull/17596))
+* Bump datadog-checks-base dependency to 36.7.0 ([#17688](https://github.com/DataDog/integrations-core/pull/17688))
+
+***Fixed***:
+
+* Emit database_instance metadata before collecting metrics ([#17665](https://github.com/DataDog/integrations-core/pull/17665))
+* Only emit database_instance metadata when dbm is enabled ([#17697](https://github.com/DataDog/integrations-core/pull/17697))
+
+## 6.4.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Add flag to exclude `db` tag from dbstats metrics ([#17276](https://github.com/DataDog/integrations-core/pull/17276))
+* Add host tags triggered events ([#17287](https://github.com/DataDog/integrations-core/pull/17287))
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+
+## 6.3.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

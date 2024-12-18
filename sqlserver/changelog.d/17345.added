@@ -1,1 +1,0 @@
-Add `sqlserver.database.replica.transaction_delay` metric to report database level replica transaction delays

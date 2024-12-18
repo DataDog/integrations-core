@@ -29,7 +29,10 @@ def test_e2e_profile_meraki(dd_agent_check):
         'device_namespace:default',
         'device_vendor:meraki',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
         'snmp_host:dashboard.meraki.com',
+        'device_hostname:dashboard.meraki.com',
         'snmp_profile:meraki',
     ]
 
@@ -51,14 +54,18 @@ def test_e2e_profile_meraki(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.29671.2.1',
         'tags': [
+            'device_id:default:' + ip_address,
+            'device_ip:' + ip_address,
             'device_namespace:default',
             'device_vendor:meraki',
             'snmp_device:' + ip_address,
             'snmp_host:dashboard.meraki.com',
+            'device_hostname:dashboard.meraki.com',
             'snmp_profile:meraki',
         ],
         'vendor': 'meraki',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 

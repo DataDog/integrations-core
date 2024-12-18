@@ -1,0 +1,190 @@
+[
+    {
+        "host": "d4c6071697ea:27017",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted",
+        "cloud_metadata": {},
+        "timestamp": 1715911398111.2722,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:39517",
+                "driver": {
+                    "name": "PyMongo",
+                    "version": "4.7.2"
+                },
+                "os": {
+                    "type": "Darwin",
+                    "name": "Darwin",
+                    "architecture": "arm64",
+                    "version": "14.4.1"
+                },
+                "platform": "CPython 3.9.16.final.0"
+            }
+        },
+        "db": {
+            "instance": "integration",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "namespace": "integration.products",
+                        "indexFilterSet": false,
+                        "parsedQuery": {
+                            "$and": [
+                                {
+                                    "data": {
+                                        "$gt": "?"
+                                    }
+                                },
+                                {
+                                    "message": {
+                                        "$regularExpression": {
+                                            "pattern": "?",
+                                            "options": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "queryHash": "C30F916C",
+                        "planCacheKey": "C30F916C",
+                        "maxIndexedOrSolutionsReached": false,
+                        "maxIndexedAndSolutionsReached": false,
+                        "maxScansToExplodeReached": false,
+                        "winningPlan": {
+                            "stage": "COLLSCAN",
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "data": {
+                                            "$gt": "?"
+                                        }
+                                    },
+                                    {
+                                        "message": {
+                                            "$regularExpression": {
+                                                "pattern": "?",
+                                                "options": ""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "direction": "forward"
+                        },
+                        "rejectedPlans": []
+                    },
+                    "executionStats": {
+                        "executionSuccess": true,
+                        "nReturned": 0,
+                        "executionTimeMillis": 14,
+                        "totalKeysExamined": 0,
+                        "totalDocsExamined": 721,
+                        "executionStages": {
+                            "stage": "COLLSCAN",
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "data": {
+                                            "$gt": "?"
+                                        }
+                                    },
+                                    {
+                                        "message": {
+                                            "$regularExpression": {
+                                                "pattern": "?",
+                                                "options": ""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "nReturned": 0,
+                            "executionTimeMillisEstimate": 13,
+                            "works": 722,
+                            "advanced": 0,
+                            "needTime": 721,
+                            "needYield": 0,
+                            "saveState": 1,
+                            "restoreState": 1,
+                            "isEOF": 1,
+                            "direction": "forward",
+                            "docsExamined": 721
+                        },
+                        "allPlansExecution": []
+                    }
+                },
+                "signature": "6f93ef1b4ea189ab"
+            },
+            "query_signature": "a5c9a4483fa9bcdf",
+            "application": null,
+            "user": "test",
+            "statement": "{\"find\": \"products\", \"filter\": {\"$and\": [{\"data\": {\"$gt\": 0.6283678507530881}}, {\"message\": {\"$regularExpression\": {\"pattern\": \"log\", \"options\": \"\"}}}]}, \"$db\": \"integration\", \"$readPreference\": {\"mode\": \"primaryPreferred\"}}",
+            "operation_metadata": {
+                "op": "query",
+                "shard": null,
+                "collection": "products",
+                "comment": "find",
+                "ns": "integration.products"
+            },
+            "query_truncated": "not_truncated",
+            "source": "activity"
+        },
+        "mongodb": {
+            "now": 1715911398.1112723,
+            "query_signature": "a5c9a4483fa9bcdf",
+            "active": true,
+            "desc": "conn104",
+            "opid": 1538838,
+            "ns": "integration.products",
+            "plan_summary": "COLLSCAN",
+            "query_framework": null,
+            "current_op_time": "2024-05-16T18:06:38.419+00:00",
+            "microsecs_running": 167,
+            "transaction_time_open_micros": null,
+            "prepare_read_conflicts": 0,
+            "write_conflicts": 0,
+            "num_yields": 0,
+            "waiting_for_lock": false,
+            "locks": {
+                "feature_compatibility_version": "r",
+                "global": "r"
+            },
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "mutex": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            },
+            "waiting_for_flow_control": false,
+            "flow_control_stats": {},
+            "waiting_for_latch": {
+                "timestamp": {
+                    "$date": "2024-05-16T18:06:38.419Z"
+                },
+                "capture_name": "FutureResolution"
+            },
+            "cursor": null,
+            "type": "op",
+            "op": "query",
+            "shard": null,
+            "collection": "products",
+            "comment": "find",
+            "truncated": "not_truncated"
+        }
+    }
+]

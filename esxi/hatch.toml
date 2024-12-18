@@ -1,0 +1,21 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+setup = ["lab"]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+setup = ["vcsim"]
+version = ["6.5", "7.0"]
+
+[envs.default.overrides]
+name."vcsim".e2e-env = { value = true }
+matrix.version.env-vars = "VSPHERE_VERSION"
+matrix.setup.e2e-env = { value = true, if = ["lab"], env = ["VSPHERE_LAB_IP", "VSPHERE_LAB_PRIVATE_KEY_PATH", "VSPHERE_LAB_USERNAME", "ESXI_HOST_IP", "ESXI_HOST_USERNAME", "ESXI_HOST_PASSWORD"] }
+matrix.setup.env-vars = [
+  { key = "USE_VSPHERE_LAB", value = "True", if = ["lab"] },
+]
+
+[envs.default]
+e2e-env = false

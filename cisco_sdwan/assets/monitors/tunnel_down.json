@@ -1,0 +1,28 @@
+{
+	"version": 2,
+	"created_at": "2024-04-05",
+	"last_updated_at": "2024-04-05",
+	"title": "Cisco SD-WAN Tunnel is down",
+	"tags": [
+		"integration:cisco-sdwan"
+	],
+	"description": "This monitor detects when a Cisco SD-WAN tunnel becomes unavailable between two devices. It tracks the status of tunnels within a specified namespace and triggers an alert if a tunnel goes down, indicating potential connectivity issues.",
+	"definition": {
+		"name": "[Cisco SD-WAN] Tunnel is down between {{local_color.name}} {{hostname.name}} ({{device_ip.name}}) to {{remote_color.name}} {{remote_hostname.name}} ({{remote_device_ip.name}})",
+		"type": "query alert",
+		"query": "min(last_15m):min:cisco_sdwan.tunnel.status{*} by {device_id,device_namespace,device_ip,device_hostname,local_color,remote_device_ip,remote_device_hostname,remote_color} < 1",
+		"message": "{{#is_alert}}\nSD-WAN Tunnel is down between device {{device_hostname.name}} ({{device_ip.name}}), color {{local_color.name}} to device {{remote_device_hostname.name}} ({{remote_device_ip.name}}), color {{remote_color.name}}.\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nSD-WAN Tunnel is back up between device {{device_hostname.name}} ({{device_ip.name}}), color {{local_color.name}} to device {{remote_device_hostname.name}} ({{remote_device_ip.name}}), color {{remote_color.name}}.\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60,
+			"notify_no_data": false,
+			"avalanche_window": 10,
+			"evaluation_delay": 1200
+		}
+	}
+}

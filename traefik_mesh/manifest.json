@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "8ace5f4d-ba92-4b68-acf0-20275c8c2a2a",
+  "app_id": "traefik-mesh",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Tracks metrics related to Traefik Mesh",
+    "title": "Traefik Mesh",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Network",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Traces",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 15633073,
+      "source_type_name": "Traefik Mesh",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "traefik_mesh.",
+        "check": "traefik_mesh.entrypoint.open_connections",
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "traefik",
+        "traefik-mesh"
+      ],
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Traefik Mesh Overview": "assets/dashboards/traefik_mesh_overview.json"
+    },
+    "monitors": {
+      "Traefik Mesh entrypoint request count failures are high.": "assets/monitors/high_request_count.json"
+    },
+    "saved_views": {
+      "Traefik Mesh Logs Overview": "assets/saved_views/traefik_mesh_log_overview.json",
+      "Traefik Mesh Error Logs Overview": "assets/saved_views/traefik_mesh_error_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

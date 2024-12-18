@@ -21,7 +21,34 @@
       "Category::Tracing",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-aws-fargate"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collect-fargate-logs-with-firelens/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/aws-fargate-metrics/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/"
+      }
     ]
   },
   "author": {

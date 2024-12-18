@@ -14,13 +14,13 @@ The SAP HANA check is included in the [Datadog Agent][2] package. To use this in
 For Unix:
 
 ```text
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install hdbcli==2.10.15
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install hdbcli==2.21.28
 ```
 
 For Windows:
 
 ```text
-"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.10.15
+"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.21.28
 ```
 
 #### Prepare HANA
@@ -90,6 +90,27 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 1. Edit the `sap_hana.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your sap_hana performance data. See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+#### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `sap_hana.d/conf.yaml` file to start collecting your SAP HANA logs, adjusting the `service` value to configure them for your environment:
+
+   ```yaml
+   logs:
+     - type: integration
+       source: sap_hana
+       service: sap_hana
+   ```
+
+    See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
 
 ### Validation
 

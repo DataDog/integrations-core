@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-08-20",
+	"last_updated_at": "2024-08-20",
+	"title": "SSL Certificate in an Error State",
+	"description": "An SSL certificate is currently in an error state and is not being used. This monitor tracks the status of the SSL certificate and triggers an alert when the status changes to unused. This will help ensure that the issue is promptly addressed.",
+	"definition": {
+		"id": 149884381,
+		"name": "SSL Certificate is in an Error State",
+		"type": "query alert",
+		"query": "sum(last_1h):max:godaddy.certificate.certificate_status{status:unused} by {certificateid} >= 1",
+		"message": "The certificate {{certificateid.name}} is currently in an error state (unused). Please review and take the necessary actions.",
+		"tags": [
+			"service:certificate",
+			"source:godaddy"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"notify_no_data": false,
+			"new_group_delay": 0,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:godaddy"
+	]
+}

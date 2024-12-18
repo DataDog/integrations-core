@@ -1,0 +1,82 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "537f740f-1612-4ced-bddd-1bc666a56ed3",
+  "app_id": "mimecast",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into mimecast logs",
+    "title": "mimecast",
+    "media": [
+      {
+        "caption": "Mimecast - Audit",
+        "image_url": "images/mimecast_audit.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mimecast - DLP",
+        "image_url": "images/mimecast_dlp.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mimecast - Rejection",
+        "image_url": "images/mimecast_rejection.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mimecast - TTP Attachment",
+        "image_url": "images/mimecast_ttp_attachment.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mimecast - TTP Impersonation Protect",
+        "image_url": "images/mimecast_ttp_impersonation_protect.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mimecast - TTP URL",
+        "image_url": "images/mimecast_ttp_url.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 18241205,
+      "source_type_name": "mimecast",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Mimecast - Audit": "assets/dashboards/mimecast_audit.json",
+      "Mimecast - DLP": "assets/dashboards/mimecast_dlp.json",
+      "Mimecast - Rejection": "assets/dashboards/mimecast_rejection.json",
+      "Mimecast - TTP Attachment": "assets/dashboards/mimecast_ttp_attachment.json",
+      "Mimecast - TTP Impersonation": "assets/dashboards/mimecast_ttp_impersonation.json",
+      "Mimecast - TTP URL": "assets/dashboards/mimecast_ttp_url.json"
+    },
+    "logs": {
+      "source": "mimecast"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

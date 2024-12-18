@@ -28,8 +28,11 @@ def test_e2e_profile_hp_h3c_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:hp-h3c-switch',
         'snmp_host:hp-h3c-switch.device.name',
+        'device_hostname:hp-h3c-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -70,6 +73,7 @@ def test_e2e_profile_hp_h3c_switch(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.25506.11.1.999',
         'vendor': 'hp',
         'device_type': 'switch',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

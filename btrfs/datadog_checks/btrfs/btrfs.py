@@ -11,8 +11,6 @@ import struct
 from collections import defaultdict
 
 import psutil
-from six import iteritems
-from six.moves import range
 
 from datadog_checks.base import AgentCheck
 
@@ -175,7 +173,7 @@ class BTRFS(AgentCheck):
         if len(btrfs_devices) == 0:
             raise Exception("No btrfs device found")
 
-        for device, mountpoint in iteritems(btrfs_devices):
+        for device, mountpoint in btrfs_devices.items():
             for flags, total_bytes, used_bytes in self.get_usage(mountpoint):
                 replication_type, usage_type = FLAGS_MAPPER[flags]
                 tags = [

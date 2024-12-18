@@ -13,7 +13,9 @@
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
-      "Supported OS::Windows"
+      "Category::Windows",
+      "Supported OS::Windows",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -47,9 +49,9 @@
       "IIS-Overview": "assets/dashboards/iis_overview.json"
     },
     "monitors": {
-      "[IIS] Anomalous amount of requests for site: {{site.name}}": "assets/monitors/req.json",
-      "[IIS] Increase of not found error per second for site: {{site.name}}": "assets/monitors/err.json",
-      "[IIS] Increase of locked error per second for site: {{site.name}}": "assets/monitors/lock.json"
+      "Request number is high": "assets/monitors/req.json",
+      "404 errors is high": "assets/monitors/err.json",
+      "Locked errors is high": "assets/monitors/lock.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
@@ -57,9 +59,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "response_time_overview": "assets/saved_views/response_time.json"
-    },
-    "logs": {
-      "source": "iis"
     }
   }
 }

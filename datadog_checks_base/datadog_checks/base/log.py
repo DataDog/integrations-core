@@ -6,16 +6,12 @@ import sys
 import warnings
 from typing import Callable  # noqa: F401
 
-from six import PY2, text_type
 from urllib3.exceptions import InsecureRequestWarning
+
+from datadog_checks.base.agent import datadog_agent
 
 from .utils.common import to_native_string
 from .utils.tracing import tracing_enabled
-
-try:
-    import datadog_agent
-except ImportError:
-    from .stubs import datadog_agent
 
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
@@ -59,17 +55,6 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
 
     def trace(self, msg, *args, **kwargs):
         self.log(TRACE_LEVEL, msg, *args, **kwargs)
-
-    if PY2:
-
-        def warn(self, msg, *args, **kwargs):
-            self.log(logging.WARNING, msg, *args, **kwargs)
-
-        def getEffectiveLevel(self):
-            """
-            Get the effective level for the underlying logger.
-            """
-            return self.logger.getEffectiveLevel()
 
 
 class CheckLogFormatter(logging.Formatter):
@@ -149,10 +134,6 @@ def _get_py_loglevel(lvl):
     """
     Map log levels to strings
     """
-    # In Python2, transform the unicode object into plain string
-    if PY2 and isinstance(lvl, text_type):
-        lvl = lvl.encode('ascii', 'ignore')
-
     # Be resilient to bad input since `lvl` comes from a configuration file
     try:
         lvl = lvl.upper()

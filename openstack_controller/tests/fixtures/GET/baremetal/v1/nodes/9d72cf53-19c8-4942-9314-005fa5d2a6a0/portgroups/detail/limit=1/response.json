@@ -1,0 +1,38 @@
+{
+    "portgroups": [
+        {
+            "address": "22:22:22:22:22:22",
+            "created_at": "2016-08-18T22:28:48.643434+11:11",
+            "extra": {},
+            "internal_info": {},
+            "links": [
+                {
+                    "href": "http://127.0.0.1/v1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+                    "rel": "bookmark"
+                }
+            ],
+            "mode": "active-backup",
+            "name": "test_portgroup",
+            "node_uuid": "9d72cf53-19c8-4942-9314-005fa5d2a6a0",
+            "ports": [
+                {
+                    "href": "http://127.0.0.1/v1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
+                    "rel": "bookmark"
+                }
+            ],
+            "properties": {},
+            "standalone_ports_supported": true,
+            "updated_at": "2016-08-18T22:28:49.653974+00:00",
+            "uuid": "9d72cf53-19c8-4942-9314-005fa5d2a6a0"
+        }
+    ],
+    "next": "http://127.0.0.1/baremetal/v1/portgroups/detail?limit=1&marker=9d72cf53-19c8-4942-9314-005fa5d2a6a0"
+}

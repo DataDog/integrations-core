@@ -1,0 +1,44 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "af03738b-a2a3-4d90-bbc8-5c6bdccfa0a5",
+  "app_id": "vonage",
+  "display_on_public_website": false,
+  "tile": {
+      "overview": "README.md#Overview",
+      "configuration": "README.md#Setup",
+      "support": "README.md#Support",
+      "changelog": "CHANGELOG.md",
+      "description": "Gain insights into Vonage logs.",
+      "title": "Vonage",
+      "media": [],
+      "classifier_tags": [
+          "Category::Log Collection",
+          "Submitted Data Type::Logs",
+          "Offering::Integration"
+      ]
+  },
+  "assets": {
+      "integration": {
+          "auto_install": true,
+          "source_type_id": 30175200,
+          "source_type_name": "vonage",
+          "events": {
+              "creates_events": false
+          },
+        "metrics": {
+            "prefix": "vonage.",
+            "check": "",
+            "metadata_path": "metadata.csv"
+            },
+        "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+      "author": {
+          "support_email": "help@datadoghq.com",
+          "name": "Datadog",
+          "homepage": "https://www.datadoghq.com",
+          "sales_email": "info@datadoghq.com"
+      }
+}

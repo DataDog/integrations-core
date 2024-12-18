@@ -1,1 +1,0 @@
-Collect the postgres table owner field in postgres schema payloads, which will be displayed in the database-monitoring schemas feature. 

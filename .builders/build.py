@@ -14,7 +14,7 @@ from typing import Generator
 from packaging.requirements import InvalidRequirement, Requirement
 
 HERE = Path(__file__).parent
-REQUIREMENTS_FILE = HERE.parent / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+REQUIREMENTS_FILE = HERE.parent / 'agent_requirements.in'
 
 if sys.platform == 'win32':
 

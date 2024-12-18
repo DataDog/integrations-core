@@ -50,3 +50,7 @@ def instance_pid_cache_duration():
 
 def instance_try_sudo():
     return False
+
+
+def instance_use_oneshot():
+    return True

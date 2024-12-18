@@ -28,8 +28,11 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
     common_tags = [
         'snmp_profile:mikrotik-router',
         'snmp_host:mikrotik-router.device.name',
+        'device_hostname:mikrotik-router.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
@@ -121,6 +124,7 @@ def test_e2e_profile_mikrotik_router(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.14988.1.999',
         'vendor': 'mikrotik',
         'device_type': 'router',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

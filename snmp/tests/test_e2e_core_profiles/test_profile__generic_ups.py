@@ -27,8 +27,11 @@ def test_e2e_profile__generic_ups(dd_agent_check):
     common_tags = [
         'snmp_profile:abstract-generic-ups',
         'snmp_host:_generic-ups.device.name',
+        'device_hostname:_generic-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'ups_ident_manufacturer:quaintly forward driving Jaded',
         'ups_ident_model:but zombies acted kept forward zombies quaintly acted Jaded',
@@ -99,6 +102,7 @@ def test_e2e_profile__generic_ups(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.2.3.4.5.6.7.8.999',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

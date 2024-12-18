@@ -17,7 +17,8 @@
       "Supported OS::Windows",
       "Category::Data Stores",
       "Category::Caching",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -51,9 +52,6 @@
     },
     "dashboards": {
       "Hazelcast Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "hazelcast"
     }
   }
 }

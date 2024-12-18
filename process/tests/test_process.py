@@ -7,7 +7,6 @@ import os
 import psutil
 import pytest
 from mock import patch
-from six import iteritems
 
 from datadog_checks.process import ProcessCheck
 
@@ -44,6 +43,17 @@ class MockProcess(object):
 
     def children(self, recursive=False):
         return []
+
+    # https://stackoverflow.com/questions/5093382/object-becomes-none-when-using-a-context-manager
+    def oneshot(self):
+        class MockOneShot(object):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, type, value, traceback):
+                pass
+
+        return MockOneShot()
 
 
 class NamedMockProcess(object):
@@ -227,7 +237,8 @@ def test_check_missing_process(aggregator, dd_run_check, caplog):
     assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
 
 
-def test_check_real_process(aggregator, dd_run_check):
+@pytest.mark.parametrize("oneshot", [True, False])
+def test_check_real_process(aggregator, dd_run_check, oneshot):
     "Check that we detect python running (at least this process)"
     from datadog_checks.base.utils.platform import Platform
 
@@ -237,6 +248,7 @@ def test_check_real_process(aggregator, dd_run_check):
         'exact_match': False,
         'ignored_denied_access': True,
         'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
+        'use_oneshot': oneshot,
     }
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     expected_tags = generate_expected_tags(instance)
@@ -316,7 +328,7 @@ def test_relocated_procfs(aggregator, dd_run_check):
     my_procfs = tempfile.mkdtemp()
 
     def _fake_procfs(arg, root=my_procfs):
-        for key, val in iteritems(arg):
+        for key, val in arg.items():
             path = os.path.join(root, key)
             if isinstance(val, dict):
                 os.mkdir(path)

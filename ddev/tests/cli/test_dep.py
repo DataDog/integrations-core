@@ -43,12 +43,10 @@ def test_freeze(ddev, fake_repo):
 
     result = ddev('dep', 'freeze')
 
-    agent_requirements_path = (
-        fake_repo / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
-    )
+    agent_requirements_path = fake_repo / 'agent_requirements.in'
 
     assert result.exit_code == 0
-    assert result.output == f'Static file: {agent_requirements_path}\n'
+    assert result.output == f'Writing combined requirements to: {agent_requirements_path}\n'
 
     requirements = agent_requirements_path.read_text()
 
@@ -70,9 +68,7 @@ def test_sync(ddev, fake_repo):
 dep-a==1.1.1
 dep-b==3.1.4
 """
-    (fake_repo / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in').write_text(
-        requirements.strip('\n')
-    )
+    (fake_repo / 'agent_requirements.in').write_text(requirements.strip('\n'))
 
     result = ddev('dep', 'sync')
 
@@ -110,7 +106,7 @@ class TestUpdates:
 
     @property
     def requirements_path(self):
-        return self.repo / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+        return self.repo / 'agent_requirements.in'
 
     def test_show_updates(self, ddev):
         self.add_integration('foo', ['dep-a==1.0.0', 'dep-b==3.1.4'])

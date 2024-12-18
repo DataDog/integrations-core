@@ -16,7 +16,7 @@ BUILDER_DIR = Path(__file__).parent
 REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'
 LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved'
-DIRECT_DEP_FILE = REPO_DIR / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+DIRECT_DEP_FILE = REPO_DIR / 'agent_requirements.in'
 CONSTANTS_FILE = REPO_DIR / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
 TARGET_TAG_PATTERNS = {
     'linux-x86_64': 'manylinux.*_x86_64|linux_x86_64',
@@ -36,6 +36,11 @@ def default_python_version() -> str:
     return match.group(1)
 
 
+@cache
+def target_python_for_major(python_major: str):
+    return '2.7' if python_major == '2' else default_python_version()
+
+
 def is_compatible_wheel(
     target_name: str,
     target_python_major: str,
@@ -44,7 +49,7 @@ def is_compatible_wheel(
     platform: str,
 ) -> bool:
     if interpreter.startswith('cp'):
-        target_python = '2.7' if target_python_major == '2' else default_python_version()
+        target_python = target_python_for_major(target_python_major)
         expected_tag = f'cp{target_python_major}' if abi == 'abi3' else f'cp{target_python}'.replace('.', '')
         if expected_tag not in interpreter:
             return False
@@ -59,8 +64,17 @@ def is_compatible_wheel(
     return True
 
 
-def generate_lock_file(requirements_file: Path, lock_file: Path) -> None:
-    target, _, python_version = lock_file.stem.rpartition('_')
+def generate_lock_file(
+    requirements_file: Path,
+    lock_file_folder: Path,
+    target: str,
+    python_version: str,
+) -> None:
+    python_target = target_python_for_major(python_version)
+    # The lockfiles contain the major.minor Python version
+    # so that the Agent can transition safely
+    lock_file = lock_file_folder / f'{target}_{python_target}.txt'
+
     python_major = python_version[-1]
 
     dependencies: dict[str, str] = {}
@@ -135,7 +149,10 @@ def main():
         for python_version in target.iterdir():
             if python_version.name.startswith('py'):
                 generate_lock_file(
-                    python_version / 'frozen.txt', LOCK_FILE_DIR / f'{target.name}_{python_version.name}.txt'
+                    python_version / 'frozen.txt',
+                    LOCK_FILE_DIR,
+                    target.name,
+                    python_version.name.strip('py'),
                 )
 
         if (image_digest_file := target / 'image_digest').is_file():

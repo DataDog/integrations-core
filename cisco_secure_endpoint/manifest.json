@@ -1,0 +1,59 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "9636c2eb-34f6-4aa4-a236-c39e47b21c79",
+  "app_id": "cisco-secure-endpoint",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Cisco Secure Endpoint Audit and Event logs.",
+    "title": "Cisco Secure Endpoint",
+    "media": [
+      {
+        "caption": "Cisco Secure Endpoint - Audit",
+        "image_url": "images/cisco_secure_endpoint_audit.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Endpoint - Event",
+        "image_url": "images/cisco_secure_endpoint_event.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Cloud",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 18601889,
+      "source_type_name": "Cisco Secure Endpoint",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Cisco Secure Endpoint - Audit": "assets/dashboards/cisco_secure_endpoint_audit.json",
+      "Cisco Secure Endpoint - Event": "assets/dashboards/cisco_secure_endpoint_event.json"
+    },
+    "logs": {
+      "source": "cisco-secure-endpoint"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

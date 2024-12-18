@@ -15,7 +15,6 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Monitoring",
       "Category::Notifications",
       "Category::Network"
     ]
@@ -42,7 +41,6 @@
     }},
     "dashboards": {{}},
     "monitors": {{}},
-    "logs": {{}},
     "saved_views": {{}}
   }},{pricing_plan}{terms}{author_info}
 }}

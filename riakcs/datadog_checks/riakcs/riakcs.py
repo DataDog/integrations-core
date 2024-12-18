@@ -5,9 +5,9 @@
 from collections import defaultdict
 from copy import deepcopy
 
+import boto3
 import simplejson as json
-from boto.s3.connection import S3Connection
-from six import iteritems
+from botocore.config import Config
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
@@ -21,7 +21,7 @@ def multidict(ordered_pairs):
         d[k].append(v)
     # unpack lists that have only 1 item
     dict_copy = deepcopy(d)
-    for k, v in iteritems(dict_copy):
+    for k, v in dict_copy.items():
         if len(v) == 1:
             d[k] = v[0]
     return dict(d)
@@ -29,18 +29,26 @@ def multidict(ordered_pairs):
 
 class RiakCs(AgentCheck):
 
-    STATS_BUCKET = 'riak-cs'
-    STATS_KEY = 'stats'
     SERVICE_CHECK_NAME = 'riakcs.can_connect'
 
     def check(self, instance):
-        s3, aggregation_key, tags, metrics = self._connect(instance)
+        fetch_stats, aggregation_key, tags, metrics = self._set_up(instance)
 
-        stats = self._get_stats(s3, aggregation_key, tags)
+        stats = self._parse_stats(fetch_stats, aggregation_key, tags)
 
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
 
         self.process_stats(stats, tags, metrics)
+
+    def connect_stats_getter(self, **s3_client_settings):
+        s3 = boto3.client('s3', **s3_client_settings)
+
+        def fetch_stats():
+            # Riak CS adds a special bucket and key.
+            key = s3.get_object(Bucket='riak-cs', Key='stats')
+            return key['Body'].read().decode()
+
+        return fetch_stats
 
     def process_stats(self, stats, tags, metrics):
         if not stats:
@@ -53,7 +61,7 @@ class RiakCs(AgentCheck):
                 metrics.update(V21_DEFAULT_METRICS)
             else:
                 metrics = V21_DEFAULT_METRICS
-            for key, value in iteritems(stats):
+            for key, value in stats.items():
                 if key not in metrics:
                     continue
                 suffix = key.rsplit("_", 1)[-1]
@@ -63,36 +71,36 @@ class RiakCs(AgentCheck):
             # pre 2.1 stats format
             legends = {len(k): k for k in stats["legend"]}
             del stats["legend"]
-            for key, values in iteritems(stats):
+            for key, values in stats.items():
                 legend = legends[len(values)]
                 for i, value in enumerate(values):
                     metric_name = "riakcs.{0}.{1}".format(key, legend[i])
                     self.gauge(metric_name, value, tags=tags)
 
-    def _connect(self, instance):
+    def _set_up(self, instance):
         for e in ("access_id", "access_secret"):
             if e not in instance:
                 raise Exception("{0} parameter is required.".format(e))
 
-        s3_settings = {
+        full_proxy = aggregation_key = instance.get('host', 'localhost') + ":" + instance.get('port', '8080')
+        use_ssl = _is_affirmative(instance.get('is_secure', True))
+        s3_client_settings = {
             "aws_access_key_id": instance.get('access_id', None),
             "aws_secret_access_key": instance.get('access_secret', None),
-            "proxy": instance.get('host', 'localhost'),
-            "proxy_port": int(instance.get('port', 8080)),
-            "is_secure": _is_affirmative(instance.get('is_secure', True)),
+            "use_ssl": use_ssl,
+            "config": Config(proxies={("https" if use_ssl else "http"): full_proxy}),
         }
 
         if instance.get('s3_root'):
-            s3_settings['host'] = instance['s3_root']
+            s3_client_settings['endpoint_url'] = instance['s3_root']
 
-        aggregation_key = s3_settings['proxy'] + ":" + str(s3_settings['proxy_port'])
         tags = instance.get("tags", [])
         if tags is None:
             tags = []
         tags.append("aggregation_key:{0}".format(aggregation_key))
 
         try:
-            s3 = S3Connection(**s3_settings)
+            fetch_stats = self.connect_stats_getter(**s3_client_settings)
         except Exception as e:
             self.log.error("Error connecting to %s: %s", aggregation_key, e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags, message=str(e))
@@ -100,14 +108,11 @@ class RiakCs(AgentCheck):
 
         metrics = instance.get("metrics", [])
 
-        return s3, aggregation_key, tags, metrics
+        return fetch_stats, aggregation_key, tags, metrics
 
-    def _get_stats(self, s3, aggregation_key, tags):
+    def _parse_stats(self, fetch_stats, aggregation_key, tags):
         try:
-            bucket = s3.get_bucket(self.STATS_BUCKET, validate=False)
-            key = bucket.get_key(self.STATS_KEY)
-            stats_str = key.get_contents_as_string()
-            stats = self.load_json(stats_str)
+            stats = self.load_json(fetch_stats())
 
         except Exception as e:
             self.log.error("Error retrieving stats from %s: %s", aggregation_key, e)

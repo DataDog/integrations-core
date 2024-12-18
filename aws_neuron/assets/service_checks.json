@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.57.0",
+        "integration": "AWS Neuron",
+        "check": "aws_neuron.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "AWS Neuron OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Neuron Monitor OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]

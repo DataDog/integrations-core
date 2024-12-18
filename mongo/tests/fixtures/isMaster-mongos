@@ -1,0 +1,36 @@
+{
+    "ismaster": true,
+    "msg": "isdbgrid",
+    "maxBsonObjectSize": 16777216,
+    "maxMessageSizeBytes": 48000000,
+    "maxWriteBatchSize": 100000,
+    "localTime": {
+        "$date": 1600348939653
+    },
+    "logicalSessionTimeoutMinutes": 30,
+    "connectionId": 195816,
+    "maxWireVersion": 21,
+    "minWireVersion": 0,
+    "ok": 1,
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600348939,
+                "i": 85
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    },
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600348939,
+            "i": 85
+        }
+    }
+  }

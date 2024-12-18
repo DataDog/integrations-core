@@ -2145,7 +2145,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:argocd.app_controller.cluster_api_resources{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
+                                            "query": "avg:argocd.app_controller.cluster.api.resources{$host,$kube_cluster_name,$kube_namespace} by {host,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",

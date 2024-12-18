@@ -1,0 +1,66 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "fff4d15b-0953-41c9-8139-ef0a8d718d93",
+  "app_id": "aws-neuron",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the performance and usage of AWS Inferentia/Trainium instances and the Neuron SDK.",
+    "title": "AWS Inferentia and AWS Trainium Monitoring",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::AI/ML",
+      "Category::AWS",
+      "Category::Cloud",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Queried Data Type::Metrics",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 21046822,
+      "source_type_name": "AWS Neuron",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "aws_neuron.",
+        "check": "aws_neuron.neuron_runtime.memory_used_bytes",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "AWS Neuron Overview": "assets/dashboards/aws_neuron_overview.json"
+    },
+    "monitors": {
+      "Execution latency": "assets/monitors/execution_latency.json",
+      "Execution errors": "assets/monitors/execution_errors.json",
+      "Neuron Runtime vCPU usage": "assets/monitors/neuron_runtime_vcpu.json"
+    },
+    "saved_views": {
+      "AWS Neuron Logs Overview": "assets/saved_views/logs_overview.json",
+      "AWS Neuron Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

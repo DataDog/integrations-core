@@ -29,8 +29,11 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
     common_tags = [
         'snmp_profile:aruba-clearpass',
         'snmp_host:aruba-clearpass.device.name',
+        'device_hostname:aruba-clearpass.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'cppm_system_version:5.0.1',
         'cppm_cluster_node_type:Master',
@@ -206,6 +209,7 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.14823.1.6.1',
         'vendor': 'aruba',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

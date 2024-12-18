@@ -385,6 +385,14 @@ PROMETHEUS_METRICS_MAP = {
     'envoy_cluster_client_ssl_socket_factory_downstream_context_secrets_not_ready': 'cluster.client_ssl_socket_factory.downstream_context_secrets_not_ready',  # noqa: E501
     'envoy_connection_limit_active_connections': 'connection_limit.active_connections',
     'envoy_connection_limit_limited_connections': 'connection_limit.limited_connections',
+    'envoy_tls_inspector_client_hello_too_large': 'tls_inspector.client_hello_too_large',
+    'envoy_tls_inspector_tls_found': 'tls_inspector.tls.found',
+    'envoy_tls_inspector_tls_not_found': 'tls_inspector.tls.not_found',
+    'envoy_tls_inspector_alpn_found': 'tls_inspector.alpn.found',
+    'envoy_tls_inspector_alpn_not_found': 'tls_inspector.alpn.not_found',
+    'envoy_tls_inspector_sni_found': 'tls_inspector.sni.found',
+    'envoy_tls_inspector_sni_not_found': 'tls_inspector.sni.not_found',
+    'envoy_tls_inspector_bytes_processed': 'tls_inspector.bytes_processed',
 }
 
 # fmt: off
@@ -3873,7 +3881,7 @@ METRICS = {
     'http.rbac.allowed': {
         'tags': (
             ('stat_prefix',),
-            (),
+            ('rule_prefix',),
             (),
         ),
         'method': 'monotonic_count',
@@ -3897,7 +3905,7 @@ METRICS = {
     'http.rbac.shadow_denied': {
         'tags': (
             ('stat_prefix',),
-            ('shadow_rule_prefix',),
+            (),
             (),
         ),
         'method': 'monotonic_count',
@@ -3951,6 +3959,18 @@ METRICS = {
     },
 }
 # fmt: on
+
+
+LEGACY_TAG_OVERWRITE = {
+    # The legacy approach gave very little ability for modifications to be done to tags.
+    # This dict allows us to fine tune and replace tags as needed.
+    'http.rbac.shadow_denied': {
+        'rule_prefix': 'shadow_rule_prefix',
+    },
+    'http.rbac.shadow_allowed': {
+        'rule_prefix': 'shadow_rule_prefix',
+    },
+}
 
 MOD_METRICS = modify_metrics_dict(METRICS)
 METRIC_TREE = make_metric_tree(METRICS)

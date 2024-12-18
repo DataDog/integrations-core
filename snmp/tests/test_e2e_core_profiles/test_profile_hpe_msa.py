@@ -28,8 +28,11 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
     common_tags = [
         'snmp_profile:hpe-msa',
         'snmp_host:hpe-msa.device.name',
+        'device_hostname:hpe-msa.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'hpe_fibrechannel_cpq_si_product_name:forward driving forward but',
         'hpe_fibrechannel_cpq_si_sys_product_id:kept',
@@ -101,6 +104,7 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.11.2.51',
         'vendor': 'hp',
         'device_type': 'storage',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

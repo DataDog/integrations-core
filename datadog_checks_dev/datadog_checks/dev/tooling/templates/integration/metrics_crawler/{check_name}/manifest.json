@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "{description}",
     "title": "{integration_name}",
     "media": [],
     "classifier_tags": [
@@ -33,7 +33,7 @@
       }}
     }},
     "dashboards": {{
-      "{integration_id}": "assets/dashboards/{check_name}_overview.json"
+      "{example_dashboard_short_name}": "assets/dashboards/{check_name}_overview.json"
     }}
   }},{pricing_plan}{terms}{author_info}
 }}

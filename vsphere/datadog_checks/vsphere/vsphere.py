@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import copy
 import datetime as dt
 import logging
 from collections import defaultdict
@@ -11,7 +12,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Callable, Dict, Generator, Iterable, List, Optional, Set, Type, cast  # noqa: F401
 
 from pyVmomi import vim, vmodl
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
@@ -26,11 +26,17 @@ from datadog_checks.vsphere.constants import (
     HOST_RESOURCES,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
+    PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
     UNLIMITED_HIST_METRICS_PER_QUERY,
 )
 from datadog_checks.vsphere.event import VSphereEvent
-from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
+from datadog_checks.vsphere.metrics import (
+    ALLOWED_METRICS_FOR_MOR,
+    ALLOWED_METRICS_FOR_VSAN,
+    PERCENT_METRICS,
+    VSAN_PERCENT_METRICS,
+)
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
     CounterId,  # noqa: F401
@@ -181,7 +187,7 @@ class VSphereCheck(AgentCheck):
         resource_filters_without_tags = [f for f in self._config.resource_filters if not isinstance(f, TagFilter)]
         filtered_infra_data = {
             mor: props
-            for mor, props in iteritems(infrastructure_data)
+            for mor, props in infrastructure_data.items()
             if isinstance(mor, tuple(self._config.collected_resource_types))
             and is_resource_collected_by_filters(mor, infrastructure_data, resource_filters_without_tags)
         }
@@ -233,7 +239,7 @@ class VSphereCheck(AgentCheck):
             all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
-        for mor, properties in iteritems(infrastructure_data):
+        for mor, properties in infrastructure_data.items():
             if not isinstance(mor, tuple(self._config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
                 continue
@@ -340,6 +346,10 @@ class VSphereCheck(AgentCheck):
             mor_payload["tags"] = tags  # type: Dict[str, Any]
 
             if hostname:
+                if self._config.hostname_transform == 'upper':
+                    hostname = hostname.upper()
+                elif self._config.hostname_transform == 'lower':
+                    hostname = hostname.lower()
                 mor_payload['hostname'] = hostname
 
             self.infrastructure_cache.set_mor_props(mor, mor_payload)
@@ -473,6 +483,139 @@ class VSphereCheck(AgentCheck):
         )
         return metrics_values
 
+    def collect_vsan_metrics(self):
+        # type: () -> None
+        collect_start_time = get_current_datetime()
+        self.log.debug("Starting vsan metrics collection (query start time: %s).", collect_start_time)
+        try:
+            t0 = Timer()
+            new_health_metrics, new_performance_metrics = self.query_vsan_metrics(
+                collect_start_time - dt.timedelta(hours=2)
+            )
+            self.gauge(
+                'datadog.vsphere.vsan.cluster.time',
+                t0.total(),
+                tags=self._config.base_tags,
+                raw=True,
+                hostname=self._hostname,
+            )
+
+            for cluster in new_health_metrics:
+                for metric_name, metric_value in cluster.items():
+                    list_of_tags = ["{}:{}".format(key, value) for key, value in metric_value.items()]
+                    self.gauge(
+                        metric_name,
+                        1,
+                        tags=list_of_tags + self._config.base_tags,
+                        raw=True,
+                        hostname=self._hostname,
+                    )
+
+            for cluster in new_performance_metrics:
+                for entity_type in cluster:
+                    if len(entity_type.value) == 0:
+                        if self.log.isEnabledFor(logging.DEBUG):
+                            self.log.debug(
+                                "No information returned for entity type %s",
+                                str(entity_type).replace("\n", "\\n"),
+                            )
+                        continue
+                    first_metric_for_entity = entity_type.value[0].metricId
+                    resource_type = first_metric_for_entity.dynamicProperty[0][0]
+                    hostname = None
+                    entity = first_metric_for_entity.dynamicProperty[0][1]
+                    resource_tags = []
+                    resource_tags.extend(self.infrastructure_cache.get_mor_tags(entity))
+                    resource_tags.extend(self.infrastructure_cache.get_mor_props(entity)['tags'])
+                    tags = []
+                    if resource_type == 'host':
+                        tags.extend(
+                            [t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags]
+                            if self._config.excluded_host_tags
+                            else []
+                        )
+                        hostname = first_metric_for_entity.dynamicProperty[0][2]
+                    else:
+                        tags = copy.deepcopy(resource_tags)
+                    tags.extend(self._config.base_tags)
+
+                    for given_metric in entity_type.value:
+                        if self.log.isEnabledFor(logging.DEBUG):
+                            self.log.debug(
+                                "Processing metric `%s`: resource_type=`%s`, result=`%s`",
+                                given_metric.metricId.label,
+                                resource_type,
+                                str(given_metric).replace("\n", "\\n"),
+                            )
+                        latest_value = given_metric.values.split(',')[-1]
+                        if latest_value == 'None':
+                            self.log.debug("None value returned for metric %s", given_metric.metricId.label)
+                            continue
+                        if given_metric.metricId.label in VSAN_PERCENT_METRICS:
+                            latest_value = float(latest_value) / 100.0
+
+                        if (
+                            'vsan.{}.{}'.format(resource_type, given_metric.metricId.label)
+                            in ALLOWED_METRICS_FOR_VSAN[resource_type]
+                        ):
+                            full_metric_name = 'vsan.{}.{}'.format(resource_type, given_metric.metricId.label)
+                        else:
+                            self.log.debug(
+                                "Skipping metric %s because it is not in the list of metrics to collect",
+                                given_metric.metricId.label,
+                            )
+                            continue
+
+                        self.gauge(
+                            full_metric_name,
+                            # for now we only collect the latest value
+                            float(latest_value),
+                            tags=tags,
+                            hostname=hostname,
+                        )
+                        self.log.debug(
+                            "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
+                            given_metric.metricId.label,
+                            float(latest_value),
+                            str(hostname),
+                            tags,
+                        )
+        except Exception as e:
+            # Don't get stuck on a failure to fetch a vsan metric
+            # Ignore them for next pass
+            self.log.warning("Unable to fetch vSAN metrics %s", e)
+
+    def query_vsan_metrics(self, starting_time):
+        # we seek to make 1 call per cluster since the cluster id needs to be passed in the perf manager
+        # {cluster_reference: [cluster_id, host1_id, host2_id, host1disk1_id, host1disk2_id, ...]}
+        cluster_nested_elts = {}
+        entity_ref_ids = {}
+        entity_ref_ids['cluster'] = ['cluster-domclient:', 'vsan-cluster-capacity:']
+        entity_ref_ids['host'] = ['host-domclient:', 'host-cpu:']
+        # {id: {0: type, 1: cluster_name, (optional)2: host_name, (optional)3: disk_id}}
+        id_to_tags = {}
+        for cluster in self.infrastructure_cache.get_mors(vim.ClusterComputeResource):
+            cluster_vsan_config = cluster.configurationEx.vsanConfigInfo
+            # only collect vsan metrics if the cluster has vsan enabled
+            if cluster_vsan_config and cluster_vsan_config.enabled:
+                self.log.debug("Collecting vsan metrics for cluster %s", cluster.name)
+                cluster_uuid = cluster_vsan_config.defaultConfig.uuid
+                cluster_nested_elts[cluster] = [cluster_uuid]
+                id_to_tags[cluster_uuid] = {1: cluster, 0: 'cluster'}
+                for host in cluster.host:
+                    if host in self.infrastructure_cache.get_mors(vim.HostSystem):
+                        host_uuid = host.configManager.vsanSystem.config.clusterInfo.nodeUuid
+                        cluster_nested_elts[cluster].append(host_uuid)
+                        id_to_tags[host_uuid] = {1: host, 2: host.name, 0: 'host'}
+                    else:
+                        self.log.debug("Skipping host %s because it was filtered", host.name)
+            else:
+                self.log.debug("Skipping vsan metrics for cluster %s because it is not a vsan cluster", cluster.name)
+        if not cluster_nested_elts:
+            self.log.debug("There are no vsan clusters to collect metrics from, skipping vsan collection")
+            return [], []
+        return self.api.get_vsan_metrics(cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time)
+
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]
         """
@@ -486,7 +629,7 @@ class VSphereCheck(AgentCheck):
                 counters = self.metrics_metadata_cache.get_metadata(resource_type)
                 metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
                 is_historical_batch = metric_type == HISTORICAL
-                for counter_key, metric_name in iteritems(counters):
+                for counter_key, metric_name in counters.items():
                     # PerformanceManager.MetricId `instance` kwarg:
                     # - An asterisk (*) to specify all instances of the metric for the specified counterId
                     # - Double-quotes ("") to specify aggregated statistics
@@ -503,7 +646,7 @@ class VSphereCheck(AgentCheck):
 
                 for batch in self.make_batch(mors, metric_ids, resource_type, is_historical_batch=is_historical_batch):
                     query_specs = []
-                    for mor, metrics in iteritems(batch):
+                    for mor, metrics in batch.items():
                         query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
                         query_spec.entity = mor
                         query_spec.metricId = metrics
@@ -612,6 +755,7 @@ class VSphereCheck(AgentCheck):
                 mor_tags = mor_props['tags'] + mor_tags
                 tags = [t for t in mor_tags if t.split(':')[0] not in self._config.excluded_host_tags]
                 tags.extend(self._config.base_tags)
+                self.log.debug("Submitting host tags for %s: %s", hostname, tags)
                 external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
 
         if external_host_tags:
@@ -625,6 +769,8 @@ class VSphereCheck(AgentCheck):
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
+            if self._config.collect_vsan:
+                new_events.extend(self.api.get_vsan_events(self.latest_event_query))
             self.gauge(
                 'datadog.vsphere.collect_events.time',
                 t0.total(),
@@ -639,7 +785,11 @@ class VSphereCheck(AgentCheck):
                     "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
                 )
                 normalized_event = VSphereEvent(
-                    event, event_config, self._config.base_tags, self._config.event_resource_filters
+                    event,
+                    event_config,
+                    self._config.base_tags,
+                    self._config.event_resource_filters,
+                    self._config.exclude_filters,
                 )
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
@@ -889,10 +1039,20 @@ class VSphereCheck(AgentCheck):
 
         all_properties = mor_props.get('properties', None)
         if not all_properties:
-            self.log.warning('Could not retrieve properties for resource %s hostname=%s', mor_name, hostname)
+            self.log.debug(
+                'Could not retrieve properties for %s resource %s hostname=%s',
+                resource_metric_suffix,
+                mor_name,
+                hostname,
+            )
             return
 
-        base_tags = self._config.base_tags + resource_tags
+        base_tags = []
+        if self._config.excluded_host_tags:
+            base_tags.extend([t for t in resource_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
+        else:
+            base_tags.extend(resource_tags)
+        base_tags.extend(self._config.base_tags)
 
         if resource_type == vim.VirtualMachine:
             object_properties = self._config.object_properties_to_collect_by_mor.get(resource_metric_suffix, [])
@@ -985,7 +1145,14 @@ class VSphereCheck(AgentCheck):
 
             # Submit property metrics after the cache is refreshed
             if self._config.collect_property_metrics:
-                for resource_type in self._config.collected_resource_types:
+
+                resources_with_property_metrics = [
+                    resource
+                    for resource in self._config.collected_resource_types
+                    if MOR_TYPE_AS_STRING[resource] in PROPERTY_METRICS_BY_RESOURCE_TYPE.keys()
+                ]
+
+                for resource_type in resources_with_property_metrics:
                     for mor in self.infrastructure_cache.get_mors(resource_type):
                         mor_props = self.infrastructure_cache.get_mor_props(mor)
                         resource_tags = mor_props.get('tags', [])
@@ -1010,3 +1177,6 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Starting metric collection in %d threads.", self._config.threads_count)
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")
+
+        if self._config.collect_vsan:
+            self.collect_vsan_metrics()

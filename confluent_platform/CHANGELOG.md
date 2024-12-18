@@ -2,7 +2,33 @@
 
 <!-- towncrier release notes start -->
 
-## 1.10.1 / 2024-03-22
+## 3.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 2.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
+## 1.10.2 / 2024-05-31 / Agent 7.55.0
+
+***Fixed***:
+
+* Add a Bean regex for stream thread metrics for Confluent version >=5.5.0. Previously, Stream Thread Metrics were not collected. Also added one useful attribute for debugging stream thread performance. ([#17490](https://github.com/DataDog/integrations-core/pull/17490))
+
+## 1.10.1 / 2024-03-22 / Agent 7.53.0
 
 ***Fixed***:
 

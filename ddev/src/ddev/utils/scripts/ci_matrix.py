@@ -54,7 +54,7 @@ TESTABLE_FILE_PATTERN = re.compile(
     """,
     re.VERBOSE,
 )
-AGENT_REQUIREMENTS_FILE = 'datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+AGENT_REQUIREMENTS_FILE = 'agent_requirements.in'
 NON_TESTABLE_FILES = {'auto_conf.yaml'}
 DISPLAY_ORDER_OVERRIDE = {
     _d: _i
@@ -74,8 +74,8 @@ PLATFORMS = {
     'linux': __plat('Linux', 'ubuntu-22.04'),
     # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
     'windows': __plat('Windows', 'windows-2022'),
-    # https://github.com/actions/runner-images/blob/main/images/macos/macos-12-Readme.md
-    'macos': __plat('macOS', 'macos-12'),
+    # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
+    'macos': __plat('macOS', 'macos-13'),
 }
 
 

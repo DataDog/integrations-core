@@ -18,7 +18,10 @@
         - metadata_entrypoint
         - read_persistent_cache
         - write_persistent_cache
+        - send_log
+        - get_log_cursor
         - warning
+        - http
 
 ## Stubs
 
@@ -31,6 +34,7 @@
         - assert_metric_has_tag_prefix
         - assert_service_check
         - assert_event
+        - assert_logs
         - assert_histogram_bucket
         - assert_metrics_using_metadata
         - assert_all_metrics_covered

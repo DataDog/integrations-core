@@ -3,16 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-from six import iteritems
+from datadog_checks.base.agent import datadog_agent
 
 from ..common import to_native_string
 from .utils import is_primitive
 from .version import parse_version
-
-try:
-    import datadog_agent
-except ImportError:
-    from ...stubs import datadog_agent
 
 LOGGER = logging.getLogger(__file__)
 
@@ -83,7 +78,7 @@ class MetadataManager(object):
             if isinstance(transformed, str):
                 self.submit_raw(name, transformed)
             else:
-                for transformed_name, transformed_value in iteritems(transformed):
+                for transformed_name, transformed_value in transformed.items():
                     self.submit_raw(transformed_name, transformed_value)
         else:
             self.submit_raw(name, value)
@@ -121,7 +116,7 @@ class MetadataManager(object):
         if scheme == 'regex' or scheme == 'parts':
             scheme = options.get('final_scheme', self.check_name)
 
-        data = {'version.{}'.format(part_name): part_value for part_name, part_value in iteritems(version_parts)}
+        data = {'version.{}'.format(part_name): part_value for part_name, part_value in version_parts.items()}
         data['version.raw'] = version
         data['version.scheme'] = scheme
 

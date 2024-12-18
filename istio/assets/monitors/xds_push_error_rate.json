@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2024-07-08",
+    "last_updated_at": "2024-07-08",
+    "title": "Istio xDS Push Error Rate",
+    "tags": [
+        "integration:istio"
+    ],
+    "description": "Pilot pushes configuration changes to Envoy proxies using Envoy’s xDS APIs. This monitor alerts you when the xDS push error rate is high, indicating that Istio may be having trouble with xDS messages, which can impact the stability and performance of the entire service mesh.",
+    "definition": {
+        "message": "{{#is_alert}}\n\nIstio is reporting a high xDS push error rate of {{value}}% in the last 15 minutes in {{kube_cluster_name.name}}. This could indicate that Istio is having trouble creating or pushing messages to the different xDS APIs.\n\n{{/is_alert}}",
+        "name": "[Istio] xDS Push Error Rate",
+        "options": {
+            "thresholds": {
+                "critical": 25
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {},
+            "avalanche_window": 10,
+            "notify_no_data": false,
+            "renotify_interval": 0,
+            "require_full_window": false
+        },
+        "priority": null,
+        "query": "sum(last_15m):sum:istio.pilot.xds.pushes.count{type:*senderr} by {kube_cluster_name}.as_count() / sum:istio.pilot.xds.pushes.count{*} by {kube_cluster_name}.as_count() * 100 > 25",
+        "tags": [
+            "integration:istio"
+        ],
+        "type": "query alert"
+    }
+}

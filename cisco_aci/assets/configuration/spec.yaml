@@ -92,6 +92,20 @@ files:
       value:
         type: boolean
         example: False
+    - name: namespace
+      description: |
+        Namespace for differentiating between devices that share the same IP.
+        If not specified, the namespace will be 'default'.
+      value:
+        type: string
+        example: default
+    - name: send_ndm_metadata
+      description: |
+        Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent.
+      value:
+        type: boolean
+        example: False
+        display_default: False
     - template: instances/http
       overrides:
         username.display_priority: 9

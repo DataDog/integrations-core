@@ -18,7 +18,8 @@
       "Category::Network",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -49,9 +50,6 @@
     },
     "dashboards": {
       "Ignite Overview": "assets/dashboards/ignite_overview.json"
-    },
-    "logs": {
-      "source": "ignite"
     }
   }
 }

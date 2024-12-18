@@ -5,15 +5,10 @@ import functools
 import inspect
 import os
 
-from six import PY2, PY3
+from datadog_checks.base.agent import datadog_agent
 
 from ..config import is_affirmative
 from ..utils.common import to_native_string
-
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
 
 EXCLUDED_MODULES = ['threading']
 
@@ -42,7 +37,7 @@ def _get_integration_name(function_name, self, *args, **kwargs):
 
 
 def tracing_method(f, tracer):
-    if (PY2 and 'self' in inspect.getargspec(f).args) or (PY3 and inspect.signature(f).parameters.get('self')):
+    if inspect.signature(f).parameters.get('self'):
 
         @functools.wraps(f)
         def wrapper(self, *args, **kwargs):

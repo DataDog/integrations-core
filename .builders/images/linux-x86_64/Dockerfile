@@ -15,28 +15,12 @@ ENV CXXFLAGS="${CFLAGS}"
 # --strip-debug reduces binary sizes and improves reproducibility
 ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 
-# For Python 2, we get openssl(1) via yum just to get the necessary headers,
-# and we remove the package after compilation to prevent it from interfering
-# with the use of openssl3 everywhere else
-ENV PYTHON2_VERSION=2.7.18
-RUN yum install -y openssl-devel && \
- DOWNLOAD_URL="https://python.org/ftp/python/${PYTHON2_VERSION}/Python-${PYTHON2_VERSION}.tgz" \
- VERSION="${PYTHON2_VERSION}" \
- SHA256="da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814" \
- RELATIVE_PATH=Python-{{version}} \
- bash install-from-source.sh \
- --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-ipv6 --enable-unicode=ucs4 \
- && yum remove -y openssl-devel
-
-# Set up virtual environment for Python 2
-RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
- && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
-
 # openssl
-RUN yum install -y perl-IPC-Cmd && \
+RUN yum install -y perl-IPC-Cmd perl-CPANPLUS && \
+ cpanp -i List::Util 1.66 && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.0.12" \
- SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
+ VERSION="3.3.2" \
+ SHA256="2e8a40b01979afe8be0bbfb3de5dc1c6709fedb46d6c89c10da114ab5fc3d281" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -51,11 +35,11 @@ RUN yum install -y perl-IPC-Cmd && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.11.8
+ENV PYTHON3_VERSION=3.12.6
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889" \
+ SHA256="85a4c1be906d20e5c5a69f2466b00da769c221d6a684acfd3a514dbf5bf10a66" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
@@ -81,6 +65,36 @@ RUN \
  RELATIVE_PATH="krb5-{{version}}/src" \
  bash install-from-source.sh --without-keyutils --without-system-verto --without-libedit --disable-static
 
+# libxml & libxslt for lxml
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
+ VERSION="2.12.6" \
+ SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
+ RELATIVE_PATH="libxml2-{{version}}" \
+ bash install-from-source.sh \
+ --without-iconv \
+ --without-python \
+ --without-icu \
+ --without-debug \
+ --without-mem-debug \
+ --without-run-debug \
+ --without-legacy \
+ --without-catalog \
+ --without-docbook \
+ --disable-static
+
+RUN \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
+ VERSION="1.1.39" \
+ SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
+ RELATIVE_PATH="libxslt-{{version}}" \
+ bash install-from-source.sh \
+ --without-python \
+ --without-crypto \
+ --without-profiler \
+ --without-debugger \
+ --disable-static
+
 # libpq and pg_config as needed by psycopg2
 RUN \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
@@ -98,7 +112,9 @@ RUN \
  VERSION="2.3.9" \
  SHA256="52833eac3d681c8b0c9a5a65f2ebd745b3a964f208fc748f977e44015a31b207" \
  RELATIVE_PATH=unixODBC-{{version}} \
- bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install
+ bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install \
+ # This is the folder where unixODBC searches for driver config and where we ask customers to copy their config to
+ --sysconfdir=/opt/datadog-agent/embedded/etc
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \
@@ -129,8 +145,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.4.0" \
- SHA256="816e41809c043ff285e8c0f06a75a1fa250211bbfb2dc0a037eeef39f1a9e427" \
+ VERSION="8.9.1" \
+ SHA256="291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

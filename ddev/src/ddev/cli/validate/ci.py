@@ -96,6 +96,13 @@ def ci(app: Application, sync: bool):
                     'setup-env-vars': '${{ inputs.setup-env-vars }}',
                 }
             )
+        # Allow providing pytest arguments for core, support to run (or not run) flaky tests
+        if is_core:
+            config.update(
+                {
+                    'pytest-args': '${{ inputs.pytest-args }}',
+                }
+            )
 
         # Prevent redundant job hierarchy names at the bottom of pull requests and also satisfy the naming requirements:
         # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_id

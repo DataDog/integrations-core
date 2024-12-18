@@ -1,0 +1,62 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "74cf38da-74b5-487f-9b9b-0d01776d1fea",
+  "app_id": "lastpass",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into LastPass reporting logs",
+    "title": "LastPass",
+    "media": [
+      {
+        "caption": "LastPass - Reporting Events 1",
+        "image_url": "images/lastpass_reporting_events_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "LastPass - Reporting Events 2",
+        "image_url": "images/lastpass_reporting_events_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "LastPass - Reporting Events 3",
+        "image_url": "images/lastpass_reporting_events_3.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 21175115,
+      "source_type_name": "LastPass",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "LastPass - Reporting Events": "assets/dashboards/lastpass_reporting_events.json"
+    },
+    "logs": {
+      "source": "lastpass"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

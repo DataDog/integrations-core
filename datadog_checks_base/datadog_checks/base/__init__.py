@@ -1,18 +1,20 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.base.agent import datadog_agent
+
 from .__about__ import __version__
 from .checks import AgentCheck
 from .checks.openmetrics import OpenMetricsBaseCheck
+from .checks.openmetrics.v2.base import OpenMetricsBaseCheckV2
 from .config import is_affirmative
 from .errors import ConfigurationError
 from .utils.common import ensure_bytes, ensure_unicode, to_native_string, to_string
 
-# Python 3+
-try:
-    from .checks.openmetrics.v2.base import OpenMetricsBaseCheckV2
-except ImportError:
-    OpenMetricsBaseCheckV2 = None
+if datadog_agent.get_config('use_boringssl'):
+    import urllib3.contrib.pyopenssl
+
+    urllib3.contrib.pyopenssl.inject_into_urllib3()
 
 # Windows-only
 try:

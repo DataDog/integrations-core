@@ -28,8 +28,11 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
     common_tags = [
         'snmp_profile:tripplite-ups',
         'snmp_host:tripplite-ups.device.name',
+        'device_hostname:tripplite-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'tl_ups_ident_id:2',
         'tl_ups_ident_serial_num:zombies acted',
@@ -111,6 +114,7 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.850.1.1.3.1',
         'vendor': 'tripplite',
         'device_type': 'ups',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

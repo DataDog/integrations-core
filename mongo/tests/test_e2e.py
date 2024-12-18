@@ -64,7 +64,9 @@ MONGOD_METRICS = BASE_METRICS + [
 
 @standalone
 @pytest.mark.e2e
-def test_e2e_mongo_standalone(dd_agent_check, instance_user):
+@pytest.mark.parametrize('database_autodiscovery_enabled', [True, False])
+def test_e2e_mongo_standalone(dd_agent_check, instance_user, database_autodiscovery_enabled):
+    instance_user['database_autodiscovery'] = {'enabled': database_autodiscovery_enabled}
     aggregator = dd_agent_check(instance_user, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
@@ -73,7 +75,9 @@ def test_e2e_mongo_standalone(dd_agent_check, instance_user):
 
 @shard
 @pytest.mark.e2e
-def test_e2e_mongo_shard(dd_agent_check, instance_authdb):
+@pytest.mark.parametrize('database_autodiscovery_enabled', [True, False])
+def test_e2e_mongo_shard(dd_agent_check, instance_authdb, database_autodiscovery_enabled):
+    instance_authdb['database_autodiscovery'] = {'enabled': database_autodiscovery_enabled}
     aggregator = dd_agent_check(instance_authdb, rate=True)
 
     for metric in MONGOS_METRICS:

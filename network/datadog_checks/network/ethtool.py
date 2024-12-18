@@ -11,8 +11,6 @@ import array
 import struct
 from collections import defaultdict
 
-from six import PY3
-
 from .const import (
     ENA_METRIC_NAMES,
     ENA_METRIC_PREFIX,
@@ -41,7 +39,7 @@ def _byte_array_to_string(s):
     Convert a byte array to string
     b'hv_netvsc\x00\x00\x00\x00' -> 'hv_netvsc'
     """
-    s = s.tobytes() if PY3 else s.tostring()
+    s = s.tobytes()
     s = s.partition(b'\x00')[0].decode('utf-8')
     return s
 

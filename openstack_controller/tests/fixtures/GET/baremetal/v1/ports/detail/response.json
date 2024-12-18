@@ -1,0 +1,54 @@
+{
+  "ports": [
+    {
+      "address": "11:11:11:11:11:11",
+      "created_at": "2016-08-18T22:28:48.643434+11:11",
+      "extra": {},
+      "internal_info": {},
+      "is_smartnic": true,
+      "links": [
+        {
+          "href": "http://127.0.0.1:6385/v1/ports/d2b30520-907d-46c8-bfee-c5586e6fb3a1",
+          "rel": "self"
+        },
+        {
+          "href": "http://127.0.0.1:6385/ports/d2b30520-907d-46c8-bfee-c5586e6fb3a1",
+          "rel": "bookmark"
+        }
+      ],
+      "local_link_connection": {
+        "port_id": "Ethernet3/1",
+        "switch_id": "0a:1b:2c:3d:4e:5f",
+        "switch_info": "switch1"
+      },
+      "name": "port1",
+      "node_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
+      "physical_network": "physnet1",
+      "portgroup_uuid": "e43c722c-248e-4c6e-8ce8-0d8ff129387a",
+      "pxe_enabled": true,
+      "updated_at": null,
+      "uuid": "d2b30520-907d-46c8-bfee-c5586e6fb3a1"
+    },
+    {
+      "uuid": "6ee9bd2f-2598-4e0d-938b-e72e95aaa785",
+      "created_at": "2023-09-30T15:36:38+00:00",
+      "updated_at": "2023-09-30T15:43:34+00:00",
+      "address": "52:54:00:d0:cf:77",
+      "extra": {},
+      "links": [
+        {
+          "href": "http://35.204.252.174/baremetal/v1/ports/6ee9bd2f-2598-4e0d-938b-e72e95aaa785",
+          "rel": "self"
+        },
+        {
+          "href": "http://35.204.252.174/baremetal/ports/6ee9bd2f-2598-4e0d-938b-e72e95aaa785",
+          "rel": "bookmark"
+        }
+      ],
+      "node_uuid": "a27588a6-518d-49b4-a23c-3d51255a7e8b",
+      "name": "port2",
+      "physical_network": "physnet1",
+      "portgroup_uuid": "e43c722c-248e-4c6e-8ce8-0d8ff129387a"
+    }
+  ]
+}

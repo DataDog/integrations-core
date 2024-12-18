@@ -2,6 +2,50 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 5.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
+## 4.3.1 / 2024-08-09 / Agent 7.57.0
+
+***Fixed***:
+
+* Fix handling of projects with no builds. We used to refresh all the projects whenever we encountered a build config that didn't have any builds associated with it. Now we refresh only the specific build config that's lacking builds. ([#18041](https://github.com/DataDog/integrations-core/pull/18041))
+* Fix handling of deleted build config ([#18122](https://github.com/DataDog/integrations-core/pull/18122))
+
+## 4.3.0 / 2024-07-05 / Agent 7.56.0
+
+***Added***:
+
+* Add support for TeamCity 2023.05.4 ([#17695](https://github.com/DataDog/integrations-core/pull/17695))
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+## 4.2.1 / 2024-05-23
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+* Check for auth_token key and skip adding guestAuth or httpAuth to url if present ([#17478](https://github.com/DataDog/integrations-core/pull/17478))
+
 ## 4.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

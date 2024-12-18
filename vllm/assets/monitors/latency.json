@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "created_at": "2024-07-02",
+  "last_updated_at": "2024-07-02",
+  "title": "Average Request Latency is High",
+  "description": "This monitor alerts you if vLLM request latency is too high. High latency means requests are waiting long to be processed. This results in clients having to wait longer for their requests to complete. It also indicates your vLLM server is receiving more requests than it can comfortably handle.",
+  "tags": [
+    "integration:vllm"
+  ],
+  "definition": {
+    "name": "Average request latency is high",
+    "type": "query alert",
+    "query": "sum(last_15m):sum:vllm.e2e_request_latency.seconds.sum{*}.as_count() / sum:vllm.e2e_request_latency.seconds.count{*}.as_count() > 0.3",
+    "message": "The average latency for requests coming into your vLLM instance is higher than the threshold. This means requests are waiting too long to be processed.",
+    "tags": [
+      "integration:vllm"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 0.3
+      },
+      "notify_audit": false,
+      "include_tags": false,
+      "avalanche_window": 10,
+      "new_host_delay": 300,
+      "silenced": {}
+    },
+    "priority": null,
+    "restriction_policy": {
+      "bindings": []
+    }
+  }
+}

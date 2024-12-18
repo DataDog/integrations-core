@@ -6,9 +6,7 @@ import socket
 import time
 from contextlib import closing
 from typing import Callable, Dict, List, Tuple, Union  # noqa: F401
-
-from six import string_types
-from six.moves.urllib.request import urlopen
+from urllib.request import urlopen
 
 from .errors import RetryError
 from .structures import LazyFunction
@@ -67,11 +65,13 @@ class CheckEndpoints(LazyFunction):
         timeout=1,  # type: int
         attempts=60,  # type: int
         wait=1,  # type: int
+        send_request=None,
     ):
-        self.endpoints = [endpoints] if isinstance(endpoints, string_types) else endpoints
+        self.endpoints = [endpoints] if isinstance(endpoints, str) else endpoints
         self.timeout = timeout
         self.attempts = attempts
         self.wait = wait
+        self.send_request = urlopen if send_request is None else send_request
 
     def __call__(self):
         last_endpoint = ''
@@ -81,12 +81,12 @@ class CheckEndpoints(LazyFunction):
             for endpoint in self.endpoints:
                 last_endpoint = endpoint
                 try:
-                    request = urlopen(endpoint, timeout=self.timeout)
+                    response = self.send_request(endpoint, timeout=self.timeout)
                 except Exception as e:
                     last_error = str(e)
                     break
                 else:
-                    status_code = request.getcode()
+                    status_code = response.getcode()
                     if 400 <= status_code < 600:
                         last_error = 'status {}'.format(status_code)
                         break
@@ -129,12 +129,10 @@ class CheckCommandOutput(LazyFunction):
         if not (self.stdout or self.stderr):
             raise ValueError('Must capture stdout, stderr, or both.')
 
-        if isinstance(patterns, string_types):
+        if isinstance(patterns, str):
             patterns = [patterns]
 
-        self.patterns = [
-            re.compile(pattern, re.M) if isinstance(pattern, string_types) else pattern for pattern in patterns
-        ]
+        self.patterns = [re.compile(pattern, re.M) if isinstance(pattern, str) else pattern for pattern in patterns]
 
         if matches == 'all':
             self.matches = len(patterns)

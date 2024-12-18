@@ -86,7 +86,7 @@ Need help? Contact [Datadog support][4].
 - [How to collect Cassandra metrics][15]
 - [Monitoring Cassandra with Datadog][16]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard_2.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/integrations/java/
 [4]: https://docs.datadoghq.com/help/

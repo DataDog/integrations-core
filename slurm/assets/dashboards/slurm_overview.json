@@ -1,0 +1,3617 @@
+{
+  "title": "Slurm Overview",
+  "description": "This dashboard displays data gathered from various Slurm command-line utilities, offering administrators a centralized, user-friendly interface for monitoring and managing a Slurm-managed cluster. It provides real-time insights into resource availability, job statuses, user allocations, and system diagnostics. By visualizing trends and identifying anomalies in resource usage, job queues, and user shares, the dashboard enables proactive decision-making. This streamlined view helps administrators address potential bottlenecks and optimize cluster performance, ensuring resources are effectively allocated across the high-performance computing environment.\n\n**Further reading:**\n\n- [Datadog Slurm Integration Documentation](https://docs.datadoghq.com/integrations/slurm/)\n- [Slurm Docs](https://slurm.schedmd.com/quickstart.html)",
+  "widgets": [
+    {
+      "id": 2491908675486838,
+      "definition": {
+        "title": "",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1414912108288008,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/slurm_large.svg",
+              "url_dark_theme": "/static/images/logos/slurm_reversed_large.svg",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8299455774320176,
+            "definition": {
+              "type": "note",
+              "content": "This dashboard displays data gathered from various Slurm command-line utilities, offering administrators a centralized, user-friendly interface for monitoring and managing a Slurm-managed cluster. It provides real-time insights into resource availability, job statuses, user allocations, and system diagnostics. By visualizing trends and identifying anomalies in resource usage, job queues, and user shares, the dashboard enables proactive decision-making. This streamlined view helps administrators address potential bottlenecks and optimize cluster performance, ensuring resources are effectively allocated across the high-performance computing environment",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 2892987503436468,
+            "definition": {
+              "type": "note",
+              "content": "**Further reading:**\n\n- [Datadog Slurm Integration Documentation](https://docs.datadoghq.com/integrations/slurm/)\n- [Slurm Docs](https://slurm.schedmd.com/quickstart.html)",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 9
+      }
+    },
+    {
+      "id": 5234310433526762,
+      "definition": {
+        "title": "Slurm Monitoring Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3057371097924390,
+            "definition": {
+              "type": "note",
+              "content": "Slurm Overview shows a quick summary of all reporting Slurm instances as well as related monitors and their status.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 3063922920608490,
+            "definition": {
+              "title": "Hosts Reporting Partition Data",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:slurm.sinfo.partition.enabled{$slurmctld_host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 5106117518289596,
+            "definition": {
+              "title": "Hosts Reporting Node Data",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:slurm.sinfo.node.enabled{$slurmctld_host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 5937035560156048,
+            "definition": {
+              "title": "Hosts Reporting Squeue Data",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:slurm.squeue.enabled{$slurmctld_host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 2788918623310076,
+            "definition": {
+              "title": "Hosts Reporting Sacct Data",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:slurm.sacct.enabled{$slurmctld_host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3441631617508082,
+            "definition": {
+              "title": "Hosts Reporting Sdiag Data",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:slurm.sdiag.enabled{$slurmctld_host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7458271297071138,
+            "definition": {
+              "title": "Hosts Reporting Sshare Data",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:slurm.sshare.enabled{$slurmctld_host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 5935466024454224,
+            "definition": {
+              "title": "Slurm Monitor Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:slurm) $slurmctld_host",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 9
+      }
+    },
+    {
+      "id": 4075969519773896,
+      "definition": {
+        "title": "Parition and Node Metrics",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1144380258482216,
+            "definition": {
+              "type": "note",
+              "content": "Displays information about Slurm partitions and Nodes. Collected from  `sinfo`",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8038485389771898,
+            "definition": {
+              "title": "In Use CPU Stats",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Allocated",
+                      "style": {
+                        "palette": "green"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Other",
+                      "style": {
+                        "palette": "purple"
+                      },
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Idle",
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.cpu.allocated{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.cpu.other{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.cpu.idle{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4895063705170368,
+            "definition": {
+              "title": "Partition GPU Stats",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Used",
+                      "style": {
+                        "palette": "green"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.gpu_used{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_gpu_type}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total",
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.gpu_total{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_gpu_used_idx,slurm_partition_gpu_type}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "order_by": "values",
+                    "line_type": "dashed",
+                    "line_width": "thick"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 5119366088903576,
+            "definition": {
+              "title": "Slurm Partitions",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Allocated",
+                      "style": {
+                        "palette": "green"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.nodes.count{$partition_name,$slurmctld_host,$slurm_partition_node_list, slurm_partition_state:allocated} by {host,slurm_default_partition,slurm_partition_availability,slurm_partition_available,slurm_partition_cpus_assigned,slurm_partition_memory_assigned,slurm_partition_name,slurm_partition_node_list,slurm_partition_state}.fill(null)"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.nodes.count{$partition_name,$slurmctld_host,$slurm_partition_node_list , !slurm_partition_state:allocated , !slurm_partition_state:down} by {host,slurm_default_partition,slurm_partition_availability,slurm_partition_available,slurm_partition_cpus_assigned,slurm_partition_memory_assigned,slurm_partition_name,slurm_partition_node_list,slurm_partition_state}.fill(null)"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.nodes.count{$partition_name,$slurmctld_host,$slurm_partition_node_list, slurm_partition_state:down} by {host,slurm_default_partition,slurm_partition_availability,slurm_partition_available,slurm_partition_cpus_assigned,slurm_partition_memory_assigned,slurm_partition_name,slurm_partition_node_list,slurm_partition_state}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 6757848192483742,
+            "definition": {
+              "title": "Slurm Partitions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.partition.nodes.count{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_default_partition,slurm_partition_availability,slurm_partition_available,slurm_partition_cpus_assigned,slurm_partition_memory_assigned,slurm_partition_name,slurm_partition_node_list,slurm_partition_state}.fill(null)",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "text_formats": [
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "allocated"
+                        },
+                        "palette": "black_on_light_green"
+                      },
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "down"
+                        },
+                        "palette": "white_on_red"
+                      },
+                      {
+                        "match": {
+                          "type": "does_not_contain",
+                          "value": "allocated"
+                        },
+                        "palette": "black_on_light_yellow"
+                      },
+                      {
+                        "match": {
+                          "type": "does_not_contain",
+                          "value": "down"
+                        },
+                        "palette": "black_on_light_yellow"
+                      }
+                    ]
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Node Count",
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 5505575156839028,
+            "definition": {
+              "type": "note",
+              "content": "Additional information about Nodes at higher [sinfo collection levels](https://github.com/DataDog/integrations-core/blob/7.60.x/slurm/datadog_checks/slurm/data/conf.yaml.example#L59)",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8926631228810772,
+            "definition": {
+              "title": "Node CPU Stats",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Allocated",
+                      "style": {
+                        "palette": "green"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Other",
+                      "style": {
+                        "palette": "purple"
+                      },
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Idle",
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.cpu.allocated{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name}.fill(null)"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.cpu.other{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name}.fill(null)"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.cpu.idle{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.cpu.total{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "order_by": "values",
+                    "line_type": "dashed",
+                    "line_width": "thick"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4575365528506786,
+            "definition": {
+              "title": "Node GPU Stats",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "green"
+                      },
+                      "alias": "GPU Used",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.gpu_used{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name,slurm_partition_gpu_type}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "GPU Total",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.gpu_total{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_partition_gpu_used_idx,slurm_partition_gpu_type}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "order_by": "values",
+                    "line_type": "dashed",
+                    "line_width": "thick"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 13,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3500873773321452,
+            "definition": {
+              "title": "Node CPU Load",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "CPU Load",
+                      "style": {
+                        "palette": "blue"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.cpu_load{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 17,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 3107833129796004,
+            "definition": {
+              "title": "Node Free Memory",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Free Memory",
+                      "style": {
+                        "palette": "blue"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.free_mem{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 17,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6878680500551526,
+            "definition": {
+              "title": "Node Temp Disk",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Temp Disk",
+                      "style": {
+                        "palette": "blue"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:slurm.node.tmp_disk{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 17,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7669523743946734,
+            "definition": {
+              "title": "Slurm Nodes",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "green"
+                      },
+                      "alias": "Allocated",
+                      "formula": "query1"
+                    },
+                    {
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "alias": "Idle",
+                      "formula": "query2"
+                    },
+                    {
+                      "style": {
+                        "palette": "red"
+                      },
+                      "alias": "Down",
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.node.info{$partition_name,slurm_node_state:allocated,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name,slurm_node_availability,slurm_node_cluster,slurm_node_threads,slurm_node_state_reason,slurm_node_memory,slurm_node_active_features,slurm_node_state}.fill(null)"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.node.info{$partition_name,!slurm_node_state:allocated,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name,slurm_node_availability,slurm_node_cluster,slurm_node_threads,slurm_node_state_reason,slurm_node_memory,slurm_node_active_features,slurm_node_state}.fill(null)"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.node.info{$partition_name,slurm_node_state:down,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name,slurm_node_availability,slurm_node_cluster,slurm_node_threads,slurm_node_state_reason,slurm_node_memory,slurm_node_active_features,slurm_node_state}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 20,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 630423119756546,
+            "definition": {
+              "title": "Slurm Nodes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.node.info{$partition_name,$slurmctld_host,$slurm_node_name} by {host,slurm_partition_name,slurm_node_name,slurm_node_availability,slurm_node_cluster,slurm_node_threads,slurm_node_state_reason,slurm_node_memory,slurm_node_active_features}.fill(null)",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Node Info",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 22,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 9,
+        "width": 12,
+        "height": 28
+      }
+    },
+    {
+      "id": 7950204449695992,
+      "definition": {
+        "title": "Job Metrics",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 533548419446190,
+            "definition": {
+              "type": "note",
+              "content": "Displays information about jobs located in the Slurm scheduling queue. Collected from `squeue` and `sacct`.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 6963047281537810,
+            "definition": {
+              "title": "Jobs Running",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Running",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.squeue.job.info{slurm_job_state:running,$slurmctld_host,$slurm_job_id,$slurm_job_user} by {host,slurm_job_id,slurm_job_user}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 671633806410634,
+            "definition": {
+              "title": "Jobs Not Running",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "alias": "Jobs Not Running",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.squeue.job.info{!slurm_job_state:running,$slurmctld_host,$slurm_job_id,$slurm_job_user} by {host,slurm_job_reason,slurm_job_id,slurm_job_user,slurm_job_name,slurm_job_state}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3566918621347214,
+            "definition": {
+              "title": "Running Jobs",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "minute",
+                "value": 5
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.squeue.job.info{$slurmctld_host,$slurm_job_id,$slurm_job_user} by {host,slurm_job_reason,slurm_job_id,slurm_job_user,slurm_job_cpus,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_tres_per_node}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "text_formats": [
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "running"
+                        },
+                        "palette": "black_on_light_green"
+                      },
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "pending"
+                        },
+                        "palette": "black_on_light_yellow"
+                      }
+                    ]
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Slurm Jobs",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 8695191570442222,
+            "definition": {
+              "type": "note",
+              "content": "This section displays accounting data for all jobs and job steps in the Slurm job accounting log or Slurm database",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 2209453189056850,
+            "definition": {
+              "title": "Job Durations",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.job.duration{slurm_job_state:running,$slurmctld_host,$slurm_job_id, slurm_job_account:$slurm_job_user.value} by {host,slurm_job_id,slurm_job_account}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 6520869016889112,
+            "definition": {
+              "title": "Job Results",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "JobInfo",
+                      "style": {
+                        "palette": "green"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "JobInfo",
+                      "style": {
+                        "palette": "red"
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "JobInfo",
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "JobInfo",
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.job.info{!slurm_job_id_suffix:*,slurm_job_state:completed,$slurmctld_host,$slurm_job_id, slurm_job_account:$slurm_job_user.value} by {host,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.job.info{!slurm_job_id_suffix:*,slurm_job_state:failed,$slurmctld_host,$slurm_job_id,$slurm_job_user, slurm_job_account:$slurm_job_user.value} by {host,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.job.info{!slurm_job_id_suffix:*,slurm_job_state:timeout,$slurmctld_host,$slurm_job_id,$slurm_job_user, slurm_job_account:$slurm_job_user.value} by {host,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.job.info{!slurm_job_id_suffix:*,slurm_job_state:cancelled,$slurmctld_host,$slurm_job_id,$slurm_job_user, slurm_job_account:$slurm_job_user.value} by {host,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 4819650605095308,
+            "definition": {
+              "title": "Job Results",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.job.info{NOT (slurm_job_state:running OR slurm_job_state:pending) AND NOT slurm_job_id_suffix:* AND $slurmctld_host AND $slurm_job_id AND slurm_job_account:$slurm_job_user.value} by {host,slurm_job_id,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.slurm_job_cputime{NOT (slurm_job_state:running OR slurm_job_state:pending) AND NOT slurm_job_id_suffix:* AND $slurmctld_host AND $slurm_job_id AND slurm_job_account:$slurm_job_user.value} by {host,slurm_job_id,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.slurm_job_maxrss{NOT (slurm_job_state:running OR slurm_job_state:pending) AND NOT slurm_job_id_suffix:* AND $slurmctld_host AND $slurm_job_id AND slurm_job_account:$slurm_job_user.value} by {host,slurm_job_id,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.slurm_job_avgcpu{NOT (slurm_job_state:running OR slurm_job_state:pending) AND NOT slurm_job_id_suffix:* AND $slurmctld_host AND $slurm_job_id AND slurm_job_account:$slurm_job_user.value} by {host,slurm_job_id,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sacct.slurm_job_avgrss{NOT (slurm_job_state:running OR slurm_job_state:pending) AND NOT slurm_job_id_suffix:* AND $slurmctld_host AND $slurm_job_id AND slurm_job_account:$slurm_job_user.value} by {host,slurm_job_id,slurm_job_partition,slurm_job_node_list,slurm_job_name,slurm_job_state,slurm_job_account,slurm_job_cpus,slurm_job_maxvm,slurm_job_exitcode,slurm_job_tres_per_node}.fill(null)",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "text_formats": [
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "completed"
+                        },
+                        "palette": "white_on_green"
+                      },
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "failed"
+                        },
+                        "palette": "white_on_red"
+                      },
+                      {
+                        "match": {
+                          "type": "contains",
+                          "value": "timeout"
+                        },
+                        "palette": "white_on_yellow"
+                      },
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "canceled"
+                        },
+                        "palette": "white_on_yellow"
+                      }
+                    ]
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "JobInfo",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "CPUTime",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "MaxRSS",
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "AvgCPU",
+                      "formula": "query4"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "AvgRSS",
+                      "formula": "query5"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 18,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 37,
+        "width": 12,
+        "height": 24,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 5338048887500328,
+      "definition": {
+        "title": "Slurmctld Execution Metrics",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6224896768660278,
+            "definition": {
+              "type": "note",
+              "content": "Provides information on slurmctld execution, including threads, agents, jobs, and scheduling algorithms. Its purpose is to analyze slurmctld behavior, aiding in tuning configuration parameters or queue policies, especially for high-throughput systems. Collected from `sdiag`.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 7623125024313294,
+            "definition": {
+              "title": "Active slurmctld Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Active Threads",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.server_thread_count{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3519178679271922,
+            "definition": {
+              "title": "Agent Threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Agent Count",
+                      "style": {
+                        "palette": "blue"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Agent Threads",
+                      "style": {
+                        "palette": "purple"
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.agent_count{$slurmctld_host} by {host}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.agent_thread_count{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1344410317948014,
+            "definition": {
+              "title": "DBD Agent Message Queue Size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "MQ Size",
+                      "style": {
+                        "palette": "dog_classic"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.dbd_agent_queue_size{$slurmctld_host} by {host}.fill(null)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 5258035573668354,
+            "definition": {
+              "title": "Queued RPC Retries",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Agent Queue Size",
+                      "style": {
+                        "palette": "dog_classic"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.agent_queue_size{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6712237052017628,
+            "definition": {
+              "type": "note",
+              "content": "Jobs Stats",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 2176401269175964,
+            "definition": {
+              "title": "Jobs Submitted",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Submitted",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.jobs_submitted{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6794558706468544,
+            "definition": {
+              "title": "Jobs Started",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.jobs_started{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 8,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7896564081915014,
+            "definition": {
+              "title": "Jobs Pending",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.jobs_pending{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 8,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6539462689730792,
+            "definition": {
+              "title": "Jobs Running",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Running",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.jobs_running{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1873629339273070,
+            "definition": {
+              "title": "Jobs Cancelled",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Cancelled",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.jobs_canceled{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 11,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2123501325488456,
+            "definition": {
+              "title": "Jobs Completed",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Completed",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.jobs_completed{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1465957894702784,
+            "definition": {
+              "title": "Jobs Failed",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Failed",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.jobs_failed{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 14,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 602705766248540,
+            "definition": {
+              "type": "note",
+              "content": "Main Schedule Statistics",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 17,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 2640418544202950,
+            "definition": {
+              "title": "Time for Last Scheduling Cycle",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Last Cycle",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.last_cycle{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 18,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6687609145978784,
+            "definition": {
+              "title": "Mean Time for All Scheduling Cycles",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Mean Time",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.mean_cycle{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 18,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4663286137645322,
+            "definition": {
+              "title": "Max Time for Scheduling Cycle",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Max Time",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.max_cycle{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 21,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4126761727463840,
+            "definition": {
+              "title": "Total Time of Scheduling Cycle",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total Time",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.total_cycles{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 21,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 858037577914086,
+            "definition": {
+              "title": "Pending Jobs Queue",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Queue Length",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.last_queue_length{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 24,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 3333632732741518,
+            "definition": {
+              "title": "Mean Number of Jobs Processed",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Cycle Depth",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.mean_depth_cycle{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 24,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 899155790734936,
+            "definition": {
+              "title": "Scheduling Cycles per Minute",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Scheduling Executions",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.cycles_per_minute{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 24,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 914773556087656,
+            "definition": {
+              "type": "note",
+              "content": "Backfilling Stats",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 27,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 6412187873405126,
+            "definition": {
+              "title": "Jobs Since Last Cycle",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Since Reset",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.total_jobs_since_start{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 28,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3608383021408238,
+            "definition": {
+              "title": "Jobs Since Slurm Restart",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Since Restart",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.total_jobs_since_cycle_start{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 28,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3068793286116352,
+            "definition": {
+              "title": "Heterogenous Job Components",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Job Components",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.total_heterogeneous_components{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 28,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1250240260593700,
+            "definition": {
+              "title": "Total Cycles",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Backfill Cycles",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.total_cycles{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 30,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2903702268668384,
+            "definition": {
+              "title": "Last Cycle",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Last Cycle",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.last_cycle{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 30,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 6538774794367920,
+            "definition": {
+              "title": "Max Cycle",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Max Cycle",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.max_cycle{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 30,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1238880234272122,
+            "definition": {
+              "title": "Mean Cycle",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Time in Scheduling Cycles (mean)",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.mean_cycle{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 32,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 8436064160034512,
+            "definition": {
+              "title": "Last Depth Cycle",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Processed",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.last_depth_cycle{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 32,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1949830880003490,
+            "definition": {
+              "title": "Last Depth Cycle Tried",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Processes Attempted",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.last_depth_try_schedule{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 32,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3992954114583250,
+            "definition": {
+              "title": "Depth Mean",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Processed (mean)",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.depth_mean{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 34,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3361623326323968,
+            "definition": {
+              "title": "Depth Mean Tried",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Attempted (mean)",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.depth_mean_try_depth{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 34,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1761583521206024,
+            "definition": {
+              "title": "Last Queue Length",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Pending",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.last_queue_length{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 34,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4154125624773156,
+            "definition": {
+              "title": "Queue Length Mean",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Jobs Pending (mean)",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.queue_length_mean{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 36,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3711958980704524,
+            "definition": {
+              "title": "Last Table Size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Time Slot Tested",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.last_table_size{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 36,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4219095913302870,
+            "definition": {
+              "title": "Mean Table Size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Time Slot Tested (mean)",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.sdiag.backfill.mean_table_size{$slurmctld_host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 36,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 61,
+        "width": 12,
+        "height": 39
+      }
+    },
+    {
+      "id": 2134671408894208,
+      "definition": {
+        "title": "Share Metrics",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3068767116744840,
+            "definition": {
+              "type": "note",
+              "content": "Shows information about the shares of associations to a cluster. Collected from `sshare`.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 3600945371891180,
+            "definition": {
+              "title": "Share Overview",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.share.raw_shares{$slurmctld_host} by {host,slurm_user,slurm_account,slurm_tres_run_mins,slurm_group_tres_mins}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.share.norm_shares{$slurmctld_host} by {host,slurm_user,slurm_account,slurm_tres_run_mins,slurm_group_tres_mins}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.share.raw_usage{$slurmctld_host} by {host,slurm_user,slurm_account,slurm_tres_run_mins,slurm_group_tres_mins}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.share.norm_usage{$slurmctld_host} by {host,slurm_user,slurm_account,slurm_tres_run_mins,slurm_group_tres_mins}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.share.effective_usage{$slurmctld_host} by {host,slurm_user,slurm_account,slurm_tres_run_mins,slurm_group_tres_mins}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query6",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.share.fair_share{$slurmctld_host} by {host,slurm_user,slurm_account,slurm_tres_run_mins,slurm_group_tres_mins}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query7",
+                      "data_source": "metrics",
+                      "query": "avg:slurm.share.level_fs{$slurmctld_host} by {host,slurm_user,slurm_account,slurm_tres_run_mins,slurm_group_tres_mins}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "RawShares",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "NormShares",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "RawUsage",
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "NormUsage",
+                      "formula": "query4"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "EffectiveUsage",
+                      "formula": "query5"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "FairShare",
+                      "formula": "query6"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "LevelFS",
+                      "formula": "query7"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 100,
+        "width": 12,
+        "height": 6
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "slurmctld_host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "partition_name",
+      "prefix": "slurm_partition_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "slurm_node_name",
+      "prefix": "slurm_node_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "slurm_partition_node_list",
+      "prefix": "slurm_partition_node_list",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "slurm_job_user",
+      "prefix": "slurm_job_user",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "slurm_job_id",
+      "prefix": "slurm_job_id",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

@@ -1,0 +1,55 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "751006a9-b87a-4f54-acc5-2886ec49073e",
+  "app_id": "kubevirt-handler",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect key metrics to monitor the health of your KubeVirt Handler Daemons.",
+    "title": "KubeVirt Handler",
+    "media": [],
+    "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 22778164,
+      "source_type_name": "KubeVirt Handler",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kubevirt_handler.",
+        "check": [
+          "kubevirt_handler.can_connect",
+          "kubevirt_handler.vmi.cpu_system_usage_seconds.count"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": ["virt-handler"]
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

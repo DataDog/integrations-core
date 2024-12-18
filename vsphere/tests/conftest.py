@@ -112,8 +112,9 @@ def mock_threadpool():
 
 @pytest.fixture
 def mock_api():
-    with patch('datadog_checks.vsphere.vsphere.VSphereAPI', MockedAPI):
-        yield
+    with patch('datadog_checks.vsphere.vsphere.VSphereAPI') as mocked_api:
+        mocked_api.side_effect = MockedAPI
+        yield mocked_api
 
 
 @pytest.fixture

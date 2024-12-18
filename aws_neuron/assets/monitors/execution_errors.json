@@ -1,0 +1,29 @@
+{
+	"version": 2,
+	"created_at": "2024-08-05",
+	"last_updated_at": "2024-08-05",
+	"title": "Execution errors",
+	"description": "This monitor tracks the total number of execution errors. A high number of execution errors can indicate issues with the execution process, such as code bugs, data inconsistencies, or resource constraints. Monitoring execution errors helps in early detection of such issues.",
+	"definition": {
+		"name": "High amount of execution errors on {{instance_id.name}}",
+		"type": "query alert",
+		"query": "sum(last_5m):sum:aws_neuron.execution.errors.count{*} by {instance_id}.as_count() > 10",
+		"message": "{{#is_alert}}{{instance_id.name}} has experienced {{value}} execution errors over the last 5 minutes.{{/is_alert}}\n{{#is_recovery}}The number of execution errors on {{instance_id.name}} is back below the threshold of {{threshold}}.{{/is_recovery}}",
+		"tags": [
+			"integration:aws_neuron"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5 
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60
+		},
+		"priority": 3
+	},
+	"tags": [
+		"integration:aws-neuron"
+	]
+}

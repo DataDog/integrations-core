@@ -90,8 +90,8 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
-    ## Configure ICMP pings for all hosts in SNMP autodiscovery
-    ## Each device is pinged with these settings each time the SNMP
+    ## Configure ICMP pings.
+    ## The network device is pinged with these settings each time the SNMP
     ## check is run.
     ##
     ## By default, we try to use an unprivileged UDP socket to send ICMP
@@ -364,12 +364,17 @@ instances:
     #
     # refresh_oids_cache_interval: 3600
 
+    ## @param collect_topology - boolean - optional - default: true
+    ## Enable the collection of topology (LLDP/CDP) data
+    #
+    # collect_topology: true
+
     ## @param interface_configs - list of mappings - optional
     ## This option is used to override interface inbound/outbound speed and add interface tags.
     ## Example:
     ## interface_configs:
     ##   - match_field: "name"  # (required) the field to match, can be `name` (interface name) or `index` (ifIndex)
-    ##     match_value: "eth0"  # (required) the value to match
+    ##     match_value: "eth0"  # (required, case sensitive) the value to match
     ##     in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
     ##     out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
     ##     tags:                # (optional) interface level tags
@@ -467,14 +472,3 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param metric_patterns - mapping - optional
-    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
-    ##
-    ## Metrics defined in `exclude` will take precedence in case of overlap.
-    #
-    # metric_patterns:
-    #   include:
-    #   - <INCLUDE_REGEX>
-    #   exclude:
-    #   - <EXCLUDE_REGEX>

@@ -148,5 +148,37 @@
             "tenant_id"
         ],
         "description": "Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.55.0",
+        "check": "openstack.heat.api.up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack HEAT API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "region_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the HEAT API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "7.55.0",
+        "check": "openstack.swift.api.up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "integration": "OpenStack",
+        "name": "OpenStack SWIFT API Up",
+        "groups": [
+            "host",
+            "keystone_server",
+            "region_id"
+        ],
+        "description": "Returns `CRITICAL` if the Agent is unable to query the SWIFT API and `UNKNOWN` if endpoint is not found in the catalog. Returns `OK` otherwise."
     }
 ]

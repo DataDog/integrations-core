@@ -4,7 +4,6 @@
 import logging
 
 import pytest
-from six import PY2
 
 serialization = None
 
@@ -18,6 +17,5 @@ def load_serialization_module(caplog):
             from datadog_checks.base.utils import serialization
 
 
-@pytest.mark.skipif(PY2, reason='Dependency orjson does not support Python 2')
 def test_fast_json():
     assert serialization.json.__name__ == 'orjson'

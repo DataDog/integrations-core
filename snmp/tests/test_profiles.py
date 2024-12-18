@@ -152,6 +152,7 @@ def test_cisco_voice(aggregator):
     tags = [
         'snmp_profile:cisco_icm',
         'snmp_host:test',
+        'device_hostname:test',
         'device_vendor:cisco',
     ] + common.CHECK_TAGS
 
@@ -181,12 +182,7 @@ def test_cisco_voice(aggregator):
     for cvp in cvp_gauges:
         aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags)
 
-    ccms_counts = ["ccmRejectedPhones", "ccmUnregisteredPhones"]
-
-    ccms_gauges = ["ccmRegisteredGateways", "ccmRegisteredPhones"]
-
-    for ccm in ccms_counts:
-        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.RATE, tags=tags)
+    ccms_gauges = ["ccmRegisteredGateways", "ccmRegisteredPhones", "ccmRejectedPhones", "ccmUnregisteredPhones"]
 
     for ccm in ccms_gauges:
         aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags)
@@ -298,6 +294,7 @@ def test_f5(aggregator):
     tags = [
         'snmp_profile:' + profile,
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'device_hostname:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
         'device_vendor:f5',
     ]
     tags += common.CHECK_TAGS
@@ -495,6 +492,7 @@ def test_f5_router(aggregator):
     common_tags = [
         'snmp_profile:router',
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'device_hostname:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
     ]
     common_tags.extend(common.CHECK_TAGS)
 
@@ -539,6 +537,7 @@ def test_cisco_3850(aggregator):
     interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
     common_tags = common.CHECK_TAGS + [
         'snmp_host:Cat-3850-4th-Floor.companyname.local',
+        'device_hostname:Cat-3850-4th-Floor.companyname.local',
         'snmp_profile:' + profile,
         'device_vendor:cisco',
     ]
@@ -820,6 +819,7 @@ def test_meraki_cloud_controller(aggregator):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:meraki-cloud-controller',
         'snmp_host:dashboard.meraki.com',
+        'device_hostname:dashboard.meraki.com',
         'device_vendor:meraki',
     ]
 
@@ -1214,6 +1214,7 @@ def test_cisco_nexus(aggregator):
 
     common_tags = common.CHECK_TAGS + [
         'snmp_host:Nexus-eu1.companyname.managed',
+        'device_hostname:Nexus-eu1.companyname.managed',
         'snmp_profile:' + profile,
         'device_vendor:cisco',
     ]
@@ -1642,7 +1643,12 @@ def test_hp_ilo4(aggregator):
     temperature_sensors = [1, 13, 28]
     batteries = [1, 3, 4, 5]
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'device_vendor:hp', 'snmp_host:hp-ilo4.example']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:' + profile,
+        'device_vendor:hp',
+        'snmp_host:hp-ilo4.example',
+        'device_hostname:hp-ilo4.example',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1728,6 +1734,7 @@ def test_proliant(aggregator):
         'snmp_profile:hpe-proliant',
         'device_vendor:hp',
         'snmp_host:hpe-proliant.example',
+        'device_hostname:hpe-proliant.example',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -2011,6 +2018,7 @@ def assert_cisco_asa(aggregator, profile):
     common_tags = common.CHECK_TAGS + [
         'snmp_profile:' + profile,
         'snmp_host:kept',
+        'device_hostname:kept',
         'device_vendor:cisco',
     ]
 
@@ -2133,15 +2141,27 @@ def assert_cisco_asa(aggregator, profile):
     rtt_indexes = [1, 7, 10, 13, 15, 18, 20]
     rtt_types = [22, 21, 17, 6, 20, 8, 16]
     rtt_states = [3, 1, 6, 4, 6, 1, 6]
-    rtt_gauges = ['rttMonLatestRttOperCompletionTime', 'rttMonLatestRttOperSense', 'rttMonCtrlOperTimeoutOccurred']
+    rtt_senses = [13, 30, 2, 21, 19, 20, 27]
+    rtt_timeouts = [1, 1, 2, 2, 1, 2, 1]
+    rtt_gauges = ['rttMonLatestRttOperCompletionTime', 'rttMonLatestRttOperSense']
     for i in range(len(rtt_indexes)):
         tags = [
             "rtt_index:{}".format(rtt_indexes[i]),
             "rtt_type:{}".format(rtt_types[i]),
             "rtt_state:{}".format(rtt_states[i]),
+            "rtt_sense:{}".format(rtt_senses[i]),
         ] + common_tags
         for rtt in rtt_gauges:
             aggregator.assert_metric('snmp.{}'.format(rtt), metric_type=aggregator.GAUGE, tags=tags)
+
+    for i in range(len(rtt_indexes)):
+        tags = [
+            "rtt_index:{}".format(rtt_indexes[i]),
+            "rtt_type:{}".format(rtt_types[i]),
+            "rtt_state:{}".format(rtt_states[i]),
+            "rtt_timeout:{}".format(rtt_timeouts[i]),
+        ] + common_tags
+        aggregator.assert_metric('snmp.rttMonCtrlOperTimeoutOccurred', metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -2172,6 +2192,7 @@ def test_checkpoint(aggregator):
         'snmp_profile:checkpoint',
         'device_vendor:checkpoint',
         'snmp_host:checkpoint.device.name',
+        'device_hostname:checkpoint.device.name',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -2246,6 +2267,7 @@ def test_checkpoint_firewall(aggregator):
         'snmp_profile:checkpoint-firewall',
         'device_vendor:checkpoint',
         'snmp_host:checkpoint.device.name',
+        'device_hostname:checkpoint.device.name',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -2317,7 +2339,12 @@ def test_checkpoint_firewall(aggregator):
 def test_arista(aggregator):
     run_profile_check('arista')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'device_vendor:arista', 'snmp_host:DCS-7504-name']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:arista',
+        'device_vendor:arista',
+        'snmp_host:DCS-7504-name',
+        'device_hostname:DCS-7504-name',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -2439,7 +2466,7 @@ def test_chatsworth(aggregator):
     common_tags = (
         common.CHECK_TAGS
         + legacy_global_tags
-        + ['snmp_profile:' + profile, 'device_vendor:chatsworth', 'snmp_host:' + host]
+        + ['snmp_profile:' + profile, 'device_vendor:chatsworth', 'snmp_host:' + host, 'device_hostname:' + host]
     )
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -2669,6 +2696,7 @@ def test_fortinet_fortigate(aggregator):
         'snmp_profile:fortinet-fortigate',
         'device_vendor:fortinet',
         'snmp_host:fortinet-fortigate.device.name',
+        'device_hostname:fortinet-fortigate.device.name',
     ]
 
     common_gauge_metrics = [
@@ -2775,6 +2803,7 @@ def test_netapp(aggregator):
     profile_tags = [
         'snmp_profile:netapp',
         'snmp_host:example-datacenter.company',
+        'device_hostname:example-datacenter.company',
         'device_vendor:netapp',
     ]
 
@@ -2883,6 +2912,7 @@ def test_cisco_catalyst(aggregator):
     run_profile_check('cisco-catalyst')
     common_tags = common.CHECK_TAGS + [
         'snmp_host:catalyst-6000.example',
+        'device_hostname:catalyst-6000.example',
         'snmp_profile:cisco-catalyst',
         'device_vendor:cisco',
     ]

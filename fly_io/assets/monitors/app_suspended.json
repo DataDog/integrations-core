@@ -1,0 +1,28 @@
+{
+    "version": 2,
+    "created_at": "2024-07-31",
+    "last_updated_at": "2024-07-31",
+    "title": "Fly.io App Suspended",
+    "tags": [
+        "integration:fly-io"
+    ],
+    "description": "A Fly.io app can be suspended if the app exits or if the app does not have any traffic. This monitor tracks whether an app status is suspended for the last 10 minutes.",
+    "definition": {
+        "name": "Fly.io app {{app_name.name}} is suspended",
+        "message": "{{#is_alert}} Fly.io app {{app_name.name}} has been suspended for the last 10 minutes.{{/is_alert}}\n\n{{#is_recovery}} Fly.io app {{app_name.name}} has recovered from suspended status for the last 10 mins.{{/is_recovery}}",
+        "query": "min(last_10m):avg:fly_io.app.count{app_status:suspended} by {app_name} >= 1",
+        "options": {
+            "thresholds": {
+                "critical": 1
+            },
+            "notify_audit": false,
+            "include_tags": false,
+            "new_group_delay": 60,
+            "timeout_h": 0
+        },
+        "tags": [
+            "integration:fly-io"
+        ],
+        "type": "query alert"
+    }
+}

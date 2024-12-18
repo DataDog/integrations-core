@@ -7,8 +7,6 @@ import mock
 import pytest
 import requests
 import requests_unixsocket
-from flaky import flaky
-from six import PY2, iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
@@ -82,7 +80,7 @@ class TestUnixDomainSocket:
         assert adapter is not None
         assert isinstance(adapter, requests_unixsocket.UnixAdapter)
 
-    @flaky(max_runs=3, rerun_filter=lambda err, name, test, plugin: PY2)
+    @pytest.mark.flaky(max_runs=3)
     @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
     def test_uds_request(self, uds_path):
         # type: (str) -> None
@@ -114,9 +112,30 @@ class TestSession:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        for key, value in iteritems(http.options):
+        for key, value in http.options.items():
             assert hasattr(http.session, key)
             assert getattr(http.session, key) == value
+
+    def test_timeout(self):
+        """
+        Respect the request timeout.
+
+        Here we test two things:
+        - We pass the timemout option correctly to the requests library.
+        - We let the requests.exceptions.Timeout bubble up from the requests library.
+
+        We trust requests to respect the timeout so we mock its response.
+        """
+
+        mock_session = mock.create_autospec(requests.Session)
+        mock_session.get.side_effect = requests.exceptions.Timeout()
+        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08}, session=mock_session)
+
+        with pytest.raises(requests.exceptions.Timeout):
+            http.get('https://foobar.com')
+
+        assert 'timeout' in mock_session.get.call_args.kwargs, mock_session.get.call_args.kwargs
+        assert mock_session.get.call_args.kwargs['timeout'] == (0.08, 0.08)
 
 
 class TestLogger:
@@ -175,10 +194,3 @@ class TestLogger:
         expected_message = 'Sending GET request to https://www.google.com'
         for _, _, message in caplog.record_tuples:
             assert message != expected_message
-
-
-class TestIntegration:
-    def test_session_timeout(self):
-        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08})
-        with pytest.raises(requests.exceptions.Timeout):
-            http.get('https://httpbin.org/delay/0.10')

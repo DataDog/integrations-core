@@ -22,15 +22,16 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 Installation steps for each node:
 
 1. [Install the Agent][2].
-2. Install the library _mapr-streams-library_ with the following command:
+2. Install the _librdkafka_ library, required by _mapr-streams-library_, by following [these instructions][14].
+3. Install the library _mapr-streams-library_ with the following command:
 
     `sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python`.
 
     If you use Python 3 with Agent v7, replace `pip` with `pip3`.
 
-3. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required for the _mapr-streams-library_ used by the Agent to find the MapR shared libraries.
-4. Reload the libraries by running `sudo ldconfig`.
-5. Configure the integration by specifying the ticket location.
+4. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required for the _mapr-streams-library_ used by the Agent to find the MapR shared libraries.
+5. Reload the libraries by running `sudo ldconfig`.
+6. Configure the integration by specifying the ticket location.
 
 #### Additional notes
 
@@ -124,3 +125,4 @@ Need more help? Contact [Datadog support][13].
 [11]: https://github.com/DataDog/integrations-core/blob/master/mapr/metadata.csv
 [12]: https://github.com/DataDog/integrations-core/blob/master/mapr/assets/service_checks.json
 [13]: https://docs.datadoghq.com/help/
+[14]: https://github.com/confluentinc/librdkafka#installing-prebuilt-packages

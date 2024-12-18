@@ -12,6 +12,12 @@ jobs:
     name: Publish test results
     runs-on: ubuntu-22.04
 
+    permissions: 
+      checks: write # For EnricoMi/publish-unit-test-result-action@v2
+      pull-requests: write  # For EnricoMi/publish-unit-test-result-action@v2
+      contents: read  # For EnricoMi/publish-unit-test-result-action@v2
+      actions: read  # For "Download and extract artifacts"
+      
     steps:
     - name: Download and extract artifacts
       id: download
@@ -43,5 +49,5 @@ jobs:
         commit: ${{ github.event.workflow_run.head_sha }}
         event_file: artifacts/github-event/event.json
         event_name: ${{ github.event.workflow_run.event }}
-        files: "artifacts/test-results/*/*.xml"
+        files: "artifacts/test-results-*/*/*.xml"
         compare_to_earlier_commit: false

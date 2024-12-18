@@ -16,7 +16,8 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -55,16 +56,13 @@
       "Traffic Server - Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Traffic Server] 4xx Errors higher than usual": "assets/monitors/4xx.json",
-      "[Traffic Server] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+      "4xx errors number is high": "assets/monitors/4xx.json",
+      "5xx errors number is high": "assets/monitors/5xx.json"
     },
     "saved_views": {
       "traffic_server_error_logs": "assets/saved_views/traffic_server_error_logs.json",
       "traffic_server_overview": "assets/saved_views/traffic_server_overview.json",
       "traffic_server_patterns": "assets/saved_views/traffic_server_error_patterns.json"
-    },
-    "logs": {
-      "source": "traffic_server"
     }
   }
 }

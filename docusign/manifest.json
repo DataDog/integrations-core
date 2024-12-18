@@ -1,0 +1,80 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "06b018f6-ef33-418e-b745-5e6d6a405731",
+  "app_id": "docusign",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Docusign event logs",
+    "title": "Docusign",
+    "media": [
+      {
+        "caption": "Docusign Overview",
+        "image_url": "images/docusign_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Docusign Envelope",
+        "image_url": "images/docusign_envelope.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Docusign Template",
+        "image_url": "images/docusign_template.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Docusign Account",
+        "image_url": "images/docusign_account.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Docusign Alert",
+        "image_url": "images/docusign_alert.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 22217426,
+      "source_type_name": "Docusign",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Docusign - Overview" : "assets/dashboards/docusign_overview.json",
+      "Docusign - Envelope" : "assets/dashboards/docusign_envelope.json",
+      "Docusign - Template" : "assets/dashboards/docusign_template.json",
+      "Docusign - Account" : "assets/dashboards/docusign_account.json",
+      "Docusign - Alert" : "assets/dashboards/docusign_alert.json"
+    },
+    "monitors": {
+      "Credential Leak Detected" : "assets/monitors/credential_leak_activity.json",
+      "Too Many Login Attempts" : "assets/monitors/multiple_login_attempts.json",
+      "Unauthorized IP Address Activity" : "assets/monitors/unauthorized_ip_activity.json"
+    },
+    "logs": {
+      "source": "docusign"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

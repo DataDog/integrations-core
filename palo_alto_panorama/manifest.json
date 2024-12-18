@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "08e3eb08-944f-4f58-94db-b8235b7ebb5e",
   "app_id": "palo-alto-panorama",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -89,9 +89,6 @@
       "Palo Alto Panorama: Correlated Events": "assets/dashboards/palo_alto_panorama_correlated_events.json",
       "Palo Alto Panorama: HIP Match": "assets/dashboards/palo_alto_panorama_hip_match.json",
       "Palo Alto Panorama: User ID": "assets/dashboards/palo_alto_panorama_user_id.json"
-    },
-    "logs": {
-      "source": "palo-alto-panorama"
     }
   },
   "author": {

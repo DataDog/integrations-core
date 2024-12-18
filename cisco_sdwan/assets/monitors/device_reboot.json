@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "created_at": "2024-04-05",
+  "last_updated_at": "2024-04-05",
+  "title": "Cisco SD-WAN Device has rebooted several times",
+  "tags": [
+    "integration:cisco-sdwan"
+  ],
+  "description": "Repeated reboots are an indication of potential issues like software-related glitches, low memory conditions, corrupt software images, hardware faults, or software bugs. By identifying these concerns, this monitor ensures network stability and optimized performance.",
+  "definition": {
+	"name": "[Cisco SD-WAN] Device {{device_hostname.name}} ({{device_ip.name}}) rebooted more than 3 times in the last 10 minutes",
+	"type": "query alert",
+	"query": "sum(last_10m):sum:cisco_sdwan.reboot.count{*} by {device_namespace,device_hostname,device_ip,device_id} > 3",
+	"message": "{{#is_alert}}\nSD-WAN Device {{device_hostname.name}} ({{device_ip.name}}) rebooted more than 3 times in the last 10 minutes.\n{{/is_alert}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_namespace.name}}:{{device_ip.name}}](/infrastructure/devices/graph?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
+	"tags": [],
+	"options": {
+		"thresholds": {
+			"critical": 3
+		},
+		"notify_audit": false,
+		"include_tags": true,
+		"new_group_delay": 60,
+		"notify_no_data": false
+	}
+  }
+}

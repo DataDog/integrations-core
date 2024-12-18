@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   cloudera:
     image: caddy:2.6.2-alpine

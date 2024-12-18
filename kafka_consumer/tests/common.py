@@ -36,15 +36,7 @@ E2E_METADATA = {
     'docker_volumes': [
         f'{HERE}/docker/ssl/certificate:/tmp/certificate',
         f'{HERE}/docker/kerberos/kdc/krb5_agent.conf:/etc/krb5.conf',
-        f'{HERE}/docker/scripts/install_librdkafka.bash:/tmp/install_librdkafka.bash',
     ],
-    'start_commands': [
-        'bash /tmp/install_librdkafka.bash',
-    ],
-    'env_vars': {
-        'LIBRDKAFKA_VERSION': os.environ["LIBRDKAFKA_VERSION"],
-        'CONFLUENT_KAFKA_VERSION': os.environ["CONFLUENT_KAFKA_VERSION"],
-    },
 }
 
 if AUTHENTICATION == "ssl":
@@ -110,14 +102,20 @@ def assert_check_kafka(aggregator, consumer_groups):
                     aggregator.assert_metric(mname, tags=tags, count=1)
 
                 for mname in CONSUMER_METRICS:
-                    aggregator.assert_metric(
-                        mname,
-                        tags=tags + [f"consumer_group:{name}"],
-                        count=1,
-                    )
+                    aggregator.assert_metric(mname)
+                    tags = tags + [f"consumer_group:{name}"]
+                    for tag in tags:
+                        aggregator.assert_metric_has_tag(mname, tag)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def assert_check_kafka_has_consumer_group_state_tag(aggregator, consumer_groups):
+    for _, _ in consumer_groups.items():
+        for mname in CONSUMER_METRICS:
+            # Check for the tag prefix consumer_group_state
+            aggregator.assert_metric_has_tag_prefix(mname, tag_prefix='consumer_group_state')
 
 
 def get_authentication_configuration(instance):

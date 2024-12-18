@@ -48,7 +48,9 @@ ddev test postgres:py3.11-9.6,py3.11-16.0 -- -k test_my_special_test
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
-@click.option('--compat', is_flag=True, help='Check compatibility with the minimum allowed Agent version')
+@click.option(
+    '--compat', is_flag=True, help='Check compatibility with the minimum allowed Agent version. Implies --recreate.'
+)
 @click.option('--ddtrace', is_flag=True, envvar='DDEV_TEST_ENABLE_TRACING', help='Enable tracing during test execution')
 @click.option('--memray', is_flag=True, help='Measure memory usage during test execution')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate environments from scratch')
@@ -89,7 +91,6 @@ def test(
     import os
     import sys
 
-    from ddev.repo.constants import PYTHON_VERSION
     from ddev.testing.constants import EndToEndEnvVars, TestEnvVars
     from ddev.testing.hatch import get_hatch_env_vars
     from ddev.utils.ci import running_in_ci
@@ -197,7 +198,33 @@ def test(
             base_command.append('--memray')
 
         if e2e:
-            base_command.extend(('-m', 'e2e'))
+            # Convert pytest_args to a list if it's a tuple
+            pytest_args_list = list(pytest_args) if isinstance(pytest_args, tuple) else pytest_args
+
+            # Initialize a list to hold indices of '-m' options and their values to be removed
+            indices_to_remove = []
+            marker_values = []
+
+            # Iterate over pytest_args_list to find '-m' or '--markers' options and their values
+            for i, arg in enumerate(pytest_args_list):
+                if arg in ('-m', '--markers') and i + 1 < len(pytest_args_list):
+                    indices_to_remove.extend([i, i + 1])
+                    marker_values.append(pytest_args_list[i + 1])
+
+            # Reverse sort indices_to_remove to avoid index shifting issues during removal
+            indices_to_remove.sort(reverse=True)
+
+            # Remove the '-m' options and their values from pytest_args_list
+            for index in indices_to_remove:
+                pytest_args_list.pop(index)
+
+            # After removing the '-m' options and their values
+            # Convert the modified pytest_args_list back to a tuple
+            pytest_args = tuple(pytest_args_list)
+
+            # Construct the combined marker expression with extracted marker values and 'e2e'
+            combined_marker = " and ".join(marker_values) + " and e2e" if marker_values else "e2e"
+            base_command.extend(('-m', combined_marker))
             global_env_vars[EndToEndEnvVars.PARENT_PYTHON] = sys.executable
 
     app.display_debug(f'Targets: {", ".join(targets)}')
@@ -210,18 +237,11 @@ def test(
 
         if standard_tests:
             if ddtrace and (target.is_integration or target.name == 'datadog_checks_base'):
-                # TODO: remove this once we drop Python 2
-                if app.platform.windows and (
-                    (python_filter and python_filter != PYTHON_VERSION)
-                    or not all(env_name.startswith('py3') for env_name in chosen_environments)
-                ):
-                    app.display_warning('Tracing is only supported on Python 3 on Windows')
-                else:
-                    command.append('--ddtrace')
-                    env_vars['DDEV_TRACE_ENABLED'] = 'true'
-                    env_vars['DD_PROFILING_ENABLED'] = 'true'
-                    env_vars['DD_SERVICE'] = os.environ.get('DD_SERVICE', 'ddev-integrations')
-                    env_vars['DD_ENV'] = os.environ.get('DD_ENV', 'ddev-integrations')
+                command.append('--ddtrace')
+                env_vars['DDEV_TRACE_ENABLED'] = 'true'
+                env_vars['DD_PROFILING_ENABLED'] = 'true'
+                env_vars['DD_SERVICE'] = os.environ.get('DD_SERVICE', 'ddev-integrations')
+                env_vars['DD_ENV'] = os.environ.get('DD_ENV', 'ddev-integrations')
 
             if junit:
                 # In order to handle multiple environments the report files must contain the environment name.

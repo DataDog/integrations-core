@@ -15,7 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -38,9 +39,6 @@
       },
       "source_type_id": 10089,
       "auto_install": true
-    },
-    "logs": {
-      "source": "tenable"
     }
   }
 }

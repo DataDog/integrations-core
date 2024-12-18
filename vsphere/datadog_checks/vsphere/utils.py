@@ -4,7 +4,6 @@
 from typing import Any, Dict, List, Optional, Type  # noqa: F401
 
 from pyVmomi import vim
-from six import iteritems
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere.constants import (
@@ -238,7 +237,7 @@ def get_mapped_instance_tag(metric_name):
     tag cannot be guessed by looking at the api results and has to be inferred using documentation or experience.
     This method acts as a utility to map a metric_name to the meaning of its instance tag.
     """
-    for prefix, tag_key in iteritems(METRIC_TO_INSTANCE_TAG_MAPPING):
+    for prefix, tag_key in METRIC_TO_INSTANCE_TAG_MAPPING.items():
         if metric_name.startswith(prefix):
             return tag_key
     return 'instance'

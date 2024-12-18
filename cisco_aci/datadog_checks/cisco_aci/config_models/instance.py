@@ -82,6 +82,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    namespace: Optional[str] = None
     ntlm_domain: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
@@ -89,6 +90,7 @@ class InstanceConfig(BaseModel):
     pwd: Optional[str] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
+    send_ndm_metadata: Optional[bool] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None

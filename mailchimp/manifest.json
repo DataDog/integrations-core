@@ -1,0 +1,63 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "ec79b5f5-df6b-4603-bdd1-399284f2093d",
+  "app_id": "mailchimp",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the performance and usage of Mailchimp Campaigns and Audiences.", 
+    "title": "Mailchimp",  
+    "media": [
+      {
+        "caption": "Mailchimp - Campaigns",
+        "image_url": "images/mailchimp_campaigns.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mailchimp - Audiences",
+        "image_url": "images/mailchimp_audiences.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 21603492,
+      "source_type_name": "Mailchimp",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mailchimp.",
+        "check": "mailchimp.campaigns.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Mailchimp - Campaigns" : "assets/dashboards/mailchimp_campaign.json",
+      "Mailchimp - Audiences" : "assets/dashboards/mailchimp_audience.json"
+    },
+    "monitors" : {
+      "Too Many Abuse Reports" : "assets/monitors/abuse_report_rate.json",
+      "Too Many Unsubscribes" : "assets/monitors/unsubscribe_rate.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

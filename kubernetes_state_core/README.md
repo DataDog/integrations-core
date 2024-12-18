@@ -187,6 +187,37 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 The Kubernetes State Metrics Core check does not include any events.
 
+### Default labels as tags
+
+#### Default recommended Kubernetes and Helm labels 
+
+|  Recommended Label        | Tag                |
+|-----------------------|-----------------------------|
+| `app.kubernetes.io/name`         | `kube_app_name`           |
+| `app.kubernetes.io/instance`          | `kube_app_instance`           |
+| `app.kubernetes.io/version`          | `kube_app_version`           |
+| `app.kubernetes.io/component`          | `kube_app_component`           |
+| `app.kubernetes.io/part-of`          | `kube_app_part_of`           |
+| `app.kubernetes.io/managed-by`          | `kube_app_managed_by`           |
+| `helm.sh/chart`          | `helm_chart`           |
+
+#### Default recommended Kubernetes node labels
+
+|  Recommended Label        | Tag                |
+|-----------------------|-----------------------------|
+| `topology.kubernetes.io/region`  | `kube_region`     |
+| `topology.kubernetes.io/zone`    | `kube_zone`       |
+| `failure-domain.beta.kubernetes.io/region`   | `kube_region`   |
+| `failure-domain.beta.kubernetes.io/zone`     | `kube_zone`     |
+
+#### Datadog labels (Unified Service Tagging)
+
+|  Datadog Label        | Tag                |
+|-----------------------|-----------------------------|
+| `tags.datadoghq.com/env`          | `env`           |
+| `tags.datadoghq.com/service`          | `service`           |
+| `tags.datadoghq.com/version`          | `version`           |
+
 ### Service Checks
 
 `kubernetes_state.cronjob.complete`
@@ -274,10 +305,10 @@ Need help? Contact [Datadog support][9].
 [1]: https://kubernetes.io/blog/2021/04/13/kube-state-metrics-v-2-0/
 [2]: #migration-from-kubernetes_state-to-kubernetes_state_core
 [3]: #data-collected
-[4]: /agent/cluster_agent/
+[4]: https://docs.datadoghq.com/agent/cluster_agent/
 [5]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state_core/metadata.csv
-[6]: /getting_started/tagging/unified_service_tagging/#configuration
+[6]: https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/#configuration
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/assets/service_checks.json
-[8]: /agent/guide/agent-commands/#agent-status-and-information
-[9]: /help/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/engineering/our-journey-taking-kubernetes-state-metrics-to-the-next-level/

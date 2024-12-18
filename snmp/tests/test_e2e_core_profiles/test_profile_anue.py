@@ -28,8 +28,11 @@ def test_e2e_profile_anue(dd_agent_check):
     common_tags = [
         'snmp_profile:anue',
         'snmp_host:anue-packet-broker.device.name',
+        'device_hostname:anue-packet-broker.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---
@@ -50,6 +53,7 @@ def test_e2e_profile_anue(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.32620.1.1',
         'vendor': 'anue',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
