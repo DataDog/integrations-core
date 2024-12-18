@@ -71,7 +71,7 @@ Property metrics are prefixed by the resource name. For example, host property m
 #### Resource Catalog metrics
 
 If the `collect_vsan_data:true` config option is set, then discovered vSAN clusters 
-will be visualized as resources in the Resource Catalog product, with the following
+are visualized as resources in the Resource Catalog product, with the following
 metrics being included as part of the resource:
 - class
 - cost
