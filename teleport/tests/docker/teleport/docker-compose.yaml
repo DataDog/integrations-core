@@ -8,5 +8,5 @@ services:
       - 443:443
     volumes:
       - ./etc/teleport:/etc/teleport
-    command: --diag-addr=0.0.0.0:3000
+    command: --diag-addr=0.0.0.0:3001
     container_name: teleport-service
