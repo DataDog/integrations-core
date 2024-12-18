@@ -4,7 +4,7 @@
 
 import pytest
 
-from .common import COMMON_METRICS, E2E_INSTANCE, USE_TELEPORT_CADDY
+from .common import COMMON_METRICS, INSTANCE, USE_TELEPORT_CADDY
 
 pytestmark = [
     pytest.mark.e2e,
@@ -14,11 +14,11 @@ pytestmark = [
 
 CONFIG = {
     "init_config": {},
-    "instances": [E2E_INSTANCE],
+    "instances": [INSTANCE],
 }
 
 
 def test_teleport_e2e(dd_agent_check):
-    aggregator = dd_agent_check(CONFIG)
+    aggregator = dd_agent_check()
     aggregator.assert_metric("teleport.health.up", value=1, count=1, tags=["teleport_status:ok"])
     aggregator.assert_metric(f"teleport.{COMMON_METRICS[0]}")

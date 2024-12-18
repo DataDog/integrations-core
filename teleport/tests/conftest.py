@@ -31,10 +31,10 @@ def dd_environment():
             sleep=5,
             conditions=[
                 CheckDockerLogs(identifier="teleport-service", patterns=["Starting Teleport"]),
-                CheckEndpoints(URL + ":3001/healthz", attempts=120),
+                CheckEndpoints(URL + ":3000/healthz", attempts=120),
             ],
         ):
-            yield {"teleport_url": URL, "diag_port": "3001"}
+            yield {"teleport_url": URL, "diag_port": "3000"}
 
 
 @pytest.fixture
