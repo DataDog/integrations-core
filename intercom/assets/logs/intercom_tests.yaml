@@ -305,7 +305,7 @@ tests:
               "update_by" : 1234567
             },
             "performed_by" : {
-              "ip" : "218.57.154.108",
+              "ip" : "185.64.148.0",
               "id" : "1234567",
               "type" : "admin",
               "email" : "abc@xyz.com"
@@ -325,7 +325,7 @@ tests:
         "threat_intel" : {
           "indicators_matched" : [ "IP" ],
           "results" : [ {
-            "indicator" : "0.0.0.0",
+            "indicator" : "185.64.148.0",
             "additional_data" : {
               "tunnels" : [ {
                 "anonymous" : false,
@@ -376,10 +376,10 @@ tests:
         "network" : {
           "ip" : {
             "attributes" : [ {
-              "ip" : "218.57.154.108",
+              "ip" : "185.64.148.0",
               "source" : [ "@data.item.performed_by.ip" ]
             } ],
-            "list" : [ "218.57.154.108" ]
+            "list" : [ "185.64.148.0" ]
           }
         }
       }
