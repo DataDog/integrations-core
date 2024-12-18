@@ -248,7 +248,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: geo-ip-parser
-          name: GeoIP for the `network.client.ip`
+          name: GeoIP Parser for `network.client.ip`
           enabled: true
           sources:
             - network.client.ip
