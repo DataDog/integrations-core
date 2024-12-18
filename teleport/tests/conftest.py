@@ -37,7 +37,6 @@ def dd_environment():
             yield {"teleport_url": URL, "diag_port": "3001"}
 
 
-
 @pytest.fixture
 def instance():
     return INSTANCE
