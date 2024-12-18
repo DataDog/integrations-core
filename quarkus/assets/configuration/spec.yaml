@@ -12,3 +12,9 @@ files:
         openmetrics_endpoint.value.example: http://localhost:8080/q/metrics
         openmetrics_endpoint.description: |
           Set this to the endpoint that Quarkus's Micrometer Prometheus MeterRegistry extension exposes.
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/application.log
+      source: quarkus
+      service: quarkus-app

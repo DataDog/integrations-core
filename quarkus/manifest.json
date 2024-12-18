@@ -16,6 +16,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Metrics",
+      "Category::Log Collection",
       "Offering::Integration",
       "Queried Data Type::Metrics",
       "Submitted Data Type::Metrics"
@@ -46,6 +47,9 @@
     },
     "dashboards": {
       "Quarkus Overview": "assets/dashboards/overview.json"
+    },
+    "saved_views": {
+      "errors": "assets/saved_views/errors.json"
     },
     "monitors": {
       "Long Requests": "assets/monitors/long_requests.json"
