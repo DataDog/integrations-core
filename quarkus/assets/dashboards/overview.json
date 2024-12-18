@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## Quarkus\n\nThis dashboard lets you montior your applications developed with the Quarkus framework.\n\n**Note: This dashboard only displays out of the box metrics. Tweak it as you add more metrics to your application.**\n\n## Useful Links\n- [Quarkus Homepage](https://quarkus.io/)\n- [How to add metrics in Quarkus](https://quarkus.io/guides/telemetry-micrometer-tutorial#inject-the-meterregistry)",
+    "description": "## Quarkus\n\nThis dashboard lets you monitor your applications developed with the Quarkus framework.\n\n**Note: This dashboard only displays out of the box metrics. Tweak it as you add more metrics to your application.**\n\n## Useful Links\n- [Quarkus Homepage](https://quarkus.io/)\n- [How to add metrics in Quarkus](https://quarkus.io/guides/telemetry-micrometer-tutorial#inject-the-meterregistry)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -41,7 +41,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "## Quarkus\n\nThis dashboard lets you montior your applications developed with the Quarkus framework.\n\n**Note: This dashboard only displays out of the box metrics. Tweak it as you add more metrics to your application.**\n",
+                            "content": "## Quarkus\n\nThis dashboard lets you monitor your applications developed with the Quarkus framework.\n\n**Note: This dashboard only displays out of the box metrics. Tweak it as you add more metrics to your application.**\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
