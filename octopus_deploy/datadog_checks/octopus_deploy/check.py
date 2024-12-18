@@ -352,6 +352,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             machine_id = machine.get("Id")
             machine_name = machine.get("Name")
             machine_slug = machine.get("Slug")
+            roles = machine.get("Roles", [])
             health_status = machine.get("HealthStatus", None)
             is_healthy = health_status == "Healthy"
             machine_tags = [
@@ -360,6 +361,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 f"machine_slug:{machine_slug}",
                 f"health_status:{health_status}",
             ]
+            machine_tags += roles
             self.gauge("machine.count", 1, tags=self._base_tags + machine_tags)
             self.gauge("machine.is_healthy", is_healthy, tags=self._base_tags + machine_tags)
 

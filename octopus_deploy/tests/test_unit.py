@@ -1295,6 +1295,7 @@ def test_machines_metrics(
             "machine_name:test-machine",
             "machine_slug:test-machine",
             "health_status:Healthy",
+            "test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -1305,6 +1306,7 @@ def test_machines_metrics(
             "machine_name:test-machine",
             "machine_slug:test-machine",
             "health_status:Healthy",
+            "test-tag",
         ],
     )
 
@@ -1364,6 +1366,7 @@ def test_machines_pagination(
             "machine_name:test-machine",
             "machine_slug:test-machine",
             "health_status:Healthy",
+            "test-tag",
         ],
     )
     aggregator.assert_metric(
@@ -1374,5 +1377,6 @@ def test_machines_pagination(
             "machine_name:test-machine",
             "machine_slug:test-machine",
             "health_status:Healthy",
+            "test-tag",
         ],
     )
