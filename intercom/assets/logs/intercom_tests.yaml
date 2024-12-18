@@ -373,15 +373,6 @@ tests:
         "app_id" : "abcdefgh",
         "delivered_at" : 0,
         "delivery_status" : "pending",
-        "network" : {
-          "ip" : {
-            "attributes" : [ {
-              "ip" : "218.57.154.108",
-              "source" : [ "@data.item.performed_by.ip" ]
-            } ],
-            "list" : [ "218.57.154.108" ]
-          }
-        }
       }
     service: "activity"
     result:
@@ -420,22 +411,22 @@ tests:
             ip: "218.57.154.108"
           ip:
             attributes:
-             -
-              ip: "0.0.0.0"
+            -
+              ip: "218.57.154.108"
               source:
-               - "@data.item.performed_by.ip"
+              - "@data.item.performed_by.ip"
             list:
-             - "0.0.0.0"
+            - "218.57.154.108"
         service: "activity"
         threat_intel:
           indicators_matched:
-           - "IP"
+          - "IP"
           results:
-           -
+          -
             indicator: "0.0.0.0"
             additional_data:
               tunnels:
-               -
+              -
                 anonymous: false
                 type: "PROXY"
                 operator: "XYZ_PROXY"
@@ -443,13 +434,13 @@ tests:
                 number: 55256
                 organization: "XYZ Inc"
               risks:
-               - "CALLBACK_PROXY"
+              - "CALLBACK_PROXY"
               infrastructure: "DATACENTER"
               organization: "XYZ Inc."
               client:
                 types:
-                 - "MOBILE"
-                 - "DESKTOP"
+                - "MOBILE"
+                - "DESKTOP"
                 count: 4
                 concentration:
                   country: "IN"
@@ -459,7 +450,7 @@ tests:
                   state: "Haryana"
                   skew: 28
                 proxies:
-                 - "LUMINATI_PROXY"
+                - "LUMINATI_PROXY"
                 countries: 1
               location:
                 country: "IN"
@@ -560,16 +551,16 @@ tests:
           "network" : {
             "ip" : {
               "attributes" : [ {
-                "ip" : "0.0.0.0",
+                "ip" : "218.57.154.108",
                 "source" : [ "@data.item.performed_by.ip" ]
               } ],
-              "list" : [ "0.0.0.0" ]
+              "list" : [ "218.57.154.108" ]
             }
           }
         }
       service: "activity"
       tags:
-       - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
       timestamp: 1726135744000
   - sample: >-
       {
