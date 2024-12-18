@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-30",
+	"last_updated_at": "2024-09-30",
+	"title": "High number of API Key regenerations",
+	"description": "This monitor tracks API key regeneration frequency in your Metabase account. A high number may indicate security concerns, misuse, or misconfigurations. Monitoring ensures effective API key management, identifying unusual patterns hinting at unauthorized access attempts or other immediate issues.",
+	"definition": {
+		"id": 154754176,
+		"name": "High number of API Key regenerations",
+		"type": "log alert",
+		"query": "logs(\"source:metabase service:activity-events @evt.name:api-key-regenerate\").index(\"*\").rollup(\"count\").last(\"1d\") > 10",
+		"message": "{{#is_alert}}\n\nThis indicates a significant rise in API key regenerations, which may signal security concerns or integration issues. Monitoring this trend helps identify potential problems and maintain service stability.\n\n{{/is_alert}}\n\n{{#is_warning}}\n\nThis indicates a significant rise in API key regenerations detected, indicating potential security risks or integration issues. Immediate monitoring is advised to maintain service stability.\n\n{{/is_warning}}\n\n@example@example.com",
+		"tags": [
+			"integration:metabase",
+			"service:activity-events"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"enable_logs_sample": true,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false
+		},
+		"priority": 1,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:metabase"
+	]
+}
