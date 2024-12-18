@@ -50,7 +50,7 @@ tests:
               "type" : "tag.list"
             },
             "custom_attributes" : {
-              "copilot_used" : false
+              "Copilot used" : false
             },
             "teammates" : {
               "type" : "admin.list"
@@ -305,7 +305,7 @@ tests:
               "update_by" : 1234567
             },
             "performed_by" : {
-              "ip" : "0.0.0.0",
+              "ip" : "218.57.154.108",
               "id" : "1234567",
               "type" : "admin",
               "email" : "abc@xyz.com"
