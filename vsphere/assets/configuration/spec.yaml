@@ -391,6 +391,7 @@ files:
       - name: collect_vsan_data
         description: |
           If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+          Furthermore, vSAN clusters will be visualized as resources in the Resource Catalog product.
         value:
           type: boolean
           example: false

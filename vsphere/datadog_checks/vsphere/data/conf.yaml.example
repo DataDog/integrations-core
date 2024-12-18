@@ -342,6 +342,7 @@ instances:
 
     ## @param collect_vsan_data - boolean - optional - default: false
     ## If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+    ## Furthermore, vSAN clusters will be visualized as resources in the Resource Catalog product.
     #
     # collect_vsan_data: false
 

@@ -179,8 +179,8 @@ class MockedAPI(object):
                 ),
             ],
         ]
-        mock_redapl_data = []
-        self.vsan_metrics_data = [mock_health_data, mock_performance_data, mock_redapl_data]
+        mock_resource_metadata_data = []
+        self.vsan_metrics_data = [mock_health_data, mock_performance_data, mock_resource_metadata_data]
         return self.vsan_metrics_data
 
 

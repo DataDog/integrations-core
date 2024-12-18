@@ -3600,9 +3600,8 @@ def test_vsan_cluster_with_host_filtered(realtime_instance, dd_run_check, caplog
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api", "mock_rest_api")
-def test_vsan_cluster_to_redapl(realtime_instance, dd_run_check, datadog_agent, caplog):
+def test_vsan_cluster_to_resource_metadata(realtime_instance, dd_run_check, datadog_agent):
     realtime_instance['collect_vsan_data'] = True
-    caplog.set_level(logging.DEBUG)
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     with patch('datadog_checks.vsphere.VSphereCheck.query_vsan_metrics') as MockQueryVsanMetrics:
         mock_cluster = MagicMock()
@@ -3622,12 +3621,12 @@ def test_vsan_cluster_to_redapl(realtime_instance, dd_run_check, datadog_agent, 
         MockQueryVsanMetrics.return_value = [
             [],
             [],
-            [{'attr0': 1.0, 'attr1': 'value1', 'attr2': 123}],
+            [{'attr0': 1.0, 'attr1': 'value1', 'attr2': 123}, {'attr0': 1.5}],
         ]
 
         dd_run_check(check)
 
-        datadog_agent.assert_metadata('', {'attr0': '1.0', 'attr1': 'value1', 'attr2': '123'})
+        datadog_agent.assert_metadata('', {'attr0': '1.0,1.5', 'attr1': 'value1', 'attr2': '123'})
         # 6 elts of version metadata + 3 elts of cluster metadata
         datadog_agent.assert_metadata_count(9)
 

@@ -68,6 +68,18 @@ collect_property_metrics: true
 
 Property metrics are prefixed by the resource name. For example, host property metrics metrics are prefixed with `vsphere.host.*`, and VM property metrics are prefixed with `vsphere.vm.*`. View all the possible property metrics in the [metadata.csv][10].
 
+#### Resource Catalog metrics
+
+If the `collect_vsan_data:true` config option is set, then discovered vSAN clusters 
+will be visualized as resources in the Resource Catalog product, with the following
+metrics being included as part of the resource:
+- class
+- cost
+- name
+- num_hosts
+- size_used
+- size_total
+- vcenter_server
 
 ### Events
 

@@ -406,7 +406,7 @@ class VSphereAPI(object):
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         health_metrics = []
         performance_metrics = []
-        to_redapl_metrics = []
+        to_resource_metadata = []
         for cluster_reference, nested_ids in cluster_nested_elts.items():
             self.log.debug("Querying vSAN metrics for cluster %s", cluster_reference.name)
             unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster_reference)
@@ -440,12 +440,12 @@ class VSphereAPI(object):
                 )
             health_metrics.append(processed_health_metrics)
 
-            redapl_cluster_data = {'name': cluster_reference.name, 'vcenter_server': self.config.hostname}
+            resource_metadata = {'name': cluster_reference.name, 'vcenter_server': self.config.hostname}
             vsan_perf_query_spec = []
             for nested_id in nested_ids:
                 for entity_type in entity_ref_ids[id_to_tags[nested_id][0]]:
                     if id_to_tags[nested_id][0] == 'cluster':
-                        redapl_cluster_data['id'] = nested_id
+                        resource_metadata['id'] = nested_id
                     vsan_perf_query_spec.append(
                         vim.cluster.VsanPerfQuerySpec(
                             entityRefId=(entity_type + str(nested_id)),
@@ -458,11 +458,11 @@ class VSphereAPI(object):
                 for metric in entity_type.value:
                     if metric.metricId.label in ('used', 'total'):
                         if metric.values != 'None':
-                            relabelMap = {
+                            label_map = {
                                 'used': 'size_used',
                                 'total': 'size_total',
                             }
-                            redapl_cluster_data[relabelMap[metric.metricId.label]] = int(metric.values.split(',')[-1])
+                            resource_metadata[label_map[metric.metricId.label]] = int(metric.values.split(',')[-1])
                     metric.metricId.dynamicProperty.append(
                         id_to_tags[entity_type.entityRefId.replace("'", "").split(':')[-1]]
                     )
@@ -471,9 +471,9 @@ class VSphereAPI(object):
                 for vm in host.vm:
                     cpuCount += vm.summary.config.numCpu
             # TODO: get cost multiplier since cost = cpuCount * multiplier
-            redapl_cluster_data['class'] = 'standard'
-            redapl_cluster_data['cost'] = cpuCount
-            redapl_cluster_data['num_hosts'] = len(cluster_reference.host)
+            resource_metadata['class'] = 'standard'
+            resource_metadata['cost'] = cpuCount
+            resource_metadata['num_hosts'] = len(cluster_reference.host)
             performance_metrics.append(discovered_metrics)
-            to_redapl_metrics.append(redapl_cluster_data)
-        return [health_metrics, performance_metrics, to_redapl_metrics]
+            to_resource_metadata.append(resource_metadata)
+        return [health_metrics, performance_metrics, to_resource_metadata]

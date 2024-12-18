@@ -321,9 +321,13 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
                     entityRefId="cluster-domclient:nested-id-1",
                     value=[MagicMock(metricId=MagicMock(dynamicProperty=[], label='total'), values='5,6')],
                 ),
+                MagicMock(
+                    entityRefId="cluster-domclient:nested-id-1",
+                    value=[MagicMock(metricId=MagicMock(dynamicProperty=[], label='used'), values='None')],
+                ),
             ]
 
-            health_metrics, performance_metrics, redapl_metrics = api.get_vsan_metrics(
+            health_metrics, performance_metrics, resource_metadata = api.get_vsan_metrics(
                 cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
             )
 
@@ -332,11 +336,11 @@ def test_vsan_metrics_api(aggregator, realtime_instance, dd_run_check):
             assert 'vsphere.vsan.cluster.health.1.count' in health_metrics[0]
             assert 'vsphere.vsan.cluster.health.2.count' in health_metrics[0]
             assert len(performance_metrics) == 1
-            assert len(performance_metrics[0]) == 5
-            assert len(redapl_metrics) == 1
-            assert redapl_metrics[0]['cost'] == 4
-            assert redapl_metrics[0]['size_used'] == 5
-            assert redapl_metrics[0]['size_total'] == 6
+            assert len(performance_metrics[0]) == 6
+            assert len(resource_metadata) == 1
+            assert resource_metadata[0]['cost'] == 4
+            assert resource_metadata[0]['size_used'] == 5
+            assert resource_metadata[0]['size_total'] == 6
 
             vsan_config = MagicMock()
             vsan_config.enabled = True
@@ -380,7 +384,7 @@ def test_vsan_empty_health_metrics(aggregator, realtime_instance, dd_run_check, 
                 )
             ]
 
-            health_metrics, performance_metrics, redapl_metrics = api.get_vsan_metrics(
+            health_metrics, performance_metrics, resource_metadata = api.get_vsan_metrics(
                 cluster_nested_elts, entity_ref_ids, id_to_tags, starting_time
             )
             assert len(health_metrics) == 0
