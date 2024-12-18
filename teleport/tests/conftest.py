@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
-from .common import INSTANCE, E2E_INSTANCE, USE_TELEPORT_CADDY
+from .common import E2E_INSTANCE, INSTANCE, USE_TELEPORT_CADDY
 
 HOST = get_docker_hostname()
 
