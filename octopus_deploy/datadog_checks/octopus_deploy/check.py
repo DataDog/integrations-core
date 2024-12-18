@@ -188,6 +188,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._process_project_groups(
                 space_id, space_name, space_config.get("project_groups") if space_config else None
             )
+            self._collect_machine_metrics(space_id)
             if self.collect_events:
                 self._collect_new_events(space_id, space_name)
 
@@ -340,6 +341,27 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self.gauge("server_node.count", 1, tags=self._base_tags + server_tags)
             self.gauge("server_node.in_maintenance_mode", maintenance_mode, tags=self._base_tags + server_tags)
             self.gauge("server_node.max_concurrent_tasks", max_tasks, tags=self._base_tags + server_tags)
+
+    def _collect_machine_metrics(self, space_id):
+        self.log.debug("Collecting server node metrics.")
+        url = f"api/{space_id}/machines"
+        response_json = self._process_paginated_endpoint(url)
+        machines = response_json.get('Items', [])
+
+        for machine in machines:
+            machine_id = machine.get("Id")
+            machine_name = machine.get("Name")
+            machine_slug = machine.get("Slug")
+            health_status = machine.get("HealthStatus", None)
+            is_healthy = health_status == "Healthy"
+            machine_tags = [
+                f"machine_id:{machine_id}",
+                f"machine_name:{machine_name}",
+                f"machine_slug:{machine_slug}",
+                f"health_status:{health_status}",
+            ]
+            self.gauge("machine.count", 1, tags=self._base_tags + machine_tags)
+            self.gauge("machine.is_healthy", is_healthy, tags=self._base_tags + machine_tags)
 
     def _collect_deployment_logs(self, space_id, task_id, tags):
         url = f"api/{space_id}/tasks/{task_id}/details"
