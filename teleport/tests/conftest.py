@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
-from .common import INSTANCE, USE_TELEPORT_CADDY
+from .common import INSTANCE, E2E_INSTANCE, USE_TELEPORT_CADDY
 
 HOST = get_docker_hostname()
 
@@ -30,11 +30,11 @@ def dd_environment():
             compose_file,
             sleep=5,
             conditions=[
-                CheckDockerLogs(identifier="teleport-service", patterns=["server running"]),
-                CheckEndpoints(URL + ":3000/healthz", attempts=120),
+                CheckDockerLogs(identifier="teleport-service", patterns=["Starting Teleport"]),
+                CheckEndpoints(URL + ":3001/healthz", attempts=120),
             ],
         ):
-            yield INSTANCE
+            yield E2E_INSTANCE
 
 
 @pytest.fixture

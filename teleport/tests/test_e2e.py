@@ -4,17 +4,17 @@
 
 import pytest
 
-from .common import COMMON_METRICS, INSTANCE, USE_TELEPORT_CADDY
+from .common import COMMON_METRICS, E2E_INSTANCE, USE_TELEPORT_CADDY
 
 pytestmark = [
     pytest.mark.e2e,
-    pytest.mark.skipif(not USE_TELEPORT_CADDY, reason="Only run e2e2 tests on caddy environment"),
+    pytest.mark.skipif(not USE_TELEPORT_CADDY, reason="Only run e2e tests on caddy environment"),
 ]
 
 
 CONFIG = {
     "init_config": {},
-    "instances": [INSTANCE],
+    "instances": [E2E_INSTANCE],
 }
 
 
