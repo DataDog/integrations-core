@@ -292,7 +292,7 @@ tests:
       tags:
        - "source:LOGS_SOURCE"
       timestamp: 1726135185000
-  - sample: |-
+  - sample: >-
       {
         "data" : {
           "item" : {
