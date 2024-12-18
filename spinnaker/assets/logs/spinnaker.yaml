@@ -1,0 +1,58 @@
+id: spinnaker
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+metric_id: spinnaker
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: spinnaker
+  enabled: true
+  filter:
+    query: source:spinnaker
+  processors:
+    - type: grok-parser
+      name: isolate_spinnaker_logs
+      enabled: true
+      source: message
+      samples:
+        - '2024-10-27 00:15:44.950  WARN 1 --- [utionAction-353]
+          c.n.s.c.k.op.job.KubectlJobExecutor      : Error from server
+          (Forbidden): customresourcedefinitions.apiextensions.k8s.io is
+          forbidden: User "system:serviceaccount:spinnaker:default" cannot list
+          resource "customresourcedefinitions" in API group
+          "apiextensions.k8s.io" at the cluster scope'
+        - "2024-11-05 12:51:18.696  INFO 1 --- [   scheduling-1]
+          s.k.p.u.r.r.RemotePluginInfoReleaseCache : Cached 0 remote plugin
+          configurations."
+        - 3577:C 28 Oct 2024 08:39:10.015 * DB saved on disk
+        - 192.168.23.146 - - [03/Nov/2024:17:09:44 +0000] "GET
+          /vendor_A_F~app.js?c849a847267171ef78ea HTTP/1.1" 200 528277
+        - "2024-11-05 12:56:29.699  INFO 1 --- [   scheduling-1]
+          s.k.p.u.r.r.RemotePluginInfoReleaseCache : Cached 0 remote plugin
+          configurations."
+      grok:
+        supportRules: ""
+        matchRules: >-
+          clouddriver_rule_1 %{date("yyyy-MM-dd
+          HH:mm:ss.SSS"):date}\s*%{word:level}\s*%{number}\s*---\s*\[%{notSpace:token_1}\]\s*%{data:AgentType}\s*\:\s*%{notSpace:http.url}\[1%{notSpace:http.url_1}\]\:\s*%{data:AgentMessage}
+
+
+          clouddriver_orca_rule_2 %{date("yyyy-MM-dd HH:mm:ss.SSS"):date}\s*%{word:level}\s*%{number}\s*---\s*\[%{notSpace:thread}\]\s*%{notSpace:class_name}\s*:\s*%{data:message}
+
+
+          deck_rule_1 %{ipv4:network.client.ip}\s*-\s*-\s*\[%{date("dd/MMM/yyyy:HH:mm:ss Z"):date}\]\s*\"%{word:http.method}\s*%{notSpace:http.url}\s*HTTP%{notSpace:http.url}\"\s*%{integer:http.status_code}\s*%{integer:token_1}
+
+
+          deck_rule_2 %{ipv4:network.client.ip}\s*-\s*-\s*\[%{date("dd/MMM/yyyy:HH:mm:ss Z"):date}\]\s*\"%{word:http.method}\s*\/\s*HTTP%{notSpace:http.url}\"\s*%{integer:http.status_code}\s*%{integer:token_1}
+
+
+          deck_rule_3 %{ipv4:network.client.ip}\s*-\s*-\s*\[%{date("dd/MMM/yyyy:HH:mm:ss Z"):date}\]\s*\"%{word:http.method}\s*%{notSpace:http.url}\s*HTTP%{notSpace:http.url_1}\"\s*%{integer:http.status_code}\s*%{integer:token_1}
+
+
+          echo_rosco_rule_1 %{date("yyyy-MM-dd HH:mm:ss.SSS"):date}\s*%{word:level}\s*%{number:id}\s*---\s*\[\s*%{notSpace:thread}\]\s*%{data:AgentType}\s*:\s*%{data:message}
+
+
+          redis_rule_1 %{number:id}\:%{word:UserRole}\s*%{date("dd MMM yyyy HH:mm:ss.SSS"):timestamp}\s*\*\s*%{data:message}
