@@ -8,8 +8,6 @@ USE_TELEPORT_CADDY = os.environ.get("USE_TELEPORT_CADDY", False)
 
 INSTANCE = {"teleport_url": "http://127.0.0.1", "diag_port": "3000"}
 
-E2E_INSTANCE = {"teleport_url": "http://127.0.0.1", "diag_port": "3001"}
-
 BAD_HOSTNAME_INSTANCE = {"teleport_url": "https://invalid-hostname"}
 
 COMMON_METRICS = [
