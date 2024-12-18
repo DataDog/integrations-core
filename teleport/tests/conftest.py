@@ -34,7 +34,8 @@ def dd_environment():
                 CheckEndpoints(URL + ":3001/healthz", attempts=120),
             ],
         ):
-            yield E2E_INSTANCE
+            yield {"teleport_url": URL, "diag_port": "3001"}
+
 
 
 @pytest.fixture
