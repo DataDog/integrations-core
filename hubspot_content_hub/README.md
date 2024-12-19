@@ -11,9 +11,7 @@ The integration includes dashboards that show and analyze both Activity Logs and
 
 ## Setup
 
-### Configuration
-
-#### Get HubSpot Content Hub Credentials
+### Generate API credentials in HubSpot Content Hub
 
 1. Log in to [HubSpot Content Hub][2] 
 2. Navigate to **Settings > Integrations > Private Apps**.
@@ -27,20 +25,25 @@ The integration includes dashboards that show and analyze both Activity Logs and
 7. Review the details in the dialog box and click **Continue creating**.
 8. In the success popup, click **Show Token**.
 
-#### Add HubSpot Credentials
+### Connect your HubSpot Content Hub Account to Datadog
 
-- HubSpot Access Token 
-
+1. Add your Access Token
+    |Parameters|Description|
+    |--------------------|--------------------|
+    |Access Token|Access token for your HubSpot private app.|
+2. Click the Save button to save your settings.
 
 ## Data Collected
 
 ### Logs 
 
-The HubSpot Content Hub integration collects and forward Activity logs to Datadog.
+The HubSpot Content Hub integration collects and forwards Activity logs to Datadog.
 
 ### Metrics
 
-The HubSpot Content Hub integration collects and forward Analytics metrics to Datadog.
+The HubSpot Content Hub integration collects and forwards Analytics metrics to Datadog.
+
+{{< get-metrics-from-git "hubspot-content-hub" >}}
 
 ### Service Checks
 
