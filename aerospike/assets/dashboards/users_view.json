@@ -24,9 +24,9 @@
         "id": 2103996640635456,
         "definition": {
           "type": "note",
-          "content": "Overview",
+          "content": "**Overview**",
           "background_color": "vivid_purple",
-          "font_size": "14",
+          "font_size": "24",
           "text_align": "center",
           "vertical_align": "top",
           "show_tick": false,

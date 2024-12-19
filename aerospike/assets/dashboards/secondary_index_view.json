@@ -24,9 +24,9 @@
         "id": 5236564488590196,
         "definition": {
           "type": "note",
-          "content": "Summary",
+          "content": "**Summary**",
           "background_color": "vivid_purple",
-          "font_size": "14",
+          "font_size": "24",
           "text_align": "center",
           "vertical_align": "top",
           "show_tick": false,
@@ -416,6 +416,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -441,7 +442,10 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 2,

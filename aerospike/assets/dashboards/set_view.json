@@ -1,5 +1,5 @@
 {
-    "title": "Set Dashboard_V1",
+    "title": "Set Dashboard",
     "description": "Set dashboard provides specific set level metrics as well as helping in tracking and setting specific set quotas.",
     "widgets": [
       {
@@ -24,9 +24,9 @@
         "id": 1765826349821636,
         "definition": {
           "type": "note",
-          "content": "Summary",
+          "content": "**Summary**",
           "background_color": "vivid_purple",
-          "font_size": "14",
+          "font_size": "24",
           "text_align": "center",
           "show_tick": false,
           "tick_pos": "50%",
@@ -335,12 +335,59 @@
         }
       },
       {
+        "id": 153607814232626,
+        "definition": {
+          "title": "Master & Replica Objects (Max)",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [
+            {
+              "response_format": "scalar",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:aerospike.aerospike_sets_objects{$aerospike_cluster, $aerospike_service, $ns, $set}",
+                  "aggregator": "last"
+                }
+              ],
+              "conditional_formats": [
+                {
+                  "comparator": ">",
+                  "value": 0,
+                  "palette": "white_on_green"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ]
+            }
+          ],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "yaxis": {
+              "include_zero": false
+            },
+            "type": "bars"
+          }
+        },
+        "layout": {
+          "x": 0,
+          "y": 3,
+          "width": 2,
+          "height": 2
+        }
+      },
+      {
         "id": 6060241769756806,
         "definition": {
           "title": "% Set Quota used (topk)",
           "title_size": "16",
           "title_align": "left",
-          "time": {},
           "type": "toplist",
           "requests": [
             {
@@ -391,9 +438,9 @@
           }
         },
         "layout": {
-          "x": 0,
+          "x": 2,
           "y": 3,
-          "width": 4,
+          "width": 2,
           "height": 2
         }
       },
@@ -446,7 +493,14 @@
                     }
                   },
                   "alias": "Min",
-                  "formula": "query3"
+                  "formula": "query3",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "green_on_white"
+                    }
+                  ]
                 },
                 {
                   "number_format": {
@@ -456,7 +510,14 @@
                     }
                   },
                   "alias": "Avg",
-                  "formula": "query1"
+                  "formula": "query1",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "green_on_white"
+                    }
+                  ]
                 },
                 {
                   "number_format": {
@@ -466,7 +527,14 @@
                     }
                   },
                   "alias": "Max",
-                  "formula": "query2"
+                  "formula": "query2",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "green_on_white"
+                    }
+                  ]
                 }
               ]
             }
@@ -476,7 +544,7 @@
         "layout": {
           "x": 4,
           "y": 3,
-          "width": 3,
+          "width": 4,
           "height": 2
         }
       },
@@ -523,15 +591,36 @@
               "formulas": [
                 {
                   "alias": "Min",
-                  "formula": "query1"
+                  "formula": "query1",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "green_on_white"
+                    }
+                  ]
                 },
                 {
                   "alias": "Avg",
-                  "formula": "query2"
+                  "formula": "query2",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "green_on_white"
+                    }
+                  ]
                 },
                 {
                   "alias": "Max",
-                  "formula": "query3"
+                  "formula": "query3",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "green_on_white"
+                    }
+                  ]
                 }
               ]
             }
@@ -539,57 +628,9 @@
           "has_search_bar": "auto"
         },
         "layout": {
-          "x": 7,
+          "x": 8,
           "y": 3,
-          "width": 3,
-          "height": 2
-        }
-      },
-      {
-        "id": 153607814232626,
-        "definition": {
-          "title": "Master & Replica Objects (Max)",
-          "title_size": "16",
-          "title_align": "left",
-          "type": "query_value",
-          "requests": [
-            {
-              "response_format": "scalar",
-              "queries": [
-                {
-                  "data_source": "metrics",
-                  "name": "query1",
-                  "query": "sum:aerospike.aerospike_sets_objects{$aerospike_cluster, $aerospike_service, $ns, $set}",
-                  "aggregator": "last"
-                }
-              ],
-              "conditional_formats": [
-                {
-                  "comparator": ">",
-                  "value": 0,
-                  "palette": "white_on_green"
-                }
-              ],
-              "formulas": [
-                {
-                  "formula": "query1"
-                }
-              ]
-            }
-          ],
-          "autoscale": true,
-          "precision": 2,
-          "timeseries_background": {
-            "yaxis": {
-              "include_zero": false
-            },
-            "type": "bars"
-          }
-        },
-        "layout": {
-          "x": 10,
-          "y": 3,
-          "width": 2,
+          "width": 4,
           "height": 2
         }
       },
@@ -638,13 +679,85 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
           "y": 5,
-          "width": 4,
-          "height": 3
+          "width": 6,
+          "height": 2
+        }
+      },
+      {
+        "id": 7614947523709538,
+        "definition": {
+          "title": "Objects",
+          "title_size": "16",
+          "title_align": "left",
+          "show_legend": true,
+          "legend_layout": "vertical",
+          "legend_columns": [
+            "avg",
+            "min",
+            "max"
+          ],
+          "time": {},
+          "type": "timeseries",
+          "requests": [
+            {
+              "formulas": [
+                {
+                  "alias": "Master Objects",
+                  "formula": "query1"
+                },
+                {
+                  "alias": "Tombstones",
+                  "formula": "query2"
+                },
+                {
+                  "alias": "Truncations",
+                  "formula": "query3"
+                }
+              ],
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:aerospike.aerospike_sets_objects{$aerospike_cluster, $aerospike_service, $ns, $set} by {aerospike_cluster,aerospike_service,ns,set}"
+                },
+                {
+                  "data_source": "metrics",
+                  "name": "query2",
+                  "query": "sum:aerospike.aerospike_sets_tombstones{$aerospike_cluster, $aerospike_service, $ns, $set} by {aerospike_cluster,aerospike_service,ns,set}"
+                },
+                {
+                  "data_source": "metrics",
+                  "name": "query3",
+                  "query": "sum:aerospike.aerospike_sets_truncate_lut{$aerospike_cluster, $aerospike_service, $ns, $set} by {aerospike_cluster,aerospike_service,ns,set}"
+                }
+              ],
+              "response_format": "timeseries",
+              "style": {
+                "palette": "dog_classic",
+                "order_by": "values",
+                "line_type": "solid",
+                "line_width": "normal"
+              },
+              "display_type": "line"
+            }
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
+        },
+        "layout": {
+          "x": 6,
+          "y": 5,
+          "width": 6,
+          "height": 2
         }
       },
       {
@@ -692,13 +805,16 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
-          "x": 4,
-          "y": 5,
-          "width": 4,
-          "height": 3
+          "x": 0,
+          "y": 7,
+          "width": 6,
+          "height": 2
         }
       },
       {
@@ -714,6 +830,7 @@
             "max",
             "avg"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -748,78 +865,16 @@
               },
               "display_type": "line"
             }
-          ]
-        },
-        "layout": {
-          "x": 8,
-          "y": 5,
-          "width": 4,
-          "height": 3
-        }
-      },
-      {
-        "id": 7614947523709538,
-        "definition": {
-          "title": "Objects",
-          "title_size": "16",
-          "title_align": "left",
-          "show_legend": true,
-          "legend_layout": "vertical",
-          "legend_columns": [
-            "avg",
-            "min",
-            "max"
           ],
-          "type": "timeseries",
-          "requests": [
-            {
-              "formulas": [
-                {
-                  "alias": "Master Objects",
-                  "formula": "query1"
-                },
-                {
-                  "alias": "Tombstones",
-                  "formula": "query2"
-                },
-                {
-                  "alias": "Truncations",
-                  "formula": "query3"
-                }
-              ],
-              "queries": [
-                {
-                  "data_source": "metrics",
-                  "name": "query1",
-                  "query": "sum:aerospike.aerospike_sets_objects{$aerospike_cluster, $aerospike_service, $ns, $set} by {aerospike_cluster,aerospike_service,ns,set}"
-                },
-                {
-                  "data_source": "metrics",
-                  "name": "query2",
-                  "query": "sum:aerospike.aerospike_sets_tombstones{$aerospike_cluster, $aerospike_service, $ns, $set} by {aerospike_cluster,aerospike_service,ns,set}"
-                },
-                {
-                  "data_source": "metrics",
-                  "name": "query3",
-                  "query": "sum:aerospike.aerospike_sets_truncate_lut{$aerospike_cluster, $aerospike_service, $ns, $set} by {aerospike_cluster,aerospike_service,ns,set}"
-                }
-              ],
-              "response_format": "timeseries",
-              "style": {
-                "palette": "dog_classic",
-                "order_by": "values",
-                "line_type": "solid",
-                "line_width": "normal"
-              },
-              "display_type": "line"
-            }
-          ]
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
-          "x": 0,
-          "y": 8,
-          "width": 4,
-          "height": 3
+          "x": 6,
+          "y": 7,
+          "width": 6,
+          "height": 2
         }
       }
     ],

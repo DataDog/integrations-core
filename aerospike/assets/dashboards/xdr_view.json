@@ -24,9 +24,9 @@
         "id": 2097418526281548,
         "definition": {
           "type": "note",
-          "content": "Overview",
+          "content": "**Overview**",
           "background_color": "vivid_purple",
-          "font_size": "14",
+          "font_size": "24",
           "text_align": "center",
           "show_tick": false,
           "tick_pos": "50%",
@@ -36,6 +36,393 @@
           "x": 2,
           "y": 0,
           "width": 10,
+          "height": 1
+        }
+      },
+      {
+        "id": 5957771962622022,
+        "definition": {
+          "type": "note",
+          "content": "**Nodes**",
+          "background_color": "vivid_purple",
+          "font_size": "18",
+          "text_align": "center",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 1,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 2374444253274420,
+        "definition": {
+          "type": "note",
+          "content": "**Host Connections**",
+          "background_color": "vivid_purple",
+          "font_size": "18",
+          "text_align": "center",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 2,
+          "y": 1,
+          "width": 4,
+          "height": 1
+        }
+      },
+      {
+        "id": 5296395946511466,
+        "definition": {
+          "type": "note",
+          "content": "**Host Network Traffic - retransmit (packets) (total) (rate)**",
+          "background_color": "vivid_purple",
+          "font_size": "14",
+          "text_align": "center",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 6,
+          "y": 1,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 6211475847091812,
+        "definition": {
+          "type": "note",
+          "content": "**Host Connections**",
+          "background_color": "vivid_purple",
+          "font_size": "18",
+          "text_align": "center",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 8,
+          "y": 1,
+          "width": 4,
+          "height": 1
+        }
+      },
+      {
+        "id": 1788144956988476,
+        "definition": {
+          "title": "DC Nodes",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [
+            {
+              "response_format": "scalar",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "avg:aerospike.aerospike_xdr_nodes{$aerospike_cluster,$aerospike_service,$dc}",
+                  "aggregator": "last"
+                }
+              ],
+              "conditional_formats": [
+                {
+                  "comparator": ">",
+                  "value": 0,
+                  "palette": "white_on_green"
+                },
+                {
+                  "comparator": "=",
+                  "value": 0,
+                  "palette": "white_on_red"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ]
+            }
+          ],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "yaxis": {
+              "include_zero": false
+            },
+            "type": "area"
+          }
+        },
+        "layout": {
+          "x": 0,
+          "y": 2,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 628399571622714,
+        "definition": {
+          "title": "Host TCP Open Connections (total)(rate)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {},
+          "type": "query_value",
+          "requests": [
+            {
+              "formulas": [
+                {
+                  "formula": "per_second(query1)"
+                }
+              ],
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_activeopens{$aerospike_cluster, $aerospike_service}.rollup(max, 30)",
+                  "aggregator": "last"
+                }
+              ],
+              "response_format": "scalar",
+              "conditional_formats": [
+                {
+                  "comparator": ">=",
+                  "value": 0,
+                  "palette": "white_on_green"
+                }
+              ]
+            }
+          ],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "type": "area"
+          }
+        },
+        "layout": {
+          "x": 2,
+          "y": 2,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 2798573670779060,
+        "definition": {
+          "title": "Host TCP Established Connections (total)(rate)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {},
+          "type": "query_value",
+          "requests": [
+            {
+              "formulas": [
+                {
+                  "formula": "per_second(query1)"
+                }
+              ],
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_currestab{$aerospike_cluster,$aerospike_service,$dc}.rollup(max, 30)",
+                  "aggregator": "last"
+                }
+              ],
+              "response_format": "scalar",
+              "conditional_formats": [
+                {
+                  "comparator": ">=",
+                  "value": 0,
+                  "palette": "white_on_green"
+                }
+              ]
+            }
+          ],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "type": "area"
+          }
+        },
+        "layout": {
+          "x": 4,
+          "y": 2,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 3748492255421564,
+        "definition": {
+          "title": "Host Network Traffic - retransmit (packets) (total) (rate)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {},
+          "type": "query_value",
+          "requests": [
+            {
+              "formulas": [
+                {
+                  "formula": "per_second(query1)"
+                }
+              ],
+              "queries": [
+                {
+                  "name": "query1",
+                  "data_source": "metrics",
+                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_retranssegs{$aerospike_cluster,$aerospike_service,$dc}.rollup(max, 30)",
+                  "aggregator": "last"
+                }
+              ],
+              "response_format": "scalar",
+              "conditional_formats": [
+                {
+                  "comparator": ">=",
+                  "value": 0,
+                  "palette": "white_on_green"
+                }
+              ]
+            }
+          ],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "type": "area"
+          }
+        },
+        "layout": {
+          "x": 6,
+          "y": 2,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 1123052587293710,
+        "definition": {
+          "title": "Host Network Transmitted Traffic (bytes) (total) (rate)",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [
+            {
+              "formulas": [
+                {
+                  "formula": "per_second(query1)"
+                }
+              ],
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:aerospike.aerospike_sysinfo_network_transfer_bytes_total{$aerospike_cluster,$aerospike_service,$dc}.rollup(max, 30)",
+                  "aggregator": "last"
+                }
+              ],
+              "response_format": "scalar",
+              "conditional_formats": [
+                {
+                  "comparator": ">=",
+                  "value": 0,
+                  "palette": "white_on_green"
+                }
+              ]
+            }
+          ],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "type": "area"
+          }
+        },
+        "layout": {
+          "x": 8,
+          "y": 2,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 3696151746172318,
+        "definition": {
+          "title": "Host Network Received Traffic (bytes) (total) (rate)",
+          "title_size": "16",
+          "title_align": "left",
+          "time": {},
+          "type": "query_value",
+          "requests": [
+            {
+              "formulas": [
+                {
+                  "formula": "per_second(query1)"
+                }
+              ],
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:aerospike.aerospike_sysinfo_network_receive_bytes_total{$aerospike_cluster,$aerospike_service,$dc}.rollup(max, 30)",
+                  "aggregator": "last"
+                }
+              ],
+              "response_format": "scalar",
+              "conditional_formats": [
+                {
+                  "comparator": ">=",
+                  "value": 0,
+                  "palette": "white_on_green"
+                }
+              ]
+            }
+          ],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "type": "area"
+          }
+        },
+        "layout": {
+          "x": 10,
+          "y": 2,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 8092126128986470,
+        "definition": {
+          "type": "note",
+          "content": "**XDR Statistics Summary**",
+          "background_color": "vivid_purple",
+          "font_size": "18",
+          "text_align": "center",
+          "vertical_align": "top",
+          "show_tick": false,
+          "tick_pos": "50%",
+          "tick_edge": "left",
+          "has_padding": true
+        },
+        "layout": {
+          "x": 0,
+          "y": 3,
+          "width": 12,
           "height": 1
         }
       },
@@ -82,7 +469,55 @@
         },
         "layout": {
           "x": 0,
-          "y": 1,
+          "y": 4,
+          "width": 2,
+          "height": 1
+        }
+      },
+      {
+        "id": 7249053984328050,
+        "definition": {
+          "title": "Total bytes shipped",
+          "title_size": "16",
+          "title_align": "left",
+          "type": "query_value",
+          "requests": [
+            {
+              "response_format": "scalar",
+              "queries": [
+                {
+                  "data_source": "metrics",
+                  "name": "query1",
+                  "query": "sum:aerospike.aerospike_xdr_bytes_shipped{$aerospike_cluster,$aerospike_service,$dc}",
+                  "aggregator": "last"
+                }
+              ],
+              "conditional_formats": [
+                {
+                  "comparator": ">=",
+                  "value": 0,
+                  "palette": "white_on_green"
+                }
+              ],
+              "formulas": [
+                {
+                  "formula": "query1"
+                }
+              ]
+            }
+          ],
+          "autoscale": true,
+          "precision": 2,
+          "timeseries_background": {
+            "yaxis": {
+              "include_zero": false
+            },
+            "type": "area"
+          }
+        },
+        "layout": {
+          "x": 2,
+          "y": 4,
           "width": 2,
           "height": 1
         }
@@ -140,8 +575,8 @@
           }
         },
         "layout": {
-          "x": 2,
-          "y": 1,
+          "x": 4,
+          "y": 4,
           "width": 2,
           "height": 1
         }
@@ -194,8 +629,8 @@
           }
         },
         "layout": {
-          "x": 4,
-          "y": 1,
+          "x": 6,
+          "y": 4,
           "width": 2,
           "height": 1
         }
@@ -206,7 +641,6 @@
           "title": "Average Lap us",
           "title_size": "16",
           "title_align": "left",
-          "time": {},
           "type": "query_value",
           "requests": [
             {
@@ -249,8 +683,8 @@
           }
         },
         "layout": {
-          "x": 6,
-          "y": 1,
+          "x": 8,
+          "y": 4,
           "width": 2,
           "height": 1
         }
@@ -297,8 +731,8 @@
           }
         },
         "layout": {
-          "x": 8,
-          "y": 1,
+          "x": 10,
+          "y": 4,
           "width": 2,
           "height": 1
         }
@@ -345,8 +779,8 @@
           }
         },
         "layout": {
-          "x": 10,
-          "y": 1,
+          "x": 0,
+          "y": 5,
           "width": 2,
           "height": 1
         }
@@ -393,346 +827,8 @@
           }
         },
         "layout": {
-          "x": 0,
-          "y": 2,
-          "width": 2,
-          "height": 1
-        }
-      },
-      {
-        "id": 7249053984328050,
-        "definition": {
-          "title": "Total bytes shipped",
-          "title_size": "16",
-          "title_align": "left",
-          "type": "query_value",
-          "requests": [
-            {
-              "response_format": "scalar",
-              "queries": [
-                {
-                  "data_source": "metrics",
-                  "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_bytes_shipped{$aerospike_cluster,$aerospike_service,$dc}",
-                  "aggregator": "last"
-                }
-              ],
-              "conditional_formats": [
-                {
-                  "comparator": ">=",
-                  "value": 0,
-                  "palette": "white_on_green"
-                }
-              ],
-              "formulas": [
-                {
-                  "formula": "query1"
-                }
-              ]
-            }
-          ],
-          "autoscale": true,
-          "precision": 2,
-          "timeseries_background": {
-            "yaxis": {
-              "include_zero": false
-            },
-            "type": "area"
-          }
-        },
-        "layout": {
           "x": 2,
-          "y": 2,
-          "width": 2,
-          "height": 1
-        }
-      },
-      {
-        "id": 1788144956988476,
-        "definition": {
-          "title": "DC Nodes",
-          "title_size": "16",
-          "title_align": "left",
-          "type": "query_value",
-          "requests": [
-            {
-              "response_format": "scalar",
-              "queries": [
-                {
-                  "data_source": "metrics",
-                  "name": "query1",
-                  "query": "avg:aerospike.aerospike_xdr_nodes{$aerospike_cluster,$aerospike_service,$dc}",
-                  "aggregator": "last"
-                }
-              ],
-              "conditional_formats": [
-                {
-                  "comparator": ">",
-                  "value": 0,
-                  "palette": "white_on_green"
-                },
-                {
-                  "comparator": "=",
-                  "value": 0,
-                  "palette": "white_on_red"
-                }
-              ],
-              "formulas": [
-                {
-                  "formula": "query1"
-                }
-              ]
-            }
-          ],
-          "autoscale": true,
-          "precision": 2,
-          "timeseries_background": {
-            "yaxis": {
-              "include_zero": false
-            },
-            "type": "area"
-          }
-        },
-        "layout": {
-          "x": 4,
-          "y": 2,
-          "width": 2,
-          "height": 1
-        }
-      },
-      {
-        "id": 628399571622714,
-        "definition": {
-          "title": "Host TCP Open Connections (total)(rate)",
-          "title_size": "16",
-          "title_align": "left",
-          "type": "query_value",
-          "requests": [
-            {
-              "formulas": [
-                {
-                  "formula": "per_second(query1)"
-                }
-              ],
-              "queries": [
-                {
-                  "data_source": "metrics",
-                  "name": "query1",
-                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_activeopens{$aerospike_cluster, $aerospike_service}",
-                  "aggregator": "last"
-                }
-              ],
-              "response_format": "scalar",
-              "conditional_formats": [
-                {
-                  "comparator": ">=",
-                  "value": 0,
-                  "palette": "white_on_green"
-                }
-              ]
-            }
-          ],
-          "autoscale": true,
-          "precision": 2,
-          "timeseries_background": {
-            "type": "area"
-          }
-        },
-        "layout": {
-          "x": 6,
-          "y": 2,
-          "width": 2,
-          "height": 1
-        }
-      },
-      {
-        "id": 2798573670779060,
-        "definition": {
-          "title": "Host TCP Established Connections (total)(rate)",
-          "title_size": "16",
-          "title_align": "left",
-          "type": "query_value",
-          "requests": [
-            {
-              "formulas": [
-                {
-                  "formula": "per_second(query1)"
-                }
-              ],
-              "queries": [
-                {
-                  "data_source": "metrics",
-                  "name": "query1",
-                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_currestab{$aerospike_cluster,$aerospike_service,$dc}",
-                  "aggregator": "last"
-                }
-              ],
-              "response_format": "scalar",
-              "conditional_formats": [
-                {
-                  "comparator": ">=",
-                  "value": 0,
-                  "palette": "white_on_green"
-                }
-              ]
-            }
-          ],
-          "autoscale": true,
-          "precision": 2,
-          "timeseries_background": {
-            "type": "area"
-          }
-        },
-        "layout": {
-          "x": 8,
-          "y": 2,
-          "width": 2,
-          "height": 1
-        }
-      },
-      {
-        "id": 3748492255421564,
-        "definition": {
-          "title": "Host Network Traffic - retransmit (packets) (total) (rate)",
-          "title_size": "16",
-          "title_align": "left",
-          "type": "query_value",
-          "requests": [
-            {
-              "formulas": [
-                {
-                  "formula": "per_second(query1)"
-                }
-              ],
-              "queries": [
-                {
-                  "name": "query1",
-                  "data_source": "metrics",
-                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_retranssegs{$aerospike_cluster,$aerospike_service,$dc}",
-                  "aggregator": "last"
-                }
-              ],
-              "response_format": "scalar",
-              "conditional_formats": [
-                {
-                  "comparator": ">=",
-                  "value": 0,
-                  "palette": "white_on_green"
-                }
-              ]
-            }
-          ],
-          "autoscale": true,
-          "precision": 2,
-          "timeseries_background": {
-            "type": "area"
-          }
-        },
-        "layout": {
-          "x": 10,
-          "y": 2,
-          "width": 2,
-          "height": 1
-        }
-      },
-      {
-        "id": 3696151746172318,
-        "definition": {
-          "title": "Host Network Received Traffic (bytes) (total) (rate)",
-          "title_size": "16",
-          "title_align": "left",
-          "type": "query_value",
-          "requests": [
-            {
-              "formulas": [
-                {
-                  "formula": "per_second(query1)",
-                  "number_format": {
-                    "unit": {
-                      "type": "canonical_unit",
-                      "unit_name": "byte"
-                    }
-                  }
-                }
-              ],
-              "queries": [
-                {
-                  "data_source": "metrics",
-                  "name": "query1",
-                  "query": "sum:aerospike.aerospike_sysinfo_network_receive_bytes_total{$aerospike_cluster,$aerospike_service,$dc}",
-                  "aggregator": "last"
-                }
-              ],
-              "response_format": "scalar",
-              "conditional_formats": [
-                {
-                  "comparator": ">=",
-                  "value": 0,
-                  "palette": "white_on_green"
-                }
-              ]
-            }
-          ],
-          "autoscale": true,
-          "precision": 2,
-          "timeseries_background": {
-            "type": "area"
-          }
-        },
-        "layout": {
-          "x": 0,
-          "y": 3,
-          "width": 2,
-          "height": 1
-        }
-      },
-      {
-        "id": 1123052587293710,
-        "definition": {
-          "title": "Host Network Transmitted Traffic (bytes) (total) (rate)",
-          "title_size": "16",
-          "title_align": "left",
-          "type": "query_value",
-          "requests": [
-            {
-              "formulas": [
-                {
-                  "formula": "per_second(query1)",
-                  "number_format": {
-                    "unit": {
-                      "type": "canonical_unit",
-                      "unit_name": "byte"
-                    }
-                  }
-                }
-              ],
-              "queries": [
-                {
-                  "data_source": "metrics",
-                  "name": "query1",
-                  "query": "sum:aerospike.aerospike_sysinfo_network_transfer_bytes_total{$aerospike_cluster,$aerospike_service,$dc}",
-                  "aggregator": "last"
-                }
-              ],
-              "response_format": "scalar",
-              "conditional_formats": [
-                {
-                  "comparator": ">=",
-                  "value": 0,
-                  "palette": "white_on_green"
-                }
-              ]
-            }
-          ],
-          "autoscale": true,
-          "precision": 2,
-          "timeseries_background": {
-            "type": "area"
-          }
-        },
-        "layout": {
-          "x": 2,
-          "y": 3,
+          "y": 5,
           "width": 2,
           "height": 1
         }
@@ -741,9 +837,9 @@
         "id": 5215774132340324,
         "definition": {
           "type": "note",
-          "content": "Detailed Statistics",
+          "content": "**Detailed Statistics**",
           "background_color": "vivid_purple",
-          "font_size": "14",
+          "font_size": "24",
           "text_align": "center",
           "show_tick": false,
           "tick_pos": "50%",
@@ -751,7 +847,7 @@
         },
         "layout": {
           "x": 0,
-          "y": 4,
+          "y": 6,
           "width": 12,
           "height": 1
         }
@@ -769,6 +865,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -794,11 +891,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 5,
+          "y": 7,
           "width": 6,
           "height": 3
         }
@@ -816,6 +916,7 @@
             "max",
             "min"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -829,7 +930,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_success{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_success{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -841,11 +942,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 5,
+          "y": 7,
           "width": 6,
           "height": 3
         }
@@ -863,6 +967,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -876,7 +981,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_abandoned{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_abandoned{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -888,11 +993,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 8,
+          "y": 10,
           "width": 6,
           "height": 3
         }
@@ -910,6 +1018,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -923,7 +1032,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_not_found{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_not_found{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -935,11 +1044,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 8,
+          "y": 10,
           "width": 6,
           "height": 3
         }
@@ -957,6 +1069,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -970,7 +1083,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_filtered_out{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_filtered_out{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -982,11 +1095,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 11,
+          "y": 13,
           "width": 6,
           "height": 3
         }
@@ -1004,6 +1120,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1017,7 +1134,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_retry_conn_reset{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_retry_conn_reset{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1029,11 +1146,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 11,
+          "y": 13,
           "width": 6,
           "height": 3
         }
@@ -1051,6 +1171,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1064,7 +1185,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_retry_dest{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_retry_dest{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1076,11 +1197,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 14,
+          "y": 16,
           "width": 6,
           "height": 3
         }
@@ -1098,6 +1222,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1111,7 +1236,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_hot_keys{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_hot_keys{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1123,11 +1248,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 14,
+          "y": 16,
           "width": 6,
           "height": 3
         }
@@ -1145,6 +1273,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1170,11 +1299,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 17,
+          "y": 19,
           "width": 6,
           "height": 3
         }
@@ -1192,6 +1324,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1217,11 +1350,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 17,
+          "y": 19,
           "width": 6,
           "height": 3
         }
@@ -1239,6 +1375,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1264,11 +1401,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 20,
+          "y": 22,
           "width": 6,
           "height": 3
         }
@@ -1286,6 +1426,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1311,11 +1452,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 20,
+          "y": 22,
           "width": 6,
           "height": 3
         }
@@ -1333,6 +1477,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1346,7 +1491,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_recoveries{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_recoveries{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1358,11 +1503,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 23,
+          "y": 25,
           "width": 6,
           "height": 3
         }
@@ -1380,6 +1528,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1405,11 +1554,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 23,
+          "y": 25,
           "width": 6,
           "height": 3
         }
@@ -1427,6 +1579,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1452,11 +1605,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 26,
+          "y": 28,
           "width": 6,
           "height": 3
         }
@@ -1474,6 +1630,7 @@
             "max",
             "avg"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1499,11 +1656,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 26,
+          "y": 28,
           "width": 6,
           "height": 3
         }
@@ -1521,6 +1681,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1546,11 +1707,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 29,
+          "y": 31,
           "width": 6,
           "height": 3
         }
@@ -1568,6 +1732,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1581,7 +1746,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_xdr_bytes_shipped{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}"
+                  "query": "sum:aerospike.aerospike_xdr_bytes_shipped{$aerospike_cluster,$aerospike_service,$dc} by {aerospike_cluster,aerospike_service,dc}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1593,11 +1758,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 29,
+          "y": 31,
           "width": 6,
           "height": 3
         }
@@ -1606,9 +1774,9 @@
         "id": 5871761486815730,
         "definition": {
           "type": "note",
-          "content": "Resources - Network",
+          "content": "**Resources - Network**",
           "background_color": "vivid_purple",
-          "font_size": "14",
+          "font_size": "24",
           "text_align": "center",
           "show_tick": false,
           "tick_pos": "50%",
@@ -1616,7 +1784,7 @@
         },
         "layout": {
           "x": 0,
-          "y": 32,
+          "y": 34,
           "width": 12,
           "height": 1
         }
@@ -1634,6 +1802,7 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
@@ -1651,12 +1820,12 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_activeopens{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_activeopens{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                 },
                 {
                   "data_source": "metrics",
                   "name": "query2",
-                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_currestab{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_currestab{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1668,11 +1837,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 33,
+          "y": 35,
           "width": 6,
           "height": 3
         }
@@ -1690,18 +1862,13 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
               "formulas": [
                 {
                   "alias": "Traffic Retransmit",
-                  "number_format": {
-                    "unit": {
-                      "type": "canonical_unit",
-                      "unit_name": "packet"
-                    }
-                  },
                   "formula": "per_second(query1)"
                 }
               ],
@@ -1709,7 +1876,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_retranssegs{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                  "query": "sum:aerospike.aerospike_sysinfo_netstat_tcp_retranssegs{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1721,11 +1888,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 33,
+          "y": 35,
           "width": 6,
           "height": 3
         }
@@ -1743,17 +1913,12 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
               "formulas": [
                 {
-                  "number_format": {
-                    "unit": {
-                      "type": "canonical_unit",
-                      "unit_name": "byte"
-                    }
-                  },
                   "alias": " Traffic Received",
                   "formula": "per_second(query1)"
                 }
@@ -1762,7 +1927,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_sysinfo_network_receive_bytes_total{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                  "query": "sum:aerospike.aerospike_sysinfo_network_receive_bytes_total{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1774,11 +1939,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 0,
-          "y": 36,
+          "y": 38,
           "width": 6,
           "height": 3
         }
@@ -1796,17 +1964,12 @@
             "min",
             "max"
           ],
+          "time": {},
           "type": "timeseries",
           "requests": [
             {
               "formulas": [
                 {
-                  "number_format": {
-                    "unit": {
-                      "type": "canonical_unit",
-                      "unit_name": "byte"
-                    }
-                  },
                   "alias": "Traffic Transmitted",
                   "formula": "per_second(query1)"
                 }
@@ -1815,7 +1978,7 @@
                 {
                   "data_source": "metrics",
                   "name": "query1",
-                  "query": "sum:aerospike.aerospike_sysinfo_network_transfer_bytes_total{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}"
+                  "query": "sum:aerospike.aerospike_sysinfo_network_transfer_bytes_total{$aerospike_cluster,$aerospike_service} by {aerospike_cluster,aerospike_service}.rollup(max, 30)"
                 }
               ],
               "response_format": "timeseries",
@@ -1827,11 +1990,14 @@
               },
               "display_type": "line"
             }
-          ]
+          ],
+          "yaxis": {
+            "include_zero": false
+          }
         },
         "layout": {
           "x": 6,
-          "y": 36,
+          "y": 38,
           "width": 6,
           "height": 3
         }
