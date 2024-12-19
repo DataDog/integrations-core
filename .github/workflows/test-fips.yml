@@ -191,9 +191,11 @@ jobs:
           v01-python-${{ env.pythonLocation }}
 
     - name: Install ddev from local folder
+      working-directory: .\python_dir
       run: |
-        python -m pip install -e ./datadog_checks_dev[cli]
-        python -m pip install -e ./ddev
+        which python
+        ./python.exe -m pip install -e ../datadog_checks_dev[cli]
+        ./python.exe -m pip install -e ../ddev
 
     - name: Configure ddev
       run: |
