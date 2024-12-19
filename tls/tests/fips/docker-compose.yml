@@ -1,0 +1,28 @@
+services:
+  fips-server:
+    build: .
+    ports:
+      - "8443:443"
+    volumes:
+      - ./ca.crt:/etc/ssl/certs/server.crt
+      - ./ca.key:/etc/ssl/private/server.key
+    command: ["/usr/local/bin/start-server.sh", "ECDHE-RSA-AES128-SHA256"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:443"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  non-fips-server:
+    build: .
+    ports:
+      - "9443:443"
+    volumes:
+      - ./ca.crt:/etc/ssl/certs/server.crt
+      - ./ca.key:/etc/ssl/private/server.key
+    command: ["/usr/local/bin/start-server.sh", "ECDHE-RSA-CHACHA20-POLY1305"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:443"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
