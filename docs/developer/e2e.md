@@ -161,6 +161,8 @@ Collector
     version.raw: 14.9
     version.scheme: semver
 ```
+> [!IMPORTANT]
+> Make sure the `dd_environment()` function in your integration's _conftest.py_ file returns a dictionary, otherwise the check will not run. The dictionary will then be used to configure the test.
 
 ## Debugging
 
